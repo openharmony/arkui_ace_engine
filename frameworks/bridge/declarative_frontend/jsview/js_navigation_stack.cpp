@@ -223,33 +223,34 @@ std::vector<std::string> JSNavigationStack::GetAllPathName()
     return pathNames;
 }
 
-std::vector<int32_t> JSNavigationStack::GetRemoveArray()
+std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
 {
     if (dataSourceObj_->IsEmpty()) {
         return {};
     }
-    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getRemoveArray"));
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getAllPathIndex"));
     auto array = JSRef<JSArray>::Cast(func->Call(dataSourceObj_));
     if (array->IsEmpty()) {
         return {};
     }
-    std::vector<int32_t> removeArrays;
+    std::vector<int32_t> pathIndex;
     for (size_t i = 0; i < array->Length(); i++) {
         auto value = array->GetValueAt(i);
         if (value->IsNumber()) {
-            removeArrays.emplace_back(value->ToNumber<int32_t>());
+            pathIndex.emplace_back(value->ToNumber<int32_t>());
         }
     }
 
-    return removeArrays;
+    return pathIndex;
 }
 
-void JSNavigationStack::ClearRemoveArray()
+void JSNavigationStack::InitNavPathIndex()
 {
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
-    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("clearRemoveArray"));
+
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("initNavPathIndex"));
     func->Call(dataSourceObj_);
 }
 
@@ -691,7 +692,10 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
     } else if (preDestination->GetIsEmpty()) {
         params[0] = JSRef<JSObject>::New();
     } else {
-        params[0] = JSClass<JSNavDestinationContext>::NewInstance();
+        JSRef<JSObject> preObj = JSClass<JSNavDestinationContext>::NewInstance();
+        auto preProxy = Referenced::Claim(preObj->Unwrap<JSNavDestinationContext>());
+        preProxy->SetNavDestinationContext(from);
+        params[0] = preObj;
     }
     auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
     if (!topDestination) {
@@ -699,7 +703,10 @@ void JSNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<N
     } else if (topDestination->GetIsEmpty()) {
         params[1] = JSRef<JSObject>::New();
     } else {
-        params[1] = JSClass<JSNavDestinationContext>::NewInstance();
+        JSRef<JSObject> topObj = JSClass<JSNavDestinationContext>::NewInstance();
+        auto topProxy = Referenced::Claim(topObj->Unwrap<JSNavDestinationContext>());
+        topProxy->SetNavDestinationContext(to);
+        params[1] = topObj;
     }
     const uint8_t operationIndex = 2;
     params[operationIndex] = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(operation)));
@@ -790,5 +797,29 @@ int32_t JSNavigationStack::LoadCurrentDestinationBuilder(
     auto builder = JSRef<JSFunc>::Cast(builderProp);
     builder->Call(thisObj, number, params);
     return res;
+}
+
+int32_t JSNavigationStack::GetJsIndexFromNativeIndex(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return -1;
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getJsIndexFromNativeIndex"));
+    JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(index));
+    auto res = func->Call(dataSourceObj_, 1, &param);
+    if (res->IsNumber()) {
+        return res->ToNumber<int32_t>();
+    }
+    return -1;
+}
+
+void JSNavigationStack::MoveIndexToTop(int32_t index)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("moveIndexToTop"));
+    JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(index));
+    func->Call(dataSourceObj_, 1, &param);
 }
 } // namespace OHOS::Ace::Framework

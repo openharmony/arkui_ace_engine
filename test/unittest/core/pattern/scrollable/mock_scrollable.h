@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 // implement interfaces with mock
 class PartiallyMockedScrollable : public ScrollablePattern {
     DECLARE_ACE_TYPE(PartiallyMockedScrollable, ScrollablePattern);
+
 private:
     MOCK_METHOD(bool, UpdateCurrentOffset, (float delta, int32_t source), (override));
     MOCK_METHOD(bool, IsAtTop, (), (const, override));
@@ -31,10 +32,12 @@ private:
     MOCK_METHOD(void, UpdateScrollBarOffset, (), (override));
     MOCK_METHOD(bool, IsScrollable, (), (const, override));
     MOCK_METHOD(OverScrollOffset, GetOverScrollOffset, (double delta), (const, override));
+    MOCK_METHOD(float, GetMainContentSize, (), (const, override));
 };
 
 class FullyMockedScrollable : public PartiallyMockedScrollable {
     DECLARE_ACE_TYPE(FullyMockedScrollable, PartiallyMockedScrollable);
+
 private:
     MOCK_METHOD(bool, HandleScrollVelocity, (float), (override));
     MOCK_METHOD(void, OnScrollEndCallback, (), (override));

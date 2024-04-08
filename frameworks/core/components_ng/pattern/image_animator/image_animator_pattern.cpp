@@ -147,30 +147,33 @@ void ImageAnimatorPattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, in
         return;
     }
     auto imageLayoutProperty = cacheImage.imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    const auto& image = images_[index];
     auto preSrc =
         imageLayoutProperty->HasImageSourceInfo() ? imageLayoutProperty->GetImageSourceInfoValue().GetSrc() : "";
-    if (preSrc != images_[index].src) {
+    if (preSrc != image.src) {
         // need to cache newImage
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(
-            images_[index].src, images_[index].bundleName, images_[index].moduleName));
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(image.src, image.bundleName, image.moduleName));
         cacheImage.index = index;
         cacheImage.isLoaded = false;
-    }
-    if (!fixedSize_) {
-        CalcSize realSize = { CalcLength(images_[index].width), CalcLength(images_[index].height) };
-        imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
-        cacheImage.imageNode->MarkModifyDone();
-        return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hostSize = host->GetGeometryNode()->GetPaddingSize();
+    if (!fixedSize_) {
+        CalcSize realSize = { CalcLength(image.width), CalcLength(image.height) };
+        imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
+        cacheImage.imageNode->GetGeometryNode()->SetContentSize(
+            { image.width.ConvertToPxWithSize(hostSize.Width()), image.height.ConvertToPxWithSize(hostSize.Height()) });
+        cacheImage.imageNode->MarkModifyDone();
+        return;
+    }
     if (!hostSize.IsPositive()) {
         // if imageNode size is nonPositive, no pixelMap will be generated. Wait for size.
         return;
     }
     imageLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(hostSize.Width()), CalcLength(hostSize.Height())));
+    cacheImage.imageNode->GetGeometryNode()->SetContentSize(hostSize);
     cacheImage.imageNode->MarkModifyDone();
 }
 

@@ -84,9 +84,11 @@ template("build_component_plugin") {
         public_configs = []
         public_configs += invoker.public_configs
       }
-
+      external_deps = []
+      if (use_hilog) {
+        external_deps += [ "hilog:libhilog" ]
+      }
       if (defined(invoker.external_deps)) {
-        external_deps = []
         external_deps += invoker.external_deps
       }
 

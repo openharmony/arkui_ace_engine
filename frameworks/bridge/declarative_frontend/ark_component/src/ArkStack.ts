@@ -18,9 +18,6 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   alignContent(value: Alignment): StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
@@ -48,7 +45,7 @@ class StackAlignContentModifier extends ModifierWithKey<number> {
   }
 }
 // @ts-ignore
-globalThis.Stack.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Stack.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkStackComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

@@ -268,29 +268,36 @@ void MutableSpanString::UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start
     }
 }
 
-void MutableSpanString::InsertString(int32_t start, const std::string& other)
+bool MutableSpanString::InsertUseFrontStyle(int32_t start)
 {
-    if (other.length() == 0 || start > GetLength()) {
-        return;
+    if (start == GetLength()) {
+        return true;
     }
-    auto text = GetWideString();
-    auto wOther = StringUtils::ToWstring(other);
-    text = GetWideStringSubstr(text, 0, start) + wOther + GetWideStringSubstr(text, start);
-    SetString(StringUtils::ToString(text));
-    auto otherLength = wOther.length();
-    bool useFrontStyle = false;
     for (auto& iter : spansMap_) {
-        if (useFrontStyle || spansMap_.find(iter.first) == spansMap_.end()) {
+        if (spansMap_.find(iter.first) == spansMap_.end()) {
             continue;
         }
         auto spans = spansMap_[iter.first];
         for (auto& span : spans) {
             if (span->GetStartIndex() <= start - 1 && span->GetEndIndex() > start - 1) {
-                useFrontStyle = true;
-                break;
+                return true;
             }
         }
     }
+    return false;
+}
+
+void MutableSpanString::InsertString(int32_t start, const std::string& other)
+{
+    if (other.length() == 0 || start > GetLength()) {
+        return;
+    }
+    bool useFrontStyle = InsertUseFrontStyle(start);
+    auto text = GetWideString();
+    auto wOther = StringUtils::ToWstring(other);
+    text = GetWideStringSubstr(text, 0, start) + wOther + GetWideStringSubstr(text, start);
+    SetString(StringUtils::ToString(text));
+    auto otherLength = wOther.length();
     for (auto& span : spans_) {
         auto spanItemStart = span->interval.first;
         auto spanItemEnd = span->interval.second;

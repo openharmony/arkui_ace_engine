@@ -15,35 +15,38 @@
 
 #include "core/interfaces/native/node/node_api.h"
 
-#include <array>
 #include <deque>
 
+#include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
-#include "core/interfaces/native/node/node_common_modifier.h"
-#include "core/interfaces/native/node/node_image_modifier.h"
-#include "core/interfaces/native/node/node_refresh_modifier.h"
-#include "core/interfaces/native/node/node_date_picker_modifier.h"
-#include "core/interfaces/native/node/node_list_modifier.h"
-#include "core/interfaces/native/node/node_scroll_modifier.h"
-#include "core/interfaces/native/node/node_text_input_modifier.h"
-#include "core/interfaces/native/node/node_text_area_modifier.h"
-#include "core/interfaces/native/node/node_timepicker_modifier.h"
-#include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_date_picker_modifier.h"
+#include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_list_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
-#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
+#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -71,7 +74,7 @@ const ArkUIStateModifier* GetUIStateModifier()
     static const ArkUIStateModifier modifier = { GetUIState, SetSupportedUIState };
     return &modifier;
 }
-}
+} // namespace NodeModifier
 
 namespace NodeEvent {
 std::deque<ArkUINodeEvent> g_eventQueue;
@@ -160,14 +163,24 @@ void DumpTreeNode(ArkUINodeHandle node)
     DumpTree(node, 0);
 }
 
-void AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
+ArkUI_Int32 AddChild(ArkUINodeHandle parent, ArkUINodeHandle child)
 {
+    auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
+    if (nodeAdapter) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
+    }
     ViewModel::AddChild(parent, child);
+    return ERROR_CODE_NO_ERROR;
 }
 
-void InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position)
+ArkUI_Int32 InsertChildAt(ArkUINodeHandle parent, ArkUINodeHandle child, int32_t position)
 {
+    auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
+    if (nodeAdapter) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
+    }
     ViewModel::InsertChildAt(parent, child, position);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
@@ -175,9 +188,14 @@ void RemoveChild(ArkUINodeHandle parent, ArkUINodeHandle child)
     ViewModel::RemoveChild(parent, child);
 }
 
-void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+ArkUI_Int32 InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
+    auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
+    if (nodeAdapter) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
+    }
     ViewModel::InsertChildAfter(parent, child, sibling);
+    return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Bool IsBuilderNode(ArkUINodeHandle node)
@@ -185,9 +203,14 @@ ArkUI_Bool IsBuilderNode(ArkUINodeHandle node)
     return ViewModel::IsBuilderNode(node);
 }
 
-void InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
+ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
+    auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
+    if (nodeAdapter) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST;
+    }
     ViewModel::InsertChildBefore(parent, child, sibling);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value)
@@ -294,12 +317,20 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperGestureSwipe,
 };
 
+const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCanvasOnReady,
+};
+
 const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListScroll,
     nullptr,
     NodeModifier::SetOnListScrollStart,
     NodeModifier::SetOnListScrollStop,
     NodeModifier::SetOnListScrollFrameBegin,
+};
+
+const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnWillScroll,
 };
 
 /* clang-format on */
@@ -425,6 +456,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_CANVAS: {
+            if (subKind >= sizeof(CANVAS_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CANVAS_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         case ARKUI_LIST: {
             // list event type.
             if (subKind >= sizeof(listNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
@@ -432,6 +471,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = listNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_WATER_FLOW: {
+            // swiper event type.
+            if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -765,8 +813,8 @@ ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle handle)
     return CustomDialog::RemoveDialogContent(handle);
 }
 
-ArkUI_Int32 SetDialogContentAlignment(ArkUIDialogHandle handle, ArkUI_Int32 alignment,
-    ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
+ArkUI_Int32 SetDialogContentAlignment(
+    ArkUIDialogHandle handle, ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
 {
     return CustomDialog::SetDialogContentAlignment(handle, alignment, offsetX, offsetY);
 }
@@ -786,7 +834,7 @@ ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle handle, ArkUI_Bool autoCancel)
     return CustomDialog::SetDialogAutoCancel(handle, autoCancel);
 }
 
-ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect * rect)
+ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect* rect)
 {
     return CustomDialog::SetDialogMask(handle, maskColor, rect);
 }
@@ -796,8 +844,8 @@ ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handle, uint32_t backgrou
     return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
 }
 
-ArkUI_Int32 SetDialogCornerRadius(ArkUIDialogHandle handle, float topLeft, float topRight,
-    float bottomLeft, float bottomRight)
+ArkUI_Int32 SetDialogCornerRadius(
+    ArkUIDialogHandle handle, float topLeft, float topRight, float bottomLeft, float bottomRight)
 {
     return CustomDialog::SetDialogCornerRadius(handle, topLeft, topRight, bottomLeft, bottomRight);
 }
@@ -992,6 +1040,7 @@ ArkUIFullNodeAPI impl_full = {
     GetGraphicsAPI,         // Graphics
     GetDialogAPI,
     GetExtendedAPI,         // Extended
+    NodeAdapter::GetNodeAdapterAPI,         // adapter.
 };
 /* clang-format on */
 } // namespace
@@ -1038,8 +1087,8 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetBasicAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "Requested basic version %{public}d is not supported, we're version %{public}d\n",
-                        version, ARKUI_BASIC_API_VERSION);
+                        "Requested basic version %{public}d is not supported, we're version %{public}d\n", version,
+                        ARKUI_BASIC_API_VERSION);
 
                     return nullptr;
                 }
@@ -1051,8 +1100,8 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_full);
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "Requested full version %{public}d is not supported, we're version %{public}d\n",
-                        version, ARKUI_FULL_API_VERSION);
+                        "Requested full version %{public}d is not supported, we're version %{public}d\n", version,
+                        ARKUI_FULL_API_VERSION);
 
                     return nullptr;
                 }
@@ -1064,8 +1113,8 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetGraphicsAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "Requested graphics version %{public}d is not supported, we're version %{public}d\n",
-                        version, ARKUI_NODE_GRAPHICS_API_VERSION);
+                        "Requested graphics version %{public}d is not supported, we're version %{public}d\n", version,
+                        ARKUI_NODE_GRAPHICS_API_VERSION);
 
                     return nullptr;
                 }
@@ -1077,16 +1126,15 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_extended);
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "Requested extended version %{public}d is not supported, we're version %{public}d\n",
-                        version, ARKUI_EXTENDED_API_VERSION);
+                        "Requested extended version %{public}d is not supported, we're version %{public}d\n", version,
+                        ARKUI_EXTENDED_API_VERSION);
 
                     return nullptr;
                 }
             }
         }
         default: {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                "API kind %{public}d is not supported\n",
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "API kind %{public}d is not supported\n",
                 static_cast<int>(kind));
 
             return nullptr;

@@ -211,11 +211,6 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
                 if (callback) {
                     callback();
                 }
-                // close text overlay.
-                if (!isSelectAll) {
-                    overlayManager->DestroySelectOverlay(overlayId, true);
-                    overlayManager->CloseSelectContentOverlay(overlayId, CloseReason::CLOSE_REASON_TOOL_BAR, true);
-                }
             });
     } else {
         auto buttonEventHub = button->GetEventHub<OptionEventHub>();

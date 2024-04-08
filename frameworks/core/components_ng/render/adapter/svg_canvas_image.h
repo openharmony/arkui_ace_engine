@@ -53,6 +53,7 @@ public:
 
     bool IsStatic() override;
     void SetRedrawCallback(std::function<void()>&& callback) override;
+    void SetOnFinishCallback(std::function<void()>&& callback) override;
 
     void ControlAnimation(bool play) override;
 

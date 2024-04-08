@@ -182,6 +182,7 @@ private:
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+    bool FindNavigationParent(const std::string& parentName);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

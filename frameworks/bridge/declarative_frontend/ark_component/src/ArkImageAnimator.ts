@@ -196,8 +196,8 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey<number> {
 }
 
 class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   images(value: Array<ImageFrameInfo>): ImageAnimatorAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity,
@@ -254,12 +254,10 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
   }
 }
 // @ts-ignore
-globalThis.ImageAnimator.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkImageAnimatorComponent(nativeNode);
+globalThis.ImageAnimator.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkImageAnimatorComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ImageAnimatorModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

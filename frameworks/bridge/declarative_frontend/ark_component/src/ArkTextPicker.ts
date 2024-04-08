@@ -15,11 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   defaultPickerItemHeight(value: string | number): this {
     modifierWithKey(
@@ -63,6 +60,11 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
   divider(value: DividerOptions | null): this {
     modifierWithKey(
       this._modifiersWithKeys, TextpickerDividerModifier.identity, TextpickerDividerModifier, value);
+    return this;
+  }
+  gradientHeight(value: Dimension): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerGradientHeightModifier.identity, TextpickerGradientHeightModifier, value);
     return this;
   }
 }
@@ -124,6 +126,23 @@ class TextpickerDividerModifier extends ModifierWithKey<DividerOptions | null> {
       this.stageValue?.color === this.value?.color &&
       this.stageValue?.startMargin === this.value?.startMargin &&
       this.stageValue?.endMargin === this.value?.endMargin);
+  }
+}
+
+class TextpickerGradientHeightModifier extends ModifierWithKey<Dimension>{
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerGradientHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetGradientHeight(node);
+    } else {
+      getUINativeModule().textpicker.setGradientHeight(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -229,12 +248,10 @@ class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey<number |
 }
 
 // @ts-ignore
-globalThis.TextPicker.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextPickerComponent(nativeNode);
+globalThis.TextPicker.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextPickerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextPickerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

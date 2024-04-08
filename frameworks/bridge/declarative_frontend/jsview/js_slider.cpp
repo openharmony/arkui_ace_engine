@@ -456,7 +456,7 @@ void JSSlider::SetSelectedBorderRadius(const JSCallbackInfo& info)
     }
 
     CalcDimension selectedBorderRadius;
-    if (!ParseJsDimensionVpNG(info[0], selectedBorderRadius, true)) {
+    if (!ParseJsDimensionVpNG(info[0], selectedBorderRadius, false)) {
         SliderModel::GetInstance()->ResetSelectedBorderRadius();
         return;
     }

@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,6 +57,8 @@ private:
     SizeF CalculateHotSize(LayoutWrapper* layoutWrapper, const SizeF& blockSize, float themeBlockHotSize);
     void GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dimension& themeTrackThickness, Dimension& themeBlockSize,
         Dimension& hotBlockShadowWidth, Dimension& themeBlockHotSize);
+    float CalculateSliderWidth(
+        float width, float height, Axis direction, const Dimension& hotBlockShadowWidth, SliderModel::SliderMode mode);
 
 private:
     float trackThickness_ = 0.0f;

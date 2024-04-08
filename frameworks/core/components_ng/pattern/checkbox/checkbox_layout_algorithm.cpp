@@ -25,6 +25,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -35,6 +36,13 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+    }
     InitializeParam();
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
@@ -74,11 +82,15 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
 
 void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->GetGeometryNode()->SetFrameSize(SizeF());
+    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG) {
+        // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
+        for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            child->GetGeometryNode()->SetFrameSize(SizeF());
+        }
+        PerformMeasureSelf(layoutWrapper);
+    } else {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
     }
-    PerformMeasureSelf(layoutWrapper);
 }
 
 void CheckBoxLayoutAlgorithm::InitializeParam()

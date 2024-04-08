@@ -178,6 +178,7 @@ private:
 
     void HandleOnClick(GestureEvent& info);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDownEvent(const TouchEventInfo& info);
     void HandleOnTouch(GestureEvent& info);
     void HandlePanStart(GestureEvent& info);
     void HandlePanMove(GestureEvent& info);
@@ -186,6 +187,7 @@ private:
 
     void CheckHandleReverse();
     bool IsHandlesInSameLine();
+    bool IsFirstHandleMoveStart(const Offset& touchOffset);
     void StopHiddenHandleTask();
     void HiddenHandle();
     void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
@@ -197,6 +199,8 @@ private:
 
     bool firstHandleDrag_ = false;
     bool secondHandleDrag_ = false;
+    bool isFirstHandleTouchDown_ = false;
+    bool isSecondHandleTouchDown_ = false;
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
     bool hasExtensionMenu_ = false;

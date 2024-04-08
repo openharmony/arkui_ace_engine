@@ -69,7 +69,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
@@ -214,6 +214,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto aiSpanMap = pattern->GetAISpanMap();
+    std::vector<WeakPtr<FrameNode>> imageNodeList;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
@@ -246,6 +247,8 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
+            auto imageNode = (*iterItems)->GetHostNode();
+            imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
             iterItems++;
         } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
@@ -288,6 +291,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }
     }
+    pattern->SetImageSpanNodeList(imageNodeList);
 }
 
 void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper)
@@ -382,7 +386,7 @@ std::string TextLayoutAlgorithm::StringOutBoundProtection(int32_t position, int3
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
@@ -772,8 +776,16 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
-    if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
-        return std::nullopt;
+
+    if (!textStyle.GetAdaptTextSize()) {
+        if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
+            return std::nullopt;
+        }
+    } else {
+        if (!AdaptMinTextSize(
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
+            return std::nullopt;
+        }
     }
     if (!paragraph_) {
         return std::nullopt;
@@ -785,9 +797,10 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     if (contentConstraint.selfIdealSize.Width().has_value()) {
         paragraphWidth = std::max(contentConstraint.selfIdealSize.Width().value(), paragraphWidth);
     } else {
-        paragraphWidth = std::max(contentConstraint.maxSize.Width(), paragraphWidth);
+        paragraphWidth = std::max(contentConstraint.minSize.Width(), paragraphWidth);
     }
-    paragraph_->Layout(std::ceil(paragraphWidth));
+    paragraphWidth = std::ceil(paragraphWidth);
+    paragraph_->Layout(paragraphWidth);
 
     textStyle_ = textStyle;
 
@@ -823,6 +836,14 @@ void TextLayoutAlgorithm::SetPropertyToModifier(
     auto fontSize = layoutProperty->GetFontSize();
     if (fontSize.has_value()) {
         modifier->SetFontSize(fontSize.value());
+    }
+    auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
+    if (adaptMinFontSize.has_value()) {
+        modifier->SetAdaptMinFontSize(adaptMinFontSize.value());
+    }
+    auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
+    if (adaptMaxFontSize.has_value()) {
+        modifier->SetAdaptMaxFontSize(adaptMaxFontSize.value());
     }
     auto fontWeight = layoutProperty->GetFontWeight();
     if (fontWeight.has_value()) {

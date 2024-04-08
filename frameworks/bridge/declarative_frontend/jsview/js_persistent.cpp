@@ -61,7 +61,6 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    ContainerScope scope(Container::CurrentIdSafely());
     if (args.Length() < 2 || !args[0]->IsString()) {
         LOGW("JSPersistent: Fail to set persistent data, args too few or key type is not a string");
         return;
@@ -69,22 +68,11 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     std::string key = args[0]->ToString();
     auto serializedValue = JSON::Stringify(args.GetVm(), args[1].Get().GetLocalHandle());
     std::string value = serializedValue->ToString(args.GetVm())->ToString();
-    auto container = Container::Current();
-    if (!container) {
-        return;
-    }
-    auto executor = container->GetTaskExecutor();
-    if(!StorageProxy::GetInstance()->GetStorage(executor)) {
+    if (!StorageProxy::GetInstance()->GetStorage()) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage(executor)->SetString(key, value);
-    AceEngine::Get().NotifyContainers(
-        [currInstanceId = container->GetInstanceId(), key, value](const RefPtr<Container>& container) {
-        if (container && container->GetInstanceId() != currInstanceId) {
-            container->NotifyAppStorage(key, value);
-        }
-    });
+    StorageProxy::GetInstance()->GetStorage()->SetString(key, value);
 }
 
 void JSPersistent::Get(const JSCallbackInfo& args)
@@ -94,17 +82,15 @@ void JSPersistent::Get(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    ContainerScope scope(Container::CurrentIdSafely());
     if (args.Length() < 1 || !args[0]->IsString()) {
         return;
     }
     std::string key = args[0]->ToString();
-    auto container = Container::Current();
-    if (!container) {
+    if (!StorageProxy::GetInstance()->GetStorage()) {
+        LOGW("no storage available");
         return;
     }
-    auto executor = container->GetTaskExecutor();
-    std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
+    std::string value = StorageProxy::GetInstance()->GetStorage()->GetString(key);
     if (value.empty() || value == "undefined") {
         args.SetReturnValue(JSVal::Undefined());
         return;
@@ -121,19 +107,16 @@ void JSPersistent::Has(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    ContainerScope scope(Container::CurrentIdSafely());
     if (args.Length() < 1 || !args[0]->IsString()) {
         LOGW("JSPersistent: Failed to Get persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
+    if (!StorageProxy::GetInstance()->GetStorage()) {
+        LOGW("no storage available");
         return;
     }
-    auto executor = container->GetTaskExecutor();
-    std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
+    std::string value = StorageProxy::GetInstance()->GetStorage()->GetString(key);
     args.SetReturnValue(value.empty()? JSVal::False() : JSVal::True());
 }
 
@@ -144,17 +127,15 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    ContainerScope scope(Container::CurrentIdSafely());
     if (args.Length() < 1 || !args[0]->IsString()) {
         return;
     }
     std::string key = args[0]->ToString();
-    auto container = Container::Current();
-    if (!container) {
+    if (!StorageProxy::GetInstance()->GetStorage()) {
+        LOGW("no storage available");
         return;
     }
-    auto executor = container->GetTaskExecutor();
-    StorageProxy::GetInstance()->GetStorage(executor)->Delete(key);
+    StorageProxy::GetInstance()->GetStorage()->Delete(key);
 }
 
 void JSPersistent::Clear(const JSCallbackInfo& args)
@@ -164,13 +145,11 @@ void JSPersistent::Clear(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    ContainerScope scope(Container::CurrentIdSafely());
-    auto container = Container::Current();
-    if (!container) {
+    if (!StorageProxy::GetInstance()->GetStorage()) {
+        LOGW("no storage available");
         return;
     }
-    auto executor = container->GetTaskExecutor();
-    StorageProxy::GetInstance()->GetStorage(executor)->Clear();
+    StorageProxy::GetInstance()->GetStorage()->Clear();
 }
 
 } // namespace OHOS::Ace::Framework

@@ -63,6 +63,14 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(
         V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pattern = frameNode->GetPattern<RefreshPattern>();
+        CHECK_NULL_RETURN(pattern, frameNode);
+        pattern->UpdateNestedModeForChildren(NestedScrollOptions({
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     layoutProperty->UpdateIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
     layoutProperty->UpdateFriction(DEFAULT_FRICTION_RATIO);

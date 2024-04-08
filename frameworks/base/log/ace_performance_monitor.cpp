@@ -17,28 +17,32 @@
 
 #include <cinttypes>
 
+#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 using namespace std;
 using namespace std::chrono;
+namespace {
+void GetTimePoint(TimePoint& now)
+{
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        now = steady_clock::now();
+    }
+}
+} // namespace
+
 ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
 {
-    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        return;
-    }
-    begin_ = steady_clock::now();
+    GetTimePoint(begin_);
     ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor()
 {
-    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        return;
-    }
-    auto end = steady_clock::now();
-    ArkUIPerfMonitor::GetInstance().RecordTimeSlice(tag_, duration_cast<nanoseconds>(end - begin_).count());
+    GetTimePoint(end_);
+    ArkUIPerfMonitor::GetInstance().RecordTimeSlice(tag_, duration_cast<nanoseconds>(end_ - begin_).count());
 }
 
 ArkUIPerfMonitor& ArkUIPerfMonitor::GetInstance()
@@ -54,21 +58,13 @@ ArkUIPerfMonitor::ArkUIPerfMonitor()
 
 void ArkUIPerfMonitor::StartPerf()
 {
-    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        ClearPerfMonitor();
-        return;
-    }
-    begin_ = steady_clock::now();
+    GetTimePoint(begin_);
     ClearPerfMonitor();
 }
 
 void ArkUIPerfMonitor::FinishPerf()
 {
-    if (!SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        ClearPerfMonitor();
-        return;
-    }
-    end_ = steady_clock::now();
+    GetTimePoint(end_);
     FlushPerfMonitor();
     ClearPerfMonitor();
 }
@@ -85,9 +81,19 @@ void ArkUIPerfMonitor::RecordTimeSlice(MonitorTag tag, int64_t duration)
     timeSlice_[tag] += duration;
 }
 
-void ArkUIPerfMonitor::RecordNodeNum(uint64_t num)
+void ArkUIPerfMonitor::RecordStateMgmtNode(int64_t num)
 {
-    nodeNum_ += num;
+    stateMgmtNodeNum_ += num;
+}
+
+void ArkUIPerfMonitor::RecordLayoutNode(int64_t num)
+{
+    layoutNodeNum_ += num;
+}
+
+void ArkUIPerfMonitor::RecordRenderNode(int64_t num)
+{
+    renderNodeNum_ += num;
 }
 
 void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status)
@@ -119,7 +125,9 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     timeSlice_[MonitorTag::JS_CALLBACK] = 0;
     timeSlice_[MonitorTag::STATIC_API] = 0;
     propertyNum_ = 0;
-    nodeNum_ = 0;
+    stateMgmtNodeNum_ = 0;
+    layoutNodeNum_ = 0;
+    renderNodeNum_ = 0;
 }
 
 void ArkUIPerfMonitor::FlushPerfMonitor()
@@ -128,8 +136,13 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     auto frameWork = total - timeSlice_[MonitorTag::COMPONENT_CREATION] - timeSlice_[MonitorTag::COMPONENT_LIFECYCLE] -
                      timeSlice_[MonitorTag::COMPONENT_UPDATE] - timeSlice_[MonitorTag::JS_CALLBACK] +
                      timeSlice_[MonitorTag::STATIC_API];
-    ACE_SCOPED_TRACE("ArkUIPerfMonitor[%" PRIu64 ", %" PRIu64 " ,%" PRId64 ", %" PRId64 "]", nodeNum_, propertyNum_,
-        total, frameWork);
+    auto json = JsonUtil::Create(true);
+    json->Put("state_mgmt", stateMgmtNodeNum_);
+    json->Put("layout", layoutNodeNum_);
+    json->Put("render", renderNodeNum_);
+    json->Put("property", propertyNum_);
+    json->Put("total", total);
+    json->Put("framework", frameWork);
+    ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", json->ToString().c_str());
 }
-
 } // namespace OHOS::Ace

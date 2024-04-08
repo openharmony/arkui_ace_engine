@@ -93,11 +93,14 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
     size_t segmentCnt = itemsCrossSize_.size();
     std::vector<std::vector<float>> crossPos(segmentCnt);
+    auto crossSize = wrapper_->GetGeometryNode()->GetFrameSize().CrossSize(axis_);
+    auto layoutDirection = wrapper_->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto isRtl = layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL;
     // prepare crossPos
     for (size_t i = 0; i < segmentCnt; ++i) {
         float pos = ((axis_ == Axis::VERTICAL) ? info_.margins_[i].left : info_.margins_[i].top).value_or(0.0f);
         for (const auto& len : itemsCrossSize_[i]) {
-            crossPos[i].push_back(pos);
+            crossPos[i].push_back(!isRtl ? pos : crossSize - pos - len);
             pos += len + crossGaps_[i];
         }
     }

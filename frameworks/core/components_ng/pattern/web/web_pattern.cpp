@@ -165,7 +165,7 @@ constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
-constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 3;
+constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 4;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
@@ -411,6 +411,10 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         CHECK_NULL_VOID(pattern);
         MouseInfo info;
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
+        if (!isHover) {
+            OHOS::NWeb::NWebCursorInfo cursorInfo;
+            pattern->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, cursorInfo);
+        }
         pattern->WebOnMouseEvent(info);
     };
 
@@ -613,7 +617,7 @@ void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
     delegate_->OnContextMenuHide("");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     int32_t globalX = static_cast<int32_t>(info->GetX()) * viewScale;
@@ -848,7 +852,7 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     int32_t globalX = static_cast<int32_t>(info->GetX());
     int32_t globalY = static_cast<int32_t>(info->GetY());
@@ -923,7 +927,7 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     auto offset = GetCoordinatePoint();
@@ -971,7 +975,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
     isW3cDragEvent_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     auto offset = GetCoordinatePoint();
@@ -991,7 +995,7 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto viewScale = pipelineContext->GetViewScale();
     auto offset = GetCoordinatePoint();
@@ -1212,8 +1216,10 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
 void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-    if (webOffset_ == offset) {
-        return;
+    if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
+        if (webOffset_ == offset) {
+            return;
+        }
     }
     webOffset_ = offset;
     UpdateTouchHandleForOverlay();
@@ -1221,6 +1227,9 @@ void WebPattern::OnAreaChangedInner()
         return;
     auto resizeOffset = Offset(offset.GetX(), offset.GetY());
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
+    if (isNeedReDrawRect_) {
+        UpdateSlideOffset(true);
+    }
 }
 
 void WebPattern::OnWebSrcUpdate()
@@ -1735,6 +1744,10 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
+
+        std::tuple<bool, bool> config = GetNativeVideoPlayerConfigValue({false, false});
+        delegate_->UpdateNativeVideoPlayerConfig(std::get<0>(config), std::get<1>(config));
+
         accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
         if (accessibilityState_) {
             delegate_->SetAccessibilityState(true);
@@ -3140,10 +3153,13 @@ void WebPattern::OnRootLayerChanged(int width, int height)
 
 void WebPattern::ReleaseResizeHold()
 {
+    if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
+        return;
+    }
     drawSize_.SetSize(rootLayerChangeSize_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
 }
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
@@ -3276,26 +3292,27 @@ void WebPattern::InitSlideUpdateListener()
     }
 }
 
-void WebPattern::UpdateSlideOffset()
+void WebPattern::UpdateSlideOffset(bool isNeedReset)
 {
     UpdateRelativeOffset();
     switch (syncAxis_) {
         case Axis::HORIZONTAL:
-            CalculateHorizontalDrawRect();
+            CalculateHorizontalDrawRect(isNeedReset);
             break;
         case Axis::VERTICAL:
-            CalculateVerticalDrawRect();
+            CalculateVerticalDrawRect(isNeedReset);
             break;
         default :
             break;
     }
 }
 
-void WebPattern::CalculateHorizontalDrawRect()
+void WebPattern::CalculateHorizontalDrawRect(bool isNeedReset)
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetX());
     if (relativeOffsetOfScroll_.GetX() >= 0) {
+        isNeedReDrawRect_ = false;
         return;
     }
 
@@ -3307,14 +3324,16 @@ void WebPattern::CalculateHorizontalDrawRect()
     renderSurface_->SetWebMessage({ x, 0 });
     TAG_LOGD(AceLogTag::ACE_WEB, "SetDrawRect x : %{public}d, y : %{public}d, width : %{public}d, height : %{public}d",
         x, y, width, height);
-    SetDrawRect(x, y, width, height);
+    SetDrawRect(x, y, width, height, isNeedReset);
+    isNeedReDrawRect_ = true;
 }
 
-void WebPattern::CalculateVerticalDrawRect()
+void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetY());
     if (relativeOffsetOfScroll_.GetY() >= 0) {
+        isNeedReDrawRect_ = false;
         return;
     }
 
@@ -3326,7 +3345,8 @@ void WebPattern::CalculateVerticalDrawRect()
     renderSurface_->SetWebMessage({ 0, y });
     TAG_LOGD(AceLogTag::ACE_WEB, "SetDrawRect x : %{public}d, y : %{public}d, width : %{public}d, height : %{public}d",
         x, y, width, height);
-    SetDrawRect(x, y, width, height);
+    SetDrawRect(x, y, width, height, isNeedReset);
+    isNeedReDrawRect_ = true;
 }
 
 void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
@@ -3341,9 +3361,9 @@ void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
-void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
+void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset)
 {
-    if ((drawRectWidth_ == width) && (drawRectHeight_ == height)) {
+    if (!isNeedReset && (drawRectWidth_ == width) && (drawRectHeight_ == height)) {
         return;
     }
     drawRectWidth_ = width;
@@ -3491,7 +3511,7 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
         CHECK_NULL_VOID(webPattern);
         webPattern->OnVisibleAreaChange(visible);
     };
-    std::vector<double> ratioList = {0.0};
+    std::vector<double> ratioList = {0.0, 1.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 } // namespace OHOS::Ace::NG

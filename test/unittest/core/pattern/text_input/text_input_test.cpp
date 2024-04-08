@@ -44,6 +44,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/type_definition.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ime/constant.h"
 #include "core/common/ime/text_editing_value.h"
@@ -66,6 +67,7 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components/common/properties/text_style_parser.h"
 
 #undef private
 #undef protected
@@ -106,6 +108,8 @@ const TextAlign DEFAULT_TEXT_ALIGN = TextAlign::LEFT;
 const CaretStyle DEFAULT_CARET_STYLE = { Dimension(3, DimensionUnit::VP) };
 const OHOS::Ace::DisplayMode DEFAULT_DISPLAY_MODE = OHOS::Ace::DisplayMode::AUTO;
 const TextInputAction DEFAULT_ENTER_KEY_TYPE = TextInputAction::BEGIN;
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -803,7 +807,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
     pattern_->HandleExtendAction(action[2]);
     pattern_->HandleExtendAction(action[3]);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijfghijklmnopqrstuvwxyz"), 0)
+    EXPECT_EQ(pattern_->GetTextValue().compare("abcdefghijklmnopqrstuvwxyz"), 0)
         << "Text is " + pattern_->GetTextValue();
 }
 
@@ -3653,7 +3657,7 @@ HWTEST_F(TextFieldUXTest, testTextAlign001, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node
+     * @tc.step1: Create Text filed node
      * @tc.expected: style is Inline
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
@@ -3661,21 +3665,21 @@ HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
     });
 
     /**
-     * @tc.step: step2. Set wordBreak BREAK_ALL
+     * @tc.step: step2. Set wordBreak NORMAL
      */
     layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
 
     /**
-     * @tc.step: step2. Set wordBreak BREAK_ALL
+     * @tc.step: step3. Set wordBreak BREAK_ALL
      */
     layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
 
     /**
-     * @tc.step: step2. Set wordBreak BREAK_ALL
+     * @tc.step: step4. Set wordBreak BREAK_WORD
      */
     layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
     frameNode_->MarkModifyDone();
@@ -4211,11 +4215,14 @@ HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
     /**
      * @tc.expected: Check if all set properties are displayed in the corresponding JSON
      */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json);
     EXPECT_TRUE(json->Contains("decoration"));
     EXPECT_TRUE(json->Contains("letterSpacing"));
     EXPECT_TRUE(json->Contains("lineHeight"));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -4290,5 +4297,104 @@ HWTEST_F(TextFieldUXTest, TextInputTextDecoration001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetTextDecoration(), TextDecoration::LINE_THROUGH);
     EXPECT_EQ(layoutProperty_->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(layoutProperty_->GetTextDecorationStyle(), TextDecorationStyle::DOTTED);
+}
+
+/**
+ * @tc.name: HandleClickEventTest001
+ * @tc.desc: test scrolling when clicking on the scroll bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create CreateTextField , GestureEvent and ScrollBars.
+     * @tc.expected: create CreateTextField , GestureEvent and ScrollBars created successfully.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+    GestureEvent info;
+    info.localLocation_ = Offset(1.0f, 110.0f);
+    pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+    pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+    // /**
+    //  * @tc.steps: step2. Test HandleClickEvent.
+    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
+    //  */
+    pattern_->hasMousePressed_ = true;
+    pattern_->HandleClickEvent(info);
+    Point point(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
+    info.localLocation_ = Offset(1.0f, 1.0f);
+    pattern_->HandleClickEvent(info);
+    Point point1(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
+    info.localLocation_ = Offset(1.0f, 300.0f);
+    pattern_->HandleClickEvent(info);
+    Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
+    EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
+}
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    auto supportAvoidance = true;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(pattern_->keyboardAvoidance_);
+    supportAvoidance = false;
+    pattern_->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: TextFieldFontFeatureTest
+ * @tc.desc: Test the caret move right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, FontFeature004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
 }
 } // namespace OHOS::Ace::NG

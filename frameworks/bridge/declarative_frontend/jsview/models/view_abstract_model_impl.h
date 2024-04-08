@@ -139,6 +139,7 @@ public:
 
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
+    void SetDynamicDim(float DimDegree) override {};
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
@@ -242,7 +243,8 @@ public:
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange) override
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange) override
     {}
     void DismissSheet() override {}
     void DismissContentCover() override {}
@@ -271,6 +273,8 @@ public:
     void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
+    void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
+    void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
 
     // global light
     void SetLightPosition(

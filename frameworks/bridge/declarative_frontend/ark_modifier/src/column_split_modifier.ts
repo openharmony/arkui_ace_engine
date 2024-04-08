@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ColumnSplitModifier extends ArkColumnSplitComponent implements AttributeModifier<ColumnSplitAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ColumnSplitAttribute): void {
-    applyAndMergeModifier<ColumnSplitAttribute, ArkColumnSplitComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ColumnSplitAttribute, ArkColumnSplitComponent, ArkComponent>(instance, this);
   }
 }

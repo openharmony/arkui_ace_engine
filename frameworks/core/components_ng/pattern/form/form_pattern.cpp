@@ -44,6 +44,7 @@
 #endif
 
 #include "core/common/udmf/udmf_client.h"
+const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -99,7 +100,7 @@ void FormPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
+        auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto subContainer = pattern->GetSubContainer();
         CHECK_NULL_VOID(subContainer);
@@ -554,9 +555,9 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     }
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
-        formManagerBridge_->AddForm(host->GetContext(), info, formInfo);
+        formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
 #else
-        formManagerBridge_->AddForm(host->GetContext(), info);
+        formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
 #endif
     }
 }
@@ -640,7 +641,7 @@ void FormPattern::InitFormManagerDelegate()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
     formManagerBridge_->AddRenderDelegate();
@@ -883,7 +884,7 @@ void FormPattern::CreateCardContainer()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -906,7 +907,7 @@ void FormPattern::CreateCardContainer()
     subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());
 
-    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
+    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](int64_t id) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -1001,8 +1002,10 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
+    int64_t uninstallFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
-    json->Put("id", std::to_string(id).c_str());
+    json->Put("id", std::to_string(uninstallFormId).c_str());
+    json->Put("idString", std::to_string(id).c_str());
     eventHub->FireOnUninstall(json->ToString());
 }
 
@@ -1012,8 +1015,10 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
+    int64_t onAcquireFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
-    json->Put("id", std::to_string(id).c_str());
+    json->Put("id", std::to_string(onAcquireFormId).c_str());
+    json->Put("idString", std::to_string(id).c_str());
     eventHub->FireOnAcquired(json->ToString());
 }
 
@@ -1115,9 +1120,12 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
-            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
-            // still dispatch 'up' event to finish this pointer event
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+            // still dispatch 'up' or 'cancel' event to finish this pointer event
             formManagerBridge_->DispatchPointerEvent(pointerEvent, serializedGesture);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_FORM, "form invisible, not dispatch pointerEvent: %{public}d.", pointerAction);
         }
         return;
     }

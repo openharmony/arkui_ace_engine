@@ -107,6 +107,8 @@ public:
     }
     virtual void SetRedrawCallback(std::function<void()>&& callback) {}
 
+    virtual void SetOnFinishCallback(std::function<void()>&& callback) {}
+
     virtual void ControlAnimation(bool play) {}
 
     virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}

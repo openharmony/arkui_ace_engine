@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class RatingModifier extends ArkRatingComponent implements AttributeModifier<RatingAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: RatingAttribute): void {
-    applyAndMergeModifier<RatingAttribute, ArkRatingComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<RatingAttribute, ArkRatingComponent, ArkComponent>(instance, this);
   }
 }

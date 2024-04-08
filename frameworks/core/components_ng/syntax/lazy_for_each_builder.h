@@ -78,9 +78,13 @@ public:
 
     RefPtr<UINode> OnDataDeleted(size_t index);
 
-    std::list<RefPtr<UINode>>& OnDataBulkDeleted(size_t index, size_t count);
+    std::list<std::pair<std::string, RefPtr<UINode>>>& OnDataBulkDeleted(size_t index, size_t count);
 
     bool OnDataChanged(size_t index);
+
+    std::list<std::pair<std::string, RefPtr<UINode>>>& OnDataBulkChanged(size_t index, size_t count);
+
+    void OnDataMoveToNewPlace(size_t from, size_t to);
 
     bool OnDataMoved(size_t from, size_t to);
 
@@ -128,7 +132,7 @@ public:
         return nullptr;
     }
 
-    std::map<int32_t, LazyForEachChild>& GetItems(std::list<RefPtr<UINode>>& childList)
+    std::map<int32_t, LazyForEachChild>& GetItems(std::list<std::pair<std::string, RefPtr<UINode>>>& childList)
     {
         startIndex_ = -1;
         endIndex_ = -1;
@@ -177,7 +181,7 @@ public:
                 }
                 auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
                 if (frameNode && frameNode->IsOnMainTree()) {
-                    childList.push_back(node.second);
+                    childList.emplace_back(key, node.second);
                 }
             }
             needTransition = false;
@@ -405,6 +409,7 @@ public:
             } else {
                 NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
                 ProcessOffscreenNode(node.second, true);
+                NotifyItemDeleted(RawPtr(node.second), key);
             }
         }
     }
@@ -520,8 +525,15 @@ public:
         }
     }
 
+    void NotifyItemDeleted(UINode* node, const std::string& key)
+    {
+        OnItemDeleted(node, key);
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
+
+    virtual void OnItemDeleted(UINode* node, const std::string& key) {};
 
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
@@ -532,19 +544,21 @@ protected:
 
     virtual void OnExpandChildrenOnInitialInNG() = 0;
 
-    virtual void NotifyDataChanged(size_t index, RefPtr<UINode>& lazyForEachNode, bool isRebuild = true) = 0;
+    virtual void NotifyDataChanged(size_t index, const RefPtr<UINode>& lazyForEachNode, bool isRebuild = true) = 0;
 
-    virtual void NotifyDataDeleted(RefPtr<UINode>& lazyForEachNode, size_t index, bool removeIds) = 0;
+    virtual void NotifyDataDeleted(const RefPtr<UINode>& lazyForEachNode, size_t index, bool removeIds) = 0;
 
     virtual void NotifyDataAdded(size_t index) = 0;
 
     virtual void KeepRemovedItemInCache(NG::LazyForEachChild node,
         std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) = 0;
 
+    void GetAllItems(std::vector<UINode*>& items);
+
 private:
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
-    std::list<RefPtr<UINode>> nodeList_;
+    std::list<std::pair<std::string, RefPtr<UINode>>> nodeList_;
     std::map<int32_t, OperationInfo> operationList_;
     std::map<std::string, int32_t> operationTypeMap = {
         {"add", 1},

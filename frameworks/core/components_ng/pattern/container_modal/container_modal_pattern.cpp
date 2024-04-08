@@ -545,6 +545,11 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     auto buttonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    auto gestureRow = GetGestureRow();
+    CHECK_NULL_VOID(gestureRow);
+    auto gestureRowProp = gestureRow->GetLayoutProperty();
+    auto customVisible = customTitleLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    gestureRowProp->UpdateVisibility(customVisible == VisibleType::VISIBLE ? VisibleType::GONE : VisibleType::VISIBLE);
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
@@ -563,6 +568,8 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     UpdateRowHeight(floatingTitleRow, height);
     auto controlButtonsRow = GetControlButtonRow();
     UpdateRowHeight(controlButtonsRow, height);
+    auto gestureRow = GetGestureRow();
+    UpdateRowHeight(gestureRow, height);
     CallButtonsRectChange();
 }
 
@@ -715,5 +722,27 @@ CalcLength ContainerModalPattern::GetControlButtonRowWidth()
 
     return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
                       TITLE_PADDING_START + TITLE_PADDING_END);
+}
+
+void ContainerModalPattern::InitColumnTouchTestFunc()
+{
+    auto column = GetColumnNode();
+    CHECK_NULL_VOID(column);
+    auto eventHub = column->GetOrCreateGestureEventHub();
+    auto func = [](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
+        TouchResult touchRes;
+        TouchResult defaultRes;
+        touchRes.strategy = TouchTestStrategy::FORWARD_COMPETITION;
+        defaultRes.strategy = TouchTestStrategy::DEFAULT;
+        defaultRes.id = "";
+        for (auto info : touchInfo) {
+            if (info.id.compare(CONTAINER_MODAL_STACK_ID) == 0) {
+                touchRes.id = info.id;
+                return touchRes;
+            }
+        }
+        return defaultRes;
+    };
+    eventHub->SetOnTouchTestFunc(func);
 }
 } // namespace OHOS::Ace::NG

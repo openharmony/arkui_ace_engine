@@ -83,6 +83,7 @@ public:
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
     virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
+    virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
@@ -196,6 +197,7 @@ public:
     virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
 
+    virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
@@ -289,6 +291,7 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
+    virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
@@ -312,7 +315,8 @@ public:
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange) = 0;
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange) = 0;
     virtual void DismissContentCover() = 0;
     virtual void DismissSheet() = 0;
     virtual void DismissDialog() {};

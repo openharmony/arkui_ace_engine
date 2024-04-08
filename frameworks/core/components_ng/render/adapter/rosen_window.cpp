@@ -90,7 +90,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-    });
+    }, id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);

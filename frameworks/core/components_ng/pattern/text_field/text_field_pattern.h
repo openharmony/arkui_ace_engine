@@ -360,7 +360,12 @@ public:
 
     OffsetF GetCaretOffset() const override
     {
-        return selectController_->GetCaretRect().GetOffset();
+        return movingCaretOffset_;
+    }
+
+    void SetMovingCaretOffset(const OffsetF& offset)
+    {
+        movingCaretOffset_ = offset;
     }
 
     float GetCaretOffsetX() const
@@ -901,6 +906,10 @@ public:
     }
     std::string GetShowResultImageSrc() const;
     std::string GetHideResultImageSrc() const;
+    std::string GetNormalUnderlineColorStr() const;
+    std::string GetTypingUnderlineColorStr() const;
+    std::string GetDisableUnderlineColorStr() const;
+    std::string GetErrorUnderlineColorStr() const;
     void OnAttachToFrameNode() override;
 
     bool GetTextInputFlag() const
@@ -1140,7 +1149,8 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
-    void ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId);
+    void ChangeMouseState(
+        const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
@@ -1151,6 +1161,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    void HanldeMaxLengthAndUnderlineTypingColor();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
@@ -1448,6 +1459,7 @@ private:
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
+    OffsetF movingCaretOffset_;
 };
 } // namespace OHOS::Ace::NG
 

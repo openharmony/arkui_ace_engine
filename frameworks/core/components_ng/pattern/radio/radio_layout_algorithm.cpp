@@ -30,6 +30,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr double NUM_TWO = 2.0;
+}
+
 std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -79,5 +83,34 @@ void RadioLayoutAlgorithm::InitializeParam()
     defaultHeight_ = radioTheme->GetHeight().ConvertToPx();
     horizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
     verticalPadding_ = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
+}
+
+void RadioLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    auto left = padding.left.value_or(0);
+    auto top = padding.top.value_or(0);
+    auto paddingOffset = OffsetF(left, top);
+    auto align = Alignment::CENTER;
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childWrapper);
+    SizeF childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+    NG::OffsetF child_offset;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (size.Width() - childSize.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (size.Height() - childSize.Height()) / NUM_TWO);
+    auto translate = child_offset + paddingOffset;
+    childWrapper->GetGeometryNode()->SetMarginFrameOffset(translate);
+    childWrapper->Layout();
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    if (content) {
+        NG::OffsetF offset;
+        offset.SetX((1.0 + align.GetHorizontal()) * (size.Width() - content->GetRect().GetSize().Width()) / NUM_TWO);
+        offset.SetY((1.0 + align.GetVertical()) * (size.Height() - content->GetRect().GetSize().Height()) / NUM_TWO);
+        auto translate = offset + paddingOffset;
+        content->SetOffset(translate);
+    }
 }
 } // namespace OHOS::Ace::NG

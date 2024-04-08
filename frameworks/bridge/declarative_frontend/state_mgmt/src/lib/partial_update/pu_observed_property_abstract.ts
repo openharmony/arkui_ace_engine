@@ -55,7 +55,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         this.subscriberRefs_.add(subscriber);
       }
     }
-    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
   }
 
   aboutToBeDeleted() {
@@ -245,6 +244,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
       }
+    } else {
+      stateMgmtConsole.warn(`${this.debugInfo()}: will not notify change, because its owning view is destroyed already`);
     }
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {

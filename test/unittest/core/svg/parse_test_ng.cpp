@@ -21,8 +21,8 @@
 #define protected public
 
 #include "include/core/SkStream.h"
-
 #include "test/mock/core/rosen/mock_canvas.h"
+
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -30,8 +30,11 @@
 #include "core/components/declaration/svg/svg_circle_declaration.h"
 #include "core/components/declaration/svg/svg_declaration.h"
 #include "core/components/declaration/svg/svg_ellipse_declaration.h"
+#include "core/components/declaration/svg/svg_fe_blend_declaration.h"
 #include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
 #include "core/components/declaration/svg/svg_fe_composite_declaration.h"
+#include "core/components/declaration/svg/svg_fe_declaration.h"
+#include "core/components/declaration/svg/svg_fe_flood_declaration.h"
 #include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
 #include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_gradient_declaration.h"
@@ -48,8 +51,10 @@
 #include "core/components_ng/svg/parse/svg_clip_path.h"
 #include "core/components_ng/svg/parse/svg_defs.h"
 #include "core/components_ng/svg/parse/svg_ellipse.h"
+#include "core/components_ng/svg/parse/svg_fe_blend.h"
 #include "core/components_ng/svg/parse/svg_fe_color_matrix.h"
 #include "core/components_ng/svg/parse/svg_fe_composite.h"
+#include "core/components_ng/svg/parse/svg_fe_flood.h"
 #include "core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
 #include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_g.h"
@@ -216,6 +221,7 @@ const std::string GRADIENT_SVG_RADIAL =
     "style=\"stop-color:rgb(0,0,255);stop-opacity:1\" /></radialGradient></defs><ellipse cx=\"200\" cy=\"70\" "
     "rx=\"85\" ry=\"55\" fill=\"url(#grad1)\" /></svg>";
 constexpr float ZERO = 0.0f;
+constexpr float ONE = 1.0f;
 const std::string G_SVG_LABEL = "<svg width=\"400\" height=\"500\"> <g id=\"myId\"> </g></svg>";
 const std::string G_ID = "myId";
 const std::string FILTER_SVG_LABEL =
@@ -266,8 +272,67 @@ const std::string SVG_ANIMATE_TRANSFORM(
     "<animateTransform attributeName =\"transform\" type=\"rotate\" repeatCount=\"3\" dur=\"1s\""
     " values=\"0 50 50;45 50 50;0 50 50\" keyTimes=\"0;0.5;1\"></animateTransform></path></svg>");
 
+const std::string NONE_STR = "";
+const std::string SATURATE_VALUE = "10";
+const std::string HUE_ROTATE = "80";
+const std::string FE_COLOR_MATRIX =
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<filter id=\"colorMatrix\">"
+        "<feColorMatrix in=\"SourceGraphic\" type=\"matrix\" values=\"R 0 0 0 0 0 G 0 0 0 0 0 B 0 0 0 0 0 A 0\" />"
+        "<feColorMatrix type=\"saturate\" values=\"10\"/>"
+        "<feColorMatrix type=\"hueRotate\" values=\"80\"/>"
+        "<feColorMatrix type=\"luminanceToAlpha\" values=\"80\"/>"
+    "</filter>"
+    "<g>"
+        "<circle cx=\"30\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
+    "</g>"
+    "<g filter=\"url(#colorMatrix)\">"
+        "<circle cx=\"80\" cy=\"30\" r=\"20\" fill=\"red\" fill-opacity=\"0.5\" />"
+    "</g>"
+"</svg>";
+
+const std::string FE_GAUSSIAN_BLUR =
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<filter id=\"colorMatrix\">"
+        "<feGaussianBlur stdDeviation=\"10 50\"/>"
+        "<feGaussianBlur stdDeviation=\"10\"/>"
+        "<feGaussianBlur stdDeviation=\"abc abc\"/>"
+    "</filter>"
+    "<g>"
+        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
+    "</g>"
+"</svg>";
+
+constexpr uint32_t RED_COLOR = 0xffff0000;
+constexpr uint32_t GREEN_COLOR = 0xff00ff00;
+
+const std::string FE_FLOOD_AND_COMPOSITE =
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<filter id=\"colorMatrix\">"
+        "<feFlood flood-color=\"red\" flood-opacity=\"0\" result=\"flood\" />"
+        "<feFlood flood-color=\"green\" flood-opacity=\"1\" result=\"flood1\" />"
+        "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\""
+            "operator=\"xor\" result=\"composite\" k1=\"1\" k2=\"0\"/>"
+    "</filter>"
+    "<g>"
+        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
+    "</g>"
+"</svg>";
+
+const std::string FE_BLEND =
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<filter id=\"colorMatrix\">"
+        "<feBlend in=\"SourceGraphic\" in2=\"SourceAlpha\" mode=\"lighten\" />"
+    "</filter>"
+    "<g>"
+        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
+    "</g>"
+"</svg>";
+
 constexpr float IMAGE_COMPONENT_WIDTH = 100.0f;
 constexpr float IMAGE_COMPONENT_HEIGHT = 100.0f;
+
+std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
 } // namespace
 class ParseTestNg : public testing::Test {
 public:
@@ -1037,7 +1102,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest002, TestSize.Level1)
 #endif
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
     ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
-    svgFe->GetImageFilter(imageFilter, colorInterpolationType);
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
     EXPECT_EQ(colorInterpolationType, ColorInterpolationType::LINEAR_RGB);
     svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
     EXPECT_NE(imageFilter, nullptr);
@@ -1062,7 +1127,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest003, TestSize.Level1)
 #endif
     ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
     ColorInterpolationType colorInterPolationType = ColorInterpolationType::LINEAR_RGB;
-    colorMatrix->OnAsImageFilter(imageFilter, srcColor, colorInterPolationType);
+    colorMatrix->OnAsImageFilter(imageFilter, srcColor, colorInterPolationType, resultHash);
     EXPECT_NE(imageFilter, nullptr);
     EXPECT_EQ(colorInterPolationType, ColorInterpolationType::LINEAR_RGB);
     EXPECT_EQ(srcColor, ColorInterpolationType::SRGB);
@@ -1095,6 +1160,159 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest001, TestSize.Level1)
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
+}
+
+/**
+ * @tc.name: ParseFeColorMatrixTest002
+ * @tc.desc: parse FeColorMatrix label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseFeColorMatrixTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_COLOR_MATRIX.c_str(), FE_COLOR_MATRIX.length());
+    EXPECT_NE(svgStream, nullptr);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+    // the first child in filter
+    auto svgFeColorMatrix1 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeColorMatrix1, nullptr);
+    auto feColorDeclaration1 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix1->declaration_);
+    EXPECT_NE(feColorDeclaration1, nullptr);
+    EXPECT_EQ(feColorDeclaration1->GetType(), SvgFeColorMatrixType::Matrix);
+    EXPECT_STREQ(feColorDeclaration1->GetValues().c_str(), VALUE.c_str());
+    // the second child in filter
+    auto svgFeColorMatrix2 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(1));
+    EXPECT_NE(svgFeColorMatrix2, nullptr);
+    auto feColorDeclaration2 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix2->declaration_);
+    EXPECT_NE(feColorDeclaration2, nullptr);
+    EXPECT_EQ(feColorDeclaration2->GetType(), SvgFeColorMatrixType::Saturate);
+    EXPECT_STREQ(feColorDeclaration2->GetValues().c_str(), SATURATE_VALUE.c_str());
+    // the third child in filter
+    auto svgFeColorMatrix3 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(2));
+    EXPECT_NE(svgFeColorMatrix3, nullptr);
+    auto feColorDeclaration3 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix3->declaration_);
+    EXPECT_NE(feColorDeclaration3, nullptr);
+    EXPECT_EQ(feColorDeclaration3->GetType(), SvgFeColorMatrixType::HueRotate);
+    EXPECT_STREQ(feColorDeclaration3->GetValues().c_str(), HUE_ROTATE.c_str());
+    // the fourth child in filter
+    auto svgFeColorMatrix4 = AceType::DynamicCast<SvgFeColorMatrix>(svgFilter->children_.at(3));
+    EXPECT_NE(svgFeColorMatrix4, nullptr);
+    auto feColorDeclaration4 = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(svgFeColorMatrix4->declaration_);
+    EXPECT_NE(feColorDeclaration4, nullptr);
+    EXPECT_EQ(feColorDeclaration4->GetType(), SvgFeColorMatrixType::LuminanceToAlpha);
+}
+
+/**
+ * @tc.name: ParseFeGaussianBlurTest001
+ * @tc.desc: parse FeGaussianBlur label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseFeGaussianBlurTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_GAUSSIAN_BLUR.c_str(), FE_GAUSSIAN_BLUR.length());
+    EXPECT_NE(svgStream, nullptr);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+    // the first child in filter
+    auto svgFeGaussianBlur1 = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeGaussianBlur1, nullptr);
+    auto svgFeGaussianBlurDeclaration1 =
+        AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussianBlur1->declaration_);
+    EXPECT_NE(svgFeGaussianBlurDeclaration1, nullptr);
+    // 10 50 = 10 50
+    EXPECT_EQ(svgFeGaussianBlurDeclaration1->GetStdDeviationX(), X1);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration1->GetStdDeviationY(), Y1);
+    // the second child in filter
+    auto svgFeGaussianBlur2 = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(1));
+    EXPECT_NE(svgFeGaussianBlur2, nullptr);
+    auto svgFeGaussianBlurDeclaration2 =
+        AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussianBlur2->declaration_);
+    EXPECT_NE(svgFeGaussianBlurDeclaration2, nullptr);
+    // 10 = 10 10
+    EXPECT_EQ(svgFeGaussianBlurDeclaration2->GetStdDeviationX(), X1);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration2->GetStdDeviationY(), X1);
+    // the third child in filter
+    auto svgFeGaussianBlur3 = AceType::DynamicCast<SvgFeGaussianBlur>(svgFilter->children_.at(2));
+    EXPECT_NE(svgFeGaussianBlur3, nullptr);
+    auto svgFeGaussianBlurDeclaration3 =
+        AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(svgFeGaussianBlur3->declaration_);
+    EXPECT_NE(svgFeGaussianBlurDeclaration3, nullptr);
+    // abc abc = 0 0
+    EXPECT_EQ(svgFeGaussianBlurDeclaration3->GetStdDeviationX(), ZERO);
+    EXPECT_EQ(svgFeGaussianBlurDeclaration3->GetStdDeviationY(), ZERO);
+}
+
+/**
+ * @tc.name: ParseFeFloodAndCompositeTest001
+ * @tc.desc: parse FeFlood And Composite label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_FLOOD_AND_COMPOSITE.c_str(), FE_FLOOD_AND_COMPOSITE.length());
+    EXPECT_NE(svgStream, nullptr);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+    // the first child in filter
+    auto svgFeFlood1 = AceType::DynamicCast<SvgFeFlood>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeFlood1, nullptr);
+    auto svgFeFloodDeclaration1 = AceType::DynamicCast<SvgFeFloodDeclaration>(svgFeFlood1->declaration_);
+    EXPECT_NE(svgFeFloodDeclaration1, nullptr);
+    EXPECT_EQ(svgFeFloodDeclaration1->GetFloodColor().GetValue(), RED_COLOR);
+    EXPECT_EQ(svgFeFloodDeclaration1->GetFloodOpacity(), ZERO);
+    // the second child in filter
+    auto svgFeFlood2 = AceType::DynamicCast<SvgFeFlood>(svgFilter->children_.at(1));
+    EXPECT_NE(svgFeFlood2, nullptr);
+    auto svgFeFloodDeclaration2 = AceType::DynamicCast<SvgFeFloodDeclaration>(svgFeFlood2->declaration_);
+    EXPECT_NE(svgFeFloodDeclaration2, nullptr);
+    EXPECT_EQ(svgFeFloodDeclaration2->GetFloodColor().GetValue(), GREEN_COLOR);
+    EXPECT_EQ(svgFeFloodDeclaration2->GetFloodOpacity(), ONE);
+    // the third child in filter
+    auto svgFeComposite = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(2));
+    EXPECT_NE(svgFeComposite, nullptr);
+    auto svgFeCompositeDeclaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(svgFeComposite->declaration_);
+    EXPECT_NE(svgFeCompositeDeclaration, nullptr);
+    EXPECT_EQ(svgFeCompositeDeclaration->GetIn().in, FeInType::SOURCE_ALPHA);
+    EXPECT_EQ(svgFeCompositeDeclaration->GetIn2().in, FeInType::SOURCE_GRAPHIC);
+    EXPECT_EQ(svgFeCompositeDeclaration->GetK1(), ONE);
+    EXPECT_EQ(svgFeCompositeDeclaration->GetK2(), ZERO);
+}
+
+/**
+ * @tc.name: ParseFeBlendTest001
+ * @tc.desc: parse FeBlend label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseFeBlendTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_BLEND.c_str(), FE_BLEND.length());
+    EXPECT_NE(svgStream, nullptr);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+    // filter is first child in svg
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+    // the first child in filter
+    auto svgFeBlend = AceType::DynamicCast<SvgFeBlend>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeBlend, nullptr);
+    auto svgFeBlendDeclaration = AceType::DynamicCast<SvgFeBlendDeclaration>(svgFeBlend->declaration_);
+    EXPECT_NE(svgFeBlendDeclaration, nullptr);
+    EXPECT_EQ(svgFeBlendDeclaration->GetIn().in, FeInType::SOURCE_GRAPHIC);
+    EXPECT_EQ(svgFeBlendDeclaration->GetIn2().in, FeInType::SOURCE_ALPHA);
+    EXPECT_EQ(svgFeBlendDeclaration->GetBlendMode(), FeBlendMode::LIGHTEN);
 }
 
 /**
@@ -1277,7 +1495,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest004, TestSize.Level1)
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::SRGB;
     ColorInterpolationType srcColor = ColorInterpolationType::LINEAR_RGB;
-    svgFe->GetImageFilter(imageFilter, colorInterpolationType);
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
     EXPECT_EQ(colorInterpolationType, ColorInterpolationType::SRGB);
 
     /* *
@@ -1308,30 +1526,42 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest005, TestSize.Level1)
      * @tc.expected: Execute function return value not is nullptr
      */
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
-    auto value = svgFe->MakeImageFilter(FeInType::SOURCE_GRAPHIC, imageFilter);
+    FeIn in = {
+        .in = FeInType::SOURCE_GRAPHIC,
+        .id = ""
+    };
+    in.in = FeInType::SOURCE_GRAPHIC;
+    auto value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::SOURCE_ALPHA, imageFilter);
+    in.in = FeInType::SOURCE_ALPHA;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_NE(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::BACKGROUND_IMAGE, imageFilter);
+    in.in = FeInType::BACKGROUND_IMAGE;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::BACKGROUND_ALPHA, imageFilter);
+    in.in = FeInType::BACKGROUND_ALPHA;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::FILL_PAINT, imageFilter);
+    in.in = FeInType::FILL_PAINT;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::STROKE_PAINT, imageFilter);
+    in.in = FeInType::STROKE_PAINT;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
-    value = svgFe->MakeImageFilter(FeInType::PRIMITIVE, imageFilter);
+    in.in = FeInType::PRIMITIVE;
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 
     // 20 = Values not in definition
     int cnt = 20;
-    value = svgFe->MakeImageFilter(static_cast<FeInType>(cnt), imageFilter);
+    in.in = static_cast<FeInType>(cnt);
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
     EXPECT_EQ(value, nullptr);
 }
 

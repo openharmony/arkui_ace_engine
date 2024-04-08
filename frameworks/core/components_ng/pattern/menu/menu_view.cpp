@@ -104,6 +104,18 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         previewNode->MountToParent(wrapperNode);
         previewNode->MarkModifyDone();
         SetSelfAndChildDraggableFalse(previewCustomNode);
+        
+        auto pipeline = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_RETURN(pipeline, std::make_pair(wrapperNode, menuNode));
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_RETURN(manager, std::make_pair(wrapperNode, menuNode));
+        auto gatherNode = manager->GetGatherNode();
+        CHECK_NULL_RETURN(gatherNode, std::make_pair(wrapperNode, menuNode));
+        auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_RETURN(textNode, std::make_pair(wrapperNode, menuNode));
+        textNode->MountToParent(wrapperNode);
+        textNode->MarkModifyDone();
     }
 
     return { wrapperNode, menuNode };
@@ -292,14 +304,25 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
 }
 
-void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode)
+void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    mainPipeline->AddAfterRenderTask([imageNode, manager]() {
+    auto gatherNode = manager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+    textNode->MountToParent(menuNode);
+    textNode->MarkModifyDone();
+    auto menuPattern = GetMenuPattern(menuNode);
+    CHECK_NULL_VOID(menuPattern);
+    mainPipeline->AddAfterRenderTask([imageNode, manager, textNode, menuPattern]() {
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
+        DragAnimationHelper::ShowBadgeAnimation(textNode);
     });
 }
 
@@ -370,9 +393,14 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = imageNode->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
     } else {
         ShowPixelMapAnimation(imageNode, menuNode);
-        ShowGatherAnimation(imageNode);
+        ShowGatherAnimation(imageNode, menuNode);
     }
 }
 

@@ -55,9 +55,10 @@ public:
                               ? theme->GetOutsetTrackThickness()
                               : theme->GetInsetTrackThickness())
                 .ToString().c_str());
-        static const std::array<std::string, 3> SLIDER_MODE_TO_STRING = {
+        static const std::array<std::string, 4> SLIDER_MODE_TO_STRING = {
             "SliderStyle.OutSet",
             "SliderStyle.InSet",
+            "SliderStyle.NONE",
             "SliderStyle.Capsule",
         };
         // should be in constructor

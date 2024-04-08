@@ -16,97 +16,197 @@
 
 
 /**
- * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
+ * @Monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
+ * 
  */
+
+
+interface IMonitor {
+ dirty: Array<string>;
+ value<T>(path?: string): IMonitorValue<T> | undefined
+}
+
+interface IMonitorValue<T> {
+  before: T;
+  now: T;
+  path: string;
+}
+
+
+class MonitorValueV3<T> {
+  public before?: T
+  public now?: T
+  public path: string
+  // properties on the path
+  public props : string[];
+
+  private dirty : boolean;
+
+  constructor(path: string) {
+    this.path = path;
+    this.dirty = false;
+    this.props = path.split(".")
+  }
+
+  setValue(isInit: boolean, newValue: T): boolean {
+    this.now = newValue
+    if (isInit) {
+      this.before = this.now
+    }
+    this.dirty = this.before !== this.now;
+    return this.dirty
+  }
+
+  // mv newValue to oldValue, set dirty to false
+  reset() {
+    this.before = this.now
+    this.dirty = false
+  }
+
+  isDirty() {
+    return this.dirty;
+  }
+}
 
 /**
  * MonitorV3
- * one MonitorV3 object per @monitor function
+ * one MonitorV3 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV3 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
- * fireChange - exec @monitor function and re-new dependencies with observeObjectAccess
+ * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
  */
+
+
 class MonitorV3 {
-  //0x1.0000.0000.0000,
+  public static readonly WATCH_PREFIX = "___watch_";
+  public static readonly WATCH_INSTANCE_PREFIX = "___watch__obj_";
+
   // start with high number to avoid same id as elmtId for components.
   public static readonly MIN_WATCH_ID = 0x1000000000000;
-  private static nextWatchId_ = MonitorV3.MIN_WATCH_ID;
+  public static nextWatchId_ = MonitorV3.MIN_WATCH_ID;
 
-  private value_: any; // 上次的值
-  private props_: string[]; // 监听的属性，objA.objB.propC 已经分解成数组[objA objB propC]
-  private target_: object; // 执行对象
-  private func_: (val: any) => void; // 属性变化的回调方法
-  private watchId_: number; // 监听唯一标识
 
-  public static readonly WATCH_PREFIX = "__wa_";
+  private values_: Array<MonitorValueV3<unknown>> = new Array<MonitorValueV3<unknown>>();
+  private target_: object  // @Monitor function 'this': data object or ViewPU
+  private monitorFunction: (m: IMonitor) => void;
+  private watchId_: number;  // unique id, similar to elmtId but identifies this object
 
-  constructor(target: object, props: string, func: (val: any) => void) {
-    ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
+  constructor(target: object, pathsString: string, func: (m: IMonitor) => void) {
     this.target_ = target;
-    this.func_ = func;
+    this.monitorFunction = func;
     this.watchId_ = ++MonitorV3.nextWatchId_;
-    this.props_ = props.split(".");
+
+    // split space separated array of paths
+    let paths = pathsString.split(/\s+/g)
+    paths.forEach(path => this.values_.push(new MonitorValueV3<unknown>(path)))
+
+    // add watchId to owning ViewPU or view model data object
+    // ViewPU uses to call clearBinding(id)
+    // FIXME data object leave data inside ObservedV3, because they can not 
+    // call clearBinding(id) before they get deleted.
+    const meta = target[MonitorV3.WATCH_INSTANCE_PREFIX]??={};
+    meta[pathsString]=this.watchId_;
   }
 
-  public InitRun(): number {
-    this.value_ = this.observeObjectAccess(true);
-    return this.watchId_;
+  public getTarget() : Object {
+    return this.target_;
   }
 
-  // 监视到该Watch改变了数据
-  public fireChange(): void {
-    let newVal = this.observeObjectAccess();
-    if (this.value_ !== newVal) {
-      stateMgmtConsole.debug(`@monitor(${this.props_.toString()}) function exec ...`);
-      this.func_.call(this.target_, newVal, this.value_)
-      this.value_ = newVal
-    }
-  }
-
-  // register current watchId while exec. analysisPath
-  private observeObjectAccess(isInit: boolean = false): Object | undefined {
-    ObserveV3.getObserve().startBind(this, this.watchId_);
-    let ret = this.analysisPath(isInit);
-    ObserveV3.getObserve().startBind(null, 0);
+  /**
+      Return array of those monitored paths
+      that changed since previous invocation
+   */
+  public get dirty() : Array<string> {
+    let ret = new Array<string>();
+    this.values_.forEach(monitorValue => {
+      if (monitorValue.isDirty()) {
+        ret.push(monitorValue.path)
+      }
+    })
     return ret;
   }
 
-  // traverse objects on the given monitor path and add dependency for
-  // watchId to each of the,
-  // this needs to be done at @monitor init and repeated every time
-  // one of the objects has changes
-  private analysisPath(isInit: boolean): Object | undefined {
+  /**
+   * return IMonitorValue for given path
+   * or if no path is specified any dirty (changed) monitor value
+   */
+  public value<T>(path?: String): IMonitorValue<T> {
+    for (let monitorValue of this.values_) {
+      if ((path === undefined && monitorValue.isDirty()) || monitorValue.path === path) {
+        return monitorValue as MonitorValueV3<T> as IMonitorValue<T>;
+      }
+    }
+    return undefined
+  }
+
+  InitRun(): MonitorV3 {
+    this.bindRun(true)
+    return this
+  }
+
+  public notifyChange() {
+    if (this.bindRun(/* is init / first run */ false)) {
+      stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
+
+      // exec @Monitor function
+      this.monitorFunction.call(this.target_, this)
+
+      // now -> before value
+      this.reset()
+    }
+  }
+
+  // called after @Monitor function call
+  private reset() {
+    this.values_.forEach(item => item.reset())
+  }
+
+  // analysisProp for each monitored path
+  private bindRun(isInit: boolean = false): boolean {
+    ObserveV3.getObserve().startBind(this, this.watchId_)
+    let ret = false
+    this.values_.forEach((item) => {
+      let dirty = item.setValue(isInit, this.analysisProp(isInit, item))
+      ret = ret || dirty
+    })
+
+    ObserveV3.getObserve().startBind(null, -1)
+    return ret
+  }
+
+  // record / update object dependencies by reading each object along the path
+  // return the value, i.e. the value of the last path item
+  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV3<T>): T | undefined {
     let obj = this.target_;
-    for (const prop of this.props_) {
-      if (typeof obj=="object" && Reflect.has(obj, prop)) {
+    for (let prop of monitoredValue.props) {
+      if (typeof obj=="object" &&  Reflect.has(obj, prop)) {
         obj = obj[prop]
       } else {
-        // FIXME change to stateMgmtConsole.applicationError
-        isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`)
+        isInit && stateMgmtConsole.warn(`watch prop "${monitoredValue.path}" initialize not found, make sure it exists!`)
         return undefined
       }
     }
-    return obj
+    return obj as unknown as T;
+  }
+
+  public static clearWatchesFromTarget(target: Object): void {
+    let meta: Object;
+    if (!target || typeof target !== "object"
+      || !(meta = target[MonitorV3.WATCH_INSTANCE_PREFIX]) || typeof meta != "object") {
+      return;
+    }
+
+    stateMgmtConsole.debug(`MonitorV3: clearWatchesFromTarget: from target ${target.constructor?.name} watchIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
+    Array.from(Object.values(meta)).forEach((watchId) => ObserveV3.getObserve().clearWatch(watchId));
   }
 }
 
-/**
- * @monitor("variable.path.expression") function decorator
- */
-/*
- const monitor = function (key) {
-  return function (target, _, descriptor) {
-    let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name)
-    target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value }
-  }
-}
-*/
 
 // Performance Improvement
 class AsyncAddMonitorV3 {
   static watches: any[] = []
-
-  static addWatch(target: any, name: string) {
+  
+  static addMonitor(target: any, name: string) {
     if (AsyncAddMonitorV3.watches.length === 0) {
       Promise.resolve(true).then(AsyncAddMonitorV3.run)
     }
@@ -118,5 +218,20 @@ class AsyncAddMonitorV3 {
       ObserveV3.getObserve().constructMonitor(item[0], item[1])
     }
     AsyncAddMonitorV3.watches=[];
+  }
+}
+
+
+/**
+ * @Monitor("variable.path.expression [, variable.path.expression") function decorator
+ */
+
+const Monitor = function (path : string, ...paths: string[]) {
+  const pathsUniqueString = paths? [path, ...paths].join(" ") : path;
+  return function (target, _, descriptor) {
+    stateMgmtConsole.debug(`@Monitor('${pathsUniqueString}')`);
+    let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name);
+    const monitorFunc = descriptor.value;
+    target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc }
   }
 }

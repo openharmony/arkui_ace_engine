@@ -529,7 +529,6 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    bool HasTabsAncestor() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void StopAutoPlay();
@@ -620,6 +619,11 @@ public:
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
+
+    void SetHasTabsAncestor(bool hasTabsAncestor)
+    {
+        hasTabsAncestor_ = hasTabsAncestor;
+    }
 
 private:
     void OnModifyDone() override;
@@ -1012,6 +1016,7 @@ private:
     bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
     bool springAnimationIsRunning_ = false;
+    bool isTouchDownSpringAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
@@ -1021,6 +1026,7 @@ private:
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;
+    bool hasTabsAncestor_ = false;
 
     std::optional<int32_t> cachedCount_;
 

@@ -58,6 +58,7 @@ public:
     virtual void SetUnselectedColor(const Color& unselectedColor) {};
     virtual void SetTrackBorderRadius(const Dimension& borderRadius) {};
     virtual void ResetTrackBorderRadius() {};
+    virtual void Pop();
 
 private:
     static std::unique_ptr<ToggleModel> instance_;

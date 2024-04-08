@@ -904,6 +904,8 @@ public:
 
     virtual void FlushPipelineImmediately() = 0;
 
+    virtual void FlushOnceVsyncTask() = 0;
+
     // get animateTo closure option
     AnimationOption GetSyncAnimationOption()
     {

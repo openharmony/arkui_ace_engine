@@ -709,6 +709,121 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+{
+    DialogProperties dialogProperties = { .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .isSysBlurStyle = false,
+        .customBuilder = dialogAttr.customBuilder,
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .backgroundColor = dialogAttr.backgroundColor,
+        .borderRadius = dialogAttr.borderRadius,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor,
+        .borderStyle = dialogAttr.borderStyle,
+        .shadow = dialogAttr.shadow,
+        .width = dialogAttr.width,
+        .height = dialogAttr.height,
+        .maskRect = dialogAttr.maskRect,
+        .autoCancel = dialogAttr.autoCancel,
+        .contentNode = dialogAttr.contentNode,
+        .maskColor = dialogAttr.maskColor,
+        .customStyle = dialogAttr.customStyle,
+        .transitionEffect = dialogAttr.transitionEffect,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    return dialogProperties;
+}
+
+void FrontendDelegateDeclarativeNG::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
+    std::function<void(int32_t)> &&callback)
+{
+    DialogProperties dialogProperties = ParsePropertiesFromAttr(dialogAttr);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto task = [dialogAttr, dialogProperties, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to open custom dialog ");
+            if (dialogProperties.isShowInSubWindow) {
+                SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
+                if (dialogProperties.isModal) {
+                    TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
+                }
+            } else {
+                overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+            }
+        };
+        MainWindowOverlay(std::move(task));
+        return;
+    } else {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "not support old pipeline");
+    }
+}
+
+void FrontendDelegateDeclarativeNG::CloseCustomDialog(const int32_t dialogId)
+{
+    auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+        overlayManager->CloseCustomDialog(dialogId);
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
+void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
+    std::function<void(int32_t)> &&callback)
+{
+    auto task = [node, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+        overlayManager->CloseCustomDialog(node, std::move(callback));
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
+void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
+    const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
+{
+    DialogProperties dialogProperties = {
+        .isSysBlurStyle = false,
+        .autoCancel = dialogAttr.autoCancel,
+        .maskColor = dialogAttr.maskColor
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    auto task = [dialogAttr, dialogProperties, node, callback]
+        (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
+        overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
+        SubwindowManager::GetInstance()->UpdateCustomDialogNG(node, dialogAttr, std::move(callback));
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {

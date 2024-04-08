@@ -176,8 +176,6 @@ private:
 
     FrameInfo* frameInfo_ = nullptr;
 
-    std::map<WeakPtr<CustomNode>, bool> delayJsActiveNodes_;
-
     static uint64_t frameId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UITaskScheduler);

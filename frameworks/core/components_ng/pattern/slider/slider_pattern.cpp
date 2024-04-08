@@ -1010,9 +1010,11 @@ void SliderPattern::UpdateBlock()
     CHECK_NULL_VOID(host);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-
+    auto sliderLayoutProperty = GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(sliderLayoutProperty);
+    auto sliderMode = sliderLayoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
     if (sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT) ==
-        SliderModelNG::BlockStyleType::IMAGE) {
+        SliderModelNG::BlockStyleType::IMAGE && sliderMode != SliderModel::SliderMode::NONE) {
         if (imageFrameNode_ == nullptr) {
             auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
             imageFrameNode_ =

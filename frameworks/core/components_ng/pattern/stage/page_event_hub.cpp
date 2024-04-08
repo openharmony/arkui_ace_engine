@@ -63,51 +63,8 @@ void PageEventHub::UpdateRadioGroupValue(const std::string& group, int32_t radio
     }
 }
 
-void PageEventHub::AddCheckBoxToGroup(const std::string& group, int32_t checkboxId)
+const RefPtr<GroupManager>& PageEventHub::GetGroupManager() const
 {
-    checkBoxGroupNotify_[group].push_back(checkboxId);
+    return groupManager_;
 }
-
-void PageEventHub::AddCheckBoxGroupToGroup(const std::string& group, int32_t checkBoxId)
-{
-    auto checkBoxGroupFrameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(checkBoxId));
-    CHECK_NULL_VOID(checkBoxGroupFrameNode);
-    const auto& list = checkBoxGroupNotify_[group];
-    auto pattern = checkBoxGroupFrameNode->GetPattern<CheckBoxGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsAddToMap(true);
-    for (auto&& item : list) {
-        auto node = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(item));
-        if (!node) {
-            continue;
-        }
-        if (checkBoxId == item) {
-            continue;
-        }
-        if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
-            pattern->SetIsAddToMap(false);
-            return;
-        }
-    }
-    checkBoxGroupNotify_[group].push_back(checkBoxId);
-}
-
-void PageEventHub::RemoveCheckBoxFromGroup(const std::string& group, int32_t checkBoxId)
-{
-    checkBoxGroupNotify_[group].remove(checkBoxId);
-}
-
-std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> PageEventHub::GetCheckBoxGroupMap()
-{
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> group;
-    for (const auto& [name, ids] : checkBoxGroupNotify_) {
-        std::list<WeakPtr<FrameNode>> list;
-        for (const auto& id : ids) {
-            list.emplace_back(DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(id)));
-        }
-        group.emplace(name, std::move(list));
-    }
-    return group;
-}
-
 } // namespace OHOS::Ace::NG

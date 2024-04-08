@@ -370,7 +370,13 @@ public:
      * @param config Indicates the ID of the UI node which bind the pupop
      */
     virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
-
+    
+    /**
+     * @description: Update the custom popup.
+     * @param config Indicates the custom popup configs.
+      */
+    virtual void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) {}
+    
     virtual SerializedGesture GetFormSerializedGesture()
     {
         return SerializedGesture();

@@ -37,9 +37,6 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   backgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
     return this;
@@ -490,7 +487,7 @@ class ButtonControlSizeModifier extends ModifierWithKey<ControlSize> {
 }
 
 // @ts-ignore
-globalThis.Button.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Button.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkButtonComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

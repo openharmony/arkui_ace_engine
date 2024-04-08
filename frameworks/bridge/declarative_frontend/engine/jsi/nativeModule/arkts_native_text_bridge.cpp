@@ -30,12 +30,9 @@ namespace {
 constexpr int SIZE_OF_TEXT_CASES = 2;
 constexpr double DEFAULT_SPAN_FONT_SIZE = 16;
 constexpr DimensionUnit DEFAULT_SPAN_FONT_UNIT = DimensionUnit::FP;
-constexpr bool DEFAULT_TEXT_SHADOW_FILL = false;
-constexpr ShadowType DEFAULT_TEXT_SHADOW_TYPE = ShadowType::COLOR;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const Color DEFAULT_DECORATION_COLOR = Color::BLACK;
-const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
 const std::string DEFAULT_FONT_WEIGHT = "400";
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -47,52 +44,6 @@ constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
-
-uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
-{
-    Color color = DEFAULT_TEXT_SHADOW_COLOR;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, jsValue, color)) {
-        color = DEFAULT_TEXT_SHADOW_COLOR;
-    }
-    return color.GetValue();
-};
-
-uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
-{
-    if (jsValue->IsBoolean()) {
-        return static_cast<uint32_t>(jsValue->ToBoolean(vm)->Value());
-    }
-    return static_cast<uint32_t>(DEFAULT_TEXT_SHADOW_FILL);
-};
-
-uint32_t parseShadowType(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
-{
-    if (jsValue->IsInt()) {
-        return jsValue->Uint32Value(vm);
-    }
-    return static_cast<uint32_t>(DEFAULT_TEXT_SHADOW_TYPE);
-};
-
-double parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
-{
-    double radius = 0.0;
-    ArkTSUtils::ParseJsDouble(vm, jsValue, radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
-    return radius;
-};
-
-double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
-{
-    CalcDimension offset;
-    if (ArkTSUtils::ParseJsResource(vm, jsValue, offset)) {
-        return offset.Value();
-    } else if (ArkTSUtils::ParseJsDimensionVp(vm, jsValue, offset)) {
-        return offset.Value();
-    }
-    return 0.0;
-};
 } // namespace
 
 ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -243,7 +194,7 @@ ArkUINativeModuleValue TextBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getTextModifier()->resetFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextModifier()->setFontSize(
@@ -269,7 +220,7 @@ ArkUINativeModuleValue TextBridge::SetLineHeight(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension lineHeight(0.0, DEFAULT_SPAN_FONT_UNIT);
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, lineHeight)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight)) {
         lineHeight.Reset();
     }
     if (lineHeight.IsNegative()) {
@@ -414,7 +365,7 @@ ArkUINativeModuleValue TextBridge::SetMinFontSize(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     CalcDimension fontSize;
-    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+    if (ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getTextModifier()->setTextMinFontSize(
             nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
     } else {
@@ -466,7 +417,7 @@ ArkUINativeModuleValue TextBridge::SetMaxFontSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+    if (ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getTextModifier()->setTextMaxFontSize(
             nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
     } else {
@@ -569,17 +520,17 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     auto offsetYArray = std::make_unique<double[]>(length);
     auto fillArray = std::make_unique<uint32_t[]>(length);
     bool radiusParseResult = ArkTSUtils::ParseArray<double>(
-        vm, radiusArg, radiusArray.get(), length, parseShadowRadius);
+        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, typeArg, typeArray.get(), length, parseShadowType);
+        vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
     bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, colorArg, colorArray.get(), length, parseShadowColor);
+        vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColor);
     bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
-        vm, offsetXArg, offsetXArray.get(), length, parseShadowOffset);
+        vm, offsetXArg, offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
     bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
-        vm, offsetYArg, offsetYArray.get(), length, parseShadowOffset);
+        vm, offsetYArg, offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
     bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, fillArg, fillArray.get(), length, parseShadowFill);
+        vm, fillArg, fillArray.get(), length, ArkTSUtils::parseShadowFill);
     if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
         !offsetYParseResult || !fillParseResult || !typeParseResult) {
         return panda::JSValueRef::Undefined(vm);
@@ -644,7 +595,7 @@ ArkUINativeModuleValue TextBridge::SetTextIndent(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension indent;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, indent) || indent.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, indent) || indent.IsNegative()) {
         indent.Reset();
     }
     
@@ -671,7 +622,7 @@ ArkUINativeModuleValue TextBridge::SetBaselineOffset(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension baselineOffset;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, baselineOffset, false) || baselineOffset.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, baselineOffset, DimensionUnit::FP, false)) {
         baselineOffset.Reset();
     }
 
@@ -698,7 +649,7 @@ ArkUINativeModuleValue TextBridge::SetLetterSpacing(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension letterSpacing;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, letterSpacing, false) || letterSpacing.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, letterSpacing, DimensionUnit::FP, false)) {
         letterSpacing.Reset();
     }
 
@@ -729,7 +680,7 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ArkUIFontStruct fontInfo;
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg,  fontSize) || sizeArg->IsNull()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) || sizeArg->IsNull()) {
         fontSize.SetValue(DEFAULT_SPAN_FONT_SIZE);
         fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
     }

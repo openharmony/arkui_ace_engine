@@ -113,7 +113,7 @@ public:
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
-        const RefPtr<FrameNode>& imageNode);
+        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
     static RefPtr<PixelMap> GetPreviewPixelMap(const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode);
     static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(const std::string& inspectorId);
     static RefPtr<PixelMap> GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode);
@@ -204,6 +204,11 @@ public:
     RefPtr<FrameNode> GetFrameNode();
 
     inline static void FlushSyncGeometryNodeTasks();
+
+    void ShowPreviewBadgeAnimation(
+        const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
+    static RefPtr<FrameNode> CreateBadgeTextNode(
+        const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
     
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
@@ -215,8 +220,9 @@ private:
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
-    std::function<void(GestureEvent&)> actionStart_;
 
+    RefPtr<PixelMap> textPixelMap_;
+    std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
     std::function<void(Offset)> textDragCallback_;

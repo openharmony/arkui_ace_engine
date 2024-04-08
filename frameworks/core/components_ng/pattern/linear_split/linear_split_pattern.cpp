@@ -416,7 +416,7 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
             mouseDragedSplitIndex_ = dragedSplitIndex_;
         }
         if (mouseDragedSplitIndex_ != DEFAULT_DRAG_INDEX) {
-            pipeline->ChangeMouseStyle(frameId, GetMouseFormat());
+            pipeline->ChangeMouseStyle(frameId, GetMouseFormat(), 0, info.GetAction() == MouseAction::WINDOW_LEAVE);
         }
         return;
     }
@@ -436,7 +436,7 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
     }
 
     if (mouseDragedSplitIndex_ != DEFAULT_DRAG_INDEX) {
-        pipeline->ChangeMouseStyle(frameId, GetMouseFormat());
+        pipeline->ChangeMouseStyle(frameId, GetMouseFormat(), 0, info.GetAction() == MouseAction::WINDOW_LEAVE);
     } else {
         if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
             pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);

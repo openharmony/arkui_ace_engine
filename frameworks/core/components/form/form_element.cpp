@@ -26,7 +26,6 @@
 #include "frameworks/core/components/form/form_component.h"
 #include "frameworks/core/components/form/render_form.h"
 #include "frameworks/core/components/form/resource/form_manager_delegate.h"
-const int64_t MAX_NUMBER_OF_JS = 0x20000000000000;
 
 namespace OHOS::Ace {
 
@@ -144,11 +143,8 @@ void FormElement::HandleOnAcquireEvent(int64_t id)
         return;
     }
 
-    int64_t onAcquireFormId = id < MAX_NUMBER_OF_JS ? id : -1;
     auto json = JsonUtil::Create(true);
-    json->Put("id", std::to_string(onAcquireFormId).c_str());
-    json->Put("idString", std::to_string(id).c_str());
-
+    json->Put("id", std::to_string(id).c_str());
     LOGI("HandleOnAcquireEvent msg:%{public}s", json->ToString().c_str());
     int32_t instance = context->GetInstanceId();
     context->GetTaskExecutor()->PostTask(
@@ -231,13 +227,9 @@ void FormElement::HandleOnUninstallEvent(int64_t formId)
         return;
     }
 
-    int64_t uninstallFormId = formId < MAX_NUMBER_OF_JS ? formId : -1;
     auto json = JsonUtil::Create(true);
-    json->Put("id", std::to_string(uninstallFormId).c_str());
-    json->Put("idString", std::to_string(formId).c_str());
-
-    LOGI("HandleOnUninstallEvent formId:%{public}s, idString:%{public}s",
-        std::to_string(uninstallFormId).c_str(), std::to_string(formId).c_str());
+    json->Put("id", std::to_string(formId).c_str());
+    LOGI("HandleOnUninstallEvent formId:%{public}s", std::to_string(formId).c_str());
     int32_t instance = context->GetInstanceId();
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), info = json->ToString(), instance] {

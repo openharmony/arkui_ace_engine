@@ -158,6 +158,122 @@ void ButtonPattern::InitButtonLabel()
     textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto && graphics = buttonRenderContext->GetOrCreateGraphics();
+    CHECK_NULL_VOID(graphics);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    if (buttonStyle != ButtonStyleMode::TEXT && !graphics->HasBackShadow()) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
+        Shadow shadow = Shadow::CreateShadow(shadowStyle);
+        buttonRenderContext->UpdateBackShadow(shadow);
+    }
+}
+
+void ButtonPattern::HandleFocusEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
+    RefPtr<RenderContext> buttonRenderContext, RefPtr<ButtonTheme> buttonTheme,
+    RefPtr<TextLayoutProperty> textLayoutProperty, RefPtr<FrameNode> textNode)
+{
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+    auto && graphics = buttonRenderContext->GetOrCreateGraphics();
+    auto && transform = buttonRenderContext->GetOrCreateTransform();
+    CHECK_NULL_VOID(graphics);
+    CHECK_NULL_VOID(transform);
+
+    if (buttonStyle != ButtonStyleMode::TEXT) {
+        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme->GetShadowNormal()));
+        shadowModify_ = (graphics->GetBackShadowValue() == shadow);
+        if (shadowModify_) {
+            ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowFocus());
+            buttonRenderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
+        }
+    }
+    VectorF scale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
+    scaleModify_ = transform->GetTransformScale() == scale;
+    if (scaleModify_) {
+        buttonRenderContext->SetScale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
+    }
+    if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
+        bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
+        if (bgColorModify_) {
+            buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
+        }
+    }
+
+    if (buttonStyle != ButtonStyleMode::EMPHASIZE) {
+        focusTextColorModify_ =
+            textLayoutProperty->GetTextColor() == buttonTheme->GetFocusTextColor(buttonStyle, buttonRole);
+        if (focusTextColorModify_) {
+            textLayoutProperty->UpdateTextColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
+            textNode->MarkDirtyNode();
+        }
+    }
+}
+
+void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
+    RefPtr<RenderContext> buttonRenderContext, RefPtr<ButtonTheme> buttonTheme,
+    RefPtr<TextLayoutProperty> textLayoutProperty, RefPtr<FrameNode> textNode)
+{
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+
+    if (buttonStyle != ButtonStyleMode::TEXT && shadowModify_) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
+        Shadow shadow = Shadow::CreateShadow(shadowStyle);
+        buttonRenderContext->UpdateBackShadow(shadow);
+    }
+    if (scaleModify_) {
+        buttonRenderContext->SetScale(1.0f, 1.0f);
+    }
+    if (bgColorModify_) {
+        buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
+    }
+    if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
+        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        textNode->MarkDirtyNode();
+    }
+}
+
+void ButtonPattern::InitFocusEvent()
+{
+    CHECK_NULL_VOID(!focusEventInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto buttonRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(buttonRenderContext);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
+        theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent(property, renderContext, theme, textPorerty, node);
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
+        theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent(property, renderContext, theme, textPorerty, node);
+    };
+    focusHub->SetOnBlurInternal(blurTask);
 }
 
 void ButtonPattern::OnModifyDone()
@@ -165,9 +281,69 @@ void ButtonPattern::OnModifyDone()
     Pattern::OnModifyDone();
     InitButtonLabel();
     HandleBackgroundColor();
+    HandleBorderColorAndWidth();
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
+    InitFocusEvent();
+}
+
+void ButtonPattern::HandleBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
+    }
+    themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
+}
+
+void ButtonPattern::HandleBorderColorAndWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+
+    Color color;
+    Dimension width;
+    BorderColorProperty borderColor;
+    BorderWidthProperty borderWidth;
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+    if (buttonStyle == ButtonStyleMode::NORMAL) {
+        color =
+            (controlSize == ControlSize::NORMAL) ? buttonTheme->GetBorderColor() : buttonTheme->GetBorderColorSmall();
+        width =
+            (controlSize == ControlSize::NORMAL) ? buttonTheme->GetBorderWidth() : buttonTheme->GetBorderWidthSmall();
+        borderColor.SetColor(color);
+        borderWidth.SetBorderWidth(width);
+    }
+
+    if (!renderContext->HasBorderWidth()) {
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+    if (!renderContext->HasBorderColor()) {
+        renderContext->UpdateBorderColor(borderColor);
+    }
 }
 
 void ButtonPattern::InitTouchEvent()
@@ -296,27 +472,6 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
     }
-}
-
-void ButtonPattern::HandleBackgroundColor()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
-    if (!renderContext->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
-    }
-    themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
-    themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
 }
 
 void ButtonPattern::HandleEnabled()

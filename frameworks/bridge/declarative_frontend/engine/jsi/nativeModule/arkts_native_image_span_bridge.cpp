@@ -14,7 +14,39 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+
+void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
+    std::vector<ArkUI_Int32>& units, int32_t argsIndex)
+{
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+
+    std::optional<CalcDimension> topLeftOptional;
+    std::optional<CalcDimension> topRightOptional;
+    std::optional<CalcDimension> bottomLeftOptional;
+    std::optional<CalcDimension> bottomRightOptional;
+
+    ArkTSUtils::ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, topRightArgs, topRightOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
+    ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+
+    ArkTSUtils::PushOuterBorderDimensionVector(topLeftOptional, values, units);
+    ArkTSUtils::PushOuterBorderDimensionVector(topRightOptional, values, units);
+    ArkTSUtils::PushOuterBorderDimensionVector(bottomLeftOptional, values, units);
+    ArkTSUtils::PushOuterBorderDimensionVector(bottomRightOptional, values, units);
+}
+} // namespace
 
 ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -73,6 +105,31 @@ ArkUINativeModuleValue ImageSpanBridge::ResetObjectFit(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanObjectFit(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Color color;
+    std::vector<ArkUI_Float32> radiusArray;
+    std::vector<ArkUI_Int32> valueUnits;
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color);
+    ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2); // Border Radius args start index
+    GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanTextBackgroundStyle(
+        nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::ResetTextBackgroundStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanTextBackgroundStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class PolygonModifier extends ArkPolygonComponent implements AttributeModifier<PolygonAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: PolygonAttribute): void {
-    applyAndMergeModifier<PolygonAttribute, ArkPolygonComponent, ArkCommonShapeComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<PolygonAttribute, ArkPolygonComponent, ArkComponent>(instance, this);
   }
 }

@@ -29,7 +29,7 @@ void RenderSvgFeComposite::Update(const RefPtr<Component> &component)
 
     auto& declaration = feComponent->GetDeclaration();
     if (declaration) {
-        in2_ = declaration->GetIn2();
+        in2_ = declaration->GetIn2().in;
         operatorType_ = declaration->GetOperatorType();
         k1_ = declaration->GetK1();
         k2_ = declaration->GetK2();

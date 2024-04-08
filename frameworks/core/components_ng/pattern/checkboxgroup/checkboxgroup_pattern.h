@@ -146,11 +146,17 @@ public:
         uiStatus_ = UIStatus::UNSELECTED;
     }
 
+    RefPtr<GroupManager> GetGroupManager() const
+    {
+        return groupManager_.Upgrade();
+    }
+
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
     void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
+    void OnAttachToMainTree() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -179,6 +185,7 @@ private:
     void InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    std::string GetGroupNameWithNavId();
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
@@ -186,6 +193,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<CheckBoxGroupModifier> checkBoxGroupModifier_;
+    WeakPtr<GroupManager> groupManager_;
     bool isHover_ = false;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool updateFlag_ = false;
@@ -200,6 +208,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool initSelected_ = false;
+    std::string navId_ = "";
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

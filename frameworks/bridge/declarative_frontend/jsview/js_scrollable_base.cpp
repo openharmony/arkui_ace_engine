@@ -25,8 +25,7 @@ void JSScrollableBase::JSFlingSpeedLimit(const JSCallbackInfo& info)
     if (!JSViewAbstract::ParseJsDouble(info[0], max)) {
         return;
     }
-    double density = PipelineBase::GetCurrentDensity();
-    NG::ScrollableModelNG::SetMaxFlingSpeed(max * density);
+    NG::ScrollableModelNG::SetMaxFlingSpeed(max);
 }
 
 void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)

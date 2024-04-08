@@ -153,6 +153,11 @@ public:
         ViewAbstract::SetBackgroundEffect(effectOption);
     }
 
+    void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) override
+    {
+        ViewAbstract::SetBackgroundImageResizableSlice(slice);
+    }
+
     void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
     {
         ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
@@ -651,6 +656,10 @@ public:
         ViewAbstract::SetLinearGradientBlur(blurPara);
     }
 
+    void SetDynamicDim(float DimDegree) override
+    {
+        ViewAbstract::SetDynamicDim(DimDegree);
+    }
     void SetDynamicLightUp(float rate, float lightUpDegree) override
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
@@ -1052,7 +1061,8 @@ public:
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange) override;
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange) override;
     void DismissSheet() override;
     void DismissContentCover() override;
 
@@ -1155,6 +1165,11 @@ public:
     void SetBloom(const float value) override
     {
         ViewAbstract::SetBloom(value);
+    }
+
+    void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override
+    {
+        ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);

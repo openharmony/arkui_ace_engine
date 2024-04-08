@@ -42,6 +42,7 @@ public:
     static const RefPtr<SelectContentOverlayManager> GetOverlayManager(
         const RefPtr<SelectOverlayHolder>& holder = nullptr);
     bool IsOpen();
+    bool IsCreating();
     void Show(bool animation, int32_t requestCode);
     void Close(int32_t id, bool animation, CloseReason reason);
     bool CloseCurrent(bool animation, CloseReason reason);
@@ -86,7 +87,7 @@ private:
     bool IsSameMouseSelectOverlay(const SelectOverlayInfo& info);
     void CloseInternal(int32_t holderId, bool animation, CloseReason reason);
     void DestroySelectOverlayNode(const RefPtr<FrameNode>& node);
-    void CreateAndMountNode(bool animation);
+    void CreateAndMountNode(const RefPtr<FrameNode>& overlayNode, bool animation);
     std::function<void()> MakeMenuCallback(OptionMenuActionId actionId, const SelectOverlayInfo& info);
     SelectOverlayInfo BuildSelectOverlayInfo(int32_t requestCode);
     void UpdateStatusInfos(SelectOverlayInfo& info);

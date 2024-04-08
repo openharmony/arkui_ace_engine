@@ -21,6 +21,9 @@ config("xcomponent_controller_config") {
     "$ace_root/interfaces/inner_api/xcomponent_controller",
   ]
   defines = [ "USE_ARK_ENGINE" ]
+  if (use_hilog) {
+    defines += [ "USE_HILOG" ]
+  }
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -54,6 +57,7 @@ ohos_shared_library("ace_xcomponent_controller") {
     "ets_runtime:libark_jsruntime",
     "napi:ace_napi",
   ]
+  public_external_deps = [ "hilog:libhilog" ]
 
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]

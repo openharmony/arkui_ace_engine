@@ -81,11 +81,17 @@ if (is_ohos_standard_system) {
   }
 
   ohos_copy("copy_abc_library") {
-    deps = [ "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier" ]
+    deps = [
+      "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
+      "$ace_root/frameworks/bridge/declarative_frontend:uicontext",
+    ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
-    sources = [ "${out_path}/arkui/ace_engine/modifier.abc" ]
+    sources = [
+      "${out_path}/arkui/ace_engine/modifier.abc",
+      "${out_path}/arkui/ace_engine/uicontext.abc",
+    ]
 
     outputs = [ target_out_dir +
                 "/previewer/common/bin/module/arkui/{{source_file_part}}" ]

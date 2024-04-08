@@ -978,24 +978,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateChildrenLayoutWrapper0019, TestSize.Lev
 }
 
 /**
- * @tc.name: FrameNodeTestNg_PostTask0020
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodePostTask0020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. build a object to PostTask
-     * @tc.expected: expect taskTypeis is UI.
-     */
-    auto callback = []() { srcimages = "test"; };
-    TaskExecutor::TaskType taskType { 1 };
-
-    FRAME_NODE2->PostTask(callback, std::move(taskType));
-    EXPECT_EQ(taskType, TaskExecutor::TaskType::UI);
-}
-
-/**
  * @tc.name: FrameNodeTestNg_MarkModifyDone0021
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -2674,5 +2656,19 @@ HWTEST_F(FrameNodeTestNg, OnTouchInterceptTest001, TestSize.Level1)
         auto mode = childEventHub->GetHitTestMode();
         EXPECT_EQ(mode, HitTestMode::HTMBLOCK);
     }
+}
+
+/**
+ * @tc.name: FrameNodeTestNg0040
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0040, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::set<std::string> allowDropSet;
+    frameNode->SetAllowDrop(allowDropSet);
+    std::set<std::string> allowDrop = frameNode->GetAllowDrop();
+    EXPECT_TRUE(allowDrop.empty());
 }
 } // namespace OHOS::Ace::NG

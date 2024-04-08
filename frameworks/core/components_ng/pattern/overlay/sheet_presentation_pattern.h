@@ -158,6 +158,21 @@ public:
         return false;
     }
 
+    void UpdateOnDetentsDidChange(std::function<void(const float)>&& onDetentsDidChange)
+    {
+        onDetentsDidChange_ = std::move(onDetentsDidChange);
+    }
+
+    void OnDetentsDidChange(float currentHeight) const
+    {
+        if (onDetentsDidChange_) {
+            onDetentsDidChange_(currentHeight);
+        }
+    }
+
+    void FireOnDetentsDidChange(float height);
+
+
     void CallShouldDismiss()
     {
         if (shouldDismiss_) {
@@ -219,9 +234,7 @@ public:
 
     void SetCurrentHeightToOverlay(float height)
     {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
+        auto overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->SetSheetHeight(height);
     }
@@ -334,9 +347,21 @@ public:
         return isAnimationProcess_;
     }
 
-    float GetSheetMaxHeight()
+    float GetPageHeightWithoutOffset() const
     {
         return pageHeight_;
+    }
+
+    float GetPageHeight()
+    {
+        auto parentOffsetY = GetRootOffsetYToWindow();
+        return pageHeight_ - parentOffsetY;
+    }
+
+    float GetSheetMaxHeight()
+    {
+        // pageHeight - statusBarHeight
+        return sheetMaxHeight_;
     }
 
     float GetSheetMaxWidth()
@@ -381,6 +406,10 @@ public:
         }
         return height_;
     }
+
+    RefPtr<OverlayManager> GetOverlayManager();
+    RefPtr<FrameNode> GetOverlayRoot();
+    float GetRootOffsetYToWindow();
 
     bool IsAvoidingKeyboard() const
     {
@@ -437,6 +466,7 @@ private:
     std::function<void()> onWillDisappear_;
     std::function<void()> shouldDismiss_;
     std::function<void(const float)> onHeightDidChange_;
+    std::function<void(const float)> onDetentsDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;

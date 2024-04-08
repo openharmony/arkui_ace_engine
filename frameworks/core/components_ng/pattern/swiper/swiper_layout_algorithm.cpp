@@ -443,12 +443,13 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         currentIndex_ = jumpIndex_.value();
     } else if (hasCachedCapture_) {
         if (targetIndex_.has_value()) {
+            auto firstItemIndex = prevItemPosition_.begin()->first;
             // Swipe to the left, layout forward from (targetIndex - 1)
-            if (targetIndex_.value() > startIndexInVisibleWindow) {
+            if (targetIndex_.value() > firstItemIndex) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, targetIndex_.value() - 1,
                     prevItemPosition_[targetIndex_.value() - 1].startPos);
                 // Swipe to the right, layout backward from (endIndex - 1)
-            } else if (targetIndex_.value() < startIndexInVisibleWindow) {
+            } else if (targetIndex_.value() < firstItemIndex) {
                 auto basicItem = ++prevItemPosition_.rbegin();
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, basicItem->first, basicItem->second.endPos);
                 // captures need not to be updated
@@ -478,18 +479,6 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else if (GreatNotEqual(startIndexInVisibleWindow, targetIndex_.value())) {
-            int32_t stepsFromCurrentToTarget = endIndex - targetIndex_.value();
-            endIndex -= (stepsFromCurrentToTarget > (totalItemCount_ - 1))
-                            ? (stepsFromCurrentToTarget - totalItemCount_ + 1)
-                            : 0;
-
-            auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            auto iter = prevItemPosition_.find(endIndex);
-            if (swiperLayoutProperty && !SwiperUtils::IsStretch(swiperLayoutProperty) &&
-                iter != prevItemPosition_.end()) {
-                endPos = iter->second.endPos;
-            }
-
             LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
             if (LessNotEqualCustomPrecision(GetEndPosition(), endMainPos_, -0.01f)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());

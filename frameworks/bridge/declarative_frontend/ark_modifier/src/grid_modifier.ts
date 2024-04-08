@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class GridModifier extends ArkGridComponent implements AttributeModifier<GridAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: GridAttribute): void {
-    applyAndMergeModifier<GridAttribute, ArkGridComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<GridAttribute, ArkGridComponent, ArkComponent>(instance, this);
   }
 }

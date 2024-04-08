@@ -19,6 +19,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -564,6 +565,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
 
+BorderWidthPropertyF LayoutProperty::CreateBorder()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToBorderWidthPropertyF(
+            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    }
+
+    return ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+}
+
 MarginPropertyF LayoutProperty::CreateMargin()
 {
     CHECK_NULL_RETURN(margin_, MarginPropertyF());
@@ -729,6 +741,14 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
     }
     layoutDirection_ = value;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
+
+TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
+{
+    auto direction = layoutDirection_.value_or(TextDirection::AUTO);
+    return direction != TextDirection::AUTO
+               ? direction
+               : (AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 
 void LayoutProperty::UpdateLayoutWeight(float value)

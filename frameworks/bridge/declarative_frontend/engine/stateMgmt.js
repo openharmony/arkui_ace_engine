@@ -12,10 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * ConfigureStateMgmt keeps track if V2 @Observed and @Track are used.
+ * If yes, it enables object deep observation mechanisms need with ObservedV3.
+ */
 class ConfigureStateMgmt {
     constructor() {
-        this.v2InUse_ = false;
-        this.v3InUse_ = false;
+        this.v2ObservedTrackInUse_ = false;
+        this.puObservedTrackInUse_ = false;
     }
     static get instance() {
         return ConfigureStateMgmt.instance__
@@ -23,51 +27,37 @@ class ConfigureStateMgmt {
             : (ConfigureStateMgmt.instance__ = new ConfigureStateMgmt());
     }
     /**
-     * framework code call this function when it sees use of a stateMgmt V3 feature
+     * framework code call this function when it sees use of a stateMgmt V2 @Observed @Track
      *
      * @param feature specify feature separately from context of use, so that in future decision can be made
      *                for individual features, not use permit either use of V2 or V3.
      * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
      * @returns true if no mix of features detected, false if mix is detected
      */
-    intentUsingV3(feature, contextOfUse = "") {
-        this.v3InUse_ = true;
-        const ret = !this.v2InUse_ && this.v3InUse_;
-        if (ret) {
-            
-        }
-        else {
-            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
-        }
-        return ret;
+    usingV2ObservedTrack(feature, contextOfUse = "") {
+        this.v2ObservedTrackInUse_ = true;
+        
     }
     /**
-     * framework code call this function when it sees use of a stateMgmt V2 feature
-     *
-     * @param feature specify feature separately from context of use, so that in future decision can be made
-     *                for individual features, not use permit either use of V2 or V3.
-     * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
-     * @returns true if no mix of features detected, false if mix is detected
-     */
-    intentUsingV2(feature, contextOfUse = "") {
-        this.v2InUse_ = true;
-        const ret = this.v2InUse_ && !this.v3InUse_;
-        if (ret) {
-            
-        }
-        else {
-            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
-        }
-        return ret;
+ * framework code call this function when it sees use of a stateMgmt PU Observed / @Track
+ *
+ * @param feature specify feature separately from context of use, so that in future decision can be made
+ *                for individual features, not use permit either use of V2 or V3.
+ * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
+ * @returns true if no mix of features detected, false if mix is detected
+ */
+    usingPUObservedTrack(feature, contextOfUse = "") {
+        this.puObservedTrackInUse_ = true;
+        
     }
     /**
-     * Return true if object deep observation mechanisms need to be enabled
-     * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
-     * (we could but we do not check for class object instance creation for performance reasons)
-     * @returns
-     */
-    needsV3Observe() {
-        return this.v3InUse_;
+      * Return true if object deep observation mechanisms need to be enabled
+      * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
+      * (we could but we do not check for class object instance creation for performance reasons)
+      * @returns
+      */
+    needsV2Observe() {
+        return this.v2ObservedTrackInUse_;
     }
 } // ConfigureStateMgmt
 ConfigureStateMgmt.HOW_TO_SAY = `Your application uses both state management V2 and V3 features! - It is strongly recommended not to mix V2 and V3. Consult the rules how state management V2 and V3 can be mixed in the same app.`;
@@ -2032,7 +2022,7 @@ class stateMgmtConsole {
     }
     static propertyAccess(...args) {
         // enable for fine grain debugging variable observation
-        // aceConsole.debug (...args)
+        // aceConsole.error(...args)
     }
     static applicationError(...args) {
         aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
@@ -2138,7 +2128,7 @@ function Observed(BaseClass) {
         constructor(...args) {
             super(...args);
             
-            ConfigureStateMgmt.instance.intentUsingV2(`@Observed`, BaseClass.name);
+            ConfigureStateMgmt.instance.usingPUObservedTrack(`@Observed`, BaseClass.name);
             let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
             Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
                 value: true,
@@ -3658,7 +3648,7 @@ class View extends NativeViewFullUpdate {
 // indicates to framework to track individual object property value changes
 function Track(target, property) {
     var _a;
-    ConfigureStateMgmt.instance.intentUsingV2(`@Track`, property);
+    ConfigureStateMgmt.instance.usingPUObservedTrack(`@Track`, property);
     Reflect.set(target, `${TrackedObject.___TRACKED_PREFIX}${property}`, true);
     Reflect.set(target, TrackedObject.___IS_TRACKED_OPTIMISED, true);
     
@@ -3765,7 +3755,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.subscriberRefs_.add(subscriber);
             }
         }
-        ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
     }
     aboutToBeDeleted() {
         super.aboutToBeDeleted();
@@ -3930,6 +3919,9 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
                 this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
             }
+        }
+        else {
+            stateMgmtConsole.warn(`${this.debugInfo()}: will not notify change, because its owning view is destroyed already`);
         }
         this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber) {
@@ -5277,6 +5269,11 @@ class ViewPU extends NativeViewPartialUpdate {
         // flag if active of inActive
         // inActive means updates are delayed
         this.isActive_ = true;
+        /*
+        private elmtIdsDelayedUpdate: Set<number> = new Set()
+        private monitorIdsDelayedUpdate: Set<number> = new Set()
+        private computedIdsDelayedUpdate: Set<number> = new Set()
+        */
         this.runReuse_ = false;
         this.hasBeenRecycled_ = false;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
@@ -5331,7 +5328,11 @@ class ViewPU extends NativeViewPartialUpdate {
         let usesStateMgmtVersion = 0;
         Object.getOwnPropertyNames(this)
             .filter((propName) => {
-            return (propName.startsWith("__") && !propName.startsWith(ObserveV3.OB_PREFIX));
+            // do not include backing store, and ObserveV3/MonitorV3/ComputedV3 meta data objects
+            return (propName.startsWith("__")
+                && !propName.startsWith(ObserveV3.OB_PREFIX)
+                && !propName.startsWith(MonitorV3.WATCH_PREFIX)
+                && !propName.startsWith(ComputedV3.COMPUTED_PREFIX));
         })
             .forEach((propName) => {
             const stateVar = Reflect.get(this, propName);
@@ -5434,6 +5435,7 @@ class ViewPU extends NativeViewPartialUpdate {
         
         // in case ViewPU is currently frozen
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+        MonitorV3.clearWatchesFromTarget(this);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
@@ -5496,6 +5498,9 @@ class ViewPU extends NativeViewPartialUpdate {
             }
         });
         return result;
+    }
+    isViewActive() {
+        return this.isActive_;
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
@@ -5752,7 +5757,7 @@ class ViewPU extends NativeViewPartialUpdate {
             
         }
         let cb = this.watchedProps.get(varName);
-        if (cb) {
+        if (cb && typeof cb === "function") {
             
             cb.call(this, varName);
         }
@@ -5764,6 +5769,8 @@ class ViewPU extends NativeViewPartialUpdate {
      *  inform that UINode with given elmtId needs rerender
      *  does NOT exec @Watch function.
      *  only used on V3 code path from ObserveV3.fireChange.
+     *
+     * FIXME will still use in the future?
      */
     uiNodeNeedUpdateV3(elmtId) {
         if (this.isFirstRender()) {
@@ -5784,9 +5791,37 @@ class ViewPU extends NativeViewPartialUpdate {
             this.dirtDescendantElementIds_.add(elmtId);
         }
         
-        // FIXME dito: this.restoreInstanceId();
         
     }
+    /*
+    private performDelayedUpdateV3(): void {
+      FIXME Component freeze
+      if(this.computedIdsDelayedUpdate.size) {
+        // exec computed functions
+        ObserveV3.getObserve().updateDirtyComputedProps(this.computedIdsDelayedUpdate);
+      }
+      if(this.monitorIdsDelayedUpdate.size) {
+        // exec  monitor functions
+        ObserveV3.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
+      }
+      if(this.elmtIdsDelayedUpdate.size) {
+        // update re-render of updated element ids once the view gets active
+        if(this.dirtDescendantElementIds_.size === 0) {
+          this.dirtDescendantElementIds_ = new Set(this.elmtIdsDelayedUpdate);
+        }
+        else {
+          this.elmtIdsDelayedUpdate.forEach((element) => {
+            this.dirtDescendantElementIds_.add(element);
+          });
+        }
+      }
+      this.markNeedUpdate();
+      this.elmtIdsDelayedUpdate.clear();
+      this.monitorIdsDelayedUpdate.clear();
+      this.computedIdsDelayedUpdate.clear();
+    }
+  }
+     */
     performDelayedUpdate() {
         if (!this.ownObservedPropertiesStore_.size) {
             return;
@@ -5821,7 +5856,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     /**
      * Function to be called from the constructor of the sub component
-     * to register a @Watch varibale
+     * to register a @Watch variable
      * @param propStr name of the variable. Note from @Provide and @Consume this is
      *      the variable name and not the alias!
      * @param callback application defined member function of sub-class
@@ -5918,7 +5953,7 @@ class ViewPU extends NativeViewPartialUpdate {
             }
         } while (this.dirtDescendantElementIds_.size);
         
-        this.dumpStateVars();
+        //this.dumpStateVars();
         
     }
     // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs
@@ -5995,13 +6030,18 @@ class ViewPU extends NativeViewPartialUpdate {
             this.syncInstanceId();
             
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            // FIXME: Because ReactNative dynamic viewer app library uses V3 @observe within V2 @Component, 
-            // the framework needs to enable both V2 recording and 
-            // V3 recording with startBind as well.
-            this.currentlyRenderedElmtIdStack_.push(elmtId);
-            // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
-            // update + initial render calls, ike in if and ForEach case, convert to stack as well
-            ObserveV3.getObserve().startBind(this, elmtId);
+            if (!this.isViewV3) {
+                // Enable PU state tracking only in PU @Components
+                this.currentlyRenderedElmtIdStack_.push(elmtId);
+            }
+            // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
+            // enable V2 object deep observation
+            // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
+            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+                // FIXME: like in V2 setting bindId_ in ObserveV3 does not work with 'stacked' 
+                // update + initial render calls, like in if and ForEach case, convert to stack as well
+                ObserveV3.getObserve().startBind(this, elmtId);
+            }
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
@@ -6010,8 +6050,12 @@ class ViewPU extends NativeViewPartialUpdate {
             if (node !== undefined) {
                 node.cleanStageValue();
             }
-            ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
-            this.currentlyRenderedElmtIdStack_.pop();
+            if (ConfigureStateMgmt.instance.needsV2Observe()) {
+                ObserveV3.getObserve().startBind(null, UINodeRegisterProxy.notRecordingDependencies);
+            }
+            if (!this.isViewV3) {
+                this.currentlyRenderedElmtIdStack_.pop();
+            }
             ViewStackProcessor.StopGetAccessRecording();
             
             this.restoreInstanceId();
@@ -6099,13 +6143,13 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.aboutToReuse(params);
             }
         }, "aboutToReuse", this.constructor.name);
+        this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child && !child.hasBeenRecycled_) {
                 child.aboutToReuseInternal();
             }
         });
-        this.updateDirtyElements();
         this.runReuse_ = false;
     }
     aboutToRecycleInternal() {
@@ -6221,6 +6265,7 @@ class ViewPU extends NativeViewPartialUpdate {
             });
             stateMgmtConsole.applicationError(`${this.debugInfo__()}: Ids generated by the ForEach id gen function must be unique. Application error!`);
         }
+        aceTrace.begin(`forEach update id: ${elmtId}, idDuplicates.length: ${idDuplicates.length}, diffIndexArray.length: ${diffIndexArray.length}`);
         
         // Item gen is with index.
         
@@ -6239,6 +6284,7 @@ class ViewPU extends NativeViewPartialUpdate {
         
         
         
+        aceTrace.end();
     }
     UpdateLazyForEachElements(elmtIds) {
         if (!Array.isArray(elmtIds)) {
@@ -6517,9 +6563,12 @@ class ViewPU extends NativeViewPartialUpdate {
      * especially after init variables from parent ViewPU has been done
      */
     finalizeConstruction() {
-        if (ConfigureStateMgmt.instance.needsV3Observe()) {
-            ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
-        }
+        // FIXME, can we skip for apps that do not use V3 at all?
+        ObserveV3.getObserve().constructMonitor(this, this.constructor.name);
+        ObserveV3.getObserve().constructComputed(this, this.constructor.name);
+        // FIME ProvideConsumeUtilV3.setupConsumeVarsV3(this);
+        // Always use ID_REFS in ViewPU
+        this[ObserveV3.ID_REFS] = {};
     }
     /**
      * v3: find a @provide'ed variable in the nearest ancestor ViewPU.
@@ -6529,6 +6578,20 @@ class ViewPU extends NativeViewPartialUpdate {
     findProvideV3(provideName) {
         // FIXME unimplemented
         return [undefined, provideName, true];
+    }
+    // WatchIds that needs to be fired later gets added to monitorIdsDelayedUpdate
+    // monitor firechange will be triggered for all these watchIds once this view gets active
+    addDelayedMonitorIds(watchId) {
+        /* FIXME @Component freeze
+        
+        this.monitorIdsDelayedUpdate.add(watchId);
+        */
+    }
+    addDelayedComputedIds(watchId) {
+        /* FIXME @Component freeze
+        
+        this.computedIdsDelayedUpdate.add(watchId);
+        */
     }
 } // class ViewPU
 // Array.sort() converts array items to string to compare them!
@@ -6771,12 +6834,9 @@ function makeBuilderParameterProxy(builderName, source) {
  * limitations under the License.
  */
 /**
- * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
- */
-/**
- * @observe class and @track class property decorators
+ * @ObservedV2 class and @trace class property decorators
  * ObserveV3 core helper class to keep track of all the object -> UINode/elmtId
- * and Monitor/watchId dependencies.
+ * Monitor/watchId, Computed/computedId dependencies.
  */
 class ObserveV3 {
     constructor() {
@@ -6794,6 +6854,7 @@ class ObserveV3 {
         // elmtIds of UINodes need re-render
         // @monitor functions that need to execute
         this.elmtIdsChanged_ = new Set();
+        this.computedPropIdsChanged_ = new Set();
         this.monitorIdsChanged_ = new Set();
         // avoid recursive execution of updateDirty
         // by state changes => fireChange while
@@ -6801,6 +6862,8 @@ class ObserveV3 {
         this.startDirty_ = false;
         // flag to indicate change observation is disabled
         this.disabled_ = false;
+        // flag to indicate ComputedV3 calculation is ongoing
+        this.calculatingComputedProp_ = false;
     }
     static getObserve() {
         if (!this.obsInstance_) {
@@ -6827,18 +6890,62 @@ class ObserveV3 {
     clearBinding(id) {
         var _a;
         (_a = this.id2targets_[id]) === null || _a === void 0 ? void 0 : _a.forEach((target) => {
-            for (let key in target[ObserveV3.SYMBOL_REFS]) {
-                if (id in target[ObserveV3.SYMBOL_REFS][key]) {
-                    delete target[ObserveV3.SYMBOL_REFS][key][id];
+            var _a, _b;
+            const idRefs = target[ObserveV3.ID_REFS];
+            const symRefs = target[ObserveV3.SYMBOL_REFS];
+            if (idRefs) {
+                (_a = idRefs[id]) === null || _a === void 0 ? void 0 : _a.forEach(key => { var _a; return (_a = symRefs === null || symRefs === void 0 ? void 0 : symRefs[key]) === null || _a === void 0 ? void 0 : _a.delete(id); });
+                delete idRefs[id];
+            }
+            else {
+                for (let key in symRefs) {
+                    (_b = symRefs[key]) === null || _b === void 0 ? void 0 : _b.delete(id);
                 }
+                ;
             }
         });
         delete this.id2targets_[id];
         delete this.id2cmp_[id];
+        
+        
+    }
+    /**
+     * Method only for testing
+     *
+     * @param expectedLength
+     * @returns true if length matches
+     */
+    get id2CompLength() {
+        return Object.keys(this.id2cmp_).length;
+    }
+    assertOnId2Comp(expectedLength) {
+        const result = expectedLength == this.id2CompLength;
+        if (!result) {
+            stateMgmtConsole.error(`assertOnId2Comp expected length ${expectedLength}, actual ${this.id2CompLength}, entries=${JSON.stringify(Object.keys(this.id2cmp_))}`);
+        }
+        return result;
+    }
+    /**
+     * Method only for testing
+     *
+     * @param expectedLength
+     * @returns true if length matches
+     */
+    get id2TargetsLength() {
+        return Object.keys(this.id2targets_).length;
+    }
+    assertOnId2Targets(expectedLength) {
+        const result = expectedLength == Object.keys(this.id2cmp_).length;
+        if (!result) {
+            stateMgmtConsole.error(`assertOnId2Target expected length ${expectedLength}, actual ${Object.keys(this.id2targets_)}, entries=${JSON.stringify(Object.keys(this.id2targets_))}`);
+        }
+        return result;
     }
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
     addRef(target, attrName) {
+        var _a, _b, _c, _d;
+        var _e, _f;
         if (this.bindCmp_ === null) {
             return;
         }
@@ -6847,18 +6954,21 @@ class ObserveV3 {
             stateMgmtConsole.applicationError(error);
             throw new TypeError(error);
         }
-        if (!target[ObserveV3.SYMBOL_REFS]) {
-            target[ObserveV3.SYMBOL_REFS] = {};
+        
+        const id = this.bindId_;
+        // Map: attribute/symbol -> dependent id
+        const symRefs = (_a = target[_e = ObserveV3.SYMBOL_REFS]) !== null && _a !== void 0 ? _a : (target[_e] = {});
+        (_b = symRefs[attrName]) !== null && _b !== void 0 ? _b : (symRefs[attrName] = new Set());
+        symRefs[attrName].add(id);
+        // Map id -> attribute/symbol
+        // optimization for faster clearBinding
+        const idRefs = target[ObserveV3.ID_REFS];
+        if (idRefs) {
+            (_c = idRefs[id]) !== null && _c !== void 0 ? _c : (idRefs[id] = new Set());
+            idRefs[id].add(attrName);
         }
-        if (!target[ObserveV3.SYMBOL_REFS][attrName]) {
-            target[ObserveV3.SYMBOL_REFS][attrName] = {};
-        }
-        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
-        obj[this.bindId_] = 1;
-        if (!this.id2targets_[this.bindId_]) {
-            this.id2targets_[this.bindId_] = new Set();
-        }
-        this.id2targets_[this.bindId_].add(target);
+        (_d = (_f = this.id2targets_)[id]) !== null && _d !== void 0 ? _d : (_f[id] = new Set());
+        this.id2targets_[id].add(target);
     }
     /**
      * setReadOnlyAttr - helper function used to update an immutable attribute
@@ -6932,36 +7042,52 @@ class ObserveV3 {
     // mark view model object 'target' property 'attrName' as changed
     // notify affected watchIds and elmtIds
     fireChange(target, attrName) {
+        // enable to get more fine grained traces
+        // including 2 (!) .end calls.
+        // aceTrace.begin(`ObservedV3.FireChange '${attrName}'`)
         if (!target[ObserveV3.SYMBOL_REFS] || this.disabled_) {
             return;
         }
-        let obj = target[ObserveV3.SYMBOL_REFS][attrName];
-        if (!obj) {
+        if (this.calculatingComputedProp_) {
+            const error = `Usage of ILLEGAL @computed function detected for ${this.bindCmp_.getProp()}! The @computed function MUST NOT change the state of any observed state variable!`;
+            stateMgmtConsole.applicationError(error);
+            throw new Error(error);
+        }
+        // enable this trace marker for more fine grained tracing of the update pipeline
+        // note: two (!) end markers need to be enabled
+        // aceTrace.begin("fireChange");
+        let changedIdSet = target[ObserveV3.SYMBOL_REFS][attrName];
+        if (!changedIdSet || !(changedIdSet instanceof Set)) {
+            // aceTrace.end();
             return;
         }
         
-        // FIXME seem to cause the crash, investigate
-        //  obj.forEach((id : number) => {
-        for (let idA in obj) {
-            const id = parseInt(idA);
+        for (const id of changedIdSet) {
             // Cannot fireChange the object that is being created.
             if (id === this.bindId_) {
                 continue;
             }
-            // if this is the first id to be added to elmtIdsChanged_ and monitorIdsChanged_, 
+            // if this is the first id to be added to any Set of changed ids, 
             // schedule an 'updateDirty' task
             // that will run after the current call stack has unwound.
             // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
             // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
-            if ((0 === this.elmtIdsChanged_.size) && (0 === this.monitorIdsChanged_.size)
-                && !this.startDirty_) {
-                Promise.resolve(true).then(this.updateDirty.bind(this));
+            if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size == 0)
+                && /* update not already in progress */ !this.startDirty_) {
+                Promise.resolve().then(this.updateDirty.bind(this));
             }
-            // add bindId to Set of pending changes.
-            (id < MonitorV3.MIN_WATCH_ID)
-                ? this.elmtIdsChanged_.add(id)
-                : this.monitorIdsChanged_.add(id);
+            // add bindId to the correct Set of pending changes.
+            if (id < ComputedV3.MIN_COMPUTED_ID) {
+                this.elmtIdsChanged_.add(id);
+            }
+            else if (id < MonitorV3.MIN_WATCH_ID) {
+                this.computedPropIdsChanged_.add(id);
+            }
+            else {
+                this.monitorIdsChanged_.add(id);
+            }
         } // for
+        // aceTrace.end();
     }
     updateDirty() {
         this.startDirty_ = true;
@@ -6969,57 +7095,147 @@ class ObserveV3 {
         this.startDirty_ = false;
     }
     updateDirty2() {
-        // process monitors first, because these might add more elmtIds of UINodes to rerender
-        this.updateDirtyMonitors(1);
-        this.notifyDirtyElmtIdsToOwningViews();
-    }
-    updateDirtyMonitors(recursionDepth) {
-        if (recursionDepth > 20) {
-            // limit recursion depth to avoid infinite loops
-            // and skip any pending @monitor function executions
-            stateMgmtConsole.applicationError(`20 loops in @monitor function execution detected. Stopping processing. Application error!`);
-            this.monitorIdsChanged_.clear(); // Clear the contents
-            return;
-        }
+        aceTrace.begin("updateDirty2");
         
-        const monitors = this.monitorIdsChanged_; // move Set
-        // exec @monitor functions might add new watchIds
-        this.monitorIdsChanged_ = new Set();
+        // obtain and unregister the removed elmtIds 
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+        // priority order of processing:
+        // 1- update computed properties until no more need computed props update 
+        // 2- update monitors until no more monitors and no more computed props
+        // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
+        // FIXME prevent infinite loops
+        do {
+            do {
+                while (this.computedPropIdsChanged_.size) {
+                    //  sort the ids and update in ascending order
+                    // If a @computed property depends on other @computed properties, their
+                    // ids will be smaller as they are defined first.
+                    const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1 - id2);
+                    this.computedPropIdsChanged_ = new Set();
+                    this.updateDirtyComputedProps(computedProps);
+                }
+                if (this.monitorIdsChanged_.size) {
+                    const monitors = this.monitorIdsChanged_;
+                    this.monitorIdsChanged_ = new Set();
+                    this.updateDirtyMonitors(monitors);
+                }
+            } while (this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+            if (this.elmtIdsChanged_.size) {
+                const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
+                this.elmtIdsChanged_ = new Set();
+                this.updateUINodes(elmtIds);
+            }
+        } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+        aceTrace.end();
+    }
+    updateDirtyComputedProps(computed) {
+        
+        aceTrace.begin(`ObservedV3.updateDirtyComputedProps ${computed.length} @computed`);
+        computed.forEach((id) => {
+            let comp = this.id2cmp_[id];
+            if (comp instanceof ComputedV3) {
+                const target = comp.getTarget();
+                if (target instanceof ViewPU && !target.isViewActive()) {
+                    // FIXME @Component freeze enable
+                    // view.addDelayedComputedIds(id);
+                }
+                else {
+                    comp.fireChange();
+                }
+            }
+        });
+        aceTrace.end();
+    }
+    updateDirtyMonitors(monitors) {
+        
+        aceTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
         let monitor;
+        let monitorTarget;
         monitors.forEach((watchId) => {
-            if ((monitor = this.id2cmp_[watchId]) && (monitor instanceof MonitorV3)) {
-                monitor.fireChange();
+            monitor = this.id2cmp_[watchId];
+            if (monitor instanceof MonitorV3) {
+                if (((monitorTarget = monitor.getTarget()) instanceof ViewPU) && !monitorTarget.isViewActive()) {
+                    // FIXME @Component freeze enable
+                    // monitor notifyChange delayed if target is a View that is not active
+                    // monitorTarget.addDelayedMonitorIds(watchId);
+                }
+                else {
+                    monitor.notifyChange();
+                }
             }
         });
-        if (this.monitorIdsChanged_.size) {
-            this.updateDirtyMonitors(recursionDepth + 1);
-        }
+        aceTrace.end();
     }
-    notifyDirtyElmtIdsToOwningViews() {
-        let view;
+    /**
+     * This version of UpdateUINodes does not wait for VSYNC, violates rules
+     * calls UpdateElement, thereby avoids the long and frequent code path from
+     * FlushDirtyNodesUpdate to CustomNode to ViewPU.updateDirtyElements to UpdateElement
+     * Code left here to reproduce benchmark measurements, compare with future optimisation
+     * @param elmtIds
+     */
+    updateUINodesWithoutVSync(elmtIds) {
         
-        this.elmtIdsChanged_.forEach((elmtId) => {
-            var _a;
-            if ((view = (_a = this.id2cmp_[elmtId]) === null || _a === void 0 ? void 0 : _a.deref()) && (view instanceof ViewPU)) {
-                // FIXME Review: uiNodeNeedUpdateV3 just copies elmtIds to another set
-                // waits for FlushBuild to call rerender call updateDirtyElements
-                // to actually render the UINodes. Could we call ViewPU.UpdateElement 
-                // right away?        
-                view.uiNodeNeedUpdateV3(elmtId);
+        aceTrace.begin(`ObserveV3.updateUINodes: ${elmtIds.length} elmtId`);
+        let view;
+        let weak;
+        elmtIds.forEach((elmtId) => {
+            if ((weak = this.id2cmp_[elmtId]) && (typeof weak == "object") && ("deref" in weak)
+                && (view = weak.deref()) && (view instanceof ViewPU)) {
+                if (view.isViewActive()) {
+                    // FIXME need to call syncInstanceId before update?
+                    view.UpdateElement(elmtId);
+                }
+                else {
+                    // FIXME @Component freeze
+                    //....
+                }
+            } // if ViewPU
+        });
+        aceTrace.end();
+    }
+    // This is the code path similar to V2, follows the rule that UI updates on VSYNC.
+    // ViewPU queues the elmtId that need update, marks the CustomNode dirty in RenderContext
+    // On next VSYNC runs FlushDirtyNodesUpdate to call rerender to call UpdateElement. Much longer code path
+    // much slower
+    updateUINodes(elmtIds) {
+        
+        aceTrace.begin(`ObserveV3.updateUINodesSlow: ${elmtIds.length} elmtId`);
+        let viewWeak;
+        let view;
+        elmtIds.forEach((elmtId) => {
+            viewWeak = this.id2cmp_[elmtId];
+            if (viewWeak && "deref" in viewWeak && (view = viewWeak.deref()) && view instanceof ViewPU) {
+                if (view.isViewActive()) {
+                    view.uiNodeNeedUpdateV3(elmtId);
+                }
+                else {
+                    // FIXME delayed update
+                }
             }
         });
-        this.elmtIdsChanged_.clear();
+        aceTrace.end();
     }
     constructMonitor(target, name) {
         let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + name);
-        if (target && target[watchProp]) {
-            Object.entries(target[watchProp]).forEach(([key, val]) => {
-                ObserveV3.getObserve().addWatch(target, key, val);
+        if (target && (typeof target == "object") && target[watchProp]) {
+            Object.entries(target[watchProp]).forEach(([funcName, func]) => {
+                if (func && funcName && typeof func == "function") {
+                    new MonitorV3(target, funcName, func).InitRun();
+                }
+                // FIXME Else handle error
+            });
+        } // if target[watchProp]
+    }
+    constructComputed(target, name) {
+        let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + name);
+        if (target && (typeof target == "object") && target[watchProp]) {
+            Object.entries(target[watchProp]).forEach(([propertyName, computeFunc]) => {
+                var _a;
+                
+                new ComputedV3(target, propertyName, computeFunc).InitRun();
             });
         }
-    }
-    addWatch(target, props, func) {
-        return new MonitorV3(target, props, func).InitRun();
     }
     clearWatch(id) {
         this.clearBinding(id);
@@ -7027,8 +7243,8 @@ class ObserveV3 {
     static autoProxyObject(target, key) {
         let val = target[key];
         // Not an object, not a collection, no proxy required
-        if (!val || typeof (val) !== "object" || !(Array.isArray(val) ||
-            val instanceof Set || val instanceof Map || val instanceof Date)) {
+        if (!val || typeof (val) !== "object"
+            || !(Array.isArray(val) || val instanceof Set || val instanceof Map || val instanceof Date)) {
             return val;
         }
         // Only collections require proxy observation, and if it has been observed, it does not need to be observed again.
@@ -7036,8 +7252,8 @@ class ObserveV3 {
             target[key] = new Proxy(val, ObserveV3.arraySetMapProxy);
             val = target[key];
         }
-        // If the return value is an array, a length observation should be added to the array.
-        if (Array.isArray(val)) {
+        // If the return value is an Array, Set, Map 
+        if (!(val instanceof Date)) {
             ObserveV3.getObserve().addRef(val, ObserveV3.OB_LENGTH);
         }
         return val;
@@ -7070,6 +7286,7 @@ class ObserveV3 {
 } // class ObserveV3
 ObserveV3.V3_DECO_META = Symbol('__v3_deco_meta__');
 ObserveV3.SYMBOL_REFS = Symbol('__use_refs__');
+ObserveV3.ID_REFS = Symbol('__id_refs__');
 ObserveV3.SYMBOL_PROXY_GET_TARGET = Symbol("__proxy_get_target");
 ObserveV3.OB_PREFIX = "__ob_"; // OB_PREFIX + attrName => backing store attribute name
 ObserveV3.OB_PREFIX_LEN = 5;
@@ -7242,7 +7459,7 @@ ObserveV3.arraySetMapProxy = {
     }
 };
 /**
- * @track class property decorator
+ * @Trace class property decorator
  *
  * @param target  class prototype object
  * @param propertyKey  class property name
@@ -7254,7 +7471,7 @@ ObserveV3.arraySetMapProxy = {
  * @from 12
  */
 const Trace = (target, propertyKey) => {
-    ConfigureStateMgmt.instance.intentUsingV3(`@track`, propertyKey);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
     return trackInternal(target, propertyKey);
 };
 const trackInternal = (target, propertyKey) => {
@@ -7287,20 +7504,28 @@ const trackInternal = (target, propertyKey) => {
     (_a = target[_b = ObserveV3.V3_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
 }; // track
 function ObservedV2(BaseClass) {
-    ConfigureStateMgmt.instance.intentUsingV3(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
     // prevent @Track inside @observed class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
         const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
     }
+    if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV3.V3_DECO_META)) {
+        // not an error, suspicious of developer oversight
+        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is thi intended? Check our application.`);
+    }
+    // Use ID_REFS only if number of observed attrs is significant
+    const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
+    const count = attrList.filter(attr => attr.startsWith(ObserveV3.OB_PREFIX)).length;
+    if (count > 5) {
+        BaseClass.prototype[ObserveV3.ID_REFS] = {};
+    }
     return class extends BaseClass {
         constructor(...args) {
             super(...args);
-            // After a "new" object, no matter how many times the watched value is assigned,
-            // only the last initial value is recognized. Therefore, you need to add "Monitor" asynchronously.
-            // Promise.resolve(true).then(() => constructMonitor(this, BaseClass.name)) // Low performance
-            AsyncAddMonitorV3.addWatch(this, BaseClass.name);
+            AsyncAddMonitorV3.addMonitor(this, BaseClass.name);
+            AsyncAddComputedV3.addComputed(this, BaseClass.name);
         }
     };
 }
@@ -7318,82 +7543,144 @@ function ObservedV2(BaseClass) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @monitor function decorator implementation and supporting classes MonitorV3 and AsyncMonitorV3
- */
+class MonitorValueV3 {
+    constructor(path) {
+        this.path = path;
+        this.dirty = false;
+        this.props = path.split(".");
+    }
+    setValue(isInit, newValue) {
+        this.now = newValue;
+        if (isInit) {
+            this.before = this.now;
+        }
+        this.dirty = this.before !== this.now;
+        return this.dirty;
+    }
+    // mv newValue to oldValue, set dirty to false
+    reset() {
+        this.before = this.now;
+        this.dirty = false;
+    }
+    isDirty() {
+        return this.dirty;
+    }
+}
 /**
  * MonitorV3
- * one MonitorV3 object per @monitor function
+ * one MonitorV3 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV3 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
- * fireChange - exec @monitor function and re-new dependencies with observeObjectAccess
+ * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
  */
 class MonitorV3 {
-    constructor(target, props, func) {
-        ConfigureStateMgmt.instance.intentUsingV3(`@monitor`, props);
+    constructor(target, pathsString, func) {
+        var _a;
+        var _b;
+        this.values_ = new Array();
         this.target_ = target;
-        this.func_ = func;
+        this.monitorFunction = func;
         this.watchId_ = ++MonitorV3.nextWatchId_;
-        this.props_ = props.split(".");
+        // split space separated array of paths
+        let paths = pathsString.split(/\s+/g);
+        paths.forEach(path => this.values_.push(new MonitorValueV3(path)));
+        // add watchId to owning ViewPU or view model data object
+        // ViewPU uses to call clearBinding(id)
+        // FIXME data object leave data inside ObservedV3, because they can not 
+        // call clearBinding(id) before they get deleted.
+        const meta = (_a = target[_b = MonitorV3.WATCH_INSTANCE_PREFIX]) !== null && _a !== void 0 ? _a : (target[_b] = {});
+        meta[pathsString] = this.watchId_;
     }
-    InitRun() {
-        this.value_ = this.observeObjectAccess(true);
-        return this.watchId_;
+    getTarget() {
+        return this.target_;
     }
-    // 监视到该Watch改变了数据
-    fireChange() {
-        let newVal = this.observeObjectAccess();
-        if (this.value_ !== newVal) {
-            
-            this.func_.call(this.target_, newVal, this.value_);
-            this.value_ = newVal;
-        }
-    }
-    // register current watchId while exec. analysisPath
-    observeObjectAccess(isInit = false) {
-        ObserveV3.getObserve().startBind(this, this.watchId_);
-        let ret = this.analysisPath(isInit);
-        ObserveV3.getObserve().startBind(null, 0);
+    /**
+        Return array of those monitored paths
+        that changed since previous invocation
+     */
+    get dirty() {
+        let ret = new Array();
+        this.values_.forEach(monitorValue => {
+            if (monitorValue.isDirty()) {
+                ret.push(monitorValue.path);
+            }
+        });
         return ret;
     }
-    // traverse objects on the given monitor path and add dependency for
-    // watchId to each of the,
-    // this needs to be done at @monitor init and repeated every time
-    // one of the objects has changes
-    analysisPath(isInit) {
+    /**
+     * return IMonitorValue for given path
+     * or if no path is specified any dirty (changed) monitor value
+     */
+    value(path) {
+        for (let monitorValue of this.values_) {
+            if ((path === undefined && monitorValue.isDirty()) || monitorValue.path === path) {
+                return monitorValue;
+            }
+        }
+        return undefined;
+    }
+    InitRun() {
+        this.bindRun(true);
+        return this;
+    }
+    notifyChange() {
+        if (this.bindRun(/* is init / first run */ false)) {
+            
+            // exec @Monitor function
+            this.monitorFunction.call(this.target_, this);
+            // now -> before value
+            this.reset();
+        }
+    }
+    // called after @Monitor function call
+    reset() {
+        this.values_.forEach(item => item.reset());
+    }
+    // analysisProp for each monitored path
+    bindRun(isInit = false) {
+        ObserveV3.getObserve().startBind(this, this.watchId_);
+        let ret = false;
+        this.values_.forEach((item) => {
+            let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
+            ret = ret || dirty;
+        });
+        ObserveV3.getObserve().startBind(null, -1);
+        return ret;
+    }
+    // record / update object dependencies by reading each object along the path
+    // return the value, i.e. the value of the last path item
+    analysisProp(isInit, monitoredValue) {
         let obj = this.target_;
-        for (const prop of this.props_) {
+        for (let prop of monitoredValue.props) {
             if (typeof obj == "object" && Reflect.has(obj, prop)) {
                 obj = obj[prop];
             }
             else {
-                // FIXME change to stateMgmtConsole.applicationError
-                isInit && stateMgmtConsole.warn(`@monitor("${this.props_.join(".")}"): path currently does not exist (can be ok when monitoring union type values)`);
+                isInit && stateMgmtConsole.warn(`watch prop "${monitoredValue.path}" initialize not found, make sure it exists!`);
                 return undefined;
             }
         }
         return obj;
     }
+    static clearWatchesFromTarget(target) {
+        var _a;
+        let meta;
+        if (!target || typeof target !== "object"
+            || !(meta = target[MonitorV3.WATCH_INSTANCE_PREFIX]) || typeof meta != "object") {
+            return;
+        }
+        
+        Array.from(Object.values(meta)).forEach((watchId) => ObserveV3.getObserve().clearWatch(watchId));
+    }
 }
-//0x1.0000.0000.0000,
+MonitorV3.WATCH_PREFIX = "___watch_";
+MonitorV3.WATCH_INSTANCE_PREFIX = "___watch__obj_";
 // start with high number to avoid same id as elmtId for components.
 MonitorV3.MIN_WATCH_ID = 0x1000000000000;
 MonitorV3.nextWatchId_ = MonitorV3.MIN_WATCH_ID;
-MonitorV3.WATCH_PREFIX = "__wa_";
-/**
- * @monitor("variable.path.expression") function decorator
- */
-/*
- const monitor = function (key) {
-  return function (target, _, descriptor) {
-    let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name)
-    target[watchProp] ? target[watchProp][key] = descriptor.value : target[watchProp] = { [key]: descriptor.value }
-  }
-}
-*/
 // Performance Improvement
 class AsyncAddMonitorV3 {
-    static addWatch(target, name) {
+    static addMonitor(target, name) {
         if (AsyncAddMonitorV3.watches.length === 0) {
             Promise.resolve(true).then(AsyncAddMonitorV3.run);
         }
@@ -7407,6 +7694,226 @@ class AsyncAddMonitorV3 {
     }
 }
 AsyncAddMonitorV3.watches = [];
+/**
+ * @Monitor("variable.path.expression [, variable.path.expression") function decorator
+ */
+const Monitor = function (path, ...paths) {
+    const pathsUniqueString = paths ? [path, ...paths].join(" ") : path;
+    return function (target, _, descriptor) {
+        
+        let watchProp = Symbol.for(MonitorV3.WATCH_PREFIX + target.constructor.name);
+        const monitorFunc = descriptor.value;
+        target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc };
+    };
+};
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * ComputedV3
+ * one ComputedV3 object per @computed variable
+ * computedId_ - similar to elmtId, identify one ComputedV3 in Observe.idToCmp Map
+ * observeObjectAccess = calculate the compute function and create dependencies to
+ * source variables
+ * fireChange - execute compute function and re-new dependencies with observeObjectAccess
+ */
+class ComputedV3 {
+    constructor(target, prop, func) {
+        this.target_ = target;
+        this.propertyComputeFunc_ = func;
+        this.computedId_ = ++ComputedV3.nextCompId_;
+        this.prop_ = prop;
+    }
+    InitRun() {
+        let cachedProp = ComputedV3.COMPUTED_CACHED_PREFIX + this.prop_;
+        let propertyKey = this.prop_;
+        Reflect.defineProperty(this.target_, propertyKey, {
+            get() {
+                ObserveV3.getObserve().addRef(this, propertyKey);
+                return ObserveV3.autoProxyObject(this, cachedProp);
+            },
+            enumerable: true
+        });
+        this.target_[cachedProp] = this.observeObjectAccess();
+        return this.computedId_;
+    }
+    fireChange() {
+        let newVal = this.observeObjectAccess();
+        let cachedProp = ComputedV3.COMPUTED_CACHED_PREFIX + this.prop_;
+        if (this.target_[cachedProp] !== newVal) {
+            this.target_[cachedProp] = newVal;
+            ObserveV3.getObserve().fireChange(this.target_, this.prop_);
+        }
+    }
+    getTarget() {
+        return this.target_;
+    }
+    getProp() {
+        return this.prop_;
+    }
+    // register current watchId while executing compute function
+    observeObjectAccess() {
+        ObserveV3.getObserve().startBind(this, this.computedId_);
+        let ret = this.propertyComputeFunc_.call(this.target_);
+        ObserveV3.getObserve().startBind(null, 0);
+        return ret;
+    }
+}
+// start with high number to avoid same id as elmtId for components.
+ComputedV3.MIN_COMPUTED_ID = 0x1000000000;
+ComputedV3.nextCompId_ = ComputedV3.MIN_COMPUTED_ID;
+ComputedV3.COMPUTED_PREFIX = "___comp_";
+ComputedV3.COMPUTED_CACHED_PREFIX = "___comp_cached_";
+class AsyncAddComputedV3 {
+    static addComputed(target, name) {
+        if (AsyncAddComputedV3.computedVars.length === 0) {
+            Promise.resolve(true).then(AsyncAddComputedV3.run);
+        }
+        AsyncAddComputedV3.computedVars.push({ target: target, name: name });
+    }
+    static run() {
+        AsyncAddComputedV3.computedVars.forEach((computedVar) => ObserveV3.getObserve().constructComputed(computedVar.target, computedVar.name));
+        // according to stackoverflow this is the fastest way to clear an Array
+        // ref https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
+        AsyncAddComputedV3.computedVars.length = 0;
+    }
+}
+AsyncAddComputedV3.computedVars = new Array();
+/**
+ * @computed variable decorator
+ */
+/**
+   * @computed class property decorator
+   *
+   * must be a 'computed' class property, e.g. @computed get varName() { return this.state1 + this.state2 }
+   * value assignment / set not allowed = has no setter.
+   *
+   * @param target  class prototype object
+   * @param propertyKey  class property name
+   *
+   * part of SDK
+   * @from 12
+   *
+   */
+/*
+const computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor) => {
+
+let watchProp = Symbol.for(ComputedV3.COMPUTED_PREFIX + target.constructor.name);
+const computeFunction = descriptor.get;
+target[watchProp] ? target[watchProp][propertyKey] = computeFunction
+                  : target[watchProp] = { [propertyKey]: computeFunction };
+}
+
+*/ 
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * @state @Component/ViewPU variable decorator
+ *
+ * local init required - transpiler needs to support
+ * no init or update form parent - transpiler needs to support
+ * new value assignment allowed = has setter
+ *
+ * part of SDK
+ * @from 12
+ *
+ */
+/*
+const state = (target: Object, propertyKey: string) => {
+    ObserveV3.addVariableDecoMeta(target, propertyKey, "@state");
+    return trackInternal(target, propertyKey);
+  }
+  */
+/**
+ * @param class property decorator
+ *
+ * local init optional - transpiler needs to support
+ * init and update form parent is mandatory when no local init, otherwise optional - transpiler needs to support
+ * new value assignment not allowed = has no setter. For update from parent @Component,
+ *               transpiler calls ViewPU.updateParam(paramName).
+ *
+ * @param target  ViewPU class prototype object
+ * @param propertyKey  class property name
+ *
+ * turns given property into getter and setter functions
+ * adds property target[storeProp] as the backing store
+ *
+ * part of SDK
+ * @from 12
+ *
+ */
+/*
+const param = (target : Object, propertyKey : string) => {
+  ObserveV3.addVariableDecoMeta(target, propertyKey, "@param");
+
+  let storeProp = ObserveV3.OB_PREFIX + propertyKey
+  target[storeProp] = target[propertyKey]
+  Reflect.defineProperty(target, propertyKey, {
+    get() {
+      ObserveV3.getObserve().addRef(this, propertyKey)
+      return ObserveV3.autoProxyObject(this, ObserveV3.OB_PREFIX + propertyKey)
+    },
+    set(_) {
+      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`)
+      return;
+    },
+    // @param can not be assigned, no setter
+    enumerable: true
+  })
+} // param
+*/
+/**
+ * @event @Component/ViewPU variable decorator
+ *
+ * @param target
+ * @param propertyKey
+ */
+/*
+const event = (target, propertyKey) => {
+  ObserveV3.addVariableDecoMeta(target, propertyKey, "@event");
+  target[propertyKey] = () => {};
+}
+*/
+// The prop parameter is not carried when the component is updated.
+// FIXME what is the purpose of this ?
+/*
+let updateChild = ViewPU.prototype["updateStateVarsOfChildByElmtId"];
+ViewPU.prototype["updateStateVarsOfChildByElmtId"] = function (elmtId, params) {
+  updateChild?.call(this, elmtId, params);
+  let child = this.getChildById(elmtId);
+  if (child) {
+    let realParams = child.paramsGenerator_ ? child.paramsGenerator_() : params
+    for (let k in realParams) {
+      if (ObserveV3.OB_PREFIX + k in child) {
+        child[k] = realParams[k];
+      }
+    }
+  }
+}
+*/
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

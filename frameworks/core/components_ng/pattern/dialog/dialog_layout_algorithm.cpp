@@ -71,39 +71,60 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
-    width_ = dialogProp->GetWidth().value_or(Dimension(-1));
     UpdateSafeArea();
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
-    if (realSize.Width().has_value()) {
-        widthMax_ = realSize.Width().value();
-    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.empty()) {
+        return;
+    }
+    auto child = children.front();
     // constraint child size unless developer is using customStyle
     if (!customSize_) {
         auto maxSize = layoutConstraint->maxSize;
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
         ComputeInnerLayoutParam(childLayoutConstraint);
+        UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
     }
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty()) {
-        return;
-    }
-    auto child = children.front();
+
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
     if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
         AnalysisHeightOfChild(layoutWrapper);
     }
+}
+
+void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
+    LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper)
+{
+    auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+    auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
+    auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
+    auto realWidth = GetRealSize(dialogWidth, static_cast<double>(childLayoutConstraint.maxSize.Width()));
+    auto realHeight = GetRealSize(dialogHeight, static_cast<double>(childLayoutConstraint.maxSize.Height()));
+    if (Positive(realHeight)) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(realHeight)));
+    }
+    if (Positive(realWidth)) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(realWidth), std::nullopt));
+    }
+    childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(realWidth, realHeight));
+}
+
+double DialogLayoutAlgorithm::GetRealSize(Dimension dialogFrame, double size)
+{
+    auto val = dialogFrame.Unit() == DimensionUnit::PERCENT ? dialogFrame.ConvertToPxWithSize(size)
+                                                            : dialogFrame.ConvertToPx();
+    return std::min(val, size);
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
@@ -223,7 +244,6 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     }
     columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
-    GetDialogWidth(width);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         width =
             SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx() < width ? SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx() : width;
@@ -309,21 +329,6 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
     return deviceColumns;
 }
 
-void DialogLayoutAlgorithm::GetDialogWidth(double& width)
-{
-    double widthValue = width;
-    if (width_.Unit() == DimensionUnit::PERCENT) {
-        width = width_.ConvertToPxWithSize(widthMax_);
-    } else {
-        width = width_.ConvertToPx();
-    }
-    if (width > widthMax_) {
-        width = widthMax_;
-    } else if (width < 0.0f) {
-        width = widthValue;
-    }
-}
-
 void DialogLayoutAlgorithm::ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog)
 {
     auto dialogContext = dialog->GetRenderContext();
@@ -374,7 +379,6 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         ProcessMaskRect(dialogPattern->GetDialogProperties().maskRect, frameNode);
     }
     auto child = children.front();
-    SetDialogSize(dialogProp, child, selfSize);
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
@@ -395,36 +399,43 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
+    if (!customSize_) {
+        ClipShaderRect(layoutWrapper);
+    }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
 }
 
-void DialogLayoutAlgorithm::SetDialogSize(
-    const RefPtr<DialogLayoutProperty>& dialogProp, const RefPtr<LayoutWrapper>& layoutWrapper, SizeF selfSize)
+void DialogLayoutAlgorithm::ClipShaderRect(LayoutWrapper* layoutWrapper)
 {
-    if (!customSize_) {
-        double heightValue = 0.0f;
-        height_ = dialogProp->GetHeight().value_or(Dimension(-1));
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto manager = context->GetSafeAreaManager();
-        CHECK_NULL_VOID(manager);
-        auto statusBarHeight = manager->GetSystemSafeArea().bottom_.Length();
-        auto height = selfSize.Height() - static_cast<float>(statusBarHeight);
-        if (height_.Unit() == DimensionUnit::PERCENT) {
-            heightValue = height_.ConvertToPxWithSize(height);
-        } else {
-            heightValue = height_.ConvertToPx();
-        }
-        if (heightValue > height) {
-            heightValue = height;
-        } else if (heightValue < 0) {
-            heightValue = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
-        }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dialogProp = DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogProp);
+    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    if (children.empty()) {
+        return;
+    }
+    auto child = children.front();
+    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
 
-        layoutWrapper->GetGeometryNode()->SetFrameSize(
-            SizeF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), heightValue));
+    // clip shadow + content
+    auto isSkip = dialogProp->GetIsModal().value_or(true) && !dialogProp->GetShowInSubWindowValue(false);
+    auto shadow = dialogPattern->GetDialogProperties().shadow;
+    if (shadow.has_value() && !isSkip) {
+        auto offset = shadow.value().GetOffset();
+        auto width = childSize.Width() + std::abs(offset.GetX());
+        auto height = childSize.Height() + std::abs(offset.GetY());
+        auto offsetx = topLeftPoint_.GetX() + std::min(offset.GetX(), 0.0);
+        auto offsety = topLeftPoint_.GetY() + std::min(offset.GetY(), 0.0);
+        auto rect = RectF(offsetx, offsety, width, height);
+        auto dialogContext = frameNode->GetRenderContext();
+        dialogContext->ClipWithRect(rect);
+        dialogContext->UpdateClipEdge(true);
     }
 }
 
