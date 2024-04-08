@@ -1260,6 +1260,8 @@ HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
     auto svgStream = SkMemoryStream::MakeCopy(FE_FLOOD_AND_COMPOSITE.c_str(), FE_FLOOD_AND_COMPOSITE.length());
     EXPECT_NE(svgStream, nullptr);
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    EXPECT_NE(svgDom, nullptr);
+    CHECK_NULL_VOID(svgDom);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     // filter is first child in svg
