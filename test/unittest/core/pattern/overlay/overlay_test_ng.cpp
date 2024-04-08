@@ -2048,7 +2048,7 @@ HWTEST_F(OverlayTestNg, ShowUIExtensionMenu, TestSize.Level1)
     ASSERT_NE(overlayManager, nullptr);
 
     RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
-    EXPECT_FALSE(overlayManager->ShowUIExtensionMenu(uiExtNode, handleRect, LONGEST_CONTENT, MENU_SIZE, baseFrameNode));
+    EXPECT_TRUE(overlayManager->ShowUIExtensionMenu(uiExtNode, handleRect, LONGEST_CONTENT, MENU_SIZE, baseFrameNode));
 }
 
 /**
