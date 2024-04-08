@@ -624,7 +624,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    */
   public forceCompleteRerender(deep: boolean = false): void {
     stateMgmtProfiler.begin("ViewPU.forceCompleteRerender");
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - start.`);
 
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
@@ -640,7 +640,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         }
       });
     }
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - end`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
   }
 
