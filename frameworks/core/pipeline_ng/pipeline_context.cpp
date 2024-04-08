@@ -753,6 +753,11 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     }
 }
 
+void PipelineContext::FlushModifier()
+{
+    window_->FlushModifier();
+}
+
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
@@ -862,6 +867,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushTouchEvents();
     taskScheduler_->FlushTask();
     FlushAnimationClosure();
+    window_->FlushModifier();
     FlushMessages();
     FlushFocus();
     window_->Unlock();
