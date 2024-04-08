@@ -64,6 +64,8 @@ void RadioModelNG::SetChecked(bool isChecked)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
