@@ -666,6 +666,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocusView();
         FlushFocus();
+        FlushFocusScroll();
     }
     // Close input method in the SCB window.
     IsCloseSCBKeyboard();
@@ -845,6 +846,18 @@ void PipelineContext::FlushFocusView()
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
     }
+}
+
+void PipelineContext::FlushFocusScroll()
+{
+    CHECK_NULL_VOID(focusManager_);
+    if (!focusManager_->GetNeedTriggerScroll()) {
+        return;
+    }
+    auto lastFocusStateNode = focusManager_->GetLastFocusStateNode();
+    CHECK_NULL_VOID(lastFocusStateNode);
+    lastFocusStateNode->TriggerFocusScroll();
+    focusManager_->SetNeedTriggerScroll(false);
 }
 
 void PipelineContext::FlushPipelineImmediately()

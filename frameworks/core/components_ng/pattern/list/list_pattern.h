@@ -127,6 +127,10 @@ public:
             });
     }
 
+    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+
+    std::function<bool(int32_t)> GetScrollIndexAbility() override;
+
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
 
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
