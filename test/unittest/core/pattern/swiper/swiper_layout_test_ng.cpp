@@ -242,8 +242,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
         5);
     EXPECT_EQ(pattern_->itemPosition_.size(), 5);
 
-    pattern_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(1);
     EXPECT_EQ(pattern_->currentIndex_, 1);
     const float itemWidth1 = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
     CheckItems(0, 3, 20.0f, itemWidth1);
@@ -279,8 +278,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
 
     FlushLayoutTask(parent);
 
-    pattern_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(1);
     EXPECT_EQ(pattern_->currentIndex_, 1);
 
     const float itemWidth1 = (400.0f - 2 * 20.0f) / 3.0f;

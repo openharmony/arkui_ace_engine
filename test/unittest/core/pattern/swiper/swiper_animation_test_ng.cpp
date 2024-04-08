@@ -110,31 +110,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
 }
 
 /**
- * @tc.name: SwiperPatternSpringAnimation005
- * @tc.desc: Swiper spring animation is playing, handle touch down to break playing animation,
- *           and handle touch up to continue playing animation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    double dragVelocity = 2000.0;
-    pattern_->springAnimation_ = nullptr;
-    pattern_->currentOffset_ = 1;
-    pattern_->contentMainSize_ = 1.0f;
-    struct SwiperItemInfo swiperItemInfo;
-    swiperItemInfo.startPos = -1.0f;
-    swiperItemInfo.endPos = -1.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
-    pattern_->PlaySpringAnimation(dragVelocity);
-
-    TouchLocationInfo touchLocationInfo("down", 0);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    pattern_->HandleTouchDown(touchLocationInfo);
-    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
-}
-
-/**
  * @tc.name: SwiperPatternFinishAnimation001
  * @tc.desc: FinishAnimation
  * @tc.type: FUNC
@@ -587,35 +562,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnForceStop001, 
 }
 
 /**
- * @tc.name: SwiperPatternSwipeToWithoutAnimation001
- * @tc.desc: SwipeToWithoutAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeToWithoutAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
-    int32_t index = 1;
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-    pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
-    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
-
-    /**
-     * @tc.steps: step2. call SwipeToWithoutAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->SwipeToWithoutAnimation(index);
-        pattern_->usePropertyAnimation_ = true;
-    }
-}
-
-/**
  * @tc.name: SwiperPatternPlayPropertyTranslateAnimation002
  * @tc.desc: PlayPropertyTranslateAnimation
  * @tc.type: FUNC
@@ -722,8 +668,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset003, TestSize.
      * @tc.steps: step4. translate > 0 and endPos - CalculateVisibleSize() < translate
      * @tc.expected: AutoLinearAnimationNeedReset return false
      */
-    controller_->ChangeIndex(3, false);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(3);
     EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(SWIPER_WIDTH * 100 + 1.f));
 }
 

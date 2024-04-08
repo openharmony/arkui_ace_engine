@@ -24,6 +24,10 @@ void SwiperTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
+
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
     swiperIndicatorTheme->color_ = Color::FromString("#182431");
     swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
@@ -36,7 +40,7 @@ void SwiperTestNg::SetUpTestSuite()
     textStyle.SetFontSize(Dimension(14.f));
     textStyle.SetFontWeight(FontWeight::W800);
     swiperIndicatorTheme->digitalIndicatorTextStyle_ = textStyle;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(SwiperIndicatorTheme::TypeId())).WillRepeatedly(Return(swiperIndicatorTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
@@ -96,19 +100,37 @@ void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& call
 void SwiperTestNg::CreateItem(int32_t itemNumber)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
-        TextModelNG model;
-        model.Create("text");
+        ButtonModelNG buttonModelNG;
+        buttonModelNG.CreateWithLabel("label");
         ViewStackProcessor::GetInstance()->Pop();
     }
 }
 
 void SwiperTestNg::CreateItemWithSize(float width, float height)
 {
-    TextModelNG model;
-    model.Create("text");
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel("label");
     ViewAbstract::SetWidth(CalcLength(width));
     ViewAbstract::SetHeight(CalcLength(height));
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+void SwiperTestNg::ShowNext()
+{
+    controller_->ShowNext();
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::ShowPrevious()
+{
+    controller_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::ChangeIndex(int32_t index)
+{
+    controller_->ChangeIndex(index, false);
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -505,8 +527,7 @@ HWTEST_F(SwiperTestNg, PostTranslateTask002, TestSize.Level1)
      * @tc.steps: step3. Swipe to last item and call PostTranslateTask
      * @tc.expected: Can not swipe to next
      */
-    controller_->SwipeToWithoutAnimation(3);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(3);
     pattern_->PostTranslateTask(DEFAULT_INTERVAL);
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
