@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
@@ -210,8 +211,11 @@ void ListModelNG::SetMultiSelectable(bool selectable)
 int32_t ListModelNG::GetScrollEnabled(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    int32_t value = 0;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, value, frameNode);
+    int32_t value = true;
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    if (layoutProperty->GetScrollEnabled()) {
+        value = layoutProperty->GetScrollEnabledValue();
+    }
     return value;
 }
 
@@ -514,8 +518,8 @@ void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
 float ListModelNG::GetScrollBarWidth(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarWidth();
-    return value->ConvertToVp();
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
+    return value.ConvertToVp();
 }
 
 void ListModelNG::SetListScrollBarWidth(FrameNode* frameNode, const std::string& value)
@@ -526,8 +530,8 @@ void ListModelNG::SetListScrollBarWidth(FrameNode* frameNode, const std::string&
 uint32_t ListModelNG::GetScrollBarColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarColor();
-    return value->GetValue();
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarColor();
+    return value.GetValue();
 }
 
 void ListModelNG::SetListScrollBarColor(FrameNode* frameNode, const std::string& value)
