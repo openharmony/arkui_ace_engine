@@ -105,15 +105,6 @@ private:
      */
     std::vector<float> CalculateCrossPositions(const PaddingPropertyF& padding);
 
-    /**
-     * @brief Calculate the distance from content's end to the viewport bottom.
-     *
-     * @param mainSize of the viewport.
-     * @param heightInView total height of items inside the viewport.
-     * @return The distance. Positive when content's end is below viewport. Return [mainSize] if last line is not in viewport.
-     */
-    float GetDistanceToBottom(float mainSize, float heightInView);
-
     // ========================================== MeasureOnJump functions =====================================
 
     void MeasureOnJump(float mainSize);

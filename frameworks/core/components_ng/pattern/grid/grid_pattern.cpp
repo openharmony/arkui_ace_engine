@@ -341,10 +341,16 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
+    float mainGap = GetMainGap();
+    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
     if (gridLayoutInfo_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+            float overScroll = 0.0f;
+            if (UseIrregularLayout()) {
+                overScroll = gridLayoutInfo_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
+            } else {
+                overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+            }
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
@@ -1491,15 +1497,30 @@ bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
     auto scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
                       (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
                       GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
-    return scrollable && (gridLayoutInfo_.IsOutOfStart() || gridLayoutInfo_.IsOutOfEnd());
+
+    bool outOfEnd = false;
+    if (UseIrregularLayout()) {
+        outOfEnd = gridLayoutInfo_.offsetEnd_;
+    } else {
+        outOfEnd = gridLayoutInfo_.IsOutOfEnd();
+    }
+
+    return scrollable && (gridLayoutInfo_.IsOutOfStart() || outOfEnd);
 }
 
 float GridPattern::GetEndOffset()
 {
     float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
     float mainGap = GetMainGap();
-    if (GetAlwaysEnabled() && GreatNotEqual(contentHeight, gridLayoutInfo_.GetTotalLineHeight(mainGap))) {
-        return gridLayoutInfo_.GetTotalLineHeight(mainGap) - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+
+    float totalHeight = gridLayoutInfo_.GetTotalLineHeight(mainGap);
+    if (GetAlwaysEnabled() && GreatNotEqual(contentHeight, totalHeight)) {
+        return totalHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    }
+
+    if (UseIrregularLayout()) {
+        return gridLayoutInfo_.currentOffset_ -
+               gridLayoutInfo_.GetDistanceToBottom(contentHeight, gridLayoutInfo_.totalHeightOfItemsInView_, mainGap);
     }
     return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
 }
@@ -1546,13 +1567,25 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
             offset.start = newStartPos;
         }
     }
+    if (UseIrregularLayout()) {
+        const auto& info = gridLayoutInfo_;
+        float disToBot = info.GetDistanceToBottom(info.lastMainSize_, info.totalHeightOfItemsInView_, GetMainGap());
+        if (!info.offsetEnd_) {
+            offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
+        } else if (Negative(delta)) {
+            offset.end = delta;
+        } else {
+            offset.end = std::min(static_cast<float>(delta), -disToBot);
+        }
+        return offset;
+    }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
-        auto endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+        float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
         if (GreatNotEqual(
                 GetMainContentSize(), gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
             endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
         }
-        auto newEndPos = endPos + delta;
+        float newEndPos = endPos + delta;
         if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
             offset.end = delta;
         }
@@ -1820,4 +1853,9 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
     return index < gridLayoutInfo_.startIndex_ - cacheCount || index > gridLayoutInfo_.endIndex_ + cacheCount;
 }
 
+inline bool GridPattern::UseIrregularLayout() const
+{
+    return SystemProperties::GetGridIrregularLayoutEnabled() &&
+           GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions();
+}
 } // namespace OHOS::Ace::NG

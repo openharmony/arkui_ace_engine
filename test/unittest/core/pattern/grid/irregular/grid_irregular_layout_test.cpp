@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "irregular_matrices.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
@@ -1513,17 +1514,62 @@ HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
     UpdateCurrentOffset(-5.0f);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 2);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
     UpdateCurrentOffset(3.0f);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 2);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
     for (int i = 0; i < 5; ++i) {
         UpdateCurrentOffset(3.0f);
         EXPECT_EQ(info.startIndex_, 0);
         EXPECT_EQ(info.endIndex_, 0);
     }
     EXPECT_EQ(info.startMainLineIndex_, 0);
-    EXPECT_EQ(info.endMainLineIndex_, 1);
+    EXPECT_EQ(info.endMainLineIndex_, 2);
     EXPECT_TRUE(info.reachStart_);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::GetOverScrollOffset001
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, GetOverScrollOffset001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 100.0f);
+        CreateItem(1, -2, 200.0f);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(5, -2, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(-200.0f);
+    UpdateCurrentOffset(-200.0f);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(info.endIndex_, 8);
+
+    UpdateCurrentOffset(-150.0f);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_EQ(info.endIndex_, 8);
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.startMainLineIndex_, 5);
+    EXPECT_EQ(info.endMainLineIndex_, 10);
+    UpdateCurrentOffset(-50.0f);
+    EXPECT_TRUE(info.offsetEnd_);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(-50).end, -50.0f);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(-10).end, -10.0f);
+    EXPECT_EQ(
+        info.GetDistanceToBottom(info.lastMainSize_, info.totalHeightOfItemsInView_, pattern_->GetMainGap()), 0.0f);
+    UpdateCurrentOffset(-50.0f);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(60).end, 50.0f);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(20).end, 20.0f);
 }
 
 /**

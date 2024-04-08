@@ -588,4 +588,21 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap) const
     }
     return len - mainGap;
 }
+
+float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView,  float mainGap) const
+{
+    if (lineHeightMap_.empty() || endMainLineIndex_ < lineHeightMap_.rbegin()->first) {
+        return mainSize;
+    }
+
+    float offset = currentOffset_;
+    // currentOffset_ is relative to startMainLine, which might be entirely above viewport
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    while (it != lineHeightMap_.end() && Negative(offset + it->second + mainGap)) {
+        offset += it->second + mainGap;
+        ++it;
+    }
+    float bottomPos = offset + heightInView;
+    return bottomPos - mainSize;
+}
 } // namespace OHOS::Ace::NG
