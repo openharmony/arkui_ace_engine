@@ -170,7 +170,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNext004, TestSize.Level1)
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Show first page because of loop
      */
-    EXPECT_TRUE(VerifyShowNext(3));
+    EXPECT_TRUE(VerifyShowNext(0));
 }
 
 /**
