@@ -258,6 +258,7 @@ public:
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false);
+    bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
     void SetHandles();
