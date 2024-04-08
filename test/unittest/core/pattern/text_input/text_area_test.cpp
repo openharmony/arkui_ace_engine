@@ -785,6 +785,121 @@ HWTEST_F(TextFieldUXTest, OnBackPressed001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaMinFontSize001
+ * @tc.desc: test TextArea minFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMinFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMinFontSize(1.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetAdaptMinFontSize(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaMaxFontSize001
+ * @tc.desc: test TextArea maxFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMaxFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMaxFontSize(2.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetAdaptMaxFontSize(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaHeightAdaptivePolicy001
+ * @tc.desc: test TextArea heightAdaptivePolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaHeightAdaptivePolicy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+}
+
+/**
  * @tc.name: TextInputTypeToString001
  * @tc.desc: Test TextInputTypeToString
  * @tc.type: FUNC

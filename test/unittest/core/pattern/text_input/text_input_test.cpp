@@ -4226,6 +4226,109 @@ HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextInputToJsonValue002
+ * @tc.desc: test attrs on ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputToJsonValue002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default attrs
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMinFontSize(1.0_px);
+        model.SetAdaptMaxFontSize(2.0_px);
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    });
+
+    /**
+     * @tc.expected: Check if all set properties are displayed in the corresponding JSON
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto json = JsonUtil::Create(true);
+    layoutProperty_->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->Contains("minFontSize"));
+    EXPECT_TRUE(json->Contains("maxFontSize"));
+    EXPECT_TRUE(json->Contains("heightAdaptivePolicy"));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: TextInputMinFontSize001
+ * @tc.desc: test TextInput minFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMinFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set minFontSize 1.0_fp
+     * @tc.expected: minFontSize is 1.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMinFontSize(1.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test minFontSize
+     */
+    EXPECT_EQ(layoutProperty_->GetAdaptMinFontSize(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextInputMaxFontSize001
+ * @tc.desc: test TextInput maxFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMaxFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set maxFontSize 2.0_fp
+     * @tc.expected: maxFontSize is 2.0_fp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMaxFontSize(2.0_fp);
+    });
+
+    /**
+     * @tc.step: step2. test maxFontSize
+     */
+    EXPECT_EQ(layoutProperty_->GetAdaptMaxFontSize(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextInputHeightAdaptivePolicy001
+ * @tc.desc: test TextInput heightAdaptivePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputHeightAdaptivePolicy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set heightAdaptivePolicy TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST
+     * @tc.expected: heightAdaptivePolicy is TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test heightAdaptivePolicy
+     */
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+}
+
+/**
  * @tc.name: TextInputLetterSpacing001
  * @tc.desc: test TextInput letterSpacing
  * @tc.type: FUNC
