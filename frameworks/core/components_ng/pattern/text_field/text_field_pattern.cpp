@@ -176,6 +176,11 @@ static std::unordered_map<TextContentType, std::pair<AceAutoFillType, std::strin
     {TextContentType::DATE, std::make_pair(AceAutoFillType::ACE_DATE, "TextContentType.DATE")},
     {TextContentType::MONTH, std::make_pair(AceAutoFillType::ACE_MONTH, "TextContentType.MONTH")},
     {TextContentType::YEAR, std::make_pair(AceAutoFillType::ACE_YEAR, "TextContentType.YEAR")},
+    {TextContentType::NICKNAME, std::make_pair(AceAutoFillType::ACE_NICKNAME, "TextContentType.NICKNAME")},
+    {TextContentType::DETAIL_INFO_WITHOUT_STREET,
+        std::make_pair(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, "TextContentType.DETAIL_INFO_WITHOUT_STREET")},
+    {TextContentType::FORMAT_ADDRESS,
+        std::make_pair(AceAutoFillType::ACE_FORMAT_ADDRESS, "TextContentType.FORMAT_ADDRESS")},
     {TextContentType::UNSPECIFIED, std::make_pair(AceAutoFillType::ACE_UNSPECIFIED, "TextContentType.UNSPECIFIED")}};
 
 void SwapIfLarger(int32_t& a, int32_t& b)
@@ -3034,7 +3039,10 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
         { AceAutoFillType::ACE_HOUR_AND_MINUTE, TextInputType::NUMBER },
         { AceAutoFillType::ACE_DATE, TextInputType::NUMBER },
         { AceAutoFillType::ACE_MONTH, TextInputType::NUMBER },
-        { AceAutoFillType::ACE_YEAR, TextInputType::NUMBER } };
+        { AceAutoFillType::ACE_YEAR, TextInputType::NUMBER },
+        { AceAutoFillType::ACE_NICKNAME, TextInputType::TEXT },
+        { AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, TextInputType::TEXT },
+        { AceAutoFillType::ACE_FORMAT_ADDRESS, TextInputType::TEXT }};
     if (keyBoardMap.find(autoFillType) != keyBoardMap.end()) {
         keyboard_ = keyBoardMap[autoFillType];
     }
@@ -6006,7 +6014,7 @@ bool TextFieldPattern::CheckAutoSave()
             return true;
         }
     }
-    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_YEAR &&
+    if (AceAutoFillType::ACE_UNSPECIFIED < autoFillType && autoFillType <= AceAutoFillType::ACE_FORMAT_ADDRESS &&
         autoFillType != AceAutoFillType::ACE_USER_NAME) {
         if (contentController_->GetTextValue() != lastAutoFillPasswordTextValue_) {
             return true;
