@@ -3465,4 +3465,40 @@ HWTEST_F(FocusHubTestNg, SetEnabled001, TestSize.Level1)
     focusHub->SetEnabled(false);
     ASSERT_FALSE(focusHub->currentFocus_);
 }
+
+/**
+ * @tc.name: FocusHubTestNg0101
+ * @tc.desc: Test the function IsSyncRequestFocusable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0101, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    eventHub->SetEnabled(false);
+
+    /**
+     * @tc.steps2: call the function IsSyncRequestFocusable with FocusType::NODE
+     * @tc.expected: The return value of IsSyncRequestFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    EXPECT_FALSE(focusHub->IsSyncRequestFocusable());
+
+    /**
+     * @tc.steps3: call the function IsSyncRequestFocusable with FocusType::SCOPE
+     * @tc.expected: The return value of IsSyncRequestFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_FALSE(focusHub->IsSyncRequestFocusable());
+
+    /**
+     * @tc.steps4: call the function IsSyncRequestFocusable with FocusType::DISABLE
+     * @tc.expected: The return value of IsSyncRequestFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::DISABLE);
+    EXPECT_FALSE(focusHub->IsSyncRequestFocusable());
+}
 } // namespace OHOS::Ace::NG

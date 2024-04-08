@@ -188,8 +188,12 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
 bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 {
     auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, false);
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
     if (context && context->GetIsFocusingByTab()) {
         if (!IsFocusableByTab()) {
+            focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_BY_TAB);
             return false;
         }
     }
@@ -199,10 +203,12 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     }
 
     if (!IsFocusableWholePath()) {
+        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_ANCESTOR);
         return false;
     }
 
     if (isJudgeRootTree && !IsOnRootTree()) {
+        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
         return false;
     }
 
@@ -215,7 +221,6 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 
     auto parent = GetParentFocusHub();
     if (parent) {
-        auto focusManager = context->GetFocusManager();
         if (focusManager) {
             auto weakFocusViewList = focusManager->GetWeakFocusViewList();
             for (const auto& weakFocusView : weakFocusViewList) {
@@ -369,6 +374,52 @@ bool FocusHub::IsFocusableScope()
 bool FocusHub::IsFocusableNode()
 {
     return IsEnabled() && IsShow() && focusable_ && parentFocusable_;
+}
+
+bool FocusHub::IsSyncRequestFocusable()
+{
+    if (focusType_ == FocusType::NODE) {
+        return IsSyncRequestFocusableNode();
+    }
+    if (focusType_ == FocusType::SCOPE) {
+        return IsSyncRequestFocusableScope();
+    }
+    return false;
+}
+
+bool FocusHub::IsSyncRequestFocusableScope()
+{
+    if (!IsSyncRequestFocusableNode()) {
+        return false;
+    }
+    if (focusDepend_ == FocusDependence::SELF || focusDepend_ == FocusDependence::AUTO) {
+        return true;
+    }
+    std::list<RefPtr<FocusHub>> focusNodes;
+    GetChildrenFocusHub(focusNodes);
+    return std::any_of(focusNodes.begin(), focusNodes.end(),
+        [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusable(); });
+}
+
+bool FocusHub::IsSyncRequestFocusableNode()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, false);
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    if (!IsEnabled() || !IsShow()) {
+        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
+        return false;
+    }
+    if (!focusable_) {
+        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE);
+        return false;
+    }
+    if (!parentFocusable_) {
+        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_ANCESTOR);
+        return false;
+    }
+    return true;
 }
 
 void FocusHub::SetFocusable(bool focusable, bool isExplicit)
@@ -1768,22 +1819,31 @@ void FocusHub::HandleParentScroll() const
     }
 }
 
-bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
+bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
     auto focusNode = GetChildFocusNodeById(id);
     if (!focusNode) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus id: %{public}s can not found.", id.c_str());
+        focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
         return false;
     }
     auto result = true;
-    if (!focusNode->IsFocusable()) {
+    if ((isSyncRequest && !focusNode->IsSyncRequestFocusable()) ||
+        (!isSyncRequest && !focusNode->IsFocusable())) {
         result = false;
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.",
         id.c_str(), focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, false);
-    pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
+    if (result || !isSyncRequest) {
+        pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
+        if (isSyncRequest) {
+            pipeline->FlushRequestFocus();
+        }
+    }
     return result;
 }
 

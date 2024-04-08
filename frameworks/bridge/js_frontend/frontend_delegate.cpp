@@ -128,11 +128,21 @@ void FrontendDelegate::ResetFocus()
     NG::FocusHub::LostFocusToViewRoot();
 }
 
-bool FrontendDelegate::RequestFocus(const std::string& value)
+bool FrontendDelegate::RequestFocus(const std::string& value, bool isSyncRequest)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->RequestFocus(value);
+    return pipeline->RequestFocus(value, isSyncRequest);
+}
+
+void FrontendDelegate::SetRequestFocusCallback(
+    std::function<void(NG::RequestFocusResult result)> callback)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetRequestFocusCallback(callback);
 }
 
 template<typename T>

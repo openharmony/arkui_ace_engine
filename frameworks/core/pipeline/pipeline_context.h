@@ -352,7 +352,7 @@ public:
     bool AccessibilityRequestFocus(const ComposeId& id);
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
-    bool RequestFocus(const std::string& targetNodeId) override;
+    bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     bool RequestDefaultFocus();
 
     bool NeedSoftKeyboard() override

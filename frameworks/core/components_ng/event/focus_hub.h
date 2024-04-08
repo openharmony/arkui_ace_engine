@@ -62,6 +62,13 @@ enum class FocusStep : int32_t {
     SHIFT_TAB = 0x5,
     TAB = 0x15,
 };
+enum class RequestFocusResult : int32_t {
+    DEFAULT = 0,
+    NON_FOCUSABLE = 1,
+    NON_FOCUSABLE_ANCESTOR = 2,
+    NON_EXIST = 3,
+    NON_FOCUSABLE_BY_TAB = 4,
+};
 
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
@@ -483,7 +490,7 @@ public:
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
     void HandleParentScroll() const;
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
-    bool RequestFocusImmediatelyById(const std::string& id);
+    bool RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest = false);
     RefPtr<FocusView> GetFirstChildFocusView();
 
     bool IsFocusableByTab();
@@ -496,6 +503,10 @@ public:
     bool IsFocusable();
     bool IsFocusableNode();
     bool IsFocusableScope();
+
+    bool IsSyncRequestFocusable();
+    bool IsSyncRequestFocusableNode();
+    bool IsSyncRequestFocusableScope();
 
     bool IsParentFocusable() const
     {

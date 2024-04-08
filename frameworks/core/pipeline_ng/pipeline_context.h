@@ -331,6 +331,8 @@ public:
 
     const RefPtr<FocusManager>& GetFocusManager() const;
 
+    const RefPtr<FocusManager>& GetOrCreateFocusManager();
+
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
         return frameRateManager_;
@@ -400,7 +402,7 @@ public:
 
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
 
-    bool RequestFocus(const std::string& targetNodeId) override;
+    bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
@@ -670,6 +672,8 @@ public:
     {
         privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
     }
+
+    void FlushRequestFocus();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

@@ -225,6 +225,8 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
+void PipelineContext::FlushRequestFocus() {}
+
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
@@ -284,6 +286,14 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
     return focusManager_;
 }
 
+const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
+{
+    if (!focusManager_) {
+        focusManager_ = MakeRefPtr<FocusManager>();
+    }
+    return focusManager_;
+}
+
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
@@ -313,7 +323,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
-bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
 {
     return false;
 }

@@ -254,7 +254,7 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
-    virtual bool RequestFocus(const std::string& targetNodeId)
+    virtual bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false)
     {
         return false;
     }
