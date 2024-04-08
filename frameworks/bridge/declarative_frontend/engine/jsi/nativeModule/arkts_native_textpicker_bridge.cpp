@@ -24,7 +24,7 @@ const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_ERR_CODE = "-1";
 const int32_t DEFAULT_NEGATIVE_NUM = -1;
 constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
-constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF007DFF;
+constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF0A59F7;
 
 constexpr int32_t NODE_INDEX = 0;
 constexpr int32_t STROKE_WIDTH_INDEX = 1;
