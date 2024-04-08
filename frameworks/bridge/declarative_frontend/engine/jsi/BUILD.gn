@@ -215,6 +215,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
+      "nativeModule/ui_context_helper.cpp",
     ]
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]

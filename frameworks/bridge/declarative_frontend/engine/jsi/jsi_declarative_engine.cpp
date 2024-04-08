@@ -35,6 +35,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_view.h"
 #include "core/common/card_scope.h"
@@ -1010,6 +1011,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::Initialize");
     ACE_DCHECK(delegate);
+    NG::UIContextHelper::RegisterRemoveUIContextFunc();
     engineInstance_ = AceType::MakeRefPtr<JsiDeclarativeEngineInstance>(delegate);
     auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime_);
     std::shared_ptr<ArkJSRuntime> arkRuntime;
