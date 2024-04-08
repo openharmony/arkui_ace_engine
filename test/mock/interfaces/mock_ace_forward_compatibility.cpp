@@ -20,4 +20,9 @@ bool AceForwardCompatibility::IsUseNG()
 {
     return false;
 }
+
+const char* AceForwardCompatibility::GetAceLibName()
+{
+    return "";
+}
 } // namespace OHOS::Ace

@@ -31,6 +31,7 @@
 #include "base/json/json_util.h"
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
+#include "base/log/event_report.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -76,18 +77,23 @@ void AcePerformanceCheck::Stop()
 
 AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& name)
 {
-    if (AcePerformanceCheck::performanceInfo_) {
-        // micro time.
-        markTime_ = GetSysTimestamp();
-        name_ = name;
-    }
+    // micro time.
+    markTime_ = GetSysTimestamp();
+    name_ = name;
 }
 
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
 {
+    auto time = static_cast<int64_t>((GetSysTimestamp() - markTime_) / CONVERT_NANOSECONDS);
+    if (time > AceChecker::GetFunctionTimeout()) {
+        auto codeInfo = GetCodeInfo(1, 1);
+        if (!codeInfo.sources.empty()) {
+            std::string msg = "Function " + name_ + " execute " + std::to_string(time) + "ms,it's timeout.";
+            EventReport::PerformanceEventReport(PerformanceExecpType::FUNCTION_TIMEOUT, codeInfo.sources, msg);
+        }
+    }
     if (AcePerformanceCheck::performanceInfo_) {
         // convert micro time to ms with 1000.
-        auto time = static_cast<int64_t>((GetSysTimestamp() - markTime_) / CONVERT_NANOSECONDS);
         RecordFunctionTimeout(time, name_);
     }
 }

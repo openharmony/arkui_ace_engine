@@ -482,9 +482,9 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextLayoutProperty->UpdateFontWeight(fontWeight);
     lastTextLayoutProperty->UpdateContent("/" + std::to_string(swiperPattern->RealTotalCount()));
     firstTextNode->MarkModifyDone();
-    firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     lastTextNode->MarkModifyDone();
-    lastTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    lastTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
@@ -511,6 +511,19 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     CHECK_NULL_VOID(host);
     touchBottomType_ = TouchBottomType::NONE;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperIndicatorPattern::SetIndicatorInteractive(bool isInteractive)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (isInteractive) {
+        eventHub->SetEnabled(true);
+    } else {
+        eventHub->SetEnabled(false);
+    }
 }
 
 bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)

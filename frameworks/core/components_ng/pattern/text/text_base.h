@@ -18,9 +18,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "base/memory/referenced.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
@@ -213,6 +214,16 @@ public:
     virtual OffsetF GetSecondHandleOffset() const
     {
         return OffsetF();
+    }
+
+    virtual RefPtr<Clipboard> GetClipboard()
+    {
+        return nullptr;
+    }
+
+    TextSelector GetTextSelector() const
+    {
+        return textSelector_;
     }
     
 protected:

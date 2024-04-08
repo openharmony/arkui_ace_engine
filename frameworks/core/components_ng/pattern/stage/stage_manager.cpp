@@ -50,6 +50,11 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(pagePattern);
     page->GetEventHub<EventHub>()->SetEnabled(false);
     pagePattern->SetPageInTransition(true);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    stageManager->SetStageInTrasition(true);
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(
             transitionType, [weak = WeakPtr<FrameNode>(page), transitionType]() {
@@ -72,6 +77,12 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 pattern->SetPageInTransition(false);
                 pattern->ProcessHideState();
                 context->MarkNeedFlushMouseEvent();
+                auto stageManager = context->GetStageManager();
+                CHECK_NULL_VOID(stageManager);
+                stageManager->SetStageInTrasition(false);
+                constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+                page->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+                    RadiusF(EdgeF(0.0f, 0.0f)));
             });
         return;
     }
@@ -94,6 +105,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             constexpr float REMOVE_CLIP_SIZE = 10000.0f;
             page->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
                 RadiusF(EdgeF(0.0f, 0.0f)));
+            auto stageManager = context->GetStageManager();
+            CHECK_NULL_VOID(stageManager);
+            stageManager->SetStageInTrasition(false);
         });
 }
 } // namespace
@@ -494,6 +508,20 @@ void StageManager::ReloadStage()
             continue;
         }
         pagePattern->ReloadPage();
+    }
+}
+
+RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        return nullptr;
+    }
+    if (stageInTrasition_) {
+        return DynamicCast<FrameNode>(destPageNode_.Upgrade());
+    } else {
+        return DynamicCast<FrameNode>(children.back());
     }
 }
 

@@ -202,7 +202,7 @@ void SetTrackBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)));
+    SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
 }
 
 void ResetTrackBackgroundColor(ArkUINodeHandle node)
@@ -214,7 +214,8 @@ void ResetTrackBackgroundColor(ArkUINodeHandle node)
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
 
-    SliderModelNG::SetTrackBackgroundColor(frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()));
+    SliderModelNG::SetTrackBackgroundColor(
+        frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor()), true);
 }
 
 void SetSelectColor(ArkUINodeHandle node, uint32_t color)

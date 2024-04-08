@@ -274,9 +274,107 @@ class SearchHeightModifier extends ModifierWithKey<Length> {
   }
 }
 
+class SearchIdModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchId');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchInspectorId(node);
+    } else {
+      getUINativeModule().search.setSearchInspectorId(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchDecoration');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetDecoration(node);
+    } else {
+      getUINativeModule().search.setDecoration(node, this.value!.type, this.value!.color);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (this.stageValue.type !== this.value.type) {
+      return true;
+    }
+    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
+      return !isResourceEqual(this.stageValue.color, this.value.color);
+    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+      return !(this.stageValue.color === this.value.color);
+    } else {
+      return true;
+    }
+  }
+}
+
+class SearchLetterSpacingModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchLetterSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetLetterSpacing(node);
+    } else {
+      getUINativeModule().search.setLetterSpacing(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchLineHeightModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchLineHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetLineHeight(node);
+    } else {
+      getUINativeModule().search.setLineHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetFontFeature(node);
+    } else {
+      getUINativeModule().search.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onEditChange(callback: (isEditing: boolean) => void): SearchAttribute {
     throw new Error('Method not implemented.');
@@ -377,18 +475,40 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchEnterKeyTypeModifier, value);
     return this;
   }
+  fontFeature(value: FontFeature): SearchAttribute {
+    modifierWithKey(this._modifiersWithKeys, SearchFontFeatureModifier.identity, SearchFontFeatureModifier, value);
+    return this;
+  }
   height(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, SearchHeightModifier.identity, SearchHeightModifier, value);
     return this;
   }
+  id(value: string): this {
+    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
+    return this;
+  }
+  key(value: string): this {
+    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
+    return this;
+  }
+  decoration(value: { type: TextDecorationType; color?: ResourceColor }): this {
+    modifierWithKey(this._modifiersWithKeys, SearchDecorationModifier.identity, SearchDecorationModifier, value);
+    return this;
+  }
+  letterSpacing(value: number | string): this {
+    modifierWithKey(this._modifiersWithKeys, SearchLetterSpacingModifier.identity, SearchLetterSpacingModifier, value);
+    return this;
+  }
+  lineHeight(value: number | string | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.Search.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkSearchComponent(nativeNode);
+globalThis.Search.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSearchComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SearchModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

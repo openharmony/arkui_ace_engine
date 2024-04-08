@@ -220,7 +220,22 @@ public:
         CHECK_NULL_VOID(tabContentEventHub);
         tabContentEventHub->FireWillHideEvent();
     }
-    
+
+    bool HasSubTabBarStyleNode() const
+    {
+        return customStyleNode_ != nullptr;
+    }
+
+    void SetCustomStyleNode(const RefPtr<FrameNode>& customStyleNode)
+    {
+        customStyleNode_ = customStyleNode;
+    }
+
+    const RefPtr<FrameNode>& FireCustomStyleNode() const
+    {
+        return customStyleNode_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;
@@ -232,6 +247,7 @@ private:
     PaddingProperty padding_;
     std::string tabBarInspectorId_;
     BottomTabBarStyle bottomTabBarStyle_;
+    RefPtr<FrameNode> customStyleNode_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };

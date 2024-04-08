@@ -27,6 +27,7 @@ class JSSearch : public JSViewAbstract, public JSInteractableView {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void JSBindMore();
 
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSearchButton(const JSCallbackInfo& info);
@@ -62,6 +63,10 @@ public:
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo& info);
+    static void SetId(const JSCallbackInfo& info);
+    static void SetKey(const std::string& key);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
 };
 

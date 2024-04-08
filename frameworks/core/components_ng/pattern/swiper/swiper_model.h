@@ -79,7 +79,7 @@ using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallb
 using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 using ContentDidScrollEvent =
-    std::function<void(int32_t selectedIndex, int32_t index, float position,float mainLength)>;
+    std::function<void(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)>;
 
 class ACE_EXPORT SwiperModel {
 public:
@@ -89,6 +89,7 @@ public:
     virtual RefPtr<SwiperController> Create();
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
+    virtual void SetIndicatorInteractive(bool interactive) {}
     virtual void SetAutoPlay(bool autoPlay);
     virtual void SetAutoPlayInterval(uint32_t interval);
     virtual void SetDuration(uint32_t duration);

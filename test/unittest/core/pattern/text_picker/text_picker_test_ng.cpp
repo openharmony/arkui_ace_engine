@@ -4834,6 +4834,38 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest002, TestSize.Level1)
     EXPECT_EQ(multiOptions.size(), 1);
 }
 
+
+/**
+ * @tc.name: TextPickerModelTest003
+ * @tc.desc: Test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelTest003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and textPickerLayoutProperty.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    /**
+     * test method SetDefaultPickerItemHeight.
+     */
+    ItemDivider divider;
+    divider.color = Color::TRANSPARENT;
+    divider.strokeWidth = 10.0_vp;
+    divider.startMargin = 10.0_vp;
+    divider.endMargin = 10.0_vp;
+    TextPickerModelNG::GetInstance()->SetDivider(divider);
+    EXPECT_EQ(textPickerLayoutProperty->GetDivider(), divider);
+}
+
 /**
  * @tc.name: TextPickerModelNGSetColumns004
  * @tc.desc: Test SetCascadeColumns.
@@ -4869,6 +4901,52 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetColumns004, TestSize.Level1)
      * @tc.expected: the result of GetCascadeOptionCount is 1.
      */
     EXPECT_EQ(1, pickerPattern->GetCascadeOptionCount());
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetGradientHeight001
+ * @tc.desc: Test TextPickerModelNG SetGradientHeight(set Dimension).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetGradientHeight001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    auto height = Dimension(10.0f, DimensionUnit::VP);
+    TextPickerModelNG::GetInstance()->SetGradientHeight(height);
+    ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
+    EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetGradientHeight002
+ * @tc.desc: Test TextPickerModelNG SetGradientHeight(set Dimension).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetGradientHeight002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    auto height = Dimension(10.0f, DimensionUnit::PERCENT);
+    TextPickerModelNG::GetInstance()->SetGradientHeight(height);
+    ASSERT_TRUE(textPickerLayoutProperty->HasGradientHeight());
+    EXPECT_EQ(height, textPickerLayoutProperty->GetGradientHeightValue());
 }
 
 /**
@@ -5730,7 +5808,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest016, TestSize.Level1)
      * @tc.step: step3. call ChangeCurrentOptionValue(), cover branch replaceColumn less or equals curColumn.
      * @tc.expected: expect successfully.
      */
-    pickerPattern->ChangeCurrentOptionValue(option, 16, 1, 0);
+    pickerPattern->ChangeCurrentOptionValue(optionsChild1, 16, 1, 0);
     EXPECT_EQ(pickerPattern->selecteds_[1], 16);
 
     /**

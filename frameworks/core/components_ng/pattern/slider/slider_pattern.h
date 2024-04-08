@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 
@@ -37,6 +38,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (UseContentModifier()) {
+            return nullptr;
+        }
         if (!IsSliderVisible()) {
             return nullptr;
         }
@@ -131,12 +135,24 @@ public:
     void UpdateValue(float value);
     void OnVisibleChange(bool isVisible) override;
 
+    void SetBuilderFunc(SliderMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    void SetSliderValue(double value, int32_t mode);
+
 private:
     void OnModifyDone() override;
     void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-
+    bool UpdateParameters();
     void CreateParagraphFunc();
     void CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
@@ -171,7 +187,7 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void GetOutsetInnerFocusPaintRect(RoundRect& paintRect);
-    void GetInsetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
@@ -199,10 +215,20 @@ private:
     void OnIsFocusActiveUpdate(bool isFocusActive);
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    bool isMinResponseExceed(const std::optional<Offset>& localLocation);
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<SliderMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
+    float minResponse_ = 0.0f;
+    float minResponseStartValue_ = value_;
+    bool isMinResponseExceedFlag_ = false;
+    SourceType eventSourceDevice_ = SourceType::NONE;
+    Offset eventLocalLocation_ {};
     bool showTips_ = false;
     bool hotFlag_ = false; // whether the mouse is hovering over the slider
     bool valueChangeFlag_ = false;
@@ -213,6 +239,8 @@ private:
     bool panMoveFlag_ = false;
     bool isVisible_ = true;
     bool isShow_ = true;
+    SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
+    bool allowDragEvents_ = true;
     int32_t fingerId_ = -1;
 
     float stepRatio_ = 1.0f / 100.0f;

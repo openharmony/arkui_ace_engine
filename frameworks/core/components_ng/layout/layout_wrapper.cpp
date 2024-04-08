@@ -25,6 +25,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -85,14 +86,24 @@ void LayoutWrapper::RestoreGeoState()
     }
 }
 
-void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
+bool LayoutWrapper::CheckPageNeedAvoidKeyboard() const
+{
+    // page will not avoid keyboard when lastChild is sheet
+    auto pattern = GetHostNode()->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    auto overlay = pattern->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, true);
+    return overlay->CheckPageNeedAvoidKeyboard();
+}
+
+void LayoutWrapper::AvoidKeyboard(bool isFocusOnPageOrOverlay)
 {
     // apply keyboard avoidance on Page
-    if (GetHostTag() == V2::PAGE_ETS_TAG) {
+    if ((GetHostTag() == V2::PAGE_ETS_TAG && CheckPageNeedAvoidKeyboard()) || GetHostTag() == V2::OVERLAY_ETS_TAG) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetSafeAreaManager();
-        if (!isFocusOnPage && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+        if (!isFocusOnPageOrOverlay && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
             return;
         }
         auto safeArea = manager->GetSafeArea();
@@ -144,21 +155,34 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    if (parent && parent->GetPattern<ScrollablePattern>()) {
+        return;
+    }
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     auto selfExpansive = host->SelfExpansive();
     if (!selfExpansive && !host->NeedRestoreSafeArea()) {
         // if safeArea switch from valid to not valid, keep node restored and return
         // otherwise if node restored, meaning expansive parent did not adjust child or so on, restore cache
-        if (CheckValidSafeArea()) {
-            GetGeometryNode()->RestoreCache();
+        const auto& geometryTransition = GetLayoutProperty()->GetGeometryTransition();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        if (!(host->GetId() == safeAreaManager->GetRootMeasureNodeId() && geometryTransition != nullptr) &&
+            CheckValidSafeArea()) {
+            ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea[%s][self:%d] save cache success res %s", host->GetTag().c_str(),
+                host->GetId(), GetGeometryNode()->GetFrameRect().ToString().c_str());
+            auto syncCasheSuccess = GetGeometryNode()->RestoreCache();
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (syncCasheSuccess) {
+                renderContext->SavePaintRect();
+            }
         }
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
-    auto parent = host->GetAncestorNodeOfFrame();
-    if (parent && parent->GetPattern<ScrollablePattern>()) {
-        return;
-    }
 
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         ExpandIntoKeyboard();
@@ -210,6 +234,9 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
     host->SetNeedRestoreSafeArea(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SavePaintRect();
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)
@@ -238,6 +265,12 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
     child->SaveGeoState();
     childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
     child->SetNeedRestoreSafeArea(true);
+    auto host = GetHostNode();
+    ACE_SCOPED_TRACE("AdjustChild[%s][self:%d] adjust child %s %d", host->GetTag().c_str(), host->GetId(),
+        child->GetTag().c_str(), child->GetId());
+    auto renderContext = child->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SavePaintRect();
 }
 
 void LayoutWrapper::RestoreExpansiveChildren()
@@ -264,7 +297,13 @@ void LayoutWrapper::RestoreExpansiveChild(const RefPtr<UINode>& childUI)
     }
     auto childGeo = child->GetGeometryNode();
     childGeo->Restore();
+    auto host = GetHostNode();
+    ACE_SCOPED_TRACE("RestoreExpansiveChild[%s][self:%d] RestoreExpansiveChild %s %d", host->GetTag().c_str(),
+        host->GetId(), child->GetTag().c_str(), child->GetId());
     child->SetNeedRestoreSafeArea(false);
+    auto renderContext = child->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SavePaintRect();
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()

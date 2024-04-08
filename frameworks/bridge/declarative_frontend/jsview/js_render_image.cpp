@@ -15,11 +15,14 @@
 
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
 
-#include "frameworks/core/common/container.h"
-#include "bridge/declarative_frontend/jsview/js_rendering_context.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+
+#include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components_ng/image_provider/svg_image_object.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -265,7 +268,10 @@ void JSRenderImage::OnImageLoadSuccess()
     imageObj_ = loadingCtx_->MoveImageObject();
     CHECK_NULL_VOID(imageObj_);
     pixelMap_ = image_->GetPixelMap();
-    svgDom_ = imageObj_->GetSVGDom();
+    auto svgImageObj = AceType::DynamicCast<NG::SvgImageObject>(imageObj_);
+    if (svgImageObj) {
+        svgDom_ = svgImageObj->MakeSvgDom(svgImageObj->GetSvgImageData(), svgImageObj->GetSourceInfo().GetFillColor());
+    }
     imageFit_ = loadingCtx_->GetImageFit();
     imageSize_ = loadingCtx_->GetImageSize();
 }

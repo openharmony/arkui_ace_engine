@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,16 @@ const std::string& RichEditorAbstractSpanResult::GetValue() const
 void RichEditorAbstractSpanResult::SetFontColor(const std::string& fontColor)
 {
     fontColor_ = fontColor;
+}
+
+void RichEditorAbstractSpanResult::SetFontFeature(const FONT_FEATURES_MAP& fontFeature)
+{
+    fontFeature_ = fontFeature;
+}
+
+const FONT_FEATURES_MAP& RichEditorAbstractSpanResult::GetFontFeatures() const
+{
+    return fontFeature_;
 }
 
 void RichEditorAbstractSpanResult::SetTextStyle(TextStyleResult textStyle)
@@ -298,6 +308,26 @@ const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEdi
     return richEditorDeleteSpans_;
 }
 
+void RichEditorChangeValue::SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span)
+{
+    originalSpans_.emplace_back(span);
+}
+
+const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorOriginalSpans() const
+{
+    return originalSpans_;
+}
+
+void RichEditorChangeValue::SetRichEditorReplacedSpans(const RichEditorAbstractSpanResult& span)
+{
+    replacedSpans_.emplace_back(span);
+}
+
+const std::list<RichEditorAbstractSpanResult>& RichEditorChangeValue::GetRichEditorReplacedSpans() const
+{
+    return replacedSpans_;
+}
+
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
     onReady_ = std::move(func);
@@ -309,7 +339,9 @@ void RichEditorEventHub::FireOnReady()
         onReady_();
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
-        host->PostTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
+        auto* context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddAfterRenderTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
     }
 }
 
@@ -370,5 +402,71 @@ std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo,
         json->Put("extraInfo", extraInfo.c_str());
     }
     return json->ToString();
+}
+
+void RichEditorEventHub::SetOnEditingChange(std::function<void(const bool&)>&& func)
+{
+    onEditingChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnEditingChange(bool isEditing)
+{
+    if (onEditingChange_) {
+        onEditingChange_(isEditing);
+    }
+}
+
+void RichEditorEventHub::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
+{
+    onWillChange_ = std::move(func);
+}
+
+bool RichEditorEventHub::FireOnWillChange(const RichEditorChangeValue& info)
+{
+    return onWillChange_ ? onWillChange_(info) : true;
+}
+
+bool RichEditorEventHub::HasOnWillChange() const
+{
+    return static_cast<bool>(onWillChange_);
+}
+
+void RichEditorEventHub::SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func)
+{
+    onDidChange_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnDidChange(const std::list<RichEditorAbstractSpanResult>& info)
+{
+    onDidChange_(info);
+}
+
+bool RichEditorEventHub::HasOnDidChange() const
+{
+    return static_cast<bool>(onDidChange_);
+}
+
+void RichEditorEventHub::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    onCut_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnCut(NG::TextCommonEvent& value)
+{
+    if (onCut_) {
+        onCut_(value);
+    }
+}
+
+void RichEditorEventHub::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    onCopy_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
+{
+    if (onCopy_) {
+        onCopy_(value);
+    }
 }
 } // namespace OHOS::Ace::NG

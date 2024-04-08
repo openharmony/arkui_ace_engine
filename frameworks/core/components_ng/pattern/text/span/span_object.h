@@ -29,11 +29,21 @@ namespace OHOS::Ace {
 
 class AttachmentImage {};
 
-enum class SpanType { Font = 0, Decoration, Background, Gesture };
+enum class SpanType { Font = 0, Decoration, Background, Gesture = 7 };
 
 enum class SpanOperation {
     ADD = 0,
     REMOVE,
+};
+
+struct GestureStyle {
+    std::optional<GestureEventFunc> onClick;
+    std::optional<GestureEventFunc> onLongPress;
+
+    bool IsEqual(const GestureStyle& other) const
+    {
+        return false;
+    }
 };
 
 class SpanWatcher : public virtual AceType {
@@ -45,6 +55,7 @@ public:
 
 class SpanBase : public virtual AceType {
     DECLARE_ACE_TYPE(SpanBase, AceType);
+
 public:
     SpanBase() = default;
     SpanBase(int32_t start, int32_t end) : start_(start), end_(end) {}
@@ -67,6 +78,7 @@ private:
 
 class FontSpan : public SpanBase {
     DECLARE_ACE_TYPE(FontSpan, SpanBase);
+
 public:
     FontSpan() = default;
     explicit FontSpan(Font font);
@@ -84,6 +96,28 @@ private:
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
 
     Font font_;
+};
+
+class GestureSpan : public SpanBase {
+    DECLARE_ACE_TYPE(GestureSpan, SpanBase);
+
+public:
+    GestureSpan() = default;
+    explicit GestureSpan(GestureStyle gestureInfo);
+    ~GestureSpan() override = default;
+    GestureSpan(GestureStyle gestureInfo, int32_t start, int32_t end);
+    GestureStyle GetGestureStyle() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
+
+    GestureStyle gestureInfo_;
 };
 
 } // namespace OHOS::Ace

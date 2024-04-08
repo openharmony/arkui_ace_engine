@@ -112,16 +112,6 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     return paint;
 }
 
-void GridPattern::InitScrollableEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
-}
-
 void GridPattern::OnModifyDone()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
@@ -143,7 +133,6 @@ void GridPattern::OnModifyDone()
     SetAxis(gridLayoutInfo_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
-        InitScrollableEvent();
     }
 
     SetEdgeEffect();
@@ -1546,7 +1535,7 @@ bool GridPattern::OutBoundaryCallback()
 OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
-    if (gridLayoutInfo_.startIndex_ == 0) {
+    if (gridLayoutInfo_.startIndex_ == 0 && gridLayoutInfo_.startMainLineIndex_ == 0) {
         auto startPos = gridLayoutInfo_.currentOffset_;
         auto newStartPos = startPos + delta;
         if (startPos > 0 && newStartPos > 0) {

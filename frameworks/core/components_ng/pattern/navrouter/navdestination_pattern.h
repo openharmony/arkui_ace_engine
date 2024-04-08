@@ -74,6 +74,9 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetName(name);
     }
 
     const std::string& GetName()
@@ -148,10 +151,10 @@ public:
     std::string GetEntryFocusViewName() override
     {
         /*
-        |-> Navigation (root focus view)
+        |-> Any FocusView (entry focus view)
           |-> NavDestination
         */
-        return V2::NAVIGATION_VIEW_ETS_TAG;
+        return ENTRY_ANY_FOCUSVIEW;
     }
 
     void SetIsOnShow(bool isOnShow)
@@ -171,13 +174,16 @@ public:
         return navigationNode_.Upgrade();
     }
 
-    void OnAttachToMainTree() override;
-
     void DumpInfo() override;
 
     uint64_t GetNavDestinationId() const
     {
         return navDestinationId_;
+    }
+
+    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
 
 private:

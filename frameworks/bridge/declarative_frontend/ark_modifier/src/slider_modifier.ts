@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class SliderModifier extends ArkSliderComponent implements AttributeModifier<SliderAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: SliderAttribute): void {
-    applyAndMergeModifier<SliderAttribute, ArkSliderComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<SliderAttribute, ArkSliderComponent, ArkComponent>(instance, this);
   }
 }

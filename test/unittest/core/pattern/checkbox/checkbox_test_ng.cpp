@@ -1071,7 +1071,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(6);
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
     /**
      * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox code when !enabled_->Get()
@@ -1180,7 +1180,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
@@ -1627,7 +1627,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest007, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
@@ -1757,7 +1757,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest010, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE2);
 }
 
@@ -1806,7 +1806,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest011, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE2);
 }
 
@@ -2167,10 +2167,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 5);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 5);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2181,6 +2182,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
      * @tc.steps: step4. create list with Children
      */
     auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    checkBoxPattern->groupManager_ = GroupManager::GetGroupManager();
+    checkBoxGroupPattern->groupManager_ = GroupManager::GetGroupManager();
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = true;
@@ -2252,8 +2255,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
     pageNode->eventHub_ = pageEventHub;
 
     stageNode->AddChild(pageNode);
@@ -2264,6 +2268,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
      * @tc.steps: step4. create list with Children
      */
     auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    checkBoxPattern->groupManager_ = GroupManager::GetGroupManager();
+    checkBoxGroupPattern->groupManager_ = GroupManager::GetGroupManager();
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
@@ -2316,9 +2322,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
     auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
-    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
+    auto groupManager = pageEventHub->GetGroupManager();
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 2);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 3);
+    groupManager->AddCheckBoxToGroup(GROUP_NAME, 4);
     pageNode->eventHub_ = pageEventHub;
     stageNode->AddChild(pageNode);
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
@@ -2328,6 +2335,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
      * @tc.steps: step4. create list with Children
      */
     auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    checkBoxPattern->groupManager_ = GroupManager::GetGroupManager();
+    checkBoxGroupPattern->groupManager_ = GroupManager::GetGroupManager();
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
     auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;

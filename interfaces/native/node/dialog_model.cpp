@@ -173,7 +173,7 @@ int32_t Close(ArkUI_NativeDialogHandle handle)
     return impl->getDialogAPI()->close(handle->controller);
 }
 
-int32_t RegiesterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler)
+int32_t RegisterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !handle) {

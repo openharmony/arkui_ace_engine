@@ -36,6 +36,7 @@
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
+#include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -77,6 +78,8 @@ public:
     static RefPtr<PipelineContext> GetCurrentContext();
 
     static RefPtr<PipelineContext> GetCurrentContextSafely();
+
+    static PipelineContext* GetCurrentContextPtrSafely();
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
@@ -266,6 +269,8 @@ public:
         dragWindowVisibleCallback_ = std::move(task);
     }
 
+    void FlushOnceVsyncTask() override;
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -324,10 +329,9 @@ public:
 
     const RefPtr<DragDropManager>& GetDragDropManager();
 
-    const RefPtr<FocusManager>& GetFocusManager()
-    {
-        return focusManager_;
-    }
+    const RefPtr<FocusManager>& GetFocusManager() const;
+
+    const RefPtr<FocusManager>& GetOrCreateFocusManager();
 
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
@@ -352,10 +356,9 @@ public:
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
 
-    void AddNavigationStateCallback(
-        int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow);
+    void AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode);
 
-    void RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId);
+    void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
 
     void FirePageChanged(int32_t pageId, bool isOnShow);
 
@@ -397,9 +400,9 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
 
-    bool RequestFocus(const std::string& targetNodeId) override;
+    bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
@@ -538,6 +541,7 @@ public:
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
     bool CheckNeedAutoSave();
     bool CheckPageFocus();
+    bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
@@ -645,10 +649,31 @@ public:
         vsyncListener_ = std::move(vsync);
     }
 
+    void SetOnceVsyncListener(VsyncCallbackFun vsync)
+    {
+        onceVsyncListener_ = std::move(vsync);
+    }
+
+    bool HasOnceVsyncListener() {
+        return onceVsyncListener_ != nullptr;
+    }
+
     const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
     {
         return navigationDumpMgr_;
     }
+
+    RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
+    {
+        return privacySensitiveManager_;
+    }
+
+    void ChangeSensitiveNodes(bool flag) override
+    {
+        privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
+    }
+
+    void FlushRequestFocus();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -670,6 +695,11 @@ protected:
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
+    void SetIsLayouting(bool layouting)
+    {
+        taskScheduler_->SetIsLayouting(layouting);
+    }
+
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
@@ -686,6 +716,8 @@ private:
     void ProcessDelayTasks();
 
     void InspectDrew();
+
+    bool TriggerKeyEventDispatch(const KeyEvent& event);
 
     void FlushBuildFinishCallbacks();
 
@@ -772,11 +804,11 @@ private:
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
 
+    bool isOnAreaChangeNodesCacheVaild_ = false;
+    std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnShowMap_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnHideMap_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -791,6 +823,7 @@ private:
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
+    RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     Rect displayAvailableRect_;
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
@@ -828,7 +861,7 @@ private:
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
-
+    std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
     std::list<FrameInfo> dumpFrameInfos_;
@@ -845,6 +878,7 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 
     VsyncCallbackFun vsyncListener_;
+    VsyncCallbackFun onceVsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;

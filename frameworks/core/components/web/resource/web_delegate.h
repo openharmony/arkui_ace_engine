@@ -280,12 +280,44 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+class NWebScreenCaptureConfigImpl : public OHOS::NWeb::NWebScreenCaptureConfig {
+public:
+    NWebScreenCaptureConfigImpl() = default;
+    ~NWebScreenCaptureConfigImpl() = default;
+
+    int32_t GetMode() override
+    {
+        return mode_;
+    }
+
+    void SetMode(int32_t mode)
+    {
+        mode_ = mode;
+    }
+
+    int32_t GetSourceId() override
+    {
+        return source_id_;
+    }
+
+    void SetSourceId(int32_t source_id)
+    {
+        source_id_ = source_id;
+    }
+
+private:
+    int32_t mode_ = 0;
+    int32_t source_id_ = -1;
+};
+
 class WebScreenCaptureRequestOhos : public WebScreenCaptureRequest {
     DECLARE_ACE_TYPE(WebScreenCaptureRequestOhos, WebScreenCaptureRequest)
 
 public:
     WebScreenCaptureRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
-        : request_(request) {}
+        : request_(request) {
+        config_ = std::make_shared<NWebScreenCaptureConfigImpl>();
+    }
 
     void Deny() const override;
 
@@ -300,7 +332,7 @@ public:
 private:
     std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest> request_;
 
-    OHOS::NWeb::NWebScreenCaptureConfig config_;
+    std::shared_ptr<NWebScreenCaptureConfigImpl> config_;
 };
 
 class WebWindowNewHandlerOhos : public WebWindowNewHandler {
@@ -390,6 +422,32 @@ class WebPattern;
 
 class RenderWeb;
 
+class NWebDragEventImpl : public OHOS::NWeb::NWebDragEvent {
+public:
+    NWebDragEventImpl(double x, double y, NWeb::DragAction action) : x_(x), y_(y), action_(action) {}
+    ~NWebDragEventImpl() = default;
+
+    double GetX() override
+    {
+        return x_;
+    }
+
+    double GetY() override
+    {
+        return y_;
+    }
+
+    NWeb::DragAction GetAction() override
+    {
+        return action_;
+    }
+
+private:
+    double x_ = 0.0;
+    double y_ = 0.0;
+    NWeb::DragAction action_ = NWeb::DragAction::DRAG_START;
+};
+
 class NWebTouchPointInfoImpl : public OHOS::NWeb::NWebTouchPointInfo {
 public:
     NWebTouchPointInfoImpl(int id, double x, double y) : id_(id), x_(x), y_(y) {}
@@ -441,6 +499,22 @@ private:
     WeakPtr<PipelineBase> context_;
 };
 
+class GestureEventResultOhos : public GestureEventResult {
+    DECLARE_ACE_TYPE(GestureEventResultOhos, GestureEventResult);
+
+public:
+    GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
+        : result_(result) {}
+
+    void SetGestureEventResult(bool result) override;
+    bool HasSendTask() { return sendTask_; }
+    void SetSendTask() { sendTask_ = true; }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result_;
+    bool sendTask_ = false;
+};
+
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
@@ -471,6 +545,8 @@ public:
         : WebResource(type, context, std::move(onError))
     {}
 
+    void UnRegisterScreenLockFunction();
+
     void SetObserver(const RefPtr<WebDelegateObserver>& observer)
     {
         observer_ = observer;
@@ -494,6 +570,8 @@ public:
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
+    void OnRenderToBackground();
+    void OnRenderToForeground();
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -551,6 +629,7 @@ public:
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void UpdateTextAutosizing(bool isTextAutosizing);
     void UpdateMetaViewport(bool isMetaViewportEnabled);
+    void UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -582,6 +661,8 @@ public:
     std::string GetUrl();
     void UpdateLocale();
     void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
     void OnWebviewHide();
@@ -621,7 +702,7 @@ public:
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
@@ -654,6 +735,7 @@ public:
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
+    void OnTooltip(const std::string& tooltip);
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
@@ -681,12 +763,13 @@ public:
     void OnFirstMeaningfulPaint(std::shared_ptr<OHOS::NWeb::NWebFirstMeaningfulPaintDetails> details);
     void OnLargestContentfulPaint(std::shared_ptr<OHOS::NWeb::NWebLargestContentfulPaintDetails> details);
     void OnSafeBrowsingCheckResult(int threat_type);
-    void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
+    void OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone);
     void OnOverScroll(float xOffset, float yOffset);
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+    void OnNativeEmbedAllDestory();
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
@@ -732,6 +815,7 @@ public:
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
+    void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
     void ExecuteAction(int64_t accessibilityId, AceAction action);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
@@ -879,6 +963,7 @@ private:
     EventCallbackV2 onScreenCaptureRequestV2_;
     EventCallbackV2 onNavigationEntryCommittedV2_;
     EventCallbackV2 onSafeBrowsingCheckResultV2_;
+    EventCallbackV2 OnNativeEmbedAllDestoryV2_;
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
@@ -921,8 +1006,11 @@ private:
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
     bool isEmbedModeEnabled_ = false;
+    std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
+    double resizeWidth_ = 0.0;
+    double resizeHeight_ = 0.0;
 #endif
 };
 

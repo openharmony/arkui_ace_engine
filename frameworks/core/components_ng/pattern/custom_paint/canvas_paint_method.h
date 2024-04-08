@@ -19,14 +19,11 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
-#ifdef USE_GRAPHIC_TEXT_GINE
-#include "rosen_text/text_style.h"
-#endif
-
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class RosenRenderContext;
 using TaskFunc = std::function<void(CanvasPaintMethod&, PaintWrapper*)>;
+using OnModifierUpdateFunc = std::function<void(void)>;
 class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
@@ -64,6 +61,11 @@ public:
         return lastLayoutSize_.Height();
     }
 
+    void SetOnModifierUpdateFunc(OnModifierUpdateFunc&& func)
+    {
+        onModifierUpdate_ = std::move(func);
+    }
+
     void CloseImageBitmap(const std::string& src);
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
@@ -73,11 +75,7 @@ public:
     void GetImageData(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Ace::ImageData>& imageData);
     void TransferFromImageBitmap(PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
     std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
-#ifndef USE_ROSEN_DRAWING
-    bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap);
-#else
     bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap);
-#endif
     std::string GetJsonData(const std::string& path);
 
     void FillText(
@@ -88,50 +86,32 @@ public:
     double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void SetTransform(const TransformParam& param) override;
+    void Reset();
 
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
         bool isStroke, bool hasShadow = false);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
-#else
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
-#endif
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
-#else
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow);
-#endif
-#ifndef USE_ROSEN_DRAWING
-    void PaintShadow(
-        const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint = nullptr) override;
-#else
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
-#endif
     OffsetF GetContentOffset(PaintWrapper* paintWrapper) const override
     {
         return OffsetF(0.0f, 0.0f);
     }
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
-#ifndef USE_ROSEN_DRAWING
-    SkCanvas* GetRawPtrOfSkCanvas() override
-    {
-        return skCanvas_.get();
-    }
-#else
     RSCanvas* GetRawPtrOfRSCanvas() override
     {
         return rsCanvas_.get();
     }
-#endif
 
     std::list<TaskFunc> tasks_;
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
+    OnModifierUpdateFunc onModifierUpdate_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

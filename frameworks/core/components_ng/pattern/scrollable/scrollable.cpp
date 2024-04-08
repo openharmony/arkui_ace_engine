@@ -115,6 +115,12 @@ Scrollable::~Scrollable()
     StopSnapAnimation();
 }
 
+void Scrollable::Initialize(PipelineContext* context)
+{
+    auto weakContext = WeakClaim(context);
+    Initialize(weakContext);
+}
+
 void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
 {
     context_ = context;

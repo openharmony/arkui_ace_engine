@@ -19,13 +19,12 @@
 #include "node/node_model.h"
 #include "node/gesture_impl.h"
 
+#include "node_extened.h"
 #include "base/log/log_wrapper.h"
 
 namespace {
 
-constexpr int32_t NONE_API_VERSION = 0;
 constexpr int32_t CURRENT_NATIVE_NODE_API_VERSION = 1;
-constexpr int32_t CURRENT_NATIVE_DIALOG_API_VERSION = 1;
 ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     CURRENT_NATIVE_NODE_API_VERSION,
     OHOS::Ace::NodeModel::CreateNode,
@@ -33,8 +32,8 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::AddChild,
     OHOS::Ace::NodeModel::RemoveChild,
     OHOS::Ace::NodeModel::InsertChildAfter,
-    nullptr,
-    nullptr,
+    OHOS::Ace::NodeModel::InsertChildBefore,
+    OHOS::Ace::NodeModel::InsertChildAt,
     OHOS::Ace::NodeModel::SetAttribute,
     OHOS::Ace::NodeModel::GetAttribute,
     OHOS::Ace::NodeModel::ResetAttribute,
@@ -43,6 +42,22 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::RegisterOnEvent,
     OHOS::Ace::NodeModel::UnregisterOnEvent,
     OHOS::Ace::NodeModel::MarkDirty,
+    OHOS::Ace::NodeModel::GetTotalChildCount,
+    OHOS::Ace::NodeModel::GetChildAt,
+    OHOS::Ace::NodeModel::GetFirstChild,
+    OHOS::Ace::NodeModel::GetLastChild,
+    OHOS::Ace::NodeModel::GetPreviousSibling,
+    OHOS::Ace::NodeModel::GetNextSibling,
+    OHOS::Ace::NodeModel::RegisterNodeCustomEvent,
+    OHOS::Ace::NodeModel::UnregisterNodeCustomEvent,
+    OHOS::Ace::NodeModel::RegisterNodeCustomReceiver,
+    OHOS::Ace::NodeModel::UnregisterNodeCustomEventReceiver,
+    OHOS::Ace::NodeModel::SetMeasuredSize,
+    OHOS::Ace::NodeModel::SetLayoutPosition,
+    OHOS::Ace::NodeModel::GetMeasuredSize,
+    OHOS::Ace::NodeModel::GetLayoutPosition,
+    OHOS::Ace::NodeModel::MeasureNode,
+    OHOS::Ace::NodeModel::LayoutNode,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
@@ -60,7 +75,7 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
     OHOS::Ace::DialogModel::SetGridColumnCount,
     OHOS::Ace::DialogModel::EnableCustomStyle,
     OHOS::Ace::DialogModel::EnableCustomAnimation,
-    OHOS::Ace::DialogModel::RegiesterOnWillDismiss,
+    OHOS::Ace::DialogModel::RegisterOnWillDismiss,
     OHOS::Ace::DialogModel::Show,
     OHOS::Ace::DialogModel::Close,
 };
@@ -68,21 +83,21 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;
 ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     CURRENT_NATIVE_GESTURE_API_VERSION,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::CreateTapGesture,
+    OHOS::Ace::GestureModel::CreateLongPressGesture,
     OHOS::Ace::GestureModel::CreatePanGesture,
-    nullptr,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::CreatePinchGesture,
+    OHOS::Ace::GestureModel::CreateRotationGesture,
+    OHOS::Ace::GestureModel::CreateSwipeGesture,
     nullptr,
     OHOS::Ace::GestureModel::DisposeGesture,
     nullptr,
     nullptr,
     OHOS::Ace::GestureModel::SetGestureEventTarget,
     OHOS::Ace::GestureModel::AddGestureToNode,
+    OHOS::Ace::GestureModel::RemoveGestureFromNode,
     nullptr,
-    nullptr,
-    nullptr,
+    OHOS::Ace::GestureModel::GetGestureType,
 };
 
 } // namespace
@@ -91,61 +106,33 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
 extern "C" {
 #endif
 
-ArkUI_AnyNativeAPI* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
-{
-    return OH_ArkUI_QueryModuleInterface(type, version);
-}
-
-ArkUI_AnyNativeAPI* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t version)
+void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const char* structName)
 {
     if (!OHOS::Ace::NodeModel::GetFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-            "fail to get %{public}d node api family of %{public}d version, impl library is not found", type, version);
+            "fail to get %{public}d node api family, impl library is not found", type);
         return nullptr;
     }
     switch (type) {
-        case ARKUI_NATIVE_NODE: {
-            switch (version) {
-                case NONE_API_VERSION:
-                case CURRENT_NATIVE_NODE_API_VERSION:
-                    return reinterpret_cast<ArkUI_AnyNativeAPI*>(&nodeImpl_1);
-                default: {
-                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "fail to get basic node api family, version is incorrect: %{public}d", version);
-                    return nullptr;
-                }
+        case ARKUI_NATIVE_NODE:
+            if (strcmp(structName, "ArkUI_NativeNodeAPI_1") == 0) {
+                return &nodeImpl_1;
             }
             break;
-        }
-        case ARKUI_NATIVE_DIALOG: {
-            switch (version) {
-                case CURRENT_NATIVE_DIALOG_API_VERSION:
-                    return reinterpret_cast<ArkUI_AnyNativeAPI*>(&dialogImpl_1);
-                default: {
-                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "fail to get dialog api family, version is incorrect: %{public}d", version);
-                    return nullptr;
-                }
-            }
-        }
-        case ARKUI_NATIVE_GESTURE: {
-            switch (version) {
-                case CURRENT_NATIVE_GESTURE_API_VERSION:
-                    return reinterpret_cast<ArkUI_AnyNativeAPI*>(&gestureImpl_1);
-                default: {
-                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                        "fail to get gesture api family, version is incorrect: %{public}d", version);
-                    return nullptr;
-                }
+        case ARKUI_NATIVE_DIALOG:
+            if (strcmp(structName, "ArkUI_NativeDialogAPI_1") == 0) {
+                return &dialogImpl_1;
             }
             break;
-        }
-        default: {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                "fail to get %{public}d node api family, version is incorrect: %{public}d", type, version);
-            return nullptr;
-        }
+        case ARKUI_NATIVE_GESTURE:
+            if (strcmp(structName, "ArkUI_NativeGestureAPI_1") == 0) {
+                return &gestureImpl_1;
+            }
+            break;
+        default:
+            break;
     }
+    return nullptr;
 }
 
 #ifdef __cplusplus

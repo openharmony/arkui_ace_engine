@@ -185,7 +185,6 @@ public:
     }
     void SetAccessibilityEnabled(bool isEnabled)
     {
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "AceApplicationInfo set accessibility enabled:%{public}d", isEnabled);
         isAccessibilityEnabled_ = isEnabled;
     }
     bool IsAccessibilityEnabled() const

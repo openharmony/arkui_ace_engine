@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include <cstdint>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -281,6 +283,15 @@ void ListModelNG::SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
     eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
+void ListModelNG::SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
+}
+
 void ListModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -415,6 +426,13 @@ void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
 void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
+}
+
+int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
+{
+    int32_t cachedCount = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    return cachedCount;
 }
 
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
@@ -574,12 +592,16 @@ void ListModelNG::SetListSpace(FrameNode* frameNode, const Dimension& space)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space, frameNode);
 }
 
+int32_t ListModelNG::GetEdgeEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ScrollableModelNG::GetEdgeEffect(frameNode);
+}
+
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto pattern = frameNode->GetPattern<ListPattern>();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    return pattern->GetAlwaysEnabled();
+    return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
 void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign)
@@ -619,4 +641,37 @@ void ListModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, FadingEdge, fadingEdge, frameNode);
 }
+
+void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidScroll(std::move(onScroll));
+}
+
+void ListModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+}
+
+void ListModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStart(std::move(onScrollStart));
+}
+
+void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
 } // namespace OHOS::Ace::NG

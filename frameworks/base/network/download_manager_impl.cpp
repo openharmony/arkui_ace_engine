@@ -43,11 +43,15 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
-constexpr OHOS::HiviewDFX::HiLogLabel ACE_DOWNLOAD_MANAGER = { LOG_CORE, 0xC0393A, "DownloadManager" };
-#define LOGI(fmt, ...) \
-    (void)OHOS::HiviewDFX::HiLog::Info(ACE_DOWNLOAD_MANAGER, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
-#define LOGE(fmt, ...) \
-    (void)OHOS::HiviewDFX::HiLog::Error(ACE_DOWNLOAD_MANAGER, "[%{public}d]" fmt, __LINE__, ##__VA_ARGS__)
+
+#define PRINT_LOG(level, fmt, ...) \
+    HILOG_IMPL(LOG_CORE, LOG_##level, 0xD00393A, "DownloadManager", "[%{public}s:%{public}d]" fmt, \
+        __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
+#define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
+#define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
+#define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
+#define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
 } // namespace
 
 // For sync download tasks, this period may cause image not able to be loaded.
@@ -132,33 +136,35 @@ public:
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
-        task->OnSuccess([successCallback = std::move(downloadCallback.successCallback), instanceId](
-                            const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Async http task of url [%{private}s] success", request.GetURL().c_str());
+        task->OnSuccess([successCallback = downloadCallback.successCallback,
+                            failCallback = downloadCallback.failCallback,
+                            instanceId](const NetStackRequest& request, const NetStackResponse& response) {
+            if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
+                LOGI("Async http task of url [%{private}s] failed, the responseCode = %d.", request.GetURL().c_str(),
+                    response.GetResponseCode());
+                std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
+                                       std::to_string(response.GetResponseCode());
+                failCallback(errorMsg, true, instanceId);
+                return;
+            }
+            LOGI("Async http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
+                response.GetResponseCode());
             successCallback(std::move(response.GetResult()), true, instanceId);
         });
-        task->OnCancel([cancelCallback = std::move(downloadCallback.cancelCallback), instanceId](
+        task->OnCancel([cancelCallback = downloadCallback.cancelCallback, instanceId](
                            const NetStackRequest& request, const NetStackResponse& response) {
             LOGI("Async Http task of url [%{private}s] cancelled by netStack", request.GetURL().c_str());
-            std::string errorMsg;
-            errorMsg.append("Http task of url ");
-            errorMsg.append(request.GetURL());
-            errorMsg.append(" cancelled by netStack");
+            std::string errorMsg = "Http task of url " + request.GetURL() + " cancelled by netStack";
             cancelCallback(errorMsg, true, instanceId);
         });
-        task->OnFail([failCallback = std::move(downloadCallback.failCallback), instanceId](
+        task->OnFail([failCallback = downloadCallback.failCallback, instanceId](
                          const NetStackRequest& request, const NetStackResponse& response, const NetStackError& error) {
             LOGI("Async http task of url [%{private}s] failed, response code %{public}d, msg from netStack: "
                  "[%{public}s]",
                 request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
-            std::string errorMsg;
-            errorMsg.append("Http task of url ");
-            errorMsg.append(request.GetURL());
-            errorMsg.append(" failed, response code ");
-            auto responseCode = response.GetResponseCode();
-            errorMsg.append(std::to_string(responseCode));
-            errorMsg.append(", msg from netStack: ");
-            errorMsg.append(error.GetErrorMessage());
+            std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
+                                   std::to_string(response.GetResponseCode()) +
+                                   ", msg from netStack: " + error.GetErrorMessage();
             failCallback(errorMsg, true, instanceId);
         });
         auto result = task->Start();
@@ -178,7 +184,8 @@ public:
         auto task = session.CreateTask(httpReq);
         std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
         task->OnSuccess([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-            LOGI("Sync Http task of url [%{private}s] success", request.GetURL().c_str());
+            LOGI("Sync http task of url [%{private}s] success, the responseCode = %d", request.GetURL().c_str(),
+                response.GetResponseCode());
             {
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
                 downloadCondition->downloadSuccess = true;

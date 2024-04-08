@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ColumnModifier extends ArkColumnComponent implements AttributeModifier<ColumnAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ColumnAttribute): void {
-    applyAndMergeModifier<ColumnAttribute, ArkColumnComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ColumnAttribute, ArkColumnComponent, ArkComponent>(instance, this);
   }
 }

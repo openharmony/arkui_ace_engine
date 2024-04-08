@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,24 +25,22 @@
 #include "core/common/container_scope.h"
 #endif
 
-extern "C" {
-int HiLogPrintArgs(LogType type, LogLevel level, unsigned int domain, const char* tag, const char* fmt, va_list ap);
-}
-
 namespace OHOS::Ace {
-
 namespace {
-
-const ::LogLevel LOG_LEVELS[] = {
-    LOG_DEBUG,
-    LOG_INFO,
-    LOG_WARN,
-    LOG_ERROR,
-    LOG_FATAL,
+#ifdef ACE_INSTANCE_LOG
+constexpr const char* INSTANCE_ID_GEN_REASONS[] = {
+    "scope",
+    "active",
+    "default",
+    "singleton",
+    "foreground",
+    "undefined",
 };
+#endif
+} // namespace
 
-const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
-    { AceLogTag::DEFAULT, "Ace" },
+const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
+    { AceLogTag::ACE_DEFAULT_DOMAIN, "Ace" },
     { AceLogTag::ACE_ALPHABET_INDEXER, "AceAlphabetIndexer" },
     { AceLogTag::ACE_COUNTER, "AceCounter" },
     { AceLogTag::ACE_SUB_WINDOW, "AceSubWindow" },
@@ -111,54 +109,16 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_TEXT_CLOCK, "AceTextClock" },
     { AceLogTag::ACE_FOLDER_STACK, "AceFolderStack" },
     { AceLogTag::ACE_SELECT_COMPONENT, "AceSelectComponent" },
+    { AceLogTag::ACE_STATE_STYLE, "AceStateStyle" },
+    { AceLogTag::ACE_SEARCH, "AceSearch" },
+    { AceLogTag::ACE_STATE_MGMT, "AceStateMgmt" },
 };
-
-const char* APP_DOMAIN_CONTENT = "JSApp";
-
-constexpr uint32_t LOG_DOMAINS[] = {
-    0xD003900,
-    0xC0D0,
-};
-
-constexpr LogType LOG_TYPES[] = {
-    LOG_CORE,
-    LOG_APP,
-};
-
-#ifdef ACE_INSTANCE_LOG
-constexpr const char* INSTANCE_ID_GEN_REASONS[] = {
-    "scope",
-    "active",
-    "default",
-    "singleton",
-    "foreground",
-    "undefined",
-};
-#endif
-
-} // namespace
-
 // initial static member object
 LogLevel LogWrapper::level_ = LogLevel::DEBUG;
 
 char LogWrapper::GetSeparatorCharacter()
 {
     return '/';
-}
-
-void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args)
-{
-    uint32_t hilogDomain = LOG_DOMAINS[static_cast<uint32_t>(domain)] + static_cast<uint32_t>(tag);
-    const char* domainContent = domain == LogDomain::FRAMEWORK ? DOMAIN_CONTENTS_MAP.at(tag) : APP_DOMAIN_CONTENT;
-#ifdef ACE_PRIVATE_LOG
-    std::string newFmt(fmt);
-    ReplaceFormatString("{private}", "{public}", newFmt);
-    HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        hilogDomain, domainContent, newFmt.c_str(), args);
-#else
-    HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        hilogDomain, domainContent, fmt, args);
-#endif
 }
 
 #ifdef ACE_INSTANCE_LOG

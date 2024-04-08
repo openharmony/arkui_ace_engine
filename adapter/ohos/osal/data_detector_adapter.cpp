@@ -193,8 +193,11 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
         });
     };
 
-    TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
-    DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    uiTaskExecutor.PostTask([info, textFunc] {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
+        DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+    });
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)

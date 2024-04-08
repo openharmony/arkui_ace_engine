@@ -70,18 +70,6 @@ ArkUINativeModuleValue LoadingProgressBridge::ResetEnableLoading(ArkUIRuntimeCal
     return panda::JSValueRef::Undefined(vm);
 }
 
-bool ParseJsColorStrategy(const EcmaVM* vm, const Local<JSValueRef>& jsValue, ForegroundColorStrategy& strategy)
-{
-    if (jsValue->IsString()) {
-        std::string colorStr = jsValue->ToString(vm)->ToString();
-        if (colorStr.compare("invert") == 0) {
-            strategy = ForegroundColorStrategy::INVERT;
-            return true;
-        }
-    }
-    return false;
-}
-
 ArkUINativeModuleValue LoadingProgressBridge::SetForegroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -91,7 +79,7 @@ ArkUINativeModuleValue LoadingProgressBridge::SetForegroundColor(ArkUIRuntimeCal
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     ForegroundColorStrategy strategy;
-    if (ParseJsColorStrategy(vm, colorArg, strategy)) {
+    if (ArkTSUtils::ParseJsColorStrategy(vm, colorArg, strategy)) {
         auto strategyInt = static_cast<uint32_t>(ForegroundColorStrategy::INVERT);
         GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, false, strategyInt);
         return panda::JSValueRef::Undefined(vm);

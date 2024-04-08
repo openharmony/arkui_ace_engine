@@ -118,6 +118,11 @@ RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
     return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
 }
 
+RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
+{
+    return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
+}
+
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
 {
     auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(UnwrapNapiValue(obj));
@@ -154,7 +159,7 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 
 #endif
 
-// When the api version >= 10, it is disable event version.
+// When the api version >= 11, it is disable event version.
 bool IsDisableEventVersion()
 {
     return Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);

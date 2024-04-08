@@ -44,6 +44,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
@@ -252,7 +253,7 @@ int32_t GetAstcPsnrProp()
 
 bool GetImageFileCacheConvertToAstcEnabled()
 {
-    return system::GetParameter("persist.image.filecache.astc.enable", "true") == "true";
+    return system::GetParameter("persist.image.filecache.astc.enable", "false") == "true";
 }
 
 bool IsUseMemoryMonitor()
@@ -281,7 +282,8 @@ bool IsResourceDecoupling()
 
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
+           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 } // namespace
 
@@ -420,6 +422,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
         deviceType_ = DeviceType::TABLET;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_TWOINONE) {
         deviceType_ = DeviceType::TWO_IN_ONE;
+    } else if (deviceProp == PROPERTY_DEVICE_TYPE_WEARABLE) {
+        deviceType_ = DeviceType::WEARABLE;
     } else {
         deviceType_ = DeviceType::PHONE;
     }
@@ -463,6 +467,7 @@ void SystemProperties::InitDeviceInfo(
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
+    acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;

@@ -23,7 +23,18 @@
 
 namespace OHOS::Ace::V2 {
 
-class DataChangeListener : virtual public Referenced {
+typedef struct Operation {
+    std::string type;
+    int32_t count;
+    int32_t index;
+    std::pair<int32_t, int32_t> coupleIndex;
+    std::string key;
+    std::pair<std::string, std::string> coupleKey;
+    std::list<std::string> keyList;
+} Operation;
+
+class DataChangeListener : virtual public AceType {
+    DECLARE_ACE_TYPE(DataChangeListener, AceType)
 public:
     virtual void OnDataReloaded() = 0;
     virtual void OnDataAdded(size_t index) = 0;
@@ -31,7 +42,11 @@ public:
     virtual void OnDataDeleted(size_t index) = 0;
     virtual void OnDataBulkDeleted(size_t index, size_t count) = 0;
     virtual void OnDataChanged(size_t index) = 0;
+    // this is exchange impl.
     virtual void OnDataMoved(size_t from, size_t to) = 0;
+    virtual void OnDatasetChange(const std::list<Operation>& DataOperations) = 0;
+    virtual void OnDataBulkChanged(size_t index, size_t count) {}
+    virtual void OnDataMoveToNewPlace(size_t from, size_t to) {}
 };
 
 class ACE_EXPORT LazyForEachComponent : public V1::ForEachComponent {

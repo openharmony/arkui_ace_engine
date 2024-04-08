@@ -124,8 +124,10 @@ public:
     RouterPageInfo GetPageInfoByIndex(int32_t index, const std::string& params);
 
     void GetState(int32_t& index, std::string& name, std::string& path);
-    void GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params);
+    void GetStateByIndex(int32_t index, std::string& name, std::string& path, std::string& params);
     void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
+
+    void GetPageNameAndPath(const RefPtr<FrameNode>& pageNode, std::string& name, std::string& path);
 
     std::string GetParams() const;
 
@@ -206,6 +208,8 @@ private:
 
     UIContentErrorCode LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");
+
+    bool CheckIndexValid(int32_t index) const;
 
     RefPtr<Framework::ManifestParser> manifestParser_;
 

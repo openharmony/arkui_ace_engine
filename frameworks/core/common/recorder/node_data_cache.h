@@ -18,7 +18,7 @@
 
 #include <list>
 #include <memory>
-#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -93,7 +93,9 @@ private:
 
     std::shared_ptr<MergedConfig> mergedConfig_;
 
-    std::mutex cacheLock_;
+    std::shared_mutex configMutex_;
+
+    std::shared_mutex cacheMutex_;
 
     std::string pageUrl_;
 

@@ -79,6 +79,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
     JSClass<JSCheckboxGroup>::StaticMethod("mark", &JSCheckboxGroup::Mark);
     JSClass<JSCheckboxGroup>::StaticMethod("size", &JSCheckboxGroup::JsSize);
     JSClass<JSCheckboxGroup>::StaticMethod("padding", &JSCheckboxGroup::JsPadding);
+    JSClass<JSCheckboxGroup>::StaticMethod("checkboxShape", &JSCheckboxGroup::SetCheckboxGroupStyle);
     JSClass<JSCheckboxGroup>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCheckboxGroup>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCheckboxGroup>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -135,6 +136,7 @@ void JSCheckboxGroup::SetSelectAll(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         selectAll = info[0]->ToBoolean();
     }
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkboxgroup select all %{public}d", selectAll);
     CheckBoxGroupModel::GetInstance()->SetSelectAll(selectAll);
     if (info.Length() > 1 && info[1]->IsFunction()) {
         ParseSelectAllObject(info, info[1]);
@@ -242,7 +244,7 @@ void JSCheckboxGroup::Mark(const JSCallbackInfo& info)
     } else {
         CheckBoxGroupModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE));
     }
-    
+
     auto strokeWidthValue = markObj->GetProperty("strokeWidth");
     CalcDimension strokeWidth;
     if ((ParseJsDimensionVp(strokeWidthValue, strokeWidth)) && (strokeWidth.Unit() != DimensionUnit::PERCENT) &&
@@ -389,5 +391,11 @@ NG::PaddingProperty JSCheckboxGroup::GetPadding(const std::optional<CalcDimensio
         }
     }
     return padding;
+}
+
+void JSCheckboxGroup::SetCheckboxGroupStyle(int32_t checkBoxGroupStyle)
+{
+    CheckBoxStyle curCheckBoxGroupStyle = static_cast<CheckBoxStyle>(checkBoxGroupStyle);
+    CheckBoxGroupModel::GetInstance()->SetCheckboxGroupStyle(curCheckBoxGroupStyle);
 }
 } // namespace OHOS::Ace::Framework

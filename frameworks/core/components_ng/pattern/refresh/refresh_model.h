@@ -52,6 +52,7 @@ public:
     virtual void SetProgressBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetOnStateChange(std::function<void(const int32_t)>&& stateChange) = 0;
     virtual void SetOnRefreshing(std::function<void()>&& refreshing) = 0;
+    virtual void SetOnOffsetChange(std::function<void(const float)>&& dragOffset) = 0;
     virtual void SetChangeEvent(std::function<void(const std::string)>&& changeEvent) = 0;
     virtual void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) = 0;
     virtual void SetLoadingText(const std::string& loadingText) = 0;

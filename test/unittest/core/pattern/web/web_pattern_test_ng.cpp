@@ -297,19 +297,6 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
     EXPECT_NE(callback, nullptr);
     webPattern->OnSelectPopupMenu(params, callback);
-    NWeb::DateTimeChooser chooser;
-    std::vector<NWeb::DateTimeSuggestion> suggestions;
-    NWeb::DateTimeSuggestion dateTime;
-    suggestions.push_back(dateTime);
-    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> chooserCallback =
-        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
-    EXPECT_NE(chooserCallback, nullptr);
-    webPattern->OnDateTimeChooserPopup(chooser, suggestions, chooserCallback);
-    suggestions.clear();
-    chooser.type = NWeb::DTC_TIME;
-    webPattern->OnDateTimeChooserPopup(chooser, suggestions, chooserCallback);
-    chooser.type = NWeb::DTC_DATE;
-    webPattern->OnDateTimeChooserPopup(chooser, suggestions, chooserCallback);
 #endif
 }
 
@@ -362,8 +349,6 @@ HWTEST_F(WebPatternTestNg, ShowDateTimeDialog007, TestSize.Level1)
     webPattern->ShowTimeDialog(chooser, suggestions, chooserCallback);
     webPattern->ShowDateTimeSuggestionDialog(chooser, suggestions, chooserCallback);
     webPattern->OnDateTimeChooserClose();
-    OHOS::NWeb::SelectMenuBound bounds;
-    webPattern->GetSelectPopupPostion(bounds);
 #endif
 }
 

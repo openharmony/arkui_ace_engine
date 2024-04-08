@@ -103,7 +103,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(TAB_BAR_INDEX);
+    auto tabBarWrapper = layoutWrapper->GetChildByIndex(TAB_BAR_INDEX);
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
     if (!tabBarWrapper || !dividerWrapper || !swiperWrapper) {

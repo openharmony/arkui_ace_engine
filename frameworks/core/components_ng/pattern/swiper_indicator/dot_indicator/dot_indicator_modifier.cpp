@@ -49,6 +49,7 @@ constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
 constexpr int32_t TOUCH_BOTTOM_ANIMATION_DURATION = 200;
 constexpr int32_t OPACITY_ANIMATION_DURATION = 100;
 constexpr uint8_t TARGET_ALPHA = 255;
+constexpr int32_t BLACK_POINT_DURATION = 400;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -509,7 +510,7 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption blackPointOption;
-    blackPointOption.SetDuration(animationDuration_);
+    blackPointOption.SetDuration(BLACK_POINT_DURATION);
     blackPointOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
     AnimationUtils::Animate(blackPointOption, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
@@ -517,10 +518,6 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
     // normal page turning
     AnimationOption optionHead;
     RefPtr<Curve> curve = headCurve_;
-    if (InstanceOf<LinearCurve>(curve)) {
-        // mass:1, stiffness:228, damping:30
-        curve = AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 228, 30);
-    }
     optionHead.SetCurve(curve);
     optionHead.SetDuration(animationDuration_);
 
@@ -714,10 +711,6 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     // normal page turning
     AnimationOption optionHead;
     RefPtr<Curve> curve = headCurve_;
-    if (InstanceOf<LinearCurve>(curve)) {
-        // mass:1, stiffness:228, damping:30
-        curve = AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 228, 30);
-    }
     optionHead.SetCurve(curve);
     optionHead.SetDuration(animationDuration_);
 

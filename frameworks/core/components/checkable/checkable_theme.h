@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHECKABLE_CHECKABLE_THEME_H
 
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -44,6 +45,18 @@ public:
     const Color& GetFocusColor() const
     {
         return focusColor_;
+    }
+    const Color& GetFocusBoardColor() const
+    {
+        return focusBoardColor_;
+    }
+    const Color& GetBorderFocusedColor() const
+    {
+        return borderFocusedColor_;
+    }
+    const Color& GetFocusedBGColorUnselected() const
+    {
+        return focusedBGColorUnselected_;
     }
     const Dimension& GetWidth() const
     {
@@ -140,6 +153,11 @@ public:
         return focusPaintPadding_;
     }
 
+    const Dimension& GetFocusBoardSize() const
+    {
+        return focusBoardSize_;
+    }
+
     double GetHoverDuration() const
     {
         return hoverDuration_;
@@ -154,6 +172,14 @@ public:
     {
         return touchDuration_;
     }
+    const InternalResource::ResourceId& GetTickResourceId() const
+    {
+        return tickResourceId_;
+    }
+    const InternalResource::ResourceId& GetDotResourceId() const
+    {
+        return dotResourceId_;
+    }
 
 protected:
     CheckableTheme() = default;
@@ -166,6 +192,9 @@ protected:
     Color hoverColor_;
     Color clickEffectColor_;
     Color shadowColor_;
+    Color focusBoardColor_;
+    Color borderFocusedColor_;
+    Color focusedBGColorUnselected_;
     Dimension width_;
     Dimension height_;
     Dimension hotZoneHorizontalPadding_;
@@ -177,6 +206,7 @@ protected:
     Dimension hoverRadius_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
+    Dimension focusBoardSize_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -185,6 +215,8 @@ protected:
     bool needFocus_ = true;
     bool backgroundSolid_ = true;
     const float ratio_ = 1.8f;
+    InternalResource::ResourceId tickResourceId_ = InternalResource::ResourceId::RADIO_TICK_SVG;
+    InternalResource::ResourceId dotResourceId_ = InternalResource::ResourceId::RADIO_DOT_SVG;
 };
 
 class CheckboxTheme : public CheckableTheme {
@@ -232,6 +264,11 @@ public:
             theme->activeColor_ = checkboxPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = checkboxPattern->GetAttr<Color>("bg_border_color_unchecked", Color::RED);
             theme->focusColor_ = checkboxPattern->GetAttr<Color>("focus_border_color", Color::RED);
+            theme->focusBoardColor_ = checkboxPattern->GetAttr<Color>("color_focused_bg", Color::RED);
+            theme->focusBoardSize_ = checkboxPattern->GetAttr<Dimension>("size_focused_bg", 2.0_vp);
+            theme->borderFocusedColor_ = checkboxPattern->GetAttr<Color>("focused_border_color", Color::RED);
+            theme->focusedBGColorUnselected_ =
+                checkboxPattern->GetAttr<Color>("focused_bg_color_unselected", Color::RED);
             theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>("bg_border_radius", 0.0_vp);
             theme->hoverColor_ = checkboxPattern->GetAttr<Color>("hover_border_color", Color::RED);
             theme->clickEffectColor_ = checkboxPattern->GetAttr<Color>("click_effect_color", Color::RED);
@@ -400,6 +437,15 @@ public:
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size", 0.0_vp);
             theme->defaultHeight_ = theme->defaultWidth_;
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
+                theme->height_ = theme->width_;
+                theme->hotZoneHorizontalPadding_ =
+                    radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
+                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+                theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 0.0_vp);
+                theme->defaultHeight_ = theme->defaultWidth_;
+            }
             theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
             theme->needFocus_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_need_focus", 0.0));
             theme->backgroundSolid_ =
@@ -411,7 +457,7 @@ public:
             theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
             theme->inactivePointColor_ = radioPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
-            theme->focusColor_ = radioPattern->GetAttr<Color>("focus_border_color", Color::RED);
+            theme->focusColor_ = radioPattern->GetAttr<Color>("bg_focus_outline_color", Color::RED);
             theme->hoverColor_ = radioPattern->GetAttr<Color>("hover_border_color", Color::RED);
             theme->clickEffectColor_ = radioPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->focusPaintPadding_ = radioPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
@@ -425,6 +471,19 @@ public:
             theme->height_ = theme->width_;
             theme->hotZoneHorizontalPadding_ = radioPattern->GetAttr<Dimension>(RADIO_PADDING, 11.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            SetRadioSize(themeConstants, theme);
+        }
+
+        void SetRadioSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
+                theme->height_ = theme->width_;
+                theme->hotZoneHorizontalPadding_ =
+                    radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
+                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            }
         }
     };
 };

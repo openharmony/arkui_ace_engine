@@ -74,7 +74,9 @@ public:
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetJsAngle(
         const std::string& key, const JSRef<JSVal>& jsValue, std::optional<float>& angle);
-    static void CheckAngle(std::optional<float>& angle);
+    static void GetJsAngleWithDefault(
+        const std::string& key, const JSRef<JSObject>& jsObj, std::optional<float>& angle, float defaultValue);
+    static inline void CheckAngle(std::optional<float>& angle);
     static void GetPerspective(const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective);
     static void GetJsPerspective(const std::string& key, const JSRef<JSVal>& jsValue, float& perspective);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
@@ -99,8 +101,7 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
-    static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
-    static NG::TransitionOptions ParseJsTransition(const JSRef<JSVal>& transitionArgs);
+    static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -122,13 +123,19 @@ public:
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
+    static void ParseSheetIsShow(
+        const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
+    static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
+    static void ParseSheetHeightCallback(const JSRef<JSObject>& paramObj,
+        std::function<void(const float)>& heightDidChange, const char* prop);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
-        std::function<void()>& shouldDismiss);
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+        std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
+        std::function<void(const float)>& onDetentsDidChange);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
@@ -303,6 +310,7 @@ public:
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
     static void JsMotionPath(const JSCallbackInfo& info);
     static void JsShadow(const JSCallbackInfo& info);
     static void JsBlendMode(const JSCallbackInfo& info);
@@ -339,6 +347,7 @@ public:
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsObscured(const JSCallbackInfo& info);
+    static void JsPrivacySensitive(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
@@ -359,9 +368,13 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
+    static void JsGestureModifier(const JSCallbackInfo& info);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
+    static void JsBackgroundImageResizable(const JSCallbackInfo& info);
+
+    static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
@@ -474,50 +487,23 @@ public:
 
     static std::string GetFunctionKeyName(FunctionKey functionkey)
     {
-        switch (functionkey) {
-            case FunctionKey::ESC:
-                return "ESC";
-                break;
-            case FunctionKey::F1:
-                return "F1";
-                break;
-            case FunctionKey::F2:
-                return "F2";
-                break;
-            case FunctionKey::F3:
-                return "F3";
-                break;
-            case FunctionKey::F4:
-                return "F4";
-                break;
-            case FunctionKey::F5:
-                return "F5";
-                break;
-            case FunctionKey::F6:
-                return "F6";
-                break;
-            case FunctionKey::F7:
-                return "F7";
-                break;
-            case FunctionKey::F8:
-                return "F8";
-                break;
-            case FunctionKey::F9:
-                return "F9";
-                break;
-            case FunctionKey::F10:
-                return "F10";
-                break;
-            case FunctionKey::F11:
-                return "F11";
-                break;
-            case FunctionKey::F12:
-                return "F12";
-                break;
-            default:
-                return "";
-                break;
-        }
+        std::map<FunctionKey, std::string> keyNameMap {
+            {FunctionKey::ESC, "ESC"},
+            {FunctionKey::F1, "F1"},
+            {FunctionKey::F2, "F2"},
+            {FunctionKey::F3, "F3"},
+            {FunctionKey::F4, "F4"},
+            {FunctionKey::F5, "F5"},
+            {FunctionKey::F6, "F6"},
+            {FunctionKey::F7, "F7"},
+            {FunctionKey::F8, "F8"},
+            {FunctionKey::F9, "F9"},
+            {FunctionKey::F10, "F10"},
+            {FunctionKey::F11, "F11"},
+            {FunctionKey::F12, "F12"}
+        };
+        auto result = keyNameMap.find(functionkey);
+        return (result != keyNameMap.end()) ? result->second : std::string();
     }
 
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
@@ -531,6 +517,11 @@ public:
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+
+    static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
+        const JSRef<JSObject>& object, const JSExecutionContext& context);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

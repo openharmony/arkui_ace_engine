@@ -54,6 +54,21 @@ struct ArkUI_Node;
  * @since 12
  */
 struct ArkUI_NativeDialog;
+
+/**
+ * @brief Sets the size constraints of a component during component layout.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_LayoutConstraint ArkUI_LayoutConstraint;
+
+/**
+ * @brief Defines the structure of the component drawing context.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_DrawContext ArkUI_DrawContext;
+
 /**
  * @brief Defines the pointer to the ArkUI native component object.
  *
@@ -1249,6 +1264,8 @@ typedef enum {
     ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_BOTTOM,
     /** No gradient. */
     ARKUI_LINEAR_GRADIENT_DIRECTION_NONE,
+    /** 自定义渐变方向. */
+    ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM,
 } ArkUI_LinearGradientDirection;
 
 /**
@@ -1326,6 +1343,209 @@ typedef struct {
     /** Height of the mask area. */
     float height;
 } ArkUI_Rect;
+
+/**
+ * @brief Describes the width and height of a component.
+ *
+ * @since 12
+ */
+typedef struct {
+    /** Width, in px. */
+    int32_t width;
+    /** Height, in px. */
+    int32_t height;
+} ArkUI_IntSize;
+
+/**
+ * @brief Describes the position of a component.
+ *
+ * @since 12
+ */
+typedef struct {
+    /** Horizontal coordinate, in px. */
+    int32_t x;
+    /** Vertical coordinate, in px. */
+    int32_t y;
+} ArkUI_IntOffset;
+
+/**
+ * @brief 嵌套滚动选项.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 只自身滚动，不与父组件联动. */
+    ARKUI_SELF_ONLY = 0,
+    /** 自身先滚动，自身滚动到边缘以后父组件滚动. */
+    ARKUI_SELF_FIRST,
+    /** 父组件先滚动，父组件滚动到边缘以后自身滚动. */
+    ARKUI_PARENT_FIRST,
+    /** 自身和父组件同时滚动. */
+    ARKUI_PARALLEL,
+} ArkUI_NestedScrollMode;
+
+/**
+ * @brief 指定的混合模式应用于视图的内容选项.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 在目标图像上按顺序混合视图的内容. */
+    ARKUI_BLEND_APPLY_TYPE_FAST = 0,
+    /** 将此组件和子组件内容绘制到离屏画布上，然后整体进行混合. */
+    ARKUI_BLEND_APPLY_TYPE_OFFSCREEN,
+} ArkUI_BlendApplyType;
+
+/**
+* @brief Creates a size constraint.
+*
+* @since 12
+*/
+ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create();
+
+/**
+* @brief Creates a deep copy of a size constraint.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @return Returns the pointer to the new size constraint.
+* @since 12
+*/
+ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Destroys the pointer to a size constraint.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @since 12
+*/
+void* OH_ArkUI_LayoutConstraint_Dispose(ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Obtains the maximum width for a size constraint, in px.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @return Returns the maximum width.
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMaxWidth(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Obtains the minimum width for a size constraint, in px.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @return Returns the minimum width.
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMinWidth(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Obtains the maximum height for a size constraint, in px.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @return Returns the maximum height.
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMaxHeight(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Obtains the minimum height for a size constraint, in px.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @return Returns the minimum height.
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetMinHeight(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Obtains the width percentage reference for a size constraint, in px.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @return Returns the width percentage reference.
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetPercentReferenceWidth(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Obtains the height percentage reference for a size constraint, in px.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @return Returns the height percentage reference.
+* @since 12
+*/
+int32_t OH_ArkUI_LayoutConstraint_GetPercentReferenceHeight(const ArkUI_LayoutConstraint* Constraint);
+
+/**
+* @brief Sets the maximum width.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @param value Indicates the maximum width, in px.
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMaxWidth(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief Sets the minimum width.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @param value Indicates the minimum width, in px.
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMinWidth(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief Sets the maximum height.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @param value Indicates the maximum height, in px.
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMaxHeight(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief Sets the minimum height.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @param value Indicates the minimum height, in px.
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetMinHeight(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief Sets the width percentage reference.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @param value Indicates the width percentage reference, in px.
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetPercentReferenceWidth(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief Sets the height percentage reference.
+*
+* @param Constraint Indicates the pointer to the size constraint.
+* @param value Indicates the height percentage reference, in px.
+* @since 12
+*/
+void OH_ArkUI_LayoutConstraint_SetPercentReferenceHeight(ArkUI_LayoutConstraint* Constraint, int32_t value);
+
+/**
+* @brief Obtains the pointer to a canvas for drawing, which can be converted into the <b>OH_Drawing_Canvas</b> pointer
+* in the <b>Drawing</b> module.
+*
+* @param context Indicates the pointer to the drawing context.
+* @return Returns the pointer to the canvas for drawing.
+* @since 12
+*/
+void* OH_ArkUI_DrawContext_GetCanvas(ArkUI_DrawContext* context);
+
+/**
+* @brief Obtains the size of a drawing area.
+*
+* @param context Indicates the pointer to the drawing context.
+* @return Returns the size of the drawing area.
+* @since 12
+*/
+ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
 
 #ifdef __cplusplus
 };

@@ -145,4 +145,76 @@ bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     auto font = fontSpan->GetFont();
     return font_.IsEqual(font);
 }
+
+// GestureSpan
+GestureSpan::GestureSpan(GestureStyle gestureInfo) : SpanBase(0, 0), gestureInfo_(std::move(gestureInfo)) {}
+
+GestureSpan::GestureSpan(GestureStyle gestureInfo, int32_t start, int32_t end)
+    : SpanBase(start, end), gestureInfo_(std::move(gestureInfo))
+{}
+
+GestureStyle GestureSpan::GetGestureStyle() const
+{
+    return gestureInfo_;
+}
+
+RefPtr<SpanBase> GestureSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<GestureSpan>(gestureInfo_, start, end);
+    return spanBase;
+}
+
+bool GestureSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto gestureSpan = DynamicCast<GestureSpan>(other);
+    if (!gestureSpan) {
+        return false;
+    }
+    auto gestureInfo = gestureSpan->GetGestureStyle();
+    return gestureInfo_.IsEqual(gestureInfo);
+}
+
+SpanType GestureSpan::GetSpanType() const
+{
+    return SpanType::Gesture;
+}
+
+std::string GestureSpan::ToString() const
+{
+    std::stringstream str;
+    str << "GestureSpan [ start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+void GestureSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddSpanStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveSpanStyle(spanItem);
+    }
+}
+
+void GestureSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (gestureInfo_.onClick.has_value()) {
+        spanItem->onClick = gestureInfo_.onClick.value();
+    }
+
+    if (gestureInfo_.onLongPress.has_value()) {
+        spanItem->onLongPress = gestureInfo_.onLongPress.value();
+    }
+}
+void GestureSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
+{
+    spanItem->onClick = nullptr;
+    spanItem->onLongPress = nullptr;
+}
 } // namespace OHOS::Ace

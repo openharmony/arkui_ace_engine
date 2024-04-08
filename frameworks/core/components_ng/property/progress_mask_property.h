@@ -90,7 +90,7 @@ private:
     float value_ = 0.0f;
     float maxValue_ = 100.0f;
     Color color_ = Color(0x99182431);
-    bool enableBreathe_ = true;
+    bool enableBreathe_ = false;
 };
 } // namespace OHOS::Ace::NG {
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_PROGRESS_MASK_PROPERTY_H

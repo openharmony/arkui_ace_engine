@@ -41,7 +41,7 @@ public:
     void Execute(int32_t index, const AnimationCallbackInfo& animationCallbackInfo);
     void Execute(int32_t errorCode);
     void Execute(const RefPtr<SwiperContentTransitionProxy>& proxy);
-    void Execute(int32_t selectedIndex, int32_t index, float position, float mainLength);
+    void Execute(int32_t selectedIndex, int32_t index, float position, float mainAxisLength);
 };
 
 class JsSwiperContentTransitionProxy : public Referenced {
@@ -53,8 +53,8 @@ public:
     void GetIndex(const JSCallbackInfo& args);
     void SetPosition(const JSCallbackInfo& args);
     void GetPosition(const JSCallbackInfo& args);
-    void SetMainLength(const JSCallbackInfo& args);
-    void GetMainLength(const JSCallbackInfo& args);
+    void SetMainAxisLength(const JSCallbackInfo& args);
+    void GetMainAxisLength(const JSCallbackInfo& args);
     void FinishTransition(const JSCallbackInfo& args);
 
     void SetProxy(const RefPtr<SwiperContentTransitionProxy>& proxy)

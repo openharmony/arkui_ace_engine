@@ -28,13 +28,9 @@ public:
     ~SvgFeGaussianBlur() override = default;
     static RefPtr<SvgNode> Create();
 
-#ifndef USE_ROSEN_DRAWING
-    void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
-        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
-#else
-    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
-#endif
+    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+        ColorInterpolationType& currentColor,
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const override;
 };
 
 } // namespace OHOS::Ace::NG

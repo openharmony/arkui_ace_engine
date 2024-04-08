@@ -171,6 +171,9 @@ void RatingPattern::UpdatePaintConfig()
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
 {
+    if (UseContentModifier()) {
+        return nullptr;
+    }
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
@@ -441,6 +444,9 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::HandleTouchUp()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     CHECK_NULL_VOID(!IsIndicator());
     state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -448,6 +454,9 @@ void RatingPattern::HandleTouchUp()
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     CHECK_NULL_VOID(!IsIndicator());
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
@@ -466,6 +475,9 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     CHECK_NULL_VOID(!IsIndicator());
     auto eventPointX = info.GetLocalLocation().GetX();
     if (Negative(eventPointX)) {
@@ -655,12 +667,27 @@ void RatingPattern::OnBlurEvent()
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void RatingPattern::SetRatingScore(double ratingScore)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    UpdateRatingScore(ratingScore);
+    OnModifyDone();
+}
+
 void RatingPattern::UpdateRatingScore(double ratingScore)
 {
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     ratingRenderProperty->UpdateRatingScore(ratingScore);
     focusRatingScore_ = ratingScore;
+    FireBuilder();
 }
 
 void RatingPattern::InitMouseEvent()
@@ -826,6 +853,7 @@ void RatingPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    FireBuilder();
 }
 
 // XTS inspector code
@@ -892,5 +920,38 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
         CHECK_NULL_VOID(ratingNode);
         ratingNode->MarkNeedRenderOnly();
     });
+}
+
+void RatingPattern::FireBuilder()
+{
+    CHECK_NULL_VOID(makeFunc_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
+{
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto property = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_RETURN(property, nullptr);
+    auto renderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_RETURN(renderProperty, nullptr);
+    auto starNum = GetStarNum(property);
+    auto isIndicator = IsIndicator();
+    auto ratingScore = renderProperty->GetRatingScore().value_or(GetRatingScoreFromTheme().value_or(0.0));
+    auto stepSize = renderProperty->GetStepSizeValue(GetStepSizeFromTheme()
+        .value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);
+    return (makeFunc_.value())(ratingConfiguration);
 }
 } // namespace OHOS::Ace::NG

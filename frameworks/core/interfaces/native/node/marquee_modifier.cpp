@@ -117,12 +117,27 @@ void ResetMarqueeFontFamily(ArkUINodeHandle node)
     MarqueeModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
 
+void SetMarqueeUpdateStrategy(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, static_cast<OHOS::Ace::MarqueeUpdateStrategy>(value));
+}
+
+void ResetMarqueeUpdateStrategy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, OHOS::Ace::MarqueeUpdateStrategy::DEFAULT);
+}
+
 namespace NodeModifier {
 const ArkUIMarqueeModifier* GetMarqueeModifier()
 {
     static const ArkUIMarqueeModifier modifier = { SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
         ResetMarqueeFontColor, SetMarqueeAllowScale, ResetMarqueeAllowScale, SetMarqueeFontWeight,
-        ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily };
+        ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily, SetMarqueeUpdateStrategy,
+        ResetMarqueeUpdateStrategy };
     return &modifier;
 }
 }

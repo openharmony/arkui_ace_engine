@@ -365,7 +365,6 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowSideBar(layoutProperty);
     OnUpdateShowControlButton(layoutProperty, host);
     OnUpdateShowDivider(layoutProperty, host);
-    UpdateControlButtonIcon();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -473,13 +472,16 @@ void SideBarContainerPattern::UpdateDividerShadow() const
     }
 }
 
-void SideBarContainerPattern::SetSideBarActive(bool isActive) const
+void SideBarContainerPattern::SetSideBarActive(bool isActive, bool onlyJsActive) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto sideBarNode = GetSideBarNode(host);
     CHECK_NULL_VOID(sideBarNode);
     sideBarNode->SetJSViewActive(isActive);
+    if (!onlyJsActive) {
+        sideBarNode->SetActive(isActive);
+    }
 }
 
 void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode)
@@ -647,7 +649,7 @@ void SideBarContainerPattern::CreateAnimation()
     CHECK_NULL_VOID(host);
 
     if (!controller_) {
-        controller_ = CREATE_ANIMATOR(host->GetContext());
+        controller_ = CREATE_ANIMATOR(host->GetContextRefPtr());
     }
 
     auto weak = AceType::WeakClaim(this);
@@ -725,7 +727,7 @@ void SideBarContainerPattern::DoAnimation()
         sideBarStatus_ = SideBarStatus::HIDDEN;
     }
 
-    SetSideBarActive(true);
+    SetSideBarActive(true, false);
     UpdateAnimDir();
 
     AnimationOption option = AnimationOption();
@@ -752,7 +754,7 @@ void SideBarContainerPattern::DoAnimation()
             } else {
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
                 pattern->UpdateControlButtonIcon();
-                pattern->SetSideBarActive(false);
+                pattern->SetSideBarActive(false, false);
             }
             pattern->inAnimation_ = false;
         }
@@ -888,7 +890,7 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     }
 
     if (!inAnimation_) {
-        SetSideBarActive(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW);
+        SetSideBarActive(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW, true);
     }
 
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();

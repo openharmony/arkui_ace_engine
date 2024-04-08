@@ -69,6 +69,41 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     return textStyle;
 }
 
+void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
+    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle)
+{
+    if (fontStyle) {
+        UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
+        UPDATE_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
+        UPDATE_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
+        UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
+        UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
+        UPDATE_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
+        UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
+        UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
+        UPDATE_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
+        UPDATE_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
+        UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolColorList, SetSymbolColorList);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, SetRenderStrategy);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolEffectStrategy, SetEffectStrategy);
+    }
+    if (textLineStyle) {
+        UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+        UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
+        UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
+        UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
+        UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
+        UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
+        UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
+        UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
+        UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
+    }
+}
+
 TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
     const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
     const RefPtr<TextTheme>& textTheme)

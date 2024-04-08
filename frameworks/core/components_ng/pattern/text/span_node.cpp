@@ -16,12 +16,15 @@
 #include "core/components_ng/pattern/text/span_node.h"
 
 #include <optional>
+#include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -29,6 +32,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -189,6 +193,24 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
     spanItem_->backgroundStyle = GetTextBackgroundStyle();
 }
 
+void SpanNode::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("Content:").append(spanItem_->GetSpanContent()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontSize:").append(spanItem_->fontStyle->GetFontSize().value_or(Dimension()).ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontColor:").append(spanItem_->fontStyle->GetTextColor().value_or(Color()).ColorToString()));
+    DumpLog::GetInstance().AddDesc(std::string("FontWeight:").append(
+        StringUtils::FontWeightToString(spanItem_->fontStyle->GetFontWeight().value())));
+    if (spanItem_->unicode != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
+        DumpLog::GetInstance().AddDesc(std::string("SymbolRenderingStrategy:").append(
+            std::to_string(spanItem_->fontStyle->GetSymbolRenderingStrategy().value_or(0))));
+        DumpLog::GetInstance().AddDesc(std::string("SymbolEffectStrategy:").append(
+            std::to_string(spanItem_->fontStyle->GetSymbolEffectStrategy().value_or(0))));
+    }
+}
+
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     const RefPtr<Paragraph>& builder, double /* width */, double /* height */, VerticalAlign /* verticalAlign */)
 {
@@ -197,17 +219,17 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     if (fontStyle || textLineStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, -1);
-        TextStyle themeTextStyle =
-            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+        auto newTextStyle = InheritParentProperties(frameNode);
+        UseSelfStyle(fontStyle, textLineStyle, newTextStyle);
         if (frameNode) {
-            FontRegisterCallback(frameNode, themeTextStyle);
+            FontRegisterCallback(frameNode, newTextStyle);
         }
-        if (NearZero(themeTextStyle.GetFontSize().Value())) {
+        if (NearZero(newTextStyle.GetFontSize().Value())) {
             return -1;
         }
-        textStyle = themeTextStyle;
+        textStyle = newTextStyle;
         textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
-        builder->PushStyle(themeTextStyle);
+        builder->PushStyle(newTextStyle);
     }
 
     auto spanContent = GetSpanContent(content);
@@ -446,7 +468,7 @@ void SpanItem::UpdateContentTextStyle(
         return;
     }
     auto displayText = content;
-    auto textCase = fontStyle ? fontStyle->GetTextCase().value_or(TextCase::NORMAL) : TextCase::NORMAL;
+    auto textCase = textStyle.has_value() ? textStyle->GetTextCase() : TextCase::NORMAL;
     StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
     if (textStyle.has_value()) {
         builder->PushStyle(textStyle.value());
@@ -496,6 +518,39 @@ bool SpanItem::IsDragging()
     return selectedStart >= 0 && selectedEnd >= 0;
 }
 
+#define INHERIT_TEXT_STYLE(group, name, func)                                     \
+    do {                                                                          \
+        if ((textLayoutProp)->Has##name()) {                                      \
+            textStyle.func(textLayoutProp->Get##name().value());                  \
+        }                                                                         \
+    } while (false)
+
+TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
+{
+    TextStyle textStyle;
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, textStyle);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, textStyle);
+    textStyle = theme->GetTextStyle();
+    auto textLayoutProp = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProp, textStyle);
+    INHERIT_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
+    INHERIT_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
+    INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
+    INHERIT_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
+    INHERIT_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
+    INHERIT_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
+    INHERIT_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
+    INHERIT_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
+    INHERIT_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
+    INHERIT_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
+    INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
+
+    INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+    return textStyle;
+}
+
 #define COPY_TEXT_STYLE(group, name, func)                          \
     do {                                                            \
         if ((group)->Has##name()) {                                 \
@@ -543,6 +598,20 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     return sameSpan;
+}
+
+std::string SpanItem::SymbolColorToString()
+{
+    auto colors = fontStyle->GetSymbolColorList();
+    auto colorStr = std::string("[");
+    if (colors.has_value()) {
+        for (const auto& color : colors.value()) {
+            colorStr.append(color.ColorToString());
+            colorStr.append(",");
+        }
+    }
+    colorStr.append("]");
+    return colorStr;
 }
 
 std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
@@ -633,5 +702,19 @@ void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle());
+}
+
+std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
+{
+    std::set<PropertyInfo> inheritPropertyInfo;
+    const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
+        PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
+        PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
+        PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
+        PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
+        PropertyInfo::FONTFEATURE };
+    set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
+        propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
+    return inheritPropertyInfo;
 }
 } // namespace OHOS::Ace::NG

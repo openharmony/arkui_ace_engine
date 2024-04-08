@@ -49,8 +49,8 @@ class RowJustifyContentlModifier extends ModifierWithKey<number> {
 }
 
 class ArkRowComponent extends ArkComponent implements RowAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   alignItems(value: VerticalAlign): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);
@@ -66,12 +66,10 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
 }
 
 // @ts-ignore
-globalThis.Row.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRowComponent(nativeNode);
+globalThis.Row.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRowComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RowModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

@@ -254,6 +254,16 @@ void TextPickerModelNG::SetDefaultPickerItemHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
+void TextPickerModelNG::SetGradientHeight(const Dimension& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetGradientHeight(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value);
+}
+
 void TextPickerModelNG::SetCanLoop(const bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value);
@@ -1030,12 +1040,26 @@ void TextPickerModelNG::SetDivider(const ItemDivider& divider)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetDivider(divider);
+    textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider);
 }
 
 void TextPickerModelNG::SetDivider(FrameNode* frameNode, const ItemDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDivider(divider);
+    textPickerPattern->SetCustomDividerFlag(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Divider, divider, frameNode);
+}
+
+void TextPickerModelNG::SetGradientHeight(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetGradientHeight(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

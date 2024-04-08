@@ -110,6 +110,26 @@ public:
         needSetInvisible_ = needSetInvisible;
     }
 
+    std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPushAnimations()
+    {
+        return pushAnimations_;
+    }
+
+    std::list<std::shared_ptr<AnimationUtils::Animation>>& GetPopAnimations()
+    {
+        return popAnimations_;
+    }
+
+    void CleanPushAnimations()
+    {
+        pushAnimations_.clear();
+    }
+
+    void CleanPopAnimations()
+    {
+        popAnimations_.clear();
+    }
+
     bool CheckCanHandleBack();
 
     void OnInspectorIdUpdate(const std::string& id) override;
@@ -123,9 +143,11 @@ public:
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
 
-    void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
-    void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
-    void TitleOpacityAnimation(const RefPtr<FrameNode>& node, bool isTransitionOut);
+    std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
+        const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
+    std::shared_ptr<AnimationUtils::Animation> MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
+    std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(
+        const RefPtr<FrameNode>& node, bool isTransitionOut);
     void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
     void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated = true);
     void NotifyPageHide();
@@ -143,8 +165,14 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
 
+    WeakPtr<UINode> GetCustomNode() const {
+        return customNode_;
+    }
+
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
+
+    void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
@@ -154,15 +182,20 @@ private:
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
         const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+    bool FindNavigationParent(const std::string& parentName);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    WeakPtr<UINode> customNode_;
+    std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
     std::string curId_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

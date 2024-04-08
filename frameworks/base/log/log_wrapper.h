@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <unordered_map>
 
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
@@ -32,6 +33,17 @@
 #define ACE_LOG_ID_WITH_REASON
 #endif
 
+#if defined(USE_HILOG)
+#include "hilog/log.h"
+constexpr uint32_t ACE_DOMAIN = 0xD003900;
+constexpr uint32_t APP_DOMAIN = 0xC0D0;
+#define PRINT_LOG(level, tag, fmt, ...) \
+    HILOG_IMPL(LOG_CORE, LOG_##level, (tag + ACE_DOMAIN), (OHOS::Ace::g_DOMAIN_CONTENTS_MAP.at(tag)),         \
+            ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                            \
+            __FUNCTION__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__)
+
+#define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "JSAPP", fmt, ##__VA_ARGS__)
+#else
 #define PRINT_LOG(level, tag, fmt, ...)                                                                       \
     do {                                                                                                      \
         if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                  \
@@ -41,11 +53,17 @@
         }                                                                                                     \
     } while (0)
 
-#define LOGD(fmt, ...) TAG_LOGD(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
-#define LOGI(fmt, ...) TAG_LOGI(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
-#define LOGW(fmt, ...) TAG_LOGW(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
-#define LOGE(fmt, ...) TAG_LOGE(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
-#define LOGF(fmt, ...) TAG_LOGF(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
+#define PRINT_APP_LOG(level, fmt, ...) \
+    OHOS::Ace::LogWrapper::PrintLog(   \
+        OHOS::Ace::LogDomain::JS_APP, OHOS::Ace::LogLevel::level, OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN,   \
+        fmt, ##__VA_ARGS__)
+#endif
+
+#define LOGD(fmt, ...) TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
+#define LOGI(fmt, ...) TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
+#define LOGW(fmt, ...) TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
+#define LOGE(fmt, ...) TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
+#define LOGF(fmt, ...) TAG_LOGF(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
 
 #define TAG_LOGD(tag, fmt, ...) PRINT_LOG(DEBUG, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGI(tag, fmt, ...) PRINT_LOG(INFO, tag, fmt, ##__VA_ARGS__)
@@ -56,20 +74,43 @@
 #define LOG_DESTROY() LOGI("destroyed")
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
 
-#define PRINT_APP_LOG(level, fmt, ...) \
-    OHOS::Ace::LogWrapper::PrintLog(   \
-        OHOS::Ace::LogDomain::JS_APP, OHOS::Ace::LogLevel::level, OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
-
 #define APP_LOGD(fmt, ...) PRINT_APP_LOG(DEBUG, fmt, ##__VA_ARGS__)
 #define APP_LOGI(fmt, ...) PRINT_APP_LOG(INFO, fmt, ##__VA_ARGS__)
 #define APP_LOGW(fmt, ...) PRINT_APP_LOG(WARN, fmt, ##__VA_ARGS__)
 #define APP_LOGE(fmt, ...) PRINT_APP_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define APP_LOGF(fmt, ...) PRINT_APP_LOG(FATAL, fmt, ##__VA_ARGS__)
 
-namespace OHOS::Ace {
+#define JSON_STRING_PUT_INT(jsonValue, var) jsonValue->Put(#var, static_cast<int64_t>(var))
+#define JSON_STRING_PUT_BOOL(jsonValue, var) jsonValue->Put(#var, var)
+#define JSON_STRING_PUT_STRING(jsonValue, var) jsonValue->Put(#var, var.c_str())
+#define JSON_STRING_PUT_STRINGABLE(jsonValue, var) jsonValue->Put(#var, var.ToString().c_str())
 
-enum class AceLogTag : uint8_t {
-    DEFAULT = 0,              // C03900
+#define JSON_STRING_PUT_OPTIONAL_INT(jsonValue, var)          \
+    do {                                                      \
+        if (var) {                                            \
+            jsonValue->Put(#var, static_cast<int64_t>(*var)); \
+        }                                                     \
+    } while (0)                                               \
+
+#define JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, var) \
+    do {                                                \
+        if (var) {                                      \
+            jsonValue->Put(#var, var->c_str());         \
+        }                                               \
+    } while (0)                                         \
+
+
+#define JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, var) \
+    do {                                                    \
+        if (var) {                                          \
+            jsonValue->Put(#var, var->ToString().c_str());  \
+        }                                                   \
+    } while (0)                                             \
+
+
+namespace OHOS::Ace {
+enum AceLogTag : uint8_t {
+    ACE_DEFAULT_DOMAIN = 0,          // C03900
     ACE_ALPHABET_INDEXER,     // C03901
     ACE_COUNTER,              // C03902
     ACE_SUB_WINDOW,           // C03903
@@ -138,10 +179,15 @@ enum class AceLogTag : uint8_t {
     ACE_TEXT_CLOCK,           // C03942
     ACE_FOLDER_STACK,         // C03943
     ACE_SELECT_COMPONENT,     // C03944
+    ACE_STATE_STYLE,          // C03945
+    ACE_SEARCH,               // C03946
+    ACE_STATE_MGMT,           // C03947
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use
 };
+
+ACE_FORCE_EXPORT extern const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP;
 
 enum class LogDomain : uint32_t {
     FRAMEWORK = 0,

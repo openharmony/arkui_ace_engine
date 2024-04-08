@@ -22,19 +22,25 @@ namespace OHOS::Ace::NG::ViewModel {
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId);
 
+ArkUI_CharPtr GetName(void* nativePtr);
+
 void DisposeNode(void* nativePtr);
 
 void AddChild(void* parentNode, void* childNode);
 
 void RemoveChild(void* parentNode, void* childNode);
 
+void InsertChildAt(void* parentNode, void* childNode, int32_t position);
+
 void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode);
+
+void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode);
 
 void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags);
 
 ExtensionCompanionNode* GetCompanion(void* nodePtr);
 
-void SetCustomCallback(void* nodePtr, ArkUI_Int32 callback);
+void SetCustomCallback(ArkUIVMContext context, void* nodePtr, ArkUI_Int32 callback);
 
 void SetCallbackMethod(ArkUIAPICallbackMethod* method);
 
@@ -45,5 +51,11 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
 ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
 
 ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
+
+ArkUI_Bool IsBuilderNode(void* nodePtr);
+
+void SetAttachNodePtr(ArkUINodeHandle nodePtr, void* attachNode);
+
+void* GetAttachNodePtr(ArkUINodeHandle nodePtr);
 
 } // namespace OHOS::Ace::NG::ViewModel

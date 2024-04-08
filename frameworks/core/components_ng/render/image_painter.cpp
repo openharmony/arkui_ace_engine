@@ -103,9 +103,10 @@ void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, cons
         }
     }
     canvas.AttachBrush(brush);
-    RSRoundRect rSRoundRect(RSRect(offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
-                            contentSize.Height() + offset.GetY()), radiusXY);
-    canvas.DrawRoundRect(rSRoundRect);
+    RSRoundRect rsRoundRect(
+        RSRect(offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(), contentSize.Height() + offset.GetY()),
+        radiusXY);
+    canvas.DrawRoundRect(rsRoundRect);
     canvas.DetachBrush();
 }
 
@@ -307,6 +308,9 @@ float CalculateBgWidth(const SizeF& boxPaintSize_, const SizeF& srcSize, const B
             width = paintAspectRatio >= srcAspectRatio ? srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height())
                                                        : boxPaintSize_.Width();
             break;
+        case BackgroundImageSizeType::FILL:
+            width = boxPaintSize_.Width();
+            break;
         case BackgroundImageSizeType::LENGTH:
             width = bgImageSize.GetSizeValueX();
             break;
@@ -333,6 +337,9 @@ float CalculateBgHeight(const SizeF& boxPaintSize_, const SizeF& srcSize, const 
         case BackgroundImageSizeType::CONTAIN:
             height = paintAspectRatio >= srcAspectRatio ? boxPaintSize_.Height()
                                                         : srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width());
+            break;
+        case BackgroundImageSizeType::FILL:
+            height = boxPaintSize_.Height();
             break;
         case BackgroundImageSizeType::LENGTH:
             height = bgImageSize.GetSizeValueY();

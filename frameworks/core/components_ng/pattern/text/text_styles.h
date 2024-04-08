@@ -97,6 +97,9 @@ TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
     const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
     const RefPtr<TextTheme>& textTheme);
 
+void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
+    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle);
+
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
 std::string GetFontWeightInJson(const std::optional<FontWeight>& value);

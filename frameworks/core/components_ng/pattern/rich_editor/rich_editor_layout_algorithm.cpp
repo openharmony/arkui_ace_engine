@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/render/paragraph.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
@@ -32,11 +33,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
         auto span = *it;
         // only checking the last char
         if (StringUtils::ToWstring(span->content).back() == L'\n') {
-            if (std::next(it) != spans.end()) {
-                span->MarkNeedRemoveNewLine(true);
-            } else {
-                span->MarkNeedRemoveNewLine(false);
-            }
+            span->MarkNeedRemoveNewLine(true);
             std::list<RefPtr<SpanItem>> newGroup;
             newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
             spans_.push_back(std::move(newGroup));
@@ -56,12 +53,46 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
     if (!spans.empty()) {
         spans_.push_back(std::move(spans));
     }
+    AppendNewLineSpan();
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
+}
+
+void RichEditorLayoutAlgorithm::AppendNewLineSpan()
+{
+    auto lastSpan = allSpans_.back();
+    CHECK_NULL_VOID(lastSpan);
+    if (StringUtils::ToWstring(lastSpan->content).back() == L'\n') {
+        std::list<RefPtr<SpanItem>> newGroup;
+        auto tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
+        tailNewLineSpan->content = "\n";
+        tailNewLineSpan->MarkNeedRemoveNewLine(true);
+        CopySpanStyle(lastSpan, tailNewLineSpan);
+        newGroup.push_back(tailNewLineSpan);
+        spans_.push_back(std::move(newGroup));
+    }
+}
+
+void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target)
+{
+    if (source->fontStyle->HasFontSize()) {
+        target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
+    }
+
+    if (source->textLineStyle->HasLeadingMargin()) {
+        auto leadingMargin = source->textLineStyle->GetLeadingMarginValue();
+        leadingMargin.pixmap.Reset();
+        target->textLineStyle->UpdateLeadingMargin(leadingMargin);
+    }
+
+    if (source->textLineStyle->HasTextAlign()) {
+        target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
+    }
 }
 
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    ACE_SCOPED_TRACE("RichEditorMeasureContent");
     pManager_->Reset();
     SetPlaceholder(layoutWrapper);
     if (spans_.empty()) {
@@ -79,6 +110,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     float textHeight = 0.0f;
     for (auto&& group : spans_) {
         // layout each paragraph
+        ACE_SCOPED_TRACE("LayoutEachParagraph");
         SetSpans(group);
         SetParagraph(nullptr);
         auto size = TextLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
@@ -119,7 +151,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     if (!res.IsPositive()) {
         return std::nullopt;
     }
-    richTextRect_.SetSize(SizeF(res.Width(), textHeight));
+    UpdateRichTextRect(res, textHeight, layoutWrapper);
     auto contentHeight = res.Height();
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         contentHeight = std::min(contentHeight, contentConstraint.selfIdealSize.Height().value());
@@ -127,6 +159,20 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
     }
     return SizeF(res.Width(), contentHeight);
+}
+
+void RichEditorLayoutAlgorithm::UpdateRichTextRect(
+    const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsShowPlaceholder()) {
+        richTextRect_.SetSize(SizeF(0.0f, 0.0f));
+    } else {
+        richTextRect_.SetSize(SizeF(res.Width(), textHeight));
+    }
 }
 
 void RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)

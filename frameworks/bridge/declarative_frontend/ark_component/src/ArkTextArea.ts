@@ -31,6 +31,86 @@ class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   }
 }
 
+class TextAreaDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaDecoration');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetDecoration(node);
+    } else {
+      getUINativeModule().textArea.setDecoration(node, this.value!.type, this.value!.color);
+    }
+  }
+  
+  checkObjectDiff(): boolean {
+    if (this.stageValue.type !== this.value.type) {
+      return true;
+    }
+    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
+      return !isResourceEqual(this.stageValue.color, this.value.color);
+    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+      return !(this.stageValue.color === this.value.color);
+    } else {
+      return true;
+    }
+  }
+}
+
+class TextAreaLetterSpacingModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaLetterSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetLetterSpacing(node);
+    } else {
+      getUINativeModule().textArea.setLetterSpacing(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaLineHeightModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaLineHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetLineHeight(node);
+    } else {
+      getUINativeModule().textArea.setLineHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
+  constructor(value: WordBreak) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaWordBreak');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetWordBreak(node);
+    } else {
+      getUINativeModule().textArea.setWordBreak(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
     super(value);
@@ -313,9 +393,26 @@ class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter
   }
 }
 
+class TextAreaFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetFontFeature(node);
+    } else {
+      getUINativeModule().textArea.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   type(value: TextAreaType): TextAreaAttribute {
     throw new Error('Method not implemented.');
@@ -418,18 +515,35 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, value);
     return this;
   }
+  fontFeature(value: FontFeature): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontFeatureModifier.identity, TextAreaFontFeatureModifier, value);
+    return this;
+  }
   customKeyboard(value: CustomBuilder): TextAreaAttribute {
     throw new Error('Method not implemented.');
   }
+  decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
+    return this;
+  }
+  letterSpacing(value: number | string): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLetterSpacingModifier.identity, TextAreaLetterSpacingModifier, value);
+    return this;
+  }
+  lineHeight(value: number | string | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
+    return this;
+  }
+  wordBreak(value: WordBreak): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.TextArea.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextAreaComponent(nativeNode);
+globalThis.TextArea.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextAreaComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextAreaModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

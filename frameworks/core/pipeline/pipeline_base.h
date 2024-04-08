@@ -254,7 +254,7 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
-    virtual bool RequestFocus(const std::string& targetNodeId)
+    virtual bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false)
     {
         return false;
     }
@@ -904,6 +904,8 @@ public:
 
     virtual void FlushPipelineImmediately() = 0;
 
+    virtual void FlushOnceVsyncTask() = 0;
+
     // get animateTo closure option
     AnimationOption GetSyncAnimationOption()
     {
@@ -1121,6 +1123,8 @@ public:
     virtual void AddSyncGeometryNodeTask(std::function<void()>&& task) {}
 
     virtual void FlushSyncGeometryNodeTasks() {}
+
+    virtual void ChangeSensitiveNodes(bool flag) {}
 
 protected:
     virtual bool MaybeRelease() override;

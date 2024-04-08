@@ -32,6 +32,8 @@ Global::Resource::DeviceType ConvertDeviceTypeToGlobal(DeviceType type)
             return Global::Resource::DeviceType::DEVICE_TABLET;
         case DeviceType::TWO_IN_ONE:
             return Global::Resource::DeviceType::DEVICE_TWOINONE;
+        case DeviceType::WEARABLE:
+            return Global::Resource::DeviceType::DEVICE_WEARABLE;
         default:
             return Global::Resource::DeviceType::DEVICE_NOT_SET;
     }

@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_painter.h"
 
 namespace OHOS::Ace::NG {
 class RichEditorOverlayModifier : public TextOverlayModifier {
@@ -60,6 +61,7 @@ private:
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<PropertySizeF> frameSize_;
+    MagnifierPainter magnifierPainter_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

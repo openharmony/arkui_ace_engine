@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::Platform {
 
-using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t);
+using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t, const uint64_t);
 using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
 using FastPreviewErrorCallback = void (*)(const std::string& jsonStr);
 

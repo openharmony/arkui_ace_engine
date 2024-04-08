@@ -42,16 +42,15 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     sliderContentModifier_->SetStepRatio(parameters_.stepRatio);
     sliderContentModifier_->SetBoardColor();
     sliderContentModifier_->SetSliderMode(paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET));
-    auto trackBorderRadius = paintProperty->GetTrackBorderRadiusValue(Dimension(parameters_.trackThickness * HALF));
-    if (GreatOrEqual(trackBorderRadius.ConvertToPx(), parameters_.trackThickness * HALF)) {
-        trackBorderRadius = Dimension(parameters_.trackThickness * HALF);
-    }
-    sliderContentModifier_->SetTrackBorderRadius(trackBorderRadius.ConvertToPx());
+    UpdateBorderRadius(paintProperty);
     auto stepSize = paintProperty->GetStepSizeValue(sliderTheme->GetMarkerSize());
     sliderContentModifier_->SetStepSize(stepSize.ConvertToPx());
     auto stepColor = paintProperty->GetStepColorValue(sliderTheme->GetMarkerColor());
     sliderContentModifier_->SetStepColor(stepColor);
     sliderContentModifier_->SetShowSteps(paintProperty->GetShowStepsValue(false));
+    sliderContentModifier_->SetSliderInteractionMode(
+        paintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK));
+    sliderContentModifier_->SetMinResponsiveDistance(paintProperty->GetMinResponsiveDistanceValue(0.0f));
     auto blockSize = parameters_.blockSize;
     if (paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET) != SliderModelNG::SliderMode::OUTSET) {
         blockSize = SizeF(std::min(blockSize.Width(), parameters_.trackThickness),
@@ -64,6 +63,26 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     sliderContentModifier_->SetBlockShape(paintProperty->GetBlockShapeValue(MakeRefPtr<BasicShape>()));
     sliderContentModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
     sliderContentModifier_->UpdateContentDirtyRect(paintWrapper->GetGeometryNode()->GetFrameSize());
+}
+
+void SliderPaintMethod::UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintProperty)
+{
+    auto trackBorderRadius = paintProperty->GetTrackBorderRadiusValue(Dimension(parameters_.trackThickness * HALF));
+    if (GreatOrEqual(trackBorderRadius.ConvertToPx(), parameters_.trackThickness * HALF)) {
+        trackBorderRadius = Dimension(parameters_.trackThickness * HALF);
+    }
+    sliderContentModifier_->SetTrackBorderRadius(trackBorderRadius.ConvertToPx());
+    auto mode = paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET);
+    Dimension selectedBorderRadius;
+    if (mode == SliderModelNG::SliderMode::NONE) {
+        selectedBorderRadius = paintProperty->GetSelectedBorderRadiusValue(Dimension(0));
+    } else {
+        selectedBorderRadius = paintProperty->GetSelectedBorderRadiusValue(trackBorderRadius);
+    }
+    if (GreatOrEqual(selectedBorderRadius.ConvertToPx(), parameters_.trackThickness * HALF)) {
+        selectedBorderRadius = Dimension(parameters_.trackThickness * HALF);
+    }
+    sliderContentModifier_->SetSelectedBorderRadius(selectedBorderRadius.ConvertToPx());
 }
 
 void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)

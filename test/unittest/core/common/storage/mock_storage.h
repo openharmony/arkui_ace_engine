@@ -27,7 +27,7 @@ class MockDistributedStorage final : public Storage {
 public:
     std::string sessionId_;
     explicit MockDistributedStorage(const std::string& sessionId, const RefPtr<TaskExecutor>& taskExecutor)
-        : Storage(taskExecutor), sessionId_(sessionId)
+        : Storage(), sessionId_(sessionId)
     {}
     ~MockDistributedStorage() override = default;
 
@@ -62,7 +62,7 @@ class MockStorageImpl : public Storage {
     DECLARE_ACE_TYPE(MockStorageImpl, Storage);
 
 public:
-    explicit MockStorageImpl(const RefPtr<TaskExecutor>& taskExecutor);
+    MockStorageImpl();
     ~MockStorageImpl() override = default;
     void SetString(const std::string& key, const std::string& value) override {};
     std::string GetString(const std::string& key) override
@@ -83,16 +83,16 @@ public:
     void Delete(const std::string& key) override {};
 };
 
-MockStorageImpl::MockStorageImpl(const RefPtr<TaskExecutor>& taskExecutor) : Storage(taskExecutor) {}
+MockStorageImpl::MockStorageImpl() : Storage() {}
 
 class MockStorageProxyImpl final : public StorageInterface {
 public:
     MockStorageProxyImpl() = default;
     ~MockStorageProxyImpl() override = default;
 
-    RefPtr<Storage> GetStorage(const RefPtr<TaskExecutor>& taskExecutor) const override
+    RefPtr<Storage> GetStorage() const override
     {
-        return AceType::MakeRefPtr<MockStorageImpl>(taskExecutor);
+        return AceType::MakeRefPtr<MockStorageImpl>();
     }
 };
 

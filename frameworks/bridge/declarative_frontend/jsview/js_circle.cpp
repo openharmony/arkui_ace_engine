@@ -62,13 +62,22 @@ void JSCircle::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSObject> params = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> width = params->GetProperty("width");
         CalcDimension dimWidth;
-        if (ParseJsDimensionVp(width, dimWidth)) {
-            circle->SetWidth(dimWidth);
-        }
         JSRef<JSVal> height = params->GetProperty("height");
         CalcDimension dimHeight;
-        if (ParseJsDimensionVp(height, dimHeight)) {
-            circle->SetHeight(dimHeight);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (ParseJsDimensionVp(width, dimWidth)) {
+                circle->SetWidth(dimWidth);
+            }
+            if (ParseJsDimensionVp(height, dimHeight)) {
+                circle->SetHeight(dimHeight);
+            }
+        } else {
+            if (ParseJsDimensionVpNG(width, dimWidth) && dimWidth.IsValid()) {
+                circle->SetWidth(dimWidth);
+            }
+            if (ParseJsDimensionVpNG(height, dimHeight) && dimHeight.IsValid()) {
+                circle->SetHeight(dimHeight);
+            }
         }
     }
     auto jsCircle = AceType::MakeRefPtr<JSCircle>();

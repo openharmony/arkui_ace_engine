@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
-const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
+const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
   'AAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAA' +
   'AAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABEZJREFUeNrt3D1rFFEUBuA' +
@@ -56,21 +56,22 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
 export class SelectTitleBar extends ViewPU {
   constructor(q7, r7, s7, t7 = -1, u7 = undefined, v7) {
     super(q7, s7, t7, v7);
-    if (typeof u7 === "function") {
+    if (typeof u7 === 'function') {
       this.paramsGenerator_ = u7;
     }
-    this.__selected = new ObservedPropertySimplePU(0, this, "selected");
+    this.__selected = new ObservedPropertySimplePU(0, this, 'selected');
     this.options = [];
     this.menuItems = [];
     this.subtitle = '';
     this.badgeValue = 0;
     this.hidesBackButton = false;
     this.onSelected = () => { };
-    this.__selectMaxWidth = new ObservedPropertySimplePU(0, this, "selectMaxWidth");
-    this.__backActive = new ObservedPropertySimplePU(false, this, "backActive");
+    this.__selectMaxWidth = new ObservedPropertySimplePU(0, this, 'selectMaxWidth');
+    this.__backActive = new ObservedPropertySimplePU(false, this, 'backActive');
     this.setInitiallyProvidedValue(r7);
     this.finalizeConstruction();
   }
+
   setInitiallyProvidedValue(p7) {
     if (p7.selected !== undefined) {
       this.selected = p7.selected;
@@ -100,13 +101,16 @@ export class SelectTitleBar extends ViewPU {
       this.backActive = p7.backActive;
     }
   }
+
   updateStateVars(o7) {
   }
+
   purgeVariableDependenciesOnElmtId(n7) {
     this.__selected.purgeDependencyOnElmtId(n7);
     this.__selectMaxWidth.purgeDependencyOnElmtId(n7);
     this.__backActive.purgeDependencyOnElmtId(n7);
   }
+
   aboutToBeDeleted() {
     this.__selected.aboutToBeDeleted();
     this.__selectMaxWidth.aboutToBeDeleted();
@@ -114,34 +118,42 @@ export class SelectTitleBar extends ViewPU {
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
+
   get selected() {
     return this.__selected.get();
   }
+
   set selected(m7) {
     this.__selected.set(m7);
   }
+
   get selectMaxWidth() {
     return this.__selectMaxWidth.get();
   }
+
   set selectMaxWidth(l7) {
     this.__selectMaxWidth.set(l7);
   }
+
   get backActive() {
     return this.__backActive.get();
   }
+
   set backActive(k7) {
     this.__backActive.set(k7);
   }
+
   initialRender() {
     this.observeComponentCreation((d7, e7) => {
       ViewStackProcessor.StartGetAccessRecordingFor(d7);
       Flex.create({
         justifyContent: FlexAlign.SpaceBetween,
-        alignItems: ItemAlign.Stretch
+        alignItems: ItemAlign.Stretch,
       });
       Flex.width('100%');
       Flex.height(SelectTitleBar.totalHeight);
-      Flex.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+      Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
       Flex.onAreaChange((g7, h7) => {
         let i7 = Number(h7.width);
         if (!this.hidesBackButton) {
@@ -153,15 +165,14 @@ export class SelectTitleBar extends ViewPU {
           let j7 = this.menuItems.length;
           if (j7 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
             i7 -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
-          }
-          else if (j7 > 0) {
+          } else if (j7 > 0) {
             i7 -= ImageMenuItem.imageHotZoneWidth * j7;
           }
         }
         if (this.badgeValue) {
-          this.selectMaxWidth = i7 - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding - SelectTitleBar.badgePadding;
-        }
-        else {
+          this.selectMaxWidth = i7 - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
+          SelectTitleBar.rightPadding - SelectTitleBar.badgePadding;
+        } else {
           this.selectMaxWidth = i7 - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
         }
       });
@@ -173,7 +184,11 @@ export class SelectTitleBar extends ViewPU {
     this.observeComponentCreation((b7, c7) => {
       ViewStackProcessor.StartGetAccessRecordingFor(b7);
       Row.create();
-      Row.margin({ left: this.hidesBackButton ? { "id": -1, "type": 10002, params: ['sys.float.ohos_id_max_padding_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+      Row.margin({ left: this.hidesBackButton ? { 'id': -1, 'type': 10002,
+        params: ['sys.float.ohos_id_max_padding_start'], 'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002,
+        params: ['sys.float.ohos_id_default_padding_start'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
       if (!c7) {
         Row.pop();
       }
@@ -201,30 +216,29 @@ export class SelectTitleBar extends ViewPU {
                 let v6 = new ImageMenuItem(this, { item: {
                   value: PUBLIC_BACK,
                   isEnabled: true,
-                  action: () => this.backActive = true
-                }, index: -1 }, undefined, t6, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 97 });
+                  action: () => this.backActive = true,
+                }, index: -1 }, undefined, t6, () => { },
+                  { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 97 });
                 ViewPU.create(v6);
                 let w6 = () => {
                   return {
                     item: {
                       value: PUBLIC_BACK,
                       isEnabled: true,
-                      action: () => this.backActive = true
+                      action: () => this.backActive = true,
                     },
-                    index: -1
+                    index: -1,
                   };
                 };
                 v6.paramsGenerator_ = w6;
-              }
-              else {
+              } else {
                 this.updateStateVarsOfChildByElmtId(t6, {});
               }
               ViewStackProcessor.StopGetAccessRecording();
             });
           }
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
@@ -257,10 +271,12 @@ export class SelectTitleBar extends ViewPU {
               position: BadgePosition.Right,
               style: {
                 badgeSize: SelectTitleBar.badgeSize,
-                badgeColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                borderColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-                borderWidth: 0
-              }
+                badgeColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'],
+                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                borderColor: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'],
+                  'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                borderWidth: 0,
+              },
             });
             if (!k6) {
               Badge.pop();
@@ -271,7 +287,8 @@ export class SelectTitleBar extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(h6);
             Row.create();
             Row.justifyContent(FlexAlign.Start);
-            Row.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_l'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+            Row.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_l'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
             if (!i6) {
               Row.pop();
             }
@@ -281,10 +298,14 @@ export class SelectTitleBar extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(f6);
             Select.create(this.options);
             Select.selected(this.selected);
-            Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : "");
-            Select.font({ size: this.hidesBackButton && !this.subtitle
-              ? { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline7'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
-            Select.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '');
+            Select.font({ size: this.hidesBackButton && !this.subtitle ?
+              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
+            Select.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Select.backgroundColor(Color.Transparent);
             Select.onSelect(this.onSelected);
             Select.constraintSize({ maxWidth: this.selectMaxWidth });
@@ -298,8 +319,7 @@ export class SelectTitleBar extends ViewPU {
           Row.pop();
           Badge.pop();
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
           this.observeComponentCreation((z5, a6) => {
             ViewStackProcessor.StartGetAccessRecordingFor(z5);
@@ -314,10 +334,14 @@ export class SelectTitleBar extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(x5);
             Select.create(this.options);
             Select.selected(this.selected);
-            Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : "");
-            Select.font({ size: this.hidesBackButton && !this.subtitle
-              ? { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline7'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_headline8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
-            Select.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Select.value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '');
+            Select.font({ size: this.hidesBackButton && !this.subtitle ?
+              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+              { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
+            Select.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Select.backgroundColor(Color.Transparent);
             Select.onSelect(this.onSelected);
             Select.constraintSize({ maxWidth: this.selectMaxWidth });
@@ -355,8 +379,10 @@ export class SelectTitleBar extends ViewPU {
           this.observeComponentCreation((o5, p5) => {
             ViewStackProcessor.StartGetAccessRecordingFor(o5);
             Text.create(this.subtitle);
-            Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_over_line'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'],
+              'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.constraintSize({ maxWidth: this.selectMaxWidth });
@@ -369,8 +395,7 @@ export class SelectTitleBar extends ViewPU {
           Text.pop();
           Row.pop();
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
@@ -391,25 +416,25 @@ export class SelectTitleBar extends ViewPU {
             this.observeComponentCreation((c5, d5) => {
               ViewStackProcessor.StartGetAccessRecordingFor(c5);
               if (d5) {
-                let e5 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + SelectTitleBar.instanceCount++ }, undefined, c5, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 169 });
+                let e5 = new CollapsibleMenuSection(this, { menuItems: this.menuItems,
+                  index: 1 + SelectTitleBar.instanceCount++ }, undefined, c5, () => { },
+                  { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 169 });
                 ViewPU.create(e5);
                 let f5 = () => {
                   return {
                     menuItems: this.menuItems,
-                    index: 1 + SelectTitleBar.instanceCount++
+                    index: 1 + SelectTitleBar.instanceCount++,
                   };
                 };
                 e5.paramsGenerator_ = f5;
-              }
-              else {
+              } else {
                 this.updateStateVarsOfChildByElmtId(c5, {});
               }
               ViewStackProcessor.StopGetAccessRecording();
             });
           }
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
         });
       }
@@ -421,6 +446,7 @@ export class SelectTitleBar extends ViewPU {
     If.pop();
     Flex.pop();
   }
+
   rerender() {
     this.updateDirtyElements();
   }
@@ -436,19 +462,20 @@ SelectTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
   constructor(k4, l4, m4, n4 = -1, o4 = undefined, p4) {
     super(k4, m4, n4, p4);
-    if (typeof o4 === "function") {
+    if (typeof o4 === 'function') {
       this.paramsGenerator_ = o4;
     }
     this.menuItems = [];
     this.index = 0;
     this.firstFocusableIndex = -1;
-    this.__isPopupShown = new ObservedPropertySimplePU(false, this, "isPopupShown");
-    this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, "isMoreIconOnFocus");
-    this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, "isMoreIconOnHover");
-    this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, "isMoreIconOnClick");
+    this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
+    this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
+    this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
+    this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
     this.setInitiallyProvidedValue(l4);
     this.finalizeConstruction();
   }
+
   setInitiallyProvidedValue(j4) {
     if (j4.menuItems !== undefined) {
       this.menuItems = j4.menuItems;
@@ -472,14 +499,17 @@ class CollapsibleMenuSection extends ViewPU {
       this.isMoreIconOnClick = j4.isMoreIconOnClick;
     }
   }
+
   updateStateVars(i4) {
   }
+
   purgeVariableDependenciesOnElmtId(h4) {
     this.__isPopupShown.purgeDependencyOnElmtId(h4);
     this.__isMoreIconOnFocus.purgeDependencyOnElmtId(h4);
     this.__isMoreIconOnHover.purgeDependencyOnElmtId(h4);
     this.__isMoreIconOnClick.purgeDependencyOnElmtId(h4);
   }
+
   aboutToBeDeleted() {
     this.__isPopupShown.aboutToBeDeleted();
     this.__isMoreIconOnFocus.aboutToBeDeleted();
@@ -488,58 +518,74 @@ class CollapsibleMenuSection extends ViewPU {
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
+
   get isPopupShown() {
     return this.__isPopupShown.get();
   }
+
   set isPopupShown(g4) {
     this.__isPopupShown.set(g4);
   }
+
   get isMoreIconOnFocus() {
     return this.__isMoreIconOnFocus.get();
   }
+
   set isMoreIconOnFocus(f4) {
     this.__isMoreIconOnFocus.set(f4);
   }
+
   get isMoreIconOnHover() {
     return this.__isMoreIconOnHover.get();
   }
+
   set isMoreIconOnHover(e4) {
     this.__isMoreIconOnHover.set(e4);
   }
+
   get isMoreIconOnClick() {
     return this.__isMoreIconOnClick.get();
   }
+
   set isMoreIconOnClick(d4) {
     this.__isMoreIconOnClick.set(d4);
   }
+
   getMoreIconFgColor() {
-    return this.isMoreIconOnClick
-      ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    return this.isMoreIconOnClick ?
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
   }
+
   getMoreIconBgColor() {
     if (this.isMoreIconOnClick) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    }
-    else if (this.isMoreIconOnHover) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    }
-    else {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    } else if (this.isMoreIconOnHover) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    } else {
       return Color.Transparent;
     }
   }
+
   aboutToAppear() {
     this.menuItems.forEach((b4, c4) => {
-      if (b4.isEnabled && this.firstFocusableIndex == -1 && c4 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+      if (b4.isEnabled && this.firstFocusableIndex === -1 && c4 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + c4 + 1;
       }
     });
   }
+
   initialRender() {
     this.observeComponentCreation((y3, z3) => {
       ViewStackProcessor.StartGetAccessRecordingFor(y3);
       Column.create();
       Column.height('100%');
-      Column.margin({ right: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_default_padding_end'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+      Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
       Column.justifyContent(FlexAlign.Center);
       if (!z3) {
         Column.pop();
@@ -568,17 +614,17 @@ class CollapsibleMenuSection extends ViewPU {
                 this.observeComponentCreation((q3, r3) => {
                   ViewStackProcessor.StartGetAccessRecordingFor(q3);
                   if (r3) {
-                    let s3 = new ImageMenuItem(this, { item: o3, index: this.index * 1000 + n3 + 1 }, undefined, q3, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 244 });
+                    let s3 = new ImageMenuItem(this, { item: o3, index: this.index * 1000 + n3 + 1 }, undefined, q3,
+                      () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 244 });
                     ViewPU.create(s3);
                     let t3 = () => {
                       return {
                         item: o3,
-                        index: this.index * 1000 + n3 + 1
+                        index: this.index * 1000 + n3 + 1,
                       };
                     };
                     s3.paramsGenerator_ = t3;
-                  }
-                  else {
+                  } else {
                     this.updateStateVarsOfChildByElmtId(q3, {});
                   }
                   ViewStackProcessor.StopGetAccessRecording();
@@ -593,8 +639,7 @@ class CollapsibleMenuSection extends ViewPU {
           });
           ForEach.pop();
         });
-      }
-      else {
+      } else {
         this.ifElseBranchUpdateFunction(1, () => {
           this.observeComponentCreation((s2, t2) => {
             ViewStackProcessor.StartGetAccessRecordingFor(s2);
@@ -605,24 +650,25 @@ class CollapsibleMenuSection extends ViewPU {
                 this.observeComponentCreation((a3, b3) => {
                   ViewStackProcessor.StartGetAccessRecordingFor(a3);
                   if (b3) {
-                    let c3 = new ImageMenuItem(this, { item: y2, index: this.index * 1000 + x2 + 1 }, undefined, a3, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 248 });
+                    let c3 = new ImageMenuItem(this, { item: y2, index: this.index * 1000 + x2 + 1 }, undefined, a3,
+                      () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 248 });
                     ViewPU.create(c3);
                     let d3 = () => {
                       return {
                         item: y2,
-                        index: this.index * 1000 + x2 + 1
+                        index: this.index * 1000 + x2 + 1,
                       };
                     };
                     c3.paramsGenerator_ = d3;
-                  }
-                  else {
+                  } else {
                     this.updateStateVarsOfChildByElmtId(a3, {});
                   }
                   ViewStackProcessor.StopGetAccessRecording();
                 });
               }
             };
-            this.forEachUpdateFunction(s2, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), u2, undefined, true, false);
+            this.forEachUpdateFunction(s2, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+              u2, undefined, true, false);
             if (!t2) {
               ForEach.pop();
             }
@@ -638,17 +684,20 @@ class CollapsibleMenuSection extends ViewPU {
             Row.foregroundColor(this.getMoreIconFgColor());
             Row.backgroundColor(this.getMoreIconBgColor());
             Row.justifyContent(FlexAlign.Center);
-            ViewStackProcessor.visualState("focused");
+            ViewStackProcessor.visualState('focused');
             Row.border({
-              radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+              radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
               width: ImageMenuItem.focusBorderWidth,
-              color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              style: BorderStyle.Solid
+              color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              style: BorderStyle.Solid,
             });
-            ViewStackProcessor.visualState("normal");
+            ViewStackProcessor.visualState('normal');
             Row.border({
-              radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-              width: 0
+              radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+              width: 0,
             });
             ViewStackProcessor.visualState();
             Row.onFocus(() => this.isMoreIconOnFocus = true);
@@ -684,7 +733,7 @@ class CollapsibleMenuSection extends ViewPU {
                 if (!o2.isVisible) {
                   this.isMoreIconOnClick = false;
                 }
-              }
+              },
             });
             if (!h2) {
               Row.pop();
@@ -714,11 +763,14 @@ class CollapsibleMenuSection extends ViewPU {
     Row.pop();
     Column.pop();
   }
+
   popupBuilder(b1 = null) {
     this.observeComponentCreation((s1, t1) => {
       ViewStackProcessor.StartGetAccessRecordingFor(s1);
       Column.create();
-      Column.width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
+      Column.width(
+        ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum
+      );
       Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
       Column.onAppear(() => {
         focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
@@ -737,24 +789,26 @@ class CollapsibleMenuSection extends ViewPU {
           this.observeComponentCreation((m1, n1) => {
             ViewStackProcessor.StartGetAccessRecordingFor(m1);
             if (n1) {
-              let o1 = new ImageMenuItem(this, { item: k1, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + j1 }, undefined, m1, () => { }, { page: "library/src/main/ets/components/mainpage/MainPage.ets", line: 326 });
+              let o1 = new ImageMenuItem(this, { item: k1,
+                index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + j1 }, undefined, m1,
+                () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 326 });
               ViewPU.create(o1);
               let p1 = () => {
                 return {
                   item: k1,
-                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + j1
+                  index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + j1,
                 };
               };
               o1.paramsGenerator_ = p1;
-            }
-            else {
+            } else {
               this.updateStateVarsOfChildByElmtId(m1, {});
             }
             ViewStackProcessor.StopGetAccessRecording();
           });
         }
       };
-      this.forEachUpdateFunction(e1, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), g1, undefined, true, false);
+      this.forEachUpdateFunction(e1, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1,
+        this.menuItems.length), g1, undefined, true, false);
       if (!f1) {
         ForEach.pop();
       }
@@ -763,6 +817,7 @@ class CollapsibleMenuSection extends ViewPU {
     ForEach.pop();
     Column.pop();
   }
+
   rerender() {
     this.updateDirtyElements();
   }
@@ -773,17 +828,18 @@ CollapsibleMenuSection.marginsNum = 2;
 class ImageMenuItem extends ViewPU {
   constructor(v, w, x, y = -1, z = undefined, a1) {
     super(v, x, y, a1);
-    if (typeof z === "function") {
+    if (typeof z === 'function') {
       this.paramsGenerator_ = z;
     }
     this.item = {};
     this.index = 0;
-    this.__isOnFocus = new ObservedPropertySimplePU(false, this, "isOnFocus");
-    this.__isOnHover = new ObservedPropertySimplePU(false, this, "isOnHover");
-    this.__isOnClick = new ObservedPropertySimplePU(false, this, "isOnClick");
+    this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+    this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
+    this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
     this.setInitiallyProvidedValue(w);
     this.finalizeConstruction();
   }
+
   setInitiallyProvidedValue(u) {
     if (u.item !== undefined) {
       this.item = u.item;
@@ -801,13 +857,16 @@ class ImageMenuItem extends ViewPU {
       this.isOnClick = u.isOnClick;
     }
   }
+
   updateStateVars(t) {
   }
+
   purgeVariableDependenciesOnElmtId(s) {
     this.__isOnFocus.purgeDependencyOnElmtId(s);
     this.__isOnHover.purgeDependencyOnElmtId(s);
     this.__isOnClick.purgeDependencyOnElmtId(s);
   }
+
   aboutToBeDeleted() {
     this.__isOnFocus.aboutToBeDeleted();
     this.__isOnHover.aboutToBeDeleted();
@@ -815,39 +874,51 @@ class ImageMenuItem extends ViewPU {
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
+
   get isOnFocus() {
     return this.__isOnFocus.get();
   }
+
   set isOnFocus(r) {
     this.__isOnFocus.set(r);
   }
+
   get isOnHover() {
     return this.__isOnHover.get();
   }
+
   set isOnHover(q) {
     this.__isOnHover.set(q);
   }
+
   get isOnClick() {
     return this.__isOnClick.get();
   }
+
   set isOnClick(p) {
     this.__isOnClick.set(p);
   }
+
   getFgColor() {
-    return this.isOnClick
-      ? { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    return this.isOnClick ?
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+      { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
   }
+
   getBgColor() {
     if (this.isOnClick) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_click_effect'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    }
-    else if (this.isOnHover) {
-      return { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
-    }
-    else {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    } else if (this.isOnHover) {
+      return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'],
+        'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+    } else {
       return Color.Transparent;
     }
   }
+
   initialRender() {
     this.observeComponentCreation((e, f) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
@@ -859,17 +930,20 @@ class ImageMenuItem extends ViewPU {
       Row.backgroundColor(this.getBgColor());
       Row.justifyContent(FlexAlign.Center);
       Row.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
-      ViewStackProcessor.visualState("focused");
+      ViewStackProcessor.visualState('focused');
       Row.border({
-        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
+          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
         width: ImageMenuItem.focusBorderWidth,
-        color: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_focused_outline'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        style: BorderStyle.Solid
+        color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'],
+          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        style: BorderStyle.Solid,
       });
-      ViewStackProcessor.visualState("normal");
+      ViewStackProcessor.visualState('normal');
       Row.border({
-        radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        width: 0
+        radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'],
+          'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+        width: 0,
       });
       ViewStackProcessor.visualState();
       Row.onFocus(() => {
@@ -930,6 +1004,7 @@ class ImageMenuItem extends ViewPU {
     });
     Row.pop();
   }
+
   rerender() {
     this.updateDirtyElements();
   }
@@ -939,7 +1014,7 @@ ImageMenuItem.imageHotZoneWidth = 48;
 ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = 0.4;
-ImageMenuItem.focusablePrefix = "Id-SelectTitleBar-ImageMenuItem-";
+ImageMenuItem.focusablePrefix = 'Id-SelectTitleBar-ImageMenuItem-';
 export default {
-  SelectTitleBar: SelectTitleBar
+  SelectTitleBar: SelectTitleBar,
 };

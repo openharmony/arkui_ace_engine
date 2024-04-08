@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,13 @@ const ITEM_SPACE = 4;
 export class SwipeRefresher extends ViewPU {
   constructor(e, t, o, s = -1) {
     super(e, o, s);
-    this.__content = new SynchedPropertySimpleOneWayPU(t.content, this, "content");
-    this.__isLoading = new SynchedPropertySimpleOneWayPU(t.isLoading, this, "isLoading");
+    this.__content = new SynchedPropertySimpleOneWayPU(t.content, this, 'content');
+    this.__isLoading = new SynchedPropertySimpleOneWayPU(t.isLoading, this, 'isLoading');
     this.setInitiallyProvidedValue(t)
   }
 
   setInitiallyProvidedValue(e) {
-    void 0 !== e.content ? this.__content.set(e.content) : this.__content.set(null);
+    void 0 !== e.content ? this.__content.set(e.content) : this.__content.set('');
     void 0 !== e.isLoading ? this.__isLoading.set(e.isLoading) : this.__isLoading.set(!1)
   }
 
@@ -94,16 +94,16 @@ export class SwipeRefresher extends ViewPU {
       Text.fontColor({
         id: -1,
         type: 10001,
-        params: ["sys.color.ohos_id_color_text_secondary"],
-        bundleName: "",
-        moduleName: ""
+        params: ['sys.color.ohos_id_color_text_secondary'],
+        bundleName: '',
+        moduleName: '',
       });
       Text.fontSize({
         id: -1,
         type: 10002,
-        params: ["sys.float.ohos_id_text_size_body2"],
-        bundleName: "",
-        moduleName: ""
+        params: ['sys.float.ohos_id_text_size_body2'],
+        bundleName: '',
+        moduleName: '',
       });
       Text.padding({ top: 16, bottom: 16 });
       t || Text.pop();

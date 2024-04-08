@@ -217,6 +217,12 @@ enum class TextOverflow {
     MARQUEE,
 };
 
+enum class TextMarqueeState {
+    START = 0,
+    BOUNCE,
+    FINISH,
+};
+
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;
 enum class TextFieldOverflowX {
     VISIBLE,
@@ -748,6 +754,12 @@ enum class NodeRenderType : uint32_t {
     RENDER_TYPE_DISPLAY = 0,
     RENDER_TYPE_TEXTURE,
 };
+
+enum class MarqueeUpdateStrategy : uint32_t {
+    DEFAULT = 0,
+    PRESERVE_POSITION,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

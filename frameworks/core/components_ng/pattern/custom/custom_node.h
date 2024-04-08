@@ -101,6 +101,8 @@ public:
         return extraInfos_;
     }
 
+    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;

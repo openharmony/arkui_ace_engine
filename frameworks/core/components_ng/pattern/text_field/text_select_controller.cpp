@@ -84,8 +84,9 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     }
     OffsetF offset = Alignment::GetAlignPosition(contentRect_.GetSize(), rect.GetSize(), align);
     rect.SetTop(offset.GetY() + contentRect_.GetY());
-
-    AdjustHandleAtEdge(rect);
+    if (textAlign != TextAlign::END) {
+        AdjustHandleAtEdge(rect);
+    }
     return rect;
 }
 
@@ -148,6 +149,20 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
         UpdateRecordCaretIndex(caretInfo_.index);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
+    }
+}
+
+OffsetF TextSelectController::CalcCaretOffsetByOffset(const Offset& localOffset)
+{
+    auto index = ConvertTouchOffsetToPosition(localOffset);
+    AdjustCursorPosition(index, localOffset);
+    if (!contentController_->IsEmpty()) {
+        CaretMetricsF caretMetrics;
+        CalcCaretMetricsByPositionNearTouchOffset(index, caretMetrics,
+            OffsetF(static_cast<float>(localOffset.GetX()), static_cast<float>(localOffset.GetY())));
+        return caretMetrics.offset;
+    } else {
+        return CalculateEmptyValueCaretRect().GetOffset();
     }
 }
 
@@ -338,6 +353,7 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
     }
     textFiled->SetTextRect(textRect);
     AdjustHandleAtEdge(handleRect);
+    textFiled->UpdateScrollBarOffset();
 }
 
 void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
@@ -484,6 +500,10 @@ void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
 void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset)
 {
     auto index = ConvertTouchOffsetToPosition(localOffset);
+    if (localOffset.GetX() > contentRect_.GetX() + contentRect_.Width() && paragraph_) {
+        float boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
+        index = ConvertTouchOffsetToPosition({localOffset.GetX() + boundaryAdjustment, localOffset.GetY()});
+    }
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
     UpdateCaretOffset(TextAffinity::UPSTREAM);

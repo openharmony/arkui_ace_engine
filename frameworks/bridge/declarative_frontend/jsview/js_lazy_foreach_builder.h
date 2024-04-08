@@ -71,14 +71,14 @@ public:
         }
     }
 
-    void NotifyDataChanged(size_t index, RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild) override
+    void NotifyDataChanged(size_t index, const RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild) override
     {
         if (updateChangedNodeFlag_ && !isRebuild) {
             changedLazyForEachNodes_[index] = lazyForEachNode;
         }
     }
 
-    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override
+    void NotifyDataDeleted(const RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override
     {
         if (updateChangedNodeFlag_) {
             decltype(changedLazyForEachNodes_) temp(std::move(changedLazyForEachNodes_));
@@ -183,6 +183,51 @@ public:
         if (updateChangedNodeFlag_) {
             UpdateDependElmtIds(info.second, jsElmtIds, key);
         }
+        return info;
+    }
+
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndexNew(int32_t index,
+        std::map<int32_t, NG::LazyForEachChild>& cachedItems,
+        std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+    {
+        std::pair<std::string, RefPtr<NG::UINode>> info;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
+        if (getDataFunc_.IsEmpty()) {
+            return info;
+        }
+
+        JSRef<JSVal> params[paramType::MAX_PARAMS_SIZE];
+        params[paramType::Data] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+        params[paramType::Index] = JSRef<JSVal>::Make(ToJSValue(index));
+        std::string key;
+        auto cachedIter = cachedItems.find(index);
+        if (cachedIter != cachedItems.end() && !cachedIter->second.first.empty()) {
+            key = cachedIter->second.first;
+        } else {
+            key = keyGenFunc_(params[paramType::Data], index);
+        }
+        auto expiringIter = expiringItems.find(key);
+        if (expiringIter != expiringItems.end()) {
+            info.first = key;
+            info.second = expiringIter->second.second;
+            expiringItems.erase(expiringIter);
+            return info;
+        }
+
+        NG::ScopedViewStackProcessor scopedViewStackProcessor;
+        auto* viewStack = NG::ViewStackProcessor::GetInstance();
+        if (parentView_) {
+            parentView_->MarkLazyForEachProcess(key);
+        }
+        viewStack->PushKey(key);
+        params[paramType::Initialize] = JSRef<JSVal>::Make(ToJSValue(true));
+        itemGenFunc_->Call(JSRef<JSObject>(), paramType::MIN_PARAMS_SIZE, params);
+        viewStack->PopKey();
+        if (parentView_) {
+            parentView_->ResetLazyForEachProcess();
+        }
+        info.first = key;
+        info.second = viewStack->Finish();
         return info;
     }
 

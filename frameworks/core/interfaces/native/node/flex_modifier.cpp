@@ -29,6 +29,43 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
+
+int ParseFlexToWrap(int align)
+{
+    FlexAlign alignment = FlexAlign::AUTO;
+    switch (align) {
+        case NUM_0: //WrapAlignment::START
+            alignment = FlexAlign::FLEX_START;
+            break;
+        case NUM_1: //WrapAlignment::CENTER
+            alignment = FlexAlign::CENTER;
+            break;
+        case NUM_2: //WrapAlignment::END
+            alignment = FlexAlign::FLEX_END;
+            break;
+        case NUM_3: //WrapAlignment::SPACE_AROUND
+            alignment = FlexAlign::SPACE_AROUND;
+            break;
+        case NUM_4: //WrapAlignment::SPACE_BETWEEN
+            alignment = FlexAlign::SPACE_BETWEEN;
+            break;
+        case NUM_5: //WrapAlignment::STRETCH
+            alignment = FlexAlign::STRETCH;
+            break;
+        case NUM_6: //WrapAlignment::SPACE_EVENLY
+            alignment = FlexAlign::SPACE_EVENLY;
+            break;
+        case NUM_7: //WrapAlignment::BASELINE
+            alignment = FlexAlign::BASELINE;
+            break;
+        default:
+            break;
+    }
+    return static_cast<int32_t>(alignment);
+}
 
 void SetFlexOptions(ArkUINodeHandle node, int* options, int length)
 {
@@ -97,9 +134,15 @@ void GetFlexOptions(ArkUINodeHandle node, ArkUIFlexOptions* options)
     CHECK_NULL_VOID(frameNode);
     options->direction = FlexModelNG::GetFlexDirection(frameNode);
     options->wrap = FlexModelNG::GetFlexWrap(frameNode);
-    options->justifyContent = FlexModelNG::GetFlexJustifyContent(frameNode);
-    options->alignItems = FlexModelNG::GetFlexAlignItems(frameNode);
-    options->alignContent = FlexModelNG::GetFlexAlignContent(frameNode);
+    if (FlexModelNG::GetFlexWrap(frameNode) <= 0) {
+        options->justifyContent = FlexModelNG::GetFlexJustifyContent(frameNode);
+        options->alignItems = FlexModelNG::GetFlexAlignItems(frameNode);
+        options->alignContent = FlexModelNG::GetFlexAlignContent(frameNode);
+    } else {
+        options->justifyContent = ParseFlexToWrap(FlexModelNG::GetFlexJustifyContent(frameNode));
+        options->alignItems = ParseFlexToWrap(FlexModelNG::GetFlexAlignItems(frameNode));
+        options->alignContent = ParseFlexToWrap(FlexModelNG::GetFlexAlignContent(frameNode));
+    }
 }
 
 namespace NodeModifier {

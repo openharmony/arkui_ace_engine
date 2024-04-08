@@ -30,7 +30,7 @@ frameworks/core/components_ng/render/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
-frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo @houhaoyu
 frameworks/core/components_ng/manager/safe_area/  @xiexiyun
 
 [Common source]
@@ -50,12 +50,12 @@ frameworks/bridge/declarative_frontend/view_stack_processor.h    @yan-shuifeng @
 
 [UI Components]
 frameworks/core/components_ng/pattern/ability_component/  @lushi1202
-frameworks/core/components_ng/pattern/action_sheet/  @cheng-feiwang
+frameworks/core/components_ng/pattern/action_sheet/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/animator/  @hehongyang9
 frameworks/core/components_ng/pattern/app_bar/  @benb365 @qsluochen
 frameworks/core/components_ng/pattern/badge/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/blank/  @xiexiyun
-frameworks/core/components_ng/pattern/bubble/  @cheng-feiwang
+frameworks/core/components_ng/pattern/bubble/  @futurescape
 frameworks/core/components_ng/pattern/button/  @fredtt
 frameworks/core/components_ng/pattern/calendar/  @techbuilding
 frameworks/core/components_ng/pattern/canvas_context/  @keerecles
@@ -68,7 +68,7 @@ frameworks/core/components_ng/pattern/counter/  @xuqinfeng1996
 frameworks/core/components_ng/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/pattern/custom_paint/  @keerecles
 frameworks/core/components_ng/pattern/data_panel/  @Hu_ZeQi
-frameworks/core/components_ng/pattern/dialog/  @cheng-feiwang
+frameworks/core/components_ng/pattern/dialog/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/divider/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/effect_component/  @liuchao92
 frameworks/core/components_ng/pattern/flex/  @xiexiyun
@@ -136,7 +136,7 @@ frameworks/core/components_ng/pattern/text_input/  @lijuan124
 frameworks/core/components_ng/pattern/text_picker/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/texttimer/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/time_picker/  @luoying_ace_admin
-frameworks/core/components_ng/pattern/toast/  @cheng-feiwang
+frameworks/core/components_ng/pattern/toast/  @futurescape
 frameworks/core/components_ng/pattern/toggle/  @fredtt
 frameworks/core/components_ng/pattern/ui_extension/  @lushi1202 @keerecles @ZhangYu-Home
 frameworks/core/components_ng/pattern/video/  @sunbees
@@ -150,7 +150,7 @@ frameworks/core/components/align/  @yangfan229
 frameworks/core/components/arc/  @aryawang
 frameworks/core/components/badge/  @Hu_ZeQi
 frameworks/core/components/box/  @yangfan229
-frameworks/core/components/bubble/  @cheng-feiwang
+frameworks/core/components/bubble/  @futurescape
 frameworks/core/components/button/  @fredtt
 frameworks/core/components/calendar/  @techbuilding
 frameworks/core/components/camera/  @cc520bf
@@ -162,13 +162,13 @@ frameworks/core/components/common/  @yan-shuifeng
 frameworks/core/components/container_modal/  @benb365
 frameworks/core/components/counter/  @xuqinfeng1996
 frameworks/core/components/coverage/  @
-frameworks/core/components/custom_dialog/  @cheng-feiwang
+frameworks/core/components/custom_dialog/  @luoying_ace_admin
 frameworks/core/components/custom_paint/  @keerecles
 frameworks/core/components/data_panel/  @Hu_ZeQi
-frameworks/core/components/declaration/  @cc520bf
-frameworks/core/components/dialog/  @cheng-feiwang
-frameworks/core/components/dialog_modal/  @cheng-feiwang
-frameworks/core/components/dialog_tween/  @cheng-feiwang
+frameworks/core/components/declaration/  @wu-yinxiao
+frameworks/core/components/dialog/  @luoying_ace_admin
+frameworks/core/components/dialog_modal/  @luoying_ace_admin
+frameworks/core/components/dialog_tween/  @luoying_ace_admin
 frameworks/core/components/display/  @
 frameworks/core/components/divider/  @luoying_ace_admin
 frameworks/core/components/drag_bar/  @
@@ -232,7 +232,7 @@ frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
 frameworks/core/components/stepper/  @tsj_2020
-frameworks/core/components/svg/  @xiexiyun
+frameworks/core/components/svg/  @wu-yinxiao
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
@@ -330,6 +330,9 @@ frameworks/core/components_ng/components.gni  @sunfei2021
 [Test source]
 test/mock/  @chenjiafeng-openharmony
 test/unittest/  @chenjiafeng-openharmony
+test/unittest/core/pattern/grid/ @zhoutianer
+test/unittest/core/pattern/swiper/ @zhoutianer
+test/unittest/core/pattern/waterflow/ @zhoutianer
 
 [Native Node Module]
 frameworks/core/interfaces/arkoala/ @nikolay-igotti

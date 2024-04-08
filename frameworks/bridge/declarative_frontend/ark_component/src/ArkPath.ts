@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkPathComponent extends ArkCommonShapeComponent implements PathAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   commands(value: string): this {
     modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
@@ -47,12 +47,10 @@ class CommandsModifier extends ModifierWithKey<string> {
 }
 
 // @ts-ignore
-globalThis.Path.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPathComponent(nativeNode);
+globalThis.Path.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkPathComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.PathModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

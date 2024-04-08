@@ -56,6 +56,20 @@ class GaugeModifier : public ContentModifier {
 public:
     GaugeModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern): pattern_(pattern)
     {
+        InitProperty();
+        AttachProperty(min_);
+        AttachProperty(max_);
+        AttachProperty(startAngle_);
+        AttachProperty(endAngle_);
+        AttachProperty(strokeWidth_);
+        AttachProperty(indicatorSpace_);
+        AttachProperty(gaugeTypeValue_);
+        AttachProperty(isShowIndicator_);
+
+        AttachProperty(shadowRadiusFloat_);
+        AttachProperty(shadowOffsetXFloat_);
+        AttachProperty(shadowOffsetYFloat_);
+
         value_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         AttachProperty(value_);
     }
@@ -66,8 +80,11 @@ public:
 
     float start_ = 0.0f;
     float end_ = 0.0f;
-    RefPtr<AnimatablePropertyFloat> value_;
+
 private:
+    void InitProperty();
+    void UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty);
+    
     void PaintCircularAndIndicator(RSCanvas& canvas);
     void PaintDraw(RSCanvas& canvas, RefPtr<GaugePaintProperty>& paintProperty,
         float startDegree, float sweepDegree, RenderRingInfo data);
@@ -103,6 +120,24 @@ private:
     void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos);
     void CreateDefaultTrianglePath(float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path);
     WeakPtr<Pattern> pattern_;
+
+    RefPtr<AnimatablePropertyFloat> value_;
+    RefPtr<AnimatablePropertyFloat> min_;
+    RefPtr<AnimatablePropertyFloat> max_;
+    RefPtr<AnimatablePropertyFloat> startAngle_;
+    RefPtr<AnimatablePropertyFloat> endAngle_;
+    RefPtr<AnimatablePropertyFloat> strokeWidth_;
+    RefPtr<AnimatablePropertyFloat> indicatorSpace_;
+    RefPtr<AnimatablePropertyFloat> gaugeTypeValue_;
+
+    RefPtr<AnimatablePropertyFloat> shadowRadiusFloat_;
+    RefPtr<AnimatablePropertyFloat> shadowOffsetXFloat_;
+    RefPtr<AnimatablePropertyFloat> shadowOffsetYFloat_;
+
+    std::vector<RefPtr<AnimatablePropertyColor>> colors_;
+    std::vector<RefPtr<AnimatablePropertyColor>> gradientColors_;
+
+    RefPtr<PropertyBool> isShowIndicator_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GaugeModifier);
 };

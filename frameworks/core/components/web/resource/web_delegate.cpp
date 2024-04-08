@@ -61,6 +61,8 @@
 #include "frameworks/base/utils/system_properties.h"
 #endif
 
+#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
+
 namespace OHOS::Ace {
 
 namespace {
@@ -425,12 +427,12 @@ std::string WebScreenCaptureRequestOhos::GetOrigin() const
 
 void WebScreenCaptureRequestOhos::SetCaptureMode(int32_t mode)
 {
-    config_.mode = mode;
+    config_->SetMode(mode);
 }
 
 void WebScreenCaptureRequestOhos::SetSourceId(int32_t sourceId)
 {
-    config_.sourceId = sourceId;
+    config_->SetSourceId(sourceId);
 }
 
 void WebScreenCaptureRequestOhos::Grant() const
@@ -649,7 +651,7 @@ NWebScreenLockCallbackImpl::NWebScreenLockCallbackImpl(const WeakPtr<PipelineBas
 
 void NWebScreenLockCallbackImpl::Handle(bool key)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
     auto weakContext = context_.Upgrade();
     CHECK_NULL_VOID(weakContext);
     auto window = weakContext->GetWindow();
@@ -661,7 +663,22 @@ WebDelegateObserver::~WebDelegateObserver() {}
 
 void WebDelegateObserver::NotifyDestory()
 {
+    if (delegate_) {
+        delegate_->UnRegisterScreenLockFunction();
+    }
     auto context = context_.Upgrade();
+    if (!context) {
+        auto currentHandler = OHOS::AppExecFwk::EventHandler::Current();
+        currentHandler->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto observer = weak.Upgrade();
+                CHECK_NULL_VOID(observer);
+                if (observer->delegate_) {
+                    observer->delegate_.Reset();
+                }
+            },
+            DESTRUCT_DELAY_MILLISECONDS);
+    }
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -676,14 +693,29 @@ void WebDelegateObserver::NotifyDestory()
         TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS);
 }
 
+void GestureEventResultOhos::SetGestureEventResult(bool result)
+{
+    if (result_) {
+        result_->SetGestureEventResult(result);
+        SetSendTask();
+    }
+}
+
+void WebDelegate::UnRegisterScreenLockFunction()
+{
+    if (nweb_) {
+        nweb_->UnRegisterScreenLockFunction(Container::CurrentId());
+    }
+}
+
 WebDelegate::~WebDelegate()
 {
+    OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
     }
     if (nweb_) {
-        nweb_->UnRegisterScreenLockFunction(GetRosenWindowId());
         nweb_->OnDestroy();
     }
     UnregisterSurfacePositionChangedCallback();
@@ -1734,6 +1766,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                          webCom->GetOverScrollId(), oldContext);
         onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
         onNavigationEntryCommittedV2_ = useNewPipe ? eventHub->GetOnNavigationEntryCommittedEvent() : nullptr;
+        OnNativeEmbedAllDestoryV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent() : nullptr;
         OnNativeEmbedLifecycleChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedLifecycleChangeId(), oldContext);
@@ -2706,7 +2739,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
-            delegate->nweb_->RegisterScreenLockFunction(delegate->GetRosenWindowId(), screenLockCallback);
+            delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
 #endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
             findListenerImpl->SetWebDelegate(weak);
@@ -2795,6 +2828,11 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
         return;
     }
 
+    if ((resizeWidth_ == width) && (resizeHeight_ == height)) {
+        return;
+    }
+    resizeWidth_ = width;
+    resizeHeight_ = height;
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3745,6 +3783,47 @@ void WebDelegate::OnWebviewShow()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::OnRenderToForeground()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToForeground");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "delegate->nweb_->OnRenderToForeground");
+                delegate->nweb_->OnRenderToForeground();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::OnRenderToBackground()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnRenderToBackground");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "delegate->nweb_->OnRenderToBackground");
+                delegate->nweb_->OnRenderToBackground();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
 {
     auto context = context_.Upgrade();
@@ -4069,6 +4148,9 @@ void WebDelegate::OnPageFinished(const std::string& param)
             if (onPageFinishedV2) {
                 onPageFinishedV2(std::make_shared<LoadWebPageFinishEvent>(param));
             }
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnScrollEndRecursive(std::nullopt);
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
         },
         TaskExecutor::TaskType::JS);
@@ -4630,6 +4712,13 @@ RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEv
     return result;
 }
 
+void WebDelegate::OnTooltip(const std::string& tooltip)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnTooltip(tooltip);
+}
+
 void WebDelegate::OnRequestFocus()
 {
     if (onRequestFocusV2_) {
@@ -5118,15 +5207,17 @@ void WebDelegate::OnAudioStateChanged(bool audible)
     }
 }
 
-void WebDelegate::OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone)
+void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
-    hotZone.width = touchHandleSize;
-    hotZone.height = touchHandleSize;
+    if (hotZone) {
+        hotZone->SetWidth(touchHandleSize);
+        hotZone->SetHeight(touchHandleSize);
+    }
 }
 
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
@@ -5330,10 +5421,8 @@ void WebDelegate::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupM
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
 {
     if (nweb_) {
-        OHOS::NWeb::DragEvent dragEvent;
-        dragEvent.x = x;
-        dragEvent.y = y;
-        dragEvent.action = static_cast<OHOS::NWeb::DragAction>(dragAction);
+        std::shared_ptr<NWebDragEventImpl> dragEvent =
+	    std::make_shared<NWebDragEventImpl>(x, y, static_cast<OHOS::NWeb::DragAction>(dragAction));
         nweb_->SendDragEvent(dragEvent);
     }
 }
@@ -5364,6 +5453,15 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
     if (nweb_) {
         nweb_->SetDrawRect(x, y, width, height);
     }
+}
+
+bool WebDelegate::GetPendingSizeStatus()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        return nweb_->GetPendingSizeStatus();
+    }
+    return false;
 }
 #endif
 
@@ -5618,6 +5716,22 @@ void WebDelegate::UpdateTextAutosizing(bool isTextAutosizing)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable, shouldOverlay]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
+            setting->SetNativeVideoPlayerConfig(enable, shouldOverlay);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
 #ifdef NG_BUILD
@@ -5711,7 +5825,7 @@ void WebDelegate::OnResizeNotWork()
     webPattern->OnResizeNotWork();
 }
 
-void WebDelegate::OnDateTimeChooserPopup(const OHOS::NWeb::DateTimeChooser& chooser,
+void WebDelegate::OnDateTimeChooserPopup(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallback> callback)
 {
@@ -5764,6 +5878,37 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     }
 }
 
+void WebDelegate::OnNativeEmbedAllDestory()
+{
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+    auto iter = embedDataInfo_.begin();
+    for (; iter != embedDataInfo_.end(); iter++) {
+        EmbedInfo info;
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
+        if (dataInfo == nullptr) {
+            continue;
+        }
+        std::string embedId = dataInfo->GetEmbedId();
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnNativeEmbedAllDestory embdedid=%{public}s", embedId.c_str());
+        std::string surfaceId = dataInfo->GetSurfaceId();
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        if (embedInfo) {
+            info = {embedInfo->GetId(), embedInfo->GetType(), embedInfo->GetSrc(),
+                embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
+                embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
+                embedInfo->GetParams()};
+        }
+        if (OnNativeEmbedAllDestoryV2_) {
+            OHOS::Ace::NativeEmbedStatus status = OHOS::Ace::NativeEmbedStatus::DESTROY;
+            OnNativeEmbedAllDestoryV2_(
+                std::make_shared<NativeEmbedDataInfo>(status, surfaceId, embedId, info));
+        }
+    }
+    embedDataInfo_.clear();
+}
+
 void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo)
 {
     if (!isEmbedModeEnabled_) {
@@ -5785,6 +5930,15 @@ void WebDelegate::OnNativeEmbedLifecycleChange(std::shared_ptr<OHOS::NWeb::NWebN
                 embedInfo->GetUrl(), embedInfo->GetTag(), embedInfo->GetWidth(),
                 embedInfo->GetHeight(), embedInfo->GetX(), embedInfo->GetY(),
                 embedInfo->GetParams()};
+        }
+		
+        if (status == OHOS::Ace::NativeEmbedStatus::CREATE || status == OHOS::Ace::NativeEmbedStatus::UPDATE) {
+            embedDataInfo_.insert_or_assign(embedId, dataInfo);
+        } else if (status == OHOS::Ace::NativeEmbedStatus::DESTROY) {
+            auto iter = embedDataInfo_.find(embedId);
+            if (iter != embedDataInfo_.end()) {
+                embedDataInfo_.erase(iter);
+            }
         }
     }
 
@@ -5810,14 +5964,18 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
     SetTouchEventInfo(event, touchEventInfo);
     CHECK_NULL_VOID(context);
     TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed gusture event notify");
+    auto param = AceType::MakeRefPtr<GestureEventResultOhos>(event->GetResult());
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), embedId, touchEventInfo]() {
+        [weak = WeakClaim(this), embedId, touchEventInfo, param]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto OnNativeEmbedGestureEventV2_ = delegate->OnNativeEmbedGestureEventV2_;
             if (OnNativeEmbedGestureEventV2_) {
                 OnNativeEmbedGestureEventV2_(
-                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo));
+                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
+                if (!param->HasSendTask()) {
+                    param->SetGestureEventResult(true);
+                }
             }
         },
         TaskExecutor::TaskType::JS);
@@ -5854,6 +6012,13 @@ void WebDelegate::OnRootLayerChanged(int width, int height)
     webPattern->OnRootLayerChanged(width, height);
 }
 
+void WebDelegate::ReleaseResizeHold()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->ReleaseResizeHold();
+}
+
 void WebDelegate::SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard)
 {
     if (nweb_) {
@@ -5880,6 +6045,12 @@ void WebDelegate::ScrollBy(float deltaX, float deltaY)
 {
     CHECK_NULL_VOID(nweb_);
     nweb_->ScrollBy(deltaX, deltaY);
+}
+
+void WebDelegate::ScrollByRefScreen(float deltaX, float deltaY, float vx, float vy)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->ScrollByRefScreen(deltaX, deltaY, vx, vy);
 }
 
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type)

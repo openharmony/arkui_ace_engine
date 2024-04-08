@@ -24,6 +24,11 @@ namespace OHOS::Ace::Napi {
 static constexpr uint32_t LAST_DOWN = 0;
 static constexpr uint32_t LAST_UP = 1;
 static constexpr uint32_t FIRST_MOVE = 2;
+static constexpr uint32_t PERF_TOUCH_EVENT = 0;
+static constexpr uint32_t PERF_MOUSE_EVENT = 1;
+static constexpr uint32_t PERF_TOUCHPAD_EVENT = 2;
+static constexpr uint32_t PERF_JOYSTICK_EVENT = 3;
+static constexpr uint32_t PERF_KEY_EVENT = 4;
 constexpr int FIRST_ARG_INDEX = 0;
 constexpr int SECOND_ARG_INDEX = 1;
 constexpr int THIRD_ARG_INDEX = 2;
@@ -117,6 +122,14 @@ static void SceneEnd(std::string sceneId, bool isJsApi)
     }
 }
 
+static void InputEvent(int type, int sourceType, int64_t time)
+{
+    PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
+    if (pMonitor != nullptr) {
+        pMonitor->RecordInputEvent(static_cast<PerfActionType>(type), static_cast<PerfSourceType>(sourceType), time);
+    }
+}
+
 static napi_value JSSceneStart(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_NUMBER_THREE;
@@ -163,6 +176,35 @@ static napi_value JSSceneEnd(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static napi_value JSRecordInputEventTime(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_NUMBER_THREE;
+    napi_value argv[ARGC_NUMBER_THREE];
+    PreParseParams(env, info, argc, argv);
+    NAPI_ASSERT(env, argc >= ARGC_NUMBER_TWO, "Wrong number of arguments");
+    if (argc < ARGC_NUMBER_TWO) {
+        return nullptr;
+    }
+
+    int type = 0;
+    if (!ParseInt32Param(env, argv[FIRST_ARG_INDEX], type)) {
+        return nullptr;
+    }
+
+    int sourceType = 0;
+    if (!ParseInt32Param(env, argv[SECOND_ARG_INDEX], sourceType)) {
+        return nullptr;
+    }
+
+    int64_t time = 0;
+    if (!ParseInt64Param(env, argv[THIRD_ARG_INDEX], time)) {
+        return nullptr;
+    }
+    InputEvent(type, sourceType, time);
+    return nullptr;
+}
+
+
 /*
  * function for module exports
  */
@@ -178,10 +220,26 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
     napi_create_uint32(env, FIRST_MOVE, &prop);
     napi_set_named_property(env, actionType, "FIRST_MOVE", prop);
 
+    napi_value sourceType = nullptr;
+    napi_create_object(env, &sourceType);
+    prop = nullptr;
+    napi_create_uint32(env, PERF_TOUCH_EVENT, &prop);
+    napi_set_named_property(env, sourceType, "PERF_TOUCH_EVENT", prop);
+    napi_create_uint32(env, PERF_MOUSE_EVENT, &prop);
+    napi_set_named_property(env, sourceType, "PERF_MOUSE_EVENT", prop);
+    napi_create_uint32(env, PERF_TOUCHPAD_EVENT, &prop);
+    napi_set_named_property(env, sourceType, "PERF_TOUCHPAD_EVENT", prop);
+    napi_create_uint32(env, PERF_JOYSTICK_EVENT, &prop);
+    napi_set_named_property(env, sourceType, "PERF_JOYSTICK_EVENT", prop);
+    napi_create_uint32(env, PERF_KEY_EVENT, &prop);
+    napi_set_named_property(env, sourceType, "PERF_KEY_EVENT", prop);
+
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("begin", JSSceneStart),
         DECLARE_NAPI_FUNCTION("end", JSSceneEnd),
+        DECLARE_NAPI_FUNCTION("recordInputEventTime", JSRecordInputEventTime),
         DECLARE_NAPI_PROPERTY("ActionType", actionType),
+        DECLARE_NAPI_PROPERTY("SourceType", sourceType),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

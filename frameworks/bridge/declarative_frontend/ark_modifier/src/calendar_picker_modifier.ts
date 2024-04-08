@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class CalendarPickerModifier extends ArkCalendarPickerComponent implements AttributeModifier<CalendarPickerAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: CalendarPickerAttribute): void {
-    applyAndMergeModifier<CalendarPickerAttribute, ArkCalendarPickerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<CalendarPickerAttribute, ArkCalendarPickerComponent, ArkComponent>(instance, this);
   }
 }

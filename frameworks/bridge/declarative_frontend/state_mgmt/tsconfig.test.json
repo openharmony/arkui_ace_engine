@@ -65,7 +65,9 @@
         // stateMgmt vers 3
     "src/lib/v3/v3_observed_track.ts",
     "src/lib/v3/v3_monitor.ts",
-
+    "src/lib/v3/v3_computed.ts",
+    "src/lib/v3/v3_variable_decorators.ts",
+    
     // unit testing
     "src/utest/common/helpers_for_test.ts",
     "src/utest/common/local_storage_test.ts",

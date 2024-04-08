@@ -217,6 +217,14 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)
         }
     }
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "%{public}s", hittedRecognizerTypeInfo.c_str());
+    if (hittedRecognizerInfo.empty()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Hitted recognizer info is empty.");
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
+        for (auto& item : dumpList) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+        }
+    }
 }
 
 bool EventManager::PostEventTouchTest(
@@ -540,6 +548,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     for (auto entry = iter->second.rbegin(); entry != iter->second.rend(); ++entry) {
         if (!(*entry)->DispatchMultiContainerEvent(point)) {
             dispatchSuccess = false;
+            if ((*entry)->GetAttachedNode().Upgrade()) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "FrameNode %{public}s dispatch multi container event fail.",
+                    (*entry)->GetAttachedNode().Upgrade()->GetTag().c_str());
+            }
             break;
         }
     }
@@ -726,6 +738,7 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "Dispatch key event: code:%{public}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
         event.action, focusNode->GetTag().c_str(), focusNode->GetId());
+    isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
     if (focusNodeHub->HandleKeyEvent(event)) {
@@ -733,9 +746,11 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
             event.code, event.action);
         return true;
     }
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
-        event.code, event.action);
-    return false;
+    if (!isKeyConsumed_) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
+            event.code, event.action);
+    }
+    return isKeyConsumed_;
 }
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)
@@ -1410,10 +1425,10 @@ void AddKeyboardShortcutKeys(
     }
 }
 
-void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::KeyboardShortcut>& keyboardShortcuts,
+bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::KeyboardShortcut>& keyboardShortcuts,
     const WeakPtr<NG::FrameNode>& node, const RefPtr<NG::EventHub>& eventHub)
 {
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, false);
     for (auto& keyboardShortcut : keyboardShortcuts) {
         if (keyboardShortcut.value.empty()) {
             continue;
@@ -1422,7 +1437,6 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
         std::vector<std::vector<KeyCode>> keyCodes;
         std::vector<uint8_t> permutation;
         AddKeyboardShortcutKeys(keyboardShortcut.keys, keyCodes, permutation);
-        // FunctionKey
         if (event.IsFunctionKey() || event.IsEscapeKey()) {
             if (event.ConvertInputCodeToString() != keyboardShortcut.value) {
                 continue;
@@ -1437,7 +1451,7 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
             // Handle the keys order problem.
             do {
                 keyCode.emplace_back(event.code);
-                if (!event.IsKey(keyCode)) {
+                if (!event.IsExactlyKey(keyCode)) {
                     keyCode.pop_back();
                     std::next_permutation(keyCode.begin(), keyCode.end());
                     continue;
@@ -1446,11 +1460,13 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
                 if (keyboardShortcut.onKeyboardShortcutAction) {
                     keyboardShortcut.onKeyboardShortcutAction();
                     LOGI("TriggerKeyboardShortcut action done.");
+                    return true;
                 } else {
                     auto gestureEventHub = eventHub->GetGestureEventHub();
                     if (gestureEventHub && gestureEventHub->IsClickable()) {
                         gestureEventHub->KeyBoardShortCutClick(event, node);
                         LOGI("TriggerKeyboardShortcut click done.");
+                        return true;
                     }
                 }
                 keyCode.pop_back();
@@ -1461,12 +1477,13 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
         keyCodes.clear();
         permutation.clear();
     }
+    return false;
 }
 
-void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
+bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
-        return;
+        return false;
     }
     for (auto& node : keyboardShortcutNode_) {
         auto frameNode = node.Upgrade();
@@ -1479,8 +1496,11 @@ void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
         }
 
         auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
-        TriggerKeyboardShortcut(event, keyboardShortcuts, node, eventHub);
+        if (TriggerKeyboardShortcut(event, keyboardShortcuts, node, eventHub)) {
+            return true;
+        }
     }
+    return false;
 }
 
 void EventManager::DelKeyboardShortcutNode(int32_t nodeId)

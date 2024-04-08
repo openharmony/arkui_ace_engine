@@ -20,4 +20,5 @@ namespace OHOS::Ace {
 ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;
 void ImageFileCache::DumpCacheInfo() {}
+void ImageFileCache::EraseCacheFile(const std::string &url) {}
 } // namespace OHOS::Ace

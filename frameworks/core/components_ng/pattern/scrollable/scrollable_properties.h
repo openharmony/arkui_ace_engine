@@ -119,6 +119,12 @@ struct NestedScrollOptions {
     }
 };
 
+struct ListItemIndex {
+    int32_t index = -1;
+    int32_t area = -1;
+    int32_t indexInGroup = -1;
+};
+
 constexpr int32_t SCROLL_FROM_NONE = 0;
 constexpr int32_t SCROLL_FROM_UPDATE = 1;
 constexpr int32_t SCROLL_FROM_ANIMATION = 2;
@@ -144,6 +150,7 @@ using OnScrollStartEvent = std::function<void()>;
 using OnScrollStopEvent = std::function<void()>;
 using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
+using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
@@ -151,6 +158,7 @@ using CalePredictSnapOffsetCallback =
                 std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 } // namespace OHOS::Ace
 
 #endif

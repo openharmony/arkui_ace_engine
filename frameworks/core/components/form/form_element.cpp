@@ -145,7 +145,6 @@ void FormElement::HandleOnAcquireEvent(int64_t id)
 
     auto json = JsonUtil::Create(true);
     json->Put("id", std::to_string(id).c_str());
-
     LOGI("HandleOnAcquireEvent msg:%{public}s", json->ToString().c_str());
     int32_t instance = context->GetInstanceId();
     context->GetTaskExecutor()->PostTask(
@@ -230,7 +229,6 @@ void FormElement::HandleOnUninstallEvent(int64_t formId)
 
     auto json = JsonUtil::Create(true);
     json->Put("id", std::to_string(formId).c_str());
-
     LOGI("HandleOnUninstallEvent formId:%{public}s", std::to_string(formId).c_str());
     int32_t instance = context->GetInstanceId();
     context->GetTaskExecutor()->PostTask(
@@ -407,14 +405,14 @@ void FormElement::CreateCardContainer()
     }
     formNode->SetSubContainer(subContainer_);
 
-    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
+    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](int64_t id) {
         auto element = weak.Upgrade();
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
             auto form = weak.Upgrade();
             if (form) {
-                LOGI("card id:%{public}zu", id);
+                LOGI("card id:%{public}" PRId64, id);
                 form->HandleOnAcquireEvent(id);
             }
         });

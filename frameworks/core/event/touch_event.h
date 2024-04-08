@@ -19,8 +19,6 @@
 #include <list>
 #include <utility>
 
-#include "interfaces/native/ui_input_event.h"
-
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
@@ -109,10 +107,7 @@ struct TouchEvent final : public UIInputEvent {
     float localX = 0.0f;
     float localY = 0.0f;
 
-    TouchEvent()
-    {
-        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_TOUCH;
-    }
+    TouchEvent() {}
 
     TouchEvent& SetId(int32_t id)
     {
@@ -883,12 +878,19 @@ public:
     {
         return history_;
     }
-
+    void AddHistoryPointerEvent(const std::shared_ptr<MMI::PointerEvent>& info)
+    {
+        historyPointerEvent_.emplace_back(info);
+    }
+    const std::list<std::shared_ptr<MMI::PointerEvent>>& GetHistoryPointerEvent() const
+    {
+        return historyPointerEvent_;
+    }
     void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     {
         pointerEvent_ = pointerEvent;
     }
-    const std::shared_ptr<MMI::PointerEvent> GetPointerEvent() const
+    const std::shared_ptr<MMI::PointerEvent>& GetPointerEvent() const
     {
         return pointerEvent_;
     }
@@ -927,15 +929,28 @@ private:
     std::list<TouchLocationInfo> touches_;
     std::list<TouchLocationInfo> changedTouches_;
     std::list<TouchLocationInfo> history_;
-    bool isTouchEventsEnd_ {false};
+    std::list<std::shared_ptr<MMI::PointerEvent>> historyPointerEvent_;
+    bool isTouchEventsEnd_ { false };
+};
+
+class ACE_EXPORT GestureEventResult : public AceType {
+    DECLARE_ACE_TYPE(GestureEventResult, AceType)
+
+public:
+    GestureEventResult() = default;
+    ~GestureEventResult() = default;
+
+    virtual void SetGestureEventResult(bool result) = 0;
 };
 
 class NativeEmbeadTouchInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbeadTouchInfo, BaseEventInfo);
 
 public:
-    NativeEmbeadTouchInfo(const std::string& embedId, const TouchEventInfo & touchEventInfo)
-        : BaseEventInfo("NativeEmbeadTouchInfo"), embedId_(embedId), touchEvent_(touchEventInfo) {}
+    NativeEmbeadTouchInfo(const std::string& embedId,
+        const TouchEventInfo& touchEventInfo,
+        const RefPtr<GestureEventResult>& result)
+        : BaseEventInfo("NativeEmbeadTouchInfo"), embedId_(embedId), touchEvent_(touchEventInfo), result_(result) {}
     ~NativeEmbeadTouchInfo() override = default;
 
     const std::string& GetEmbedId() const
@@ -947,10 +962,14 @@ public:
     {
         return touchEvent_;
     }
-
+    const RefPtr<GestureEventResult>& GetResult() const
+    {
+        return result_;
+    }
 private:
     std::string embedId_;
     TouchEventInfo touchEvent_;
+    RefPtr<GestureEventResult> result_;
 };
 
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;

@@ -16,39 +16,39 @@
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
 #include "core/components_ng/render/adapter/render_texture_impl.h"
-#ifdef XCOMPONENT_SUPPORTED
-#include "core/components_ng/render/adapter/render_surface_impl.h"
 #endif
-#else
 #include "core/components_ng/render/adapter/render_surface_impl.h"
-#endif
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-RefPtr<RenderSurface> RenderSurface::Create(bool isUseExtSurface)
+// under the condition of supporting cross platform and texture rendering
+#ifdef RENDER_EXTRACT_SUPPORTED
+RefPtr<RenderSurface> RenderSurface::Create(const RenderSurfaceTpye& type)
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        switch (type) {
+            case RenderSurfaceTpye::SURFACE:
+                return MakeRefPtr<RenderSurfaceImpl>();
+            case RenderSurfaceTpye::TEXTURE:
+                return MakeRefPtr<RenderTextureImpl>();
+            default:
+                break;
+        }
+    }
+    return MakeRefPtr<RenderSurface>();
+}
 #else
+// under the condition of supporting ohos platform
 RefPtr<RenderSurface> RenderSurface::Create()
-#endif
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
 #if defined(OHOS_PLATFORM) && defined(ENABLE_ROSEN_BACKEND)
         return MakeRefPtr<RosenRenderSurface>();
-#else
-#ifdef VIDEO_TEXTURE_SUPPORTED
-#ifdef XCOMPONENT_SUPPORTED
-        if (isUseExtSurface) {
-            return MakeRefPtr<RenderSurfaceImpl>();
-        }
-#endif
-        return MakeRefPtr<RenderTextureImpl>();
-#else
-        return MakeRefPtr<RenderSurfaceImpl>();
-#endif
 #endif
     }
     return MakeRefPtr<RenderSurface>();
 }
+#endif
 } // namespace OHOS::Ace::NG

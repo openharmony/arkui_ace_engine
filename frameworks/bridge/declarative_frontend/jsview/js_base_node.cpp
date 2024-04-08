@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
@@ -65,7 +66,8 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     // If the node is a UINode, amount it to a BuilderProxyNode.
     // Let the returned node be a FrameNode.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
-    if (!flag) {
+    auto isSupportExportTexture = EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0;
+    if (!flag && newNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
             "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
@@ -80,7 +82,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     }
     viewNode_ = newNode;
     CHECK_NULL_VOID(viewNode_);
-    if (EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
+    if (isSupportExportTexture) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
         CHECK_NULL_VOID(exportTextureInfo);
@@ -123,44 +125,9 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
         auto jsFunc = JSRef<JSFunc>::Cast(jsDrawFunc);
         RefPtr<JsFunction> jsDraw = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(renderNode), jsFunc);
         auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-        pattern->SetDrawCallback(
-            [func = std::move(jsDraw), execCtx = info.GetExecutionContext(), vm](NG::DrawingContext& context) -> void {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
-                JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-                objectTemplate->SetInternalFieldCount(1);
-                JSRef<JSObject> contextObj = objectTemplate->NewInstance();
-                JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
-                sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
-                sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
-                contextObj->SetPropertyObject("size", sizeObj);
-
-                auto engine = EngineHelper::GetCurrentEngine();
-                CHECK_NULL_VOID(engine);
-                NativeEngine* nativeEngine = engine->GetNativeEngine();
-                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-                ScopeRAII scope(env);
-
-                auto jsCanvas =
-                    OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas, context.width, context.height);
-                JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
-                contextObj->SetPropertyObject("canvas", jsCanvasVal);
-
-                auto jsVal = JSRef<JSVal>::Cast(contextObj);
-                panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
-                JSValueWrapper valueWrapper = value;
-                napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-
-                napi_wrap(
-                    env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
-
-                JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-                OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-                napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
-                if (unwrapCanvas) {
-                    unwrapCanvas->ResetCanvas();
-                }
-            });
+        auto execCtx = info.GetExecutionContext();
+        auto drawCallback = JSViewAbstract::GetDrawCallback(jsDraw, execCtx);
+        pattern->SetDrawCallback(std::move(drawCallback));
     }
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }

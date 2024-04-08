@@ -59,8 +59,10 @@ const std::string appResourcesPathStage = "/home/ubuntu/demo/preview/js/default_
 const std::string systemResourcesPath = "/home/ubuntu/demo/preview/js/SystemResources";
 #endif
 
-auto&& renderCallback = [](const void*, const size_t bufferSize, const int32_t width, const int32_t height) -> bool {
-    LOGI("OnRender: bufferSize = %{public}zu, [width, height] = [%{public}d, %{public}d]", bufferSize, width, height);
+auto&& renderCallback = [](
+    const void*, const size_t bufferSize, const int32_t width, const int32_t height, const uint64_t timestamp) -> bool {
+    LOGI("OnRender: bufferSize = %{public}zu, [width, height] = [%{public}d, %{public}d],
+    timestamp = %{public}llu", bufferSize, width, height, timestamp);
     return true;
 };
 

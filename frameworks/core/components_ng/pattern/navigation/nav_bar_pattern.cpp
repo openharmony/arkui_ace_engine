@@ -31,133 +31,13 @@
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
-RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
-{
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(text);
-    textLayoutProperty->UpdateFontSize(TEXT_FONT_SIZE);
-    textLayoutProperty->UpdateTextColor(TEXT_COLOR);
-    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    return textNode;
-}
-
-RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src, const bool isButtonEnabled)
-{
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(src);
-    auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, nullptr);
-
-    if (isButtonEnabled) {
-        info.SetFillColor(theme->GetMenuIconColor());
-    } else {
-        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
-    }
-
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-
-    auto iconSize = theme->GetMenuIconSize();
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
-    iconNode->MarkModifyDone();
-    return iconNode;
-}
-
-void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, bool isMoreButton, const BarItem menuItem = BarItem())
-{
-    auto eventHub = buttonNode->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(eventHub);
-
-    if (isMoreButton) {
-        auto hoverTask = [weakTargetNode = WeakPtr<FrameNode>(buttonNode)](bool isHover) {
-            auto targetNode = weakTargetNode.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            auto popupParam = AceType::MakeRefPtr<PopupParam>();
-            popupParam->SetMessage(Localization::GetInstance()->GetEntryLetters("common.more"));
-            popupParam->SetIsShow(isHover);
-            popupParam->SetBlockEvent(false);
-            ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
-        };
-        eventHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverTask)));
-        return;
-    }
-
-    if (menuItem.action) {
-        auto gestureEventHub = buttonNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureEventHub);
-        auto clickCallback = [action = menuItem.action](GestureEvent& info) {
-            if (info.GetSourceDevice() == SourceType::KEYBOARD) {
-                return;
-            }
-            action();
-        };
-        gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
-    }
-}
-
-void UpdateBarItemNodeWithItem(
-    const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, const bool isButtonEnabled)
-{
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN) && barItem.text.has_value() &&
-        !barItem.text.value().empty()) {
-        auto textNode = CreateBarItemTextNode(barItem.text.value());
-        barItemNode->SetTextNode(textNode);
-        barItemNode->AddChild(textNode);
-    }
-    if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
-        auto iconNode = CreateBarItemIconNode(barItem.icon.value(), isButtonEnabled);
-        barItemNode->SetIconNode(iconNode);
-        barItemNode->AddChild(iconNode);
-    }
-    if (barItem.action) {
-        auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetItemAction(barItem.action);
-    }
-    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
-    barItemNode->MarkModifyDone();
-}
-
-void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButtonEnabled)
-{
-    int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-
-    auto info = ImageSourceInfo("");
-    info.SetResourceId(theme->GetMoreResourceId());
-    if (isButtonEnabled) {
-        info.SetFillColor(theme->GetMenuIconColor());
-    } else {
-        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
-    }
-
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    auto iconSize = theme->GetMenuIconSize();
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
-    imageNode->MarkModifyDone();
-
-    barItemNode->SetIsMoreItemNode(true);
-    barItemNode->SetIconNode(imageNode);
-    barItemNode->AddChild(imageNode);
-    barItemNode->MarkModifyDone();
-}
-
 void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
     const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
@@ -261,35 +141,16 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     for (const auto& menuItem : menuItems) {
         ++count;
         if (needMoreButton && (count > mostMenuItemCount - 1)) {
-            params.push_back({ menuItem.text.value_or(""), menuItem.icon.value_or(""), menuItem.action });
+            params.push_back({ menuItem.text.value_or(""), menuItem.icon.value_or(""),
+                menuItem.isEnabled.value_or(true), menuItem.action });
         } else {
-            auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-            CHECK_NULL_RETURN(buttonPattern, nullptr);
-            buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-            buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-            buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-            auto menuItemNode = FrameNode::CreateFrameNode(
-                V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
-            CHECK_NULL_RETURN(menuItemNode, nullptr);
-            auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
-            CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
-            menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-            menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-            menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
-            auto renderContext = menuItemNode->GetRenderContext();
-            CHECK_NULL_RETURN(renderContext, nullptr);
-            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            InitTitleBarButtonEvent(menuItemNode, false, menuItem);
-
-            PaddingProperty padding;
-            padding.SetEdges(CalcLength(BUTTON_PADDING));
-            menuItemLayoutProperty->UpdatePadding(padding);
-
+            auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
+            NavigationTitleUtil::InitTitleBarButtonEvent(
+                menuItemNode, false, menuItem, menuItem.isEnabled.value_or(true));
             int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
             barItemNode->InitializePatternAndContext();
-            UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled);
+            NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled);
             auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
             CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
             barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -309,34 +170,21 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
         CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        BuildMoreIemNode(barItemNode, isButtonEnabled);
+        NavigationTitleUtil::BuildMoreIemNode(barItemNode, isButtonEnabled);
+        auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
         MenuParam menuParam;
         menuParam.isShowInSubWindow = false;
+        auto targetId = barItemNode->GetId();
+        auto targetTag = barItemNode->GetTag();
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            menuParam.placement = Placement::BOTTOM_RIGHT;
+            targetId = menuItemNode->GetId();
+            targetTag = menuItemNode->GetTag();
+        }
         auto barMenuNode = MenuView::Create(
-            std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
-        auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-        CHECK_NULL_RETURN(buttonPattern, nullptr);
-        buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
-        buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
-        auto menuItemNode = FrameNode::CreateFrameNode(
-            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
-        CHECK_NULL_RETURN(menuItemNode, nullptr);
-        auto menuItemLayoutProperty = menuItemNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
-        menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-        menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
-        auto renderContext = menuItemNode->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, nullptr);
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
-        InitTitleBarButtonEvent(menuItemNode, true);
-
-        PaddingProperty padding;
-        padding.SetEdges(CalcLength(BUTTON_PADDING));
-        menuItemLayoutProperty->UpdatePadding(padding);
+        NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, true);
 
         barItemNode->MountToParent(menuItemNode);
         barItemNode->MarkModifyDone();
@@ -602,7 +450,7 @@ float NavBarPattern::OnCoordScrollUpdate(float offset)
 
 void NavBarPattern::OnCoordScrollEnd()
 {
-    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+    if (titleMode_ != NavigationTitleMode::FREE) {
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());

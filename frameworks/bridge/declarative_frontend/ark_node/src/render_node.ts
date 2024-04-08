@@ -64,16 +64,28 @@ type EdgeStyles = {
   left?: BorderStyle;
 };
 
-interface Edges {
-  left: number,
-  right: number,
-  top: number,
-  bottom: number,
+interface EdgesT<T> {
+  left: T,
+  right: T,
+  top: T,
+  bottom: T,
+}
+interface SizeT<T> {
+  width: T;
+  height: T;
 }
 
-type EdgeWidths = Edges;
+enum LengthUnit {
+  PX = 0,
+  VP = 1,
+  FP = 2,
+  PERCENT = 3,
+  LPX = 4,
+}
 
-type EdgeColors = Edges;
+type EdgeWidths = EdgesT<Number>;
+
+type EdgeColors = EdgesT<Number>;
 
 interface Corners {
   topLeft: number,
@@ -111,6 +123,35 @@ interface Circle {
 
 interface CommandPath {
   commands: string
+}
+
+class LengthMetric {
+  public unit: LengthUnit;
+  public value: number;
+  constructor(value: number, unit?: LengthUnit) {
+      if (unit in LengthUnit) {
+          this.unit = unit;
+          this.value = value;
+      } else {
+          this.unit = LengthUnit.VP;
+          this.value = 0;
+      }
+  }
+  static px(value: number) {
+      return new LengthMetric(value, LengthUnit.PX);
+  }
+  static vp(value: number) {
+      return new LengthMetric(value, LengthUnit.VP);
+  }
+  static fp(value: number) {
+      return new LengthMetric(value, LengthUnit.FP);
+  }
+  static percent(value: number) {
+      return new LengthMetric(value, LengthUnit.PERCENT);
+  }
+  static lpx(value: number) {
+      return new LengthMetric(value, LengthUnit.LPX);
+  }
 }
 
 class ShapeMask {
@@ -162,7 +203,7 @@ class ShapeMask {
 class RenderNode {
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
-  private parentRenderNode: RenderNode | null;
+  private parentRenderNode: WeakRef<RenderNode> | null;
   private backgroundColorValue: number;
   private clipToFrameValue: boolean;
   private frameValue: Frame;
@@ -189,7 +230,7 @@ class RenderNode {
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
-    this.clipToFrameValue = false;
+    this.clipToFrameValue = true;
     this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
     this.opacityValue = 1.0;
     this.pivotValue = { x: 0.5, y: 0.5 };
@@ -211,6 +252,7 @@ class RenderNode {
     this.baseNode_ = new __JSBaseNode__();
     this.baseNode_.draw = this.draw;
     this.nodePtr = this.baseNode_.createRenderNode(this);
+    this.clipToFrame = true;
   }
 
   set backgroundColor(color: number) {
@@ -218,7 +260,7 @@ class RenderNode {
     getUINativeModule().renderNode.setBackgroundColor(this.nodePtr, this.backgroundColorValue);
   }
   set clipToFrame(useClip: boolean) {
-    this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(useClip, false);
+    this.clipToFrameValue = this.checkUndefinedOrNullWithDefaultValue<boolean>(useClip, true);
     getUINativeModule().renderNode.setClipToFrame(this.nodePtr, this.clipToFrameValue);
   }
   set frame(frame: Frame) {
@@ -397,7 +439,7 @@ class RenderNode {
       return;
     }
     this.childrenList.push(node);
-    node.parentRenderNode = this;
+    node.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
   }
   insertChildAfter(child: RenderNode, sibling: RenderNode | null) {
@@ -408,7 +450,7 @@ class RenderNode {
     if (indexOfNode !== -1) {
       return;
     }
-    child.parentRenderNode = this;
+    child.parentRenderNode = new WeakRef(this);
     let indexOfSibling = this.childrenList.findIndex(element => element === sibling);
     if (indexOfSibling === -1) {
       sibling === null;
@@ -454,23 +496,31 @@ class RenderNode {
     if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
       return null;
     }
-    let siblingList = this.parentRenderNode.childrenList;
+    let parent = this.parentRenderNode.deref();
+    if (parent === undefined || parent === null) {
+      return null;
+    }
+    let siblingList = parent.childrenList;
     const index = siblingList.findIndex(element => element === this);
     if (index === -1) {
       return null;
     }
-    return this.parentRenderNode.getChild(index + 1);
+    return parent.getChild(index + 1);
   }
   getPreviousSibling(): RenderNode | null {
     if (this.parentRenderNode === undefined || this.parentRenderNode === null) {
       return null;
     }
-    let siblingList = this.parentRenderNode.childrenList;
+    let parent = this.parentRenderNode.deref();
+    if (parent === undefined || parent === null) {
+      return null;
+    }
+    let siblingList = parent.childrenList;
     const index = siblingList.findIndex(element => element === this);
     if (index === -1) {
       return null;
     }
-    return this.parentRenderNode.getChild(index - 1);
+    return parent.getChild(index - 1);
   }
   setNodePtr(nodePtr: NodePtr) {
     this.nodePtr = nodePtr;

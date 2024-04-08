@@ -59,7 +59,7 @@ public:
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
-    void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override;
+    void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
@@ -69,6 +69,9 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
+    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void UpdateInspectorId(const std::string& key) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
@@ -91,6 +94,13 @@ public:
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
+    static void SetId(FrameNode* frameNode, const std::string& key);
+    static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
+    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);

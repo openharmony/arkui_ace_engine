@@ -37,6 +37,7 @@ public:
     static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
+    static void SetCheckboxGroupStyle(int32_t checkBoxGroupStyle);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CHECKBOXGROUP_H

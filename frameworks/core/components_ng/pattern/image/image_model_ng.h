@@ -47,6 +47,7 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float> &matrix) override;
+    void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) override;
     void SetDraggable(bool draggable) override;
     void SetOnDragStart(OnDragStartFunc &&onDragStart) override;
     void SetOnDragEnter(OnDragDropFunc &&onDragEnter) override;
@@ -91,6 +92,7 @@ public:
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
+    static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

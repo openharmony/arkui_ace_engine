@@ -214,7 +214,7 @@ void SearchPattern::HandleEnabled()
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    eventHub->SetEnabled(searchEventHub->IsEnabled()? true : false);
+    eventHub->SetEnabled(searchEventHub->IsEnabled() ? true : false);
     textFieldFrameNode->MarkModifyDone();
 }
 
@@ -552,7 +552,8 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldPattern);
     auto text = textFieldPattern->GetTextValue();
     searchEventHub->UpdateSubmitEvent(text);
-    textFieldPattern->CloseKeyboard(true);
+    // close keyboard and select background color
+    textFieldPattern->StopEditing();
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -615,6 +616,8 @@ void SearchPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "KeyAction:%{public}d, KeyCode:%{public}d", static_cast<int>(event.action),
+        static_cast<int>(event.code));
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -636,8 +639,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     constexpr int ONE = 1; // Only one focusable component on scene
     bool isOnlyOneFocusableComponent = getMaxFocusableCount(getMaxFocusableCount, parentHub) == ONE;
 
-    if (event.action == KeyAction::UP && event.code == KeyCode::KEY_TAB &&
-        focusChoice_ != FocusChoice::SEARCH) {
+    if (event.action == KeyAction::UP && event.code == KeyCode::KEY_TAB && focusChoice_ != FocusChoice::SEARCH) {
         textFieldPattern->HandleSetSelection(0, 0, false); // Clear selection and caret when tab pressed
     }
 
@@ -763,6 +765,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
 
 void SearchPattern::PaintFocusState(bool recoverFlag)
 {
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "Focus Choice = %{public}d", static_cast<int>(focusChoice_));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -1143,6 +1146,21 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     json->Put("type", SearchTypeToString().c_str());
     textFieldLayoutProperty->HasCopyOptions();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        json->Put(
+            "letterSpacing", textFieldLayoutProperty->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
+        json->Put("lineHeight", textFieldLayoutProperty->GetLineHeight().value_or(0.0_vp).ToString().c_str());
+        auto jsonDecoration = JsonUtil::Create(true);
+        std::string type = V2::ConvertWrapTextDecorationToStirng(
+            textFieldLayoutProperty->GetTextDecoration().value_or(TextDecoration::NONE));
+        jsonDecoration->Put("type", type.c_str());
+        jsonDecoration->Put(
+            "color", textFieldLayoutProperty->GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+        std::string style = V2::ConvertWrapTextDecorationStyleToString(
+            textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+        jsonDecoration->Put("style", style.c_str());
+        json->Put("decoration", jsonDecoration->ToString().c_str());
+    }
 }
 
 std::string SearchPattern::SearchTypeToString() const

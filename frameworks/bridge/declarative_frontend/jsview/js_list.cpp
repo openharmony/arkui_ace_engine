@@ -477,6 +477,41 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSList::ScrollVisibleContentChangeCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollVisibleContentChange = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const ListItemIndex start, const ListItemIndex end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+
+            JSRef<JSObject> startInfo = JSRef<JSObject>::New();
+            SetListItemIndex(startInfo, start);
+            JSRef<JSVal> startParam = JSRef<JSObject>::Cast(startInfo);
+
+            JSRef<JSObject> endInfo = JSRef<JSObject>::New();
+            SetListItemIndex(endInfo, end);
+            JSRef<JSVal> endParam = JSRef<JSObject>::Cast(endInfo);
+
+            JSRef<JSVal> params[] = { startParam, endParam };
+            func->Call(JSRef<JSObject>(), 2, params);
+            return;
+        };
+        ListModel::GetInstance()->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
+    }
+    args.ReturnSelf();
+}
+
+void JSList::SetListItemIndex(JSRef<JSObject> listItemInfo, ListItemIndex indexInfo)
+{
+    listItemInfo->SetProperty<int32_t>("index", indexInfo.index);
+    if (indexInfo.indexInGroup != -1) {
+        listItemInfo->SetProperty<int32_t>("itemIndexInGroup", indexInfo.indexInGroup);
+    }
+    if (indexInfo.area != -1) {
+        listItemInfo->SetProperty<int32_t>("itemGroupArea", indexInfo.area);
+    }
+}
+
 void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -684,6 +719,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
     JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
     JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
+    JSClass<JSList>::StaticMethod("onScrollVisibleContentChange", &JSList::ScrollVisibleContentChangeCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
     JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
     JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);

@@ -47,7 +47,8 @@ public:
     }
     std::string GetContentInfo() override;
     // JSFrontend delegate NG functions.
-    void RunPage(const std::string& url, const std::string& params, const std::string& profile);
+    void RunPage(const std::string& url, const std::string& params,
+        const std::string& profile, bool isNamedRouter = false);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::string& params, const std::string& profile);
     void OnConfigurationUpdated(const std::string& data);
@@ -147,6 +148,11 @@ public:
     void ShowDialog(const PromptDialogAttr &dialogAttr, const std::vector<ButtonInfo> &buttons,
         std::function<void(int32_t, int32_t)> &&callback, const std::set<std::string> &callbacks,
         std::function<void(bool)>&& onStatusChanged) override;
+    void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
+    void CloseCustomDialog(const int32_t dialogId) override;
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;
+    void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)> &&callback) override;
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;
 
@@ -214,6 +220,15 @@ public:
     void CreateSnapshot(std::function<void()>&& customBuilder,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector) override;
+
+    void AddFrameNodeToOverlay(
+        const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
+    void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void ShowAllNodesOnOverlay() override;
+    void HideAllNodesOnOverlay() override;
+
     void RequestAnimationFrame(const std::string& callbackId) override {}
 
     void CancelAnimationFrame(const std::string& callbackId) override {}
@@ -283,6 +298,8 @@ public:
     void RebuildAllPages();
 
 private:
+    DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
+
     PipelineContextHolder pipelineContextHolder_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PageRouterManager> pageRouterManager_;

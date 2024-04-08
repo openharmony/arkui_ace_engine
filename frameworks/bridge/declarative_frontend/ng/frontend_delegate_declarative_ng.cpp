@@ -165,7 +165,7 @@ void FrontendDelegateDeclarativeNG::AttachSubPipelineContext(const RefPtr<Pipeli
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
-    const std::string& url, const std::string& params, const std::string& profile)
+    const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage");
 
@@ -187,11 +187,15 @@ void FrontendDelegateDeclarativeNG::RunPage(
     }
     taskExecutor_->PostTask(
         [manifestParser = manifestParser_, delegate = Claim(this),
-            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             pageRouterManager->SetManifestParser(manifestParser);
-            pageRouterManager->RunPage(url, params);
+            if (isNamedRouter) {
+                pageRouterManager->RunPageByNamedRouter(url, params);
+            } else {
+                pageRouterManager->RunPage(url, params);
+            }
             auto pipeline = delegate->GetPipelineContext();
             // TODO: get platform version from context, and should stored in AceApplicationInfo.
             if (manifestParser->GetMinPlatformVersion() > 0) {
@@ -705,6 +709,121 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+{
+    DialogProperties dialogProperties = { .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .isSysBlurStyle = false,
+        .customBuilder = dialogAttr.customBuilder,
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .backgroundColor = dialogAttr.backgroundColor,
+        .borderRadius = dialogAttr.borderRadius,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor,
+        .borderStyle = dialogAttr.borderStyle,
+        .shadow = dialogAttr.shadow,
+        .width = dialogAttr.width,
+        .height = dialogAttr.height,
+        .maskRect = dialogAttr.maskRect,
+        .autoCancel = dialogAttr.autoCancel,
+        .contentNode = dialogAttr.contentNode,
+        .maskColor = dialogAttr.maskColor,
+        .customStyle = dialogAttr.customStyle,
+        .transitionEffect = dialogAttr.transitionEffect,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear };
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    return dialogProperties;
+}
+
+void FrontendDelegateDeclarativeNG::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
+    std::function<void(int32_t)> &&callback)
+{
+    DialogProperties dialogProperties = ParsePropertiesFromAttr(dialogAttr);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto task = [dialogAttr, dialogProperties, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to open custom dialog ");
+            if (dialogProperties.isShowInSubWindow) {
+                SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
+                if (dialogProperties.isModal) {
+                    TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
+                }
+            } else {
+                overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+            }
+        };
+        MainWindowOverlay(std::move(task));
+        return;
+    } else {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "not support old pipeline");
+    }
+}
+
+void FrontendDelegateDeclarativeNG::CloseCustomDialog(const int32_t dialogId)
+{
+    auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+        overlayManager->CloseCustomDialog(dialogId);
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
+void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
+    std::function<void(int32_t)> &&callback)
+{
+    auto task = [node, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+        overlayManager->CloseCustomDialog(node, std::move(callback));
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
+void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
+    const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
+{
+    DialogProperties dialogProperties = {
+        .isSysBlurStyle = false,
+        .autoCancel = dialogAttr.autoCancel,
+        .maskColor = dialogAttr.maskColor
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    auto task = [dialogAttr, dialogProperties, node, callback]
+        (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
+        overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
+        SubwindowManager::GetInstance()->UpdateCustomDialogNG(node, dialogAttr, std::move(callback));
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
@@ -1032,4 +1151,64 @@ void FrontendDelegateDeclarativeNG::CreateSnapshot(
 #endif
 }
 
+void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(
+    const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
+{
+    auto task = [node, index, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->AddFrameNodeToOverlay(node, index);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->RemoveFrameNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->ShowNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
+{
+    auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->HideNodeOnOverlay(node);
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::ShowAllNodesOnOverlay()
+{
+    auto task = [containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->ShowAllNodesOnOverlay();
+    };
+    MainWindowOverlay(std::move(task));
+}
+
+void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
+{
+    auto task = [containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(containerId);
+        overlayManager->HideAllNodesOnOverlay();
+    };
+    MainWindowOverlay(std::move(task));
+}
 } // namespace OHOS::Ace::Framework

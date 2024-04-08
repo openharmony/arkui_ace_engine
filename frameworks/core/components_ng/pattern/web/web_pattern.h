@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "base/memory/referenced.h"
@@ -123,7 +124,7 @@ public:
 
     bool NeedSoftKeyboard() const override;
 
-    void UpdateSlideOffset() override;
+    void UpdateSlideOffset(bool isNeedReset = false) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -377,6 +378,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
+    using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -401,11 +404,12 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
+    void UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info);
     std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
@@ -419,7 +423,7 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
-    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
@@ -454,6 +458,8 @@ public:
         return layoutMode_;
     }
     void OnRootLayerChanged(int width, int height);
+    void ReleaseResizeHold();
+    bool GetPendingSizeStatus();
     int GetRootLayerWidth() const
     {
         return rootLayerWidth_;
@@ -468,6 +474,7 @@ public:
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
 
 private:
@@ -537,6 +544,7 @@ private:
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
+    void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     int GetWebId();
 
     void InitEvent();
@@ -547,6 +555,7 @@ private:
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
     void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
+    void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -568,8 +577,8 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect();
-    void CalculateVerticalDrawRect();
+    void CalculateHorizontalDrawRect(bool isNeedReset);
+    void CalculateVerticalDrawRect(bool isNeedReset);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -616,7 +625,7 @@ private:
     void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
-    OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
+    OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
 
     struct TouchInfo {
@@ -629,13 +638,13 @@ private:
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
-    bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
+    bool ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task) const;
@@ -644,6 +653,7 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
+    void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
     void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
@@ -675,13 +685,14 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
-    Size lastSyncRenderSize_;
-    int64_t lastTimeStamp_ = 0;
+    Size rootLayerChangeSize_;
     Size drawSizeCache_;
+    bool isNeedReDrawRect_ = false;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     bool isDragging_ = false;
+    bool isDisableSlide_ = false;
     bool isW3cDragEvent_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;
@@ -694,6 +705,10 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
+    int32_t tooltipTextId_ = -1;
+    bool tooltipEnabled_ = false;
+    int32_t mouseHoveredX_ = -1;
+    int32_t mouseHoveredY_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
@@ -706,13 +721,12 @@ private:
     OffsetF relativeOffsetOfScroll_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isNeedUpdateScrollAxis_ = true;
-    bool isNeedUpdateFilterScrolAxis_ = true;
+    bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;
     Axis syncAxis_ = Axis::NONE;
     Axis expectedScrollAxis_ = Axis::FREE;
-    Axis expectedFilterScrollAxis_ = Axis::FREE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     int32_t drawRectWidth_ = 0;
@@ -720,7 +734,6 @@ private:
     std::unordered_map<Axis, WeakPtr<NestableScrollContainer>> parentsMap_;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
-    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;

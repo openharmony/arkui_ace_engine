@@ -93,8 +93,8 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
         // 2- nested Object/Array inside observed another object/array in parent, source is its value
         if (typeof sourceValue == "object" && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
-          stateMgmtConsole.applicationError(`${this.debugInfo()}:  Provided source object's class is not instance of SubscribableAbstract,
-              it also lacks @Observed class decorator. Object property changes will not be observed. Application error!`);
+          stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
+            Object property changes will not be observed.`);
         }
         stateMgmtConsole.debug(`${this.debugInfo()}: constructor: wrapping source in a new ObservedPropertyObjectPU`);
         this.createSourceDependency(sourceValue);
@@ -106,6 +106,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_ != undefined) {
       this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
     }
+    this.setDecoratorInfo("@Prop");
     stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done!`);
   }
 
@@ -125,10 +126,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       this.source_ = undefined;
     }
     super.aboutToBeDeleted();
-  }
-
-  public debugInfoDecorator(): string {
-    return `@Prop (class SynchedPropertyOneWayPU)`;
   }
 
   // sync peer can be 

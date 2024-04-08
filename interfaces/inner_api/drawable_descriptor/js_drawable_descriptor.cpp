@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,6 @@
 #ifndef PREVIEW
 #include "pixel_map_napi.h"
 #endif
-#include "base/utils/utils.h"
 
 namespace {
 constexpr char DRAWABLE_BASE[] = "DrawableDescriptor";
@@ -122,7 +121,7 @@ napi_value JsDrawableDescriptor::ToNapi(
         NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &result));
         NAPI_CALL(env, napi_wrap(env, result, drawable, Destructor, nullptr, nullptr));
     } else {
-        HILOG_INFO("create reference failed, drawable constructor is null");
+        HILOGI("create reference failed, drawable constructor is null");
     }
 
     return result;
@@ -210,7 +209,7 @@ napi_value JsDrawableDescriptor::GetMaskClipPath(napi_env env, napi_callback_inf
     auto path = OHOS::Ace::Napi::LayeredDrawableDescriptor::GetStaticMaskClipPath();
     napi_value result = nullptr;
     if (napi_ok != napi_create_string_utf8(env, path.c_str(), NAPI_AUTO_LENGTH, &result)) {
-        HILOG_INFO("JsDrawableDescriptor Failed");
+        HILOGI("JsDrawableDescriptor Failed");
     }
     return result;
 }

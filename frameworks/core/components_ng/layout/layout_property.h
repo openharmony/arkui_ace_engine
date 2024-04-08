@@ -123,6 +123,8 @@ public:
         return layoutDirection_.value_or(TextDirection::AUTO);
     }
 
+    TextDirection GetNonAutoLayoutDirection() const;
+
     RefPtr<GeometryTransition> GetGeometryTransition() const
     {
         return geometryTransition_.Upgrade();
@@ -245,6 +247,7 @@ public:
     PaddingPropertyF CreatePaddingAndBorder();
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
+    BorderWidthPropertyF CreateBorder();
 
     MarginPropertyF CreateMargin();
 
@@ -288,7 +291,7 @@ public:
         isOverlayNode_ = isOverlayNode;
     }
 
-    bool IsOverlayNode()
+    bool IsOverlayNode() const
     {
         return isOverlayNode_;
     }

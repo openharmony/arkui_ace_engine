@@ -143,17 +143,29 @@ void DatePickerPattern::OnLanguageConfigurationUpdate()
 {
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
     CHECK_NULL_VOID(buttonConfirmNode);
-    auto confirmNode = buttonConfirmNode->GetFirstChild();
-    auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
+    auto confirmNode = AceType::DynamicCast<FrameNode>(buttonConfirmNode->GetFirstChild());
+    CHECK_NULL_VOID(confirmNode);
+    auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(confirmNodeLayout);
     confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonCancelNode = weakButtonCancel_.Upgrade();
     CHECK_NULL_VOID(buttonCancelNode);
-    auto cancelNode = buttonCancelNode->GetFirstChild();
-    auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
+    auto cancelNode = AceType::DynamicCast<FrameNode>(buttonCancelNode->GetFirstChild());
+    CHECK_NULL_VOID(cancelNode);
+    auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto lunarSwitchNode = weakLunarSwitchText_.Upgrade();
+    CHECK_NULL_VOID(lunarSwitchNode);
+    auto lunarSwitchTextLayoutProperty = lunarSwitchNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(lunarSwitchTextLayoutProperty);
+    lunarSwitchTextLayoutProperty->UpdateContent(
+        Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    lunarSwitchNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
@@ -463,7 +475,8 @@ void DatePickerPattern::FlushColumn()
     CHECK_NULL_VOID(dataPickerRowLayoutProperty);
     auto lunarDate = dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate()));
     AdjustLunarDate(lunarDate);
-    if (dataPickerRowLayoutProperty->GetLunar().value_or(false)) {
+    std::string language = Localization::GetInstance()->GetLanguage();
+    if (dataPickerRowLayoutProperty->GetLunar().value_or(false) && (strcmp(language.c_str(), "zh") == 0)) {
         LunarColumnsBuilding(lunarDate);
     } else {
         SolarColumnsBuilding(LunarToSolar(lunarDate));
@@ -517,7 +530,8 @@ void DatePickerPattern::FlushMonthDaysColumn()
     CHECK_NULL_VOID(yearDaysNode);
     auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(dataPickerRowLayoutProperty);
-    if (dataPickerRowLayoutProperty->GetLunar().value_or(false)) {
+    std::string language = Localization::GetInstance()->GetLanguage();
+    if (dataPickerRowLayoutProperty->GetLunar().value_or(false) && (strcmp(language.c_str(), "zh") == 0)) {
         LunarMonthDaysColumnBuilding(
             dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate())));
     } else {

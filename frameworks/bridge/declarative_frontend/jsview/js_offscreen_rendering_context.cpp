@@ -146,6 +146,7 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
         &JSCanvasRenderer::JsCreateConicGradient);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("saveLayer", &JSCanvasRenderer::JsSaveLayer);
     JSClass<JSOffscreenRenderingContext>::CustomMethod("restoreLayer", &JSCanvasRenderer::JsRestoreLayer);
+    JSClass<JSOffscreenRenderingContext>::CustomMethod("reset", &JSCanvasRenderer::JsReset);
     JSClass<JSOffscreenRenderingContext>::Bind(globalObj, JSOffscreenRenderingContext::Constructor,
         JSOffscreenRenderingContext::Destructor);
 }

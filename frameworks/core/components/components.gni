@@ -70,7 +70,9 @@ template("build_component") {
       }
 
       external_deps = []
-
+      if (use_hilog) {
+        external_deps += [ "hilog:libhilog" ]
+      }
       if (defined(invoker.external_deps)) {
         external_deps += invoker.external_deps
       }

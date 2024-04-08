@@ -168,6 +168,15 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, titlebarHeight);
+
+    auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        auto geometryNode = hostNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION,
+            "Navdestination id is %d{public}, frameRect is %{public}s",
+            hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
+    }
 }
 
 } // namespace OHOS::Ace::NG

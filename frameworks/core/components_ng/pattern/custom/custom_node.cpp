@@ -65,10 +65,7 @@ void CustomNode::Render()
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
             auto parent = GetParent();
-            bool parentNeedExportTexture = false;
-            if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
-                parentNeedExportTexture = parent->IsNeedExportTexture();
-            }
+            bool parentNeedExportTexture = parent ? parent->IsNeedExportTexture() : false;
             ViewStackProcessor::GetInstance()->SetIsExportTexture(parentNeedExportTexture || IsNeedExportTexture());
             auto child = renderFunction();
             if (child) {
@@ -102,11 +99,10 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
 
 void CustomNode::SetJSViewActive(bool active)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    if (!context) {
-        return;
+    if (GetJsActive() != active) {
+        SetJsActive(active);
+        FireSetActiveFunc(active);
     }
-    context->SetJSViewActive(active, WeakClaim(this));
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
@@ -166,5 +162,24 @@ RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, 
 {
     Render();
     return UINode::GetFrameChildByIndex(index, needBuild, isCache);
+}
+
+void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end)
+{
+    if (start <= end) {
+        if (start > 0 || end < 0) {
+            SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
+        }
+    } else {
+        if (end < 0 && start > 0) {
+            SetActive(false);
+            SetJSViewActive(false);
+        } else {
+            SetJSViewActive(true);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

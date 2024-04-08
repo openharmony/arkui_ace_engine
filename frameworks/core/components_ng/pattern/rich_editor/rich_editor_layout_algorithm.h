@@ -60,6 +60,8 @@ private:
 
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group);
 
+    void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
+
     void SetPlaceholder(LayoutWrapper* layoutWrapper);
 
     std::string SpansToString()
@@ -73,6 +75,8 @@ private:
         }
         return ss.str();
     }
+    void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
+    void AppendNewLineSpan();
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     std::list<RefPtr<SpanItem>> allSpans_;

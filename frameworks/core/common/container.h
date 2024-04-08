@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/components_ng/pattern/navigation/navigation_route.h"
 #include "core/event/pointer_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/common/container_consts.h"
@@ -79,6 +80,10 @@ public:
     }
 
     virtual void DestroyView() {}
+    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
+    {
+        return false;
+    }
 
     // Get the instance id of this container
     virtual int32_t GetInstanceId() const = 0;
@@ -198,6 +203,16 @@ public:
         firstUpdateData_ = false;
     }
 
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+
+    const std::string& GetBundleName() const
+    {
+        return bundleName_;
+    }
+
     void SetModuleName(const std::string& moduleName)
     {
         moduleName_ = moduleName;
@@ -312,6 +327,12 @@ public:
         return container ? container->isFRSCardContainer_ : false;
     }
 
+    static bool IsInSubContainer()
+    {
+        auto container = Current();
+        return container ? container->IsSubContainer() : false;
+    }
+
     Window* GetWindow() const
     {
         auto context = GetPipelineContext();
@@ -359,6 +380,16 @@ public:
     const RefPtr<PageUrlChecker>& GetPageUrlChecker()
     {
         return pageUrlChecker_;
+    }
+
+    void SetNavigationRoute(const RefPtr<NG::NavigationRoute>& navigationRoute)
+    {
+        navigationRoute_ = navigationRoute;
+    }
+
+    RefPtr<NG::NavigationRoute> GetNavigationRoute() const
+    {
+        return navigationRoute_;
     }
 
     virtual bool IsDialogContainer() const
@@ -422,7 +453,7 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool &isPopup)
     {
         return false;
     }
@@ -486,6 +517,7 @@ protected:
     bool isDynamicRender_ = false;
 
 private:
+    std::string bundleName_;
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
@@ -493,6 +525,7 @@ private:
     bool usePartialUpdate_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
+    RefPtr<NG::NavigationRoute> navigationRoute_;
     bool isModule_ = false;
     std::shared_ptr<NG::DistributedUI> distributedUI_;
     RefPtr<NG::AppBarView> appBar_;

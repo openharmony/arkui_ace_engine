@@ -326,6 +326,11 @@ public:
         needOptionPropertyHeightReset_ = needOptionPropertyHeightReset;
     }
 
+    bool isHover() const
+    {
+        return isHover_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

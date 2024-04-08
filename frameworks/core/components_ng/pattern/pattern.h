@@ -38,6 +38,7 @@ class AccessibilityEventInfo;
 }
 
 namespace OHOS::Ace::NG {
+class AccessibilitySessionAdapter;
 struct DirtySwapConfig {
     bool frameSizeChange = false;
     bool frameOffsetChange = false;
@@ -85,7 +86,7 @@ public:
     {
         return false;
     }
-    
+
     virtual bool IsSupportDrawModifier() const
     {
         return true;
@@ -166,30 +167,23 @@ public:
 
     virtual void OnModifyDone()
     {
-        FrameNode::PostTask(
-            [weak = WeakClaim(this)]() {
-                if (Recorder::IsCacheAvaliable()) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->OnAfterModifyDone();
-                }
-            },
-            TaskExecutor::TaskType::UI);
+#if (defined(__aarch64__) || defined(__x86_64__))
         if (IsNeedInitClickEventRecorder()) {
             InitClickEventRecorder();
         }
-        auto frameNode = frameNode_.Upgrade();
-        auto children = frameNode->GetChildren();
+#endif
+        auto* frameNode = GetUnsafeHostPtr();
+        const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
         }
-        auto renderContext = frameNode->GetRenderContext();
+        const auto& renderContext = frameNode->GetRenderContext();
         if (!renderContext->HasForegroundColor() && !renderContext->HasForegroundColorStrategy()) {
             return;
         }
         std::list<RefPtr<FrameNode>> childrenList {};
         std::queue<RefPtr<FrameNode>> queue {};
-        queue.emplace(frameNode);
+        queue.emplace(Claim(frameNode));
         RefPtr<FrameNode> parentNode;
         while (!queue.empty()) {
             parentNode = queue.front();
@@ -248,6 +242,8 @@ public:
 
     virtual void OnMountToParentDone() {}
 
+    virtual void OnSensitiveStyleChange(bool isSensitive) {}
+
     virtual bool IsRootPattern() const
     {
         return false;
@@ -263,7 +259,7 @@ public:
         return true;
     }
 
-    virtual void UpdateSlideOffset() {}
+    virtual void UpdateSlideOffset(bool isNeedReset = false) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -327,6 +323,11 @@ public:
     RefPtr<FrameNode> GetHost() const
     {
         return frameNode_.Upgrade();
+    }
+
+    FrameNode* GetUnsafeHostPtr() const
+    {
+        return UnsafeRawPtr(frameNode_);
     }
 
     virtual void DumpInfo() {}
@@ -483,6 +484,11 @@ public:
         return false;
     }
 
+    virtual RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter()
+    {
+        return nullptr;
+    }
+
     virtual int32_t GetUiExtensionId()
     {
         return -1;
@@ -499,7 +505,7 @@ public:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;
@@ -548,7 +554,7 @@ protected:
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
             if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;

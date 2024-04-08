@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,16 +39,11 @@ public:
     bool HasRadioId(const std::string& group, int32_t radioId);
     void UpdateRadioGroupValue(const std::string& group, int32_t radioId);
 
-    void AddCheckBoxToGroup(const std::string& group, int32_t checkBoxId);
-    void AddCheckBoxGroupToGroup(const std::string& group, int32_t checkBoxId);
-    void RemoveCheckBoxFromGroup(const std::string& group, int32_t checkBoxId);
-
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> GetCheckBoxGroupMap();
+    const RefPtr<GroupManager>& GetGroupManager() const;
 
 private:
     std::unordered_map<std::string, std::list<int32_t>> radioGroupNotify_;
-
-    std::unordered_map<std::string, std::list<int32_t>> checkBoxGroupNotify_;
+    RefPtr<GroupManager> groupManager_ = MakeRefPtr<GroupManager>();
 };
 
 } // namespace OHOS::Ace::NG

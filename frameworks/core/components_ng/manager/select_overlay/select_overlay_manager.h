@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
@@ -109,6 +110,9 @@ public:
 
     void ResetSelection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode);
 
+    const RefPtr<SelectContentOverlayManager>& GetSelectContentOverlayManager();
+    void CloseSelectContentOverlay(int32_t overlayId, CloseReason reason, bool animation);
+
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
 
@@ -117,6 +121,8 @@ private:
     bool IsTouchInCallerArea(const std::optional<NG::PointF>& point = std::nullopt) const;
 
     void NotifyOverlayClosed(bool closedByGlobalEvent = false);
+
+    bool PreProcessTouchEvent(const NG::PointF& point, const TouchEvent& touchPoint);
 
     RefPtr<FrameNode> GetCallerHost() const;
 
@@ -133,6 +139,8 @@ private:
     std::vector<std::string> touchTestResults_;
 
     std::map<int32_t, std::map<int32_t, ScrollableParentCallback>> parentScrollCallbacks_;
+
+    RefPtr<SelectContentOverlayManager> selectContentManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);
 };

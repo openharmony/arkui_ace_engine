@@ -261,6 +261,11 @@ public:
         return retVal_;
     }
 
+    panda::JsiRuntimeCallInfo* GetJsiRuntimeCallInfo() const
+    {
+        return info_;
+    }
+
     JsiExecutionContext GetExecutionContext() const
     {
         return JsiExecutionContext { info_->GetVM() };

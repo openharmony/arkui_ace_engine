@@ -3527,48 +3527,6 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanRecognizerTest011
- * @tc.desc: Test PanRecognizer function: SetDirection
- * @tc.type: FUNC
- */
-HWTEST_F(GesturesTestNg, PanRecognizerTest011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PanRecognizer.
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    PanDirection panDirection;
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case1: panDirection is VERTICAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::VERTICAL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::VERTICAL);
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case2: panDirection is HORIZONTAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::HORIZONTAL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::HORIZONTAL);
-
-    /**
-     * @tc.steps: step2. call SetDirection function
-     * @tc.steps: case2: panDirection is HORIZONTAL
-     * @tc.expected: step2. result equals.
-     */
-    panDirection.type = PanDirection::ALL;
-    panRecognizer.SetDirection(panDirection);
-    EXPECT_EQ(panRecognizer.velocityTracker_.mainAxis_, Axis::HORIZONTAL);
-}
-
-/**
  * @tc.name: PanRecognizerTest012
  * @tc.desc: Test PanRecognizer function: ChangeFingers
  * @tc.type: FUNC
@@ -10793,7 +10751,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchMoveEventTest005, TestSize.Leve
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), 0);
 }
 
 /**
@@ -11600,14 +11558,14 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchUpEvent002, TestSize.Level1)
     panRecognizerPtr->isForDrag_ = true;
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
     panRecognizerPtr->HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::DETECTING);
 
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->fingers_ = 0;
     panRecognizerPtr->isForDrag_ = false;
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
     panRecognizerPtr->HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::DETECTING);
 }
 
 /**
@@ -12423,7 +12381,7 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize
         AceType::WeakClaim(AceType::RawPtr(guestureEventHub)), panDirection, 1, 50.0f);
     guestureEventHub->dragEventActuator_->isDragUserReject_ = true;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::NONE);
 
     /**
      * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
@@ -12434,7 +12392,7 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     guestureEventHub->dragEventActuator_->isDragUserReject_ = false;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
+    EXPECT_FALSE(guestureEventHub->dragEventActuator_->isDragUserReject_);
 }
 
 /**

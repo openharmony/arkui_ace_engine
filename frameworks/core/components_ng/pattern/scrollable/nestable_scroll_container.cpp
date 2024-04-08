@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<NestableScrollContainer> NestableScrollContainer::SearchParent()
@@ -32,7 +33,8 @@ RefPtr<NestableScrollContainer> NestableScrollContainer::SearchParent()
         if (!pattern) {
             continue;
         }
-        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        if ((!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) ||
+                !isSearchRefresh_) &&
             InstanceOf<RefreshPattern>(pattern)) {
             continue;
         }
@@ -54,14 +56,17 @@ void NestableScrollContainer::UpdateNestedModeForChildren(const NestedScrollOpti
     }
 }
 
-void NestableScrollContainer::SetNestedScroll(const NestedScrollOptions& nestedScroll)
+void NestableScrollContainer::SetNestedScroll(const NestedScrollOptions& nestedScroll, bool isFixedNestedScrollMode)
 {
-    auto parent = parent_.Upgrade();
-    if (!isFixedNestedScrollMode_) {
-        nestedScroll_ = nestedScroll;
-    } else if (parent && AceType::InstanceOf<RefreshPattern>(parent)) {
-        parent->SetNestedScroll(nestedScroll);
+    if (!isFixedNestedScrollMode && AceType::InstanceOf<ScrollablePattern>(this)) {
+        if (nestedScroll.NeedParent()) {
+            isSearchRefresh_ = false;
+        } else {
+            isSearchRefresh_ = true;
+        }
     }
+    SetIsFixedNestedScrollMode(isFixedNestedScrollMode);
+    nestedScroll_ = nestedScroll;
 }
 
 void NestableScrollContainer::SetParentScrollable()
@@ -69,14 +74,15 @@ void NestableScrollContainer::SetParentScrollable()
     parent_ = SearchParent();
     auto parent = parent_.Upgrade();
     CHECK_NULL_VOID(parent);
-    auto && childNestedMode = parent->GetNestedModeForChildren();
-    auto selfNestedScrollMode = nestedScroll_;
-    if (childNestedMode) {
-        SetNestedScroll(*childNestedMode);
-        SetIsFixedNestedScrollMode(true);
-    }
-    if (AceType::InstanceOf<RefreshPattern>(parent)) {
-        parent->SetNestedScroll(selfNestedScrollMode);
+    if (!isFixedNestedScrollMode_) {
+        auto && childNestedMode = parent->GetNestedModeForChildren();
+        auto selfNestedScrollMode = nestedScroll_;
+        if (childNestedMode) {
+            SetNestedScroll(*childNestedMode, true);
+        }
+        if (AceType::InstanceOf<RefreshPattern>(parent)) {
+            parent->SetNestedScroll(selfNestedScrollMode);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

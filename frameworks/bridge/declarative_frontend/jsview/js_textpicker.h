@@ -91,7 +91,7 @@ public:
     static void SetSelectedIndex(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
-
+    static void SetGradientHeight(const JSCallbackInfo& info);
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
     static void ProcessCascadeSelected(const std::vector<NG::TextCascadePickerOptions>& options,
@@ -111,6 +111,7 @@ private:
     static void CreateMulti(const RefPtr<PickerTheme>& theme, const std::vector<std::string>& values,
         const std::vector<uint32_t>& selectedValues, const NG::TextCascadePickerOptionsAttr& attr,
         const std::vector<NG::TextCascadePickerOptions>& options);
+    static bool CheckDividerValue(const Dimension &dimension);
 };
 
 class JSTextPickerDialog {

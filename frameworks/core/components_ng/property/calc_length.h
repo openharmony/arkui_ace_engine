@@ -50,7 +50,10 @@ struct ACE_EXPORT ScaleProperty {
 class CalcLength {
 public:
     CalcLength() = default;
-    explicit CalcLength(const std::string& value) : calcValue_(value) {}
+    explicit CalcLength(const std::string& value) : calcValue_(value)
+    {
+        dimension_.SetUnit(DimensionUnit::CALC);
+    }
     ~CalcLength() = default;
 
     explicit CalcLength(double value, DimensionUnit unit = DimensionUnit::PX) : dimension_(value, unit) {};

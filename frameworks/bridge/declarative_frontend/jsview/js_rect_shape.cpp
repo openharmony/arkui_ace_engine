@@ -181,22 +181,22 @@ void JSRectShape::ConstructorCallback(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         CalcDimension width;
-        if (ParseJsDimensionVp(obj->GetProperty("width"), width) && width.IsValid()) {
+        if (ParseJsDimensionVpNG(obj->GetProperty("width"), width) && width.IsValid()) {
             rect->SetWidth(width);
         }
 
         CalcDimension height;
-        if (ParseJsDimensionVp(obj->GetProperty("height"), height) && height.IsValid()) {
+        if (ParseJsDimensionVpNG(obj->GetProperty("height"), height) && height.IsValid()) {
             rect->SetHeight(height);
         }
 
         CalcDimension radiusWidth;
-        if (ParseJsDimensionVp(obj->GetProperty("radiusWidth"), radiusWidth) && radiusWidth.IsValid()) {
+        if (ParseJsDimensionVpNG(obj->GetProperty("radiusWidth"), radiusWidth) && radiusWidth.IsValid()) {
             rect->SetRadiusWidth(radiusWidth);
         }
 
         CalcDimension radiusHeight;
-        if (ParseJsDimensionVp(obj->GetProperty("radiusHeight"), radiusHeight) && radiusHeight.IsValid()) {
+        if (ParseJsDimensionVpNG(obj->GetProperty("radiusHeight"), radiusHeight) && radiusHeight.IsValid()) {
             rect->SetRadiusHeight(radiusHeight);
         }
 

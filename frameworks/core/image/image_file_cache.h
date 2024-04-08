@@ -59,6 +59,7 @@ public:
     void SetCacheFileInfo();
     void WriteCacheFile(
         const std::string& url, const void* data, size_t size, const std::string& suffix = std::string());
+    void EraseCacheFile(const std::string& url);
     void ClearCacheFile(const std::vector<std::string>& removeFiles);
     std::string ConstructCacheFilePath(const std::string& fileName);
     void DumpCacheInfo();
@@ -67,7 +68,7 @@ private:
         std::vector<std::string>& removeVector);
     std::string GetCacheFilePathInner(const std::string& url, const std::string& suffix);
     bool ConvertToAstcAndWriteToFile(const void* const data, size_t size, const std::string& fileCacheKey,
-        size_t& astcSize);
+        size_t& astcSize, const std::string& url);
 
     std::shared_mutex cacheFilePathMutex_;
     std::string cacheFilePath_;
