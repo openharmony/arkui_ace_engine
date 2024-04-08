@@ -1700,16 +1700,6 @@ void FrameNode::MarkDirtyNode(
         auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
         auto selfExpansiveToMark = opts && opts->ExpansiveToMark();
         if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || selfExpansiveToMark) {
-            if (CheckMeasureSelfAndParentFlag(extraFlag)) {
-                RequestParentDirty();
-                return;
-            }
-            if (CheckMeasureSelfFlag(extraFlag)) {
-                CHECK_NULL_VOID(!isLayoutDirtyMarked_);
-                isLayoutDirtyMarked_ = true;
-                context->AddDirtyLayoutNode(Claim(this));
-                return;
-            }
             bool parentStopMark = false;
             auto parent = GetAncestorNodeOfFrame();
             if (parent) {
