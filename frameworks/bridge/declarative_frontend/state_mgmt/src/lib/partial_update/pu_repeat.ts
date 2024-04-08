@@ -71,7 +71,7 @@ class __RepeatItem<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 // framework internal, deep observation 
 // implementation for deep observation 
 
-@observed
+@ObservedV2
 class __RepeatItemDeep<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 
     constructor(initialItem: T, initialIndex?: number) {
@@ -79,8 +79,8 @@ class __RepeatItemDeep<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
         this.index = initialIndex
     }
 
-    @track item: T;
-    @track index?: number;
+    @Trace item: T;
+    @Trace index?: number;
 
     public updateItem(newItemValue: T): void {
         this.item = newItemValue;

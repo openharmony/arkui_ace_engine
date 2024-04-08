@@ -5728,6 +5728,8 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceCompleteRerender(deep = false) {
+        
+        
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
@@ -5740,6 +5742,8 @@ class ViewPU extends NativeViewPartialUpdate {
                 }
             });
         }
+        
+        
     }
     /**
      * force a complete rerender / update on specific node by executing update function.
@@ -6640,7 +6644,7 @@ class ViewPU extends NativeViewPartialUpdate {
         /* FIXME @Component freeze
         
         this.computedIdsDelayedUpdate.add(watchId);
-        */
+      */
     }
 } // class ViewPU
 // Array.sort() converts array items to string to compare them!
@@ -8030,13 +8034,13 @@ let __RepeatItemDeep = class __RepeatItemDeep {
     }
 };
 __decorate([
-    track
+    Trace
 ], __RepeatItemDeep.prototype, "item", void 0);
 __decorate([
-    track
+    Trace
 ], __RepeatItemDeep.prototype, "index", void 0);
 __RepeatItemDeep = __decorate([
-    observed
+    ObservedV2
 ], __RepeatItemDeep);
 // helper
 class __RepeatDefaultKeyGen {

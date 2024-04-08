@@ -34,14 +34,6 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
     }
 }
 
-void AppendNodeAndChildrenIds(const RefPtr<UINode>& root, std::list<int32_t>& ids)
-{
-    ids.emplace_back(root->GetId());
-    for (auto& node : root->GetChildren()) {
-        AppendNodeAndChildrenIds(node, ids);
-    }
-}
-
 } // namespace
 
 RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
@@ -139,8 +131,10 @@ void ForEachNode::CompareAndUpdateChildren()
         }
     }
 
+    {
     ACE_SCOPED_TRACE("ForEachNode::Update Id[%d] preIds[%zu] newIds[%zu] oldIdsSet[%zu] additionalChildComps[%zu]",
         GetId(), tempIds_.size(), ids_.size(), oldIdsSet.size(), additionalChildComps.size());
+    }
 
     if (IsOnMainTree()) {
         for (const auto& newChild : additionalChildComps) {
@@ -150,9 +144,12 @@ void ForEachNode::CompareAndUpdateChildren()
 
     tempChildren_.clear();
 
-    auto parent = GetParent();
-    if (parent) {
-        parent->ChildrenUpdatedFrom(0);
+    // find the nearest FrameNode parent
+    for (auto parent = GetParent(); parent; parent = parent->GetParent()) {
+        if (auto frameNode = AceType::DynamicCast<FrameNode>(parent)) {
+            frameNode->ChildrenUpdatedFrom(0);
+            break;
+        }
     }
 }
 
@@ -194,22 +191,21 @@ void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
             AddChild(oldNode, DEFAULT_NODE_SLOT, true);
             // Remove and trigger all Detach callback.
             RemoveChild(oldNode, true);
-            // Load removedElmtId with all the descendant elementIDs of the removed nodes
-            AppendNodeAndChildrenIds(oldNode, removedElmtId);
+            // Collect IDs of removed nodes starting from 'oldNode' (incl.)
+            CollectRemovedChildren({ oldNode }, removedElmtId, false);
         }
     }
 
     tempChildren_.clear();
     tempChildrenOfRepeat_.clear();
 
-    auto parent = GetParent();
-    if (parent) {
-        parent->ChildrenUpdatedFrom(0);
+    // find the nearest FrameNode parent
+    for (auto parent = GetParent(); parent; parent = parent->GetParent()) {
+        if (auto frameNode = AceType::DynamicCast<FrameNode>(parent)) {
+            frameNode->ChildrenUpdatedFrom(0);
+            break;
+        }
     }
-
-    // call when children changed
-    //FlushUpdateAndMarkDirty();
-    //stack processor =>FlushRerenderTask();
 
     LOGE("ForEachNode::FinishRepeatRender END");
 }
