@@ -5218,7 +5218,7 @@ void CommonBridge::GetSwipeGestureValue(
     Local<JSValueRef> speedArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
     if (!speedArg.IsNull() && !speedArg->IsUndefined()) {
         auto speedValue = static_cast<double>(speedArg->ToNumber(vm)->Value());
-        speed = speedValue < 0.0 ? DEFAULT_SLIDE_SPEED : speedValue;
+        speed = LessOrEqual(speedValue, 0.0) ? DEFAULT_SLIDE_SPEED : speedValue;
     }
 }
 
