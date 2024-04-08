@@ -700,6 +700,10 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     CHECK_NULL_VOID(modifier);
     modifier->SetFontFamilies(textStyle.GetFontFamilies());
     modifier->SetFontSize(textStyle.GetFontSize());
+    if (textStyle.GetAdaptTextSize()) {
+        modifier->SetAdaptMinFontSize(textStyle.GetAdaptMinFontSize());
+        modifier->SetAdaptMaxFontSize(textStyle.GetAdaptMaxFontSize());
+    }
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
@@ -739,10 +743,49 @@ void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)
     }
 }
 
+bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyle,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const LayoutConstraintF& contentConstraint,
+    LayoutWrapper* layoutWrapper)
+{
+    bool result = false;
+    switch (layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
+        case TextHeightAdaptivePolicy::MAX_LINES_FIRST:
+        case TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST:
+            result = AdaptMinFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            break;
+        case TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST:
+            result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            break;
+        default:
+            break;
+    }
+    return result;
+}
+
+bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
+{
+    if (!CreateParagraphEx(textStyle, content, contentConstraint, layoutWrapper)) {
+        return false;
+    }
+    if (needLayout) {
+        CHECK_NULL_RETURN(paragraph_, false);
+        auto maxSize = GetMaxMeasureSize(contentConstraint);
+        paragraph_->Layout(maxSize.Width());
+    }
+    return true;
+}
+
 void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& textStyle, bool isDisabled)
 {
+    if (layoutProperty->HasAdaptMinFontSize()) {
+        textStyle.SetAdaptMinFontSize(layoutProperty->GetAdaptMinFontSize().value());
+    }
+    if (layoutProperty->HasAdaptMaxFontSize()) {
+        textStyle.SetAdaptMaxFontSize(layoutProperty->GetAdaptMaxFontSize().value());
+    }
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto pipeline = frameNode->GetContext();
@@ -780,6 +823,14 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& placeholderTextStyle, bool isDisabled)
 {
+    if (layoutProperty->GetPlaceholderValue("").empty()) {
+        if (layoutProperty->HasAdaptMinFontSize()) {
+            placeholderTextStyle.SetAdaptMinFontSize(layoutProperty->GetAdaptMinFontSize().value());
+        }
+        if (layoutProperty->HasAdaptMaxFontSize()) {
+            placeholderTextStyle.SetAdaptMaxFontSize(layoutProperty->GetAdaptMaxFontSize().value());
+        }
+    }
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto pipeline = frameNode->GetContext();

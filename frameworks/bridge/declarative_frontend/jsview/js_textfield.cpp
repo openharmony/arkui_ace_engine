@@ -85,6 +85,8 @@ constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1386,6 +1388,51 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
             TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
         }
     } while (false);
+}
+
+void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension minFontSize;
+    if (!ParseJsDimensionFpNG(info[0], minFontSize, false)) {
+        TextFieldModel::GetInstance()->SetAdaptMinFontSize(CalcDimension());
+        return;
+    }
+    if (minFontSize.IsNegative()) {
+        minFontSize = CalcDimension();
+    }
+    TextFieldModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
+}
+
+void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    if (!ParseJsDimensionFpNG(info[0], maxFontSize, false)) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+        TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
+        return;
+    }
+    if (maxFontSize.IsNegative()) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    }
+    TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
+}
+
+void JSTextField::SetHeightAdaptivePolicy(int32_t value)
+{
+    if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
 
 void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)

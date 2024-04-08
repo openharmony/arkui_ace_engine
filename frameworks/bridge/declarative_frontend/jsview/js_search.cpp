@@ -115,6 +115,8 @@ void JSSearch::JSBind(BindingTarget globalObj)
 void JSSearch::JSBindMore()
 {
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
+    JSClass<JSSearch>::StaticMethod("minFontSize", &JSSearch::SetMinFontSize);
+    JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
     JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
@@ -850,6 +852,43 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
             SearchModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
         }
     } while (false);
+}
+
+void JSSearch::SetMinFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension minFontSize;
+    if (!ParseJsDimensionFpNG(info[0], minFontSize, false)) {
+        SearchModel::GetInstance()->SetAdaptMinFontSize(CalcDimension());
+        return;
+    }
+    if (minFontSize.IsNegative()) {
+        minFontSize = CalcDimension();
+    }
+    SearchModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
+}
+
+void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    if (!ParseJsDimensionFpNG(info[0], maxFontSize, false)) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+        SearchModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
+        return;
+    }
+    if (maxFontSize.IsNegative()) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    }
+    SearchModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
 
 void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)

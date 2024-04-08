@@ -297,6 +297,9 @@ public:
 
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetAdaptMinFontSize(const Dimension& value) {};
+    virtual void SetAdaptMaxFontSize(const Dimension& value) {};
+    virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {};
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
