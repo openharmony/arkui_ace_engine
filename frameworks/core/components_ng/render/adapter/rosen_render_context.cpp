@@ -727,6 +727,12 @@ void RosenRenderContext::OnBackgroundImagePositionUpdate(const BackgroundImagePo
     PaintBackground();
 }
 
+void RosenRenderContext::OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& /*ImageResizableSlice*/)
+{
+    CHECK_NULL_VOID(rsNode_);
+    PaintBackground();
+}
+
 void RosenRenderContext::SetBackBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);

@@ -363,6 +363,7 @@ private:
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
+    void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) override;
 
     void OnForegroundColorUpdate(const Color& value) override;
     void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) override;
