@@ -32,7 +32,7 @@ class VariableUtilV3 {
        */
     public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
       const meta = target[ObserveV2.V3_DECO_META]?.[attrName];
-      if (!meta || meta["deco"] != '@param') {
+      if (!meta || meta.deco !== '@param') {
         const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
         stateMgmtConsole.error(error);
         throw new Error(error);
@@ -54,7 +54,7 @@ class VariableUtilV3 {
     public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
       // prevent update for @param @once
       const meta = target[ObserveV2.V3_DECO_META]?.[attrName];
-      if (!meta || meta["deco"] != '@param') {
+      if (!meta || meta.deco !== '@param') {
         const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
         stateMgmtConsole.error(error);
         throw new Error(error);
@@ -66,13 +66,13 @@ class VariableUtilV3 {
         stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' unchanged. Doing nothing.`);
         return;
       }
-      if (meta["deco2"] == "@once") {
+      if (meta.deco2 === '@once') {
         // @param @once - init but no update
         stateMgmtConsole.log(`updateParm: '@param @once ${attrName}' - Skip updating.`);
       } else {
         stateMgmtConsole.propertyAccess(`updateParm '@param ${attrName}' - updating backing store and fireChange.`);
         target[storeProp] = newValue;
-        ObserveV2.getObserve().fireChange(target, attrName)
+        ObserveV2.getObserve().fireChange(target, attrName);
       }
     }
   }
@@ -86,23 +86,23 @@ class VariableUtilV3 {
      * similar to @see addVariableDecoMeta, but adds the alias to allow search from @consume for @provide counterpart
      * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
-     * @param deco "@state", "@event", etc (note "@model" gets transpiled in "@param" and "@event")
+     * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
      */
-    public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: "@provide" | "@consume"): void {
+    public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@provide' | '@consume'): void {
       // add decorator meta data to prototype
       const meta = proto[ObserveV2.V3_DECO_META] ??= {};
       // note: aliasName is the actual alias not the prefixed version
-      meta[varName] = { "deco": deco, "aliasName": aliasName };
+      meta[varName] = { 'deco': deco, 'aliasName': aliasName };
   
       // prefix to avoid name collisions with variable of same name as the alias!
       const aliasProp = ProvideConsumeUtilV3.ALIAS_PREFIX + aliasName;
-      meta[aliasProp] = { "varName": varName, "deco": deco }
+      meta[aliasProp] = { 'varName': varName, 'deco': deco };
   
       // FIXME 
       // when splitting ViewPU and ViewV2
       // use instanceOf. Until then, this is a workaround.
       // any @state, @track, etc V3 event handles this function to return false
-      Reflect.defineProperty(proto, "isViewV3", {
+      Reflect.defineProperty(proto, 'isViewV3', {
         get() { return true; },
         enumerable: false
       }
@@ -116,13 +116,13 @@ class VariableUtilV3 {
       }
   
       for (const [key, value] of Object.entries(meta)) {
-        if (value["deco"] == "@consume" && value["varName"]) {
+        if ((value as any).deco === '@consume' && (value as any).varName) {
           const prefixedAliasName = key;
           let result = ProvideConsumeUtilV3.findProvide(view, prefixedAliasName);
           if (result && result[0] && result[1]) {
-            ProvideConsumeUtilV3.connectConsume2Provide(view, value["varName"], result[0], result[1])
+            ProvideConsumeUtilV3.connectConsume2Provide(view, (value as any).varName, result[0], result[1]);
           } else {
-            ProvideConsumeUtilV3.defineConsumeWithoutProvide(view, value["varName"]);
+            ProvideConsumeUtilV3.defineConsumeWithoutProvide(view, (value as any).varName);
           }
         }
       }
@@ -138,10 +138,10 @@ class VariableUtilV3 {
     private static findProvide(view: ViewV2, searchingPrefixedAliasName: string): [ViewV2, string] | undefined {
       let checkView : IView | undefined = view?.getParent();
       while (checkView) {
-        const meta = checkView.constructor?.prototype[ObserveV2.V3_DECO_META]
+        const meta = checkView.constructor?.prototype[ObserveV2.V3_DECO_META];
         if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
           const aliasMeta = meta[searchingPrefixedAliasName];
-          const providedVarName: string | undefined = aliasMeta && (aliasMeta["deco"] == "@provide" ? aliasMeta["varName"] : undefined);
+          const providedVarName: string | undefined = aliasMeta && (aliasMeta.deco === '@provide' ? aliasMeta.varName : undefined);
   
           if (providedVarName) {
             stateMgmtConsole.debug(`findProvide: success: ${checkView.debugInfo__()} has matching @provide('${searchingPrefixedAliasName.substring(ProvideConsumeUtilV3.ALIAS_PREFIX.length)}') ${providedVarName}`);
@@ -154,20 +154,18 @@ class VariableUtilV3 {
       return undefined;
     }
   
-    private static connectConsume2Provide(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string) {
+    private static connectConsume2Provide(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): void {
       stateMgmtConsole.debug(`connectConsume2PRovide: Connect ${consumeView.debugInfo__()} '@consume ${consumeVarName}' to ${provideView.debugInfo__()} '@provide ${provideVarName}'`);
   
-      // weakref provideView ?
-      //const storeProvide = ObserveV2.OB_PREFIX + provideVarName;
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
-          stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} get`)
+          stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} get`);
           ObserveV2.getObserve().addRef(this, consumeVarName);
           const view = weakView.deref();
           if (!view) {
-            const error = `${this.debugInfo__()}: get() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`
+            const error = `${this.debugInfo__()}: get() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
             throw new Error(error);
           }
@@ -175,10 +173,10 @@ class VariableUtilV3 {
         },
         set(val) {
           // If the object has not been observed, you can directly assign a value to it. This improves performance.
-          stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} set`)
+          stateMgmtConsole.propertyAccess(`@consume ${consumeVarName} set`);
           const view = weakView.deref();
           if (!view) {
-            const error = `${this.debugInfo__()}: set() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`
+            const error = `${this.debugInfo__()}: set() on @consume ${consumeVarName}: providing @ComponentV2 ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
             throw new Error(error);
           }
@@ -192,29 +190,29 @@ class VariableUtilV3 {
           }
         },
         enumerable: true
-      })
+      });
     }
   
-    private static defineConsumeWithoutProvide(consumeView: ViewV2, consumeVarName: string) {
+    private static defineConsumeWithoutProvide(consumeView: ViewV2, consumeVarName: string): void {
       stateMgmtConsole.debug(`defineConsumeWithoutProvide: ${consumeView.debugInfo__()} @consume ${consumeVarName} does not have @provide counter part, uses local init value`);
   
       const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
       consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
-          ObserveV2.getObserve().addRef(this, consumeVarName)
-          return ObserveV2.autoProxyObject(this, ObserveV2.OB_PREFIX + consumeVarName)
+          ObserveV2.getObserve().addRef(this, consumeVarName);
+          return ObserveV2.autoProxyObject(this, ObserveV2.OB_PREFIX + consumeVarName);
         },
         set(val) {
           if (val !== this[storeProp]) {
-            this[storeProp] = val
+            this[storeProp] = val;
             if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
-              ObserveV2.getObserve().fireChange(this, consumeVarName)
+              ObserveV2.getObserve().fireChange(this, consumeVarName);
             }
           }
         },
         enumerable: true
-      })
+      });
     }
   }
   

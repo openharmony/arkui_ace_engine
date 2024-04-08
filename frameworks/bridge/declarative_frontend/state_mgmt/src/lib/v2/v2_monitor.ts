@@ -25,9 +25,9 @@
 
 
 class MonitorValueV2<T> {
-  public before?: T
-  public now?: T
-  public path: string
+  public before?: T;
+  public now?: T;
+  public path: string;
   // properties on the path
   public props : string[];
 
@@ -36,22 +36,22 @@ class MonitorValueV2<T> {
   constructor(path: string) {
     this.path = path;
     this.dirty = false;
-    this.props = path.split(".")
+    this.props = path.split('.');
   }
 
   setValue(isInit: boolean, newValue: T): boolean {
-    this.now = newValue
+    this.now = newValue;
     if (isInit) {
-      this.before = this.now
+      this.before = this.now;
     }
     this.dirty = this.before !== this.now;
-    return this.dirty
+    return this.dirty;
   }
 
   // mv newValue to oldValue, set dirty to false
   reset() {
-    this.before = this.now
-    this.dirty = false
+    this.before = this.now;
+    this.dirty = false;
   }
 
   isDirty() {
@@ -69,8 +69,8 @@ class MonitorValueV2<T> {
 
 
 class MonitorV2 {
-  public static readonly WATCH_PREFIX = "___watch_";
-  public static readonly WATCH_INSTANCE_PREFIX = "___watch__obj_";
+  public static readonly WATCH_PREFIX = '___watch_';
+  public static readonly WATCH_INSTANCE_PREFIX = '___watch__obj_';
 
   // start with high number to avoid same id as elmtId for components.
   public static readonly MIN_WATCH_ID = 0x1000000000000;
@@ -78,9 +78,9 @@ class MonitorV2 {
 
 
   private values_: Array<MonitorValueV2<unknown>> = new Array<MonitorValueV2<unknown>>();
-  private target_: object  // @monitor function 'this': data object or ViewV2
+  private target_: object; // @monitor function 'this': data object or ViewV2
   private monitorFunction: (m: IMonitor) => void;
-  private watchId_: number;  // unique id, similar to elmtId but identifies this object
+  private watchId_: number; // unique id, similar to elmtId but identifies this object
 
   constructor(target: object, pathsString: string, func: (m: IMonitor) => void) {
     this.target_ = target;
@@ -88,15 +88,15 @@ class MonitorV2 {
     this.watchId_ = ++MonitorV2.nextWatchId_;
 
     // split space separated array of paths
-    let paths = pathsString.split(/\s+/g)
-    paths.forEach(path => this.values_.push(new MonitorValueV2<unknown>(path)))
+    let paths = pathsString.split(/\s+/g);
+    paths.forEach(path => this.values_.push(new MonitorValueV2<unknown>(path)));
 
     // add watchId to owning ViewV2 or view model data object
     // ViewV2 uses to call clearBinding(id)
     // FIXME data object leave data inside ObservedV3, because they can not 
     // call clearBinding(id) before they get deleted.
-    const meta = target[MonitorV2.WATCH_INSTANCE_PREFIX]??={};
-    meta[pathsString]=this.watchId_;
+    const meta = target[MonitorV2.WATCH_INSTANCE_PREFIX] ??= {};
+    meta[pathsString] = this.watchId_;
   }
 
   public getTarget() : Object {
@@ -111,9 +111,9 @@ class MonitorV2 {
     let ret = new Array<string>();
     this.values_.forEach(monitorValue => {
       if (monitorValue.isDirty()) {
-        ret.push(monitorValue.path)
+        ret.push(monitorValue.path);
       }
-    })
+    });
     return ret;
   }
 
@@ -127,42 +127,42 @@ class MonitorV2 {
         return monitorValue as MonitorValueV2<T> as IMonitorValue<T>;
       }
     }
-    return undefined
+    return undefined;
   }
 
   InitRun(): MonitorV2 {
-    this.bindRun(true)
-    return this
+    this.bindRun(true);
+    return this;
   }
 
-  public notifyChange() {
+  public notifyChange(): void {
     if (this.bindRun(/* is init / first run */ false)) {
       stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
 
       // exec @Monitor function
-      this.monitorFunction.call(this.target_, this)
+      this.monitorFunction.call(this.target_, this);
 
       // now -> before value
-      this.reset()
+      this.reset();
     }
   }
 
   // called after @Monitor function call
-  private reset() {
-    this.values_.forEach(item => item.reset())
+  private reset(): void {
+    this.values_.forEach(item => item.reset());
   }
 
   // analysisProp for each monitored path
   private bindRun(isInit: boolean = false): boolean {
-    ObserveV2.getObserve().startBind(this, this.watchId_)
-    let ret = false
+    ObserveV2.getObserve().startBind(this, this.watchId_);
+    let ret = false;
     this.values_.forEach((item) => {
-      let dirty = item.setValue(isInit, this.analysisProp(isInit, item))
-      ret = ret || dirty
-    })
+      let dirty = item.setValue(isInit, this.analysisProp(isInit, item));
+      ret = ret || dirty;
+    });
 
-    ObserveV2.getObserve().startBind(null, -1)
-    return ret
+    ObserveV2.getObserve().startBind(null, -1);
+    return ret;
   }
 
   // record / update object dependencies by reading each object along the path
@@ -170,11 +170,11 @@ class MonitorV2 {
   private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): T | undefined {
     let obj = this.target_;
     for (let prop of monitoredValue.props) {
-      if (typeof obj=="object" &&  Reflect.has(obj, prop)) {
-        obj = obj[prop]
+      if (typeof obj === 'object' && Reflect.has(obj, prop)) {
+        obj = obj[prop];
       } else {
-        isInit && stateMgmtConsole.warn(`watch prop "${monitoredValue.path}" initialize not found, make sure it exists!`)
-        return undefined
+        isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
+        return undefined;
       }
     }
     return obj as unknown as T;
@@ -182,8 +182,8 @@ class MonitorV2 {
 
   public static clearWatchesFromTarget(target: Object): void {
     let meta: Object;
-    if (!target || typeof target !== "object"
-      || !(meta = target[MonitorV2.WATCH_INSTANCE_PREFIX]) || typeof meta != "object") {
+    if (!target || typeof target !== 'object' ||
+        !(meta = target[MonitorV2.WATCH_INSTANCE_PREFIX]) || typeof meta !== 'object') {
       return;
     }
 
@@ -195,19 +195,19 @@ class MonitorV2 {
 
 // Performance Improvement
 class AsyncAddMonitorV2 {
-  static watches: any[] = []
+  static watches: any[] = [];
   
-  static addMonitor(target: any, name: string) {
+  static addMonitor(target: any, name: string): void {
     if (AsyncAddMonitorV2.watches.length === 0) {
-      Promise.resolve(true).then(AsyncAddMonitorV2.run)
+      Promise.resolve(true).then(AsyncAddMonitorV2.run);
     }
-    AsyncAddMonitorV2.watches.push([target, name])
+    AsyncAddMonitorV2.watches.push([target, name]);
   }
 
-  static run() {
+  static run(): void {
     for (let item of AsyncAddMonitorV2.watches) {
-      ObserveV2.getObserve().constructMonitor(item[0], item[1])
+      ObserveV2.getObserve().constructMonitor(item[0], item[1]);
     }
-    AsyncAddMonitorV2.watches=[];
+    AsyncAddMonitorV2.watches = [];
   }
 }

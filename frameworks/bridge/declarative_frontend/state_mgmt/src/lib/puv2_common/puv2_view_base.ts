@@ -73,7 +73,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU/V2 object by given elmtId
-    this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
+    this.id_ = elmtId === UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
 
     stateMgmtConsole.debug(`PUV2ViewBase constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
@@ -84,8 +84,8 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     if (parent) {
       // this View is not a top-level View
       this.setCardId(parent.getCardId());
-      // Call below will set this.parent_ to parent as well
-      parent.addChild(this as unknown as IView);  // FIXME
+      // Call below will set this parent_ to parent as well
+      parent.addChild(this as unknown as IView); // FIXME
     }
 
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
@@ -185,7 +185,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
         child.setDeleting();
         child.setDeleteStatusRecursively();
       }
-    })
+    });
   }
 
   // KEEP
@@ -226,11 +226,11 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // use function only for debug output and DFX.
   // KEEP
   public debugInfoElmtIds(elmtIds: Array<number>): string {
-    let result: string = "";
-    let sepa: string = "";
+    let result: string = '';
+    let sepa: string = '';
     elmtIds.forEach((elmtId: number) => {
       result += `${sepa}${this.debugInfoElmtId(elmtId)}`;
-      sepa = ", ";
+      sepa = ', ';
     });
     return result;
   }
@@ -280,7 +280,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   // KEEP  
   public updateStateVarsOfChildByElmtId(elmtId, params: Object): void {
-    stateMgmtProfiler.begin("ViewPU/V2.updateStateVarsOfChildByElmtId");
+    stateMgmtProfiler.begin('ViewPU/V2.updateStateVarsOfChildByElmtId');
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - start`);
 
     if (elmtId < 0) {
@@ -304,13 +304,13 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // this function equals purgeDeletedElmtIdsRecursively because it does un-registration for all ViewPU/V2's
   // KEEP
   protected purgeDeletedElmtIds(): void {
-    stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) start ...`)
+    stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) start ...`);
     // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
     UINodeRegisterProxy.obtainDeletedElmtIds();
     // unregister the removed elmtIds requested from the cpp side for all ViewPUs/ViewV2, it will make the first ViewPUs/ViewV2 slower
     // than before, but the rest ViewPUs/ViewV2 will be faster
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) end... `)
+    stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) end... `);
   }
 
 
@@ -327,7 +327,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   public ifElseBranchUpdateFunction(branchId: number, branchfunc: () => void): void {
     const oldBranchid: number = If.getBranchId();
 
-    if (branchId == oldBranchid) {
+    if (branchId === oldBranchid) {
       stateMgmtConsole.debug(`${this.debugInfo__()}: ifElseBranchUpdateFunction: IfElse branch unchanged, no work to do.`);
       return;
     }
@@ -366,7 +366,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     itemGenFuncUsesIndex: boolean = false,
     idGenFuncUsesIndex: boolean = false): void {
 
-    stateMgmtProfiler.begin("ViewPU/V2.forEachUpdateFunction");
+    stateMgmtProfiler.begin('ViewPU/V2.forEachUpdateFunction');
     stateMgmtConsole.debug(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render) start ...`);
 
     if (itemArray === null || itemArray === undefined) {
@@ -375,13 +375,13 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       return;
     }
 
-    if (typeof itemGenFunc !== "function") {
+    if (typeof itemGenFunc !== 'function') {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
       stateMgmtProfiler.end();
       return;
     }
 
-    if (idGenFunc !== undefined && typeof idGenFunc !== "function") {
+    if (idGenFunc !== undefined && typeof idGenFunc !== 'function') {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render): id generator is not a function. Application error!`);
       stateMgmtProfiler.end();
       return;
@@ -395,9 +395,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {
-          throw new Error(`${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`)
+          throw new Error(`${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
         }
-      }
+      };
     }
 
     let diffIndexArray = []; // New indexes compared to old one.
@@ -427,7 +427,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     // Its error if there are duplicate IDs.
     if (idDuplicates.length > 0) {
       idDuplicates.forEach((indx) => {
-        stateMgmtConsole.error(`Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
+        stateMgmtConsole.error(`Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx === 2 ? 'nd' : 'rd' : 'th'} array item ${arr[indx]}.`);
       });
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: Ids generated by the ForEach id gen function must be unique. Application error!`);
     }
@@ -435,9 +435,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     stateMgmtConsole.debug(`${this.debugInfo__()}: forEachUpdateFunction: diff indexes ${JSON.stringify(diffIndexArray)} . `);
 
     // Item gen is with index.
-    stateMgmtConsole.debug(`   ... item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
+    stateMgmtConsole.debug(`   ... item Gen ${itemGenFuncUsesIndex ? 'with' : 'without'} index`);
     // Create new elements if any.
-    stateMgmtProfiler.begin("ViewPU/V2.forEachUpdateFunction (native)");
+    stateMgmtProfiler.begin('ViewPU/V2.forEachUpdateFunction (native)');
     diffIndexArray.forEach((indx) => {
       ForEach.createNewChildStart(newIdArray[indx], this);
       if (itemGenFuncUsesIndex) {
@@ -493,7 +493,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   // KEEP
   public debugInfoViewHierarchyInternal(depth: number = 0, recursive: boolean = false): string {
-    let retVaL: string = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
+    let retVaL: string = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
     if (this.isCompFreezeAllowed()) {
       retVaL += ` {freezeWhenInactive : ${this.isCompFreezeAllowed()}}`;
     }
@@ -501,7 +501,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     if (depth < 1 || recursive) {
       this.childrenWeakrefMap_.forEach((weakChild: WeakRef<IView>) => {
         retVaL += weakChild.deref()?.debugInfoViewHierarchyInternal(depth + 1, recursive);
-      })
+      });
     }
     return retVaL;
   }
@@ -513,19 +513,19 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   // KEEP
   public debugInfoUpdateFuncByElmtIdInternal(counter: ProfileRecursionCounter, depth: number = 0, recursive: boolean = false): string {
-    let retVaL: string = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+    let retVaL: string = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
     this.updateFuncByElmtId.forEach((value, key, map) => {
-      retVaL += `\n${"  ".repeat(depth + 2)}${value.getComponentName()}[${key}]`
-    })
+      retVaL += `\n${'  '.repeat(depth + 2)}${value.getComponentName()}[${key}]`;
+    });
     counter.total += this.updateFuncByElmtId.size;
-    retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`
+    retVaL += `\n${'  '.repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`;
     if (recursive) {
       this.childrenWeakrefMap_.forEach((value, key, map) => {
         retVaL += value.deref()?.debugInfoUpdateFuncByElmtIdInternal(counter, depth + 1, recursive);
-      })
+      });
     }
-    if (recursive && depth == 0) {
-      retVaL += `\nTotal: ${counter.total}`
+    if (recursive && depth === 0) {
+      retVaL += `\nTotal: ${counter.total}`;
     }
     return retVaL;
   }
@@ -534,4 +534,4 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return Array.from(PUV2ViewBase.inactiveComponents_)
       .map((component) => `- ${component}`).join('\n');
   }
-}  // class PUV2ViewBase
+} // class PUV2ViewBase

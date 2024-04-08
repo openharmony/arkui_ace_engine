@@ -59,7 +59,7 @@ class UINodeRegisterProxy {
 
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
-        if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {
+        if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds !== 'function') {
             stateMgmtConsole.error(`UINodeRegisterProxy obtainDeletedElmtIds is not a function: ${UINodeRegisterProxy.instance_.obtainDeletedElmtIds}.` );
         } else {
             UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
@@ -81,7 +81,7 @@ class UINodeRegisterProxy {
 
     private populateRemoveElementInfo(removedElements: Array<number>) {
         for (const elmtId of removedElements) {
-            const removedElementInfo: RemovedElementInfo = { elmtId, tag: "" };
+            const removedElementInfo: RemovedElementInfo = { elmtId, tag: '' };
             this.removeElementsInfo_.push(removedElementInfo);
         }
     }
@@ -114,7 +114,7 @@ class UINodeRegisterProxy {
                     stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
             } else {
-                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`)
+                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`);
             }
 
             // FIXME: only do this if app uses V3

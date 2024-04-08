@@ -44,8 +44,8 @@ class ComputedV2 {
   private propertyComputeFunc_: () => any;
   private computedId_: number; 
 
-  public static readonly COMPUTED_PREFIX =  "___comp_";
-  public static readonly COMPUTED_CACHED_PREFIX = "___comp_cached_";
+  public static readonly COMPUTED_PREFIX = '___comp_';
+  public static readonly COMPUTED_CACHED_PREFIX = '___comp_cached_';
 
   constructor(target: object, prop: string, func: (...args: any[]) => any) {
     this.target_ = target;
@@ -96,23 +96,24 @@ class ComputedV2 {
 }
 
 interface AsyncAddComputedJobEntryV2 {
-  target: Object
-  name: string
+  target: Object;
+  name: string;
 }
 class AsyncAddComputedV2 {
   static computedVars : Array<AsyncAddComputedJobEntryV2> = new Array<AsyncAddComputedJobEntryV2>();
 
-  static addComputed(target: Object, name: string) {
+  static addComputed(target: Object, name: string): void {
     if (AsyncAddComputedV2.computedVars.length === 0) {
-      Promise.resolve(true).then(AsyncAddComputedV2.run)
+      Promise.resolve(true).then(AsyncAddComputedV2.run);
     }
     AsyncAddComputedV2.computedVars.push({target: target, name: name});
   }
 
-  static run() {
-    AsyncAddComputedV2.computedVars.forEach((computedVar : AsyncAddComputedJobEntryV2) => ObserveV2.getObserve().constructComputed(computedVar.target, computedVar.name));
+  static run(): void {
+    AsyncAddComputedV2.computedVars.forEach((computedVar : AsyncAddComputedJobEntryV2) =>
+      ObserveV2.getObserve().constructComputed(computedVar.target, computedVar.name));
     // according to stackoverflow this is the fastest way to clear an Array
     // ref https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
-    AsyncAddComputedV2.computedVars.length=0;
+    AsyncAddComputedV2.computedVars.length = 0;
   }
 }

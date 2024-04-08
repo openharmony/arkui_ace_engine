@@ -63,7 +63,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.owningView_ = undefined;
   }
 
-  private decoratorInfo_: string = "";
+  private decoratorInfo_: string = '';
 
   public setDecoratorInfo(decorate: string) {
     this.decoratorInfo_ = decorate;
@@ -84,7 +84,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   public debugInfoOwningView() : string {
-    return `${this.owningView_ ? this.owningView_.debugInfo__() : "owning @Component UNKNOWN"}`;
+    return `${this.owningView_ ? this.owningView_.debugInfo__() : 'owning @Component UNKNOWN'}`;
   }
 
   // dump info about owning view and subscribers (PU ones only)
@@ -97,17 +97,17 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   public debugInfoSyncPeers(): string {
     if (!this.subscriberRefs_.size) {
-      return "|--Sync peers: none";
+      return '|--Sync peers: none';
     }
     let result: string = `|--Sync peers: {`;
-    let sepa: string = "";
+    let sepa: string = '';
     this.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
-      if ("debugInfo" in subscriber) {
+      if ('debugInfo' in subscriber) {
         result += `\n    ${sepa}${(subscriber as ObservedPropertyAbstractPU<any>).debugInfo()}`;
-        sepa = ", ";
+        sepa = ', ';
       }
     });
-    result += "\n  }"
+    result += '\n  }';
     return result;
   }
 
@@ -119,13 +119,13 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     if (this.owningView_) {
       return this.owningView_.debugInfoElmtId(elmtId);
     }
-    return "<unknown element id " + elmtId + ", missing owning view>";
+    return '<unknown element id ' + elmtId + ', missing owning view>';
   }
 
   public debugInfoDependentComponents(): string | Object {
     let result: string = `|--Dependent elements: `;
-    let sepa: string = "; ";
-    let sepaDiff: string = ""
+    let sepa: string = '; ';
+    let sepaDiff: string = '';
     const dumpDependantElements = true;
 
     let queue: Array<ObservedPropertyAbstractPU<any>> = [this];
@@ -139,7 +139,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         result += `${sepa}${item.debugInfoOwningView()}`;
       }
       result += `${sepaDiff}${item.debugInfoDependentElmtIds(dumpDependantElements)}`; // new dependent elements
-      sepaDiff = ", "
+      sepaDiff = ', ';
 
       item.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
         if ((subscriber instanceof ObservedPropertyAbstractPU)) {
@@ -167,8 +167,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   protected isPropSourceObservedPropertyFakeName(): string | false {
-    return this.info() && this.info().endsWith("_prop_fake_state_source___")
-      ? this.info().substring(0, this.info().length - "_prop_fake_state_source___".length)
+    return this.info() && this.info().endsWith('_prop_fake_state_source___')
+      ? this.info().substring(0, this.info().length - '_prop_fake_state_source___'.length)
       : false;
   }
 
@@ -243,8 +243,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // also property/item changes to  ObservedObjects of class object type, which use compat mode
   // Date and Array are notified as if there had been an assignment.
   protected notifyPropertyHasChangedPU() {
-    stateMgmtProfiler.begin("ObservedPropertyAbstractPU.notifyPropertyHasChangedPU");
-    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`)
+    stateMgmtProfiler.begin('ObservedPropertyAbstractPU.notifyPropertyHasChangedPU');
+    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
@@ -269,12 +269,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   // notify owning ViewPU and peers of a ObservedObject @Track property's assignment
   protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string) : void {
-    stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyTrackedObjectPropertyHasChanged");
-    stateMgmtConsole.debug(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged.`)
+    stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyTrackedObjectPropertyHasChanged');
+    stateMgmtConsole.debug(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged.`);
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
-        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, "notifyTrackedObjectPropertyHasChanged"));
+        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
       } else {
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
@@ -313,9 +313,9 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
-    let res = ((typeof value == "object" && typeof value != "function" && !ObserveV2.IsObservedObjectV3(value))
-    || typeof value == "number" || typeof value == "string" || typeof value == "boolean"
-    || value == undefined || value == null);
+    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV3(value)) ||
+    typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' ||
+    value === undefined || value === null);
     if (!res) {
       errorReport.varValueCheckFailed({
           customComponent: this.debugInfoOwningView(),
@@ -323,7 +323,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           variableName: this.info(),
           expectedType: `undefined, null, number, boolean, string, or Object but not function, not V3 @observed / @track class`,
           value: value
-        })
+        });
     }
     return res;
   }
@@ -335,8 +335,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       FIXME this expects the Map, Set patch to go in
    */
   protected checkIsObject(value: T): boolean {
-    let res = ((typeof value == "object" && typeof value != "function" && !ObserveV2.IsObservedObjectV3(value))
-    || value == undefined || value == null);
+    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV3(value)) ||
+    value === undefined || value === null);
     if (!res) {
       errorReport.varValueCheckFailed({
           customComponent: this.debugInfoOwningView(),
@@ -344,7 +344,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           variableName: this.info(),
           expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
           value: value
-        })
+        });
     }
     return res;
   }
@@ -354,7 +354,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     see 1st parameter for explanation what is allowed
    */
   protected checkIsSimple(value: T): boolean {
-    let res = (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean");
+    let res = (value === undefined || typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean');
     if (!res) {
       errorReport.varValueCheckFailed({
         customComponent: this.debugInfoOwningView(),
@@ -362,7 +362,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         variableName: this.info(),
         expectedType: `undefined, number, boolean, string`,
         value: value
-      })
+      });
     }
     return res;
   }
@@ -399,7 +399,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
   static CreateObservedObject<C>(value: C, owningView: IPropertySubscriber, thisPropertyName: PropertyInfo)
     : ObservedPropertyAbstract<C> {
-    return (typeof value === "object") ?
+    return (typeof value === 'object') ?
       new ObservedPropertyObject(value, owningView, thisPropertyName)
       : new ObservedPropertySimple(value, owningView, thisPropertyName);
   }
@@ -432,7 +432,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       throw new TypeError(error);
     }
 
-    stateMgmtConsole.debug(`${this.debugInfo()}: recordPropertyDependentUpdate: add (state) variable dependency for elmtId ${elmtId}.`)
+    stateMgmtConsole.debug(`${this.debugInfo()}: recordPropertyDependentUpdate: add (state) variable dependency for elmtId ${elmtId}.`);
     this.dependentElmtIdsByProperty_.addPropertyDependency(elmtId);
   }
 
@@ -440,7 +440,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    * caller ensures renderingElmtId >= 0
    */
   protected recordTrackObjectPropertyDependencyForElmtId(renderingElmtId : number, readTrackedPropertyName : string) : void {
-    stateMgmtConsole.debug(`${this.debugInfo()}: recordTrackObjectPropertyDependency on elmtId ${renderingElmtId}.`)
+    stateMgmtConsole.debug(`${this.debugInfo()}: recordTrackObjectPropertyDependency on elmtId ${renderingElmtId}.`);
     this.dependentElmtIdsByProperty_.addTrackedObjectPropertyDependency(readTrackedPropertyName, renderingElmtId);
   }
   
@@ -483,7 +483,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   */
   public onTrackedObjectPropertyHasChangedPU(sourceObject: ObservedObject<T>, changedPropertyName: string) {
     stateMgmtConsole.debug(`${this.debugInfo()}: onTrackedObjectPropertyHasChangedPU: property '${changedPropertyName}' of \
-      object value has changed.`)
+      object value has changed.`);
 
     this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
   }
@@ -497,7 +497,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   */
   public onTrackedObjectPropertyCompatModeHasChangedPU(sourceObject: ObservedObject<T>, changedPropertyName: string) {
     stateMgmtConsole.debug(`${this.debugInfo()}: onTrackedObjectPropertyCompatModeHasChangedPU: property '${changedPropertyName}' of \
-      object value has changed.`)
+      object value has changed.`);
 
     this.notifyPropertyHasChangedPU();
   }
@@ -569,7 +569,7 @@ class PropertyDependencies {
   public dumpInfoDependencies(owningView: ViewPU|undefined = undefined, dumpDependantElements): string {
     const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
     let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${Array.from(this.propertyDependencies_).map(formatElmtId).join(', ')}`;
-    const arr = Array.from(this.propertyDependencies_).map(formatElmtId)
+    const arr = Array.from(this.propertyDependencies_).map(formatElmtId);
     if (dumpDependantElements) return (arr.length > 1 ? arr.join(', ') : arr[0]);
     this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
       result += `  property '@Track ${propertyName}' change affects elmtIds: ${Array.from(propertyElmtId).map(formatElmtId).join(', ')}`;

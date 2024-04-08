@@ -49,7 +49,7 @@ declare class WeakRef<T extends Object> {
   class UpdateFuncRecord {
     private updateFunc_: UpdateFunc;
     private classObject_: UIClassObject;
-    private node_?: ArkComponent
+    private node_?: ArkComponent;
   
     constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }) {
       this.updateFunc_ = params.updateFunc;
@@ -66,11 +66,11 @@ declare class WeakRef<T extends Object> {
     }
   
     public getComponentName(): string {
-      return (this.classObject_ && ("name" in this.classObject_)) ? Reflect.get(this.classObject_, "name") as string : "unspecified UINode";
+      return (this.classObject_ && ('name' in this.classObject_)) ? Reflect.get(this.classObject_, 'name') as string : 'unspecified UINode';
     }
   
     public getPopFunc(): () => void {
-      return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop! : () => { };
+      return (this.classObject_ && 'pop' in this.classObject_) ? this.classObject_.pop! : () => { };
     }
   
     public getNode(): ArkComponent | undefined {
@@ -124,11 +124,11 @@ class UpdateFuncsByElmtId {
     // dump info about known elmtIds to a string
     // use function only for debug output and DFX.
     public debugInfoRegisteredElmtIds(): string {
-      let result: string = "";
-      let sepa: string = "";
+      let result: string = '';
+      let sepa: string = '';
       this.map_.forEach((value: UpdateFuncRecord, elmtId: number) => {
         result += `${sepa}${value.getComponentName()}[${elmtId}]`;
-        sepa = ", ";
+        sepa = ', ';
       });
       return result;
     }
@@ -137,5 +137,5 @@ class UpdateFuncsByElmtId {
       const updateFuncEntry = this.map_.get(elmtId);
       return updateFuncEntry ? `'${updateFuncEntry!.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
     }
-  }  // class UpdateFuncByElmtId
+  } // class UpdateFuncByElmtId
   

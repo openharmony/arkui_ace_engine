@@ -59,7 +59,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // its aboutToBeDeleted implementation
     protected aboutToBeDeletedInternal(): void {
         stateMgmtConsole.debug(`${this.debugInfo__()}: aboutToBeDeletedInternal`);
-        // if this.isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
+        // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
         // to set and resursively set its children any more
         if (!this.isDeleting_) {
             this.isDeleting_ = true;
@@ -72,12 +72,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
         Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
-            // FIXME split View: enable delete  this.purgeDeleteElmtId(elmtId);
-        })
+            // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
+        });
 
-        //if (this.hasRecycleManager()) {
-        //   this.getRecycleManager().purgeAllCachedRecycleNode();
-        //}
+        /*if this hasRecycleManager() {
+           this getRecycleManager() purgeAllCachedRecycleNode();
+        }*/
 
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
@@ -90,9 +90,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
-        // in case ViewPU is currently frozen
-        // ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-
+        /* in case ViewPU is currently frozen
+           ViewPU inactiveComponents_ delete(`${this.constructor.name}[${this.id__()}]`);
+        */
         MonitorV2.clearWatchesFromTarget(this);
 
         this.updateFuncByElmtId.clear();
@@ -112,8 +112,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.error(`@ComponentV2 ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
             return;
         }
-        const _componentName: string = (classObject && ("name" in classObject)) ? Reflect.get(classObject, "name") as string : "unspecified UINode";
-        const _popFunc: () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => { };
+        const _componentName: string = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') as string : 'unspecified UINode';
+        const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : () => { };
         const updateFunc = (elmtId: number, isFirstRender: boolean) => {
             this.syncInstanceId();
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
@@ -150,7 +150,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // avoid the incompatible change that move set function before updateFunc.
             this.updateFuncByElmtId.delete(elmtId);
             UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
-            stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in update func: ${(error as Error).message}`)
+            stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in update func: ${(error as Error).message}`);
             throw error;
         }
         stateMgmtConsole.debug(`${this.debugInfo__()} is initial rendering elmtId ${elmtId}, tag: ${_componentName}, and updateFuncByElmtId size :${this.updateFuncByElmtId.size}`);
@@ -194,19 +194,22 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
-        if (!this.dirtDescendantElementIds_.size) { //  && !this.runReuse_) {
+        if (!this.dirtDescendantElementIds_.size) { //  && !this runReuse_) {
             // mark ComposedElement dirty when first elmtIds are added
             // do not need to do this every time
             this.syncInstanceId();
             this.markNeedUpdate();
             this.restoreInstanceId();
         }
-        //  if (this.hasRecycleManager()) {
-        //      this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
-        //  } else {
+        /*  if (this hasRecycleManager()) {
+              this dirtDescendantElementIds_ add(this.recycleManager_.proxyNodeId(elmtId));
+            } else {
+        */
         this.dirtDescendantElementIds_.add(elmtId);
-        // }
-        stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
+        /*
+            }
+        */
+        stateMgmtConsole.debug(`${this.debugInfo__()}: uiNodeNeedUpdate: updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
 
         stateMgmtProfiler.end();
     }
@@ -217,8 +220,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
  * run its update function
  *
  */
-    public updateDirtyElements() {
-        stateMgmtProfiler.begin("ViewV2.updateDirtyElements");
+    public updateDirtyElements(): void {
+        stateMgmtProfiler.begin('ViewV2.updateDirtyElements');
         do {
             stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render): sorted dirty elmtIds: ${Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber)}, starting ....`);
 
@@ -233,11 +236,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
-                //if (this.hasRecycleManager()) {
-                //   this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
-                // } else {
+                /*if (this hasRecycleManager()) {
+                   this UpdateElement (this recycleManager_ proxyNodeId(elmtId));
+                 } else {
+                    */
                 this.UpdateElement(elmtId);
-                // }
+                /*
+                 }
+                */
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
 
@@ -251,8 +257,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
 
     public UpdateElement(elmtId: number): void {
-        stateMgmtProfiler.begin("ViewPU.UpdateElement");
-        if (elmtId == this.id__()) {
+        stateMgmtProfiler.begin('ViewPU.UpdateElement');
+        if (elmtId === this.id__()) {
             // do not attempt to update itself.
             // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
             stateMgmtProfiler.end();
@@ -263,15 +269,15 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
         const updateFunc = entry ? entry.getUpdateFunc() : undefined;
 
-        if (typeof updateFunc !== "function") {
+        if (typeof updateFunc !== 'function') {
             stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);
         } else {
             const componentName = entry.getComponentName();
             stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} start ...`);
-            stateMgmtProfiler.begin("ViewV2.updateFunc");
+            stateMgmtProfiler.begin('ViewV2.updateFunc');
             updateFunc(elmtId, /* isFirstRender */ false);
             stateMgmtProfiler.end();
-            stateMgmtProfiler.begin("ViewV2.finishUpdateFunc (native)");
+            stateMgmtProfiler.begin('ViewV2.finishUpdateFunc (native)');
             this.finishUpdateFunc(elmtId);
             stateMgmtProfiler.end();
             stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${componentName} elmtId ${elmtId} - DONE`);
@@ -299,19 +305,20 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         let retVal: ViewPU = undefined;
         for (const [key, value] of this.childrenWeakrefMap_.entries()) {
             retVal = value.deref().findViewPUInHierarchy(id);
-            if (retVal)
+            if (retVal) {
                 break;
+            }
         }
         return retVal;
     }
 
     public setActiveInternal(newState: boolean): void {
-        throw new Error("ViewV2: setActiveInternal is unimplemented")
+        throw new Error('ViewV2: setActiveInternal is unimplemented');
     }
 
     /*
       findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
-      if 'this' ViewPU has a @Provide("providedPropName") return it, otherwise ask from its parent ViewPU.
+      if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
       function needed for mixed @Component and @ComponentV2 parent child hierarchies.
     */
     public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
@@ -325,23 +332,23 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
 
     public debugInfoDirtDescendantElementIdsInternal(depth: number = 0, recursive: boolean = false, counter: ProfileRecursionCounter): string {
-        let retVaL: string = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+        let retVaL: string = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
         retVaL += `ViewV2 keeps no info about dirty elmtIds`;
         if (recursive) {
             this.childrenWeakrefMap_.forEach((value, key, map) => {
                 retVaL += value.deref()?.debugInfoDirtDescendantElementIdsInternal(depth + 1, recursive, counter);
-            })
+            });
         }
 
-        if (recursive && depth == 0) {
-            retVaL += `\nTotal: ${counter.total}`
+        if (recursive && depth === 0) {
+            retVaL += `\nTotal: ${counter.total}`;
         }
         return retVaL;
     }
 
 
     protected debugInfoStateVars(): string {
-        return ""; // TODO DFX, read out META
+        return ''; // TODO DFX, read out META
     }
 
     /**

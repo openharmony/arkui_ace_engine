@@ -41,7 +41,7 @@ function ObservedV2<T extends ConstructorV2>(BaseClass: T) {
 
   // prevent @Track inside @observed class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`
+    const error = `'@observed class ${BaseClass?.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
     stateMgmtConsole.applicationError(error);
     throw new Error(error);
   }
@@ -61,11 +61,11 @@ function ObservedV2<T extends ConstructorV2>(BaseClass: T) {
   }
   return class extends BaseClass {
     constructor(...args) {
-      super(...args)
-      AsyncAddMonitorV2.addMonitor(this, BaseClass.name)
-      AsyncAddComputedV2.addComputed(this, BaseClass.name)
+      super(...args);
+      AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
+      AsyncAddComputedV2.addComputed(this, BaseClass.name);
     }
-  }
+  };
 }
 
 // FIXME remove the old name decorator once Compiler NT has been updated
@@ -84,7 +84,7 @@ const observed = ObservedV2;
 const Trace = (target: Object, propertyKey: string) => {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
   return trackInternal(target, propertyKey);
-}
+};
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const track = Trace;
@@ -103,9 +103,9 @@ const track = Trace;
  *
  */
 const Local = (target: Object, propertyKey: string) => {
-  ObserveV2.addVariableDecoMeta(target, propertyKey, "@state");
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@state');
   return trackInternal(target, propertyKey);
-}
+};
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const state = Local;
@@ -127,24 +127,24 @@ const state = Local;
  *
  */
 const Param = (proto: Object, propertyKey: string) => {
-  stateMgmtConsole.debug(`@param ${propertyKey}`)
-  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, "@param", undefined);
+  stateMgmtConsole.debug(`@param ${propertyKey}`);
+  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@param', undefined);
 
   let storeProp = ObserveV2.OB_PREFIX + propertyKey;
   proto[storeProp] = proto[propertyKey];
   Reflect.defineProperty(proto, propertyKey, {
     get() {
-      ObserveV2.getObserve().addRef(this, propertyKey)
-      return ObserveV2.autoProxyObject(this, ObserveV2.OB_PREFIX + propertyKey)
+      ObserveV2.getObserve().addRef(this, propertyKey);
+      return ObserveV2.autoProxyObject(this, ObserveV2.OB_PREFIX + propertyKey);
     },
     set(_) {
-      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`)
+      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
       return;
     },
     // @param can not be assigned, no setter
     enumerable: true
-  })
-} // Param
+  });
+}; // Param
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const param = Param;
@@ -163,8 +163,8 @@ const param = Param;
  */
 const Once = (proto: Object, propertyKey: string) => {
   stateMgmtConsole.debug(`@once ${propertyKey}`);
-  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, "@once");
-}
+  ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@once');
+};
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const once = Once;
@@ -186,9 +186,9 @@ const once = Once;
  */
 
 const Event = (target, propertyKey) => {
-  ObserveV2.addVariableDecoMeta(target, propertyKey, "@event");
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@event');
   target[propertyKey] ??= () => { };
-}
+};
 
 
 // FIXME remove the old name decorator once Compiler NT has been updated
@@ -215,10 +215,10 @@ const event = Event;
 const Provider = (aliasName?: string) => {
   return (proto: Object, varName: string) => {
     const providedUnderName: string = aliasName || varName;
-    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, "@provide");
+    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@provide');
     trackInternal(proto, varName);
-  }
-} // @Provider
+  };
+}; // @Provider
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const provide = Provider;
@@ -246,9 +246,9 @@ const Consumer = (aliasName?: string) => {
 
     // redefining the property happens when owning ViewV2 gets constructed
     // and @Consumer gets connected to @provide counterpart
-    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, "@consume");
-  }
-}  // @Consumer
+    ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@consume');
+  };
+}; // @Consumer
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const consume = Consumer;
@@ -260,27 +260,27 @@ const consume = Consumer;
  * @Monitor(path: string, paths: string[]) functionName (m : IMonitor) : void
  * 
  * @param path : string , path of monitored object properties (strictly objects, no arrays, maps etc)
- *              property names separated by ".". 
+ *              property names separated by '.'.
  * @param paths : string[] , further, optional paths to monitor
  * 
  * 
  * The decorated function must have one parameter of type IMonitor and no return value.
  * 
- * Example: @Monitor("varName.obj", "varName.obj.proA", "varName2) onChange(m : IMonitor) : void { ... }
+ * Example: @Monitor('varName.obj', 'varName.obj.proA', 'varName2') onChange(m : IMonitor) : void { ... }
  * monitors assignments to this.varName.obj, this.varName.obj.propA, and this.varName2 .
  * 
  * part of SDK
  * @since 12
  */
 const Monitor = function (key : string, ...keys: string[]) {
-  const pathsUniqueString = keys? [key, ...keys].join(" ") : key;
+  const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor) {
     stateMgmtConsole.debug(`@monitor('${pathsUniqueString}')`);
     let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
     const monitorFunc = descriptor.value;
-    target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc }
-  }
-}
+    target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc };
+  };
+};
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const monitor = Monitor;
@@ -294,7 +294,7 @@ const monitor = Monitor;
 */
 interface IMonitor {
   dirty: Array<string>;
-  value<T>(key?: string): IMonitorValue<T> | undefined
+  value<T>(key?: string): IMonitorValue<T> | undefined;
  }
  
  interface IMonitorValue<T> {
@@ -328,7 +328,7 @@ const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescr
   target[watchProp] ? target[watchProp][propertyKey] = computeFunction
     : target[watchProp] = { [propertyKey]: computeFunction };
 
-}
+};
 
 // FIXME remove the old name decorator once Compiler NT has been updated
 const computed = Computed;
