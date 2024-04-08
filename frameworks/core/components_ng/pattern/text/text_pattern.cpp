@@ -465,6 +465,13 @@ RefPtr<RenderContext> TextPattern::GetRenderContext()
 
 void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
 {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (textLayoutProperty->GetMaxLines() == 0) {
+        CloseSelectOverlay();
+        ResetSelection();
+        return;
+    }
     selectOverlay_->ProcessOverlay(request);
 }
 
