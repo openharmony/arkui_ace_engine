@@ -60,6 +60,8 @@ SearchModel* SearchModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
+constexpr double DEFAULT_OPACITY = 0.2;
+const int32_t DEFAULT_ALPHA = 255;
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -106,13 +108,19 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
+    JSBindMore();
+    JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSSearch::JSBindMore()
+{
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
     JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
-    JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSSearch>::StaticMethod("selectedBackgroundColor", &JSSearch::SetSelectedBackgroundColor);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -189,6 +197,27 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
+}
+
+void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedColor();
+    }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    SearchModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
 void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)

@@ -407,6 +407,18 @@ void SearchModelNG::SetPlaceholderFont(const Font& font)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetSelectedBackgroundColor(const Color& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateSelectedBackgroundColor(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SearchModelNG::SetTextFont(const Font& font)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
