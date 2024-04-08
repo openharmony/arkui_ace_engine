@@ -262,6 +262,7 @@ public:
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
+    virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};

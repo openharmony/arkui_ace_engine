@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -95,8 +96,8 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
         frameSize.SetHeight(textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
     } else {
-        auto height = contentHeight + pattern->GetVerticalPaddingAndBorderSum() < defaultHeight
-                          ? defaultHeight
+        auto height = LessNotEqual(contentHeight, defaultHeight)
+                          ? defaultHeight + pattern->GetVerticalPaddingAndBorderSum()
                           : contentHeight + pattern->GetVerticalPaddingAndBorderSum();
         frameSize.SetHeight(height);
     }
@@ -224,14 +225,7 @@ float TextInputLayoutAlgorithm::GetDefaultHeightByType(LayoutWrapper* layoutWrap
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, 0.0f);
-    if (pattern->IsShowPasswordIcon()) {
-        return static_cast<float>(textFieldTheme->GetPasswordTypeHeight().ConvertToPx());
-    }
-    return static_cast<float>(textFieldTheme->GetHeight().ConvertToPx());
+    return static_cast<float>(textFieldTheme->GetContentHeight().ConvertToPx());
 }
 
 bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
