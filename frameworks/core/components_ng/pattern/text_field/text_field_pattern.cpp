@@ -3119,10 +3119,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
-    double positionY = (tmpHost->GetGeometryNode()->GetMarginFrameOffset() +
-                           tmpHost->GetParentGlobalOffsetDuringLayout() - pipeline->GetRootRect().GetOffset())
-                           .GetY() +
-                       windowRect.Top();
+    double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     double height = frameRect_.Height();
     auto offset = AVOID_OFFSET.ConvertToPx();
     height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
@@ -6088,7 +6085,7 @@ OffsetF TextFieldPattern::GetTextPaintOffset() const
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto textPaintOffset = host->GetParentGlobalOffsetDuringLayout() + host->GetGeometryNode()->GetFrameOffset();
+    auto textPaintOffset = host->GetPaintRectOffset();
     return textPaintOffset - rootOffset;
 }
 
