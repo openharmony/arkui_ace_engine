@@ -133,14 +133,9 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 }
 } // namespace
 
-XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
-    const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
-    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
-{}
-
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
-    : XComponentPattern(id, type, xcomponentController, initWidth, initHeight)
+    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
 {
     SetLibraryName(libraryname);
 }
