@@ -201,7 +201,7 @@ void SpanNode::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("FontColor:").append(spanItem_->fontStyle->GetTextColor().value_or(Color()).ColorToString()));
     DumpLog::GetInstance().AddDesc(std::string("FontWeight:").append(
-        StringUtils::FontWeightToString(spanItem_->fontStyle->GetFontWeight().value())));
+        StringUtils::FontWeightToString(spanItem_->fontStyle->GetFontWeight().value_or(FontWeight::NORMAL))));
     if (spanItem_->unicode != 0) {
         DumpLog::GetInstance().AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
         DumpLog::GetInstance().AddDesc(std::string("SymbolRenderingStrategy:").append(
