@@ -271,7 +271,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    ShowWindow(false);
+    ShowWindow(popupInfo.focusable);
     window_->SetTouchable(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
