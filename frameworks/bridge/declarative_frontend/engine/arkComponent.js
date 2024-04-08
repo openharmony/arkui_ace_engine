@@ -17647,7 +17647,7 @@ class ArkWebComponent extends ArkComponent {
   onOverrideUrlLoading(callback) {
     throw new Error('Method not implemented.');
   }
-  enableNativeVideoPlayer(config) {
+  enableNativeMediaPlayer(config) {
     throw new Error('Method not implemented.');
   }
 }
