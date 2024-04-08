@@ -31,6 +31,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr int32_t INVALID_PAGE_INDEX = -1;
 std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
 {
@@ -177,8 +178,11 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnAttachToMainTree()
 {
-    std::string url = GetPageInfo()->GetPageUrl();
-    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(url);
+    int32_t index = INVALID_PAGE_INDEX;
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate) {
+        index = delegate->GetStackSize();
+    }
     GetPageInfo()->SetPageIndex(index);
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
