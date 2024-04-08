@@ -72,6 +72,16 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (opts && opts->Expansive() && navDestinationContentNode) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
+            navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+            navDestinationContentNode->MarkModifyDone();
+    }
+
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     UpdateTitlebarVisibility(hostNode);
@@ -129,13 +139,6 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
 
-    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
-    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-    if (opts && opts->Expansive() && navDestinationContentNode) {
-        navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navDestinationContentNode->MarkModifyDone();
-    }
-
     if (navDestinationLayoutProperty->HasNoPixMap()) {
         if (navDestinationLayoutProperty->HasImageSource()) {
             titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
@@ -152,6 +155,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetJSViewActive(true);
+        auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
         if (opts && opts->Expansive()) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }

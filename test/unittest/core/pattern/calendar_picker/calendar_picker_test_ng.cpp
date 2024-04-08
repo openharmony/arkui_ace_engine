@@ -1661,7 +1661,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
 
-    auto context = frameNode->GetContext();
+    auto context = frameNode->GetContextRefPtr();
     ASSERT_NE(context, nullptr);
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 

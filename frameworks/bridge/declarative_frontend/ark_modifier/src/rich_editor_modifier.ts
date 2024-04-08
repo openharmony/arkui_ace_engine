@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class RichEditorModifier extends ArkRichEditorComponent implements AttributeModifier<RichEditorAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: RichEditorAttribute): void {
-    applyAndMergeModifier<RichEditorAttribute, ArkRichEditorComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<RichEditorAttribute, ArkRichEditorComponent, ArkComponent>(instance, this);
   }
 }

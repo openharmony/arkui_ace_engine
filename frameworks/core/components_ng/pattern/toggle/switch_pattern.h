@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,6 +62,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (UseContentModifier()) {
+            return nullptr;
+        }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         if (!switchModifier_) {
@@ -75,10 +79,7 @@ public:
         auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
         paintMethod->SetDirection(direction_);
         paintMethod->SetIsSelect(isOn_.value_or(false));
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        auto enabled = eventHub->IsEnabled();
-        paintMethod->SetEnabled(enabled);
+        paintMethod->SetEnabled(enabled_);
         paintMethod->SetDragOffsetX(dragOffsetX_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod->SetIsDragEvent(isDragEvent_);
@@ -127,6 +128,17 @@ public:
 
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
+    void SetBuilderFunc(SwitchMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    void SetSwitchIsOn(bool value);
 
 private:
     void OnModifyDone() override;
@@ -164,6 +176,11 @@ private:
     void RemoveLastHotZoneRect() const;
     void UpdateSwitchPaintProperty();
     void UpdateSwitchLayoutProperty();
+    void FireBuilder();
+
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<SwitchMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     RefPtr<PanEvent> panEvent_;
 
@@ -178,6 +195,7 @@ private:
     bool isHover_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
+    bool enabled_ = true;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

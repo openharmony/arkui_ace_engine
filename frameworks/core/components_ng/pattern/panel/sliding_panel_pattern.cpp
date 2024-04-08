@@ -617,7 +617,7 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    animator_ = CREATE_ANIMATOR(host->GetContext());
+    animator_ = CREATE_ANIMATOR(host->GetContextRefPtr());
     isAnimating_ = true;
     animator_->ClearInterpolators();
     animator_->ClearAllListeners();

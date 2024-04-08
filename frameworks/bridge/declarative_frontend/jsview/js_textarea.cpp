@@ -29,6 +29,9 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr uint32_t MAX_LINES = 3;
+}
 
 void JSTextArea::JSBind(BindingTarget globalObj)
 {
@@ -58,7 +61,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("maxLength", &JSTextField::SetMaxLength);
     JSClass<JSTextArea>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
     JSClass<JSTextArea>::StaticMethod("barState", &JSTextField::SetBarState);
-    JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextField::SetMaxLines);
+    JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextArea::SetMaxLines);
     JSClass<JSTextArea>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
@@ -84,16 +87,33 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("enterKeyType", &JSTextField::SetEnterKeyType);
     JSClass<JSTextArea>::StaticMethod("type", &JSTextField::SetType);
     JSClass<JSTextArea>::StaticMethod("decoration", &JSTextField::SetDecoration);
+    JSClass<JSTextArea>::StaticMethod("minFontSize", &JSTextField::SetMinFontSize);
+    JSClass<JSTextArea>::StaticMethod("maxFontSize", &JSTextField::SetMaxFontSize);
+    JSClass<JSTextArea>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
     JSClass<JSTextArea>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextArea>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
     JSClass<JSTextArea>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
     JSClass<JSTextArea>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
+    JSClass<JSTextArea>::StaticMethod("selectedBackgroundColor", &JSTextField::SetSelectedBackgroundColor);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSTextArea::Create(const JSCallbackInfo& info)
 {
     JSTextField::CreateTextArea(info);
+}
+
+void JSTextArea::SetMaxLines(const JSCallbackInfo& info)
+{
+    auto normalMaxViewLines = Infinity<uint32_t>();
+    auto inlineMaxViewLines = MAX_LINES;
+    auto isValid = !(info.Length() < 1 || !info[0]->IsNumber() || info[0]->ToNumber<int32_t>() <= 0);
+    if (isValid) {
+        inlineMaxViewLines = info[0]->ToNumber<uint32_t>();
+        normalMaxViewLines = info[0]->ToNumber<uint32_t>();
+    }
+    TextFieldModel::GetInstance()->SetNormalMaxViewLines(normalMaxViewLines);
+    TextFieldModel::GetInstance()->SetMaxViewLines(inlineMaxViewLines);
 }
 
 void JSTextAreaController::JSBind(BindingTarget globalObj)

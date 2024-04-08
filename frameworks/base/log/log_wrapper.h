@@ -42,7 +42,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
             ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                            \
             __FUNCTION__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__)
 
-#define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "Ace", fmt, ##__VA_ARGS__)
+#define PRINT_APP_LOG(level, fmt, ...) HILOG_IMPL(LOG_APP, LOG_##level, APP_DOMAIN, "JSAPP", fmt, ##__VA_ARGS__)
 #else
 #define PRINT_LOG(level, tag, fmt, ...)                                                                       \
     do {                                                                                                      \
@@ -179,12 +179,15 @@ enum AceLogTag : uint8_t {
     ACE_TEXT_CLOCK,           // C03942
     ACE_FOLDER_STACK,         // C03943
     ACE_SELECT_COMPONENT,     // C03944
+    ACE_STATE_STYLE,          // C03945
+    ACE_SEARCH,               // C03946
+    ACE_STATE_MGMT,           // C03947
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use
 };
 
-extern const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP;
+ACE_FORCE_EXPORT extern const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP;
 
 enum class LogDomain : uint32_t {
     FRAMEWORK = 0,

@@ -43,6 +43,7 @@ public:
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     RectF GetSelectArea() override;
+    void GetSelectAreaFromHandle(RectF& rect);
     std::string GetSelectedText() override;
 
     // override SelectOverlayCallback

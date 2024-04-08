@@ -77,18 +77,23 @@ void AcePerformanceCheck::Stop()
 
 AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& name)
 {
-    if (AcePerformanceCheck::performanceInfo_) {
-        // micro time.
-        markTime_ = GetSysTimestamp();
-        name_ = name;
-    }
+    // micro time.
+    markTime_ = GetSysTimestamp();
+    name_ = name;
 }
 
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
 {
+    auto time = static_cast<int64_t>((GetSysTimestamp() - markTime_) / CONVERT_NANOSECONDS);
+    if (time > AceChecker::GetFunctionTimeout()) {
+        auto codeInfo = GetCodeInfo(1, 1);
+        if (!codeInfo.sources.empty()) {
+            std::string msg = "Function " + name_ + " execute " + std::to_string(time) + "ms,it's timeout.";
+            EventReport::PerformanceEventReport(PerformanceExecpType::FUNCTION_TIMEOUT, codeInfo.sources, msg);
+        }
+    }
     if (AcePerformanceCheck::performanceInfo_) {
         // convert micro time to ms with 1000.
-        auto time = static_cast<int64_t>((GetSysTimestamp() - markTime_) / CONVERT_NANOSECONDS);
         RecordFunctionTimeout(time, name_);
     }
 }
@@ -196,14 +201,6 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
         CheckPage(codeInfo, "9901")) {
         return;
     }
-    if (pageNodeCount >= AceChecker::GetPageNodes()) {
-        std::string msg = "page node is " + std::to_string(pageNodeCount) + ",it's overflow.";
-        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_NODE_OVERFLOW, codeInfo.sources, msg);
-    }
-    if (pageDepth >= AceChecker::GetPageDepth()) {
-        std::string msg = "page depth is " + std::to_string(pageDepth) + ",it's overflow.";
-        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_DEPTH_OVERFLOW, codeInfo.sources, msg);
-    }
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9901");
@@ -240,8 +237,6 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::s
     if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9902", codeInfo.sources)) {
         return;
     }
-    std::string msg = "Function " + functionName + " execute " + std::to_string(time) + "ms,it's timeout.";
-    EventReport::PerformanceEventReport(PerformanceExecpType::FUNCTION_TIMEOUT, codeInfo.sources, msg);
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
@@ -258,10 +253,6 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
 {
     if (vsyncTimeout < AceChecker::GetVsyncTimeout() || CheckPage(codeInfo, "9903")) {
         return;
-    }
-    if (vsyncTimeout >= AceChecker::GetVsyncTimeout()) {
-        std::string msg = "page Loading " + std::to_string(vsyncTimeout) + "ms,it's timeout.";
-        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_LAYOUT_TIMEOUT, codeInfo.sources, msg);
     }
     auto eventTime = GetCurrentTime();
     CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);

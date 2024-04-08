@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class PatternLockModifier extends ArkPatternLockComponent implements AttributeModifier<PatternLockAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: PatternLockAttribute): void {
-    applyAndMergeModifier<PatternLockAttribute, ArkPatternLockComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<PatternLockAttribute, ArkPatternLockComponent, ArkComponent>(instance, this);
   }
 }

@@ -122,6 +122,8 @@ public:
     virtual void Delete() {}
     virtual void Insert(const std::string& args) {}
 
+    virtual void SetPasswordState(bool flag) {}
+
     virtual void CaretPosition(int32_t caretPosition) {}
     virtual int32_t GetCaretIndex()
     {
@@ -260,6 +262,7 @@ public:
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
+    virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
@@ -270,6 +273,7 @@ public:
     virtual void SetShowError(const std::string& errorText, bool visible) {};
     virtual void SetBarState(DisplayMode value) {};
     virtual void SetMaxViewLines(uint32_t value) {};
+    virtual void SetNormalMaxViewLines(uint32_t value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
@@ -294,6 +298,9 @@ public:
 
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetAdaptMinFontSize(const Dimension& value) {};
+    virtual void SetAdaptMaxFontSize(const Dimension& value) {};
+    virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {};
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};

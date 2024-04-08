@@ -118,6 +118,14 @@ public:
         }
     }
 
+    std::optional<std::string> GetTag()
+    {
+        if (gestureInfo_) {
+            return gestureInfo_->GetTag();
+        }
+        return std::nullopt;
+    }
+
     virtual int32_t SizeofMe()
     {
         return 0;

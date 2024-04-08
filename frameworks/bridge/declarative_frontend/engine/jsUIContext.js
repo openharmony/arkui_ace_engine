@@ -16,7 +16,7 @@
 class Font {
     /**
      * Construct new instance of Font.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -48,7 +48,7 @@ class Font {
 class MediaQuery {
     /**
      * Construct new instance of MediaQuery.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -120,6 +120,12 @@ class DragController {
         __JSScopeUtil__.restoreInstanceId();
         return dragPreview;
     }
+
+    setDragEventStrictReportingEnabled(enable) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.setDragEventStrictReportingEnabled(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
@@ -169,7 +175,7 @@ class MeasureUtils {
 class UIContext {
     /**
      * Construct new instance of UIContext.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -221,6 +227,12 @@ class UIContext {
         }
         return this.componentUtils_;
     }
+
+    getOverlayManager() {
+        this.overlayManager_ = new OverlayManager(this.instanceId_);
+        return this.overlayManager_;
+    }
+
     animateTo(value, event) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.animateTo(value, event);
@@ -336,18 +348,51 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return node;
     }
+
+    getFrameNodeByNodeId(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeById(id);
+        let xNode = globalThis.requireNapi('arkui.node');
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
     getFocusController() {
         if (this.focusController_ == null) {
             this.focusController_ = new FocusController(this.instanceId_);
         }
         return this.focusController_;
     }
+
+    setDynamicDimming(id, number) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        Context.setDynamicDimming(nodePtr, number);
+    }
+
+    getCursorController() {
+        if (this.cursorController_ == null) {
+            this.cursorController_ = new CursorController(this.instanceId_);
+        }
+        return this.cursorController_;
+    }
+    
+    getContextMenuController() {
+        if (this.contextMenuController_ == null) {
+            this.contextMenuController_ = new ContextMenuController(this.instanceId_);
+        }
+        return this.contextMenuController_;
+    }
 }
 
 class FocusController {
     /**
      * Construct new instance of FocusController.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 12
      */
@@ -369,10 +414,52 @@ class FocusController {
     }
 }
 
+class CursorController {
+    /**
+     * Construct new instance of CursorController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    restoreDefault() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        cursorControl.restoreDefault();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    
+    setCursor(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        cursorControl.setCursor(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
+class ContextMenuController {
+    /**
+     * Construct new instance of ContextMenuController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    close() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        ContextMenu.close();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
 class ComponentUtils {
     /**
      * Construct new instance of ComponentUtils.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -391,7 +478,7 @@ class ComponentUtils {
 class Router {
     /**
      * Construct new instance of Font.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -547,7 +634,7 @@ class Router {
 class PromptAction {
     /**
      * Construct new instance of PromptAction.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
@@ -575,6 +662,34 @@ class PromptAction {
         }
     }
 
+    openCustomDialog(content, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (arguments.length === 2) {
+            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode(), options);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        else {
+            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
+    updateCustomDialog(content, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.updateCustomDialog(content.getFrameNode(), options);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closeCustomDialog(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     showActionMenu(options, callback) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (typeof callback !== 'undefined') {
@@ -592,7 +707,7 @@ class PromptAction {
 class AtomicServiceBar {
     /**
      * Construct new instance of AtomicServiceBar.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 11
      */
@@ -632,6 +747,58 @@ class AtomicServiceBar {
     }
 }
 
+class OverlayManager {
+    /**
+     * Construct new instance of Overlay.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_overlayManager = globalThis.requireNapi('overlay');
+    }
+
+    addComponentContent(content, index) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof index !== 'undefined') {
+            this.ohos_overlayManager.addFrameNode(content.getFrameNode(), index);
+        } else {
+            this.ohos_overlayManager.addFrameNode(content.getFrameNode());
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    removeComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.removeFrameNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    showComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.showNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    hideComponentContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.hideNode(content.getFrameNode());
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    showAllComponentContents() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.showAllFrameNodes();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    hideAllComponentContents() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_overlayManager.hideAllFrameNodes();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
 /**
  * Get UIContext instance.
  * @param instanceId obtained on the c++ side.
@@ -639,6 +806,17 @@ class AtomicServiceBar {
  */
 function __getUIContext__(instanceId) {
     return new UIContext(instanceId);
+}
+
+/**
+ * Get FrameNode by id of UIContext instance.
+ * @param nodeId the id of frameNode.
+ * @param instanceId obtained on the C++ side.
+ * @returns FrameNode instance.
+ */
+function __getFrameNodeByNodeId__(nodeId, instanceId) {
+    const uiContext = __getUIContext__(instanceId);
+    return uiContext.getFrameNodeByNodeId(nodeId);
 }
 
 /**
@@ -656,3 +834,10 @@ function __checkRegexValid__(pattern) {
         return result;
     }
 }
+
+export default { Font, MediaQuery, UIInspector, DragController, UIObserver, MeasureUtils, UIContext,
+    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager };
+
+globalThis.__getUIContext__ = __getUIContext__;
+globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;
+globalThis.__checkRegexValid__ = __checkRegexValid__;

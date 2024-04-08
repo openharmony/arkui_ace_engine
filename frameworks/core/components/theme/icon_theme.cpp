@@ -42,6 +42,7 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::FA_CLOCK_WIDGET_SECOND, "fa_clock_widget_second" },
     { InternalResource::ResourceId::FULLSCREEN_SVG, "full_screen" },
     { InternalResource::ResourceId::HIDE_PASSWORD_SVG, "hide_password" },
+    { InternalResource::ResourceId::TITLEBAR_BACK, "titlebar_back" },
     { InternalResource::ResourceId::IC_BACK, "ic_back" },
     { InternalResource::ResourceId::IC_MORE, "ic_more" },
     { InternalResource::ResourceId::INDEXER_ARROW_PNG, "indexer_arrow" },

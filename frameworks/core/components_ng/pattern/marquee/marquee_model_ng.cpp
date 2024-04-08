@@ -140,6 +140,15 @@ void MarqueeModelNG::SetFontFamily(const std::optional<std::vector<std::string>>
     }
 }
 
+void MarqueeModelNG::SetMarqueeUpdateStrategy(const std::optional<MarqueeUpdateStrategy>& marqueeUpdateStrategy)
+{
+    if (marqueeUpdateStrategy.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, MarqueeUpdateStrategy, marqueeUpdateStrategy.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, MarqueeUpdateStrategy, PROPERTY_UPDATE_NORMAL);
+    }
+}
+
 void MarqueeModelNG::SetOnStart(std::function<void()>&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -220,6 +229,19 @@ void MarqueeModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Colo
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             MarqueeLayoutProperty, FontColor, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void MarqueeModelNG::SetMarqueeUpdateStrategy(
+    FrameNode* frameNode, const std::optional<MarqueeUpdateStrategy>& marqueeUpdateStrategy)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (marqueeUpdateStrategy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            MarqueeLayoutProperty, MarqueeUpdateStrategy, marqueeUpdateStrategy.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            MarqueeLayoutProperty, MarqueeUpdateStrategy, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

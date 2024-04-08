@@ -31,6 +31,13 @@ bool JudgeTrackness(Axis direction, float blockDiameter, float trackThickness, f
     }
     return blockDiameter > width || trackThickness > width;
 }
+
+RefPtr<SliderTheme> GetTheme()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<SliderTheme>();
+}
 } // namespace
 
 SizeF SliderLayoutAlgorithm::CalculateHotSize(
@@ -61,11 +68,14 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+    }
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(sliderLayoutProperty, std::nullopt);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto theme = pipeline->GetTheme<SliderTheme>();
+    auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, std::nullopt);
 
     float width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
@@ -99,14 +109,26 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     }
     blockSize_ = sliderLayoutProperty->GetBlockSizeValue(SizeF(blockDiameter, blockDiameter));
     blockHotSize_ = CalculateHotSize(layoutWrapper, blockSize_, static_cast<float>(themeBlockHotSize.ConvertToPx()));
-    auto blockWidth = direction == Axis::HORIZONTAL ? blockSize_.Height() : blockSize_.Width();
-    auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());
-    sliderWidth = std::max(sliderWidth, trackThickness_);
-    sliderWidth = std::max(sliderWidth, direction == Axis::HORIZONTAL ? blockHotSize_.Height() : blockHotSize_.Width());
-    sliderWidth = std::max(sliderWidth, blockWidth + static_cast<float>(hotBlockShadowWidth.ConvertToPx()) / HALF);
-    sliderWidth = std::clamp(sliderWidth, 0.0f, direction == Axis::HORIZONTAL ? height : width);
+    auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    auto sliderWidth = CalculateSliderWidth(width, height, direction, hotBlockShadowWidth, mode);
     float sliderLength = direction == Axis::HORIZONTAL ? width : height;
     return direction == Axis::HORIZONTAL ? SizeF(sliderLength, sliderWidth) : SizeF(sliderWidth, sliderLength);
+}
+
+float SliderLayoutAlgorithm::CalculateSliderWidth(
+    float width, float height, Axis direction, const Dimension& hotBlockShadowWidth, SliderModel::SliderMode mode)
+{
+    auto theme = GetTheme();
+    auto blockWidth = direction == Axis::HORIZONTAL ? blockSize_.Height() : blockSize_.Width();
+    auto blockHotWidth = direction == Axis::HORIZONTAL ? blockHotSize_.Height() : blockHotSize_.Width();
+    auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());
+    sliderWidth = std::max(sliderWidth, trackThickness_);
+    if (mode == SliderModel::SliderMode::OUTSET) {
+        sliderWidth = std::max(sliderWidth, blockHotWidth);
+        sliderWidth = std::max(sliderWidth, blockWidth + static_cast<float>(hotBlockShadowWidth.ConvertToPx()) / HALF);
+    }
+    sliderWidth = std::clamp(sliderWidth, 0.0f, direction == Axis::HORIZONTAL ? height : width);
+    return sliderWidth;
 }
 
 void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dimension& themeTrackThickness,
@@ -142,7 +164,13 @@ void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dim
 void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    layoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->UseContentModifier()) {
+        layoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
+    }
     if (layoutWrapper->GetTotalChildCount() != 0) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(0);
         child->Measure(layoutConstraint);
@@ -152,16 +180,20 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        BoxLayoutAlgorithm::Layout(layoutWrapper);
+        return;
+    }
     PerformLayout(layoutWrapper);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();

@@ -31,6 +31,8 @@ public:
         const std::string& id, XComponentType type, const std::string& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
     XComponentType GetType() override;
+    std::string GetLibraryName() override;
+    void SetLibraryName(const std::string& libraryName) override;
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;
     void SetOnDestroy(DestroyEvent&& onDestroy) override;
@@ -38,6 +40,10 @@ public:
     void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
+    void EnableAnalyzer(bool enable) override;
+    void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
+    void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
+    void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);

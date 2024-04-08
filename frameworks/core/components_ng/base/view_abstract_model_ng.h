@@ -153,6 +153,11 @@ public:
         ViewAbstract::SetBackgroundEffect(effectOption);
     }
 
+    void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) override
+    {
+        ViewAbstract::SetBackgroundImageResizableSlice(slice);
+    }
+
     void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
     {
         ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
@@ -169,6 +174,11 @@ public:
     void SetLightUpEffect(double radio) override
     {
         ViewAbstract::SetLightUpEffect(radio);
+    }
+
+    void SetDisallowDropForcedly(bool isDisallowDropForcedly) override
+    {
+        ViewAbstract::SetDisallowDropForcedly(isDisallowDropForcedly);
     }
 
     void SetPadding(const CalcDimension& value) override
@@ -523,53 +533,27 @@ public:
         ViewAbstract::SetChainedTransition(effect);
     }
 
-    void SetOverlay(const std::string& text, const std::function<void()>&& buildFunc,
+    void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY) override
+        const std::optional<Dimension>& offsetY, NG::OverlayType type) override
     {
-        if (buildFunc) {
-            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            CHECK_NULL_VOID(frameNode);
-            auto overlayNode = frameNode->GetOverlayNode();
-            if (!overlayNode) {
-                auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
-                    ScopedViewStackProcessor builderViewStackProcessor;
-                    buildFunc();
-                    auto customNode = ViewStackProcessor::GetInstance()->Finish();
-                    return customNode;
-                };
-                overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-                CHECK_NULL_VOID(overlayNode);
-                frameNode->SetOverlayNode(overlayNode);
-                overlayNode->SetParent(AceType::WeakClaim(frameNode));
-                overlayNode->SetActive(true);
-            } else {
-                overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (type == NG::OverlayType::BUILDER) {
+            ViewAbstract::SetOverlayBuilder(std::move(buildFunc), align, offsetX, offsetY);
+        } else {
+            NG::OverlayOptions overlay;
+            overlay.content = text;
+            overlay.align = align.value_or(Alignment::TOP_LEFT);
+            if (offsetX.has_value()) {
+                overlay.x = offsetX.value();
             }
-            auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-            CHECK_NULL_VOID(layoutProperty);
-            layoutProperty->SetIsOverlayNode(true);
-            layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-            layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
-            layoutProperty->SetOverlayOffset(offsetX, offsetY);
-            auto renderContext = overlayNode->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateZIndex(INT32_MAX);
-            auto focusHub = overlayNode->GetOrCreateFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetFocusable(false);
-            return;
+            if (offsetY.has_value()) {
+                overlay.y = offsetY.value();
+            }
+            ViewAbstract::SetOverlay(overlay);
+            if (type == NG::OverlayType::RESET) {
+                ViewAbstract::SetOverlayBuilder(nullptr, align, offsetX, offsetY);
+            }
         }
-        NG::OverlayOptions overlay;
-        overlay.content = text;
-        overlay.align = align.value_or(Alignment::TOP_LEFT);
-        if (offsetX.has_value()) {
-            overlay.x = offsetX.value();
-        }
-        if (offsetY.has_value()) {
-            overlay.y = offsetY.value();
-        }
-        ViewAbstract::SetOverlay(overlay);
     }
 
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override
@@ -677,6 +661,10 @@ public:
         ViewAbstract::SetLinearGradientBlur(blurPara);
     }
 
+    void SetDynamicDim(float DimDegree) override
+    {
+        ViewAbstract::SetDynamicDim(DimDegree);
+    }
     void SetDynamicLightUp(float rate, float lightUpDegree) override
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
@@ -1078,7 +1066,8 @@ public:
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange) override;
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange) override;
     void DismissSheet() override;
     void DismissContentCover() override;
 
@@ -1181,6 +1170,11 @@ public:
     void SetBloom(const float value) override
     {
         ViewAbstract::SetBloom(value);
+    }
+
+    void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override
+    {
+        ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);

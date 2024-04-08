@@ -178,6 +178,13 @@ public:
     }
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+    WeakPtr<ListItemPattern> GetSwiperItem()
+    {
+        if (!swiperItem_.Upgrade()) {
+            return nullptr;
+        }
+        return swiperItem_;
+    }
     void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
     {
         if (swiperItem == swiperItem_) {

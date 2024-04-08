@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -35,8 +36,8 @@ struct InlineMeasureItem {
 };
 
 class TextFieldContentModifier;
-class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm);
+class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm, public TextAdaptFontSizer {
+    DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm, TextAdaptFontSizer);
 
 public:
     TextFieldLayoutAlgorithm() = default;
@@ -48,7 +49,9 @@ public:
         paragraph_->Reset();
     }
 
-    const RefPtr<Paragraph>& GetParagraph() const;
+    const RefPtr<Paragraph>& GetParagraph() const override;
+    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
     const RectF& GetTextRect() const
     {
@@ -93,11 +96,6 @@ protected:
         const std::string& content, bool needObscureText, bool disableTextAlign = false);
     void CreateInlineParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
         int32_t nakedCharPosition, bool disableTextAlign = false);
-    bool CreateParagraphAndLayout(
-        const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
-    bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        const RefPtr<PipelineContext>& pipeline);
-    bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
     void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();
@@ -122,6 +120,12 @@ protected:
     SizeF TextInputMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+
+    bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
+
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;
     InlineMeasureItem inlineMeasureItem_;

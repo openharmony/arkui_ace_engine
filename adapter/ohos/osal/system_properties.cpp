@@ -253,7 +253,7 @@ int32_t GetAstcPsnrProp()
 
 bool GetImageFileCacheConvertToAstcEnabled()
 {
-    return system::GetParameter("persist.image.filecache.astc.enable", "true") == "true";
+    return system::GetParameter("persist.image.filecache.astc.enable", "false") == "true";
 }
 
 bool IsUseMemoryMonitor()
@@ -282,7 +282,8 @@ bool IsResourceDecoupling()
 
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
+           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 } // namespace
 
@@ -466,6 +467,7 @@ void SystemProperties::InitDeviceInfo(
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
+    acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;

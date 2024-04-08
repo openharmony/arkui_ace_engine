@@ -64,6 +64,14 @@ void ScrollableModelNG::SetOnWillScroll(OnScrollEvent&& onScroll)
     eventHub->SetOnWillScroll(std::move(onScroll));
 }
 
+void ScrollableModelNG::SetOnWillScroll(FrameNode* frameNode, OnScrollEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillScroll(std::move(event));
+}
+
 void ScrollableModelNG::SetOnDidScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

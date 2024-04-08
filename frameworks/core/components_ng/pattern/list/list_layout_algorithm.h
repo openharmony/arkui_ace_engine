@@ -427,6 +427,7 @@ private:
 
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;
+    bool isSnapCenter_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;

@@ -250,6 +250,7 @@ public:
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
+    void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
     void SetContainerModalTitleHeight(int32_t height) override;
@@ -307,6 +308,7 @@ private:
 
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
+    void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
 
     static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
     void RenderLayoutBoundary(bool isDebugBoundary);
@@ -344,6 +346,7 @@ private:
     std::string formData_;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
+    std::unordered_map<int32_t, int32_t> popupUIExtensionRecords_;
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;

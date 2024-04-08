@@ -515,6 +515,40 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
     }
 }
 
+void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        overlay->CloseCustomDialog(node, std::move(callback));
+        iter++;
+    }
+}
+
+void SubwindowManager::UpdateCustomDialogNG(
+    const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "update customDialog ng enter");
+    DialogProperties dialogProperties = {
+        .isSysBlurStyle = false,
+        .autoCancel = dialogAttr.autoCancel,
+        .maskColor = dialogAttr.maskColor
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto overlay = iter->second->GetOverlayManager();
+        overlay->UpdateCustomDialog(node, dialogProperties, std::move(callback));
+        iter++;
+    }
+}
+
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
@@ -766,6 +800,17 @@ void SubwindowManager::CloseCustomDialog(const int32_t dialogId)
         return;
     }
     subwindow->CloseCustomDialog(dialogId);
+    return;
+}
+
+void SubwindowManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetDialogSubwindow(containerId);
+    if (!subwindow) {
+        return;
+    }
+    subwindow->CloseCustomDialog(node, std::move(callback));
     return;
 }
 

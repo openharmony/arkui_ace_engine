@@ -38,7 +38,6 @@ constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
 constexpr bool DEFAULT_KEY_BOARD_VALUE = true;
 constexpr char DEFAULT_FONT_FAMILY[] = "HarmonyOS Sans";
-constexpr uint32_t DEFAULT_CARET_COLOR = 0xFF007DFF;
 const uint32_t ERROR_UINT_CODE = -1;
 const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
@@ -79,6 +78,7 @@ void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxViewLines(frameNode, maxLine);
+    TextFieldModelNG::SetNormalMaxViewLines(frameNode, maxLine);
 }
 
 void ResetTextAreaMaxLines(ArkUINodeHandle node)
@@ -86,6 +86,7 @@ void ResetTextAreaMaxLines(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxViewLines(frameNode, DEFAULT_MAX_VIEW_LINE);
+    TextFieldModelNG::SetNormalMaxViewLines(frameNode, Infinity<uint32_t>());
 }
 
 void SetTextAreaCopyOption(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -312,7 +313,12 @@ void ResetTextAreaCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCaretColor(frameNode, Color(DEFAULT_CARET_COLOR));
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto caretColor = static_cast<int32_t>(theme->GetCursorColor().GetValue());
+    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
 }
 
 void SetTextAreaMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -648,6 +654,23 @@ void ResetTextAreaFontFeature(ArkUINodeHandle node)
     std::string strValue = "";
     TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
+
+void SetTextAreaWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (wordBreak < 0 || wordBreak >= WORD_BREAK_TYPES.size()) {
+        wordBreak = 2; // 2 is the default value of WordBreak::BREAK_WORD
+    }
+    TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[wordBreak]);
+}
+
+void ResetTextAreaWordBreak(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
+}
 } // namespace
 
 namespace NodeModifier {
@@ -669,7 +692,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
         ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
         ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
-        ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature };
+        ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak,
+        ResetTextAreaWordBreak };
     return &modifier;
 }
 

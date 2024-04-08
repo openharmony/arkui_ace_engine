@@ -104,7 +104,11 @@ void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
 {
     auto gestureInfo = const_cast<GestureEvent&>(info);
     if (actionStart_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web success");
         actionStart_(gestureInfo);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WEB, "DragDrop start drag task for web failed,"
+            "because actionStart function is null");
     }
 }
 
@@ -259,6 +263,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (gestureHub->GetTextDraggable()) {
+            actuator->textPixelMap_ = nullptr;
             actuator->HideTextAnimation();
         }
         auto userActionEnd = actuator->userCallback_->GetActionEndEventFunc();
@@ -294,6 +299,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (!GetIsBindOverlayValue(actuator)) {
             if (gestureHub->GetTextDraggable()) {
                 if (gestureHub->GetIsTextDraggable()) {
+                    textPixelMap_ = nullptr;
                     HideTextAnimation();
                 }
             } else {
@@ -1082,7 +1088,9 @@ void DragEventActuator::SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHu
     pattern->CloseSelectOverlay();
     CHECK_NULL_VOID(dragNode);
     auto pixelMap = dragNode->GetRenderContext()->GetThumbnailPixelMap();
-    if (pixelMap) {
+    if (textPixelMap_) {
+        gestureHub->SetPixelMap(textPixelMap_);
+    } else if (pixelMap) {
         gestureHub->SetPixelMap(pixelMap);
     } else {
         gestureHub->SetPixelMap(nullptr);
@@ -1119,6 +1127,10 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     // mount to rootNode
     manager->MountPixelMapToRootNode(columnNode);
     auto modifier = dragNode->GetPattern<TextDragPattern>()->GetOverlayModifier();
+    auto renderContext = dragNode->GetRenderContext();
+    if (renderContext) {
+        textPixelMap_ = renderContext->GetThumbnailPixelMap();
+    }
     modifier->StartAnimate();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
@@ -1439,7 +1451,10 @@ void DragEventActuator::GetFrameNodePreviewPixelMap(const RefPtr<FrameNode>& fra
     auto dragPreviewInfo = frameNode->GetDragPreview();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (dragPreviewInfo.pixelMap != nullptr) {
+    if (dragPreviewInfo.inspectorId != "") {
+        auto previewPixelMap = GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        gestureHub->SetDragPreviewPixelMap(previewPixelMap);
+    } else if (dragPreviewInfo.pixelMap != nullptr) {
         gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
     } else {
         auto context = frameNode->GetRenderContext();

@@ -74,6 +74,7 @@ public:
 
     // common method
     bool SelectOverlayIsOn();
+    bool SelectOverlayIsCreating();
     void CloseOverlay(bool animation, CloseReason reason);
     void ToggleMenu();
     void ShowMenu();

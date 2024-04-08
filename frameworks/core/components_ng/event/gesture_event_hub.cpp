@@ -53,6 +53,9 @@
 
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#ifdef WEB_SUPPORTED
+#include "core/components_ng/pattern/web/web_pattern.h"
+#endif
 namespace OHOS::Ace::NG {
 namespace {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -93,7 +96,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
-    if (clickEventActuator_) {
+    if (clickEventActuator_ && !redirectClick_) {
         clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
     if (userParallelClickEventActuator_) {
@@ -222,7 +225,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     current = PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-    auto context = host->GetContext();
     int32_t parallelIndex = 0;
     int32_t exclusiveIndex = 0;
     for (auto const& recognizer : gestureHierarchy_) {
@@ -304,7 +306,7 @@ void GestureEventHub::UpdateGestureHierarchy()
 {
     auto host = GetFrameNode();
     CHECK_NULL_VOID(host);
-    bool success = gestures_.size() == gestureHierarchy_.size();
+    bool success = (gestures_.size() + modifierGestures_.size()) == gestureHierarchy_.size() && !needRecollect_;
     if (success) {
         auto iter = gestures_.begin();
         auto recognizerIter = gestureHierarchy_.begin();
@@ -316,43 +318,53 @@ void GestureEventHub::UpdateGestureHierarchy()
             }
         }
     }
-
     if (success) {
         gestures_.clear();
         return;
     }
 
     gestureHierarchy_.clear();
-    for (auto const& gesture : gestures_) {
-        if (!gesture) {
-            continue;
-        }
-        auto recognizer = gesture->CreateRecognizer();
-
-        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
-        if (clickRecognizer) {
-            clickRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
-        }
-
-        auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
-        if (longPressRecognizer) {
-            longPressRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
-            auto pattern = host->GetPattern();
-            if (pattern && longPressRecognizer->HasAction()) {
-                longPressRecognizer->SetOnLongPressRecorder(pattern->GetLongPressEventRecorder());
-            }
-        }
-
-        if (!recognizer) {
-            continue;
-        }
-        auto priority = gesture->GetPriority();
-        auto gestureMask = gesture->GetGestureMask();
-        recognizer->SetPriority(priority);
-        recognizer->SetPriorityMask(gestureMask);
-        gestureHierarchy_.emplace_back(recognizer);
+    for (const auto& gesture : gestures_) {
+        AddGestureToGestureHierarchy(gesture);
     }
+    for (const auto& gesture : modifierGestures_) {
+        AddGestureToGestureHierarchy(gesture);
+    }
+    needRecollect_ = false;
     gestures_.clear();
+}
+
+void GestureEventHub::AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture)
+{
+    if (!gesture) {
+        return;
+    }
+    auto recognizer = gesture->CreateRecognizer();
+
+    auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
+    if (clickRecognizer) {
+        clickRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
+
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
+    if (longPressRecognizer) {
+        longPressRecognizer->SetOnAccessibility(GetOnAccessibilityEventFunc());
+        auto host = GetFrameNode();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern();
+        if (pattern && longPressRecognizer->HasAction()) {
+            longPressRecognizer->SetOnLongPressRecorder(pattern->GetLongPressEventRecorder());
+        }
+    }
+
+    if (!recognizer) {
+        return;
+    }
+    auto priority = gesture->GetPriority();
+    auto gestureMask = gesture->GetGestureMask();
+    recognizer->SetPriority(priority);
+    recognizer->SetPriorityMask(gestureMask);
+    gestureHierarchy_.emplace_back(recognizer);
 }
 
 void GestureEventHub::CombineIntoExclusiveRecognizer(
@@ -504,6 +516,8 @@ void GestureEventHub::ResetDragActionForWeb()
 void GestureEventHub::StartDragTaskForWeb()
 {
     if (!isReceivedDragGestureInfo_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
+            "because not recv gesture info");
         return;
     }
 
@@ -513,12 +527,14 @@ void GestureEventHub::StartDragTaskForWeb()
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
 
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop post a task to start drag for web");
     taskScheduler->PostTask(
         [weak = WeakClaim(this)]() {
             auto gestureHub = weak.Upgrade();
             CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
             CHECK_NULL_VOID(dragEventActuator);
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web in async task");
             dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI);
@@ -539,10 +555,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, result);
     auto frameTag = frameNode->GetTag();
-    if (frameTag == V2::WEB_ETS_TAG) {
-        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
-        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
-    } else if (needScale) {
+    if (needScale) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else {
@@ -712,6 +725,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         auto rectCenter = frameNode->GetPaintRectCenter();
         frameNodeOffset_ = OffsetF(rectCenter.GetX() - frameNodeSize_.Width() / 2.0f,
             rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
+#ifdef WEB_SUPPORTED
+        if (frameTag == V2::WEB_ETS_TAG) {
+            auto webPattern = frameNode->GetPattern<WebPattern>();
+            if (webPattern) {
+                frameNodeOffset_.SetX(frameNodeOffset_.GetX() + webPattern->GetDragOffset().GetX());
+                frameNodeOffset_.SetY(frameNodeOffset_.GetY() + webPattern->GetDragOffset().GetY());
+            }
+        }
+#endif
     }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
@@ -1392,6 +1414,7 @@ void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHu
 {
     CHECK_NULL_VOID(gestureEventHub);
     gestures_ = gestureEventHub->backupGestures_;
+    modifierGestures_ = gestureEventHub->backupModifierGestures_;
     recreateGesture_ = true;
 }
 
@@ -1634,5 +1657,37 @@ int32_t GestureEventHub::GetSelectItemSize()
     CHECK_NULL_RETURN(scrollPattern, 0);
     auto children = scrollPattern->GetVisibleSelectedItems();
     return children.size();
+}
+
+void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
+{
+    bool needRecollect = false;
+    for (auto iter = modifierGestures_.begin(); iter != modifierGestures_.end();) {
+        auto tag = (*iter)->GetTag();
+        if (tag.has_value() && tag.value() == gestureTag) {
+            iter = modifierGestures_.erase(iter);
+            backupModifierGestures_.remove(*iter);
+            needRecollect = true;
+        } else {
+            auto group = AceType::DynamicCast<GestureGroup>(*iter);
+            if (group) {
+                group->RemoveChildrenByTag(gestureTag, needRecollect);
+            }
+            iter++;
+        }
+    }
+    if (needRecollect) {
+        recreateGesture_ = true;
+        needRecollect_ = true;
+        OnModifyDone();
+    }
+}
+
+void GestureEventHub::ClearModifierGesture()
+{
+    modifierGestures_.clear();
+    backupModifierGestures_.clear();
+    recreateGesture_ = true;
+    OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

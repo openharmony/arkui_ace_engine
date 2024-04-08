@@ -118,6 +118,7 @@ public:
     void RestoreLayer();
     void UpdateSize(int32_t width, int32_t height);
     bool IsSucceed();
+    void Reset();
 
     size_t GetBitmapSize();
 private:

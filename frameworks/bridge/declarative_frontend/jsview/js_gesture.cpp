@@ -387,7 +387,7 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
     }
     if (speed->IsNumber()) {
         double speedNumber = speed->ToNumber<double>();
-        speedNum = LessNotEqual(speedNumber, 0.0) ? DEFAULT_SLIDE_SPEED : speedNumber;
+        speedNum = LessOrEqual(speedNumber, 0.0) ? DEFAULT_SLIDE_SPEED : speedNumber;
     }
     if (directionNum->IsNumber()) {
         uint32_t directNum = directionNum->ToNumber<uint32_t>();

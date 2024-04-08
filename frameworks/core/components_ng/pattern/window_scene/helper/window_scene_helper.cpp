@@ -149,8 +149,8 @@ bool WindowSceneHelper::GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frame
 void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
 {
 #if defined (ENABLE_STANDARD_INPUT)
-    if (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG || frameNode->GetTag() ==
-        V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    if (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+        frameNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) notNeedSoftKeyboard.",
             frameNode->GetTag().c_str(), frameNode->GetId());
         return;

@@ -1783,7 +1783,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
-    JSClass<JSWeb>::StaticMethod("enableNativeVideoPlayer", &JSWeb::EnableNativeVideoPlayer);
+    JSClass<JSWeb>::StaticMethod("enableNativeMediaPlayer", &JSWeb::EnableNativeVideoPlayer);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);

@@ -83,6 +83,9 @@ template("js_inspector") {
       "inspect_toolbar_item.cpp",
       "inspect_video.cpp",
     ]
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 }
 

@@ -15,11 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   loop(value: boolean): this {
     throw new Error('Method not implemented.');
@@ -154,12 +151,10 @@ class TimepickerUseMilitaryTimeModifier extends ModifierWithKey<boolean> {
 }
 
 // @ts-ignore
-globalThis.TimePicker.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTimePickerComponent(nativeNode);
+globalThis.TimePicker.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTimePickerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TimePickerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

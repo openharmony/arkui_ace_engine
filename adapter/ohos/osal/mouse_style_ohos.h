@@ -31,6 +31,8 @@ public:
     bool ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const override;
     void SetMouseIcon(
         int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const override;
+    void SetCustomCursor(
+        int32_t windowId, int32_t focusX, int32_t focusY, std::shared_ptr<Media::PixelMap> pixelMap) const override;
     void SetPointerVisible(MouseFormat pointerStyle) const override;
 };
 

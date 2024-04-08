@@ -20,8 +20,24 @@
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 
-namespace OHOS::Ace::NodeModel {
+struct ArkUI_NodeEvent {
+    int32_t category;
+    int32_t kind;
+    int32_t targetId;
+    ArkUI_NodeHandle node;
+    void* userData;
+    void* origin;
+    int32_t eventId;
+};
 
+enum NodeEventCategory {
+    NODE_EVENT_CATEGORY_UNKOWN = -1,
+    NODE_EVENT_CATEGORY_INPUT_EVENT,
+    NODE_EVENT_CATEGORY_COMPONENT_EVENT,
+    NODE_EVENT_CATEGORY_STRING_ASYNC_EVENT,
+};
+
+namespace OHOS::Ace::NodeModel {
 // for error info, use int instead of ArkUINodeEventType
 ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType);
 ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type);
@@ -29,8 +45,8 @@ bool IsStringEvent(ArkUI_Int32 type);
 bool IsTouchEvent(ArkUI_Int32 type);
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
-bool ConvertEventResult(ArkUI_NodeEvent* event, ArkUINodeEvent* origin);
 
 void HandleInnerEvent(ArkUINodeEvent* innerEvent);
-
+int32_t ConvertToCTouchActionType(int32_t originActionType);
+int32_t ConvertToCInputEventToolType(int32_t originSourceType);
 }; // namespace OHOS::Ace::NodeModel

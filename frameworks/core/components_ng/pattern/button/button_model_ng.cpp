@@ -534,6 +534,19 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, value, frameNode);
     return value;
 }
+void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
+{
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetButtonPress(xPos, yPos);
+}
 
 void ButtonModelNG::ResetBorderRadius()
 {

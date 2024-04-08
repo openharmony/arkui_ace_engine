@@ -42,14 +42,21 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     ConstructTextStyles(frameNode, textStyle, textContent_, showPlaceHolder_);
 
     auto isInlineStyle = pattern->IsNormalInlineState();
+    if (!isInlineStyle && textFieldLayoutProperty->HasNormalMaxViewLines()) {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
 
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
-    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
-        CreateParagraph(textStyle, pattern->GetDragContents(), textContent_, false);
+    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
+    if (textStyle.GetAdaptTextSize()) {
+        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, textFieldContentConstraint,
+            layoutWrapper)) {
+            return std::nullopt;
+        }
     } else {
-        CreateParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
+        CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
@@ -59,7 +66,6 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         preferredHeight_ = pattern->PreferredLineHeight(true);
     }
 
-    auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     // Paragraph layout.}
     if (isInlineStyle) {
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
@@ -174,5 +180,22 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
         TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
     }
+}
+
+bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    // update child position.
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto isInlineStyle = pattern->IsNormalInlineState();
+    if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
+        CreateParagraph(textStyle, pattern->GetDragContents(), content, false);
+    } else {
+        CreateParagraph(textStyle, content, false, pattern->GetNakedCharPosition());
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

@@ -55,7 +55,6 @@ group("linux_core_unittest") {
     "layout:core_layout_unittest",
     "manager:core_manager_unittest",
     "pattern/animator:animator_test_ng",
-    "pattern/app_bar:app_bar_test_ng",
     "pattern/badge:badge_test_ng",
     "pattern/blank:blank_test_ng",
     "pattern/bubble:bubble_test_ng",

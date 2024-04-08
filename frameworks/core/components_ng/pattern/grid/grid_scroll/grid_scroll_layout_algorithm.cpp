@@ -1859,7 +1859,7 @@ void GridScrollLayoutAlgorithm::FillCacheLineAtEnd(float mainSize, float crossSi
 
     for (; currentMainLineIndex_ <= tempEndMainLineIndex + cacheCount; currentMainLineIndex_++) {
         float lineHeight = FillNewCacheLineBackward(crossSize, mainSize, layoutWrapper, currentMainLineIndex_);
-        if (LessOrEqual(lineHeight, 0.0)) {
+        if (LessNotEqual(lineHeight, 0.0)) {
             break;
         }
     }
@@ -2022,7 +2022,10 @@ void GridScrollLayoutAlgorithm::CompeleteItemCrossPosition(
         auto currentIndex = item.second;
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-            continue;
+            for (auto i = item.first; i < crossCount_; ++i) {
+                predictBuildList_.emplace_back(currentIndex++);
+            }
+            break;
         }
         itemsCrossPosition_.try_emplace(currentIndex, ComputeItemCrossPosition(layoutWrapper, item.first));
     }

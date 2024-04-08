@@ -373,8 +373,8 @@ class SearchFontFeatureModifier extends ModifierWithKey<FontFeature> {
 }
 
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onEditChange(callback: (isEditing: boolean) => void): SearchAttribute {
     throw new Error('Method not implemented.');
@@ -505,12 +505,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
 }
 // @ts-ignore
-globalThis.Search.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkSearchComponent(nativeNode);
+globalThis.Search.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSearchComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SearchModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

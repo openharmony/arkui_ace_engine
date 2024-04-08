@@ -127,6 +127,8 @@ public:
     void GetStateByIndex(int32_t index, std::string& name, std::string& path, std::string& params);
     void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
 
+    void GetPageNameAndPath(const RefPtr<FrameNode>& pageNode, std::string& name, std::string& path);
+
     std::string GetParams() const;
 
     int32_t GetIndexByUrl(const std::string& url) const;

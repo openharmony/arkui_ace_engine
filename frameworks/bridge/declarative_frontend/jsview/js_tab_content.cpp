@@ -465,6 +465,9 @@ void SetBuilderNode(const JSRef<JSObject>& paramObject)
     }
     auto contentObject = JSRef<JSObject>::Cast(contentParam);
     JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsObject()) {
+        return;
+    }
     auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
     JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
     if (nodeptr.IsEmpty()) {

@@ -33,7 +33,7 @@ namespace {
 constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
-constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 150;
+constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 200;
 constexpr float DEFAULT_CUSTOM_SCALE = 0.7F;
 constexpr float INDICATOR_MIN_SCALE = 0.8F;
 constexpr float INDICATOR_MAX_SCALE = 1.0F;
@@ -98,7 +98,12 @@ void RadioPattern::UpdateIndicatorType()
     } else {
         ImageNodeCreate();
     }
-    if (!radioPaintProperty->GetRadioCheckValue()) {
+    if (radioPaintProperty->HasRadioCheck()) {
+        if (!radioPaintProperty->GetRadioCheckValue()) {
+            SetBuilderState();
+        }
+    } else {
+        radioPaintProperty->UpdateRadioCheck(false);
         SetBuilderState();
     }
 }
@@ -149,6 +154,7 @@ void RadioPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
+    FireBuilder();
 }
 
 void RadioPattern::ImageNodeCreate()
@@ -169,6 +175,14 @@ void RadioPattern::ImageNodeCreate()
     imageProperty->UpdateUserDefinedIdealSize(GetChildContentSize());
     auto imageSourceInfo = GetImageSourceInfoFromTheme(radioPaintProperty->GetRadioIndicator().value_or(0));
     UpdateInternalResource(imageSourceInfo);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    auto indicatorColor = radioPaintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
+    auto imageRenderProperty = childNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateSvgFillColor(indicatorColor);
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     childNode->MountToParent(host);
     childNode->MarkModifyDone();
@@ -257,6 +271,9 @@ void RadioPattern::InitClickEvent()
 
 void RadioPattern::InitTouchEvent()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (touchListener_) {
         return;
     }
@@ -281,6 +298,9 @@ void RadioPattern::InitTouchEvent()
 
 void RadioPattern::InitMouseEvent()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (mouseEvent_) {
         return;
     }
@@ -303,6 +323,9 @@ void RadioPattern::InitMouseEvent()
 
 void RadioPattern::HandleMouseEvent(bool isHover)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     isHover_ = isHover;
     if (isHover) {
         touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -316,6 +339,9 @@ void RadioPattern::HandleMouseEvent(bool isHover)
 
 void RadioPattern::OnClick()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
@@ -334,6 +360,9 @@ void RadioPattern::OnClick()
 
 void RadioPattern::OnTouchDown()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -347,6 +376,9 @@ void RadioPattern::OnTouchDown()
 
 void RadioPattern::OnTouchUp()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -451,6 +483,7 @@ void RadioPattern::UpdateState()
     }
     preCheck_ = check;
     isGroupChanged_ = false;
+    FireBuilder();
 }
 
 void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
@@ -478,7 +511,6 @@ void RadioPattern::startEnterAnimation()
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
     delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION);
-    delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
     auto host = GetHost();
     auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(childNode);
@@ -508,8 +540,6 @@ void RadioPattern::startExitAnimation()
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption delayOption;
     delayOption.SetCurve(springCurve);
-    delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION);
-    delayOption.SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
     auto host = GetHost();
     auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(childNode);
@@ -580,11 +610,6 @@ void RadioPattern::LoadBuilder()
             childNode = AceType::DynamicCast<FrameNode>(customNode);
             CHECK_NULL_VOID(childNode);
         }
-        auto customGeometry = childNode->GetGeometryNode();
-        CHECK_NULL_VOID(customGeometry);
-        auto customProperty = childNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_VOID(customProperty);
-        customProperty->UpdateUserDefinedIdealSize(GetChildContentSize());
         childNode->MountToParent(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -793,5 +818,55 @@ void RadioPattern::HandleEnabled()
         CHECK_NULL_VOID(paintProperty);
         paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void RadioPattern::SetRadioChecked(bool check)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateRadioCheck(check);
+    UpdateState();
+    OnModifyDone();
+}
+
+void RadioPattern::FireBuilder()
+{
+    CHECK_NULL_VOID(makeFunc_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    customNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(customNode_);
+    host->AddChild(customNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> RadioPattern::BuildContentModifierNode()
+{
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<RadioEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto value = eventHub->GetValue();
+    auto enabled = eventHub->IsEnabled();
+    auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    bool isChecked = false;
+    if (paintProperty->HasRadioCheck()) {
+        isChecked = paintProperty->GetRadioCheckValue();
+    } else {
+        isChecked = false;
+    }
+    RadioConfiguration radioConfiguration(value, isChecked, enabled);
+    return (makeFunc_.value())(radioConfiguration);
 }
 } // namespace OHOS::Ace::NG

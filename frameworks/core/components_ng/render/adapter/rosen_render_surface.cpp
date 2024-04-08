@@ -35,6 +35,29 @@ constexpr int32_t MAX_BUFFER_SIZE = 3;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
+
+GraphicTransformType ConvertRotation(Rotation rotation)
+{
+    GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+        case Rotation::ROTATION_90:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_90;
+            break;
+        case Rotation::ROTATION_180:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_180;
+            break;
+        case Rotation::ROTATION_270:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_270;
+            break;
+        default:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+    }
+    return transform;
+}
 } // namespace
 
 #ifdef OHOS_PLATFORM
@@ -108,8 +131,6 @@ void RosenRenderSurface::InitSurface()
             if (producerSurface_ == nullptr) {
                 return;
             }
-            auto defaultUsage = producerSurface_->GetDefaultUsage();
-            producerSurface_->SetDefaultUsage(defaultUsage | BUFFER_USAGE_MEM_DMA);
             if (drawBufferListener_ == nullptr) {
                 drawBufferListener_ = new DrawBufferListener(WeakClaim(this));
             }
@@ -118,8 +139,6 @@ void RosenRenderSurface::InitSurface()
             auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rsNode);
             CHECK_NULL_VOID(surfaceNode);
             producerSurface_ = surfaceNode->GetSurface();
-            auto defaultUsage = producerSurface_->GetDefaultUsage();
-            producerSurface_->SetDefaultUsage(defaultUsage | BUFFER_USAGE_MEM_DMA | BUFFER_USAGE_HW_COMPOSER);
         }
     }
     RegisterSurface();
@@ -195,6 +214,13 @@ void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t 
 void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
 {
     extSurfaceCallbackInterface_ = extSurfaceCallback;
+}
+
+void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
+{
+    auto transform = ConvertRotation(dmRotation);
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->SetTransformHint(transform);
 }
 
 void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)

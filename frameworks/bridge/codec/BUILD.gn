@@ -24,4 +24,7 @@ ohos_source_set("data_codec") {
     "standard_codec_buffer_operator.cpp",
     "standard_function_codec.cpp",
   ]
+  if (use_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }

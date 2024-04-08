@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class RowModifier extends ArkRowComponent implements AttributeModifier<RowAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: RowAttribute): void {
-    applyAndMergeModifier<RowAttribute, ArkRowComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<RowAttribute, ArkRowComponent, ArkComponent>(instance, this);
   }
 }

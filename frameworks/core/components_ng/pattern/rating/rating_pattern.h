@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 #include "core/components_ng/pattern/rating/rating_layout_property.h"
+#include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -98,6 +99,18 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    void SetBuilderFunc(RatingMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    void SetRatingScore(double value);
+
 private:
     void UpdateRatingScore(double ratingScore);
     void MarkDirtyNode(const PropertyChangeFlag& flag);
@@ -146,7 +159,11 @@ private:
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
 
+    std::optional<RatingMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickEvent_;

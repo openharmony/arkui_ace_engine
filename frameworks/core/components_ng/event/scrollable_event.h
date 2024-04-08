@@ -37,6 +37,7 @@ using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const G
     const RefPtr<FrameNode>&, const RefPtr<TargetComponent>&)>;
 using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
 using GetAnimateVelocityCallback = std::function<double()>;
+using ClickJudgeCallback = std::function<bool(const PointF&)>;
 
 class ScrollableEvent : public AceType {
     DECLARE_ACE_TYPE(ScrollableEvent, AceType)
@@ -156,6 +157,16 @@ public:
         }
     }
 
+    bool ClickJudge(const PointF& localPoint) const
+    {
+        return clickJudgeCallback_ && clickJudgeCallback_(localPoint);
+    }
+
+    void SetClickJudgeCallback(const ClickJudgeCallback&& clickJudgeCallback)
+    {
+        clickJudgeCallback_ = std::move(clickJudgeCallback);
+    }
+
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
@@ -165,6 +176,7 @@ private:
     InBarRegionCallback inBarRegionCallback_;
     InBarRegionCallback inBarRectRegionCallback_;
     GetAnimateVelocityCallback getAnimateVelocityCallback_;
+    ClickJudgeCallback clickJudgeCallback_;
 };
 
 class ScrollableActuator : public GestureEventActuator {

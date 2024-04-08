@@ -19,6 +19,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -255,7 +256,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->maxSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->minSize);
             MinusPaddingToNonNegativeSize(margin, layoutConstraint_->percentReference);
@@ -483,13 +484,23 @@ void LayoutProperty::UpdateContentConstraint()
     if (padding_) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentConstraint_->MinusPaddingToNonNegativeSize(
+                paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        } else {
+            contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        }
     }
     if (borderWidth_) {
         auto borderWidthF = ConvertToBorderWidthPropertyF(
             *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        contentConstraint_->MinusPadding(
-            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            contentConstraint_->MinusPaddingToNonNegativeSize(
+                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        } else {
+            contentConstraint_->MinusPadding(
+                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        }
     }
 }
 
@@ -552,6 +563,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
     return ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+}
+
+BorderWidthPropertyF LayoutProperty::CreateBorder()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToBorderWidthPropertyF(
+            borderWidth_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    }
+
+    return ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
 
 MarginPropertyF LayoutProperty::CreateMargin()
@@ -719,6 +741,14 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
     }
     layoutDirection_ = value;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+}
+
+TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
+{
+    auto direction = layoutDirection_.value_or(TextDirection::AUTO);
+    return direction != TextDirection::AUTO
+               ? direction
+               : (AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
 }
 
 void LayoutProperty::UpdateLayoutWeight(float value)

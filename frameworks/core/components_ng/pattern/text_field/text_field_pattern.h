@@ -360,7 +360,12 @@ public:
 
     OffsetF GetCaretOffset() const override
     {
-        return selectController_->GetCaretRect().GetOffset();
+        return movingCaretOffset_;
+    }
+
+    void SetMovingCaretOffset(const OffsetF& offset)
+    {
+        movingCaretOffset_ = offset;
     }
 
     float GetCaretOffsetX() const
@@ -901,6 +906,10 @@ public:
     }
     std::string GetShowResultImageSrc() const;
     std::string GetHideResultImageSrc() const;
+    std::string GetNormalUnderlineColorStr() const;
+    std::string GetTypingUnderlineColorStr() const;
+    std::string GetDisableUnderlineColorStr() const;
+    std::string GetErrorUnderlineColorStr() const;
     void OnAttachToFrameNode() override;
 
     bool GetTextInputFlag() const
@@ -926,11 +935,6 @@ public:
     bool GetScrollBarVisible() const
     {
         return scrollBarVisible_;
-    }
-
-    float GetPreviewWidth() const
-    {
-        return inlineState_.frameRect.Width();
     }
 
     void SetFillRequestFinish(bool success)
@@ -1045,9 +1049,9 @@ public:
 
     bool HandleSpaceEvent();
 
-    virtual void InitBackGroundColorAndBorderRadius();
-
-    void SavePreUnderLineState();
+    virtual void ApplyNormalTheme();
+    void ApplyUnderlineTheme();
+    void ApplyInlineTheme();
 
     int32_t GetContentWideTextLength() override
     {
@@ -1095,6 +1099,10 @@ public:
     void OnVirtualKeyboardAreaChanged() override;
     void ScrollPage(bool reverse, bool smooth = false) override;
     void InitScrollBarClickEvent() override {}
+    bool IsUnderlineMode();
+    bool IsInlineMode();
+    bool IsShowError();
+    void ResetContextAttr();
 
     bool IsTransparent()
     {
@@ -1140,7 +1148,8 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
-    void ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId);
+    void ChangeMouseState(
+        const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass = false);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
     void HandleRightMouseEvent(MouseInfo& info);
@@ -1151,6 +1160,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    void HanldeMaxLengthAndUnderlineTypingColor();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
@@ -1209,18 +1219,12 @@ private:
     void CalculateDefaultCursor();
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
-    void SaveUnderlineStates();
-    void ApplyUnderlineStates();
-    void SavePasswordModeStates();
     void SetAccessibilityAction();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
 
     void UpdateCopyAllStatus();
-    void SaveInlineStates();
-    void ApplyInlineStates();
     void RestorePreInlineStates();
-    void RestoreUnderlineStates();
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
@@ -1282,8 +1286,10 @@ private:
     void KeyboardContentTypeToInputType();
     void ProcessScroll();
     void ProcessCounter();
-    RefPtr<TextFieldLayoutProperty> GetTextFieldLayoutProperty();
     void HandleParentGlobalOffsetChange();
+    void SetThemeAttr();
+    void SetThemeBorderAttr();
+    void ProcessInlinePaddingAndMargin();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1342,11 +1348,6 @@ private:
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
-    bool preInline = false;
-    bool preUnderline = false;
-    bool preErrorState_ = false;
-    float preErrorMargin_ = 0.0f;
-    bool restoreMarginState_ = false;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
@@ -1395,10 +1396,6 @@ private:
     bool inlineFocusState_ = false;
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
-    bool needApplyInlineSize_ = false;
-    PreState inlineState_;
-    // inline --end
-    PreState preUnderlineState_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
@@ -1448,6 +1445,7 @@ private:
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
+    OffsetF movingCaretOffset_;
 };
 } // namespace OHOS::Ace::NG
 

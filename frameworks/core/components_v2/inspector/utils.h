@@ -545,6 +545,18 @@ inline std::string ConvertWrapTextHeightAdaptivePolicyToString(TextHeightAdaptiv
     return index < 0 ? "TextHeightAdaptivePolicy.MAX_LINES_FIRST" : heightAdaptivePolicytTable[index].value;
 }
 
+inline std::string ConvertWrapMarqueeUpdateStrategyToStirng(MarqueeUpdateStrategy marqueeUpdateStrategy)
+{
+    static const LinearEnumMapNode<MarqueeUpdateStrategy, std::string> marqueeUpdateStrategyTable[] = {
+        { MarqueeUpdateStrategy::DEFAULT, "MarqueeUpdateStrategy.DEFAULT" },
+        { MarqueeUpdateStrategy::PRESERVE_POSITION, "MarqueeUpdateStrategy.PRESERVE_POSITION" },
+    };
+
+    auto index = BinarySearchFindIndex(
+        marqueeUpdateStrategyTable, ArraySize(marqueeUpdateStrategyTable), marqueeUpdateStrategy);
+    return index < 0 ? "MarqueeUpdateStrategy.DEFAULT" : marqueeUpdateStrategyTable[index].value;
+}
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H

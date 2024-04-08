@@ -84,6 +84,10 @@ private:
     void ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType);
     void ButtonClickEvent();
     void UpdateArrowContent();
+    void InitOnKeyEvent();
+    bool OnKeyEvent(const KeyEvent& event);
+    void OnClick() const;
+
     int32_t TotalCount() const;
     RefPtr<ClickEvent> buttonClickListenr_;
     RefPtr<TouchEventImpl> buttonTouchListenr_;

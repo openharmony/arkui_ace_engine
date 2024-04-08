@@ -60,6 +60,7 @@ public:
         RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
     static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    static void ExecuteWithoutAnimation(const PropertyCallback& callback);
 };
 } // namespace OHOS::Ace
 

@@ -73,8 +73,8 @@ bool ConvertSlice(const ImagePaintConfig& config, RectF& result, float rawImageW
 #ifndef USE_ROSEN_DRAWING
 void UpdateSKFilter(const ImagePaintConfig& config, SKPaint& paint)
 {
-    if (config.colorFilter_) {
-        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_->data()));
+    if (config.colorFilter_.colorFilterMatrix_) {
+        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_.colorFilterMatrix_->data()));
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
     }
@@ -82,10 +82,16 @@ void UpdateSKFilter(const ImagePaintConfig& config, SKPaint& paint)
 #else
 void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
 {
-    if (config.colorFilter_) {
+    if (config.colorFilter_.colorFilterMatrix_) {
         RSColorMatrix colorMatrix;
-        colorMatrix.SetArray(config.colorFilter_->data());
+        colorMatrix.SetArray(config.colorFilter_.colorFilterMatrix_->data());
         filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+    } else if (config.colorFilter_.colorFilterDrawing_) {
+        auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
+            config.colorFilter_.colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
+        if (colorFilterSptrAddr && (*colorFilterSptrAddr)) {
+            filter.SetColorFilter(*colorFilterSptrAddr);
+        }
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(GRAY_COLOR_MATRIX);
@@ -112,7 +118,7 @@ std::shared_ptr<RSImage> DrawingImage::MakeRSImageFromPixmap(const RefPtr<PixelM
     RSAlphaType alphaType = AlphaTypeToRSAlphaType(pixmap);
     RSBitmapFormat bitmapFormat = { colorType, alphaType };
     auto bitmap = std::make_shared<RSBitmap>();
-    bitmap->Build(pixmap->GetWidth(), pixmap->GetHeight(), bitmapFormat);
+    bitmap->Build(pixmap->GetWidth(), pixmap->GetHeight(), bitmapFormat, pixmap->GetRowStride());
     bitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixmap->GetPixels())));
 
     auto image = std::make_shared<RSImage>();

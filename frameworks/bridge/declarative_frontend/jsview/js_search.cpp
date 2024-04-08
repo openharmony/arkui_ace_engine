@@ -60,6 +60,8 @@ SearchModel* SearchModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
+constexpr double DEFAULT_OPACITY = 0.2;
+const int32_t DEFAULT_ALPHA = 255;
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -106,13 +108,21 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
+    JSBindMore();
+    JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSSearch::JSBindMore()
+{
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
+    JSClass<JSSearch>::StaticMethod("minFontSize", &JSSearch::SetMinFontSize);
+    JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
     JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
-    JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSSearch>::StaticMethod("selectedBackgroundColor", &JSSearch::SetSelectedBackgroundColor);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -191,6 +201,27 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
 }
 
+void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedColor();
+    }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    SearchModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+}
+
 void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
@@ -221,14 +252,11 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
-    std::string buttonValue;
-    if (!ParseJsString(info[0], buttonValue)) {
-        return;
+    std::string buttonValue = "";
+    if (info[0]->IsString()) {
+        buttonValue = info[0]->ToString();
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
-    SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-    SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
-
     if (info[1]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[1]);
 
@@ -250,6 +278,9 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             fontColor = theme->GetSearchButtonTextColor();
         }
         SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+    } else {
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
     }
 }
 
@@ -357,6 +388,13 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     }
     SearchModel::GetInstance()->SetCancelIconSize(iconSize);
 
+    // set icon color
+    Color iconColor;
+    auto iconColorProp = iconParam->GetProperty("color");
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
+
     // set icon src
     std::string iconSrc;
     auto iconSrcProp = iconParam->GetProperty("src");
@@ -364,13 +402,6 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
         iconSrc = "";
     }
     SearchModel::GetInstance()->SetRightIconSrcPath(iconSrc);
-
-    // set icon color
-    Color iconColor;
-    auto iconColorProp = iconParam->GetProperty("color");
-    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
-    }
 }
 
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
@@ -475,14 +506,16 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
 
 void JSSearch::SetTextFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        return;
-    }
-    auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
-    Font font;
+    auto themeFontWeight = theme->GetFontWeight();
+    Font font {.fontSize = themeFontSize, .fontWeight = themeFontWeight, .fontStyle = Ace::FontStyle::NORMAL};
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        SearchModel::GetInstance()->SetTextFont(font);
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = param->GetProperty("size");
     CalcDimension size = themeFontSize;
     if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
@@ -789,6 +822,9 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
     do {
         auto tmpInfo = info[0];
         if (!tmpInfo->IsObject()) {
+            SearchModel::GetInstance()->SetTextDecoration(TextDecoration::NONE);
+            SearchModel::GetInstance()->SetTextDecorationColor(Color::BLACK);
+            SearchModel::GetInstance()->SetTextDecorationStyle(TextDecorationStyle::SOLID);
             break;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
@@ -816,6 +852,43 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
             SearchModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
         }
     } while (false);
+}
+
+void JSSearch::SetMinFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension minFontSize;
+    if (!ParseJsDimensionFpNG(info[0], minFontSize, false)) {
+        SearchModel::GetInstance()->SetAdaptMinFontSize(CalcDimension());
+        return;
+    }
+    if (minFontSize.IsNegative()) {
+        minFontSize = CalcDimension();
+    }
+    SearchModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
+}
+
+void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    if (!ParseJsDimensionFpNG(info[0], maxFontSize, false)) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+        SearchModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
+        return;
+    }
+    if (maxFontSize.IsNegative()) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    }
+    SearchModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
 
 void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)

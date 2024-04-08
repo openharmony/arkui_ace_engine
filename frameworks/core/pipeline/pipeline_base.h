@@ -254,7 +254,7 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
-    virtual bool RequestFocus(const std::string& targetNodeId)
+    virtual bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false)
     {
         return false;
     }
@@ -903,6 +903,8 @@ public:
     virtual void FlushUITasks() = 0;
 
     virtual void FlushPipelineImmediately() = 0;
+
+    virtual void FlushOnceVsyncTask() = 0;
 
     // get animateTo closure option
     AnimationOption GetSyncAnimationOption()

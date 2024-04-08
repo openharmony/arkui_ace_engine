@@ -130,7 +130,9 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
+    auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
+    CheckScrollToEdge(oldScrollableDistance, scrollableDistance_);
     auto axis = GetAxis();
     auto oldMainSize = GetMainAxisSize(viewPort_, axis);
     auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
@@ -262,7 +264,11 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 
 bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
-    return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
+    if (Positive(scrollableDistance_)) {
+        return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
+    } else {
+        return !NearZero(currentOffset_);
+    }
 }
 
 bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
@@ -522,6 +528,14 @@ void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
     float distance = scrollEdgeType == ScrollEdgeType::SCROLL_TOP ? -currentOffset_ :
         (-scrollableDistance_ - currentOffset_);
     ScrollBy(distance, distance, smooth);
+    scrollEdgeType_ = scrollEdgeType;
+}
+
+void ScrollPattern::CheckScrollToEdge(float oldScrollableDistance, float newScrollableDistance)
+{
+    if (!NearEqual(oldScrollableDistance, newScrollableDistance) && scrollEdgeType_ != ScrollEdgeType::SCROLL_NONE) {
+        ScrollToEdge(scrollEdgeType_, true);
+    }
 }
 
 void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish)

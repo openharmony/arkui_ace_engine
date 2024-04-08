@@ -66,6 +66,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     // If the node is a UINode, amount it to a BuilderProxyNode.
     // Let the returned node be a FrameNode.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
+    auto isSupportExportTexture = EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0;
     if (!flag && newNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
@@ -81,7 +82,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     }
     viewNode_ = newNode;
     CHECK_NULL_VOID(viewNode_);
-    if (EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
+    if (isSupportExportTexture) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
         CHECK_NULL_VOID(exportTextureInfo);

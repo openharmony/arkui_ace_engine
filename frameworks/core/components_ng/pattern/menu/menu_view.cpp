@@ -53,6 +53,22 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
+void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (frameNode) {
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->SetDragForbiddenForcely(true);
+    }
+    for (const auto& child : customNode->GetChildren()) {
+        SetSelfAndChildDraggableFalse(child);
+    }
+}
+
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
     MenuType type = MenuType::MENU, const bool hasPreviewTransitionEffect = false,
@@ -87,6 +103,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         previewNode->AddChild(previewCustomNode);
         previewNode->MountToParent(wrapperNode);
         previewNode->MarkModifyDone();
+        SetSelfAndChildDraggableFalse(previewCustomNode);
         
         auto pipeline = PipelineContext::GetMainPipelineContext();
         CHECK_NULL_RETURN(pipeline, std::make_pair(wrapperNode, menuNode));
@@ -376,6 +393,11 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = imageNode->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
     } else {
         ShowPixelMapAnimation(imageNode, menuNode);
         ShowGatherAnimation(imageNode, menuNode);

@@ -118,6 +118,11 @@ RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
     return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
 }
 
+RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
+{
+    return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
+}
+
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
 {
     auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(UnwrapNapiValue(obj));

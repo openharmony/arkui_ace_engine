@@ -26,6 +26,14 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+struct TextMarqueeOptions {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStart, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStep, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeLoop, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDirection, MarqueeDirection);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDelay, int32_t);
+};
+
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(TextLayoutProperty, LayoutProperty);
 
@@ -85,10 +93,17 @@ public:
         TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_GROUP(TextMarqueeOptions, TextMarqueeOptions);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStart, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStep, double, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeLoop, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeDirection, MarqueeDirection, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeDelay, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ForegroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
 
     // placeholder

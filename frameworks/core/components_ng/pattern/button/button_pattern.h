@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 namespace OHOS::Ace::NG {
@@ -288,6 +289,18 @@ public:
         return touchListener_;
     }
 
+    void SetBuilderFunc(ButtonMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    void SetButtonPress(double xPos, double yPos);
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
     void OnColorConfigurationUpdate() override;
 
     void SetSkipColorConfigurationUpdate()
@@ -320,8 +333,14 @@ protected:
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
     void HandleBackgroundColor();
+    void HandleBorderColorAndWidth();
     void HandleEnabled();
     void InitButtonLabel();
+    void InitFocusEvent();
+    void HandleFocusEvent(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
+    void HandleBlurEvent(RefPtr<ButtonLayoutProperty>,
+        RefPtr<RenderContext>, RefPtr<ButtonTheme>, RefPtr<TextLayoutProperty>, RefPtr<FrameNode>);
     Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type);
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo, int32_t duration,
         const RefPtr<Curve>& curve);
@@ -337,9 +356,15 @@ private:
     Color focusBorderColor_;
     Color themeBgColor_;
     Color themeTextColor_;
+    Color borderColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
-
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
+    GestureEventFunc tapEventFunc_;
+    std::optional<ButtonMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
+    std::optional<GestureEventFunc> clickEventFunc_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
@@ -348,6 +373,7 @@ private:
     bool isInHover_ = false;
     Offset localLocation_;
     Dimension focusBorderWidth_;
+    Dimension borderWidth_;
 
     std::optional<Color> blendClickColor_ = std::nullopt;
     std::optional<Color> blendHoverColor_ = std::nullopt;
@@ -355,6 +381,11 @@ private:
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
+    bool focusEventInitialized_ = false;
+    bool focusTextColorModify_ = false;
+    bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
 };
 } // namespace OHOS::Ace::NG
 

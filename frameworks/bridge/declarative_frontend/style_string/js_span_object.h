@@ -45,5 +45,24 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSFontSpan);
     RefPtr<FontSpan> fontSpan_;
 };
+
+class JSGestureSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSGestureSpan, AceType)
+
+public:
+    JSGestureSpan() = default;
+    ~JSGestureSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSGestureSpan* gestureSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<GestureSpan> ParseJSGestureSpan(const JSCallbackInfo& args);
+
+    RefPtr<GestureSpan>& GetGestureSpan();
+    void SetGestureSpan(const RefPtr<GestureSpan>& gestureSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSGestureSpan);
+    RefPtr<GestureSpan> gestureSpan_;
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

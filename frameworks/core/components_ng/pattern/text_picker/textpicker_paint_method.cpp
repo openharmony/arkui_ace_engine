@@ -19,6 +19,8 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -62,6 +64,8 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
             if (contentRect.Width() >= 0.0f && (contentRect.Height() >= dividerHeight)) {
                 if (textPickerPattern->GetCustomDividerFlag()) {
                     auto divider = textPickerPattern->GetDivider();
+                    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+                    divider.isRtl = (textDirection == TextDirection::RTL) ? true : false;
                     picker->PaintCustomDividerLines(canvas, contentRect, frameRect, divider, dividerHeight);
                 } else {
                     picker->PaintDefaultDividerLines(canvas, contentRect, dividerHeight);
@@ -78,7 +82,7 @@ void TextPickerPaintMethod::PaintCustomDividerLines(RSCanvas& canvas, const Rect
 {
     DividerInfo info;
     if (NeedPaintDividerLines(contentRect, divider, dividerHeight, info)) {
-        PaintDividerLines(canvas, contentRect, info);
+        PaintDividerLines(canvas, contentRect, info, false);
     } else {
         PaintDisable(canvas, frameRect.Width(), frameRect.Height());
     }
@@ -111,10 +115,9 @@ void TextPickerPaintMethod::PaintDefaultDividerLines(RSCanvas& canvas, const Rec
     PaintDividerLines(canvas, contentRect, info);
 }
 
-bool TextPickerPaintMethod::NeedPaintDividerLines(const RectF &contentRect, const ItemDivider &divider,
-    double dividerHeight, DividerInfo& info)
+bool TextPickerPaintMethod::SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info)
 {
-    if (divider.strokeWidth.ConvertToPx() > contentRect.Height()) {
+    if (divider.strokeWidth.ConvertToPx() > dividerHeight / DOUBLE) {
         auto pipeline = PipelineContext::GetCurrentContext();
         if (!pipeline) {
             return false;
@@ -128,11 +131,19 @@ bool TextPickerPaintMethod::NeedPaintDividerLines(const RectF &contentRect, cons
     } else {
         info.dividerWidth = divider.strokeWidth.ConvertToPx();
     }
-    
-    if (info.dividerWidth <= 0) {
+
+    if (info.dividerWidth <= 0.0f) {
         return false;
     }
+    return true;
+}
 
+bool TextPickerPaintMethod::NeedPaintDividerLines(const RectF &contentRect, const ItemDivider &divider,
+    double dividerHeight, DividerInfo& info)
+{
+    if (!SetStrokeWidth(divider, dividerHeight, info)) {
+        return false;
+    }
     info.dividerHeight = dividerHeight;
     info.startMargin = std::max(0.0, divider.startMargin.ConvertToPx());
     info.endMargin = std::max(0.0, divider.endMargin.ConvertToPx());
@@ -158,23 +169,50 @@ bool TextPickerPaintMethod::NeedPaintDividerLines(const RectF &contentRect, cons
         info.startMargin = 0.0f;
         info.endMargin = 0.0f;
     }
-    dividerMargin += info.startMargin;
+    if (divider.isRtl) {
+        dividerMargin += info.endMargin;
+    } else {
+        dividerMargin += info.startMargin;
+    }
     dividerLength = dividerLength - info.startMargin - info.endMargin;
     info.dividerMargin = dividerMargin;
     info.dividerLength = dividerLength;
     return true;
 }
 
-void TextPickerPaintMethod::PaintDividerLines(RSCanvas& canvas, RectF contentRect, const DividerInfo &info)
+void TextPickerPaintMethod::PaintDividerLines(RSCanvas& canvas, const RectF& contentRect, const DividerInfo &info,
+    bool isDefaultLine)
 {
-    DividerPainter dividerPainter(info.dividerWidth, info.dividerLength, false, info.dividerColor, LineCap::SQUARE);
-    double upperLine = (contentRect.Height() - info.dividerHeight) / 2.0 + contentRect.GetY();
-    double downLine = (contentRect.Height() + info.dividerHeight) / 2.0 + contentRect.GetY();
-
+    double upperLine = 0.0f;
+    double downLine = 0.0f;
+    if (isDefaultLine) {
+        upperLine = (contentRect.Height() - info.dividerHeight) / DOUBLE + contentRect.GetY();
+        downLine = (contentRect.Height() + info.dividerHeight) / DOUBLE + contentRect.GetY();
+    } else {
+        upperLine = (contentRect.Height() - info.dividerHeight - info.dividerWidth) / DOUBLE + contentRect.GetY();
+        downLine = (contentRect.Height() + info.dividerHeight  - info.dividerWidth) / DOUBLE + contentRect.GetY();
+    }
     OffsetF offset = OffsetF(info.dividerMargin, upperLine);
-    dividerPainter.DrawLine(canvas, offset);
+    PaintLine(offset, info, canvas);
     OffsetF offsetY = OffsetF(info.dividerMargin, downLine);
-    dividerPainter.DrawLine(canvas, offsetY);
+    PaintLine(offsetY, info, canvas);
+}
+
+void TextPickerPaintMethod::PaintLine(const OffsetF& offset, const DividerInfo &info, RSCanvas& canvas)
+{
+    canvas.Save();
+    RSBrush brush;
+    brush.SetColor(info.dividerColor.GetValue());
+    canvas.AttachBrush(brush);
+    
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    auto endPointX = offset.GetX() + info.dividerLength;
+    auto endPointY = offset.GetY() + info.dividerWidth;
+
+    canvas.DrawRect(RSRect(startPointX, startPointY, endPointX, endPointY));
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 void TextPickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)

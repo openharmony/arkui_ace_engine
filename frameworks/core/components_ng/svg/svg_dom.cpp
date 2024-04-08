@@ -271,6 +271,25 @@ bool SvgDom::IsStatic()
     return svgContext_->GetAnimatorCount() == 0;
 }
 
+void SvgDom::SetAnimationOnFinishCallback(const std::function<void()>& onFinishCallback)
+{
+    if (IsStatic() || !root_) {
+        return;
+    }
+    svgContext_->InitAnimatorNeedFinishCnt();
+    onFinishCallback_ = std::move(onFinishCallback);
+    auto AnimatorOnFinishCallback = [weakSvgDom = AceType::WeakClaim(this)]() {
+        auto svgDom = weakSvgDom.Upgrade();
+        CHECK_NULL_VOID(svgDom);
+        auto svgContext = svgDom->svgContext_;
+        if (svgContext && !svgContext->ReleaseAndGetAnimatorNeedFinishCnt()) {
+            svgDom->onFinishCallback_();
+        }
+    };
+
+    root_->PushAnimatorOnFinishCallback(AnimatorOnFinishCallback);
+}
+
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
@@ -283,6 +302,7 @@ void SvgDom::DrawImage(
     if (GreatNotEqual(smoothEdge_, 0.0f)) {
         root_->SetSmoothEdge(smoothEdge_);
     }
+    root_->SetColorFilter(colorFilter_);
     root_->Draw(canvas, layout, fillColor_);
     canvas.Restore();
 }
@@ -369,5 +389,10 @@ void SvgDom::SetFillColor(const std::optional<Color>& color)
 void SvgDom::SetSmoothEdge(float value)
 {
     smoothEdge_ = value;
+}
+
+void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
+{
+    colorFilter_ = colorFilter;
 }
 } // namespace OHOS::Ace::NG

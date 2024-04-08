@@ -94,6 +94,23 @@ class TextAreaLineHeightModifier extends ModifierWithKey<number | string | Resou
   }
 }
 
+class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
+  constructor(value: WordBreak) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaWordBreak');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetWordBreak(node);
+    } else {
+      getUINativeModule().textArea.setWordBreak(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
     super(value);
@@ -394,8 +411,8 @@ class TextAreaFontFeatureModifier extends ModifierWithKey<FontFeature> {
 }
 
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   type(value: TextAreaType): TextAreaAttribute {
     throw new Error('Method not implemented.');
@@ -517,15 +534,16 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  wordBreak(value: WordBreak): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.TextArea.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextAreaComponent(nativeNode);
+globalThis.TextArea.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextAreaComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextAreaModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

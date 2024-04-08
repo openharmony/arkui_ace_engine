@@ -16,8 +16,8 @@
 /// <reference path='./import.ts' />
 
 class ArkNavigatorComponent extends ArkComponent implements NavigatorAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   active(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ActiveModifier.identity, ActiveModifier, value);
@@ -98,12 +98,10 @@ class TargetModifier extends ModifierWithKey<string> {
 }
 
 // @ts-ignore
-globalThis.Navigator.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkNavigatorComponent(nativeNode);
+globalThis.Navigator.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkNavigatorComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.NavigatorModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

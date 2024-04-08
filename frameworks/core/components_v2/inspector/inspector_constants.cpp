@@ -51,6 +51,8 @@ const char ATTRS_COMMON_ZINDEX[] = "zIndex";
 const char ROOT_ETS_TAG[] = "root";
 // stage view
 const char STAGE_ETS_TAG[] = "stage";
+// overlay view
+const char OVERLAY_ETS_TAG[] = "overlay";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
@@ -545,6 +547,10 @@ ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
 const char UI_EXTENSION_SURFACE_TAG[] = "UIExtensionSurface";
 const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
+
+// embedded_component
+const char EMBEDDED_COMPONENT_TAG[] = "EmbeddedComponent";
+const char EMBEDDED_COMPONENT_ETS_TAG[] = "EmbeddedComponent";
 
 // LocationButton
 const char LOCATION_BUTTON_COMPONENT_TAG[] = "LocationButtonComponent";

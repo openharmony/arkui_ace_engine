@@ -20,6 +20,7 @@
 #include <dlfcn.h>
 #endif
 
+#include "base/log/ace_scoring_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -71,6 +72,39 @@ void JSImageSpan::SetTextBackgroundStyle(const JSCallbackInfo& info)
     NG::ImageSpanView::SetPlaceHolderStyle(textBackgroundStyle);
 }
 
+void JSImageSpan::OnComplete(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (arg->IsFunction()) {
+        auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
+            JSRef<JSFunc>::Cast(arg), LoadImageSuccEventToJSValue);
+
+        auto onComplete = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](
+                              const LoadImageSuccessEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("ImageSpan.onComplete");
+            func->Execute(info);
+        };
+        ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
+    }
+}
+
+void JSImageSpan::OnError(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (arg->IsFunction()) {
+        auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
+            JSRef<JSFunc>::Cast(arg), LoadImageFailEventToJSValue);
+        auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](
+                           const LoadImageFailEvent& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("ImageSpan.onError");
+            func->Execute(info);
+        };
+        ImageModel::GetInstance()->SetOnError(onError);
+    }
+}
+
 void JSImageSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImageSpan>::Declare("ImageSpan");
@@ -79,6 +113,8 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit);
     JSClass<JSImageSpan>::StaticMethod("verticalAlign", &JSImageSpan::SetVerticalAlign);
     JSClass<JSImageSpan>::StaticMethod("textBackgroundStyle", &JSImageSpan::SetTextBackgroundStyle);
+    JSClass<JSImageSpan>::StaticMethod("onComplete", &JSImageSpan::OnComplete);
+    JSClass<JSImageSpan>::StaticMethod("onError", &JSImageSpan::OnError);
     JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

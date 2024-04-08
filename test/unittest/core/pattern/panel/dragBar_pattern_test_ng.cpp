@@ -36,6 +36,8 @@
 #include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -59,8 +61,14 @@ const std::vector<Offset> LOCAL_LOCATIONS = { Offset(20.0f, 60.0f), Offset(50.0f
 
 class DragBarPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestSuite()
+    {
+        MockPipelineContext::SetUp();
+    }
+    static void TearDownTestSuite()
+    {
+        MockPipelineContext::TearDown();
+    }
     void SetUp() override;
     void TearDown() override;
 
@@ -165,6 +173,7 @@ HWTEST_F(DragBarPatternTestNg, DragBarPatternTest002, TestSize.Level1)
      */
     auto dragBarPattern = dragBarNode->GetPattern<DragBarPattern>();
     EXPECT_FALSE(dragBarPattern == nullptr);
+    dragBarPattern->barStyleAnimator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
     auto paintProperty = AceType::DynamicCast<DragBarPaintProperty>(dragBarPattern->CreatePaintProperty());
     EXPECT_FALSE(paintProperty == nullptr);
     paintProperty->UpdateDragOffset(DRAG_OFFSET);

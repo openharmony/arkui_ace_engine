@@ -503,6 +503,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info.localLocation_ = Offset(1, 1);
     pattern->HandleOnClick(info);
     EXPECT_TRUE(pattern->GetSelectOverlayInfo()->menuInfo.menuIsShow);
+    pattern->isFirstHandleTouchDown_ = true;
     pattern->HandlePanStart(info);
     EXPECT_TRUE(pattern->firstHandleDrag_);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
@@ -520,6 +521,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info2.localLocation_ = Offset(11, 11);
     ASSERT_NE(pattern->info_, nullptr);
     pattern->info_->isHandleLineShow = false;
+    pattern->isSecondHandleTouchDown_ = true;
     pattern->HandlePanStart(info2);
     EXPECT_TRUE(pattern->secondHandleDrag_);
     const auto& offset2 = OffsetF(info2.GetDelta().GetX(), info2.GetDelta().GetY());
@@ -549,12 +551,14 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     pattern->info_->onHandleMoveStart = [&](bool isFirst) {
         callBackFlag = 1;
     };
+    pattern->isFirstHandleTouchDown_ = true;
     pattern->HandlePanStart(info4);
     EXPECT_EQ(callBackFlag, 1);
 
     // not in first region and in second region
     info4.localLocation_ = Offset(11, 11);
     callBackFlag = 0;
+    pattern->isSecondHandleTouchDown_ = true;
     pattern->HandlePanStart(info4);
     EXPECT_EQ(callBackFlag, 1);
 
@@ -1701,8 +1705,6 @@ HWTEST_F(SelectOverlayTestNg, UpdateContentModifier004, TestSize.Level1)
     ASSERT_NE(paintWrapper, nullptr);
     RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_NE(paintMethod, nullptr);
-    paintMethod = pattern->CreateNodePaintMethod();
-    EXPECT_NE(paintMethod, nullptr);
     auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
     EXPECT_NE(selectOverlayPaintMethod, nullptr);
     /**
@@ -1710,6 +1712,9 @@ HWTEST_F(SelectOverlayTestNg, UpdateContentModifier004, TestSize.Level1)
      * @tc.expected: handleColor equals theme handleColor.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     auto contentModifier = pattern->selectOverlayContentModifier_;
     ASSERT_NE(contentModifier, nullptr);
@@ -1723,6 +1728,7 @@ HWTEST_F(SelectOverlayTestNg, UpdateContentModifier004, TestSize.Level1)
     selectOverlayPaintMethod->info_.handlerColor = Color::RED;
     selectOverlayPaintMethod->UpdateContentModifier(paintWrapper);
     EXPECT_TRUE(contentModifier->handleColor_->Get() == Color::RED);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**

@@ -31,6 +31,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr int32_t INVALID_PAGE_INDEX = -1;
 std::string KEY_PAGE_TRANSITION_PROPERTY = "pageTransitionProperty";
 void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
 {
@@ -177,8 +178,11 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnAttachToMainTree()
 {
-    std::string url = GetPageInfo()->GetPageUrl();
-    int32_t index = EngineHelper::GetCurrentDelegate()->GetIndexByUrl(url);
+    int32_t index = INVALID_PAGE_INDEX;
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate) {
+        index = delegate->GetStackSize();
+    }
     GetPageInfo()->SetPageIndex(index);
     state_ = RouterPageState::ABOUT_TO_APPEAR;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
@@ -275,6 +279,10 @@ void PagePattern::OnHide()
 
 bool PagePattern::OnBackPressed()
 {
+    if (RemoveOverlay()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
+        return true;
+    }
     if (isPageInTransition_) {
         return true;
     }
@@ -403,5 +411,21 @@ bool PagePattern::AvoidKeyboard() const
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
+}
+
+bool PagePattern::RemoveOverlay()
+{
+    CHECK_NULL_RETURN(overlayManager_, false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    return overlayManager_->RemoveOverlay(true);
+}
+
+void PagePattern::MarkDirtyOverlay()
+{
+    CHECK_NULL_VOID(overlayManager_);
+    overlayManager_->MarkDirtyOverlay();
 }
 } // namespace OHOS::Ace::NG

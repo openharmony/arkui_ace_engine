@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/common/ime/text_input_action.h"
 
 #define protected public
 #define private public
@@ -50,6 +51,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components/common/properties/text_style_parser.h"
 #undef protected
 #undef private
 
@@ -72,6 +74,8 @@ constexpr int32_t BUTTON_INDEX = 4;
 const std::string EMPTY_VALUE;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 } // namespace
 
 class SearchTestNg : public testing::Test {
@@ -3001,9 +3005,30 @@ HWTEST_F(SearchTestNg, SetProperty003, TestSize.Level1)
 
     //test SetRightIconSrcPath
     auto cancelImageLayoutProperty = imageFNode->GetLayoutProperty<ImageLayoutProperty>();
-    searchModelInstance.SetRightIconSrcPath(frameNode, PLACEHOLDER);
     searchModelInstance.SetRightIconSrcPath(frameNode, "");
     ASSERT_STREQ(cancelImageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "resource:///ohos_test_image.svg");
+
+    //test SetEnterKeyType
+    searchModelInstance.SetSearchEnterKeyType(frameNode, TextInputAction::NEXT);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(TextInputAction::NEXT, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
+}
+
+/**
+ * @tc.name: SetEnterKeyType001
+ * @tc.desc: test search set enterKeyType default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetEnterKeyType001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto fNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    FrameNode* frameNode = &(*fNode);
+    searchModelInstance.SetSearchEnterKeyType(frameNode, TextInputAction::UNSPECIFIED);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(fNode->GetChildren().front());
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(TextInputAction::SEARCH, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
 }
 
 /**
@@ -3105,5 +3130,67 @@ HWTEST_F(SearchTestNg, TextDecoration001, TestSize.Level1)
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecoration(), Ace::TextDecoration::UNDERLINE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationColor(), Color::BLUE);
     EXPECT_EQ(textFieldLayoutProperty->GetTextDecorationStyle(), Ace::TextDecorationStyle::DASHED);
+}
+
+/**
+ * @tc.name: UpdateFontFeature
+ * @tc.desc: test fontFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetProperty004, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    SearchModelNG searchModelInstance;
+    searchModelInstance.SetFontFeature(FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
+    SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: UpdateFontFeature
+ * @tc.desc: test fontFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetProperty005, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    SearchModelNG searchModelInstance;
+    searchModelInstance.SetFontFeature(FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+
+    layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
+    SearchModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
+    EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: SupportAvoidanceTest
+ * @tc.desc: test whether the custom keyboard supports the collision avoidance function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SupportAvoidanceTest, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto supportAvoidance = true;
+    textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_TRUE(textFieldPattern->keyboardAvoidance_);
+    supportAvoidance = false;
+    textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+    EXPECT_FALSE(textFieldPattern->keyboardAvoidance_);
 }
 } // namespace OHOS::Ace::NG

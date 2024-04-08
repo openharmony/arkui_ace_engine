@@ -141,4 +141,18 @@ void RatingModelNG::SetBackgroundSrc(FrameNode* frameNode, const std::string& va
             RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value), frameNode);
     }
 }
+
+void RatingModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void RatingModelNG::SetChangeValue(FrameNode* frameNode, double value)
+{
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRatingScore(value);
+}
 } // namespace OHOS::Ace::NG

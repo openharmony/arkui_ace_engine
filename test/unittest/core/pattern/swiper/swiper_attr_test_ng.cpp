@@ -514,6 +514,8 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount001, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+    EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
 }
 
 /**
@@ -529,6 +531,8 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount002, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(2); });
     EXPECT_EQ(pattern_->GetDisplayCount(), 2);
+    EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
+    EXPECT_GT(GetChildWidth(frameNode_, 1), 0.f);
 }
 
 /**
@@ -539,11 +543,14 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount002, TestSize.Level1)
 HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set displayCount to invalid 0
-     * @tc.expected: DisplayCount is default 1
+     * @tc.cases: Set displayCount to ITEM_NUMBER+1
+     * @tc.expected: DisplayCount is ITEM_NUMBER+1, last item place has placeholder child
      */
-    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(0); });
-    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(ITEM_NUMBER + 1); });
+    EXPECT_EQ(pattern_->GetDisplayCount(), 5);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER); // child number still is 4
+    EXPECT_GT(GetChildWidth(frameNode_, 3), 0.f); // item size > 0
+    EXPECT_GT(GetChildWidth(frameNode_, 4), 0.f); // placeholder child
 }
 
 /**
@@ -552,6 +559,40 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set minsize to half of swiper width
+     * @tc.expected: show 2 item in one page
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetMinSize(Dimension(SWIPER_WIDTH / 3)); });
+    EXPECT_TRUE(pattern_->IsAutoFill());
+    EXPECT_EQ(pattern_->GetDisplayCount(), 2);
+    EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 0.f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
+}
+
+/**
+ * @tc.name: AttrDisplayCount005
+ * @tc.desc: Test property about DisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set displayCount to invalid 0
+     * @tc.expected: DisplayCount is default 1
+     */
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(0); });
+    EXPECT_EQ(pattern_->GetDisplayCount(), 1);
+}
+
+/**
+ * @tc.name: AttrDisplayCount006
+ * @tc.desc: Test property about DisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, AttrDisplayCount006, TestSize.Level1)
 {
     /**
      * @tc.cases: Do not set displayCount

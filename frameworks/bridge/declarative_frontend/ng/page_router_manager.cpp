@@ -46,6 +46,7 @@ namespace {
 
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
+constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
 
 void ExitToDesktop()
 {
@@ -217,13 +218,13 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
         auto PageInfoByUrl = FindPageInStack(target.url);
         auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
         if (PageInfoByUrl.second) {
-            // get PageInfo by url, find page in stack, move postion and update params.
+            // get pageInfo by url, find page in stack, move postion and update params.
             MovePageToFront(PageInfoByUrl.first, PageInfoByUrl.second, target, true);
             return;
         }
         auto PageInfoByPagePath = FindPageInStack(pagePath);
         if (PageInfoByPagePath.second) {
-            // get PageInfo by pagePath, find page in stack, move postion and update params.
+            // get pageInfo by pagePath, find page in stack, move postion and update params.
             MovePageToFront(PageInfoByPagePath.first, PageInfoByPagePath.second, target, true);
             return;
         }
@@ -480,26 +481,41 @@ int32_t PageRouterManager::GetStackSize() const
 
 RouterPageInfo PageRouterManager::GetPageInfoByIndex(int32_t index, const std::string& params)
 {
-    RouterPageInfo target;
-    if (!CheckIndexValid(index)) {
-        return target;
+    RouterPageInfo emptyForReturn;
+    if (!CheckIndexValid(index) &&
+        index != static_cast<int32_t>(pageRouterStack_.size() + 1) /* in case the page is on popping */) {
+        return emptyForReturn;
     }
     std::string url;
     int32_t counter = 1;
     for (const auto& iter : pageRouterStack_) {
         if (counter == index) {
             auto pageNode = iter.Upgrade();
-            CHECK_NULL_RETURN(pageNode, target);
+            CHECK_NULL_RETURN(pageNode, emptyForReturn);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            CHECK_NULL_RETURN(pagePattern, target);
-            auto PageInfo = DynamicCast<NG::EntryPageInfo>(pagePattern->GetPageInfo());
-            CHECK_NULL_RETURN(PageInfo, target);
-            url = PageInfo->GetPageUrl();
-            return NG::RouterPageInfo({ url, params });
+            CHECK_NULL_RETURN(pagePattern, emptyForReturn);
+            auto pageInfo = pagePattern->GetPageInfo();
+            CHECK_NULL_RETURN(pageInfo, emptyForReturn);
+            return NG::RouterPageInfo({ pageInfo->GetPageUrl(), params });
         }
         counter++;
     }
-    return target;
+
+    // in case the page is on popping
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, emptyForReturn);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, emptyForReturn);
+    auto popPage = stageManager->GetLastPage();
+    CHECK_NULL_RETURN(popPage, emptyForReturn);
+    auto pagePattern = popPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, emptyForReturn);
+    auto pageInfo = pagePattern->GetPageInfo();
+    // make sure the last page is the one with 'index'
+    if (pageInfo && pageInfo->GetPageIndex() == index) {
+        return NG::RouterPageInfo({ pageInfo->GetPageUrl(), params });
+    }
+    return emptyForReturn;
 }
 
 void PageRouterManager::GetState(int32_t& index, std::string& name, std::string& path)
@@ -540,7 +556,8 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
 void PageRouterManager::GetStateByIndex(int32_t index, std::string& name, std::string& path, std::string& params)
 {
     CHECK_RUN_ON(JS);
-    if (!CheckIndexValid(index)) {
+    if (!CheckIndexValid(index) &&
+        index != static_cast<int32_t>(pageRouterStack_.size() + 1) /* in case the page is on popping */) {
         return;
     }
 
@@ -549,34 +566,33 @@ void PageRouterManager::GetStateByIndex(int32_t index, std::string& name, std::s
         if (counter == index) {
             auto pageNode = iter.Upgrade();
             CHECK_NULL_VOID(pageNode);
+            GetPageNameAndPath(pageNode, name, path);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
-            auto PageInfo = DynamicCast<NG::EntryPageInfo>(pagePattern->GetPageInfo());
-            CHECK_NULL_VOID(PageInfo);
-            auto url = PageInfo->GetPageUrl();
-            params = PageInfo->GetPageParams();
-            auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
-            if (!pagePath.empty()) {
-                url = pagePath;
-            }
-            auto pos = url.rfind(".js");
-            if (pos == url.length() - 3) {
-                url = url.substr(0, pos);
-            }
-            pos = url.rfind("/");
-            if (pos != std::string::npos) {
-                name = url.substr(pos + 1);
-                path = url.substr(0, pos + 1);
-            }
-            if (name.size() == 0) {
-                name = "index";
-            }
-            if (path.size() == 0) {
-                path = "/" + url;
-            }
-            break;
+            auto pageInfo = DynamicCast<NG::EntryPageInfo>(pagePattern->GetPageInfo());
+            CHECK_NULL_VOID(pageInfo);
+            params = pageInfo->GetPageParams();
+            return;
         }
         counter++;
+    }
+
+    // in case the page is on popping
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto popPage = stageManager->GetLastPage();
+    CHECK_NULL_VOID(popPage);
+    auto pagePattern = popPage->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = pagePattern->GetPageInfo();
+    // make sure the last page is the one with 'index'
+    if (pageInfo && pageInfo->GetPageIndex() == index) {
+        GetPageNameAndPath(popPage, name, path);
+        auto entryPageInfo = DynamicCast<NG::EntryPageInfo>(pageInfo);
+        CHECK_NULL_VOID(entryPageInfo);
+        params = entryPageInfo->GetPageParams();
     }
 }
 
@@ -590,11 +606,11 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
         CHECK_NULL_VOID(pageNode);
         auto pagePattern = pageNode->GetPattern<PagePattern>();
         CHECK_NULL_VOID(pagePattern);
-        auto PageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
-        CHECK_NULL_VOID(PageInfo);
+        auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+        CHECK_NULL_VOID(pageInfo);
         std::string tempUrl;
-        if (PageInfo->GetPageUrl() == url) {
-            stateInfo.params = PageInfo->GetPageParams();
+        if (pageInfo->GetPageUrl() == url) {
+            stateInfo.params = pageInfo->GetPageParams();
             stateInfo.index = counter;
             auto pos = url.rfind(".js");
             if (pos == url.length() - 3) {
@@ -619,6 +635,34 @@ void PageRouterManager::GetStateByUrl(std::string& url, std::vector<Framework::S
             stateArray.emplace_back(stateInfo);
         }
         counter++;
+    }
+}
+
+void PageRouterManager::GetPageNameAndPath(const RefPtr<FrameNode>& pageNode, std::string& name, std::string& path)
+{
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto url = pageInfo->GetPageUrl();
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+    if (!pagePath.empty()) {
+        url = pagePath;
+    }
+    auto pos = url.rfind(".js");
+    if (pos == url.length() - JS_FILE_EXTENSION_LENGTH) {
+        url = url.substr(0, pos);
+    }
+    pos = url.rfind("/");
+    if (pos != std::string::npos) {
+        name = url.substr(pos + 1);
+        path = url.substr(0, pos + 1);
+    }
+    if (name.size() == 0) {
+        name = "index";
+    }
+    if (path.size() == 0) {
+        path = "/" + url;
     }
 }
 
@@ -695,7 +739,13 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     if (container->IsUseStageModel()) {
         auto pagePath = entryPageInfo->GetPagePath();
         auto moduleName = container->GetModuleName();
-        auto judgePath = moduleName + "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+        std::string judgePath = "";
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            judgePath = "entry/build/default/cache/default/default@CompileArkTS/esmodule/debug/" + moduleName +
+                        "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ts";
+        } else {
+            judgePath = moduleName + "/src/main/ets/" + pagePath.substr(0, pagePath.size() - 3) + ".ets";
+        }
         if (Framework::GetAssetContentImpl(assetManager, "sourceMaps.map", jsSourceMap)) {
             auto jsonPages = JsonUtil::ParseJsonString(jsSourceMap);
             auto jsonPage = jsonPages->GetValue(judgePath)->ToString();

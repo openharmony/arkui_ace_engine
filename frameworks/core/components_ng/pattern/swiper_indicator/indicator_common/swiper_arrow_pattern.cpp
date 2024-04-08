@@ -39,10 +39,58 @@ void SwiperArrowPattern::OnModifyDone()
         index_ = GetSwiperArrowLayoutProperty()->GetIndex().value_or(0);
         isFirstCreate_ = false;
         InitButtonEvent();
+        InitOnKeyEvent();
     } else {
         UpdateArrowContent();
     }
     UpdateButtonNode(index_);
+}
+
+void SwiperArrowPattern::InitOnKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool SwiperArrowPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        OnClick();
+        return true;
+    }
+    return false;
+}
+
+void SwiperArrowPattern::OnClick() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperController = swiperPattern->GetSwiperController();
+    CHECK_NULL_VOID(swiperController);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+        swiperController->ShowPrevious();
+        return;
+    }
+    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+        swiperController->ShowNext();
+    }
 }
 
 void SwiperArrowPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub)
@@ -119,20 +167,8 @@ void SwiperArrowPattern::ButtonClickEvent()
     if (!hoverOnClickFlag_ && swiperArrowLayoutProperty->GetHoverShowValue(false)) {
         return;
     }
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperController = swiperPattern->GetSwiperController();
-    CHECK_NULL_VOID(swiperController);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
-        swiperController->ShowPrevious();
-    }
-    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
-        swiperController->ShowNext();
-    }
+
+    OnClick();
 }
 
 void SwiperArrowPattern::InitNavigationArrow()

@@ -501,7 +501,10 @@ public:
 
     void SetReverse(bool reverse)
     {
-        isReverse_ = reverse;
+        if (isReverse_ != reverse) {
+            isReverse_ = reverse;
+            isReverseUpdate_ = true;
+        }
     }
 
     bool IsReverse()
@@ -568,6 +571,7 @@ private:
     Dimension inactiveWidth_;
     Dimension activeWidth_;
     Dimension normalWidth_;
+    Dimension themeNormalWidth_;
     Dimension touchWidth_;
     Dimension hoverWidth_;
 
@@ -598,6 +602,7 @@ private:
     bool isUserNormalWidth_ = false;
     bool needAdaptAnimation_ = false;
     bool isReverse_ = false;
+    bool isReverseUpdate_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;

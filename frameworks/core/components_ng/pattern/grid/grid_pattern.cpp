@@ -1535,7 +1535,7 @@ bool GridPattern::OutBoundaryCallback()
 OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
-    if (gridLayoutInfo_.startIndex_ == 0) {
+    if (gridLayoutInfo_.startIndex_ == 0 && gridLayoutInfo_.startMainLineIndex_ == 0) {
         auto startPos = gridLayoutInfo_.currentOffset_;
         auto newStartPos = startPos + delta;
         if (startPos > 0 && newStartPos > 0) {

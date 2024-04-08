@@ -24,6 +24,13 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<RatingPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+    }
     // case 1: rating component is set with valid size, return contentConstraint.selfIdealSize as component size
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
@@ -60,6 +67,13 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
 void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::Layout(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RatingPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        return;
+    }
     // if layout size has not decided yet, resize target can not be calculated
     CHECK_NULL_VOID(layoutWrapper->GetGeometryNode()->GetContent());
     const auto& ratingSize = layoutWrapper->GetGeometryNode()->GetContentSize();

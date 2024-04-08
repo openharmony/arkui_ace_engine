@@ -61,7 +61,7 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
 
 @Component
 struct ComposeTitleBar {
-  item: ComposeTitleBarMenuItem | null = null
+  item: ComposeTitleBarMenuItem | undefined = undefined
   title: ResourceStr = ''
   subtitle: ResourceStr = ''
   menuItems?: Array<ComposeTitleBarMenuItem>
@@ -93,7 +93,7 @@ struct ComposeTitleBar {
         }, index: -1 })
 
         if (this.item !== undefined) {
-          Image(this.item?.value)
+          Image(this.item.value)
             .width(ComposeTitleBar.portraitImageSize)
             .height(ComposeTitleBar.portraitImageSize)
             .margin({
