@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "base/geometry/dimension.h"
+#include "base/image/drawing_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/components/box/drag_drop_event.h"
@@ -57,6 +58,7 @@ public:
     virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float> &matrix) = 0;
+    virtual void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) = 0;
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc &&onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc &&onDragEnter) = 0;

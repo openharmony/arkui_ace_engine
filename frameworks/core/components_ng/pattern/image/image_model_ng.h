@@ -47,6 +47,7 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float> &matrix) override;
+    void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) override;
     void SetDraggable(bool draggable) override;
     void SetOnDragStart(OnDragStartFunc &&onDragStart) override;
     void SetOnDragEnter(OnDragDropFunc &&onDragEnter) override;
