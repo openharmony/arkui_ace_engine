@@ -3248,6 +3248,12 @@ bool TextFieldPattern::RequestCustomKeyboard()
     overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
     keyboardOverlay_ = overlayManager;
+    auto caretHeight = selectController_->GetCaretRect().Height();
+    auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
+    if (selectController_->GetCaretRect().GetY() > caretHeight) {
+        safeHeight = caretHeight;
+    }
+    keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), safeHeight);
     return true;
 }
 

@@ -178,6 +178,12 @@ public:
         return rootMeasureNodeId_;
     }
 
+    float GetSafeHeight() const
+    {
+        Dimension safeDistance = 16.0_vp;
+        return safeDistance.ConvertToPx();
+    }
+
 private:
     bool isAtomicService_ = false;
 

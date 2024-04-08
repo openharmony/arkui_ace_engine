@@ -3860,10 +3860,13 @@ void OverlayManager::SetCustomKeybroadHeight(float customHeight)
     if (!keyboardAvoidance_) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
+}
+
+void OverlayManager::SetCustomKeyboardOption(bool supportAvoidance)
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
+    keyboardAvoidance_ = supportAvoidance;
 }
 
 void OverlayManager::SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
@@ -3955,7 +3958,21 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     CHECK_NULL_VOID(pattern);
     customKeyboardMap_.erase(pattern->GetTargetId());
     PlayKeyboardTransition(customKeyboard, false);
-    SetCustomKeybroadHeight();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, 0.0f);
+    CHECK_NULL_VOID(pipeline);
+    pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
+}
+
+void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
+{
+    auto it = customKeyboardMap_.find(targetId);
+    auto customKeyboard = it->second;
+    auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
+    pattern->SetKeyboardAreaChange(keyboardAvoidance_);
+    pattern->SetKeyboardOption(keyboardAvoidance_);
+    pattern->SetKeyboardSafeHeight(safeHeight);
 }
 
 // This function will be used in SceneBoard Thread only.

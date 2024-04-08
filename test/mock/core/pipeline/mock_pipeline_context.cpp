@@ -15,9 +15,9 @@
 
 #include "mock_pipeline_context.h"
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -72,16 +72,14 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootHeight_);
 }
 
-std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
-    const std::string& id)
+std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)
 {
     return nullptr;
 }
 
-void PipelineContext::AddOrReplaceNavigationNode(
-    const std::string &id, const WeakPtr<FrameNode>& node) {}
+void PipelineContext::AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node) {}
 
-void PipelineContext::DeleteNavigationNode(const std::string &id) {}
+void PipelineContext::DeleteNavigationNode(const std::string& id) {}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
@@ -227,12 +225,20 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushRequestFocus() {}
 
-void PipelineContext::OnVirtualKeyboardHeightChange(
-    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
 {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
     float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{}
+
+void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const float safeHeight, const bool supportAvoidance)
+{}
+
+void PipelineContext::OriginalAvoidanceLogic(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
 void PipelineContext::CheckVirtualKeyboardHeight() {}
@@ -394,8 +400,8 @@ FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_
 
 void PipelineContext::DumpPipelineInfo() const {}
 
-void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
-    const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback)
+void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, const std::vector<double>& ratio,
+    const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
@@ -581,9 +587,11 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {}
-void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
-    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {}
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
+{}
+void PipelineBase::OnVirtualKeyboardAreaChange(
+    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{}
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
