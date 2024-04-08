@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float SWIPER_TH = 0.25f;
 constexpr float SWIPER_SPEED_TH = 1200.f;
-constexpr float SWIPE_RATIO = 1.848f;
+constexpr float SWIPE_RATIO = 0.6f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
@@ -384,7 +384,11 @@ float ListItemPattern::CalculateFriction(float gamma)
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
-    return exp(-ratio * gamma);
+    float result = ratio * std::pow(1.0 - gamma, SQUARE);
+    if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
+        return result;
+    }
+    return 1.0f;
 }
 
 float ListItemPattern::GetFriction()
