@@ -79,7 +79,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeM());
+                textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
                 textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
                 textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
             }
