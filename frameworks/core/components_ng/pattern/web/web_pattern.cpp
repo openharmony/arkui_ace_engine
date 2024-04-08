@@ -3008,6 +3008,7 @@ bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, fl
         float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
         parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
         return true;
     }
@@ -3187,12 +3188,9 @@ void WebPattern::ReleaseResizeHold()
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     if (isNeedUpdateScrollAxis_) {
-        expectedScrollAxis_ = GetAxis();
-        if (parentsMap_.size() > 1) {
-            expectedScrollAxis_ = (x != 0 || y != 0)
-                ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
-                : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
-        }
+        expectedScrollAxis_ = (x != 0 || y != 0)
+            ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
+            : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
         isNeedUpdateScrollAxis_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
             "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
