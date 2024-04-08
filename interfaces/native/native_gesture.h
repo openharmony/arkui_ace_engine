@@ -17,7 +17,7 @@
  * @addtogroup ArkUI_NativeModule
  * @{
  *
- * @brief 提供ArkUI在Native侧的注册手势回调的能力。
+ * @brief Defines APIs for ArkUI to register gesture callbacks on the native side.
  *
  * @since 12
  */
@@ -25,7 +25,7 @@
 /**
  * @file native_gesture.h
  *
- * @brief 提供NativeGesture接口的类型定义。
+ * @brief Provides type definitions for <b>NativeGesture</b> APIs.
  *
  * @library libace_ndk.z.so
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -43,524 +43,567 @@ extern "C" {
 #endif
 
 /**
- * @brief 提供手势组件实例对象定义。
+ * @brief Defines a gesture recognizer.
  *
  * @since 12
  */
-struct ArkUI_GestureRecognizer;
+typedef struct ArkUI_GestureRecognizer ArkUI_GestureRecognizer;
 
 /**
- * @brief 提供手势打断数据类型对象定义。
+ * @brief Defines the gesture interruption information.
  *
  * @since 12
  */
-struct ArkUI_GestureInterruptInfo;
+typedef struct ArkUI_GestureInterruptInfo ArkUI_GestureInterruptInfo;
 
 /**
- * @brief 提供手势事件数据类型对象定义。
+ * @brief Defines the gesture event.
  *
  * @since 12
  */
-struct ArkUI_GestureEvent;
+typedef struct ArkUI_GestureEvent ArkUI_GestureEvent;
 
 /**
- * @brief 定义手势事件类型。
+ * @brief Enumerates gesture event types.
  *
  * @since 12
  */
 typedef enum {
-    /** 手势事件触发。 */
+    /** Triggered. */
     GESTURE_EVENT_ACTION_ACCEPT = 0x01,
 
-    /** 手势事件更新。 */
+    /** Updated. */
     GESTURE_EVENT_ACTION_UPDATE = 0x02,
 
-    /** 手势事件结束。 */
+    /** Ended. */
     GESTURE_EVENT_ACTION_END = 0x04,
 
-    /** 手势事件取消。 */
+    /** Canceled. */
     GESTURE_EVENT_ACTION_CANCEL = 0x08,
 } ArkUI_GestureEventActionType;
 
 /**
- * @brief 定义手势事件类型集合
+ * @brief Defines a set of gesture event types.
  *
- * 例：ArkUI_GestureEventActionTypeMask actions = GESTURE_EVENT_ACTION_ACCEPT | GESTURE_EVENT_ACTION_UPDATE;\n
+ * Example: ArkUI_GestureEventActionTypeMask actions = GESTURE_EVENT_ACTION_ACCEPT | GESTURE_EVENT_ACTION_UPDATE;\n
  *
  * @since 12
  */
 typedef uint32_t ArkUI_GestureEventActionTypeMask;
 
 /**
- * @brief 定义手势事件模式
+ * @brief Enumerates gesture event modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 正常手势。 */
+    /** Normal. */
     NORMAL = 0,
 
-    /** 高优先级手势。 */
+    /** High-priority. */
     PRIORITY = 1,
 
-    /** 并发手势。 */
+    /** Parallel. */
     PARALLEL = 2,
 } ArkUI_GesturePriority;
 
 /**
- * @brief 定义手势组事件模式。
+ * @brief Enumerates gesture group modes.
  *
  * @since 12
  */
 typedef enum {
-    /* 顺序手势模式，按照注册顺序识别手势，直到所有手势识别成功。若有识别失败，后续识别均失败。仅有最后一个手势响应结束事件。*/
-    SEQUENCE_GROUP = 0,
+    /* Sequential recognition. Gestures are recognized in the registration sequence until all gestures are recognized
+     * successfully. Once one gesture fails to be recognized, all subsequent gestures fail to be recognized.
+     * Only the last gesture in the gesture group can respond to the end event. */
+    SEQUENTIAL_GROUP = 0,
 
-    /** 并发手势模式，注册的手势同时识别，直到所有手势识别结束，手势识别互相不影响。*/
+    /** Parallel recognition. Registered gestures are recognized concurrently until all gestures are recognized.
+      * The recognition result of each gesture does not affect each other. */
     PARALLEL_GROUP = 1,
 
-    /** 互斥手势模式，注册的手势同时识别，若有一个手势识别成功，则结束手势识别。*/
+    /** Exclusive recognition. Registered gestures are identified concurrently.
+      * If one gesture is successfully recognized, gesture recognition ends. */
     EXCLUSIVE_GROUP = 2,
 } ArkUI_GroupGestureMode;
 
 /**
- * @brief 定义滑动手势方向。
+ * @brief Enumerates gesture directions.
  *
  * @since 12
  */
 typedef enum {
-    /** 所有方向。*/
+    /** All directions. */
     GESTURE_DIRECTION_ALL = 0b1111,
 
-    /** 水平方向。*/
+    /** Horizontal direction. */
     GESTURE_DIRECTION_HORIZONTAL = 0b0011,
 
-    /** 竖直方向。*/
+    /** Vertical direction. */
     GESTURE_DIRECTION_VERTICAL = 0b1100,
 
-    /** 向左方向。*/
+    /** Leftward. */
     GESTURE_DIRECTION_LEFT = 0b0001,
 
-    /** 向右方向。*/
+    /** Rightward. */
     GESTURE_DIRECTION_RIGHT = 0b0010,
 
-    /** 向上方向。*/
+    /** Upward. */
     GESTURE_DIRECTION_UP = 0b0100,
 
-    /** 向下方向。*/
+    /** Downward. */
     GESTURE_DIRECTION_DOWN = 0b1000,
 
-    /** 任何方向都不触发手势事件。*/
+    /** None. */
     GESTURE_DIRECTION_NONE = 0,
 } ArkUI_GestureDirection;
 
 /**
- * @brief 定义滑动手势方向集合。
+ * @brief Defines a set of gesture directions.
  *
- *        例：ArkUI_GestureDirectionMask directions = GESTURE_DIRECTION_LEFT | GESTURE_DIRECTION_RIGHT。\n
- *        directions 表明支持左右水平方向。\n
+ * Example: ArkUI_GestureDirectionMask directions = GESTURE_DIRECTION_LEFT | GESTURE_DIRECTION_RIGHT \n
+ * This example indicates that the leftward and rightward directions are supported. \n
  *
  * @since 12
  */
 typedef uint32_t ArkUI_GestureDirectionMask;
 
 /**
- * @brief 定义手势屏蔽模式
+ * @brief Enumerates gesture masking modes.
  *
  * @since 12
  */
 typedef enum {
-    /** 不屏蔽子组件的手势，按照默认手势识别顺序进行识别。*/
+    /** The gestures of child components are enabled and recognized based on the default gesture recognition sequence.*/
     NORMAL_GESTURE_MASK = 0,
 
-    /** 屏蔽子组件的手势，包括子组件上系统内置的手势。*/
+    /** The gestures of child components are disabled, including the built-in gestures. */
     IGNORE_INTERNAL_GESTURE_MASK,
 } ArkUI_GestureMask;
 
 /**
- * @brief 定义手势类型
+ * @brief Enumerates gesture types.
  *
  * @since 12
  */
 typedef enum {
-    /** 敲击手势。*/
+    /** Tap. */
     TAP_GESTURE = 0,
 
-    /** 长按手势。*/
+    /** Long press. */
     LONG_PRESS_GESTURE,
 
-    /** 拖动手势。*/
+    /** Pan. */
     PAN_GESTURE,
 
-    /** 捏合手势。*/
+    /** Pinch. */
     PINCH_GESTURE,
 
-    /** 旋转手势。*/
+    /** Rotate. */
     ROTATION_GESTURE,
 
-    /** 滑动手势。*/
+    /** Swipe. */
     SWIPE_GESTURE,
 
-    /** 手势组合。*/
+    /** A group of gestures. */
     GROUP_GESTURE,
 } ArkUI_GestureRecognizerType;
 
 /**
- * @brief 定义手势打断结果。
+ * @brief Enumerates gesture interruption results.
  *
  * @since 12
  */
 typedef enum {
-    /** 手势继续。*/
+    /** The gesture recognition process continues. */
     GESTURE_INTERRUPT_RESULT_CONTINUE = 0,
 
-    /** 手势打断。*/
+    /** The gesture recognition process is paused. */
     GESTURE_INTERRUPT_RESULT_REJECT,
 } ArkUI_GestureInterruptResult;
 
 /**
-* @brief 判断是否组件内置手势。
+* @brief Checks whether a gesture is a built-in gesture of the component.
 *
-* @param event 手势打断回调事件。
-* @return true: 系统内置手势；
-*         false: 非系统内置手势。
+* @param event Indicates the pointer to the gesture interruption information.
+* @return Returns <b>true</b> if the gesture is a built-in gesture; returns <b>false</b> otherwise.
+
 * @since 12
 */
 bool OH_ArkUI_GestureInterruptInfo_GetSystemFlag(const ArkUI_GestureInterruptInfo* event);
 
 /**
-* @brief 返回被打断的手势指针。
+* @brief Obtains the pointer to interrupted gesture recognizer.
 *
-* @param event 打断回调事件。
-* @return  被打断的手势指针。
+* @param event Indicates the pointer to the gesture interruption information.
+* @return Returns the pointer to interrupted gesture recognizer.
 * @since 12
 */
 ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI_GestureInterruptInfo* event);
 
 /**
-* @brief 返回打断的手势事件数据。
+* @brief Obtains the pointer to the interrupted gesture event.
 *
-* @param event 打断回调事件。
-* @return  打断的手势事件数据。
+* @param event Indicates the pointer to the gesture interruption information.
+* @return Returns the pointer to the interrupted gesture event.
 * @since 12
 */
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event);
 
 /**
-* @brief 返回手势事件类型。
+* @brief Obtains the gesture event type.
 *
-* @param event 手势事件。
-* @return  手势事件类型。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the gesture event type.
 * @since 12
 */
 ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 返回手势输入。
+* @brief Obtains gesture input.
 *
-* @param event 手势事件。
-* @return  手势事件的原始输入事件。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the pointer to the input event of the gesture event.
 * @since 12
 */
 const ArkUI_UIInputEvent* OH_ArkUI_GestureEvent_GetRawInputEvent(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 返回长按手势定时触发次数。
+* @brief Obtains the number of times that a long press gesture is triggered periodically.
 *
-* @param event 手势事件。
-* @return 长按手势定时触发次数。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the number of times that the long press gesture is triggered periodically.
 * @since 12
 */
 int32_t OH_ArkUI_LongPress_GetRepeatCount(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 滑动手势返回手势主方向速度。
+* @brief Obtains the velocity of a pan gesture along the main axis.
 *
-* @param event 手势事件。
-* @return 当前手势主方向速度，为xy轴方向速度的平方和的算数平方根，单位px/秒。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the velocity of the pan gesture along the main axis, in px/s.
+*         The value is the square root of the sum of the squares of the velocity on the x-axis and y-axis.
 * @since 12
 */
 float OH_ArkUI_PanGesture_GetVelocity(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 滑动手势返回当前手势的x轴方向速度。
+* @brief Obtains the velocity of a pan gesture along the x-axis.
 *
-* @param event 手势事件。
-* @return 当前手势的x轴方向速度，单位px/秒。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the velocity of the pan gesture along the x-axis, in px/s.
 * @since 12
 */
 float OH_ArkUI_PanGesture_GetVelocityX(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 滑动手势返回当前手势的y轴方向速度。
+* @brief Obtains the velocity of a pan gesture along the y-axis.
 *
-* @param event 手势事件。
-* @return 当前手势的y轴方向速度，单位px/秒。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the velocity of the pan gesture along the y-axis, in px/s.
 * @since 12
 */
 float OH_ArkUI_PanGesture_GetVelocityY(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 滑动手势返回当前手势事件x轴相对偏移量。
+* @brief Obtains the relative offset of a pan gesture along the x-axis.
 *
-* @param event 手势事件。
-* @return 当前手势事件x轴相对偏移量，单位为px。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the relative offset of the gesture along the x-axis, in px.
 * @since 12
 */
 float OH_ArkUI_PanGesture_GetOffsetX(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 滑动手势返回当前手势事件y轴相对偏移量。
+* @brief Obtains the relative offset of a pan gesture along the y-axis.
 *
-* @param event 手势事件。
-* @return 当前手势事件y轴相对偏移量，单位为px。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the relative offset of the gesture along the y-axis, in px.
 * @since 12
 */
 float OH_ArkUI_PanGesture_GetOffsetY(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 滑动手势返回当前手势事件角度信息。
+* @brief Obtains the angle information of the swipe gesture.
 *
-*        角度计算方式：滑动手势被识别到后，连接两根手指之间的线被识别为起始线条，随着手指的滑动，手指之间的线条会发生旋转，\n
-*        根据起始线条两端点和当前线条两端点的坐标，使用反正切函数分别计算其相对于水平方向的夹角，\n
-*        最后arctan2(cy2-cy1,cx2-cx1)-arctan2(y2-y1,x2-x1)为旋转的角度。\n
-*        以起始线条为坐标系，顺时针旋转为0到180度，逆时针旋转为-180到0度。\n
+* After a swipe gesture is recognized, a line connecting the two fingers is identified as the initial line.
+* As the fingers swipe, the line between the fingers rotates. \n
+* Based on the coordinates of the initial line's and current line's end points, the arc tangent function is used to
+* calculate the respective included angle of the points relative to the horizontal direction \n
+* by using the following formula: Rotation angle = arctan2(cy2-cy1,cx2-cx1) - arctan2(y2-y1,x2-x1). \n
+* The initial line is used as the coordinate system. Values from 0 to 180 degrees represent clockwise rotation,
+* while values from –180 to 0 degrees represent counterclockwise rotation. \n
 *
-* @param event 手势事件。
-* @return 滑动手势的角度，即两根手指间的线段与水平方向的夹角变化的度数。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the angle of the swipe gesture, which is the result obtained based on the aforementioned formula.
 * @since 12
 */
 float OH_ArkUI_SwipeGesture_GetAngle(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 滑动手势场景中所有手指滑动平均速度。
+* @brief Obtains the average velocity of all fingers used in the swipe gesture.
 *
-* @param event 手势事件。
-* @return 滑动手势速度，即所有手指滑动的平均速度，单位为px/秒。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the average velocity of all fingers used in the swipe gesture, in px/s.
 * @since 12
 */
 float OH_ArkUI_SwipeGesture_GetVelocity(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 旋转手势返回当前手势事件角度信息。
+* @brief Obtains the angle information of a rotation gesture.
 *
-* @param event 手势事件。
-* @return 旋转角度。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the rotation angle.
 * @since 12
 */
 float OH_ArkUI_RotationGesture_GetAngle(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 捏合手势返回当前手势事件缩放信息。
+* @brief Obtains the scale ratio of a pinch gesture.
 *
-* @param event 手势事件。
-* @return 缩放比例。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the scale ratio.
 * @since 12
 */
 float OH_ArkUI_PinchGesture_GetScale(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 捏合手势中心点相对于当前组件元素左上角x轴坐标。
+* @brief Obtains the X coordinate of the center of the pinch gesture, in vp,
+* relative to the upper left corner of the current component.
 *
-* @param event 手势事件。
-* @return 捏合手势中心点相对于当前组件元素左上角x轴坐标，单位为px。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the X coordinate of the center of the pinch gesture, in vp,
+* relative to the upper left corner of the current component.
 * @since 12
 */
 float OH_ArkUI_PinchGesture_GetCenterX(const ArkUI_GestureEvent* event);
 
 /**
-* @brief 捏合手势中心点相对于当前组件元素左上角y轴坐标。
+* @brief Obtains the Y coordinate of the center of the pinch gesture, in vp,
+* relative to the upper left corner of the current component.
 *
-* @param event 手势事件。
-* @return 捏合手势中心点相对于当前组件元素左上角y轴坐标，单位为px。
+* @param event Indicates the pointer to the gesture event.
+* @return Returns the Y coordinate of the center of the pinch gesture, in vp,
+* relative to the upper left corner of the current component.
 * @since 12
 */
 float OH_ArkUI_PinchGesture_GetCenterY(const ArkUI_GestureEvent* event);
 
 /**
- * @brief 手势模块接口集合。
+ * @brief Defines the gesture APIs.
  *
  * @since 12
  */
 typedef struct {
-    /** 结构版本号 = 1。*/
+    /** The struct version is 1. */
     int32_t version;
 
     /**
-    * @brief 创建敲击手势。
+    * @brief Creates a tap gesture.
     *
-    *        1. 支持单击、双击和多次点击事件的识别。\n
-    *        2. 当配置多击时，上一次的最后一根手指抬起和下一次的第一根手指按下的超时时间为300毫秒。\n
-    *        3. 当上次点击的位置与当前点击的位置距离超过60vp等效像素点时，手势识别失败。\n
-    *        4. 当配置多指时，第一根手指按下后300毫秒内未有足够的手指数按下，手势识别失败，\n
-    *           第一根手指抬起后300毫秒内未有足够的手指抬起，手势识别失败。\n
-    *        5. 实际点击手指数超过配置值，手势识别成功。\n
+    *        1. This API is used to trigger a tap gesture with one, two, or more taps. \n
+    *        2. If multi-tap is configured, the timeout interval between a lift and the next tap is 300 ms. \n
+    *        3. If the distance between the last tapped position and the current tapped position exceeds 60 vp,
+    *           gesture recognition fails. \n
+    *        4. If the value is greater than 1, the tap gesture will fail to be recognized when the number of fingers
+    *           touching the screen within 300 ms of the first finger touch is less than the required number, \n
+    *           or when the number of fingers lifted from the screen within 300 ms of the first finger's being lifted
+    *           is less than the required number. \n
+    *        5. When the number of fingers touching the screen exceeds the set value, the gesture can be recognized. \n
     *
-    * @param countNum 识别的连续点击次数。当设置的值小于1或不设置时，会被转化为默认值 1。
-    * @param fingersNum 触发点击的手指数，最小为1指， 最大为10指。当设置小于1的值或不设置时，会被转化为默认值 1。
-    * @return 返回创建的敲击手势指针。
+    * @param countNum Indicates the number of consecutive taps. If the value is less than 1 or is not set,
+    *        the default value <b>1</b> is used.
+    * @param fingersNum Indicates the number of fingers required to trigger a tap. The value ranges
+    *        from 1 to 10. If the value is less than 1 or is not set, the default value <b>1</b> is used.
+    * @return Returns the pointer to the created gesture.
     */
     ArkUI_GestureRecognizer* (*createTapGesture)(int32_t countNum, int32_t fingersNum);
 
     /**
-    * @brief 创建长按手势。
+    * @brief Creates a long press gesture.
     *
-    *        1. 用于触发长按手势事件，触发长按手势的最少手指数为1，最短长按时间为500毫秒。\n
-    *        2. 当组件默认支持可拖拽时，如Text、TextInput、TextArea、HyperLink、Image和RichEditor等组件。\n
-    *           长按手势与拖拽会出现冲突，事件优先级如下：\n
-    *           长按触发时间 < 500ms，长按事件优先拖拽事件响应。\n
-    *           长按触发时间 >= 500ms，拖拽事件优先长按事件响应。\n
-    *        3. 手指按下后若发生超过15px的移动，则判定当前长按手势识别失败。\n
+    *        1. This API is used to trigger a long press gesture, which requires one or more fingers with a minimum
+    *           The value ranges 500 ms hold-down time. \n
+    *        2. In components that support drag actions by default, such as <b><Text></b>, <b><TextInput></b>,
+    *           <b><TextArea></b>, <b><Hyperlink></b>, <b><Image></b>, and <b>RichEditor></b>, the long press gesture \n
+    *           may conflict with the drag action. If this occurs, they are handled as follows: \n
+    *           If the minimum duration of the long press gesture is less than 500 ms, the long press gesture receives
+    *           a higher response priority than the drag action. \n
+    *           If the minimum duration of the long press gesture is greater than or equal to 500 ms,
+    *           the drag action receives a higher response priority than the long press gesture. \n
+    *        3. If a finger moves more than 15 px after being pressed, the gesture recognition fails. \n
     *
-    * @param fingersNum 触发长按的最少手指数，最小为1指， 最大取值为10指。
-    * @param repeatResult 是否连续触发事件回调。
-    * @param durationNum 触发长按的最短时间，单位为毫秒（ms）。设置小于等于0时，按照默认值500处理。
-    * @return 返回创建的敲击手势指针。
+    * @param fingersNum Indicates the minimum number of fingers to trigger a long press gesture.
+    *        The value ranges from 1 to 10.
+    * @param repeatResult Indicates whether to continuously trigger the event callback.
+    * @param durationNum Indicates the minimum hold-down time, in ms.
+    *        If the value is less than or equal to 0, the default value <b>500</b> is used.
+    * @return Returns the pointer to the created gesture.
     */
     ArkUI_GestureRecognizer* (*createLongPressGesture)(int32_t fingersNum, bool repeatResult, int32_t durationNum);
 
     /**
-    * @brief 创建拖动手势。
+    * @brief Creates a pan gesture.
     *
-    *        1. 当滑动的最小距离超过设定的最小值时触发拖动手势事件。\n
-    *        2. Tabs组件滑动与该拖动手势事件同时存在时，可将distanceNum值设为1，使拖动更灵敏，避免造成事件错乱。\n
+    *        1. This API is used to trigger a pan gesture when the movement distance of a finger on the screen exceeds
+    *           the minimum value. \n
+    *        2. If a pan gesture and a tab swipe occur at the same time, set <b>distanceNum</b> to <b>1</b>
+    *           so that the gesture can be more easily recognized. \n
     *
-    * @param fingersNum 用于指定触发拖动的最少手指数，最小为1指，最大取值为10指。当设置的值小于1或不设置时，会被转化为默认值 1。
-    * @param directions 用于指定触发拖动的手势方向，此枚举值支持逻辑与(&)和逻辑或（|）运算。
-    * @param distanceNum 用于指定触发拖动手势事件的最小拖动距离，单位为px。当设定的值小于等于0时，按默认值5px处理。
-    * @return 返回创建的拖动手势指针。
+    * @param fingersNum Indicates the minimum number of fingers to trigger a pan gesture. The value ranges from 1 to 10.
+    *        If the value is less than 1 or is not set, the default value <b>1</b> is used.
+    * @param directions Indicates the pan direction. The value supports the AND (&amp;) and OR (\|) operations.
+    * @param distanceNum Indicates the minimum pan distance to trigger the gesture, in vp. If this parameter is
+    *        set to a value less than or equal to 0, the default value <b>5</b> is used.
+    * @return Returns the pointer to the created gesture.
     */
     ArkUI_GestureRecognizer* (*createPanGesture)(
         int32_t fingersNum, ArkUI_GestureDirectionMask directions, double distanceNum);
 
     /**
-    * @brief 创建捏合手势。
+    * @brief Creates a pinch gesture.
     *
-    *        1. 触发捏合手势的最少手指为2指，最大为5指，最小识别距离为distanceNum 像素点。\n
-    *        2. 触发手势手指可以多于fingersNum数目，但只有先落下的与fingersNum相同数目的手指参与手势计算。\n
+    *        1. This API is used to trigger a pinch gesture, which requires two to five fingers with a minimum 5 vp
+    *           distance between the fingers. \n
+    *        2. While more fingers than the minimum number can be pressed to trigger the gesture, only the first
+    *           fingers of the minimum number participate in gesture calculation. \n
     *
-    * @param fingersNum 触发捏合的最少手指数, 最小为2指，最大为5指。默认值：2。
-    * @param distanceNum 最小识别距离，单位为px。当设置识别距离的值小于等于0时，会被转化为默认值5px处理。
-    * @return 返回创建的手势指针。
+    * @param fingersNum Indicates the minimum number of fingers to trigger a pinch. The value ranges from 2 to 5.
+    *        Default value: <b>2</b>
+    * @param distanceNum Indicates the minimum recognition distance, in px. If this parameter is set to a value less
+    *        than or equal to 0, the default value <b>5</b> is used.
+    * @return Returns the pointer to the created gesture.
     */
     ArkUI_GestureRecognizer* (*createPinchGesture)(int32_t fingersNum, double distanceNum);
 
     /**
-    * @brief 创建旋转手势。
+    * @brief Creates a rotation gesture.
     *
-    *        1. 触发旋转手势的最少手指为2指，最大为5指，最小改变度数为1度。\n
-    *        2. 触发手势手指可以多于fingers数目，但只有先落下的两指参与手势计算。\n
+    *        1. This API is used to trigger a rotation gesture, which requires two to five fingers with a
+    *           minimum 1-degree rotation angle. \n
+    *        2. While more fingers than the minimum number can be pressed to trigger the gesture, only the first
+    *           two fingers participate in gesture calculation. \n
     *
-    * @param fingersNum 触发旋转的最少手指数, 最小为2指，最大为5指。默认值：2。
-    * @param angleNum 触发旋转手势的最小改变度数，单位为deg。默认值：1。当改变度数的值小于等于0或大于360时，会被转化为默认值 1。
-    * @return 返回创建的手势指针。
+    * @param fingersNum Indicates the minimum number of fingers to trigger a rotation. The value ranges from 2 to 5.
+    *        Default value: <b>2</b>
+    * @param angleNum Indicates the minimum degree that can trigger the rotation gesture. Default value: <b>1</b>
+    *        If this parameter is set to a value less than or equal to 0 or greater than 360,
+    *        the default value <b>1</b> is used.
+    * @return Returns the pointer to the created gesture.
     */
     ArkUI_GestureRecognizer* (*createRotationGesture)(int32_t fingersNum, double angleNum);
 
     /**
-    * @brief 创建滑动手势。
+    * @brief Creates a swipe gesture.
     *
-    *        1. 用于触发滑动事件，滑动速度大于speedNum px/s时可识别成功。\n
+    *        This API is used to implement a swipe gesture, which can be recognized when the swipe speed is 100
+    *        vp/s or higher. \n
     *
-    * @param fingersNum 触发滑动的最少手指数，默认为1，最小为1指，最大为10指。
-    * @param directions 触发滑动手势的滑动方向。
-    * @param speedNum 识别滑动的最小速度，单位 px/s。当设置滑动速度的值小于等于0时，会被转化为默认值100px/s。
-    * @return 返回创建的手势指针。
+    * @param fingersNum Indicates the minimum number of fingers to trigger a swipe gesture.
+    *        The value ranges from 1 to 10.
+    * @param directions Indicates the swipe direction.
+    * @param speedNum Indicates the minimum speed of the swipe gesture, in px/s.
+    *        If this parameter is set to a value less than or equal to 0, the default value <b>100</b> is used.
+    * @return Returns the pointer to the created gesture.
     */
     ArkUI_GestureRecognizer* (*createSwipeGesture)(
         int32_t fingersNum, ArkUI_GestureDirectionMask directions, double speedNum);
 
     /**
-    * @brief 创建手势组。
+    * @brief Creates a gesture group.
     *
-    * @param gestureMode 手势组模式。
-    * @return 返回创建的手势组指针。
+    * @param gestureMode Indicates the gesture group mode.
+    * @return Returns the pointer to the created gesture group.
     */
     ArkUI_GestureRecognizer* (*createGroupGesture)(ArkUI_GroupGestureMode gestureMode);
 
     /**
-    * @brief 销毁手势，释放资源。
+    * @brief Disposes a gesture to release resources.
     *
-    * @param recognizer 需要被销毁的手势。
+    * @param recognizer Indicates the pointer to the gesture to dispose.
     */
     void (*dispose)(ArkUI_GestureRecognizer* recognizer);
 
     /**
-    * @brief 手势组增加子手势。
+    * @brief Adds a gesture to a gesture group.
     *
-    * @param group 需要被关联子手势的手势组。
-    * @param child 子手势。
-    * @return 0 - 成功。
-    *         401 - 参数错误。比如添加手势到非手势组对象内。
+    * @param group Indicates the pointer to the gesture group.
+    * @param child Indicates the gesture to be added to the gesture group.
+    * @return Returns <b>0</b> if success.
+    *         Returns <b>401</b> if a parameter exception occurs. Returns 401 if a parameter exception occurs.
     */
     int32_t (*addChildGesture)(ArkUI_GestureRecognizer* group, ArkUI_GestureRecognizer* child);
 
     /**
-    * @brief 删除子手势。
+    * @brief Removes a gesture to a gesture group.
     *
-    * @param group 需要被删除子手势的手势组。
-    * @param child 子手势。
-    * @return 0 - 成功。
-    *         401 - 参数错误。
+    * @param group Indicates the pointer to the gesture group.
+    * @param child Indicates the gesture to be removed to the gesture group.
+    * @return Returns <b>0</b> if success.
+    *         Returns <b>401</b> if a parameter exception occurs.
     */
     int32_t (*removeChildGesture)(ArkUI_GestureRecognizer* group, ArkUI_GestureRecognizer* child);
 
     /**
-    * @brief 创建手势关联回调方法。
+    * @brief Registers a callback for gestures.
     *
-    * @param recognizer 需要被绑定回调事件的各类手势指针。
-    * @param actionTypeMask 需要相应的手势事件类型集合，一次性可以注册多个回调，在回调中区分回调事件类型。
-    *                       例：actionTypeMask = GESTURE_EVENT_ACTION_ACCEPT | GESTURE_EVENT_ACTION_UPDATE;
-    * @param extraParams targetReceiver 回调时传入的上下文数据。
-    * @param targetReceiver 对应注册手势类型的事件回调处理， event 返回手势回调数据。
-    * @return 0 - 成功。
-    *         401 - 参数错误。
+    * @param recognizer Indicates the pointer to the gesture recognizer.
+    * @param actionTypeMask Indicates the set of gesture event types. Multiple callbacks can be registered at once,
+    *        with the callback event types distinguished in the callbacks.
+    *        Example: actionTypeMask = GESTURE_EVENT_ACTION_ACCEPT | GESTURE_EVENT_ACTION_UPDATE;
+    * @param extraParams Indicates the context passed in the <b>targetReceiver</b> callback.
+    * @param targetReceiver Indicates the callback to register for processing the gesture event types.
+    *        <b>event</b> indicates the gesture callback data.
+    * @return Returns <b>0</b> if success.
+    *         Returns <b>401</b> if a parameter exception occurs.
     */
     int32_t (*setGestureEventTarget)(
         ArkUI_GestureRecognizer* recognizer, ArkUI_GestureEventActionTypeMask actionTypeMask, void* extraParams,
         void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParams));
 
     /**
-    * @brief 将手势添加到UI组件。
+    * @brief Adds a gesture to a UI component.
     *
-    * @param node 需要被绑定手势的ARKUI组件。
-    * @param recognizer 绑定此节点的手势。
-    * @param mode 标识此手势的模式（NORMAL_GESTURE， PARALLEL_GESTURE， PRIORITY_GESTURE）。
-    * @param mask 手势屏蔽模式。
-    * @return 0 - 成功。
-    *         401 - 参数错误。
+    * @param node Indicates the UI component to which you want to add the gesture.
+    * @param recognizer Indicates the gesture to be added to the UI component.
+    * @param mode Indicates the gesture event mode. Available options are <b>NORMAL_GESTURE</b>,
+    *        <b>PARALLEL_GESTURE</b>, and <b>PRIORITY_GESTURE</b>.
+    * @param mask Indicates the gesture masking mode.
+    * @return Returns <b>0</b> if success.
+    *         Returns <b>401</b> if a parameter exception occurs.
     */
     int32_t (*addGestureToNode)(
         ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority mode, ArkUI_GestureMask mask);
 
     /**
-    * @brief 在节点中移除手势。
+    * @brief Removes a gesture from a node.
     *
-    * @param node 需要被移除手势的节点。
-    * @param recognizer 需要被移除的手势。
-    * @return 0 - 成功。
-    *         401 - 参数错误。
+    * @param node Indicates the node from which you want to remove the gesture.
+    * @param recognizer Indicates the gesture to be removed.
+    * @return Returns <b>0</b> if success.
+    * Returns <b>401</b> if a parameter exception occurs.
     */
     int32_t (*removeGestureFromNode)(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer);
 
     /**
-    * @brief 设置节点手势打断回调。
+    * @brief Sets a gesture interruption callback for a node.
     *
-    * @param node 需要被设置手势打断回调的ARKUI节点。
-    * @param interrupter 打断回调, info 返回手势打断数据。
-    *                    interrupter 返回 GESTURE_INTERRUPT_RESULT_CONTINUE, 手势正常进行；
-                                     返回 GESTURE_INTERRUPT_RESULT_REJECT 手势打断。
-    * @return 0 - 成功。
-    *         401 - 参数错误。
+    * @param node Indicates the node for which you want to set a gesture interruption callback.
+    * @param interrupter Indicates the gesture interruption callback to set.
+    *        <b>info</b> indicates the gesture interruption data. If <b>interrupter</b> returns
+    *        <b>GESTURE_INTERRUPT_RESULT_CONTINUE</b>, the gesture recognition process continues. If it returns
+    *        <b>GESTURE_INTERRUPT_RESULT_REJECT</b>, the gesture recognition process is paused.
+    * @return Returns <b>0</b> if success.
+    * Returns <b>401</b> if a parameter exception occurs.
     */
     int32_t (*setGestureInterrupterToNode)(
         ArkUI_NodeHandle node, ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
 
     /**
-    * @brief 获取手势类别。
+    * @brief Obtains the type of a gesture.
     *
-    * @param recognizer 手势指针。
-    * @return 手势类型。
+    * @param recognizer Indicates the pointer to the gesture.
+    * @return Returns the gesture type.
     */
     ArkUI_GestureRecognizerType (*getGestureType)(ArkUI_GestureRecognizer* recognizer);
 } ArkUI_NativeGestureAPI_1;
