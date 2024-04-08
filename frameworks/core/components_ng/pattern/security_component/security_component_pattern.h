@@ -112,6 +112,8 @@ private:
     void UnregisterSecurityComponent();
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
+    void DoTriggerOnclick(int32_t result);
+    void TriggerOnclick(int32_t instance_, int32_t result);
 #endif
     std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;

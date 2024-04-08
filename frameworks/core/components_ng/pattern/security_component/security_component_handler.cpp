@@ -494,7 +494,8 @@ int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t& scId)
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t& scId,
-    RefPtr<FrameNode>& node, SecCompClickEvent& event)
+    RefPtr<FrameNode>& node, SecCompClickEvent& event,
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
 {
     std::string componentInfo;
     SecCompType type;
@@ -503,11 +504,17 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
     }
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_RETURN(container, -1);
-    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, event, container->GetToken());
+    sptr<IRemoteObject> token = container->GetToken();
+    if (container->GetParentToken() != nullptr) {
+        token = container->GetParentToken();
+    }
+    return SecCompKit::ReportSecurityComponentClickEvent(scId,
+        componentInfo, event, token, std::move(callback));
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
-    RefPtr<FrameNode>& node, GestureEvent& event)
+    RefPtr<FrameNode>& node, GestureEvent& event,
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
 {
     SecCompClickEvent secEvent;
     secEvent.type = ClickEventType::POINT_EVENT_TYPE;
@@ -525,11 +532,12 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
 #endif
 
-    return ReportSecurityComponentClickEventInner(scId, node, secEvent);
+    return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
-    RefPtr<FrameNode>& node, const KeyEvent& event)
+    RefPtr<FrameNode>& node, const KeyEvent& event,
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
 {
     SecCompClickEvent secEvent;
     secEvent.type = ClickEventType::KEY_EVENT_TYPE;
@@ -542,7 +550,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
-    return ReportSecurityComponentClickEventInner(scId, node, secEvent);
+    return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));
 }
 
 bool SecurityComponentHandler::IsSecurityComponentServiceExist()
