@@ -2411,8 +2411,7 @@ void TextFieldPattern::AutoFillValueChanged()
     auto autoContentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (autoContentType == TextContentType::PERSON_FULL_NAME || autoContentType == TextContentType::PERSON_LAST_NAME ||
-        autoContentType == TextContentType::PERSON_FIRST_NAME) {
+    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END) {
         container->UpdatePopupUIExtension(host);
     }
 }
