@@ -886,6 +886,7 @@ void PipelineContext::FlushBuild()
     }
     FlushOnceVsyncTask();
     isRebuildFinished_ = false;
+    navigationMgr_->FireNavigationUpdateCallback();
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
@@ -2117,7 +2118,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             DumpLog::GetInstance().OutPutBySize();
         }
     } else if (params[0] == "-navigation") {
-        auto navigationDumpMgr = GetNavigationDumpManager();
+        auto navigationDumpMgr = GetNavigationManager();
         if (navigationDumpMgr) {
             navigationDumpMgr->OnDumpInfo();
         }

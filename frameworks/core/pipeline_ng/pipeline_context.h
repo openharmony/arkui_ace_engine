@@ -38,7 +38,7 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
-#include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -658,9 +658,9 @@ public:
         return onceVsyncListener_ != nullptr;
     }
 
-    const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
+    const RefPtr<NavigationManager>& GetNavigationManager() const
     {
-        return navigationDumpMgr_;
+        return navigationMgr_;
     }
 
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
@@ -883,7 +883,7 @@ private:
 
     int32_t preNodeId_ = -1;
 
-    RefPtr<NavigationDumpManager> navigationDumpMgr_ = MakeRefPtr<NavigationDumpManager>();
+    RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
 };
 } // namespace OHOS::Ace::NG
 
