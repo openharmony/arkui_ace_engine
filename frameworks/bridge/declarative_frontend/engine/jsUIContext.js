@@ -373,6 +373,20 @@ class UIContext {
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
         Context.setDynamicDimming(nodePtr, number);
     }
+
+    getCursorController() {
+        if (this.cursorController_ == null) {
+            this.cursorController_ = new CursorController(this.instanceId_);
+        }
+        return this.cursorController_;
+    }
+    
+    getContextMenuController() {
+        if (this.contextMenuController_ == null) {
+            this.contextMenuController_ = new ContextMenuController(this.instanceId_);
+        }
+        return this.contextMenuController_;
+    }
 }
 
 class FocusController {
@@ -397,6 +411,48 @@ class FocusController {
         let result = this.ohos_focusController.requestFocus(value);
         __JSScopeUtil__.restoreInstanceId();
         return result;
+    }
+}
+
+class CursorController {
+    /**
+     * Construct new instance of CursorController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    restoreDefault() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        cursorControl.restoreDefault();
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    
+    setCursor(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        cursorControl.setCursor(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
+class ContextMenuController {
+    /**
+     * Construct new instance of ContextMenuController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 12
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    close() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        ContextMenu.close();
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 
