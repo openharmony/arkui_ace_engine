@@ -150,8 +150,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetParentGlobalOffsetDuringLayout() +
-                          layoutWrapper->GetGeometryNode()->GetFrameOffset() - context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::TOP_CENTER;
 
     auto offsetBase = OffsetF(
