@@ -146,6 +146,21 @@ void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, b
     panVelocity_.UpdateTouchPoint(event.id, transformEvent, end);
 }
 
+void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end)
+{
+    auto pesudoTouchEvent = TouchEvent();
+    pesudoTouchEvent.time = event.time;
+    auto revertAxisValue = event.ConvertToSummationAxisValue(lastAxisEvent_);
+    pesudoTouchEvent.x = revertAxisValue.first;
+    pesudoTouchEvent.y = revertAxisValue.second;
+    panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, end);
+    lastAxisEvent_ = event;
+    if (!end) {
+        lastAxisEvent_.horizontalAxis = pesudoTouchEvent.x;
+        lastAxisEvent_.verticalAxis = pesudoTouchEvent.y;
+    }
+}
+
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     if (!firstInputTime_.has_value()) {
@@ -236,14 +251,15 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     inputEventType_ = InputEventType::AXIS;
+    lastAxisEvent_ = event;
 
+    panVelocity_.Reset(event.id);
     auto pesudoTouchEvent = TouchEvent();
     pesudoTouchEvent.time = event.time;
-    panVelocity_.Reset(event.id);
-    pesudoTouchEvent.x = lastAxisEvent_.horizontalAxis + event.horizontalAxis;
-    pesudoTouchEvent.y = lastAxisEvent_.verticalAxis + event.verticalAxis;
+    auto revertAxisValue = event.ConvertToSummationAxisValue(lastAxisEvent_);
+    pesudoTouchEvent.x = revertAxisValue.first;
+    pesudoTouchEvent.y = revertAxisValue.second;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, false);
-    lastAxisEvent_ = event;
     refereeState_ = RefereeState::DETECTING;
 }
 
@@ -307,11 +323,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives axis end event");
     globalPoint_ = Point(event.x, event.y);
 
-    auto pesudoTouchEvent = TouchEvent();
-    pesudoTouchEvent.time = event.time;
-    pesudoTouchEvent.x = lastAxisEvent_.horizontalAxis + event.horizontalAxis;
-    pesudoTouchEvent.y = lastAxisEvent_.verticalAxis + event.verticalAxis;
-    panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, true);
+    UpdateAxisPointInVelocityTracker(event, true);
     time_ = event.time;
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -428,13 +440,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
 
-    auto pesudoTouchEvent = TouchEvent();
-    pesudoTouchEvent.time = event.time;
-    pesudoTouchEvent.x = lastAxisEvent_.horizontalAxis + event.horizontalAxis;
-    pesudoTouchEvent.y = lastAxisEvent_.verticalAxis + event.verticalAxis;
-    panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, false);
-
-    lastAxisEvent_ = event;
+    UpdateAxisPointInVelocityTracker(event);
     time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
