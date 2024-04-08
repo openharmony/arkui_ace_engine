@@ -15,8 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 
+#include "base/log/ace_scoring_log.h"
+#include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -92,4 +96,80 @@ void JSFontSpan::SetFontSpan(const RefPtr<FontSpan>& fontSpan)
     fontSpan_ = fontSpan;
 }
 
+void JSGestureSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto gestureSpan = Referenced::MakeRefPtr<JSGestureSpan>();
+    gestureSpan->IncRefCount();
+
+    RefPtr<GestureSpan> span;
+    if (args.Length() <= 0) {
+        GestureStyle gestureInfo;
+        span = AceType::MakeRefPtr<GestureSpan>(gestureInfo);
+    } else {
+        span = JSGestureSpan::ParseJSGestureSpan(args);
+    }
+    gestureSpan->gestureSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(gestureSpan));
+}
+
+void JSGestureSpan::Destructor(JSGestureSpan* gestureSpan)
+{
+    if (gestureSpan != nullptr) {
+        gestureSpan->DecRefCount();
+    }
+}
+
+void JSGestureSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSGestureSpan>::Declare("GestureStyle");
+    JSClass<JSGestureSpan>::Bind(globalObj, JSGestureSpan::Constructor, JSGestureSpan::Destructor);
+}
+
+RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args)
+{
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args[0]);
+    GestureStyle gestureInfo;
+
+    auto clickFunc = object->GetProperty("onClick");
+    if (!clickFunc->IsFunction() || clickFunc->IsUndefined()) {
+        gestureInfo.onClick = std::nullopt;
+    } else {
+        auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
+        auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            ACE_SCORING_EVENT("SpanString.onClick");
+            func->Execute(*clickInfo);
+        };
+        auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+        gestureInfo.onClick = std::move(tmpClickFunc);
+    }
+
+    auto longPressFunc = object->GetProperty("onLongPress");
+    if (!longPressFunc->IsFunction() || longPressFunc->IsUndefined()) {
+        gestureInfo.onLongPress = std::nullopt;
+    } else {
+        auto jsOnLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
+        auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsOnLongPressFunc](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            ACE_SCORING_EVENT("SpanString.onLongPress");
+            func->Execute(*longPressInfo);
+        };
+        auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
+        gestureInfo.onLongPress = std::move(tmpLongPressFunc);
+    }
+
+    return AceType::MakeRefPtr<GestureSpan>(gestureInfo);
+}
+
+RefPtr<GestureSpan>& JSGestureSpan::GetGestureSpan()
+{
+    return gestureSpan_;
+}
+
+void JSGestureSpan::SetGestureSpan(const RefPtr<GestureSpan>& gestureSpan)
+{
+    gestureSpan_ = gestureSpan;
+}
 } // namespace OHOS::Ace::Framework
