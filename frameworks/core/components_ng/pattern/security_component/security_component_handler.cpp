@@ -360,7 +360,11 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     buttonInfo.rect_.height_ = rect.Height();
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_RETURN(container, false);
-    buttonInfo.windowId_ = static_cast<int32_t>(container->GetWindowId());
+    uint32_t windId = container->GetWindowId();
+    if (pipeline->IsFocusWindowIdSetted()) {
+        windId = pipeline->GetFocusWindowId();
+    }
+    buttonInfo.windowId_ = static_cast<int32_t>(windId);
     return true;
 }
 
