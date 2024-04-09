@@ -99,6 +99,7 @@ private:
         double GetMainAxisVelocity();
         void UpdateTouchPoint(int32_t id, const TouchEvent& event, bool end);
         void Reset(int32_t id);
+        void ResetAll();
         void SetDirection(int32_t directionType);
 
     private:
