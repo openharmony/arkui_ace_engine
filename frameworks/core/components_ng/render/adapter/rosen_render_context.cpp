@@ -16,6 +16,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 #include <algorithm>
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <memory>

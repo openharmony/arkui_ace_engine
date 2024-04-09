@@ -2391,7 +2391,6 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
 
 void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
 {
-    LOGW("wjh in JsForegroundEffect");
     if (info.Length() == 0) {
         return;
     }
@@ -2400,10 +2399,10 @@ void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
         ParseJsDouble(jsOption->GetProperty("radius"), radius);
     }
-    if(LessNotEqual(0.0, radius)) {
+    if(LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
-    radius = GreatOrEqual(0.0, radius) ? radius : 0.0;
+    radius = GreatOrEqual(radius, 0.0) ? radius : 0.0;
     ViewAbstractModel::GetInstance()->SetForegroundEffect(radius);
 }
 
