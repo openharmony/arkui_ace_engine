@@ -174,7 +174,11 @@ void UIObserverHandler::HandleDrawCommandSendCallBack()
 {
     CHECK_NULL_VOID(drawCommandSendHandleFunc_);
     ACE_LAYOUT_SCOPED_TRACE("drawCommandSend");
-    drawCommandSendHandleFunc_();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([callback = drawCommandSendHandleFunc_] { callback(); }, TaskExecutor::TaskType::JS);
 }
 
 void UIObserverHandler::HandleLayoutDoneCallBack()
