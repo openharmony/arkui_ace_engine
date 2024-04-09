@@ -431,10 +431,7 @@ public:
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
-    void SetCustomKeyboardOption(bool supportAvoidance)
-    {
-        keyboardAvoidance_ = supportAvoidance;
-    }
+    void SetCustomKeyboardOption(bool supportAvoidance);
 
     void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
         RefPtr<FrameNode> customKeyboard);
@@ -482,6 +479,7 @@ public:
         return overlayNode_;
     }
     bool CheckPageNeedAvoidKeyboard() const;
+    void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
 
 private:
     void PopToast(int32_t targetId);

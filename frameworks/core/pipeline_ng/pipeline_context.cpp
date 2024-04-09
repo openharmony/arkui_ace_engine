@@ -65,6 +65,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -1481,8 +1482,8 @@ void PipelineContext::CheckVirtualKeyboardHeight()
     OnVirtualKeyboardHeightChange(keyboardHeight);
 }
 
-void PipelineContext::OnVirtualKeyboardHeightChange(
-    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
 {
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
@@ -1498,6 +1499,54 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     }
 #endif
 
+    if (supportAvoidance) {
+        AvoidanceLogic(keyboardHeight, rsTransaction, safeHeight, supportAvoidance);
+    } else {
+        OriginalAvoidanceLogic(keyboardHeight, rsTransaction);
+    }
+
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
+    const float safeHeight, const bool supportAvoidance)
+{
+    auto func = [this, keyboardHeight, safeHeight, supportAvoidance]() mutable {
+        safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+        keyboardHeight += safeAreaManager_->GetSafeHeight();
+        float positionY = 0.0f;
+        auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+        if (manager) {
+            positionY = static_cast<float>(manager->GetClickPosition().GetY());
+        }
+        if (NearZero(keyboardHeight)) {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (LessOrEqual(positionY, rootHeight_ - keyboardHeight)) {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (positionY > rootHeight_ - keyboardHeight) {
+            safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight) - safeHeight);
+        } else {
+            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        }
+        SyncSafeArea(true);
+        // layout immediately
+        FlushUITasks();
+
+        CHECK_NULL_VOID(manager);
+        manager->ScrollTextFieldToSafeArea();
+        FlushUITasks();
+    };
+    AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
+    Animate(option, option.GetCurve(), func);
+}
+
+void PipelineContext::OriginalAvoidanceLogic(
+    float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
     auto func = [this, keyboardHeight]() mutable {
         safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         if (keyboardHeight > 0) {
@@ -1544,15 +1593,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
-
     AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig_, keyboardHeight);
     Animate(option, option.GetCurve(), func);
-
-#ifdef ENABLE_ROSEN_BACKEND
-    if (rsTransaction) {
-        rsTransaction->Commit();
-    }
-#endif
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
