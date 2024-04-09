@@ -75,6 +75,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
+    isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
+    isModal_ = dialogProp->GetIsModal().value_or(true);
     UpdateSafeArea();
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
@@ -368,7 +370,8 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumn(GridSizeType type)
     return columnNum;
 }
 
-void DialogLayoutAlgorithm::ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog)
+void DialogLayoutAlgorithm::ProcessMaskRect(
+    std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask)
 {
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_VOID(dialogContext);
@@ -386,8 +389,13 @@ void DialogLayoutAlgorithm::ProcessMaskRect(std::optional<DimensionRect> maskRec
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     RectF rect = RectF(offset.GetX().ConvertToPxWithSize(rootWidth), offset.GetY().ConvertToPxWithSize(rootHeight),
         width.ConvertToPxWithSize(rootWidth), height.ConvertToPxWithSize(rootHeight));
-    dialogContext->ClipWithRect(rect);
-    dialogContext->UpdateClipEdge(true);
+    auto isMaskFullScreen =
+        rect == RectF(0.0, 0.0, PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight());
+    auto clipMask = isModal_ && isMask && !isMaskFullScreen;
+    if (!isShowInSubWindow_ && clipMask) {
+        dialogContext->ClipWithRect(rect);
+        dialogContext->UpdateClipEdge(true);
+    }
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion.emplace_back(width, height, offset);
@@ -414,8 +422,8 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto dialogPattern = frameNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
-    if (dialogPattern->GetDialogProperties().maskRect.has_value()) {
-        ProcessMaskRect(dialogPattern->GetDialogProperties().maskRect, frameNode);
+    if (isModal_ && dialogPattern->GetDialogProperties().maskRect.has_value()) {
+        ProcessMaskRect(dialogPattern->GetDialogProperties().maskRect, frameNode, true);
     }
     auto child = children.front();
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
@@ -431,51 +439,14 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
-    if ((!dialogProp->GetIsModal().value_or(true) ||
-            (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) &&
-        !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
+    if ((!isModal_ || isShowInSubWindow_) && !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
         ProcessMaskRect(
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
-    if (!customSize_) {
-        ClipShaderRect(layoutWrapper);
-    }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
-}
-
-void DialogLayoutAlgorithm::ClipShaderRect(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto dialogProp = DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(dialogProp);
-    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
-    CHECK_NULL_VOID(dialogPattern);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty()) {
-        return;
-    }
-    auto child = children.front();
-    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-
-    // clip shadow + content
-    auto isSkip = dialogProp->GetIsModal().value_or(true) && !dialogProp->GetShowInSubWindowValue(false);
-    auto shadow = dialogPattern->GetDialogProperties().shadow;
-    if (shadow.has_value() && !isSkip) {
-        auto offset = shadow.value().GetOffset();
-        auto width = childSize.Width() + std::abs(offset.GetX());
-        auto height = childSize.Height() + std::abs(offset.GetY());
-        auto offsetx = topLeftPoint_.GetX() + std::min(offset.GetX(), 0.0);
-        auto offsety = topLeftPoint_.GetY() + std::min(offset.GetY(), 0.0);
-        auto rect = RectF(offsetx, offsety, width, height);
-        auto dialogContext = frameNode->GetRenderContext();
-        dialogContext->ClipWithRect(rect);
-        dialogContext->UpdateClipEdge(true);
-    }
 }
 
 void DialogLayoutAlgorithm::SetSubWindowHotarea(
