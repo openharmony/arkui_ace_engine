@@ -744,6 +744,7 @@ void TextFieldPattern::HandleFocusEvent()
         } else {
             inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
         }
+        ProcessResponseArea();
     } else {
         StartTwinkling();
     }
@@ -5149,6 +5150,7 @@ void TextFieldPattern::RestorePreInlineStates()
     ApplyNormalTheme();
     ApplyUnderlineTheme();
     ProcessInnerPadding();
+    ProcessResponseArea();
 }
 
 void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
@@ -5991,9 +5993,12 @@ void TextFieldPattern::ProcessResponseArea()
         return;
     }
 
-    if (IsShowUnit()) {
+    if (IsUnderlineMode()) {
         responseArea_ = AceType::MakeRefPtr<UnitResponseArea>(WeakClaim(this), unitNode_);
         responseArea_->InitResponseArea();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 

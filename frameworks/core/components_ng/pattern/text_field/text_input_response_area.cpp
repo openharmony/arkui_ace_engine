@@ -368,7 +368,7 @@ bool UnitResponseArea::IsShowUnit()
     CHECK_NULL_RETURN(pattern, false);
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsShowUnit();
+    return textFieldPattern->IsUnderlineMode();
 } // UnitResponseArea end
 
 void CleanNodeResponseArea::InitResponseArea()
