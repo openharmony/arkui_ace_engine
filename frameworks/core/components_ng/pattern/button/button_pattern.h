@@ -135,7 +135,7 @@ public:
                 .ToString()
                 .c_str());
         json->Put("fontWeight",
-            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str());
         json->Put("fontColor", layoutProperty->GetFontColor()
                                    .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
                                    .ColorToString()
@@ -162,7 +162,7 @@ public:
         auto fontJsValue = JsonUtil::Create(true);
         fontJsValue->Put("size", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
         fontJsValue->Put("weight",
-            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str());
         fontJsValue->Put("family", fontFamily.c_str());
         fontJsValue->Put(
             "style", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
