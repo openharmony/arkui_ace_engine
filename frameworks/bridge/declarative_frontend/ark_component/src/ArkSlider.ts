@@ -84,6 +84,9 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     return this;
   }
   setContentModifier(modifier: ContentModifier<SliderConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, this);

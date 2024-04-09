@@ -10907,6 +10907,9 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
@@ -11811,6 +11814,9 @@ class ArkToggleComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, this);
@@ -12550,6 +12556,9 @@ class ArkRadioComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, this);
@@ -13316,6 +13325,9 @@ class ArkSliderComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, this);
@@ -13667,6 +13679,9 @@ class ArkRatingComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
@@ -13765,6 +13780,9 @@ class ArkCheckboxComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, this);

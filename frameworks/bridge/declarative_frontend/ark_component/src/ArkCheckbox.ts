@@ -85,6 +85,9 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
     return this;
   }
   setContentModifier(modifier: ContentModifier<CheckBoxConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, this);
