@@ -100,6 +100,9 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Home); } },
     { KeyComb(KeyCode::KEY_MOVE_END, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::End); } },
+    { KeyComb(KeyCode::KEY_B, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_B); } },
+    { KeyComb(KeyCode::KEY_I, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_I); } },
+    { KeyComb(KeyCode::KEY_U, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_U); } },
 };
 
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
