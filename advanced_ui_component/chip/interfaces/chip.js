@@ -1036,7 +1036,11 @@ export class ChipComponent extends ViewPU {
             Row.focusable(true);
             Row.colorBlend(ObservedObject.GetRawObject(this.chipBlendColor));
             Row.opacity(this.getChipNodeOpacity());
+            ViewStackProcessor.visualState("normal");
+            Row.overlay(undefined);
+            ViewStackProcessor.visualState("focused");
             Row.overlay({ builder: this.focusOverlay.bind(this) }, { align: Alignment.Center });
+            ViewStackProcessor.visualState();
             Row.onFocus(() => {
                 this.chipNodeOnFocus = true;
             });
@@ -1099,8 +1103,6 @@ export class ChipComponent extends ViewPU {
             Text.textAlign(TextAlign.Center);
             Text.visibility(this.getVisibility());
             Text.draggable(false);
-            ViewStackProcessor.visualState("focused");
-            ViewStackProcessor.visualState();
         }, Text);
         Text.pop();
         this.observeComponentCreation2((k, l) => {
