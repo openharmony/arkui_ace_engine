@@ -139,7 +139,7 @@ enum class FormExcepType {
 
 #ifdef VSYNC_TIMEOUT_CHECK
 enum class VsyncExcepType {
-    VSYNC_TIMEOUT
+    UI_VSYNC_TIMEOUT
 };
 #endif
 
@@ -177,7 +177,7 @@ public:
     static void SendAccessibilityException(AccessibilityExcepType type);
     static void SendFormException(FormExcepType type);
 #ifdef VSYNC_TIMEOUT_CHECK
-    static void SendVsyncException(VsyncExcepType type);
+    static void SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp);
 #endif
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
