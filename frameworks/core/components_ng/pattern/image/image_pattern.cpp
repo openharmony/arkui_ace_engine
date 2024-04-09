@@ -396,7 +396,6 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
     const RectF& dstRect, const ImageSourceInfo& sourceInfo, int32_t frameCount)
 {
-    CHECK_NULL_VOID(canvasImage);
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
 
@@ -670,6 +669,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
             return;
         }
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
+        CHECK_NULL_VOID(pattern->altImage_);
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
