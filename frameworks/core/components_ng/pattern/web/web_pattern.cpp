@@ -3555,6 +3555,10 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        if (!visible && !NearZero(ratio)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "Fiterate not visible when ratio=%{public}f", ratio);
+            return;
+        }
         webPattern->OnVisibleAreaChange(visible);
     };
     std::vector<double> ratioList = {0.0, 1.0};
