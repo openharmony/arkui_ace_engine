@@ -57,10 +57,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMode, DisplayMode, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
+    Dimension GetBarWidth() const;
+    Color GetBarColor() const;
 
 private:
-    Color GetBarColor() const;
-    Dimension GetBarWidth() const;
     std::string GetBarStateString() const;
 };
 } // namespace OHOS::Ace::NG

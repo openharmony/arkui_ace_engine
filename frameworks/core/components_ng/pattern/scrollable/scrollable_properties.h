@@ -88,6 +88,13 @@ struct ScrollFrameResult {
     }
 };
 
+struct ScrollSnapOptions {
+    int32_t snapAlign;
+    int32_t enableSnapToStart;
+    int32_t enableSnapToEnd;
+    std::vector<Dimension> paginationParams;
+};
+
 struct NestedScrollOptions {
     NestedScrollMode forward;
     NestedScrollMode backward;
