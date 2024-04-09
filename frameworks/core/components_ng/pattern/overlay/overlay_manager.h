@@ -480,6 +480,7 @@ public:
     }
     bool CheckPageNeedAvoidKeyboard() const;
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
+    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
 
 private:
     void PopToast(int32_t targetId);

@@ -1434,6 +1434,18 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     rootNode->Clean();
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuWrapperPattern->IsContextMenu() && menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+        auto filterNode = menuWrapperPattern->GetFilterColumnNode();
+        if (filterNode) {
+            SetHasFilter(true);
+            SetFilterColumnNode(filterNode);
+            filterNode->MountToParent(rootNode);
+            ShowFilterAnimation(filterNode);
+            filterNode->MarkModifyDone();
+        }
+    }
     menu->MountToParent(rootNode);
     ShowMenuAnimation(menu);
     menu->MarkModifyDone();
@@ -4806,5 +4818,45 @@ const WeakPtr<UINode>& OverlayManager::GetRootNode() const
 const RefPtr<GroupManager>& OverlayManager::GetGroupManager() const
 {
     return groupManager_;
+}
+
+void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
+{
+    CHECK_NULL_VOID(columnNode);
+
+    auto filterRenderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(filterRenderContext);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    auto maskColor = menuTheme->GetPreviewMenuMaskColor();
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
+    styleOption.colorMode = ThemeColorMode::SYSTEM;
+
+    AnimationOption option;
+    option.SetDuration(menuTheme->GetFilterAnimationDuration());
+    option.SetCurve(Curves::SHARP);
+    option.SetOnFinishEvent([] {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto manager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->SetFilterActive(false);
+    });
+    filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
+    AnimationUtils::Animate(
+        option,
+        [filterRenderContext, styleOption, maskColor]() {
+            CHECK_NULL_VOID(filterRenderContext);
+            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+                filterRenderContext->UpdateBackBlurStyle(styleOption);
+            } else {
+                filterRenderContext->UpdateBackgroundColor(maskColor);
+            }
+        },
+        option.GetOnFinishEvent());
 }
 } // namespace OHOS::Ace::NG

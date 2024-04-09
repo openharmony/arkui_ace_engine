@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
@@ -252,6 +253,16 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+    {
+        filterColumnNode_ = columnNode;
+    }
+
+    RefPtr<FrameNode> GetFilterColumnNode()
+    {
+        return filterColumnNode_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -291,6 +302,7 @@ private:
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
+    RefPtr<FrameNode> filterColumnNode_;
 };
 } // namespace OHOS::Ace::NG
 
