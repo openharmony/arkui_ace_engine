@@ -65,6 +65,8 @@ constexpr Dimension CALIBERATE_Y = 4.0_vp;
 
 constexpr Dimension SELECT_SMALL_PADDING_VP = 4.0_vp;
 
+constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
+
 static std::string ConvertControlSizeToString(ControlSize controlSize)
 {
     std::string result;
@@ -411,6 +413,16 @@ void SelectPattern::SetDisabledStyle()
     CHECK_NULL_VOID(spinnerRenderProperty);
     spinnerRenderProperty->UpdateSvgFillColor(theme->GetDisabledSpinnerColor());
     spinner_->MarkModifyDone();
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(renderContext->GetBackgroundColor()
+                                                 .value_or(theme->GetButtonBackgroundColor())
+                                                 .BlendOpacity(theme->GetDisabledFontColorAlpha()));
+    }
 }
 
 void SelectPattern::SetSelected(int32_t index)
@@ -1295,8 +1307,13 @@ void SelectPattern::ResetParams()
     NG::PaddingProperty paddings;
     paddings.top = std::nullopt;
     paddings.bottom = std::nullopt;
-    paddings.left = NG::CalcLength(SELECT_SMALL_PADDING_VP);
-    paddings.right = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+    if (controlSize_ == ControlSize::SMALL) {
+        paddings.left = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+        paddings.right = NG::CalcLength(SELECT_SMALL_PADDING_VP);
+    } else {
+        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
+        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+    }
     ViewAbstract::SetPadding(paddings);
 }
 
