@@ -3968,8 +3968,13 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
 void OverlayManager::AvoidCustomKeyboard(int32_t targetId, float safeHeight)
 {
     auto it = customKeyboardMap_.find(targetId);
+    if (it == customKeyboardMap_.end()) {
+        return;
+    }
     auto customKeyboard = it->second;
+    CHECK_NULL_VOID(customKeyboard);
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAreaChange(keyboardAvoidance_);
     pattern->SetKeyboardOption(keyboardAvoidance_);
     pattern->SetKeyboardSafeHeight(safeHeight);

@@ -57,12 +57,14 @@ void KeyboardPattern::DumpInfo()
 void KeyboardPattern::OnModifyDone()
 {
     auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     context->AddOnAreaChangeNode(GetHost()->GetId());
 }
 
 void KeyboardPattern::OnAreaChangedInner()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto parentGlobal = host->GetTransformRectRelativeToWindow();
     auto customHeight = parentGlobal.Height();
     if (NearEqual(customHeight, keyboardHeight_)) {
@@ -72,6 +74,7 @@ void KeyboardPattern::OnAreaChangedInner()
     // Check that the effective height of the keyboard is captured
     if (std::abs(customHeight) > boundaryHeight) {
         auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_);
     }
@@ -82,9 +85,11 @@ void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
 {
     if (keyboardAvoidance) {
         auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto parentGlobal = host->GetTransformRectRelativeToWindow();
         auto keyboardHeight = parentGlobal.Height();
         auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, keyboardHeight);
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_);
     }
