@@ -341,35 +341,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperFlex001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperLayoutAlgorithmLayout001
- * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_TRUE(IsEqual(indicatorNode->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(232.0, 800.0)));
-}
-
-/**
- * @tc.name: SwiperLayoutAlgorithmLayout002
- * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_TRUE(IsEqual(indicatorNode->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(464.0, 400.0)));
-}
-
-/**
  * @tc.name: SwiperLayoutAlgorithmLayout003
  * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
  * @tc.type: FUNC
