@@ -909,6 +909,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
                 TaskExecutor::TaskType::JS);
         };
 
+        CleanPageOverlay();
         pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
