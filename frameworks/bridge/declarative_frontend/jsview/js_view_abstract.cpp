@@ -2396,17 +2396,13 @@ void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
     }
     double radius = 0.0;
     if (info[0]->IsObject()) {
-        LOGE("f00573291 JsForegroundEffect1 radius: %{public}f", radius);
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
         ParseJsDouble(jsOption->GetProperty("radius"), radius);
-        LOGE("f00573291 JsForegroundEffect2 radius: %{public}f", radius);
     }
     if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
-        LOGE("f00573291 JsForegroundEffect3 radius: %{public}f", radius);
     }
     radius = GreatOrEqual(radius, 0.0) ? radius : 0.0;
-    LOGE("f00573291 JsForegroundEffect4 radius: %{public}f", radius);
     ViewAbstractModel::GetInstance()->SetForegroundEffect(radius);
 }
 
