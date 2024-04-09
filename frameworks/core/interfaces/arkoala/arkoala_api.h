@@ -1187,6 +1187,8 @@ struct ArkUICommonModifier {
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
+    void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options);
+    void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
