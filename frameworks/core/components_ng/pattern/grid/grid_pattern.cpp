@@ -1551,6 +1551,19 @@ bool GridPattern::OutBoundaryCallback()
     return IsOutOfBoundary();
 }
 
+void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
+{
+    const auto& info = gridLayoutInfo_;
+    float disToBot = info.GetDistanceToBottom(info.lastMainSize_, info.totalHeightOfItemsInView_, GetMainGap());
+    if (!info.offsetEnd_) {
+        offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
+    } else if (Negative(delta)) {
+        offset.end = delta;
+    } else {
+        offset.end = std::min(static_cast<float>(delta), -disToBot);
+    }
+}
+
 OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
@@ -1568,21 +1581,13 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
         }
     }
     if (UseIrregularLayout()) {
-        const auto& info = gridLayoutInfo_;
-        float disToBot = info.GetDistanceToBottom(info.lastMainSize_, info.totalHeightOfItemsInView_, GetMainGap());
-        if (!info.offsetEnd_) {
-            offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
-        } else if (Negative(delta)) {
-            offset.end = delta;
-        } else {
-            offset.end = std::min(static_cast<float>(delta), -disToBot);
-        }
+        GetEndOverScrollIrregular(offset, static_cast<float>(delta));
         return offset;
     }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
         float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
-        if (GreatNotEqual(
-                GetMainContentSize(), gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
+        if (GreatNotEqual(GetMainContentSize(),
+            gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
             endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
         }
         float newEndPos = endPos + delta;

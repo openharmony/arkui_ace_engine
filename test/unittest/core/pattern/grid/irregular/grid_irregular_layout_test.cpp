@@ -1463,7 +1463,6 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo8());
         model.SetColumnsGap(Dimension { 5.0f });
-        // model.SetRowsGap(Dimension { 1.0f });
         CreateFixedItem(7);
         model.SetEdgeEffect(EdgeEffect::NONE, true);
     });

@@ -156,6 +156,7 @@ public:
     }
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
     bool OutBoundaryCallback() override;
 

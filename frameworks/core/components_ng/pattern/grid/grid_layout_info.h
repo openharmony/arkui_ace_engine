@@ -234,7 +234,7 @@ struct GridLayoutInfo {
      * @param mainSize of the viewport.
      * @param heightInView total height of items inside the viewport.
      * @param mainGap gap between lines along the main axis.
-     * @return The distance. Positive when content's end is below viewport. Return [mainSize] if last line is not in viewport.
+     * @return Positive when content's end is below viewport. Return [mainSize] if last line is not in viewport.
      */
     float GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const;
 
