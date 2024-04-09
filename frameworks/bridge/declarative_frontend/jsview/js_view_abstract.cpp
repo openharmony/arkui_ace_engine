@@ -2399,7 +2399,7 @@ void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
         ParseJsDouble(jsOption->GetProperty("radius"), radius);
     }
-    if(LessNotEqual(radius, 0.0)) {
+    if (LessNotEqual(radius, 0.0)) {
         radius = 0.0;
     }
     radius = GreatOrEqual(radius, 0.0) ? radius : 0.0;
