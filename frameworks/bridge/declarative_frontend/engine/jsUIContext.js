@@ -340,6 +340,9 @@ class UIContext {
     getFrameNodeById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        if (!nodePtr) {
+            return null;
+        }
         let xNode = globalThis.requireNapi('arkui.node');
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
@@ -387,6 +390,9 @@ class UIContext {
     setDynamicDimming(id, number) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        if (!nodePtr) {
+            return;
+        }
         Context.setDynamicDimming(nodePtr, number);
     }
 
