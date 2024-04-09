@@ -169,7 +169,7 @@ constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 3;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 int64_t last_height_ = 0L;
 int64_t last_width_ = 0L;
-bool dragWindowFlag = false;
+bool g_dragWindowFlag = false;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
@@ -2850,12 +2850,12 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
         case WindowSizeChangeReason::DRAG_END: {
-            dragWindowFlag = true;
+            g_dragWindowFlag = true;
             WindowDrag(width, height);
             break;
         }
         default:
-            dragWindowFlag = false;
+            g_dragWindowFlag = false;
             last_height_ = 0;
             last_width_ = 0;
             break;
@@ -2872,10 +2872,9 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
         last_height_ = height;
         last_width_ = width;
     }
-    if (!GetPendingSizeStatus() && dragWindowFlag) {
+    if (!GetPendingSizeStatus() && g_dragWindowFlag) {
         int64_t pre_height = height - last_height_;
         int64_t pre_width = width - last_width_;
-        TAG_LOGI(AceLogTag::ACE_WEB, "pre_height = %{public}ld, pre_width = %{public}ld", pre_height, pre_width);
         delegate_->DragResize(width, height, pre_height, pre_width);
         last_height_ = height;
         last_width_ = width;
