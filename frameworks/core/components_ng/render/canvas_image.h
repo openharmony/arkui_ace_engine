@@ -30,8 +30,13 @@
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
 struct ImageColorFilter {
-    std::shared_ptr<std::vector<float>> colorFilterMatrix_ = nullptr;
-    RefPtr<DrawingColorFilter> colorFilterDrawing_ = nullptr;
+    std::shared_ptr<std::vector<float>> colorFilterMatrix_;
+    RefPtr<DrawingColorFilter> colorFilterDrawing_;
+    void Reset()
+    {
+        colorFilterMatrix_.reset();
+        colorFilterDrawing_.Reset();
+    }
 };
 struct ImagePaintConfig {
     RectF srcRect_;
