@@ -3804,6 +3804,9 @@ class UICommonEvent {
 }
 
 function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
