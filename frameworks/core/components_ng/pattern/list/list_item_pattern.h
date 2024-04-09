@@ -229,6 +229,7 @@ public:
 
     bool GetLayouted() const;
     float GetEstimateHeight(float estimateHeight, Axis axis) const;
+    bool ClickJudge(const PointF& localPoint);
 
 protected:
     void OnModifyDone() override;
