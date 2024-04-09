@@ -913,6 +913,11 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         target->UpdateWordBreak(source->GetWordBreakValue(WordBreak::BREAK_WORD));
         target->AddPropertyInfo(PropertyInfo::WORD_BREAK);
     }
+
+    if (source->HasLineBreakStrategy()) {
+        target->UpdateLineBreakStrategy(source->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
+        target->AddPropertyInfo(PropertyInfo::LINE_BREAK_STRATEGY);
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
@@ -1352,6 +1357,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
                     Dimension(lm.size.Height()).ConvertToVp() },
                 .textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START)),
                 .wordBreak = static_cast<int32_t>((*it)->GetWordBreakValue(WordBreak::BREAK_WORD)),
+                .lineBreakStrategy = static_cast<int32_t>((*it)->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY)),
                 .range = { paraStart, (*it)->GetSpanItem()->position },
             });
             paraStart = (*it)->GetSpanItem()->position;
@@ -1454,6 +1460,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateTextAlign(style.textAlign.value_or(TextAlign::START));
     spanNode->UpdateWordBreak(style.wordBreak.value_or(WordBreak::BREAK_WORD));
+    spanNode->UpdateLineBreakStrategy(style.lineBreakStrategy.value_or(LineBreakStrategy::GREEDY));
     if (style.leadingMargin.has_value()) {
         spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
         spanNode->UpdateLeadingMargin(*style.leadingMargin);
@@ -2998,6 +3005,7 @@ void RichEditorPattern::ResetFirstNodeStyle()
         if (firstNode) {
             firstNode->ResetTextAlign();
             firstNode->ResetWordBreak();
+            firstNode->ResetLineBreakStrategy();
             firstNode->ResetLeadingMargin();
             tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }

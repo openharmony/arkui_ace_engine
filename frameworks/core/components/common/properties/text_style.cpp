@@ -39,7 +39,7 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            textDecorationColor_ == rhs.textDecorationColor_ && textCase_ == rhs.textCase_ &&
            baselineOffset_ == rhs.baselineOffset_ && adaptHeight_ == rhs.adaptHeight_ &&
            textIndent_ == rhs.textIndent_ && verticalAlign_ == rhs.verticalAlign_ && wordSpacing_ == rhs.wordSpacing_ &&
-           ellipsisMode_ == rhs.ellipsisMode_;
+           ellipsisMode_ == rhs.ellipsisMode_ && lineBreakStrategy_ == rhs.lineBreakStrategy_;
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const

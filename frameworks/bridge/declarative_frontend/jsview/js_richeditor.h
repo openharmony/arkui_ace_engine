@@ -158,6 +158,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
     struct UpdateSpanStyle updateSpanStyle_;
     struct UpdateSpanStyle typingStyle_;
+    static void ParseLineBreakStrategyParagraphStyle(
+        const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

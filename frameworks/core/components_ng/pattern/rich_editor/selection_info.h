@@ -82,6 +82,7 @@ struct TextStyleResult {
     std::string decorationColor;
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
+    int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
     float leadingMarginSize[2] = { 0.0, 0.0 };
 };
 
@@ -175,6 +176,7 @@ struct ParagraphInfo {
     float leadingMarginSize[2] = { 0.0, 0.0 };
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
+    int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
 
     std::pair<int32_t, int32_t> range;
 };

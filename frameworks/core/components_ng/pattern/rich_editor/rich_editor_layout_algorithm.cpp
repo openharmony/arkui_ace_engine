@@ -266,6 +266,9 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     if (lineStyle->propWordBreak) {
         style.wordBreak = *(lineStyle->propWordBreak);
     }
+    if (lineStyle->propLineBreakStrategy) {
+        style.lineBreakStrategy = *(lineStyle->propLineBreakStrategy);
+    }
     if (lineStyle->propTextIndent) {
         style.leadingMargin = std::make_optional<LeadingMargin>();
         style.leadingMargin->size = SizeF(lineStyle->propTextIndent->ConvertToPx(), 0.0f);
