@@ -8376,16 +8376,17 @@ bool JSViewAbstract::CheckLength(
 // obscured means that the developer calls the component to be private style.
 void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined()) {
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined() || arg->IsNull()) {
         std::vector<ObscuredReasons> reasons(0);
         ViewAbstractModel::GetInstance()->SetObscured(reasons);
         return;
     }
-    if (!info[0]->IsArray()) {
+    if (!arg->IsArray()) {
         return;
     }
 
-    auto obscuredArray = JSRef<JSArray>::Cast(info[0]);
+    auto obscuredArray = JSRef<JSArray>::Cast(arg);
     size_t size = obscuredArray->Length();
     std::vector<ObscuredReasons> reasons(size);
     reasons.clear();
