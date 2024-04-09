@@ -58,6 +58,7 @@ RadioModifier::RadioModifier()
     isOnAnimationFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     isCheck_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
     uiStatus_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
@@ -70,6 +71,7 @@ RadioModifier::RadioModifier()
 
     AttachProperty(enabled_);
     AttachProperty(isCheck_);
+    AttachProperty(isFocused_);
     AttachProperty(uiStatus_);
     AttachProperty(offset_);
     AttachProperty(size_);
@@ -213,6 +215,7 @@ void RadioModifier::SetBoardColor(LinearColor color, int32_t duratuion, const Re
 void RadioModifier::PaintRadio(
     RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& contentOffset) const
 {
+    DrawFocusBoard(canvas, contentSize, contentOffset);
     DrawTouchAndHoverBoard(canvas, contentSize, contentOffset);
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
     float centerX = contentOffset.GetX() + outCircleRadius;
@@ -369,6 +372,30 @@ void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& conten
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius);
+    canvas.DetachBrush();
+}
+
+void RadioModifier::DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
+{
+    float outCircleRadius = contentSize.Width() / CALC_RADIUS;
+    float centerX = outCircleRadius + offset.GetX();
+    float centerY = outCircleRadius + offset.GetY();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    Dimension widthSize = radioTheme->GetSizeFocusBg();
+    Color color = radioTheme->GetFocusedBgColor();
+    RSBrush brush;
+    if (isFocused_->Get()) {
+        brush.SetColor(ToRSColor(color));
+    } else {
+        brush.SetColor(ToRSColor(Color::TRANSPARENT));
+    }
+    brush.SetAntiAlias(true);
+    outCircleRadius += widthSize.ConvertToPx();
     canvas.AttachBrush(brush);
     canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius);
     canvas.DetachBrush();
