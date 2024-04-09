@@ -393,6 +393,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        actuator->isOnBeforeLiftingAnimation = false;
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
@@ -539,9 +540,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             }
             auto actuator = weak.Upgrade();
             CHECK_NULL_VOID(actuator);
-            CreateGatherNode(actuator);
-            DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
-            DragAnimationHelper::PlayNodeAnimationBeforeLifting(frameNode);
+            auto longPressRecognizer = actuator->longPressRecognizer_;
+            if (longPressRecognizer && longPressRecognizer->GetGestureDisposal() != GestureDisposal::REJECT) {
+                CreateGatherNode(actuator);
+                actuator->isOnBeforeLiftingAnimation = true;
+                DragAnimationHelper::PlayGatherAnimationBeforeLifting(actuator);
+                DragAnimationHelper::PlayNodeAnimationBeforeLifting(frameNode);
+            } else {
+                actuator->isOnBeforeLiftingAnimation = false;
+            }
         };
 
         longPressRecognizer_->SetThumbnailCallback(std::move(callback));
@@ -553,6 +560,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->HandleTouchUpEvent();
         } else if (info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
             actuator->HandleTouchCancelEvent();
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
+            actuator->HandleTouchMoveEvent();
         }
     };
     auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -1582,6 +1591,21 @@ void DragEventActuator::HandleTouchCancelEvent()
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetHasGatherNode(false);
+}
+
+void DragEventActuator::HandleTouchMoveEvent()
+{
+    if (longPressRecognizer_ && isOnBeforeLiftingAnimation &&
+        longPressRecognizer_->GetGestureDisposal() == GestureDisposal::REJECT) {
+        SetGatherNode(nullptr);
+        ClearGatherNodeChildrenInfo();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto manager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemoveGatherNodeWithAnimation();
+        isOnBeforeLiftingAnimation = false;
+    }
 }
 
 void DragEventActuator::SetGatherNode(const RefPtr<FrameNode>& gatherNode)
