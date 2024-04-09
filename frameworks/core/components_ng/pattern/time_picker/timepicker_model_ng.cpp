@@ -228,6 +228,22 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
 }
 
+void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
+    ZeroPrefixType& minuteType, ZeroPrefixType& secondType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetPrefixHour(hourType);
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, static_cast<int32_t>(hourType));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute, static_cast<int32_t>(minuteType));
+    if (timePickerRowPattern->GetHasSecond()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond, static_cast<int32_t>(secondType));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond, static_cast<int32_t>(ZeroPrefixType::OFF));
+    }
+}
+
 void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled);

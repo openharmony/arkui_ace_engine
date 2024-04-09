@@ -46,6 +46,11 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const char TIMEPICKER_OPTIONS_HOUR[] = "hour";
+const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
+const char TIMEPICKER_OPTIONS_SECOND[] = "second";
+const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
+const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
 } // namespace
 
 std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
@@ -1117,6 +1122,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
+    JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1137,6 +1143,43 @@ void JSTimePicker::Loop(bool isLoop)
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+}
+
+void JSTimePicker::DateTimeOptions(const JSCallbackInfo& info)
+{
+    JSRef<JSObject> paramObject;
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    ZeroPrefixType minuteType = ZeroPrefixType::AUTO;
+    ZeroPrefixType secondType = ZeroPrefixType::AUTO;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto hourValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_HOUR);
+        if (hourValue->IsString()) {
+            std::string hour = hourValue->ToString();
+            if (hour == TIMEPICKER_OPTIONS_TWO_DIGIT_VAL) {
+                hourType = ZeroPrefixType::SHOW;
+            } else if (hour == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+                hourType = ZeroPrefixType::HIDE;
+            }
+        }
+        auto minuteValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_MINUTE);
+        if (minuteValue->IsString()) {
+            minuteType = ZeroPrefixType::SHOW;
+            std::string minute = minuteValue->ToString();
+            if (minute == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+                minuteType = ZeroPrefixType::HIDE;
+            }
+        }
+        auto secondValue = paramObject->GetProperty(TIMEPICKER_OPTIONS_SECOND);
+        if (secondValue->IsString()) {
+            secondType = ZeroPrefixType::SHOW;
+            std::string second = secondValue->ToString();
+            if (second == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+                secondType = ZeroPrefixType::HIDE;
+            }
+        }
+    }
+    TimePickerModel::GetInstance()->SetDateTimeOptions(hourType, minuteType, secondType);
 }
 
 void JSTimePicker::PickerBackgroundColor(const JSCallbackInfo& info)
