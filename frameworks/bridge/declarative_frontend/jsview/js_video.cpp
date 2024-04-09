@@ -85,15 +85,18 @@ void JSVideo::Create(const JSCallbackInfo& info)
     VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
 
     std::string previewUri;
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(previewUriValue, bundleName, moduleName);
     if (previewUriValue->IsUndefined() || previewUriValue->IsNull()) {
         // When it is undefined, just set the empty image.
-        VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
+        VideoModel::GetInstance()->SetPosterSourceInfo(previewUri, "", "");
         return;
     }
     auto noPixMap = ParseJsMedia(previewUriValue, previewUri);
     if (noPixMap) {
         // Src is a string or resource
-        VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
+        VideoModel::GetInstance()->SetPosterSourceInfo(previewUri, bundleName, moduleName);
     } else {
         // Src is a pixelmap.
 #if defined(PIXEL_MAP_SUPPORTED)
