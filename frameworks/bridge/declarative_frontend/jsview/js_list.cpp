@@ -679,11 +679,15 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::SetFadingEdge(bool fadingEdge)
+{
+    ListModel::GetInstance()->SetFadingEdge(fadingEdge);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
     JSClass<JSList>::StaticMethod("create", &JSList::Create);
-
     JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
     JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
     JSClass<JSList>::StaticMethod("clip", &JSScrollable::JsClip);
@@ -707,7 +711,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
-
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
@@ -719,7 +722,19 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onScrollVisibleContentChange", &JSList::ScrollVisibleContentChangeCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
     JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
+    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
+    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
+    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
+    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
+    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
+    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSList>::StaticMethod("fadingEdge", &JSList::SetFadingEdge);
+    BindInteractableViewMethods();
+    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
+}
 
+void JSList::BindInteractableViewMethods()
+{
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -727,15 +742,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-
-    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
-    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
-    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
-    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
-    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
-    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-
-    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSListScroller::JSBind(BindingTarget globalObj)

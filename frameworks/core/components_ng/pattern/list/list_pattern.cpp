@@ -41,6 +41,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -50,6 +51,8 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
+constexpr float LIST_START_MAIN_POS = 0.0f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -90,6 +93,16 @@ void ListPattern::OnModifyDone()
     SetAccessibilityAction();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+    auto conlist = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(conlist);
+    auto listTheme = conlist->GetTheme<ListTheme>();
+    CHECK_NULL_VOID(listTheme);
+    auto listThemeFadingEdge = listTheme->GetFadingEdge();
+    isFadingEdge_ = listLayoutProperty->GetFadingEdge().value_or(listThemeFadingEdge);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && isFadingEdge_) {
+        CreateAnalyzerOverlay(host);
     }
 }
 
@@ -296,6 +309,35 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
     return 0.0f;
 }
 
+void ListPattern::CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode)
+{
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto uiNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() {
+                return AceType::MakeRefPtr<LinearLayoutPattern>(true);
+            });
+        return uiNode;
+    };
+    auto overlayNode = AceType::DynamicCast<FrameNode>(builderFunc());
+    CHECK_NULL_VOID(overlayNode);
+    listNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(listNode)));
+    overlayNode->SetActive(true);
+    overlayNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    auto overlayProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(overlayProperty);
+    overlayProperty->SetIsOverlayNode(true);
+    overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    overlayProperty->UpdateAlignment(Alignment::CENTER);
+    auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("0px"));
+    auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("0px"));
+    overlayProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
 {
     auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
@@ -325,7 +367,36 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
+
+    UpdateFadingEdge(paint);
     return paint;
+}
+
+void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
+{
+    if (!isFadingEdge_ || LIST_START_MAIN_POS == contentMainSize_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = host->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto overlayRenderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(overlayRenderContext);
+    if (Negative(startMainPos_) || GreatNotEqual(endMainPos_, contentMainSize_)) {
+        auto isTopEdgeFadingUpdate = isTopEdgeFading_ != (startMainPos_ < LIST_START_MAIN_POS);
+        auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != (endMainPos_ > contentMainSize_);
+        if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate) {
+            auto isFadingTop = startMainPos_ < LIST_START_MAIN_POS;
+            auto isFadingBottom = endMainPos_ > contentMainSize_;
+            auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
+                std::abs(contentMainSize_ - LIST_START_MAIN_POS);
+            paint->SetOverlayRenderContext(overlayRenderContext);
+            paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading);
+        }
+    }
+    isTopEdgeFading_ = (startMainPos_ < LIST_START_MAIN_POS);
+    isLowerEdgeFading_ = (endMainPos_ > contentMainSize_);
 }
 
 bool ListPattern::UpdateStartListItemIndex()

@@ -46,6 +46,8 @@ public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
     ~ListPattern() override = default;
 
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode);
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -322,6 +324,11 @@ private:
     bool UpdateEndListItemIndex();
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
+
+    void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
+    bool isFadingEdge_ = false;
+    bool isTopEdgeFading_ = false;
+    bool isLowerEdgeFading_ = false;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;

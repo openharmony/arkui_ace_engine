@@ -632,6 +632,16 @@ void ListModelNG::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnim
     pattern->SetChainAnimationOptions(options);
 }
 
+void ListModelNG::SetFadingEdge(bool fadingEdge)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, FadingEdge, fadingEdge);
+}
+
+void ListModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, FadingEdge, fadingEdge, frameNode);
+}
+
 void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
     CHECK_NULL_VOID(frameNode);
