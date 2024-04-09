@@ -111,6 +111,7 @@ public:
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void ReleaseRenderer();
     void SetVisibleChange(bool isVisible);
+    void SetObscured(bool isObscured);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);

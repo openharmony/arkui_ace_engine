@@ -92,6 +92,8 @@ void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& f
 
 void FormManagerDelegate::SetVisibleChange(bool isVisible) {}
 
+void FormManagerDelegate::SetObscured(bool isObscured) {}
+
 #if OHOS_STANDARD_SYSTEM
 bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& cardName, AppExecFwk::FormInfo& formInfo)

@@ -51,12 +51,14 @@ public:
 
     virtual void DispatchSurfaceChangeEvent(float width, float height) = 0;
     virtual void SetVisibleChange(bool isVisible) = 0;
+    virtual void SetObscured(bool isObscured) = 0;
 
     enum Message : uint32_t {
         DISPATCH_POINTER_EVENT = 1,
         SET_ALLOW_UPDATE,
         DISPATCH_SURFACE_CHANGE_EVENT,
         SET_VISIBLE_CHANGE,
+        SET_OBSCURED,
     };
 };
 }  // namespace Ace

@@ -110,6 +110,8 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
         HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
     }
+    HILOG_INFO("ChangeSensitiveNodes: %{public}s", obscurationMode_ ? "true" : "false");
+    uiContent_->ChangeSensitiveNodes(obscurationMode_);
     uiContent_->Foreground();
 }
 
@@ -128,6 +130,7 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
     borderWidth_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f);
+    obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
 }
 
 void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
