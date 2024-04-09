@@ -194,7 +194,7 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     private mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
-        if ((typeof item == "object") && Reflect.has(item as Object, "__is_observed")) {
+        if (ObservedObject.IsObservedObject(item)) {
             return new __RepeatItemDeep(item as T, index);
         } else {
             return new __RepeatItem(this.owningView_, item, index);

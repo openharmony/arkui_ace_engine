@@ -34,6 +34,17 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
     }
 }
 
+// find the nearest FrameNode parent
+RefPtr<FrameNode> GetParentFrameNode(const RefPtr<UINode>& node)
+{
+    for (auto parent = node; parent; parent = parent->GetParent()) {
+        if (auto frameNode = AceType::DynamicCast<FrameNode>(parent)) {
+            return frameNode;
+        }
+    }
+    return nullptr;
+}
+
 } // namespace
 
 RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
@@ -144,12 +155,8 @@ void ForEachNode::CompareAndUpdateChildren()
 
     tempChildren_.clear();
 
-    // find the nearest FrameNode parent
-    for (auto parent = GetParent(); parent; parent = parent->GetParent()) {
-        if (auto frameNode = AceType::DynamicCast<FrameNode>(parent)) {
-            frameNode->ChildrenUpdatedFrom(0);
-            break;
-        }
+    if (auto frameNode = GetParentFrameNode(GetParent())) {
+        frameNode->ChildrenUpdatedFrom(0);
     }
 }
 
@@ -165,7 +172,7 @@ void ForEachNode::FlushUpdateAndMarkDirty()
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-// RepeatNode only. TBD move to repeat_node.cpp
+// RepeatNode only
 void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
 {
     ACE_SCOPED_TRACE("ForEachNode::FinishRepeatRender");
@@ -199,12 +206,8 @@ void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
     tempChildren_.clear();
     tempChildrenOfRepeat_.clear();
 
-    // find the nearest FrameNode parent
-    for (auto parent = GetParent(); parent; parent = parent->GetParent()) {
-        if (auto frameNode = AceType::DynamicCast<FrameNode>(parent)) {
-            frameNode->ChildrenUpdatedFrom(0);
-            break;
-        }
+    if (auto frameNode = GetParentFrameNode(GetParent())) {
+        frameNode->ChildrenUpdatedFrom(0);
     }
 
     LOGE("ForEachNode::FinishRepeatRender END");
