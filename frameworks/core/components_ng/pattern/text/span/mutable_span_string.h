@@ -24,14 +24,18 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace {
+enum class AroundImage {
+    AFTER = 0,
+    BEFORE,
+    NONE
+};
 
 class ACE_EXPORT MutableSpanString : public SpanString {
     DECLARE_ACE_TYPE(MutableSpanString, SpanString);
 
 public:
     explicit MutableSpanString(const std::string& text) : SpanString(text) {}
-    MutableSpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans)
-        : SpanString(text, spans) {}
+    explicit MutableSpanString(const NG::ImageSpanOptions& options) : SpanString(options) {}
     void ReplaceString(int32_t start, int32_t length, const std::string& other);
     void InsertString(int32_t start, const std::string& other);
     void RemoveString(int32_t start, int32_t length);
@@ -47,14 +51,26 @@ private:
     void KeepSpansOrder();
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
+    void ApplyInsertSpanStringToSpans(int32_t start, const RefPtr<SpanString>& spanString);
+    void ApplyInsertSpanStringToSpanBase(int32_t start, const RefPtr<SpanString>& spanString);
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
     bool InsertUseFrontStyle(int32_t start);
+    void UpdateSpanAndSpanMapAfterInsertSpanString(int32_t start, int32_t offset);
     void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);
     void UpdateSpansWithOffset(int32_t start, int32_t offset);
     void UpdateSpanMapWithOffset(int32_t start, int32_t offset);
     void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset);
+    void UpdateSpansWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
+    void UpdateSpanMapWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
+    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset, SpanStringOperation op);
+    AroundImage IsInsertAroundImage(int32_t start);
+    void InsertSpanStringAfterImage(int32_t start, const RefPtr<SpanString>& spanString);
+    void InsertStringAroundImage(int32_t start, const std::string& str, AroundImage AroundMode);
+    int32_t GetStepsByPosition(int32_t pos);
+    void RemoveImageSpan(int32_t start, int32_t end);
+    void NotifyDeleteImage(const std::vector<int32_t>& deleteImageId);
 };
 } // namespace OHOS::Ace
 

@@ -71,12 +71,14 @@ public:
     static void CreateJsRichEditorCommonEvent(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info);
+    static std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
+    static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void ParseUserGesture(
-        const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
+        const JSCallbackInfo& args, NG::UserGestureOptions& gestureOption, const std::string& spanType);
     static void ParseJsFont(const JSRef<JSObject>& fontObject, Font& font);
 };
 
@@ -109,9 +111,9 @@ public:
     void AddTextSpan(const JSCallbackInfo& args);
     void AddSymbolSpan(const JSCallbackInfo& args);
     void AddPlaceholderSpan(const JSCallbackInfo& args);
-    void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
+    void ParseOptions(const JSCallbackInfo& args, NG::SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
-    ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
+    NG::ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     void ParseJsTextStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
@@ -120,7 +122,7 @@ public:
         struct UpdateSpanStyle& updateSpanStyle);
     void ParseJsSymbolSpanStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
-    ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
+    NG::ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);

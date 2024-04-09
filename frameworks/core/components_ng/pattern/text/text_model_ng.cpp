@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include <utility>
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
@@ -67,7 +68,7 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
     if (spanString) {
         spanString->AddSpanWatcher(WeakPtr(textPattern));
         auto spans = spanString->GetSpanItems();
-        textPattern->SetSpanItemChildren(spans);
+        textPattern->UpdateSpanItems(std::move(spans));
         textPattern->SetSpanStringMode(true);
     }
 }

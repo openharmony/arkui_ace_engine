@@ -15,10 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/text/text_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -82,7 +81,7 @@ void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
 
 void JSFontSpan::SetFontColor(const JSCallbackInfo& info) {}
 
-RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
+const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
     return fontSpan_;
 }
@@ -92,4 +91,119 @@ void JSFontSpan::SetFontSpan(const RefPtr<FontSpan>& fontSpan)
     fontSpan_ = fontSpan;
 }
 
+// JSImageAttachment
+void JSImageAttachment::Constructor(const JSCallbackInfo& args)
+{
+
+}
+
+void JSImageAttachment::Destructor(JSImageAttachment* imageSpan)
+{
+    if (imageSpan != nullptr) {
+        imageSpan->DecRefCount();
+    }
+}
+
+void JSImageAttachment::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSImageAttachment>::Declare("ImageAttachment ");
+    JSClass<JSImageAttachment>::CustomProperty(
+        "value", &JSImageAttachment::GetImageSrc, &JSImageAttachment::SetImageSrc);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "size", &JSImageAttachment::GetImageSize, &JSImageAttachment::SetImageSize);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "verticalAlign", &JSImageAttachment::GetImageSrc, &JSImageAttachment::SetImageSrc);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "objectFit", &JSImageAttachment::GetImageVerticalAlign, &JSImageAttachment::SetImageVerticalAlign);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "layoutStyle", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "value", &JSImageAttachment::GetImageLayoutStyle, &JSImageAttachment::SetImageLayoutStyle);
+    JSClass<JSImageAttachment>::Bind(globalObj, JSImageAttachment::Constructor, JSImageAttachment::Destructor);
+}
+
+RefPtr<ImageSpan> JSImageAttachment::ParseJsFontSpan(const JSRef<JSObject>& obj)
+{
+    return nullptr;
+}
+
+void JSImageAttachment::GetImageSrc(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageOptions = imageSpan_->GetImageSpanOptions();
+    JSRef<JSVal> ret;
+    if (imageOptions.image.has_value()) {
+        ret = JSRef<JSVal>::Make(ToJSValue(imageOptions.image.value()));
+    }
+    if (imageOptions.imagePixelMap.has_value()) {
+#ifdef PIXEL_MAP_SUPPORTED
+        ret = ConvertPixmap(imageOptions.imagePixelMap.value());
+#endif
+    }
+    info.SetReturnValue(ret);
+}
+
+void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->size.has_value()) {
+        return;
+    }
+    JSRef<JSArray> imageSize = JSRef<JSArray>::New();
+    imageSize->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(imageAttr->size->width)));
+    imageSize->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(imageAttr->size->height)));
+    info.SetReturnValue(imageSize);
+}
+
+void JSImageAttachment::GetImageVerticalAlign(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->verticalAlign.has_value()) {
+        return;
+    }
+    // 涉及是否减一
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(imageAttr->verticalAlign)));
+}
+
+void JSImageAttachment::GetImageObjectFit(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->objectFit.has_value()) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(imageAttr->objectFit)));
+}
+
+void JSImageAttachment::GetImageLayoutStyle(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value()) {
+        return;
+    }
+    auto layoutStyle = JSRef<JSObject>::New();
+    if (imageAttr->marginProp.has_value()) {
+        layoutStyle->SetProperty<std::string>("margin", imageAttr->marginProp->ToString());
+    }
+    if (imageAttr->paddingProp.has_value()) {
+        layoutStyle->SetProperty<std::string>("padding", imageAttr->paddingProp->ToString());
+    }
+    if (imageAttr->borderRadius.has_value()) {
+        layoutStyle->SetProperty<std::string>("borderRadius", imageAttr->borderRadius->ToString());
+    }
+    info.SetReturnValue(layoutStyle);
+}
+
+const RefPtr<ImageSpan>& JSImageAttachment::GetImageSpan()
+{
+    return imageSpan_;
+}
+
+void JSImageAttachment::SetImageSpan(const RefPtr<ImageSpan>& imageSpan)
+{
+    imageSpan_ = imageSpan;
+}
 } // namespace OHOS::Ace::Framework

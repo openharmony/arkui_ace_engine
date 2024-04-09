@@ -90,6 +90,97 @@ struct HandleInfoNG {
     RectF rect;
 };
 
+struct UserGestureOptions {
+    GestureEventFunc onClick;
+    GestureEventFunc onLongPress;
+};
+
+struct ImageSpanSize {
+    CalcDimension width;
+    CalcDimension height;
+
+    bool operator==(const ImageSpanSize& other) const
+    {
+        return width == other.width && height == other.height;
+    }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, width);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, height);
+        return jsonValue->ToString();
+    }
+};
+
+struct ImageSpanAttribute {
+    std::optional<ImageSpanSize> size;
+    std::optional<VerticalAlign> verticalAlign;
+    std::optional<ImageFit> objectFit;
+    std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
+    std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
+    std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
+
+    bool operator==(const ImageSpanAttribute& attribute) const
+    {
+        return size == attribute.size && verticalAlign == attribute.verticalAlign && objectFit == attribute.objectFit &&
+            marginProp == attribute.marginProp && borderRadius == attribute.borderRadius &&
+            paddingProp == attribute.paddingProp;
+    }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, size);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, verticalAlign);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, objectFit);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, marginProp);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
+        return jsonValue->ToString();
+    }
+};
+
+struct SpanOptionBase {
+    std::optional<int32_t> offset;
+    UserGestureOptions userGestureOption;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
+        return jsonValue->ToString();
+    }
+};
+
+struct ImageSpanOptions : SpanOptionBase {
+    std::optional<int32_t> offset;
+    std::optional<std::string> image;
+    std::optional<std::string> bundleName;
+    std::optional<std::string> moduleName;
+    std::optional<RefPtr<PixelMap>> imagePixelMap;
+    std::optional<ImageSpanAttribute> imageAttribute;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, bundleName);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, moduleName);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
+        if (imagePixelMap && *imagePixelMap) {
+            std::string pixSize = "[";
+            pixSize += std::to_string((*imagePixelMap)->GetWidth());
+            pixSize += "*";
+            pixSize += std::to_string((*imagePixelMap)->GetHeight());
+            pixSize += "]";
+            jsonValue->Put("pixelMapSize", pixSize.c_str());
+        }
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, imageAttribute);
+        return jsonValue->ToString();
+    }
+};
+
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme);
 

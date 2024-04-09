@@ -28,8 +28,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSSpanString : public virtual AceType {
-    DECLARE_ACE_TYPE(JSSpanString, AceType)
+class JSSpanString : public virtual Referenced {
 
 public:
     JSSpanString() = default;
@@ -42,24 +41,28 @@ public:
     void SetLength(const JSCallbackInfo& info);
     void IsEqualToSpanString(const JSCallbackInfo& info);
     void GetSubSpanString(const JSCallbackInfo& info);
-    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(JSRef<JSObject> obj, int32_t maxLength);
+    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength);
     static JSRef<JSObject> CreateJSSpanBaseObject(const RefPtr<SpanBase>& spanObject);
     static JSRef<JSObject> CreateJsFontSpan(const RefPtr<SpanBase>& spanObject);
-    static RefPtr<SpanBase> ParseJsSpanBase(int32_t start, int32_t length, SpanType type, JSRef<JSObject> obj);
-    static RefPtr<SpanBase> ParseJsFontSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
+    static JSRef<JSObject> CreateJsImageSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsSpanBase(int32_t start, int32_t length, SpanType type, const JSRef<JSObject>& obj);
+    static RefPtr<SpanBase> ParseJsFontSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
     static bool CheckSpanType(const int32_t& type);
     bool CheckParameters(const int32_t& start, const int32_t& length);
     void GetSpans(const JSCallbackInfo& info);
     const RefPtr<SpanString>& GetController();
     void SetController(const RefPtr<SpanString>& spanString);
 
+    static NG::ImageSpanOptions ParseJsImageAttachment(const JSRef<JSObject>& obj);
 private:
+    static NG::ImageSpanOptions CreateImageOptions(const JSRef<JSObject>& obj);
+    static NG::ImageSpanAttribute ParseJsImageSpanAttribute(const JSRef<JSObject>& obj);
+
     ACE_DISALLOW_COPY_AND_MOVE(JSSpanString);
     RefPtr<SpanString> spanString_;
 };
 
 class JSMutableSpanString final : public JSSpanString {
-    DECLARE_ACE_TYPE(JSMutableSpanString, AceType)
 
 public:
     JSMutableSpanString() = default;

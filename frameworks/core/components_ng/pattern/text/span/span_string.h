@@ -38,7 +38,7 @@ class ACE_EXPORT SpanString : public SpanStringBase {
 
 public:
     explicit SpanString(const std::string& text);
-    SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans);
+    explicit SpanString(const NG::ImageSpanOptions& options);
     ~SpanString() override;
     const std::string& GetString() const;
     std::wstring GetWideString();
@@ -56,12 +56,12 @@ public:
     const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
     void AddSpan(const RefPtr<SpanBase>& span);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
+    void BindWithSpans(std::vector<RefPtr<SpanBase>> spans);
 
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
         int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;
-    void BindWithSpans(std::vector<RefPtr<SpanBase>> spans);
     void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
     void SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int32_t, int32_t> interval);
     void ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation);

@@ -73,10 +73,7 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
-namespace {
-
-std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
+std::optional<NG::MarginProperty> JSRichEditor::ParseMarginAttr(JsiRef<JSVal> marginAttr)
 {
     std::optional<NG::MarginProperty> marginProp = std::nullopt;
     CalcDimension length;
@@ -99,7 +96,7 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
     return marginProp;
 }
 
-std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
+std::optional<NG::BorderRadiusProperty> JSRichEditor::ParseBorderRadiusAttr(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
     CalcDimension radiusDim;
@@ -136,8 +133,6 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
     }
     return prop;
 }
-
-} // namespace
 
 void JSRichEditor::Create(const JSCallbackInfo& info)
 {
@@ -1067,13 +1062,13 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
-ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute)
+NG::ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    ImageSpanAttribute imageStyle;
+    NG::ImageSpanAttribute imageStyle;
     auto sizeObj = imageAttribute->GetProperty("size");
     if (sizeObj->IsArray()) {
-        ImageSpanSize imageSize;
+        NG::ImageSpanSize imageSize;
         JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetValueAt(0);
         CalcDimension imageSpanWidth;
@@ -1113,10 +1108,10 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
     if (!layoutStyleObject->IsUndefined()) {
         auto marginAttr = layoutStyleObject->GetProperty("margin");
-        imageStyle.marginProp = ParseMarginAttr(marginAttr);
+        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
         updateSpanStyle_.marginProp = imageStyle.marginProp;
         auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
-        imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
+        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
         updateSpanStyle_.borderRadius = imageStyle.borderRadius;
     }
     return imageStyle;
@@ -1310,7 +1305,7 @@ void JSRichEditorController::ParseTextDecoration(
 }
 
 void ParseUserGesture(
-    const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType)
+    const JSCallbackInfo& args, NG::UserGestureOptions& gestureOption, const std::string& spanType)
 {
     if (args.Length() < 2) {
         return;
@@ -1364,7 +1359,7 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
     if (args.Length() < 1) {
         return;
     }
-    ImageSpanOptions options;
+    NG::ImageSpanOptions options;
     if (!args[0]->IsEmpty() && args[0]->ToString() != "") {
         options = CreateJsImageOptions(args);
     } else {
@@ -1402,10 +1397,10 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         auto imageStyleObj = imageObject->GetProperty("imageStyle");
         JSRef<JSObject> imageAttribute = JSRef<JSObject>::Cast(imageStyleObj);
         if (!imageAttribute->IsUndefined()) {
-            ImageSpanAttribute imageStyle = ParseJsImageSpanAttribute(imageAttribute);
+            NG::ImageSpanAttribute imageStyle = ParseJsImageSpanAttribute(imageAttribute);
             options.imageAttribute = imageStyle;
         }
-        UserGestureOptions gestureOption;
+        NG::UserGestureOptions gestureOption;
         ParseUserGesture(args, gestureOption, "ImageSpan");
         options.userGestureOption = std::move(gestureOption);
     }
@@ -1417,10 +1412,10 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
 
-ImageSpanOptions JSRichEditorController::CreateJsImageOptions(const JSCallbackInfo& args)
+NG::ImageSpanOptions JSRichEditorController::CreateJsImageOptions(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    ImageSpanOptions options;
+    NG::ImageSpanOptions options;
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, options);
     bool isCard = context->IsFormRender();
@@ -1520,7 +1515,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
                 options.paraStyle = style;
             }
         }
-        UserGestureOptions gestureOption;
+        NG::UserGestureOptions gestureOption;
         ParseUserGesture(args, gestureOption, "TextSpan");
         options.userGestureOption = std::move(gestureOption);
     }
@@ -1663,7 +1658,7 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
     } else {
         funcValue = builder;
     }
-    SpanOptionBase options;
+    NG::SpanOptionBase options;
     {
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(funcValue));
         CHECK_NULL_VOID(builderFunc);
@@ -1681,7 +1676,7 @@ void JSRichEditorController::AddPlaceholderSpan(const JSCallbackInfo& args)
     }
 }
 
-void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan)
+void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, NG::SpanOptionBase& placeholderSpan)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (args.Length() < 2) {
@@ -1940,7 +1935,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
-    ImageSpanAttribute imageStyle;
+    NG::ImageSpanAttribute imageStyle;
     auto richEditorTextStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("textStyle"));
     auto richEditorImageStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("imageStyle"));
     auto richEditorSymbolSpanStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("symbolStyle"));

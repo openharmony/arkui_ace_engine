@@ -72,6 +72,7 @@ public:
     ~TextPattern() override = default;
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
+    std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
 
     virtual int32_t GetTextContentLength();
 
@@ -499,10 +500,6 @@ public:
     bool CheckClickedOnSpanOrText(RectF textContentRect, const Offset& localLocation);
 
     // style string
-    void SetSpanItemChildren(const std::list<RefPtr<SpanItem>>& spans)
-    {
-        spans_ = spans;
-    }
     void SetSpanStringMode(bool isSpanStringMode)
     {
         isSpanStringMode_ = isSpanStringMode;
@@ -511,7 +508,8 @@ public:
     {
         return isSpanStringMode_;
     }
-    void UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems) override;
+    void UpdateSpanItems(std::list<RefPtr<SpanItem>>&& spanItems) override;
+    void DeleteImageSpans(const std::vector<int32_t>& deleteImageId) override;
 
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
@@ -586,6 +584,7 @@ protected:
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
+    void DeleteRedundantImageNode();
 
     virtual bool CanStartAITask()
     {
@@ -661,6 +660,12 @@ private:
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    // SpanString
+    void InheritParentProperties(const RefPtr<SpanItem>& spanItem);
+    void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
+    void ProcessSpanString();
+    int32_t CalculateImageIndex(const RefPtr<ImageSpanItem>& imageItem);
     // to check if drag is in progress
     void SetCurrentDragTool(SourceTool tool)
     {

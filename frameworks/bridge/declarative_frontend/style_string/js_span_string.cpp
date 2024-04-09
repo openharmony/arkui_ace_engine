@@ -15,10 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
 namespace OHOS::Ace::Framework {
 
 const std::vector<SpanType> types = { SpanType::Font };
@@ -31,13 +33,18 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
     RefPtr<SpanString> spanString;
     if (args.Length() == 0) {
         spanString = AceType::MakeRefPtr<SpanString>(data);
-    } else if (args.Length() == 1) {
-        JSViewAbstract::ParseJsString(args[0], data);
-        spanString = AceType::MakeRefPtr<SpanString>(data);
     } else {
-        JSViewAbstract::ParseJsString(args[0], data);
-        auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
-        spanString = AceType::MakeRefPtr<SpanString>(data, spanBases);
+        if (args[0]->IsString()) {
+            JSViewAbstract::ParseJsString(args[0], data);
+            spanString = AceType::MakeRefPtr<SpanString>(data);
+        } else {
+            auto attachment = JSSpanString::ParseJsImageAttachment(args[0]);
+            spanString = AceType::MakeRefPtr<SpanString>(attachment);
+        }
+        if (args.Length() > 1) {
+            auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
+            spanString->BindWithSpans(spanBases);
+        }
     }
     jsSpanString->SetController(spanString);
     args.SetReturnValue(Referenced::RawPtr(jsSpanString));
@@ -81,7 +88,7 @@ void JSSpanString::IsEqualToSpanString(const JSCallbackInfo& info)
         info.SetReturnValue(JSRef<JSVal>::Make(JSVal(ToJSValue(false))));
         return;
     }
-    auto jsSpanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+    auto *jsSpanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
     if (!jsSpanString || !jsSpanString->GetController()) {
         info.SetReturnValue(JSRef<JSVal>::Make(JSVal(ToJSValue(false))));
         return;
@@ -131,7 +138,7 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
         if (!CheckSpanType(spanType)) {
             return;
         }
-        SpanType type = static_cast<SpanType>(spanType);
+        auto type = static_cast<SpanType>(spanType);
         spans = spanString_->GetSpans(start, length, type);
     } else {
         spans = spanString_->GetSpans(start, length);
@@ -157,6 +164,11 @@ JSRef<JSObject> JSSpanString::CreateJSSpanBaseObject(const RefPtr<SpanBase>& spa
             resultObj->SetPropertyObject("styledValue", obj);
             return resultObj;
         }
+        case SpanType::Image: {
+            JSRef<JSObject> obj = CreateJsImageSpan(spanObject);
+            resultObj->SetPropertyObject("styledValue", obj);
+            return resultObj;
+        }
         default:
             break;
     }
@@ -174,7 +186,17 @@ JSRef<JSObject> JSSpanString::CreateJsFontSpan(const RefPtr<SpanBase>& spanObjec
     return obj;
 }
 
-RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, SpanType type, JSRef<JSObject> obj)
+JSRef<JSObject> JSSpanString::CreateJsImageSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<ImageSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSFontSpan>::NewInstance();
+    auto imageSpan = Referenced::Claim(obj->Unwrap<JSImageAttachment>());
+    imageSpan->SetImageSpan(span);
+    return obj;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, SpanType type, const JSRef<JSObject>& obj)
 {
     switch (type) {
         case SpanType::Font:
@@ -185,7 +207,7 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
     return nullptr;
 }
 
-RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
+RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
 {
     auto* fontSpan = obj->Unwrap<JSFontSpan>();
     if (fontSpan && fontSpan->GetFontSpan()) {
@@ -196,7 +218,7 @@ RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, JS
 
 bool JSSpanString::CheckSpanType(const int32_t& type)
 {
-    if (type < 0 || type >= static_cast<int32_t>(types.size())) {
+    if (type < 0 || type >= static_cast<int32_t>(SpanType::None)) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
         return false;
     }
@@ -213,7 +235,7 @@ bool JSSpanString::CheckParameters(const int32_t& start, const int32_t& length)
     return true;
 }
 
-std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(JSRef<JSObject> obj, int32_t maxLength)
+std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength)
 {
     std::vector<RefPtr<SpanBase>> spanBaseVector;
     auto arrays = JSRef<JSArray>::Cast(obj);
@@ -243,7 +265,7 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(JSRef<JSObject
         if (!styleStringValue->IsObject()) {
             continue;
         }
-        SpanType type = static_cast<SpanType>(styleKey->ToNumber<int32_t>());
+        auto type = static_cast<SpanType>(styleKey->ToNumber<int32_t>());
         auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleStringValue));
         if (spanBase) {
             spanBaseVector.emplace_back(spanBase);
@@ -262,6 +284,104 @@ void JSSpanString::SetController(const RefPtr<SpanString>& spanString)
     spanString_ = spanString;
 }
 
+NG::ImageSpanOptions JSSpanString::ParseJsImageAttachment(const JSRef<JSObject>& obj)
+{
+    auto imageOptions = CreateImageOptions(obj);
+    auto imageAttribute = ParseJsImageSpanAttribute(obj);
+    imageOptions.imageAttribute = imageAttribute;
+    return imageOptions;
+}
+
+NG::ImageSpanOptions JSSpanString::CreateImageOptions(const JSRef<JSObject>& obj)
+{
+    NG::ImageSpanOptions options;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, options);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, options);
+    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+
+    std::string imageSrc;
+    std::string bundleName;
+    std::string moduleName;
+    auto imageValue = obj->GetProperty("value");
+    bool srcValid = JSContainerBase::ParseJsMedia(imageValue, imageSrc);
+    if (isCard && imageValue->IsString()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(imageSrc);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            imageSrc.clear();
+        }
+    }
+    JSImage::GetJsMediaBundleInfo(imageValue, bundleName, moduleName);
+    options.image = imageSrc;
+    options.bundleName = bundleName;
+    options.moduleName = moduleName;
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (!isCard) {
+            if (JSImage::IsDrawable(imageValue)) {
+                options.imagePixelMap = GetDrawablePixmap(imageValue);
+            } else {
+                options.imagePixelMap = CreatePixelMapFromNapiValue(imageValue);
+            }
+        }
+#endif
+    }
+    return options;
+}
+
+NG::ImageSpanAttribute JSSpanString::ParseJsImageSpanAttribute(const JSRef<JSObject>& obj)
+{
+    NG::ImageSpanAttribute imageStyle;
+    auto sizeObj = obj->GetProperty("size");
+    if (sizeObj->IsArray()) {
+        NG::ImageSpanSize imageSize;
+        JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
+        JSRef<JSVal> width = size->GetValueAt(0);
+        CalcDimension imageSpanWidth;
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth)) {
+            imageSize.width = imageSpanWidth;
+        }
+        JSRef<JSVal> height = size->GetValueAt(1);
+        CalcDimension imageSpanHeight;
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight)) {
+            imageSize.height = imageSpanHeight;
+        }
+        imageStyle.size = imageSize;
+    }
+    JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
+    if (!verticalAlign->IsNull()) {
+        auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
+        if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
+            align = VerticalAlign::BOTTOM;
+        }
+        imageStyle.verticalAlign = align;
+    }
+    JSRef<JSVal> objectFit = obj->GetProperty("objectFit");
+    if (!objectFit->IsNull() && objectFit->IsNumber()) {
+        auto fit = static_cast<ImageFit>(objectFit->ToNumber<int32_t>());
+        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+            fit = ImageFit::COVER;
+        }
+        imageStyle.objectFit = fit;
+    } else {
+        imageStyle.objectFit = ImageFit::COVER;
+    }
+    auto layoutStyleObj = obj->GetProperty("layoutStyle");
+    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+    if (!layoutStyleObject->IsUndefined()) {
+        auto marginAttr = layoutStyleObject->GetProperty("margin");
+        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
+        auto paddingAttr = layoutStyleObject->GetProperty("padding");
+        imageStyle.paddingProp = JSRichEditor::ParseMarginAttr(paddingAttr);
+        auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
+        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
+    }
+    return imageStyle;
+}
+
+// JSMutableSpanString
 void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
 {
     auto jsSpanString = Referenced::MakeRefPtr<JSMutableSpanString>();
@@ -271,13 +391,18 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
     RefPtr<MutableSpanString> spanString;
     if (args.Length() == 0) {
         spanString = AceType::MakeRefPtr<MutableSpanString>(data);
-    } else if (args.Length() == 1) {
-        JSViewAbstract::ParseJsString(args[0], data);
-        spanString = AceType::MakeRefPtr<MutableSpanString>(data);
     } else {
-        JSViewAbstract::ParseJsString(args[0], data);
-        auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
-        spanString = AceType::MakeRefPtr<MutableSpanString>(data, spanBases);
+        if (args[0]->IsString()) {
+            JSViewAbstract::ParseJsString(args[0], data);
+            spanString = AceType::MakeRefPtr<MutableSpanString>(data);
+        } else {
+            auto attachment = JSSpanString::ParseJsImageAttachment(args[0]);
+            spanString = AceType::MakeRefPtr<MutableSpanString>(attachment);
+        }
+        if (args.Length() > 1) {
+            auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
+            spanString->BindWithSpans(spanBases);
+        }
     }
     jsSpanString->SetController(spanString);
     jsSpanString->SetMutableController(spanString);
@@ -387,7 +512,7 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
     }
     auto start = startObj->ToNumber<int32_t>();
     auto length = lengthObj->ToNumber<int32_t>();
-    SpanType type = static_cast<SpanType>(spanType);
+    auto type = static_cast<SpanType>(spanType);
     auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleValueObj));
     if (!spanBase) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
@@ -422,7 +547,7 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
     }
     auto start = startObj->ToNumber<int32_t>();
     auto length = lengthObj->ToNumber<int32_t>();
-    SpanType type = static_cast<SpanType>(spanType);
+    auto type = static_cast<SpanType>(spanType);
     auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleValueObj));
     if (!spanBase) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
@@ -448,7 +573,7 @@ void JSMutableSpanString::RemoveSpan(const JSCallbackInfo& info)
     if (!CheckSpanType(spanType)) {
         return;
     }
-    SpanType type = static_cast<SpanType>(spanType);
+    auto type = static_cast<SpanType>(spanType);
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
     if (!CheckParameters(start, length)) {

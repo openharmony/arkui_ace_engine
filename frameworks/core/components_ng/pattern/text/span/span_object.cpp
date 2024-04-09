@@ -145,4 +145,66 @@ bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     auto font = fontSpan->GetFont();
     return font_.IsEqual(font);
 }
+
+// ImageSpan
+ImageSpan::ImageSpan(const NG::ImageSpanOptions& options) : SpanBase(0, 1), imageOptions_(options) {}
+
+bool ImageSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto imageSpan = DynamicCast<ImageSpan>(other);
+    if (!imageSpan) {
+        return false;
+    }
+    if (imageOptions_.imageAttribute.has_value() && imageSpan->GetImageAttribute().has_value()) {
+        return imageOptions_.imageAttribute.value() == imageSpan->GetImageAttribute().value();
+    }
+    return false;
+}
+
+RefPtr<SpanBase> ImageSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    if (end - start > 1) {
+        return nullptr;
+    }
+    auto spanBase = MakeRefPtr<ImageSpan>(imageOptions_);
+    spanBase->UpdateStartIndex(start);
+    spanBase->UpdateEndIndex(end);
+    return spanBase;
+}
+
+SpanType ImageSpan::GetSpanType() const
+{
+    return SpanType::Image;
+}
+
+void ImageSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    auto imageItem = DynamicCast<NG::ImageSpanItem>(spanItem);
+    if (!imageItem) {
+        return;
+    }
+
+    switch (operation) {
+        case SpanOperation::ADD:
+            imageItem->SetImageSpanOptions(imageOptions_);
+            break;
+        case SpanOperation::REMOVE:
+            imageItem->ResetImageSpanOptions();
+    }
+}
+
+std::string ImageSpan::ToString() const
+{
+    return "";
+}
+
+const NG::ImageSpanOptions& ImageSpan::GetImageSpanOptions()
+{
+    return imageOptions_;
+}
+
+const std::optional<NG::ImageSpanAttribute>& ImageSpan::GetImageAttribute() const
+{
+    return imageOptions_.imageAttribute;
+}
 } // namespace OHOS::Ace

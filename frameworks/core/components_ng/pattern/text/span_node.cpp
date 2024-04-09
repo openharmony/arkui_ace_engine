@@ -498,6 +498,38 @@ bool SpanItem::IsDragging()
     return selectedStart >= 0 && selectedEnd >= 0;
 }
 
+ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
+{
+    bool selectFlag = true;
+    ResultObject resultObject;
+    int32_t endPosition = interval.second;
+    int32_t startPosition = interval.first;
+    int32_t itemLength = endPosition - startPosition;
+
+    if (startPosition >= start && endPosition <= end) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition < start && endPosition <= end && endPosition > start) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition >= start && startPosition < end && endPosition >= end) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    } else if (startPosition <= start && endPosition >= end) {
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    } else {
+        selectFlag = false;
+    }
+    if (selectFlag) {
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.type = SelectSpanType::TYPESPAN;
+        resultObject.valueString = content;
+    }
+    return resultObject;
+}
+
 #define INHERIT_TEXT_STYLE(group, name, func)                                     \
     do {                                                                          \
         if ((textLayoutProp)->Has##name()) {                                      \
@@ -633,6 +665,39 @@ void ImageSpanItem::UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& im
     auto property = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(property);
     backgroundStyle = property->GetPlaceHolderStyle();
+}
+
+void ImageSpanItem::SetImageSpanOptions(const ImageSpanOptions& options)
+{
+    this->options = options;
+}
+
+void ImageSpanItem::ResetImageSpanOptions()
+{
+    options.imageAttribute.reset();
+}
+
+ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+
+    int32_t endPosition = interval.second;
+    int32_t startPosition = interval.first;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        resultObject.type = SelectSpanType::TYPEIMAGE;
+        if (options.image.has_value()) {
+            resultObject.valueString = options.image.value();
+        }
+        if (options.imagePixelMap.has_value()) {
+            resultObject.valuePixelMap = options.imagePixelMap.value();
+        }
+    }
+    return resultObject;
 }
 
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const

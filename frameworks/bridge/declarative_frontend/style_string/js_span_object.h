@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 
-#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -25,8 +24,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSFontSpan : public virtual AceType {
-    DECLARE_ACE_TYPE(JSFontSpan, AceType)
+class JSFontSpan : public Referenced {
 
 public:
     JSFontSpan() = default;
@@ -38,12 +36,40 @@ public:
     void GetFontColor(const JSCallbackInfo& info);
     void SetFontColor(const JSCallbackInfo& info);
 
-    RefPtr<FontSpan>& GetFontSpan();
+    const RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSFontSpan);
     RefPtr<FontSpan> fontSpan_;
+};
+
+class JSImageAttachment : public Referenced {
+
+public:
+    JSImageAttachment() = default;
+    ~JSImageAttachment() override = default;
+    static void Constructor(const JSCallbackInfo &args);
+    static void Destructor(JSImageAttachment *imageSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<ImageSpan> ParseJsFontSpan(const JSRef<JSObject> &obj);
+    void GetImageSrc(const JSCallbackInfo &info);
+    void SetImageSrc(const JSCallbackInfo &info) {}
+    void GetImageSize(const JSCallbackInfo &info);
+    void SetImageSize(const JSCallbackInfo &info) {}
+    void GetImageVerticalAlign(const JSCallbackInfo &info);
+    void SetImageVerticalAlign(const JSCallbackInfo &info) {}
+    void GetImageObjectFit(const JSCallbackInfo &info);
+    void SetImageObjectFit(const JSCallbackInfo &info) {}
+    void GetImageLayoutStyle(const JSCallbackInfo &info);
+    void SetImageLayoutStyle(const JSCallbackInfo &info) {}
+
+    const RefPtr<ImageSpan>& GetImageSpan();
+    void SetImageSpan(const RefPtr<ImageSpan>& imageSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSImageAttachment);
+    RefPtr<ImageSpan> imageSpan_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

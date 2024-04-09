@@ -14,22 +14,29 @@
  */
 
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include <utility>
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 
 namespace OHOS::Ace {
-SpanString::SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans) : SpanString(text)
-{
-    BindWithSpans(spans);
-}
-
 SpanString::SpanString(const std::string& text) : text_(text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
     spanItem->content = text;
     spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
     spans_.emplace_back(spanItem);
+}
+
+SpanString::SpanString(const NG::ImageSpanOptions& options) : text_(" ")
+{
+    auto spanItem = MakeRefPtr<NG::ImageSpanItem>();
+    spanItem->options = options;
+    spanItem->content = " ";
+    spanItem->interval = { 0, 1 };
+    spans_.emplace_back(spanItem);
+    spansMap_[SpanType::Image].emplace_back(MakeRefPtr<ImageSpan>(options));
 }
 
 SpanString::~SpanString()
@@ -335,10 +342,8 @@ RefPtr<SpanBase> SpanString::GetSpan(int32_t start, int32_t length, SpanType spa
     }
     int32_t end = start + length;
     auto spanBaseList = spansMap_.find(spanType)->second;
-    for (auto itr = spanBaseList.begin(); itr != spanBaseList.end(); ++itr) {
-        auto spanBase = *itr;
-
-        if ((start <= spanBase->GetStartIndex() && spanBase->GetStartIndex() < end) ||
+    for (const auto& spanBase : spanBaseList) {
+         if ((start <= spanBase->GetStartIndex() && spanBase->GetStartIndex() < end) ||
             (start <= spanBase->GetEndIndex() && spanBase->GetEndIndex() <= end)) {
             int32_t newStart = start <= spanBase->GetStartIndex() ? spanBase->GetStartIndex() : start;
             int32_t newEnd = spanBase->GetEndIndex() < end ? spanBase->GetEndIndex() : end;
@@ -393,7 +398,7 @@ void SpanString::NotifySpanWatcher()
         if (!watcher) {
             continue;
         }
-        watcher->UpdateSpanItems(spans_);
+        watcher->UpdateSpanItems(std::move(spans_));
     }
 }
 
