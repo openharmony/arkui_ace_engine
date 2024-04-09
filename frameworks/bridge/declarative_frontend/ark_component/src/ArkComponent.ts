@@ -3791,6 +3791,9 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
