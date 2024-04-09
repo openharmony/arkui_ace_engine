@@ -370,6 +370,11 @@ public:
     {
         return badgeNumber_;
     }
+    
+    void SetIsTouchGatherAnimationPlaying(bool isTouchGatherAnimationPlaying)
+    {
+        isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
+    }
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -447,6 +452,7 @@ private:
     OffsetF pixelMapOffset_ {0.0f, 0.0f};
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
+    bool isTouchGatherAnimationPlaying_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
