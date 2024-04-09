@@ -2533,6 +2533,10 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
     }
     DumpCommonPropertyNG(nodeInfo);
     DumpAccessibilityPropertyNG(nodeInfo);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty) {
+        DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
+    }
     DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
 }
 
