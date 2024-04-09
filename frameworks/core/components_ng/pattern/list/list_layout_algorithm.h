@@ -24,11 +24,13 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
+class ListPositionMap;
 
 struct ListItemInfo {
     int32_t id;
@@ -268,8 +270,7 @@ public:
 
     void BeginLayoutBackward(float startPos, LayoutWrapper* layoutWrapper);
 
-    void HandleJumpAuto(LayoutWrapper* layoutWrapper,
-        int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
+    void HandleJumpAuto(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex);
 
     void HandleJumpCenter(LayoutWrapper* layoutWrapper);
 
@@ -286,7 +287,13 @@ public:
     bool CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex,
         int32_t jumpIndex, float jumpIndexStartPos);
 
-    virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex);
+    virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex,
+        bool groupLayoutAll = true);
+
+    virtual float GetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex)
+    {
+        return childrenSize_->GetChildSize(childIndex);
+    }
 
     virtual int32_t GetLanes() const
     {
@@ -328,6 +335,16 @@ public:
 
     void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
 
+    void SetListChildrenMainSize(const RefPtr<ListChildrenMainSize>& childrenMainSize)
+    {
+        childrenSize_ = childrenMainSize;
+    }
+
+    void SetListPositionMap(const RefPtr<ListPositionMap>& posMap)
+    {
+        posMap_ = posMap;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -363,9 +380,12 @@ protected:
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+    void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
+    RefPtr<ListChildrenMainSize> childrenSize_;
+    RefPtr<ListPositionMap> posMap_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     void CheckJumpToIndex();
