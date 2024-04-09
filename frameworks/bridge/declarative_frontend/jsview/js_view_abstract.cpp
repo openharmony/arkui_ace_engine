@@ -5043,32 +5043,43 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsSetDragPreviewOptions", info, checkList)) {
         return;
     }
+    NG::DragPreviewOption previewOption;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
-    auto dragPreviewMode = NG::DragPreviewMode::AUTO;
     if (mode->IsNumber()) {
         int32_t modeValue = mode->ToNumber<int>();
         if (modeValue >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
             modeValue <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-            dragPreviewMode = static_cast<NG::DragPreviewMode>(modeValue);
+            previewOption.mode = static_cast<NG::DragPreviewMode>(modeValue);
         }
     }
-    bool defaultAnimationBeforeLifting = false;
-    bool isMultiSelecttionEnabled = false;
+
+    auto numberBadge = obj->GetProperty("numberBadge");
+    if (!numberBadge->IsEmpty()) {
+        if (numberBadge->IsNumber()) {
+            previewOption.isNumber = true;
+            previewOption.badgeNumber = numberBadge->ToNumber<int>();
+        } else if (numberBadge->IsBoolean()) {
+            previewOption.isNumber = false;
+            previewOption.isShowBadge = numberBadge->ToBoolean();
+        }
+    } else {
+        previewOption.isNumber = false;
+        previewOption.isShowBadge = true;
+    }
+
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
         auto multiSelection = interObj->GetProperty("isMultiSelectionEnabled");
         if (multiSelection->IsBoolean()) {
-            isMultiSelecttionEnabled = multiSelection->ToBoolean();
+            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean();
         }
         auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
         if (defaultAnimation->IsBoolean()) {
-            defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
+            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
     }
-    NG::DragPreviewOption option { dragPreviewMode, defaultAnimationBeforeLifting,
-        isMultiSelecttionEnabled };
-    ViewAbstractModel::GetInstance()->SetDragPreviewOptions(option);
+    ViewAbstractModel::GetInstance()->SetDragPreviewOptions(previewOption);
 }
 
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)

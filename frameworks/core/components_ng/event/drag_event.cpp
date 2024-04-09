@@ -72,7 +72,6 @@ constexpr float SPRING_DAMPING_FRACTION = 0.73f;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
 constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
-constexpr Dimension BADGE_DEFAULT_SIZE = 24.0_vp;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -287,6 +286,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->SetHasGatherNode(false);
+        dragDropManager->SetBadgeNumber(-1);
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
@@ -413,6 +413,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->longPressInfo_ = info;
             actuator->isReceivedLongPress_ = true;
             return;
+        }
+        auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+        auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+        if (badgeNumber.has_value()) {
+            dragDropManager->SetBadgeNumber(badgeNumber.value());
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
         actuator->SetFilter(actuator);
@@ -1624,8 +1629,9 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
     CHECK_NULL_VOID(gestureEventHub);
     auto frameNode = gestureEventHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto childInfo = manager->GetGatherNodeChildrenInfo();
-    auto childSize = childInfo.size() + 1;
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    auto childSize = badgeNumber.has_value() ? badgeNumber.value() : manager->GetGatherNodeChildrenInfo().size() + 1;
     auto textNode = CreateBadgeTextNode(frameNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE, true);
     CHECK_NULL_VOID(textNode);
     auto column = manager->GetPixelMapNode();
@@ -1656,7 +1662,7 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     auto height = pixelMap->GetHeight();
     auto offset = isUsePixelMapOffset ? GetFloatImageOffset(frameNode, pixelMap) : frameNode->GetOffsetInScreen();
     double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 -
-        BADGE_DEFAULT_SIZE.ConvertToPx() + (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+        BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
     double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
     textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);

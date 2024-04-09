@@ -641,6 +641,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     draggedFrameNode_ = nullptr;
     preMovePoint_ = Point(0, 0);
     hasNotifiedTransformation_ = false;
+    badgeNumber_ = -1;
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
