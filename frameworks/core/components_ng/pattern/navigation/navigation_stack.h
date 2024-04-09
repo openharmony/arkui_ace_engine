@@ -163,6 +163,16 @@ public:
     virtual int32_t GetJsIndexFromNativeIndex(int32_t index) { return -1; }
     virtual void MoveIndexToTop(int32_t index) {}
 
+    RefPtr<UINode> GetHostNavigationNode()
+    {
+        return navigationNode_.Upgrade();
+    }
+
+    void SetHostNavigationNode(const RefPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = navigationNode;
+    }
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
@@ -175,6 +185,7 @@ protected:
     NavPathList preNavPathList_;
     NavPathList cacheNodes_;
     bool animated_ = true;
+    WeakPtr<UINode> navigationNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H

@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -43,6 +43,8 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/pipeline/base/element_register.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
+#include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 
 namespace OHOS::Ace {
 
@@ -908,6 +910,32 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto navigationMgr = pipeline->GetNavigationDumpManager();
+    CHECK_NULL_VOID(navigationMgr);
+    auto result = navigationMgr->GetNavigationInfo(GetViewNode());
+    CHECK_NULL_VOID(result);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    do {
+        obj->SetProperty<std::string>("navigationId", result->navigationId);
+        auto stack = result->pathStack.Upgrade();
+        CHECK_NULL_BREAK(stack);
+        auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
+        CHECK_NULL_BREAK(jsStack);
+        auto navPathStackObj = jsStack->GetDataSourceObj();
+        CHECK_NULL_BREAK(!navPathStackObj->IsEmpty());
+        obj->SetPropertyObject("pathStack", navPathStackObj);
+        info.SetReturnValue(obj);
+        return;
+    } while (false);
+    JSRef<JSObject> navPathStack = JSRef<JSObject>::New();
+    obj->SetPropertyObject("pathStack", navPathStack);
+    info.SetReturnValue(obj);
+}
+
 void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
 {
     ContainerScope scope(GetInstanceId());
@@ -944,6 +972,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "queryNavigationInfo", &JSViewPartialUpdate::JSGetNavigationInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }

@@ -1470,6 +1470,7 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
     }
     navigationStack_ = navigationStack;
     if (navigationStack_) {
+        navigationStack_->SetHostNavigationNode(GetHost());
         WeakPtr<NavigationPattern> weakPattern = WeakClaim(this);
         auto id = Container::CurrentId();
         auto callback = [weakPattern, id]() {

@@ -27,6 +27,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 
 namespace OHOS::Ace::NG {
 enum class NavDestinationState {
