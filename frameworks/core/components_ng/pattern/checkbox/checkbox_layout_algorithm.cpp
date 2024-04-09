@@ -105,4 +105,34 @@ void CheckBoxLayoutAlgorithm::InitializeParam()
     verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
 }
 
+void CheckBoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    BoxLayoutAlgorithm::Layout(layoutWrapper);
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    auto left = padding.left.value_or(0);
+    auto top = padding.top.value_or(0);
+    auto paddingOffset = OffsetF(left, top);
+    auto align = Alignment::CENTER;
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childWrapper);
+    SizeF childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+    NG::OffsetF child_offset;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (size.Width() - childSize.Width()) / 2.0);
+    child_offset.SetY((1.0 + align.GetVertical()) * (size.Height() - childSize.Height()) / 2.0);
+    auto translate = child_offset + paddingOffset;
+    childWrapper->GetGeometryNode()->SetMarginFrameOffset(translate);
+    childWrapper->Layout();
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    if (content) {
+        NG::OffsetF offset;
+        offset.SetX((1.0 + align.GetHorizontal()) * (size.Width() - content->GetRect().GetSize().Width()) / 2.0);
+        offset.SetY((1.0 + align.GetVertical()) * (size.Height() - content->GetRect().GetSize().Height()) / 2.0);
+        auto translate = offset + paddingOffset;
+        content->SetOffset(translate);
+    }
+}
+
 } // namespace OHOS::Ace::NG
