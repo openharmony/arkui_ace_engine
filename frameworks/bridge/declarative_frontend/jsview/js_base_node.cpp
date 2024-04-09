@@ -66,7 +66,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     // If the node is a UINode, amount it to a BuilderProxyNode.
     // Let the returned node be a FrameNode.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
-    auto isSupportExportTexture = EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0;
+    auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
     if (!flag && newNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
