@@ -118,6 +118,9 @@ public:
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);

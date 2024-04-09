@@ -786,6 +786,20 @@ void TextFieldModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HeightAdaptivePolicy, value);
 }
+void TextFieldModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode);
+}
+
+void TextFieldModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, value, frameNode);
+}
+
+void TextFieldModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HeightAdaptivePolicy, value, frameNode);
+}
 
 void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
 {

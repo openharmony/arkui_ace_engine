@@ -1415,6 +1415,30 @@ void SearchModelNG::SetLineHeight(const Dimension& value)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateAdaptMinFontSize(value);
+    textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateAdaptMaxFontSize(value);
+    textFieldLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);

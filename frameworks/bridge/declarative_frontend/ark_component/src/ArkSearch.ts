@@ -336,6 +336,23 @@ class SearchLetterSpacingModifier extends ModifierWithKey<number | string> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class SearchMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMinFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchMinFontSize(node);
+    } else {
+      getUINativeModule().search.setSearchMinFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class SearchLineHeightModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
@@ -347,6 +364,23 @@ class SearchLineHeightModifier extends ModifierWithKey<number | string | Resourc
       getUINativeModule().search.resetLineHeight(node);
     } else {
       getUINativeModule().search.setLineHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SearchMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMaxFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchMaxFontSize(node);
+    } else {
+      getUINativeModule().search.setSearchMaxFontSize(node, this.value);
     }
   }
 
@@ -501,6 +535,14 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   lineHeight(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
+    return this;
+  }
+  minFontSize(value: number | string | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMinFontSizeModifier.identity, SearchMinFontSizeModifier, value);
+    return this;
+  }
+  maxFontSize(value: number | string | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
     return this;
   }
 }

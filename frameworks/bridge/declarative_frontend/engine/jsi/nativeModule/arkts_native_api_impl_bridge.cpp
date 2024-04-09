@@ -994,6 +994,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFontFeature));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetFontFeature));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchMinFontSize));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchMinFontSize));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchMaxFontSize));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchMaxFontSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -1221,6 +1229,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetWordBreak));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetWordBreak));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMinFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMinFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMaxFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetHeightAdaptivePolicy));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetHeightAdaptivePolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
@@ -1487,6 +1507,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetWordBreak));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetWordBreak));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMinFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetMinFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMaxFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetMaxFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetHeightAdaptivePolicy));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetHeightAdaptivePolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);
