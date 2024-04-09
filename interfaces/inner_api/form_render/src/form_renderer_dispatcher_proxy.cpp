@@ -124,29 +124,6 @@ bool FormRendererDispatcherProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-void FormRendererDispatcherProxy::SetVisibleChange(bool isVisible)
-{
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
-        return;
-    }
-
-    if (!data.WriteBool(isVisible)) {
-        HILOG_ERROR("write isVisible fail, action error");
-        return;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int error = Remote()->SendRequest(
-        static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_VISIBLE_CHANGE),
-        data, reply, option);
-    if (error != ERR_OK) {
-        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
-    }
-}
-
 void FormRendererDispatcherProxy::SetObscured(bool isObscured)
 {
     MessageParcel data;

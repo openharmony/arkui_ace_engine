@@ -40,8 +40,6 @@ public:
 
     void DispatchSurfaceChangeEvent(float width, float height) override;
 
-    void SetVisibleChange(bool isVisible) override;
-
     void SetObscured(bool isObscured) override;
 private:
     template<typename T>
