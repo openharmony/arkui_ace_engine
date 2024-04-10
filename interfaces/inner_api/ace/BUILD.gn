@@ -20,6 +20,9 @@ config("uicontent_public_config") {
     "${ace_root}/interfaces/inner_api/ace",
     "${ace_root}/interfaces/inner_api/ace/ai/",
   ]
+  if (use_hilog) {
+    defines = [ "USE_HILOG" ]
+  }
 }
 
 config("uicontent_config") {
@@ -92,7 +95,7 @@ ohos_shared_library("ace_uicontent") {
     ]
   }
   deps = [ ":ace_forward_compatibility" ]
-
+  public_external_deps = external_deps
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part

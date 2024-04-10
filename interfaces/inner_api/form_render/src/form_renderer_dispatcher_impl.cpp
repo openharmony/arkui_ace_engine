@@ -101,6 +101,7 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
     }
 
     handler->PostTask([content = uiContent_, width, height]() {
+        HILOG_INFO("Root node update, width: %{public}f, height: %{public}f.", width, height);
         auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
@@ -134,6 +135,24 @@ void FormRendererDispatcherImpl::SetVisibleChange(bool isVisible)
             return;
         }
         uiContent->ProcessFormVisibleChange(isVisible);
+    });
+}
+
+void FormRendererDispatcherImpl::SetObscured(bool isObscured)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostTask([content = uiContent_, isObscured]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("Update ChangeSensitiveNodes: %{public}s", isObscured ? "true" : "false");
+        uiContent->ChangeSensitiveNodes(isObscured);
     });
 }
 } // namespace Ace

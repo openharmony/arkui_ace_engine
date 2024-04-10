@@ -648,6 +648,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         jsView->jsViewFunction_->ExecuteOnDumpInfo(params);
     };
 
+    auto getThisFunc = [weak = AceType::WeakClaim(this)]() -> void* {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, nullptr);
+        ContainerScope scope(jsView->GetInstanceId());
+        return (void*)&(jsView->jsViewObject_);
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -660,6 +667,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .recycleCustomNodeFunc = recycleCustomNode,
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
+        .getThisFunc = std::move(getThisFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),
@@ -912,6 +920,17 @@ void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
     info.SetReturnValue(jsVal);
 }
 
+void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
+{
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    auto nodeId = -1;
+    if (node) {
+        nodeId = node->GetId();
+    }
+    
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     JSClass<JSViewPartialUpdate>::Declare("NativeViewPartialUpdate");
@@ -937,6 +956,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

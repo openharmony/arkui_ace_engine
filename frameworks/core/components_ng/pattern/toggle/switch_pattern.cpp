@@ -75,6 +75,13 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
+    auto enabled = hub->IsEnabled();
+    if (enabled_ != enabled) {
+        enabled_ = enabled;
+        auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
@@ -84,6 +91,7 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
+    FireBuilder();
 }
 
 void SwitchPattern::UpdateSwitchPaintProperty()
@@ -163,6 +171,7 @@ void SwitchPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->UpdateSelectStatus(false);
     });
+    FireBuilder();
 }
 
 void SwitchPattern::UpdateSelectStatus(bool isSelected)
@@ -253,6 +262,9 @@ void SwitchPattern::UpdateChangeEvent() const
 
 void SwitchPattern::OnClick()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     isOn_ = !isOn_.value_or(false);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch click result %{public}d", isOn_.value_or(false));
     OnChange();
@@ -263,6 +275,9 @@ void SwitchPattern::OnClick()
 
 void SwitchPattern::OnTouchDown()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch touch down hover status %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
@@ -277,6 +292,9 @@ void SwitchPattern::OnTouchDown()
 
 void SwitchPattern::OnTouchUp()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch touch up hover status %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
@@ -287,6 +305,7 @@ void SwitchPattern::OnTouchUp()
     CHECK_NULL_VOID(host);
     isTouch_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    FireBuilder();
 }
 
 void SwitchPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -558,5 +577,50 @@ void SwitchPattern::OnColorConfigurationUpdate()
 
     host->MarkDirtyNode();
     host->SetNeedCallChildrenUpdate(false);
+}
+void SwitchPattern::SetSwitchIsOn(bool ison)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIsOn(ison);
+    OnModifyDone();
+}
+
+void SwitchPattern::FireBuilder()
+{
+    CHECK_NULL_VOID(makeFunc_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> SwitchPattern::BuildContentModifierNode()
+{
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    auto eventHub = host->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    bool isOn = false;
+    if (paintProperty->HasIsOn()) {
+        isOn = paintProperty->GetIsOnValue();
+    }
+    ToggleConfiguration toggleConfiguration(enabled, isOn);
+    return (makeFunc_.value())(toggleConfiguration);
 }
 } // namespace OHOS::Ace::NG

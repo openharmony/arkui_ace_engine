@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ScrollModifier extends ArkScrollComponent implements AttributeModifier<ScrollAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ScrollAttribute): void {
-    applyAndMergeModifier<ScrollAttribute, ArkScrollComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ScrollAttribute, ArkScrollComponent, ArkComponent>(instance, this);
   }
 }

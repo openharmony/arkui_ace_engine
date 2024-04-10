@@ -61,17 +61,17 @@ private:
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
-
+    int32_t GetDeviceColumn(GridSizeType type);
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
     bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
     bool IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize);
     void MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize,
         const RefPtr<OverlayManager> subOverlayManager);
-    void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog);
+    void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask = false);
     void SetSubWindowHotarea(
         const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId);
-	
+
     void UpdateTouchRegion();
 
     double GetPaddingBottom() const;
@@ -80,21 +80,18 @@ private:
         OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const;
 
     SizeF UpdateHeightWithSafeArea(SizeF size);
-    void GetDialogWidth(double& width);
-    void SetDialogSize(
-        const RefPtr<DialogLayoutProperty>& dialogProp, const RefPtr<LayoutWrapper>& layoutWrapper, SizeF selfSize);
     void UpdateSafeArea();
-
+    void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
+        LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
+    double GetRealSize(Dimension dialogFrame, double size);
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
     SafeAreaInsets safeAreaInsets_;
-
+    bool isModal_ = true;
+    bool isShowInSubWindow_ = false;
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;
-    CalcDimension width_ = Dimension(-1);
-    CalcDimension height_ = Dimension(-1);
-    double widthMax_ = 0;
     DimensionOffset dialogOffset_;
     DialogAlignment alignment_ = DialogAlignment::DEFAULT;
     TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;

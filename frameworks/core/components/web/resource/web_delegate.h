@@ -545,6 +545,8 @@ public:
         : WebResource(type, context, std::move(onError))
     {}
 
+    void UnRegisterScreenLockFunction();
+
     void SetObserver(const RefPtr<WebDelegateObserver>& observer)
     {
         observer_ = observer;
@@ -1007,6 +1009,8 @@ private:
     std::map<std::string, std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo>> embedDataInfo_;
     std::string tag_;
     std::string tag_type_;
+    double resizeWidth_ = 0.0;
+    double resizeHeight_ = 0.0;
 #endif
 };
 

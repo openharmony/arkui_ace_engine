@@ -28,6 +28,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int RESIZEABLE_VEC_LENGTH = 12;
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
 constexpr bool DEFAULT_IMAGE_AUTORESIZE = true;
 constexpr bool DEFAULT_SYNC_LOAD_VALUE = false;
@@ -36,6 +40,7 @@ constexpr bool DEFAULT_FIT_ORIGINAL_SIZE = false;
 constexpr ImageInterpolation DEFAULT_IMAGE_INTERPOLATION = ImageInterpolation::NONE;
 constexpr bool DEFAULT_DRAGGABLE = false;
 constexpr ArkUI_Float32 DEFAULT_IMAGE_EDGE_ANTIALIASING = 0;
+constexpr ImageResizableSlice DEFAULT_IMAGE_SLICE;
 const std::vector<float> DEFAULT_COLOR_FILTER = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
 constexpr int32_t LOAD_ERROR_CODE = 401;
 constexpr int32_t IMAGE_LOAD_STATUS_INDEX = 0;
@@ -48,7 +53,47 @@ constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
 constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
 constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
+const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
+    ResizableOption::BOTTOM, ResizableOption::LEFT };
 std::string g_strValue;
+
+bool SetCalcDimension(std::optional<CalcDimension>& optDimension, const ArkUIStringAndFloat* options,
+    ArkUI_Int32 optionsLength, ArkUI_Int32 offset)
+{
+    if ((options == nullptr) || (offset < 0) || ((offset + NUM_3) > optionsLength)) {
+        return false;
+    }
+    auto hasValue = options[offset];
+    auto value = options[offset + NUM_1];
+    auto unit = options[offset + NUM_2];
+    if (static_cast<bool>(hasValue.value)) {
+        auto unitValue = static_cast<DimensionUnit>(unit.value);
+        if (unitValue == DimensionUnit::CALC) {
+            std::string str;
+            if (value.valueStr != nullptr) {
+                str = value.valueStr;
+            }
+            CalcDimension calcDimension(str, unitValue);
+            optDimension = calcDimension;
+        } else {
+            CalcDimension calcDimension(value.value, unitValue);
+            optDimension = calcDimension;
+        }
+    }
+    return true;
+}
+
+void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
+{
+    for (unsigned int index = 0; index < RESIZEABLE_VEC_LENGTH; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, RESIZEABLE_VEC_LENGTH, index);
+        if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
+            resizable.SetEdgeSlice(direction, optDimension.value());
+        }
+    }
+}
 
 void SetImageSrc(ArkUINodeHandle node, const char* value)
 {
@@ -461,6 +506,21 @@ void ResetEdgeAntialiasing(ArkUINodeHandle node)
     ImageModelNG::SetSmoothEdge(frameNode, DEFAULT_IMAGE_EDGE_ANTIALIASING);
 }
 
+void SetResizable(ArkUINodeHandle node, const ArkUIStringAndFloat* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice resizable;
+    SetResizableFromVec(resizable, options);
+    ImageModelNG::SetResizableSlice(frameNode, resizable);
+}
+
+void ResetResizable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetResizableSlice(frameNode, DEFAULT_IMAGE_SLICE);
+}
 
 } // namespace
 
@@ -474,9 +534,9 @@ const ArkUIImageModifier* GetImageModifier()
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
-        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, GetImageSrc,
-        GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
-        GetImageDraggable, GetRenderMode };
+        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
+        ResetResizable, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation,
+        GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode };
     return &modifier;
 }
 

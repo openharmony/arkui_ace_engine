@@ -54,7 +54,7 @@ function mergeMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
 }
 
 class ModifierUtils {
-  static dirtyComponentSet: Set<ArkComponent> = new Set();
+  static dirtyComponentSet: Set<ArkComponent | ArkSpanComponent> = new Set();
   static dirtyFlag = false;
 
   static copyModifierWithKey(obj: ModifierWithKey<string | number | boolean | object>): ModifierWithKey<string | number | boolean | object> {
@@ -85,13 +85,13 @@ class ModifierUtils {
     return stageMap;
   }
 
-  static applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
+  static applyAndMergeModifier<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(instance: T, modifier: M): void {
     // @ts-ignore
     let component: C = instance as C;
     mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
   }
 
-  static applySetOnChange<T, M extends ArkComponent, C extends ArkComponent>(modifier: M): void {
+  static applySetOnChange<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(modifier: M): void {
     let myMap = modifier._modifiersWithKeys as ModifierMap;
     if (modifier._classType === ModifierType.STATE) {
       myMap.setOnChange((value: AttributeModifierWithKey) => {
@@ -104,7 +104,7 @@ class ModifierUtils {
     }
   }
 
-  static putDirtyModifier<M extends ArkComponent>(arkModifier: M, attributeModifierWithKey: ModifierWithKey<string | number | boolean | object>): void {
+  static putDirtyModifier<M extends ArkComponent | ArkSpanComponent>(arkModifier: M, attributeModifierWithKey: ModifierWithKey<string | number | boolean | object>): void {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
     if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
@@ -118,19 +118,24 @@ class ModifierUtils {
   }
 
   static requestFrame(): void {
-    getUINativeModule().frameNode.registerFrameCallback(() => {
+    const frameCallback = () => {
       this.dirtyComponentSet.forEach(item => {
-        if (item._nativePtrChanged && !item._weakPtr.invalid()) {
+        const nativePtrValid = !item._weakPtr.invalid();
+        if (item._nativePtrChanged && nativePtrValid) {
           item._modifiersWithKeys.forEach((value, key) => {
             value.applyPeer(item.nativePtr, false);
-          })
+          });
           item._nativePtrChanged = false;
         }
-        getUINativeModule().frameNode.markDirty(item.nativePtr, 0b100);
-      })
+        if (nativePtrValid) {
+          getUINativeModule().frameNode.markDirty(item.nativePtr, 0b100);
+        }
+      });
       this.dirtyComponentSet.clear();
       this.dirtyFlag = false;
-    });
+    };
+  
+    getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
 }
 
@@ -194,11 +199,10 @@ class AttributeUpdater {
   private _attribute: ArkComponent;
   private _isAttributeUpdater: boolean;
 
-  //Enum 修改写法
   static StateEnum = {
     INIT: 0,
     UPDATE: 1
-  }
+  };
 
   constructor() {
     this._state = AttributeUpdater.StateEnum.INIT;

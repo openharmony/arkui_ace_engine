@@ -336,6 +336,23 @@ class SearchLetterSpacingModifier extends ModifierWithKey<number | string> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class SearchMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMinFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchMinFontSize(node);
+    } else {
+      getUINativeModule().search.setSearchMinFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class SearchLineHeightModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
@@ -347,6 +364,23 @@ class SearchLineHeightModifier extends ModifierWithKey<number | string | Resourc
       getUINativeModule().search.resetLineHeight(node);
     } else {
       getUINativeModule().search.setLineHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SearchMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMaxFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchMaxFontSize(node);
+    } else {
+      getUINativeModule().search.setSearchMaxFontSize(node, this.value);
     }
   }
 
@@ -373,8 +407,8 @@ class SearchFontFeatureModifier extends ModifierWithKey<FontFeature> {
 }
 
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onEditChange(callback: (isEditing: boolean) => void): SearchAttribute {
     throw new Error('Method not implemented.');
@@ -503,14 +537,20 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
     return this;
   }
+  minFontSize(value: number | string | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMinFontSizeModifier.identity, SearchMinFontSizeModifier, value);
+    return this;
+  }
+  maxFontSize(value: number | string | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.Search.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkSearchComponent(nativeNode);
+globalThis.Search.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkSearchComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.SearchModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

@@ -67,6 +67,7 @@ public:
         ResetTextAlignChanged();
         ResetDisplayMode();
         ResetMaxViewLines();
+        ResetNormalMaxViewLines();
         ResetSelectionMenuHidden();
         ResetPasswordRules();
         ResetEnableAutoFill();
@@ -101,16 +102,23 @@ public:
         json->Put("selectAll", propSelectAllValue_.value_or(false));
         json->Put("passwordRules", propPasswordRules_.value_or("").c_str());
         json->Put("enableAutoFill", propEnableAutoFill_.value_or(true));
-        json->Put("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str());
-        json->Put("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str());
-        auto jsonDecoration = JsonUtil::Create(true);
-        std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));
-        jsonDecoration->Put("type", type.c_str());
-        jsonDecoration->Put("color", GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
-        std::string style =
-            V2::ConvertWrapTextDecorationStyleToString(GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
-        jsonDecoration->Put("style", style.c_str());
-        json->Put("decoration", jsonDecoration->ToString().c_str());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            json->Put("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str());
+            json->Put("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str());
+            auto jsonDecoration = JsonUtil::Create(true);
+            std::string type = V2::ConvertWrapTextDecorationToStirng(
+                GetTextDecoration().value_or(TextDecoration::NONE));
+            jsonDecoration->Put("type", type.c_str());
+            jsonDecoration->Put("color", GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+            std::string style = V2::ConvertWrapTextDecorationStyleToString(
+                GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+            jsonDecoration->Put("style", style.c_str());
+            json->Put("decoration", jsonDecoration->ToString().c_str());
+            json->Put("minFontSize", GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str());
+            json->Put("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str());
+            json->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
+        }
         json->Put("wordBreak",
             V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str());
     }
@@ -123,6 +131,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FONT_FEATURES_MAP, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecoration, TextDecoration, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
@@ -131,6 +141,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLength, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_NORMAL);
@@ -168,6 +180,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NormalMaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsDisabled, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextContentTypeChanged, bool, PROPERTY_UPDATE_MEASURE);

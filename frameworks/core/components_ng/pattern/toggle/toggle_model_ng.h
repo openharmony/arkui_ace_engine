@@ -15,11 +15,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOGGLE_TOGGLE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOGGLE_TOGGLE_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 
 namespace OHOS::Ace::NG {
 
+class ToggleConfiguration : public CommonConfiguration {
+    public:
+        ToggleConfiguration(bool enabled, bool isOn)
+            : CommonConfiguration(enabled), isOn_(isOn)
+        {}
+        bool isOn_;
+};
+using SwitchMakeCallback = std::function<RefPtr<FrameNode>(const ToggleConfiguration& toggleConfiguration)>;
 class ACE_EXPORT ToggleModelNG : public OHOS::Ace::ToggleModel {
 public:
     void Create(ToggleType toggleType, bool isOn) override;
@@ -34,6 +43,7 @@ public:
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
+    void Pop() override;
     void SetPointRadius(const Dimension& switchPointRadius) override;
     void ResetPointRadius() override;
     void SetUnselectedColor(const Color& unselectedColor) override;
@@ -54,6 +64,8 @@ public:
     static void SetPadding(FrameNode* frameNode, const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetSwitchIsOn(FrameNode* frameNode, bool isOn);
+    static void SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& jsMake);
+    static void SetChangeValue(FrameNode* frameNode, bool value);
 
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);

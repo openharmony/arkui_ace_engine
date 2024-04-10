@@ -44,6 +44,9 @@ enum class AceAutoFillType {
     ACE_DATE,
     ACE_MONTH,
     ACE_YEAR,
+    ACE_NICKNAME,
+    ACE_DETAIL_INFO_WITHOUT_STREET,
+    ACE_FORMAT_ADDRESS,
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_ACE_AUTO_FILL_TYPE_H

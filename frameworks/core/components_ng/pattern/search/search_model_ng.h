@@ -66,11 +66,16 @@ public:
     void SetType(TextInputType value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetAdaptMinFontSize(const Dimension& value) override;
+    void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
     void SetFontFeature(const FONT_FEATURES_MAP& value) override;
     void UpdateInspectorId(const std::string& key) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);

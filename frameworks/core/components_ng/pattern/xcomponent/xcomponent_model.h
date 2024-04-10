@@ -27,6 +27,10 @@ namespace OHOS::Ace {
 using LoadEvent = std::function<void(const std::string&)>;
 using DestroyEvent = std::function<void()>;
 using DetachCallback = std::function<void(const std::string&)>;
+using SurfaceCreatedEvent = std::function<void(const std::string&)>;
+using SurfaceChangedEvent = std::function<void(const std::string&, const NG::RectF&)>;
+using SurfaceDestroyedEvent = std::function<void(const std::string&)>;
+
 class XComponentModel {
 public:
     static XComponentModel* GetInstance();
@@ -34,6 +38,11 @@ public:
     {
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    }
+    static bool IsCommonEventAvailable(const XComponentType& type, std::string& libraryName)
+    {
+        return type == XComponentType::NODE ||
+               (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && libraryName == "");
     }
     virtual ~XComponentModel() = default;
 
@@ -59,6 +68,14 @@ public:
     {
         return XComponentType::UNKNOWN;
     }
+    virtual std::string GetLibraryName()
+    {
+        return "";
+    }
+    virtual void EnableAnalyzer(bool enable) {}
+    virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
+    virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
+    virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

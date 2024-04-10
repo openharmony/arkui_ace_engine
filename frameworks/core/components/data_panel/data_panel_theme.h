@@ -53,6 +53,7 @@ public:
             theme->thickness_ = dataPanelPattern->GetAttr<Dimension>("datapanel_thickness", 0.0_vp);
             theme->defaultHeight_ = dataPanelPattern->GetAttr<Dimension>("datapanel_height", 0.0_vp);
             theme->defaultWidth_ = dataPanelPattern->GetAttr<Dimension>("datapanel_width", 0.0_vp);
+            theme->defaultBorderRadius_ = dataPanelPattern->GetAttr<Dimension>("datapanel_corner_radius", 8.0_vp);
             theme->trackShadowOffsetX_ = dataPanelPattern->GetAttr<Dimension>("datapanel_trackshadow_offsetx", 0.0_vp);
             theme->trackShadowOffsetY_ = dataPanelPattern->GetAttr<Dimension>("datapanel_trackshadow_offsety", 0.0_vp);
             theme->backgroundColor_ = dataPanelPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
@@ -120,6 +121,11 @@ public:
         return defaultWidth_;
     }
 
+    const Dimension& GetDefaultBorderRadius() const
+    {
+        return defaultBorderRadius_;
+    }
+
     const Dimension& GetThickness() const
     {
         return thickness_;
@@ -153,6 +159,7 @@ private:
     Color backgroundColor_;
     Dimension defaultHeight_;
     Dimension defaultWidth_;
+    Dimension defaultBorderRadius_;
     Dimension thickness_;
     Dimension trackShadowRadius_;
     Dimension trackShadowOffsetX_;

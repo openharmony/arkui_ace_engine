@@ -14,6 +14,8 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 #define protected public
 #define private public
@@ -27,9 +29,11 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-
+#include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,11 +43,17 @@ namespace {
 constexpr float RET_VALUE = 0.0;
 constexpr float OFFSET_HANDLED = 0.07;
 constexpr float OFFSET_VALUE = 59.001;
+constexpr float DEFAULT_SIZE_LENGTH = 20.0f;
 constexpr Color FRONT_COLOR = Color(0xff0000ff);
 const std::string BAR_ITEM_ETS_TAG = "TitleBar";
 const std::string NAV_BAR_ITEM_ETS_TAG = "NavBar";
 const std::string EMPTY_TEXT = "";
 const std::string TITLE_BAR_TEXT = "title";
+const std::string TITLE_BAR_NODE_MENU = "menu";
+const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
+const std::string NAVDES_GROUP_NODE =  "navdestination_group_node";
+const std::string NAVIGATION_MENU_ETS_TAG = "NavigationMenu";
+
 } // namespace
 
 class TitleBarTestNg : public testing::Test {
@@ -399,12 +409,9 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest002, TestSize.L
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
     frameNode_->GetSubtitle();
-    titleBarPattern_->springController_ = nullptr;
-    titleBarPattern_->animator_  = nullptr;
     titleBarPattern_->ProcessTitleDragStart(offset);
     EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
 
-    titleBarPattern_->springMotion_ = nullptr;
     titleBarPattern_->SpringAnimation(100.0f, 0);
     titleBarPattern_->AnimateTo(offset);
     titleBarPattern_->ProcessTitleDragStart(offset);
@@ -447,7 +454,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern004, TestSize.Level1)
     auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY = AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
-    titleBarPattern->springMotion_ = AceType::MakeRefPtr<SpringMotion>(startPos, 0, 0, DEFAULT_OVER_SPRING_PROPERTY);
     titleBarPattern->SpringAnimation(startPos, 0);
     titleBarPattern->SetOverDragOffset(startPos);
     EXPECT_EQ(titleBarPattern->GetOverDragOffset(), startPos);
@@ -474,19 +480,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern005, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-}
-
-/**
- * @tc.name: TitleBarPattern006
- * @tc.desc: Test AnimateTo function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern006, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    CreateNavBar();
-    titleBarPattern_->AnimateTo(0);
-    EXPECT_NE(titleBarPattern_->animator_, nullptr);
 }
 
 /**
@@ -761,7 +754,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternOnCoordScrollStartTest024, TestSize.Leve
     auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    titleBarPattern_->springMotion_ = nullptr;
     titleBarPattern_->SpringAnimation(100.0f, 0);
     titleBarPattern_->AnimateTo(offset);
     titleBarPattern_->OnCoordScrollStart();
@@ -968,5 +960,221 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest038, TestSize.Level1)
     ASSERT_NE(subtitle, nullptr);
     frameNode_->SetSubtitle(subtitle);
     titleBarPattern_->SetMaxTitleBarHeight();
+}
+
+/**
+ * @tc.name: MountMenu001
+ * @tc.desc: Test MountMenu function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, MountMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is not NAV_DESTINATION.
+     */
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAVBAR);
+    titleBarPattern_->MountMenu(frameNode_);
+    EXPECT_EQ(frameNode_->GetLastChild(), nullptr);
+}
+
+/**
+ * @tc.name: MountMenu002
+ * @tc.desc: Test MountMenu function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, MountMenu002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is NAV_DESTINATION.
+     * and MenuNodeOperationValue is REPLACE and PrevMenuIsCustomValue is true
+     */
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+    frameNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    frameNode_->UpdatePrevMenuIsCustom(true);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    frameNode_->SetMenu(menuNode);
+    titleBarPattern_->MountMenu(frameNode_);
+    ASSERT_NE(frameNode_->GetLastChild(), nullptr);
+    EXPECT_EQ(frameNode_->GetLastChild()->GetTag(), TITLE_BAR_NODE_MENU);
+}
+
+/**
+ * @tc.name: MountMenu003
+ * @tc.desc: Test MountMenu function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, MountMenu003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+
+    /**
+     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is NAV_DESTINATION.
+     * and MenuNodeOperationValue is REPLACE and PrevMenuIsCustomValue is false and HasMenuNodeId
+     */
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+    frameNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    frameNode_->UpdatePrevMenuIsCustom(false);
+    titleBarPattern_->SetMenuNodeId(33);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    auto navdesGroupNode = AceType::MakeRefPtr<NavDestinationGroupNode>(NAVDES_GROUP_NODE,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavDestinationPattern>());
+    ASSERT_NE(navdesGroupNode, nullptr);
+    auto eventHub = navdesGroupNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(false);
+    frameNode_->SetParent(navdesGroupNode);
+    titleBarPattern_->SetMaxMenuNum(3);
+
+    titleBarPattern_->MountMenu(frameNode_);
+    ASSERT_NE(frameNode_->GetLastChild(), nullptr);
+    EXPECT_EQ(frameNode_->GetLastChild()->GetTag(), NAVIGATION_MENU_ETS_TAG);
+    MockPipelineContext::TearDown();
+}
+
+
+/**
+ * @tc.name: MountMenu004
+ * @tc.desc: Test MountMenu function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, MountMenu004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is NAV_DESTINATION.
+     * and MenuNodeOperationValue is REPLACE and PrevMenuIsCustomValue is false and HasMenuNodeId is false
+     */
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+    frameNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    frameNode_->UpdatePrevMenuIsCustom(true);
+
+    titleBarPattern_->MountMenu(frameNode_);
+    EXPECT_EQ(frameNode_->GetLastChild(), nullptr);
+}
+
+/**
+ * @tc.name:OnWindowSizeChanged001
+ * @tc.desc: Test OnWindowSizeChanged function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnWindowSizeChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters
+     */
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. Create related objects for titleBar
+     */
+    auto size = SizeF(DEFAULT_SIZE_LENGTH, DEFAULT_SIZE_LENGTH);
+    auto navGeometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(navGeometryNode, nullptr);
+    navGeometryNode->SetFrameSize(size);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    frameNode_->SetMenu(menuNode);
+    auto buttonNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    buttonNode->MountToParent(menuNode);
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(FRAME_ITEM_ETS_TAG, nodeId);
+    ASSERT_NE(barItemNode, nullptr);
+    barItemNode->MountToParent(buttonNode);
+    barItemNode->SetIsMoreItemNode(true);
+    frameNode_->SetIsTitleMenuNodeShowing(true);
+
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+
+    bool isItemActionFired = false;
+    auto barItemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    ASSERT_NE(barItemEventHub, nullptr);
+    barItemEventHub->SetItemAction([&]() { isItemActionFired = true; });
+
+    /**
+     * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
+     * @tc.expected: Set isItemActionFired is true
+     */
+    frameNode_->UpdatePrevMenuIsCustom(true);
+    titleBarPattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    EXPECT_TRUE(isItemActionFired);
+
+    /**
+     * @tc.steps: step4. call OnWindowSizeChanged func when PrevMenuIsCustom is false
+     * @tc.expected: isItemActionFired is true
+     */
+    frameNode_->UpdatePrevMenuIsCustom(false);
+    titleBarPattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    EXPECT_TRUE(isItemActionFired);
+}
+
+/**
+ * @tc.name: TitleBarPatternAnimateToTest001
+ * @tc.desc: Test AnimateTo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternAnimateToTest001, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    ASSERT_EQ(titleBarPattern_->animation_, nullptr);
+    titleBarPattern_->AnimateTo(offset);
+    ASSERT_NE(titleBarPattern_->animation_, nullptr);
+    titleBarPattern_->OnCoordScrollStart();
+    ASSERT_EQ(titleBarPattern_->animation_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPatternSpringAnimationTest001
+ * @tc.desc: Test SpringAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternSpringAnimationTest001, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
+    titleBarPattern_->SpringAnimation(100.0f, 0);
+    ASSERT_NE(titleBarPattern_->springAnimation_, nullptr);
+    titleBarPattern_->OnCoordScrollStart();
+    ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
 }
 } // namespace OHOS::Ace::NG

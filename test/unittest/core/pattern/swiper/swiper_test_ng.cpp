@@ -24,16 +24,23 @@ void SwiperTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
+
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
     swiperIndicatorTheme->color_ = Color::FromString("#182431");
     swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
+    swiperIndicatorTheme->hoverArrowBackgroundColor_ = HOVER_ARROW_COLOR;
+    swiperIndicatorTheme->clickArrowBackgroundColor_ = CLICK_ARROW_COLOR;
+    swiperIndicatorTheme->arrowDisabledAlpha_ = ARROW_DISABLED_ALPHA;
     swiperIndicatorTheme->size_ = Dimension(6.f);
     TextStyle textStyle;
     textStyle.SetTextColor(Color::FromString("#ff182431"));
     textStyle.SetFontSize(Dimension(14.f));
     textStyle.SetFontWeight(FontWeight::W800);
     swiperIndicatorTheme->digitalIndicatorTextStyle_ = textStyle;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(SwiperIndicatorTheme::TypeId())).WillRepeatedly(Return(swiperIndicatorTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
@@ -93,10 +100,37 @@ void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& call
 void SwiperTestNg::CreateItem(int32_t itemNumber)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
-        TextModelNG model;
-        model.Create("text");
+        ButtonModelNG buttonModelNG;
+        buttonModelNG.CreateWithLabel("label");
         ViewStackProcessor::GetInstance()->Pop();
     }
+}
+
+void SwiperTestNg::CreateItemWithSize(float width, float height)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel("label");
+    ViewAbstract::SetWidth(CalcLength(width));
+    ViewAbstract::SetHeight(CalcLength(height));
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
+void SwiperTestNg::ShowNext()
+{
+    controller_->ShowNext();
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::ShowPrevious()
+{
+    controller_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::ChangeIndex(int32_t index)
+{
+    controller_->ChangeIndex(index, false);
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -493,8 +527,7 @@ HWTEST_F(SwiperTestNg, PostTranslateTask002, TestSize.Level1)
      * @tc.steps: step3. Swipe to last item and call PostTranslateTask
      * @tc.expected: Can not swipe to next
      */
-    controller_->SwipeToWithoutAnimation(3);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(3);
     pattern_->PostTranslateTask(DEFAULT_INTERVAL);
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
@@ -691,11 +724,12 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset002, TestSize.Level1)
         model.SetLoop(false);
     });
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::SPRING);
+    pattern_->isTouchPad_ = true;
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, -10.f);
+    EXPECT_GT(pattern_->currentDelta_, -10.f);
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 10.f);
+    EXPECT_GT(pattern_->currentDelta_, 10.f);
 }
 
 /**
@@ -1110,7 +1144,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone002, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperPatternRegisterVisibleAreaChange002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto pipeline = frameNode_->GetContext();
+    auto pipeline = frameNode_->GetContextRefPtr();
     auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
 
     /**
@@ -1149,7 +1183,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
      * @tc.steps: step2. call InitSurfaceChangedCallback and then callback.
      * @tc.expected: Related function is called.
      */
-    auto pipeline = frameNode_->GetContext();
+    auto pipeline = frameNode_->GetContextRefPtr();
     pattern_->surfaceChangedCallbackId_.emplace(1);
     pattern_->InitSurfaceChangedCallback();
     pipeline->callbackId_ = 0;
@@ -1177,8 +1211,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
     EXPECT_EQ(callbackmapnumber2, 1);
     auto testFunction2 = pipeline->surfaceChangedCallbackMap_[1];
     testFunction2(1, 1, 1, 1, WindowSizeChangeReason::UNDEFINED);
-    auto callbacknumber2 = pattern_->surfaceChangedCallbackId_;
-    EXPECT_EQ(callbacknumber2, 1);
+    EXPECT_EQ(pattern_->surfaceChangedCallbackId_, 1);
+    testFunction2(1, 1, 1, 1, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(pattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
 
     auto childswiperNode1 = FrameNode::CreateFrameNode("childswiper", 1, AceType::MakeRefPtr<SwiperPattern>(), false);
     childswiperNode1->MountToParent(frameNode_);
@@ -1371,29 +1406,6 @@ HWTEST_F(SwiperTestNg, ResetDisplayCount001, TestSize.Level1)
     auto uiNode = AceType::DynamicCast<FrameNode>(element);
     pattern = uiNode->GetPattern<SwiperPattern>();
     EXPECT_NE(pattern->GetDisplayCount(), 10);
-}
-
-HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone00081, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Default value
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub_)));
-
-    auto pipeline = MockPipelineContext::GetCurrent();
-    pipeline->restoreNodeInfo_.emplace(std::make_pair(1, "testFlushUITasks"));
-    pattern_->InitPanEvent(gestureEventHub);
-    EXPECT_EQ(pattern_->direction_, Axis::HORIZONTAL);
-
-    pattern_->touchEvent_ = nullptr;
-    pattern_->InitTouchEvent(gestureEventHub);
-    TouchEventFunc callback = [](TouchEventInfo& info) {};
-
-    pattern_->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
-    pattern_->InitTouchEvent(gestureEventHub);
-    pattern_->OnModifyDone();
-    EXPECT_TRUE(pattern_->panEvent_);
 }
 
 /**

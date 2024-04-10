@@ -19,6 +19,18 @@
 #include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
+constexpr double PERCENT_100 = 100.0;
+constexpr float LINEAR_GRADIENT_ANGLE = 90.0f;
+
+namespace {
+    GradientColor CreatePercentGradientColor(float percent, Color color)
+    {
+        NG::GradientColor gredient = GradientColor(color);
+        gredient.SetDimension(CalcDimension(percent * PERCENT_100, DimensionUnit::PERCENT));
+        return gredient;
+    }
+} // namespace
+
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
@@ -45,6 +57,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto renderContext = paintWrapper->GetRenderContext();
+    UpdateFadingGradient(renderContext);
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
     listContentModifier_->SetClipOffset(paddingOffset);
     listContentModifier_->SetClipSize(frameSize);
@@ -183,5 +196,35 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
+
+void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)
+{
+    if ((!isFadingTop_ && !isFadingBottom_) || Negative(percentFading_)) {
+        return;
+    }
+    CHECK_NULL_VOID(listRenderContext);
+    CHECK_NULL_VOID(overlayRenderContext_);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    if (isFadingTop_) {
+        gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
+        gradient.AddColor(CreatePercentGradientColor(percentFading_, Color::WHITE));
+    }
+    if (isFadingBottom_) {
+        gradient.AddColor(CreatePercentGradientColor(1 - percentFading_, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
+    }
+    Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
+    if (axis == Axis::HORIZONTAL) {
+        gradient.GetLinearGradient()->angle = CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
+    }
+    listRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    listRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+
+    overlayRenderContext_->UpdateZIndex(INT32_MAX);
+    overlayRenderContext_->UpdateLinearGradient(gradient);
+    overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
+    overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 } // namespace OHOS::Ace::NG

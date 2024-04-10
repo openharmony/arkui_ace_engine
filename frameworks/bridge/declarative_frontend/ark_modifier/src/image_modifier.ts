@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ImageModifier extends ArkImageComponent implements AttributeModifier<ImageAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ImageAttribute): void {
-    applyAndMergeModifier<ImageAttribute, ArkImageComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ImageAttribute, ArkImageComponent, ArkComponent>(instance, this);
   }
 }

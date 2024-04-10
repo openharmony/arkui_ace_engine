@@ -181,7 +181,7 @@ RefPtr<FrameNode> VideoTestNg::CreateVideoNode(TestProperty& testProperty)
         VideoModelNG().SetProgressRate(testProperty.progressRate.value());
     }
     if (testProperty.posterUrl.has_value()) {
-        VideoModelNG().SetPosterSourceInfo(testProperty.posterUrl.value());
+        VideoModelNG().SetPosterSourceInfo(testProperty.posterUrl.value(), "", "");
     }
     if (testProperty.muted.has_value()) {
         VideoModelNG().SetMuted(testProperty.muted.value());
@@ -239,7 +239,7 @@ HWTEST_F(VideoTestNg, VideoPropertyTest002, TestSize.Level1)
 
     video.SetSrc(VIDEO_SRC);
     video.SetProgressRate(VIDEO_PROGRESS_RATE);
-    video.SetPosterSourceInfo(VIDEO_POSTER_URL);
+    video.SetPosterSourceInfo(VIDEO_POSTER_URL, "", "");
     video.SetMuted(MUTED_VALUE);
     video.SetAutoPlay(AUTO_PLAY);
     video.SetControls(CONTROL_VALUE);
@@ -398,7 +398,7 @@ HWTEST_F(VideoTestNg, VideoMeasureTest005, TestSize.Level1)
         .WillRepeatedly(Return(false));
 
     // when video set preview image and control, it will contains two children which are image and row respectively.
-    video.SetPosterSourceInfo(VIDEO_POSTER_URL);
+    video.SetPosterSourceInfo(VIDEO_POSTER_URL, "", "");
     video.SetControls(CONTROL_VALUE);
 
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -1196,7 +1196,7 @@ HWTEST_F(VideoTestNg, VideoPropertyTest016, TestSize.Level1)
     video.SetPosterSourceByPixelMap(secondPixelMap);
     EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), secondPixelMapImage);
 
-    video.SetPosterSourceInfo(VIDEO_POSTER_URL);
+    video.SetPosterSourceInfo(VIDEO_POSTER_URL, "", "");
     EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), urlImage);
 
     video.SetPosterSourceByPixelMap(pixelMap);

@@ -188,8 +188,8 @@ int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* impl = GetFullImpl();
-    impl->getExtendedAPI()->setMeasureWidth(node->uiNodeHandle, width);
-    impl->getExtendedAPI()->setMeasureHeight(node->uiNodeHandle, height);
+    impl->getExtendedAPI()->setMeasureWidth(node->uiNodeHandle, width > 0 ? width : 0);
+    impl->getExtendedAPI()->setMeasureHeight(node->uiNodeHandle, height > 0 ? height : 0);
     return ERROR_CODE_NO_ERROR;
 }
 

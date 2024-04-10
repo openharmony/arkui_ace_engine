@@ -551,9 +551,6 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   dataDetectorConfig(config: any): this {
     throw new Error('Method not implemented.');
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   font(value: Font): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, value);
     return this;
@@ -673,7 +670,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
 }
 // @ts-ignore
-globalThis.Text.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Text.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkTextComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

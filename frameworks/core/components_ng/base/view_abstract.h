@@ -74,6 +74,12 @@ enum class ContextMenuRegisterType : char {
     CUSTOM_TYPE = 1,
 };
 
+enum class OverlayType {
+    BUILDER = 0,
+    TEXT = 1,
+    RESET = 2,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -127,6 +133,7 @@ public:
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
     static void SetBackgroundEffect(const EffectOption &effectOption);
+    static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
     static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
@@ -175,6 +182,7 @@ public:
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetDynamicDim(float DimDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
@@ -273,6 +281,7 @@ public:
 
     static void SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent> &)> &&onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
+    static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
@@ -320,6 +329,9 @@ public:
     static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
+    static void SetOverlayBuilder(std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
     // motionPath
     static void SetMotionPath(const MotionPathOption &motionPath);
     // progress mask
@@ -338,11 +350,23 @@ public:
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
+    static void DisableOnClick(FrameNode* frameNode);
+    static void DisableOnTouch(FrameNode* frameNode);
+    static void DisableOnKeyEvent(FrameNode* frameNode);
+    static void DisableOnHover(FrameNode* frameNode);
+    static void DisableOnMouse(FrameNode* frameNode);
+    static void DisableOnAppear(FrameNode* frameNode);
+    static void DisableOnDisappear(FrameNode* frameNode);
+    static void DisableOnFocus(FrameNode* frameNode);
+    static void DisableOnBlur(FrameNode* frameNode);
+    static void DisableOnAreaChange(FrameNode* frameNode);
 
     // useEffect
     static void SetUseEffect(bool useEffect);
 
     static void SetFreeze(bool freeze);
+
+    static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
 
     // useShadowBatching
     static void SetUseShadowBatching(bool useShadowBatching);
@@ -483,6 +507,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
+    static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
@@ -490,6 +515,7 @@ public:
     static void SetSharedTransition(
         FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     static void SetTransition(FrameNode* frameNode, const TransitionOptions& options);
+    static void CleanTransition(FrameNode* frameNode);
     static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
@@ -512,6 +538,12 @@ public:
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc);
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
+    static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
+    static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
+    static void SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback);
+    static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
+    static void SetOnSizeChanged(
+        FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
@@ -521,6 +553,7 @@ public:
     static bool GetNeedFocus(FrameNode* frameNode);
     static double GetOpacity(FrameNode* frameNode);
     static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
+    static BorderWidthProperty GetLayoutBorderWidth(FrameNode* frameNode);
     static BorderRadiusProperty GetBorderRadius(FrameNode* frameNode);
     static BorderColorProperty GetBorderColor(FrameNode* frameNode);
     static BorderStyleProperty GetBorderStyle(FrameNode* frameNode);
@@ -589,11 +622,14 @@ public:
     static std::string GetBackgroundImageSrc(FrameNode* frameNode);
     static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
     static PaddingProperty GetPadding(FrameNode* frameNode);
+    static std::optional<CalcSize> GetConfigSize(FrameNode* frameNode);
     static std::string GetKey(FrameNode* frameNode);
     static bool GetEnabled(FrameNode* frameNode);
     static MarginProperty GetMargin(FrameNode* frameNode);
     static TranslateOptions GetTranslate(FrameNode* frameNode);
     static float GetAspectRatio(FrameNode* frameNode);
+    static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
+
 private:
     static void AddDragFrameNodeToManager();
 };

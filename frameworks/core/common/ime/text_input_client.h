@@ -142,6 +142,8 @@ public:
 
     virtual void HandleSelect(CaretMoveIntent direction) {}
 
+    virtual void HandleSelectFontStyle(KeyCode code) {}
+
     virtual void HandleOnSelectAll() {}
 
     virtual void HandleOnEnter() {}

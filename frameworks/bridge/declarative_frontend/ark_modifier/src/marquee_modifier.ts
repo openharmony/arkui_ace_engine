@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class MarqueeModifier extends ArkMarqueeComponent implements AttributeModifier<MarqueeAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: MarqueeAttribute): void {
-    applyAndMergeModifier<MarqueeAttribute, ArkMarqueeComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<MarqueeAttribute, ArkMarqueeComponent, ArkComponent>(instance, this);
   }
 }

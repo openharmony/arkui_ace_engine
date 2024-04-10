@@ -47,7 +47,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float NORMAL_LENGTH = 100.0f;
 constexpr int64_t FORM_ID_OF_TDD = 123456;
+const std::string FORM_ID_STRING_OF_TDD = "123456";
 constexpr int32_t NODE_ID_OF_PARENT_NODE = 654321;
+const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
 RequestFormInfo formInfo;
 DirtySwapConfig config;
 FormModelNG formModelNG;
@@ -202,16 +204,20 @@ HWTEST_F(FormTestNg, FormModelNGTest001, TestSize.Level1)
     formNG.AllowUpdate(false);
     formNG.SetVisibility(VisibleType(1));
     formNG.SetModuleName("test form");
+    formNG.SetObscured(reasonsVector);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
     ASSERT_NE(property, nullptr);
+    auto formPattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(formPattern, nullptr);
     auto formInfo = property->GetRequestFormInfoValue();
     ASSERT_EQ(formInfo.dimension, 1);
     ASSERT_EQ(formInfo.renderingMode, 0);
     EXPECT_FALSE(formInfo.allowUpdate);
     ASSERT_EQ(formInfo.moduleName, "test form");
+    ASSERT_EQ(formPattern->isFormObscured_, 1);
 }
 
 /**
@@ -260,6 +266,38 @@ HWTEST_F(FormTestNg, FormModelNGTest002, TestSize.Level1)
     formNG.SetOnLoad(std::move(onLoad));
     auto frameNodeonLoad = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNodeonLoad, nullptr);
+}
+
+/**
+ * @tc.name: FormModelNGTest003
+ * @tc.desc: create form node
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormModelNGTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init FormModelNG object
+     */
+    FormModelNG formNG;
+    formNG.Create(formInfo);
+
+    /**
+     * @tc.steps: step2. Set call methods
+     * @tc.expected: Check the FormModelNG pattern value
+     */
+    std::vector<ObscuredReasons> reasons;
+    reasons.resize(0);
+    formNG.SetObscured(reasons);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto formPattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(formPattern, nullptr);
+    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto formInfo = property->GetRequestFormInfoValue();
+    ASSERT_EQ(formInfo.obscuredMode, 0);
+    ASSERT_EQ(formPattern->isFormObscured_, 0);
 }
 
 /**
@@ -498,7 +536,8 @@ HWTEST_F(FormTestNg, CreateCardContainer002, TestSize.Level1)
      */
     FormManager::GetInstance().AddSubContainer(1, subContainer);
     ASSERT_EQ(Container::IsCurrentUseNewPipeline(), true);
-    ASSERT_EQ(frameNode->GetContext()->GetInstanceId(), FormManager::GetInstance().GetSubContainer(1)->GetInstanceId());
+    ASSERT_EQ(
+        frameNode->GetContextRefPtr()->GetInstanceId(), FormManager::GetInstance().GetSubContainer(1)->GetInstanceId());
     pattern->CreateCardContainer();
     ASSERT_EQ(FormManager::GetInstance().GetSubContainer(1), nullptr);
 
@@ -632,6 +671,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
     eventHub->SetOnUninstall([](const std::string& string) {
         auto json = JsonUtil::Create(true);
         json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
+        json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
         ASSERT_EQ(string, json->ToString());
     });
     pattern->FireOnUninstallEvent(FORM_ID_OF_TDD);
@@ -643,6 +683,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
     eventHub->SetOnAcquired([](const std::string& string) {
         auto json = JsonUtil::Create(true);
         json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
+        json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
         ASSERT_EQ(string, json->ToString());
     });
     pattern->FireOnAcquiredEvent(FORM_ID_OF_TDD);

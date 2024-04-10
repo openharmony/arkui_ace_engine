@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -73,14 +74,6 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
-    CHECK_NULL_RETURN(listItemEventHub, nullptr);
-    if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
-        !listItemEventHub->GetEndOnDelete()) {
-        return MakeRefPtr<BoxLayoutAlgorithm>();
-    }
     auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, childNodeIndex_);
     layoutAlgorithm->SetAxis(axis_);
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
@@ -208,6 +201,32 @@ void ListItemPattern::SetSwiperItemForList()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItem(AceType::WeakClaim(this));
+    auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
+        auto item = weak.Upgrade();
+        CHECK_NULL_RETURN(item, true);
+        auto host = item->GetHost();
+        CHECK_NULL_RETURN(host, true);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, true);
+        auto offset = geometryNode->GetMarginFrameOffset();
+        auto size = geometryNode->GetMarginFrameSize();
+        double xOffset = static_cast<double>(localPoint.GetX()) - offset.GetX();
+        double yOffset = static_cast<double>(localPoint.GetY()) - offset.GetY();
+        if (yOffset > 0 && yOffset < size.Height()) {
+            if (item->startNodeSize_ && xOffset > 0 && xOffset < item->startNodeSize_) {
+                return false;
+            }
+            if (item->endNodeSize_ && xOffset > size.Width() - item->endNodeSize_ && xOffset < size.Width()) {
+                return false;
+            }
+        }
+        return true;
+    };
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto scrollableEvent = listPattern->GetScrollableEvent();
+        CHECK_NULL_VOID(scrollableEvent);
+        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
+    }
 }
 
 void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback)
@@ -607,6 +626,19 @@ void ListItemPattern::FireSwipeActionStateChange(SwipeActionState newState)
     swipeActionState_ = newState;
     bool isStart = GreatNotEqual(curOffset_, 0.0);
     listItemEventHub->FireStateChangeEvent(newState, isStart);
+}
+
+void ListItemPattern::ResetToItemChild()
+{
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    auto scrollableEvent = listPattern->GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
+    scrollableEvent->SetClickJudgeCallback(nullptr);
+    swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+    FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
 }
 
 void ListItemPattern::HandleDragEnd(const GestureEvent& info)

@@ -46,6 +46,10 @@ namespace {
     constexpr Dimension BADGE_TEXT_FONT_SIZE = 14.0_fp;
     const Color BADGE_TEXT_FONT_COLOR = Color::FromString("#ffffffff");
     const Color BADGE_BACKGROUND_COLOR = Color::FromString("#ff007dff");
+    constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 10.0f;
+    constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
+    constexpr float DEFAULT_INTERPOLATING_SPRING_STIFFNESS = 410.0f;
+    constexpr float DEFAULT_INTERPOLATING_SPRING_DAMPING = 38.0f;
 }
 
 void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, float& maxDistance, float& minDistance,
@@ -188,8 +192,10 @@ void DragAnimationHelper::PlayNodeAnimationBeforeLifting(const RefPtr<FrameNode>
     }
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
-    const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.33f, 0.67f, 1.0f);
-    option.SetCurve(curve);
+    auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATING_SPRING_VELOCITY,
+        DEFAULT_INTERPOLATING_SPRING_MASS, DEFAULT_INTERPOLATING_SPRING_STIFFNESS,
+        DEFAULT_INTERPOLATING_SPRING_DAMPING);
+    option.SetCurve(springCurve);
     auto frameContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(frameContext);
     frameContext->UpdateTransformScale({ 1.0, 1.0 });

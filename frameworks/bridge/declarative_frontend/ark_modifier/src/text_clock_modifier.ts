@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class TextClockModifier extends ArkTextClockComponent implements AttributeModifier<TextClockAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: TextClockAttribute): void {
-    applyAndMergeModifier<TextClockAttribute, ArkTextClockComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<TextClockAttribute, ArkTextClockComponent, ArkComponent>(instance, this);
   }
 }

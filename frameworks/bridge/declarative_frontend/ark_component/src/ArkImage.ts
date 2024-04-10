@@ -150,6 +150,31 @@ class ImageEdgeAntialiasingModifier extends ModifierWithKey<number> {
   }
 }
 
+class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
+  constructor(value: ResizableOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('resizable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetResizable(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceRight: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      if (!isUndefined(this.value.slice)) {
+        let tmpSlice = this.value.slice as EdgeWidths;
+        sliceTop = tmpSlice.top;
+        sliceRight = tmpSlice.right;
+        sliceBottom = tmpSlice.bottom;
+        sliceLeft = tmpSlice.left;
+      }
+      getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
+    }
+  }
+}
+
 class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
   constructor(value: ImageInterpolation) {
     super(value);
@@ -445,11 +470,8 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
 }
 
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback): this {
-    throw new Error('Method not implemented.');
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -566,12 +588,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
 }
 // @ts-ignore
-globalThis.Image.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkImageComponent(nativeNode);
+globalThis.Image.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkImageComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ImageModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

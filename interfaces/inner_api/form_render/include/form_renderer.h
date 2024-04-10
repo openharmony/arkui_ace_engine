@@ -73,6 +73,7 @@ private:
     void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     bool allowUpdate_ = true;
+    bool obscurationMode_ = false;
     float width_ = 0.0f;
     float height_ = 0.0f;
     float borderWidth_ = 0.0f;

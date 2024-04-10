@@ -29,6 +29,8 @@ public:
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(TimeChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
+    void SetDateTimeOptions(ZeroPrefixType& hourType,
+        ZeroPrefixType& minuteType, ZeroPrefixType& secondType) override;
     void SetWheelModeEnabled(bool wheelModeEnabled) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;

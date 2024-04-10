@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
@@ -231,7 +232,9 @@ void NGGestureRecognizer::SetTransInfo(int transId)
 void NGGestureRecognizer::AboutToAccept()
 {
     if (AceType::InstanceOf<RecognizerGroup>(this)) {
+        HandleWillAccept();
         OnAccepted();
+        HandleDidAccept();
         return;
     }
 
@@ -249,7 +252,31 @@ void NGGestureRecognizer::AboutToAccept()
         eventManager->SetInnerFlag(false);
     }
     ctrl->TrySetFirstResponse(frameNode);
+    HandleWillAccept();
     OnAccepted();
+    HandleDidAccept();
+}
+
+void NGGestureRecognizer::HandleWillAccept()
+{
+    auto node = GetAttachedNode().Upgrade();
+    if (AceType::InstanceOf<ClickRecognizer>(this)) {
+        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(this);
+        GestureEvent gestureEventInfo = clickRecognizer->GetGestureEventInfo();
+        ClickInfo clickInfo = clickRecognizer->GetClickInfo();
+        UIObserverHandler::GetInstance().NotifyWillClick(gestureEventInfo, clickInfo, node);
+    }
+}
+
+void NGGestureRecognizer::HandleDidAccept()
+{
+    auto node = GetAttachedNode().Upgrade();
+    if (AceType::InstanceOf<ClickRecognizer>(this)) {
+        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(this);
+        GestureEvent gestureEventInfo = clickRecognizer->GetGestureEventInfo();
+        ClickInfo clickInfo = clickRecognizer->GetClickInfo();
+        UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, node);
+    }
 }
 
 RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const

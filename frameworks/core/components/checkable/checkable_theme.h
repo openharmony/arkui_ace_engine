@@ -46,6 +46,18 @@ public:
     {
         return focusColor_;
     }
+    const Color& GetFocusBoardColor() const
+    {
+        return focusBoardColor_;
+    }
+    const Color& GetBorderFocusedColor() const
+    {
+        return borderFocusedColor_;
+    }
+    const Color& GetFocusedBGColorUnselected() const
+    {
+        return focusedBGColorUnselected_;
+    }
     const Dimension& GetWidth() const
     {
         return width_;
@@ -141,6 +153,11 @@ public:
         return focusPaintPadding_;
     }
 
+    const Dimension& GetFocusBoardSize() const
+    {
+        return focusBoardSize_;
+    }
+
     double GetHoverDuration() const
     {
         return hoverDuration_;
@@ -175,6 +192,9 @@ protected:
     Color hoverColor_;
     Color clickEffectColor_;
     Color shadowColor_;
+    Color focusBoardColor_;
+    Color borderFocusedColor_;
+    Color focusedBGColorUnselected_;
     Dimension width_;
     Dimension height_;
     Dimension hotZoneHorizontalPadding_;
@@ -186,6 +206,7 @@ protected:
     Dimension hoverRadius_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
+    Dimension focusBoardSize_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -229,8 +250,13 @@ public:
             theme->width_ = checkboxPattern->GetAttr<Dimension>("checkbox_size", 0.0_vp);
             theme->height_ = theme->width_;
             theme->hotZoneHorizontalPadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 0.0_vp);
-            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size", 0.0_vp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->hotZoneHorizontalPadding_ =
+                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
+                theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
+            }
+            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultHeight_ = theme->defaultWidth_;
             theme->needFocus_ = static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_need_focus", 0.0));
             theme->backgroundSolid_ =
@@ -243,6 +269,11 @@ public:
             theme->activeColor_ = checkboxPattern->GetAttr<Color>("bg_color_checked", Color::RED);
             theme->inactiveColor_ = checkboxPattern->GetAttr<Color>("bg_border_color_unchecked", Color::RED);
             theme->focusColor_ = checkboxPattern->GetAttr<Color>("focus_border_color", Color::RED);
+            theme->focusBoardColor_ = checkboxPattern->GetAttr<Color>("color_focused_bg", Color::RED);
+            theme->focusBoardSize_ = checkboxPattern->GetAttr<Dimension>("size_focused_bg", 2.0_vp);
+            theme->borderFocusedColor_ = checkboxPattern->GetAttr<Color>("focused_border_color", Color::RED);
+            theme->focusedBGColorUnselected_ =
+                checkboxPattern->GetAttr<Color>("focused_bg_color_unselected", Color::RED);
             theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>("bg_border_radius", 0.0_vp);
             theme->hoverColor_ = checkboxPattern->GetAttr<Color>("hover_border_color", Color::RED);
             theme->clickEffectColor_ = checkboxPattern->GetAttr<Color>("click_effect_color", Color::RED);
@@ -258,6 +289,12 @@ public:
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
+            SetCheckboxSize(themeConstants, theme);
+        }
+
+        void SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
             // width/height/borderRadius not exist in theme
             theme->width_ = checkboxPattern->GetAttr<Dimension>("width", 26.0_vp);
             theme->height_ = theme->width_;
@@ -265,6 +302,11 @@ public:
             theme->hotZoneHorizontalPadding_ =
                 checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->hotZoneHorizontalPadding_ =
+                    checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding_twelve", 2.0_vp);
+                theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+            }
         }
     };
 

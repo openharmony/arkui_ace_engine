@@ -55,7 +55,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         this.subscriberRefs_.add(subscriber);
       }
     }
-    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
   }
 
   aboutToBeDeleted() {
@@ -151,6 +150,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       });
     }
     return result;
+  }
+
+  /**/
+  public hasDependencies(): boolean {
+    return this.dependentElmtIdsByProperty_.hasDependencies();
   }
 
   /* for @Prop value from source we need to generate a @State
@@ -569,4 +573,7 @@ class PropertyDependencies {
     return result;
   }
 
+  public hasDependencies() : boolean {
+    return this.propertyDependencies_.size > 0 || this.trackedObjectPropertyDependencies_.size > 0;
+  }
 }

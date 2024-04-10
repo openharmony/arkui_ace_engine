@@ -42,7 +42,10 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
     { ERROR_CODE_INTERNAL_ERROR, "Internal error. " },
     { ERROR_CODE_URI_ERROR, "Uri error. " },
     { ERROR_CODE_PAGE_STACK_FULL, "Page stack error. " },
-    { ERROR_CODE_URI_ERROR_LITE, "Uri error. " }
+    { ERROR_CODE_URI_ERROR_LITE, "Uri error. " },
+    { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
+    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
+    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " }
 };
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode)

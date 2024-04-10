@@ -122,6 +122,7 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     if (image->IsStatic()) {
         return;
     }
+    SetOnFinishCallback(image);
     SetRedrawCallback(image);
     RegisterVisibleAreaChange();
     auto layoutProps = GetLayoutProperty<LayoutProperty>();
@@ -130,6 +131,19 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         image->ControlAnimation(false);
     }
+}
+
+void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
+{
+    CHECK_NULL_VOID(image);
+    image->SetOnFinishCallback([weak = WeakPtr(GetHost())] {
+        auto imageNode = weak.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+        if (eventHub) {
+            eventHub->FireFinishEvent();
+        }
+    });
 }
 
 void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
@@ -308,6 +322,18 @@ void ImagePattern::OnImageLoadSuccess()
     host->MarkNeedRenderOnly();
 }
 
+bool ImagePattern::CheckIfNeeedLayout()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    CHECK_NULL_RETURN(host->GetGeometryNode()->GetContent(), true);
+    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_RETURN(props, true);
+    const auto& layoutConstraint = props->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, true);
+    return !(layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid());
+}
+
 void ImagePattern::OnImageDataReady()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -323,18 +349,10 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
-    if (!props) {
+    if (CheckIfNeeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return;
-    }
-    auto&& layoutConstraint = props->GetCalcLayoutConstraint();
-
-    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid()) {
-        auto geo = host->GetGeometryNode();
-        StartDecoding(geo->GetContentSize());
     } else {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        StartDecoding(geometryNode->GetContentSize());
     }
 }
 
@@ -400,10 +418,6 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
         return;
     }
 
-    auto renderProps = host->GetPaintProperty<ImageRenderProperty>();
-    if (renderProps) {
-        renderProps->UpdateNeedBorderRadius(true);
-    }
     canvasImage->SetPaintConfig(config);
 }
 
@@ -655,6 +669,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
             return;
         }
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
+        CHECK_NULL_VOID(pattern->altImage_);
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
@@ -993,25 +1008,95 @@ void ImagePattern::UpdateFillColorIfForegroundColor()
     }
 }
 
-void ImagePattern::DumpInfo()
+void ImagePattern::DumpLayoutInfo()
 {
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     DumpLog::GetInstance().AddDesc(std::string("url: ").append(src.ToString()));
+
+    auto altSrc = layoutProp->GetAlt().value_or(ImageSourceInfo(""));
+    DumpLog::GetInstance().AddDesc(std::string("altUrl: ").append(altSrc.ToString()));
+
+    auto imageFit = layoutProp->GetImageFit().value_or(ImageFit::COVER);
+    DumpLog::GetInstance().AddDesc(std::string("objectFit: ").append(GetImageFitStr(imageFit)));
+
+    auto fitOriginalSize = layoutProp->GetFitOriginalSize().value_or(false);
+    DumpLog::GetInstance().AddDesc(std::string("fitOriginalSize: ").append(fitOriginalSize ? "true" : "false"));
+
+    const std::optional<SizeF>& sourceSize = layoutProp->GetSourceSize();
+    if (sourceSize.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("sourceSize: ").append(sourceSize.value().ToString()));
+    }
+}
+
+void ImagePattern::DumpRenderInfo()
+{
+    auto renderProp = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(renderProp);
+
+    auto imageRenderMode = renderProp->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
+    DumpLog::GetInstance().AddDesc(
+        std::string("renderMode: ").append((imageRenderMode == ImageRenderMode::ORIGINAL) ? "Original" : "Template"));
+
+    auto imageRepeat = renderProp->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+    DumpLog::GetInstance().AddDesc(std::string("objectRepeat: ").append(GetImageRepeatStr(imageRepeat)));
+
+    auto imageColorFilter = renderProp->GetColorFilter();
+    if (imageColorFilter.has_value()) {
+        auto colorFilter = imageColorFilter.value();
+        DumpLog::GetInstance().AddDesc(std::string("colorFilter: ").append(GetImageColorFilterStr(colorFilter)));
+    }
+
+    auto fillColor = renderProp->GetSvgFillColor();
+    if (fillColor.has_value()) {
+        auto color = fillColor.value();
+        DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
+    }
+
+    auto matchTextDirection = renderProp->GetMatchTextDirection().value_or(false);
+    matchTextDirection ? DumpLog::GetInstance().AddDesc("matchTextDirection:true")
+                       : DumpLog::GetInstance().AddDesc("matchTextDirection:false");
+
+    auto smoothEdge = renderProp->GetSmoothEdge();
+    if (smoothEdge.has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("edgeAntialiasing: ").append(std::to_string(smoothEdge.value())));
+    }
+
+    auto needBorderRadius = renderProp->GetNeedBorderRadius().value_or(false);
+    needBorderRadius ? DumpLog::GetInstance().AddDesc("needBorderRadius:true")
+                     : DumpLog::GetInstance().AddDesc("needBorderRadius:false");
+
+    if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("resizable slice: ").append(renderProp->GetImageResizableSliceValue({}).ToString()));
+    }
+}
+
+void ImagePattern::DumpInfo()
+{
+    DumpLayoutInfo();
+    DumpRenderInfo();
+
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
+
+    autoResizeDefault_ ? DumpLog::GetInstance().AddDesc("autoResize:true")
+                       : DumpLog::GetInstance().AddDesc("autoResize:false");
+
+
     DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation());
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
         DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
     }
-    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
-    if (imageRenderProperty && imageRenderProperty->HasImageResizableSlice() &&
-        imageRenderProperty->GetImageResizableSliceValue({}).Valid()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("reslzable slice: ").append(imageRenderProperty->GetImageResizableSliceValue({}).ToString()));
+
+    auto host = GetHost();
+    if (host) {
+        auto enDrage = host->IsDraggable();
+        enDrage ? DumpLog::GetInstance().AddDesc("draggable:true") : DumpLog::GetInstance().AddDesc("draggable:false");
     }
+
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
 }
 
@@ -1102,6 +1187,58 @@ void ImagePattern::OnConfigurationUpdate()
         altImageSourceInfo.SetIsConfigurationChange(true);
         LoadAltImage(altImageSourceInfo);
     }
+}
+
+std::string ImagePattern::GetImageFitStr(ImageFit value)
+{
+    switch (value) {
+        case ImageFit::CONTAIN:
+            return "CONTAIN";
+        case ImageFit::COVER:
+            return "COVER";
+        case ImageFit::FILL:
+            return "FILL";
+        case ImageFit::FITWIDTH:
+            return "FITWIDTH";
+        case ImageFit::FITHEIGHT:
+            return "FITHEIGHT";
+        case ImageFit::NONE:
+            return "NONE";
+        case ImageFit::SCALE_DOWN:
+            return "SCALE_DOWN";
+        case ImageFit::TOP_LEFT:
+            return "TOP_LEFT";
+        default:
+            return "COVER";
+    }
+}
+
+std::string ImagePattern::GetImageRepeatStr(ImageRepeat value)
+{
+    switch (value) {
+        case ImageRepeat::NO_REPEAT:
+            return "NO_REPEAT";
+        case ImageRepeat::REPEAT:
+            return "REPEAT_XY";
+        case ImageRepeat::REPEAT_X:
+            return "REPEAT_X";
+        case ImageRepeat::REPEAT_Y:
+            return "REPEAT_Y";
+        default:
+            return "NO_REPEAT";
+    }
+}
+
+std::string ImagePattern::GetImageColorFilterStr(const std::vector<float>& colorFilter)
+{
+    if (colorFilter.empty()) {
+        return "";
+    }
+    std::string result = "[" + std::to_string(colorFilter[0]);
+    for (uint32_t idx = 1; idx < colorFilter.size(); ++idx) {
+        result += ", " + std::to_string(colorFilter[idx]);
+    }
+    return result + "]";
 }
 
 void ImagePattern::EnableAnalyzer(bool value)

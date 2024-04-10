@@ -17,6 +17,9 @@
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/components_ng/gestures/pan_gesture.h"
+#include "core/components_ng/gestures/pinch_gesture.h"
+#include "core/components_ng/gestures/rotation_gesture.h"
+#include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -72,6 +75,74 @@ ArkUIGesture* createLongPressGesture(ArkUI_Int32 fingers, bool repeat, ArkUI_Int
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(longPressGestureObject));
 }
 
+ArkUIGesture* createPinchGesture(ArkUI_Int32 fingers, ArkUI_Float64 distance)
+{
+    auto pinchGestureObject = AceType::MakeRefPtr<PinchGesture>(fingers, distance);
+    pinchGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(pinchGestureObject));
+}
+
+ArkUIGesture* createRotationGesture(ArkUI_Int32 fingers, ArkUI_Float64 angle)
+{
+    auto rotationGestureObject = AceType::MakeRefPtr<RotationGesture>(fingers, angle);
+    rotationGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(rotationGestureObject));
+}
+
+ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed)
+{
+    SwipeDirection swipeDirection{SwipeDirection::NONE};
+    if (directions & ArkUI_GESTURE_DIRECTION_HORIZONTAL) {
+        swipeDirection.type = SwipeDirection::HORIZONTAL;
+    }
+    if (directions & ArkUI_GESTURE_DIRECTION_VERTICAL) {
+        swipeDirection.type = SwipeDirection::VERTICAL;
+    }
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
+    swipeGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
+}
+
+ArkUIGesture* createSwipeGestureByModifier(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed)
+{
+    SwipeDirection swipeDirection{ SwipeDirection::NONE};
+    switch (direction) {
+        case ArkUI_SWIPE_GESTURE_DIRECTION_ALL:
+            swipeDirection.type = SwipeDirection::ALL;
+            break;
+        case ArkUI_SWIPE_GESTURE_DIRECTION_NONE:
+            swipeDirection.type = SwipeDirection::NONE;
+            break;
+        case ArkUI_SWIPE_GESTURE_DIRECTION_HORIZONTAL:
+            swipeDirection.type = SwipeDirection::HORIZONTAL;
+            break;
+        case ArkUI_SWIPE_GESTURE_DIRECTION_VERTICAL:
+            swipeDirection.type = SwipeDirection::VERTICAL;
+            break;
+        default:
+            swipeDirection.type = SwipeDirection::NONE;
+            break;
+    }
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
+    swipeGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
+}
+
+ArkUIGesture* createGestureGroup(ArkUI_Int32 mode)
+{
+    auto gestureMode = static_cast<GestureMode>(mode);
+    auto gestureGroupObject = AceType::MakeRefPtr<GestureGroup>(gestureMode);
+    gestureGroupObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(gestureGroupObject));
+}
+
+void addGestureToGestureGroup(ArkUIGesture* group, ArkUIGesture* child)
+{
+    auto* gestureGroup = reinterpret_cast<GestureGroup*>(group);
+    auto* childGesture = reinterpret_cast<Gesture*>(child);
+    gestureGroup->AddGesture(AceType::Claim(childGesture));
+}
+
 void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
@@ -87,6 +158,10 @@ ArkUIAPIEventGestureAsyncEvent getGestureEvent(GestureEvent& info)
     ret.velocity = info.GetVelocity().GetVelocityValue();
     ret.x = info.GetOffsetX();
     ret.y = info.GetOffsetY();
+    ret.angle = info.GetAngle();
+    ret.scale = info.GetScale();
+    ret.pinchCenterX = info.GetPinchCenter().GetX();
+    ret.pinchCenterY = info.GetPinchCenter().GetY();
     return ret;
 }
 
@@ -179,6 +254,21 @@ void removeGestureFromNode(ArkUINodeHandle node, ArkUIGesture* gesture)
     gestureHub->RemoveGesture(gesturePtr);
 }
 
+void removeGestureFromNodeByTag(ArkUINodeHandle node, ArkUI_CharPtr gestureTag)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    std::string tag(gestureTag);
+    gestureHub->RemoveGesturesByTag(tag);
+}
+
+void clearGestures(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->ClearModifierGesture();
+}
+
 namespace NodeModifier {
 const ArkUIGestureModifier* GetGestureModifier()
 {
@@ -186,10 +276,18 @@ const ArkUIGestureModifier* GetGestureModifier()
         createTapGesture,
         createLongPressGesture,
         createPanGesture,
+        createPinchGesture,
+        createRotationGesture,
+        createSwipeGesture,
+        createSwipeGestureByModifier,
+        createGestureGroup,
+        addGestureToGestureGroup,
         dispose,
         registerGestureEvent,
         addGestureToNode,
         removeGestureFromNode,
+        removeGestureFromNodeByTag,
+        clearGestures,
         };
     return &modifier;
 }

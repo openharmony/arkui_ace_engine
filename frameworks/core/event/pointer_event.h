@@ -63,6 +63,7 @@ struct PointerEvent final {
     float force = 0.0f;
     int32_t deviceId = 0;
     TimeStamp downTime;
+    TimeStamp time;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t targetWindowId = -1;
     int32_t x = 0;

@@ -146,5 +146,28 @@ void FormRendererDispatcherProxy::SetVisibleChange(bool isVisible)
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
     }
 }
+
+void FormRendererDispatcherProxy::SetObscured(bool isObscured)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+
+    if (!data.WriteBool(isObscured)) {
+        HILOG_ERROR("write isObscured fail, action error");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_OBSCURED),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+    }
+}
 } // namespace Ace
 } // namespace OHOS

@@ -46,7 +46,10 @@ enum class TextContentType {
     DATE = 20,
     MONTH = 21,
     YEAR = 22,
-    END = YEAR,
+    NICKNAME = 23,
+    DETAIL_INFO_WITHOUT_STREET = 24,
+    FORMAT_ADDRESS = 25,
+    END = FORMAT_ADDRESS,
 };
 TextContentType CastToTextContentType(int32_t value);
 };      // namespace OHOS::Ace::NG

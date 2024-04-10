@@ -438,4 +438,9 @@ size_t OffscreenCanvasPattern::GetBitmapSize()
     CHECK_NULL_RETURN(offscreenPaintMethod_, 0);
     return offscreenPaintMethod_->GetBitmapSize();
 }
+
+void OffscreenCanvasPattern::Reset()
+{
+    offscreenPaintMethod_->Reset();
+}
 } // namespace OHOS::Ace::NG

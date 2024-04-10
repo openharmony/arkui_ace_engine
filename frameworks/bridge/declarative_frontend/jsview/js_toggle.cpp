@@ -67,6 +67,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("responseRegion", &JSToggle::JsResponseRegion);
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
+    JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
     JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
@@ -78,7 +79,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSToggle>::InheritAndBind<JSContainerBase>(globalObj);
+    JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -402,6 +403,11 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
     }
 }
 
+void JSToggle::Pop()
+{
+    ToggleModel::GetInstance()->Pop();
+}
+
 void JSToggle::SwitchStyle(const JSCallbackInfo& info)
 {
     if ((info.Length() < 1) || !info[0]->IsObject()) {
@@ -410,8 +416,8 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
 
     CalcDimension pointRadius;
-    if (jsObj->HasProperty("pointRadius") && ParseJsDimensionVp(jsObj->GetProperty("pointRadius"), pointRadius) &&
-        !pointRadius.IsNegative()) {
+    if (jsObj->HasProperty("pointRadius") &&
+        ParseJsDimensionVpNG(jsObj->GetProperty("pointRadius"), pointRadius, false) && !pointRadius.IsNegative()) {
         ToggleModel::GetInstance()->SetPointRadius(pointRadius);
     } else {
         ToggleModel::GetInstance()->ResetPointRadius();
@@ -442,7 +448,8 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
 
     CalcDimension trackRadius;
     if (jsObj->HasProperty("trackBorderRadius") &&
-        ParseJsDimensionVp(jsObj->GetProperty("trackBorderRadius"), trackRadius) && !trackRadius.IsNegative()) {
+        ParseJsDimensionVpNG(jsObj->GetProperty("trackBorderRadius"), trackRadius, false) &&
+        !trackRadius.IsNegative()) {
         ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
     } else {
         ToggleModel::GetInstance()->ResetTrackBorderRadius();

@@ -29,6 +29,7 @@ public:
     static void JSKeyframeAnimateTo(const JSCallbackInfo& info);
     static const AnimationOption CreateAnimation(const JSRef<JSObject>& animationArgs, bool isForm = false);
     static RefPtr<Curve> ParseCurve(const JSRef<JSVal>& curveArgs, bool exceptSpring = false);
+    static void SetDynamicDimming(const JSCallbackInfo& info);
 
 private:
     static void AnimateToInner(const JSCallbackInfo& info, bool immediately);

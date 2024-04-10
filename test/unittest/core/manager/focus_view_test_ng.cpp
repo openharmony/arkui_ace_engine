@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -71,29 +72,38 @@ HWTEST_F(FocusViewTestNg, FocusViewTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. construct all kinds of FocusView.
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
     auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
 
     auto bubblePattern = AceType::MakeRefPtr<BubblePattern>();
     auto bubbleNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, -1, bubblePattern);
     auto bubbleFocusHub = bubbleNode->GetOrCreateFocusHub();
+    rootNode->AddChild(bubbleNode);
 
     auto dialogPattern = AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr);
     auto dialogNode = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, -1, dialogPattern);
     auto dialogFocusHub = dialogNode->GetOrCreateFocusHub();
+    rootNode->AddChild(dialogNode);
 
     auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "Menu", MenuType::MENU);
     auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, -1, menuPattern);
     auto menuFocusHub = menuNode->GetOrCreateFocusHub();
+    rootNode->AddChild(menuNode);
 
     auto modalPattern = AceType::MakeRefPtr<ModalPresentationPattern>(-1, ModalTransition::DEFAULT, nullptr);
     auto modalNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, -1, modalPattern);
     auto modalFocusHub = modalNode->GetOrCreateFocusHub();
+    rootNode->AddChild(modalNode);
 
     auto sheetPattern = AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr);
     auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, -1, sheetPattern);
     auto sheetFocusHub = sheetNode->GetOrCreateFocusHub();
+    rootNode->AddChild(sheetNode);
 
     auto navigationPattern = AceType::MakeRefPtr<NavigationPattern>();
     auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, -1, navigationPattern);
@@ -204,9 +214,13 @@ HWTEST_F(FocusViewTestNg, FocusViewTest002, TestSize.Level1)
      *     - Button
      *     - Button
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
     auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
 
     auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
@@ -267,9 +281,13 @@ HWTEST_F(FocusViewTestNg, FocusViewTest003, TestSize.Level1)
      *     - Button
      *     - Button
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
     auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
 
     auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
@@ -331,9 +349,13 @@ HWTEST_F(FocusViewTestNg, FocusViewTest004, TestSize.Level1)
      *     - Button
      *     - Button
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
     auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
 
     auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
@@ -399,9 +421,13 @@ HWTEST_F(FocusViewTestNg, FocusViewTest005, TestSize.Level1)
      *     - Button21
      *     - Button22
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
     auto pagePattern1 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode1 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern1);
     auto pageFocusHub1 = pageNode1->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode1);
 
     auto columnPattern1 = AceType::MakeRefPtr<LinearLayoutPattern>(true);
     auto columnNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern1);
@@ -422,6 +448,7 @@ HWTEST_F(FocusViewTestNg, FocusViewTest005, TestSize.Level1)
     auto pagePattern2 = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode2 = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern2);
     auto pageFocusHub2 = pageNode2->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode2);
 
     auto columnPattern2 = AceType::MakeRefPtr<LinearLayoutPattern>(true);
     auto columnNode2 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern2);
@@ -575,9 +602,13 @@ HWTEST_F(FocusViewTestNg, FocusViewTest006, TestSize.Level1)
      *     - Button
      *     - Button
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
     auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
 
     auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
@@ -649,9 +680,13 @@ HWTEST_F(FocusViewTestNg, FocusViewTest007, TestSize.Level1)
      *     - Button
      *     - Button
      */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
     auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
 
     auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);

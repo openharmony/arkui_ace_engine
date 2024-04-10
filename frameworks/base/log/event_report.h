@@ -139,15 +139,14 @@ enum class FormExcepType {
 
 #ifdef VSYNC_TIMEOUT_CHECK
 enum class VsyncExcepType {
-    VSYNC_TIMEOUT
+    UI_VSYNC_TIMEOUT
 };
 #endif
 
 enum class RawEventType { WARNING, FREEZE, RECOVER };
 
 enum class PerformanceExecpType {
-    PAGE_LAYOUT_TIMEOUT = 0,
-    PAGE_NODE_OVERFLOW,
+    PAGE_NODE_OVERFLOW = 0,
     PAGE_DEPTH_OVERFLOW,
     FUNCTION_TIMEOUT
 };
@@ -178,7 +177,7 @@ public:
     static void SendAccessibilityException(AccessibilityExcepType type);
     static void SendFormException(FormExcepType type);
 #ifdef VSYNC_TIMEOUT_CHECK
-    static void SendVsyncException(VsyncExcepType type);
+    static void SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp);
 #endif
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);

@@ -199,6 +199,7 @@ public:
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
     void HandleTouchUpEvent();
+    void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
     RefPtr<FrameNode> GetItemFatherNode();
     RefPtr<FrameNode> GetFrameNode();
@@ -220,8 +221,9 @@ private:
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
-    std::function<void(GestureEvent&)> actionStart_;
 
+    RefPtr<PixelMap> textPixelMap_;
+    std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
@@ -230,6 +232,7 @@ private:
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isSelectedItemNode_ = false;
+    bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
 

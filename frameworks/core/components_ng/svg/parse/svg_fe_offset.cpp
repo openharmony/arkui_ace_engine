@@ -34,26 +34,17 @@ SvgFeOffset::SvgFeOffset() : SvgFe()
     declaration_->InitializeStyle();
 }
 
-#ifndef USE_ROSEN_DRAWING
-void SvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor) const
-#else
 void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
-    ColorInterpolationType& currentColor) const
-#endif
+    ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     auto declaration = AceType::DynamicCast<SvgFeOffsetDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
-    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
-#ifndef USE_ROSEN_DRAWING
-
-    imageFilter = SkImageFilters::Offset(declaration->GetDx(), declaration->GetDy(), imageFilter);
-
-#else
+    imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
     imageFilter =
         RSRecordingImageFilter::CreateOffsetImageFilter(declaration->GetDx(), declaration->GetDy(), imageFilter);
-#endif
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
+    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
 }
 
 } // namespace OHOS::Ace::NG

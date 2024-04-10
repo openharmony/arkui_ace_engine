@@ -432,6 +432,11 @@ napi_value DeclarativeFrontendNG::GetContextValue()
     return jsEngine_->GetContextValue();
 }
 
+napi_value DeclarativeFrontendNG::GetFrameNodeValueByNodeId(int32_t nodeId)
+{
+    return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
+}
+
 void DeclarativeFrontendNG::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)
 {
     if (delegate_) {

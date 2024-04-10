@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
@@ -373,6 +374,35 @@ void ResetTextPickerDivider(ArkUINodeHandle node)
     TextPickerModelNG::SetDivider(frameNode, divider);
 }
 
+void SetTextPickerGradientHeight(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetGradientHeight(frameNode, Dimension(dVal, static_cast<DimensionUnit>(dUnit)));
+}
+
+void ResetTextPickerGradientHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+
+    CalcDimension height;
+    if (pickerTheme) {
+        height = pickerTheme->GetGradientHeight();
+    } else {
+        height = 0.0_vp;
+    }
+
+    TextPickerModelNG::SetGradientHeight(frameNode, height);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -384,8 +414,8 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         SetTextPickerDisappearTextStyle, SetTextPickerDefaultPickerItemHeight, ResetTextPickerCanLoop,
         ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
         ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
-        GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr,
-        GetTextPickerValue, SetTextPickerValue, SetTextPickerDivider, ResetTextPickerDivider};
+        GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
+        SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight};
 
     return &modifier;
 }

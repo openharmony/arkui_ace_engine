@@ -104,7 +104,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     pickerStack->MountToParent(contentColumn);
     // build lunarswitch Node
     if (settingData.lunarswitch) {
-        CreateLunarswitchNode(contentColumn, std::move(lunarChangeEvent), settingData.isLunar);
+        CreateLunarswitchNode(contentColumn, dateNode, std::move(lunarChangeEvent), settingData.isLunar);
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
@@ -141,6 +141,25 @@ void DatePickerDialogView::SetTimeNodeColumnWeight(
                 DimensionUnit::PERCENT)),
             std::nullopt));
     }
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    textLayoutProperty->UpdateFontSize(pickerTheme->GetLunarSwitchTextSize());
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
+    textNode->MarkModifyDone();
+    return textNode;
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateStackNode()
@@ -535,6 +554,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     timePickerRowPattern->SetShowCount(showCount);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ZeroPrefixType hourType = ZeroPrefixType::SHOW;
+        timePickerRowPattern->SetPrefixHour(hourType);
+    }
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -629,8 +652,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(
     return buttonCancelNode;
 }
 
-void DatePickerDialogView::CreateLunarswitchNode(
-    const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar)
+void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn,
+    const RefPtr<FrameNode>& dateNode, std::function<void(const bool)>&& changeEvent, bool isLunar)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -670,17 +693,12 @@ void DatePickerDialogView::CreateLunarswitchNode(
     checkbox->MarkModifyDone();
     checkbox->MountToParent(contentRow);
 
-    auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textNode = CreateLunarSwitchTextNode();
     CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    // the unicode encoding of chinese string of lunarSwitch.
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetLunarSwitchTextSize());
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
-    textNode->MarkModifyDone();
     textNode->MountToParent(contentRow);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetLunarSwitchTextNode(textNode);
 
     contentRow->MountToParent(contentColumn);
 }

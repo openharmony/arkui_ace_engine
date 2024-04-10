@@ -46,8 +46,8 @@ class RowSplitClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   resizeable(value: boolean): RowSplitAttribute {
     modifierWithKey(this._modifiersWithKeys, RowSplitResizeableModifier.identity, RowSplitResizeableModifier, value);
@@ -59,12 +59,10 @@ class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
   }
 }
 // @ts-ignore
-globalThis.RowSplit.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRowSplitComponent(nativeNode);
+globalThis.RowSplit.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRowSplitComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RowSplitModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

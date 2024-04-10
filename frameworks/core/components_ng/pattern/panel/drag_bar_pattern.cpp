@@ -92,12 +92,14 @@ void DragBarPattern::InitProps()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     if (!animator_) {
-        animator_ = CREATE_ANIMATOR(host->GetContext());
+        animator_ = CREATE_ANIMATOR(context);
     }
 
     if (!barTouchAnimator_) {
-        barTouchAnimator_ = CREATE_ANIMATOR(host->GetContext());
+        barTouchAnimator_ = CREATE_ANIMATOR(context);
         auto touchAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0, SCALE, Curves::SHARP);
         touchAnimation->AddListener([weak = AceType::WeakClaim(this)](float value) {
             auto dragBar = weak.Upgrade();
@@ -111,12 +113,12 @@ void DragBarPattern::InitProps()
         barTouchAnimator_->SetFillMode(FillMode::FORWARDS);
     }
     if (!barRangeAnimator_) {
-        barRangeAnimator_ = CREATE_ANIMATOR(host->GetContext());
+        barRangeAnimator_ = CREATE_ANIMATOR(context);
         barRangeAnimator_->SetFillMode(FillMode::FORWARDS);
         barRangeAnimator_->SetDuration(RESET_DURATION);
     }
     if (!barStyleAnimator_) {
-        barStyleAnimator_ = CREATE_ANIMATOR(host->GetContext());
+        barStyleAnimator_ = CREATE_ANIMATOR(context);
         barStyleAnimator_->SetFillMode(FillMode::FORWARDS);
         barStyleAnimator_->SetDuration(STYLE_DURATION);
     }

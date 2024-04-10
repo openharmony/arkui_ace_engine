@@ -174,6 +174,9 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
     }
     // assume lineHeightMap is continuous in range [begin, rbegin].
     int32_t itemCount = FindItemCount(lineHeightMap_.begin()->first, lineHeightMap_.rbegin()->first);
+    if (itemCount == 0) {
+        return 0.0f;
+    }
     if (itemCount == childrenCount_ || (lineHeightMap_.begin()->first == 0 && itemCount >= startIndex_)) {
         return GetStartLineOffset(mainGap);
     }
@@ -188,13 +191,31 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
 
 int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
 {
-    const auto firstLine = gridMatrix_.find(startLine);
-    const auto lastLine = gridMatrix_.find(endLine);
-    if (firstLine == gridMatrix_.end() || lastLine == gridMatrix_.end()) {
-        return -1;
+    auto firstLine = gridMatrix_.find(startLine);
+    auto lastLine = gridMatrix_.find(endLine);
+    if (firstLine == gridMatrix_.end() || firstLine->second.empty()) {
+        for (auto i = startLine; i <= endLine; ++i) {
+            auto it = gridMatrix_.find(i);
+            if (it != gridMatrix_.end()) {
+                firstLine = it;
+                break;
+            }
+        }
+        if (firstLine == gridMatrix_.end() || firstLine->second.empty()) {
+            return 0;
+        }
     }
-    if (firstLine->second.empty() || lastLine->second.empty()) {
-        return -1;
+    if (lastLine == gridMatrix_.end() || lastLine->second.empty()) {
+        for (auto i = endLine; i >= startLine; --i) {
+            auto it = gridMatrix_.find(i);
+            if (it != gridMatrix_.end()) {
+                lastLine = it;
+                break;
+            }
+        }
+        if (lastLine == gridMatrix_.end() || lastLine->second.empty()) {
+            return 0;
+        }
     }
 
     int32_t minIdx = firstLine->second.begin()->second;

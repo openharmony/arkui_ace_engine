@@ -70,9 +70,13 @@ public:
     MOCK_METHOD0(IsFocused, bool());
     MOCK_METHOD2(OpenCustomDialog, void(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback));
     MOCK_METHOD1(CloseCustomDialog, void(const int32_t dialogId));
+    MOCK_METHOD2(CloseCustomDialog, void(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback));
     MOCK_METHOD2(
         OpenCustomDialogNG, void(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback));
     MOCK_METHOD1(CloseCustomDialogNG, void(int32_t dialogId));
+    MOCK_METHOD2(CloseCustomDialogNG, void(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD3(UpdateCustomDialogNG, void(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback));
     MOCK_METHOD0(ResizeWindowForFoldStatus, void());
     MOCK_METHOD1(ResizeWindowForFoldStatus, void(int32_t parentContainerId));
     MOCK_METHOD0(MarkDirtyDialogSafeArea, void());

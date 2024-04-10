@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class CheckboxModifier extends ArkCheckboxComponent implements AttributeModifier<CheckboxAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: CheckboxAttribute): void {
-    applyAndMergeModifier<CheckboxAttribute, ArkCheckboxComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<CheckboxAttribute, ArkCheckboxComponent, ArkComponent>(instance, this);
   }
 }

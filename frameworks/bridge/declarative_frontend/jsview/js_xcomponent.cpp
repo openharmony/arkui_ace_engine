@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -71,6 +72,54 @@ XComponentModel* XComponentModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+void SetControllerCallback(const JSRef<JSObject>& object, const JsiExecutionContext& execCtx)
+{
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCreatedFunc = object->GetProperty("onSurfaceCreated");
+    if (jsCreatedFunc->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsCreatedFunc));
+        auto onSurfaceCreated = [execCtx, func = std::move(jsFunc), node = targetNode](const std::string& surfaceId) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("XComponentController.onSurfaceCreated");
+            PipelineContext::SetCallBackNode(node);
+            auto jsVal = JSRef<JSVal>::Make(ToJSValue(surfaceId));
+            func->ExecuteJS(1, &jsVal);
+        };
+        XComponentModel::GetInstance()->SetControllerOnCreated(std::move(onSurfaceCreated));
+    }
+    auto jsChangedFunc = object->GetProperty("onSurfaceChanged");
+    if (jsChangedFunc->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsChangedFunc));
+        auto onSurfaceChanged = [execCtx, func = std::move(jsFunc), node = targetNode](
+                                    const std::string& surfaceId, const NG::RectF& rect) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("XComponentController.onSurfaceChanged");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSObject> rectObj = JSRef<JSObject>::New();
+            rectObj->SetProperty("offsetX", rect.Left());
+            rectObj->SetProperty("offsetY", rect.Top());
+            rectObj->SetProperty("surfaceWidth", rect.Width());
+            rectObj->SetProperty("surfaceHeight", rect.Height());
+            auto jsSurfaceId = JSRef<JSVal>::Make(ToJSValue(surfaceId));
+            JSRef<JSVal> params[2] = { jsSurfaceId, rectObj };
+            func->ExecuteJS(2, params);
+        };
+        XComponentModel::GetInstance()->SetControllerOnChanged(std::move(onSurfaceChanged));
+    }
+    auto jsDestroyedFunc = object->GetProperty("onSurfaceDestroyed");
+    if (jsDestroyedFunc->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsDestroyedFunc));
+        auto onSurfaceDestroyed = [execCtx, func = std::move(jsFunc), node = targetNode](const std::string& surfaceId) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("XComponentController.onSurfaceDestroyed");
+            PipelineContext::SetCallBackNode(node);
+            auto jsVal = JSRef<JSVal>::Make(ToJSValue(surfaceId));
+            func->ExecuteJS(1, &jsVal);
+        };
+        XComponentModel::GetInstance()->SetControllerOnDestroyed(std::move(onSurfaceDestroyed));
+    }
+}
+
 void JSXComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponent>::Declare("XComponent");
@@ -107,6 +156,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("lightUpEffect", &JSXComponent::JsLightUpEffect);
     JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::JsPixelStretchEffect);
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
+    JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -123,12 +173,15 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
 
     auto type = paramObject->GetProperty("type");
-    auto libraryname = paramObject->GetProperty("libraryname");
-    auto controllerObj = paramObject->GetProperty("controller");
+    auto libraryNameValue = paramObject->GetProperty("libraryname");
+    auto controller = paramObject->GetProperty("controller");
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
-    if (controllerObj->IsObject()) {
-        auto* jsXComponentController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSXComponentController>();
+    JSRef<JSObject> controllerObj;
+    if (controller->IsObject()) {
+        controllerObj = JSRef<JSObject>::Cast(controller);
+        auto* jsXComponentController = controllerObj->Unwrap<JSXComponentController>();
         if (jsXComponentController) {
+            jsXComponentController->SetInstanceId(Container::CurrentId());
             XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
                 id->ToString(), jsXComponentController);
             xcomponentController = jsXComponentController->GetController();
@@ -140,8 +193,13 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     } else if (type->IsNumber()) {
         xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
+
+    std::string libraryName = libraryNameValue->IsString() ? libraryNameValue->ToString() : "";
     XComponentModel::GetInstance()->Create(
-        id->ToString(), xcomponentType, libraryname->ToString(), xcomponentController);
+        id->ToString(), xcomponentType, libraryName, xcomponentController);
+    if (libraryNameValue->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
+        SetControllerCallback(controllerObj, info.GetExecutionContext());
+    }
 
     auto detachCallback = [](const std::string& xcomponentId) {
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcomponentId);
@@ -278,7 +336,8 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
 void JSXComponent::JsOnAppear(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSInteractableView::JsOnAppear(args);
@@ -287,7 +346,8 @@ void JSXComponent::JsOnAppear(const JSCallbackInfo& args)
 void JSXComponent::JsOnDisAppear(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSInteractableView::JsOnDisAppear(args);
@@ -296,7 +356,8 @@ void JSXComponent::JsOnDisAppear(const JSCallbackInfo& args)
 void JSXComponent::JsOnTouch(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSInteractableView::JsOnTouch(args);
@@ -305,7 +366,8 @@ void JSXComponent::JsOnTouch(const JSCallbackInfo& args)
 void JSXComponent::JsOnClick(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnClick(args);
@@ -314,7 +376,8 @@ void JSXComponent::JsOnClick(const JSCallbackInfo& args)
 void JSXComponent::JsOnKeyEvent(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnKeyEvent(args);
@@ -323,7 +386,8 @@ void JSXComponent::JsOnKeyEvent(const JSCallbackInfo& args)
 void JSXComponent::JsOnMouse(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnMouse(args);
@@ -332,7 +396,8 @@ void JSXComponent::JsOnMouse(const JSCallbackInfo& args)
 void JSXComponent::JsOnHover(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnHover(args);
@@ -342,7 +407,8 @@ void JSXComponent::JsOnHover(const JSCallbackInfo& args)
 void JSXComponent::JsOnFocus(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnFocus(args);
@@ -351,7 +417,8 @@ void JSXComponent::JsOnFocus(const JSCallbackInfo& args)
 void JSXComponent::JsOnBlur(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type != XComponentType::NODE) {
+    auto libraryName = XComponentModel::GetInstance()->GetLibraryName();
+    if (!XComponentModel::IsCommonEventAvailable(type, libraryName)) {
         return;
     }
     JSViewAbstract::JsOnBlur(args);
@@ -534,6 +601,15 @@ void JSXComponent::JsLinearGradientBlur(const JSCallbackInfo& args)
         return;
     }
     JSViewAbstract::JsLinearGradientBlur(args);
+}
+
+void JSXComponent::JsEnableAnalyzer(bool enable)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    XComponentModel::GetInstance()->EnableAnalyzer(enable);
 }
 
 } // namespace OHOS::Ace::Framework

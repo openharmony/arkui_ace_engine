@@ -174,6 +174,10 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     std::optional<TextDecoration> textDecoration;
     if (typeValue->IsNumber()) {
         textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+    } else {
+        auto theme = GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        textDecoration = theme->GetTextStyle().GetTextDecoration();
     }
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
@@ -187,12 +191,8 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
         // default color
         colorVal = Color::BLACK;
     }
-    if (textDecoration) {
-        SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
-    }
-    if (colorVal) {
-        SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
-    }
+    SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
+    SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
     if (textDecorationStyle) {
         SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }

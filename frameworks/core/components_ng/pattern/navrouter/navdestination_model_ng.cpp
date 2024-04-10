@@ -55,6 +55,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
     }
     navDestinationNode->UpdatePrevTitleIsCustom(false);
 
+    auto theme = NavigationGetTheme();
     // create or update main title
     auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     if (hasMainTitle) {
@@ -68,7 +69,6 @@ bool NavDestinationModelNG::ParseCommonTitle(
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            auto theme = NavigationGetTheme();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
             textLayoutProperty->UpdateContent(title);
             textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
@@ -78,6 +78,11 @@ bool NavDestinationModelNG::ParseCommonTitle(
             textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
+                textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
+                textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+            }
             titleBarNode->SetTitle(mainTitle);
             titleBarNode->AddChild(mainTitle);
         }
@@ -113,6 +118,10 @@ bool NavDestinationModelNG::ParseCommonTitle(
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
+            textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
+        }
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }
@@ -185,39 +194,64 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     navDestinationNode->AddChild(titleBarNode);
     navDestinationNode->SetTitleBarNode(titleBarNode);
 
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
     int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto backButtonNode =
         FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ButtonPattern>());
     auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     buttonPattern->SetSkipColorConfigurationUpdate();
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    }
     titleBarNode->AddChild(backButtonNode);
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
-    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
-    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
-    PaddingProperty padding;
-    padding.SetEdges(CalcLength(BUTTON_PADDING));
-    backButtonLayoutProperty->UpdatePadding(padding);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(theme->GetIconBackgroundWidth()), CalcLength(theme->GetIconBackgroundHeight())));
+        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(theme->GetCornerRadius()));
+        renderContext->UpdateBackgroundColor(theme->GetCompBackgroundColor());
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+        backButtonLayoutProperty->UpdatePadding(padding);
+    } else {
+        backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
+        backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(BUTTON_PADDING));
+        backButtonLayoutProperty->UpdatePadding(padding);
+    }
 
     auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(backButtonImageNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
+
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(theme->GetBackResourceId());
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
-
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto iconColor = theme->GetIconColor();
+        imageSourceInfo.SetFillColor(iconColor);
+        imageSourceInfo.SetResourceId(theme->GetBackBtnResourceId());
+        auto iconWidth = theme->GetIconWidth();
+        auto iconHeight = theme->GetIconHeight();
+        backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth),
+            CalcLength(iconHeight)));
+    }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     backButtonNode->AddChild(backButtonImageNode);

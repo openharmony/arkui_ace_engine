@@ -230,8 +230,9 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        const bool supportAvoidance = false) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -239,6 +240,8 @@ public:
     void SetCardViewAccessibilityParams(const std::string& key, bool focus);
 
     void FlushPipelineImmediately() override;
+
+    void FlushOnceVsyncTask() override {}
 
     void RegisterEventHandler(const RefPtr<AceEventHandler>& handler)
     {
@@ -350,7 +353,7 @@ public:
     bool AccessibilityRequestFocus(const ComposeId& id);
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
-    bool RequestFocus(const std::string& targetNodeId) override;
+    bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     bool RequestDefaultFocus();
 
     bool NeedSoftKeyboard() override

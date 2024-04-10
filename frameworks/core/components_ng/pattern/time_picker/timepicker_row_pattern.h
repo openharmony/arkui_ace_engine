@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/i18n/localization.h"
+#include "base/i18n/time_format.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
@@ -96,6 +97,8 @@ public:
     void UpdateAllChildNode();
 
     void HandleHourColumnBuilding();
+
+    void HandleMinAndSecColumnBuilding();
 
     void FlushColumn();
 
@@ -189,6 +192,16 @@ public:
         return timePickerLayoutProperty->GetIsUseMilitaryTimeValue(hour24_);
     }
 
+    void SetPrefixHour(ZeroPrefixType& value)
+    {
+        prefixHour_ = value;
+    }
+
+    ZeroPrefixType GetPrefixHour() const
+    {
+        return prefixHour_;
+    }
+
     void ClearOptionsHour()
     {
         // when switch IsUseMilitaryTime state, should clear options_[hourColumn]
@@ -279,6 +292,32 @@ public:
     void SetHasSecond(bool value)
     {
         hasSecond_ = value;
+    }
+
+    void SetPrefixMinute(ZeroPrefixType value)
+    {
+        prefixMinute_ = value;
+    }
+
+    ZeroPrefixType GetPrefixMinute() const
+    {
+        auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+        CHECK_NULL_RETURN(timePickerLayoutProperty, prefixMinute_);
+        return static_cast<ZeroPrefixType>(
+            timePickerLayoutProperty->GetPrefixMinuteValue(0));
+    }
+
+    void SetPrefixSecond(ZeroPrefixType value)
+    {
+        prefixSecond_ = value;
+    }
+
+    ZeroPrefixType GetPrefixSecond() const
+    {
+        auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+        CHECK_NULL_RETURN(timePickerLayoutProperty, prefixSecond_);
+        return static_cast<ZeroPrefixType>(
+            timePickerLayoutProperty->GetPrefixSecondValue(0));
     }
 
     bool GetWheelModeEnabled() const
@@ -398,6 +437,9 @@ private:
     Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
+    ZeroPrefixType prefixMinute_ = ZeroPrefixType::AUTO;
+    ZeroPrefixType prefixSecond_ = ZeroPrefixType::AUTO;
     PickerTime selectedTime_ = PickerTime::Current();
     PickerDate dialogTitleDate_ = PickerDate::Current();
     std::optional<int32_t> amPmId_;

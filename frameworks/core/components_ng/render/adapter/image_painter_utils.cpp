@@ -103,8 +103,8 @@ void ImagePainterUtils::AddFilter(SkPaint& paint, SkSamplingOptions& options, co
             break;
     }
 
-    if (config.colorFilter_) {
-        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_->data()));
+    if (config.colorFilter_.colorFilterMatrix_) {
+        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_.colorFilterMatrix_->data()));
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
     }
@@ -131,10 +131,16 @@ void ImagePainterUtils::AddFilter(RSBrush& brush, RSSamplingOptions& options, co
     }
 
     auto filter = brush.GetFilter();
-    if (config.colorFilter_) {
+    if (config.colorFilter_.colorFilterMatrix_) {
         RSColorMatrix colorMatrix;
-        colorMatrix.SetArray(config.colorFilter_->data());
+        colorMatrix.SetArray(config.colorFilter_.colorFilterMatrix_->data());
         filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+    } else if (config.colorFilter_.colorFilterDrawing_) {
+        auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
+            config.colorFilter_.colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
+        if (colorFilterSptrAddr && (*colorFilterSptrAddr)) {
+            filter.SetColorFilter(*colorFilterSptrAddr);
+        }
     } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(GRAY_COLOR_MATRIX);

@@ -47,15 +47,7 @@ public:
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         float strokePaintSize = size.Width();
-        if (paintProperty->GetCheckBoxGroupSelectedColor().has_value()) {
-            checkboxGroupModifier_->SetActiveColor(paintProperty->GetCheckBoxGroupSelectedColor().value());
-        }
-        if (paintProperty->GetCheckBoxGroupUnSelectedColor().has_value()) {
-            checkboxGroupModifier_->SetInactiveColor(paintProperty->GetCheckBoxGroupUnSelectedColor().value());
-        }
-        if (paintProperty->GetCheckBoxGroupCheckMarkColor().has_value()) {
-            checkboxGroupModifier_->SetPointColor(paintProperty->GetCheckBoxGroupCheckMarkColor().value());
-        }
+        SetModifierContentType(paintProperty);
         if (paintProperty->GetCheckBoxGroupCheckMarkSize().has_value()) {
             if (paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx() >= 0) {
                 strokePaintSize = paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx();
@@ -95,6 +87,23 @@ public:
         checkboxGroupModifier_->SetBoundsRect(boundsRect);
         SetHoverEffectType(paintProperty);
         checkboxGroupModifier_->SetInactivePointColor(checkboxTheme->GetInactivePointColor());
+    }
+
+    void SetModifierContentType(const RefPtr<CheckBoxGroupPaintProperty>& paintProperty)
+    {
+        CHECK_NULL_VOID(paintProperty);
+        if (paintProperty->GetCheckBoxGroupSelectedColor().has_value()) {
+            checkboxGroupModifier_->SetActiveColor(paintProperty->GetCheckBoxGroupSelectedColor().value());
+        }
+        if (paintProperty->GetCheckBoxGroupUnSelectedColor().has_value()) {
+            checkboxGroupModifier_->SetInactiveColor(paintProperty->GetCheckBoxGroupUnSelectedColor().value());
+        }
+        if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
+            checkboxGroupModifier_->SetCheckboxGroupStyle(paintProperty->GetCheckBoxGroupSelectedStyleValue());
+        }
+        if (paintProperty->GetCheckBoxGroupCheckMarkColor().has_value()) {
+            checkboxGroupModifier_->SetPointColor(paintProperty->GetCheckBoxGroupCheckMarkColor().value());
+        }
     }
 
     void SetHoverEffectType(const RefPtr<CheckBoxGroupPaintProperty>& checkBoxgroupPaintProperty)

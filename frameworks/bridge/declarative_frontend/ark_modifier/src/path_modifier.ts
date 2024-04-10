@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class PathModifier extends ArkPathComponent implements AttributeModifier<PathAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: PathAttribute): void {
-    applyAndMergeModifier<PathAttribute, ArkPathComponent, ArkCommonShapeComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<PathAttribute, ArkPathComponent, ArkComponent>(instance, this);
   }
 }

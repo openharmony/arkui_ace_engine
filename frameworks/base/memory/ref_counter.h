@@ -26,12 +26,12 @@ namespace OHOS::Ace {
 // Reference counter.
 class RefCounter {
 public:
-    virtual int32_t IncStrongRef() = 0;
+    virtual void IncStrongRef() = 0;
     virtual int32_t DecStrongRef() = 0;
-    virtual int32_t TryIncStrongRef() = 0;
+    virtual bool TryIncStrongRef() = 0;
     virtual int32_t StrongRefCount() const = 0;
-    virtual int32_t IncWeakRef() = 0;
-    virtual int32_t DecWeakRef() = 0;
+    virtual void IncWeakRef() = 0;
+    virtual void DecWeakRef() = 0;
 
 protected:
     virtual ~RefCounter() = default;
@@ -43,11 +43,9 @@ public:
     explicit ThreadSafeCounter(int32_t count) : count_(count) {}
     ~ThreadSafeCounter() = default;
 
-    int32_t Increase()
+    void Increase()
     {
-        int32_t count = count_.fetch_add(1, std::memory_order_relaxed) + 1;
-        ACE_DCHECK(count > 0);
-        return count;
+        count_.fetch_add(1, std::memory_order_relaxed);
     }
     int32_t Decrease()
     {
@@ -61,16 +59,16 @@ public:
     }
 
     // Try to increase reference count while current value is not zero.
-    int32_t TryIncrease()
+    bool TryIncrease()
     {
         int32_t count = CurrentCount();
         do {
             if (count == 0) {
-                return 0;
+                return false;
             }
             ACE_DCHECK(count > 0);
         } while (!count_.compare_exchange_weak(count, count + 1, std::memory_order_relaxed));
-        return count + 1;
+        return true;
     }
 
 private:
@@ -85,11 +83,9 @@ public:
     explicit ThreadUnsafeCounter(int32_t count) : count_(count) {}
     ~ThreadUnsafeCounter() = default;
 
-    int32_t Increase()
+    void Increase()
     {
-        int32_t count = ++count_;
-        ACE_DCHECK(count > 0);
-        return count;
+        ++count_;
     }
     int32_t Decrease()
     {
@@ -103,9 +99,13 @@ public:
     }
 
     // Try to increase count while current value is not zero.
-    int32_t TryIncrease()
+    bool TryIncrease()
     {
-        return CurrentCount() == 0 ? 0 : Increase();
+        if (CurrentCount() == 0) {
+            return false;
+        }
+        Increase();
+        return true;
     }
 
 private:
@@ -122,15 +122,15 @@ public:
         return new RefCounterImpl();
     }
 
-    int32_t IncStrongRef() final
+    void IncStrongRef() final
     {
-        return strongRef_.Increase();
+        strongRef_.Increase();
     }
     int32_t DecStrongRef() final
     {
         return strongRef_.Decrease();
     }
-    int32_t TryIncStrongRef() final
+    bool TryIncStrongRef() final
     {
         return strongRef_.TryIncrease();
     }
@@ -139,18 +139,17 @@ public:
         return strongRef_.CurrentCount();
     }
 
-    int32_t IncWeakRef() final
+    void IncWeakRef() final
     {
-        return weakRef_.Increase();
+        weakRef_.Increase();
     }
-    int32_t DecWeakRef() final
+    void DecWeakRef() final
     {
         int32_t refCount = weakRef_.Decrease();
         if (refCount == 0) {
             // Release this reference counter, while its weak reference have reduced to zero.
             delete this;
         }
-        return refCount;
     }
 
 private:

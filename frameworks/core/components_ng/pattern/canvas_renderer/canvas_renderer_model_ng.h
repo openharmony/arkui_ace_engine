@@ -98,6 +98,7 @@ public:
     void GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer) override;
     void SaveLayer(const BaseInfo& baseInfo) override;
     void RestoreLayer(const BaseInfo& baseInfo) override;
+    void Reset(const BaseInfo& baseInfo) override;
     TextMetrics GetMeasureTextMetrics(const BaseInfo& baseInfo, const std::string& text) override;
 
 private:

@@ -79,7 +79,10 @@ constexpr char MAXMENUITEM[] = "MAXMENUITEM";
 constexpr char CHANGEDEFAULTSETTING[] = "CHANGEDEFAULTSETTING";
 constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
 #ifdef VSYNC_TIMEOUT_CHECK
-constexpr char EXECPTION_VSYNC[] = "VSYNC_EXCEPTION";
+constexpr char UI_VSYNC_TIMEOUT[] = "UI_VSYNC_TIMEOUT";
+constexpr char EVENT_KEY_WINDOW_ID[] = "WINDOW_ID";
+constexpr char EVENT_KEY_INSTANCE_ID[] = "INSTANCE_ID";
+constexpr char EVENT_KEY_VSYNC_TIMESTAMP[] = "VSYNC_TIMESTAMP";
 #endif
 constexpr char WARNNING_PERFERMANCE[] = "PERFERMANCE_WARNNING";
 
@@ -227,14 +230,17 @@ void EventReport::SendFormException(FormExcepType type)
 }
 
 #ifdef VSYNC_TIMEOUT_CHECK
-void EventReport::SendVsyncException(VsyncExcepType type)
+void EventReport::SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp)
 {
-    EventInfo eventInfo = {
-        .eventType = EXECPTION_VSYNC,
-        .errorType = static_cast<int32_t>(type),
-    };
-
-    SendEventInner(eventInfo);
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UI_VSYNC_TIMEOUT,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_WINDOW_ID, windowId,
+        EVENT_KEY_INSTANCE_ID, instanceId,
+        EVENT_KEY_VSYNC_TIMESTAMP, timeStamp);
 }
 #endif
 

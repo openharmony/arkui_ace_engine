@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 class Matrix4N;
 class MatrixN4;
 
-class ACE_EXPORT Matrix4 {
+class ACE_FORCE_EXPORT Matrix4 {
 public:
     // Matrix dimension is 4X4.
     static constexpr int32_t DIMENSION = 4;

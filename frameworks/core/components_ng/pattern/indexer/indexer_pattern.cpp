@@ -849,7 +849,7 @@ void IndexerPattern::UpdateBubbleView()
     auto currentListData =
         popListData ? popListData(actualChildIndex >= 0 ? actualChildIndex : actualIndex) : std::vector<std::string>();
     UpdateBubbleListView(currentListData);
-    UpdateBubbleLetterView(!currentListData.empty());
+    UpdateBubbleLetterView(!currentListData.empty(), currentListData);
     auto columnRenderContext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -953,7 +953,7 @@ void IndexerPattern::UpdateBubbleSize()
     popupNode_->MarkDirtyNode();
 }
 
-void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
+void IndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData)
 {
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
@@ -981,8 +981,8 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
                             ? paintProperty->GetPopupItemBorderRadiusValue()
                             : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
         letterContext->UpdateBorderRadius({ radius, radius, radius, radius });
-        letterNodeRenderContext->UpdateBackgroundColor(
-            paintProperty->GetPopupTitleBackground().value_or(indexerTheme->GetPopupTitleBackground()));
+        letterNodeRenderContext->UpdateBackgroundColor(paintProperty->GetPopupTitleBackground().value_or(
+            currentListData.size() > 0 ? indexerTheme->GetPopupTitleBackground() : Color(POPUP_TITLE_BG_COLOR_SINGLE)));
     } else {
         auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
         letterLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
@@ -1698,7 +1698,9 @@ void IndexerPattern::StartBubbleAppearAnimation()
 
 void IndexerPattern::StartDelayTask(uint32_t duration)
 {
-    auto context = UINode::GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
     delayTask_.Reset([weak = AceType::WeakClaim(this)] {

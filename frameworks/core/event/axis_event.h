@@ -17,8 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_AXIS_EVENT_H
 
 #include <list>
-
-#include "interfaces/native/ui_input_event.h"
+#include <utility>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -56,10 +55,8 @@ enum class AxisAction : int32_t {
     END,
     CANCEL,
 };
-
-struct UIInputEvent : public ArkUI_UIInputEvent {
+struct UIInputEvent {
     virtual ~UIInputEvent() = default;
-    ArkUI_UIInputEvent_Type eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_UNKNOWN;
     TimeStamp time;
 };
 
@@ -86,10 +83,7 @@ struct AxisEvent final : public UIInputEvent {
     float localX = 0.0;
     float localY = 0.0;
 
-    AxisEvent()
-    {
-        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS;
-    }
+    AxisEvent() {}
 
     AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
@@ -99,7 +93,6 @@ struct AxisEvent final : public UIInputEvent {
           isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
           sourceTool(sourceTool), pointerEvent(std::move(pointerEvent))
     {
-        eventType = ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS;
         time = timestamp;
     }
 
@@ -176,6 +169,12 @@ struct AxisEvent final : public UIInputEvent {
             result = Offset(-horizontalAxis, -verticalAxis);
         }
         return result * (LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
+    }
+
+    // MMI has the different direction, need to check truth direction.
+    std::pair<float, float> ConvertToSummationAxisValue(const AxisEvent& event) const
+    {
+        return std::make_pair(event.horizontalAxis - horizontalAxis, event.verticalAxis - verticalAxis);
     }
 };
 

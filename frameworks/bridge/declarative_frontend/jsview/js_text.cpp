@@ -107,6 +107,15 @@ void JSText::SetFont(const JSCallbackInfo& info)
 void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 {
     auto tmpInfo = info[0];
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    font.fontSize = theme->GetTextStyle().GetFontSize();
+    font.fontWeight = theme->GetTextStyle().GetFontWeight();
+    font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
+    font.fontStyle = theme->GetTextStyle().GetFontStyle();
+    
     if (!tmpInfo->IsObject()) {
         return;
     }
@@ -115,12 +124,6 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     CalcDimension size;
     if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
         font.fontSize = size;
-    } else {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        font.fontSize = theme->GetTextStyle().GetFontSize();
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -348,9 +351,7 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
     JSRef<JSVal> args = info[0];
-    if (!ParseJsFontFamilies(args, fontFamilies)) {
-        return;
-    }
+    ParseJsFontFamilies(args, fontFamilies);
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
@@ -893,6 +894,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::StaticMethod("fontFeature", &JSText::SetFontFeature);
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
+    JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
+    JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -946,4 +949,81 @@ void JSText::ParseMenuParam(
         menuParam.onDisappear = std::move(onDisappear);
     }
 }
+
+void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    NG::TextMarqueeOptions options;
+
+    if (!args->IsObject()) {
+        TextModel::GetInstance()->SetMarqueeOptions(options);
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(args);
+    auto getStart = paramObject->GetProperty("start");
+    if (getStart->IsBoolean()) {
+        options.UpdateTextMarqueeStart(getStart->ToBoolean());
+    }
+
+    auto getLoop = paramObject->GetProperty("loop");
+    if (getLoop->IsNumber()) {
+        int32_t loop = static_cast<int32_t>(getLoop->ToNumber<double>());
+        if (loop == std::numeric_limits<int32_t>::max() || loop <= 0) {
+            loop = -1;
+        }
+        options.UpdateTextMarqueeLoop(loop);
+    }
+
+    auto getStep = paramObject->GetProperty("step");
+    if (getStep->IsNumber()) {
+        auto step = getStep->ToNumber<double>();
+        if (GreatNotEqual(step, 0.0)) {
+            options.UpdateTextMarqueeStep(Dimension(step, DimensionUnit::VP).ConvertToPx());
+        }
+    }
+
+    auto delay = paramObject->GetProperty("delay");
+    if (delay->IsNumber()) {
+        auto delayDouble = delay->ToNumber<double>();
+        int32_t delayValue = static_cast<int32_t>(delayDouble);
+        if (delayValue < 0) {
+            delayValue = 0;
+        }
+        options.UpdateTextMarqueeDelay(delayValue);
+    }
+
+    auto getFromStart = paramObject->GetProperty("fromStart");
+    if (getFromStart->IsBoolean()) {
+        options.UpdateTextMarqueeDirection(
+            getFromStart->ToBoolean() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
+    }
+
+    TextModel::GetInstance()->SetMarqueeOptions(options);
+}
+
+void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onMarqueeStateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             int32_t value) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Text.onMarqueeStateChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        func->ExecuteJS(1, &newJSVal);
+    };
+
+    TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
+}
+
 } // namespace OHOS::Ace::Framework

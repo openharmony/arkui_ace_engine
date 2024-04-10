@@ -15,10 +15,13 @@
 
 /// <reference path='./import.ts' />
 class ArkCircleComponent extends ArkCommonShapeComponent implements CircleAttribute {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
+  }
 }
 
 // @ts-ignore
-globalThis.Circle.attributeModifier = function (modifier: ArkComponent) {
+globalThis.Circle.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkCircleComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {

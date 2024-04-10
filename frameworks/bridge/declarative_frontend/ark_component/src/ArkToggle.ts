@@ -15,11 +15,11 @@
 
 /// <reference path='./import.ts' />
 class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+  builder: WrappedBuilder<Object[]> | null = null;
+  toggleNode: BuilderNode<[ToggleConfiguration]> | null = null;
+  modifier: ContentModifier<ToggleConfiguration>;
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onChange(callback: (isOn: boolean) => void): this {
     throw new Error('Method not implemented.');
@@ -55,6 +55,22 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   switchStyle(value: SwitchStyle): this {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<ToggleConfiguration>): this {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, toggleConfiguration: ToggleConfiguration): FrameNode | null {
+    toggleConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.toggleNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.toggleNode = new xNode.BuilderNode(context);
+      this.toggleNode.build(this.builder, toggleConfiguration);
+    } else {
+      this.toggleNode.update(toggleConfiguration);
+    }
+    return this.toggleNode.getFrameNode();
   }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
@@ -263,13 +279,19 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
   }
 }
 // @ts-ignore
-globalThis.Toggle.attributeModifier = function (modifier) {
+globalThis.Toggle.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkToggleComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ToggleModifier(nativePtr, classType);
+  });
+};
+// @ts-ignore
+globalThis.Toggle.contentModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkToggleComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
+  component.setContentModifier(modifier);
 };
-

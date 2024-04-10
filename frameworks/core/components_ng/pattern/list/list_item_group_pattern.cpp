@@ -85,6 +85,13 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
     auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex, footerIndex, itemStartIndex_);
     layoutAlgorithm->SetItemsPosition(itemPosition_);
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
+    if (childrenSize_ && ListChildrenSizeExist()) {
+        if (!posMap_) {
+            posMap_ = MakeRefPtr<ListPositionMap>();
+        }
+        layoutAlgorithm->SetListChildrenMainSize(childrenSize_);
+        layoutAlgorithm->SetListPositionMap(posMap_);
+    }
     return layoutAlgorithm;
 }
 
@@ -174,6 +181,61 @@ void ListItemGroupPattern::CheckListDirectionInCardStyle()
     }
 }
 
+RefPtr<FrameNode> ListItemGroupPattern::GetListFrameNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent && !frameNode) {
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    return frameNode;
+}
+
+bool ListItemGroupPattern::ListChildrenSizeExist()
+{
+    RefPtr<FrameNode> listNode = GetListFrameNode();
+    CHECK_NULL_RETURN(listNode, false);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, false);
+    return listPattern->ListChildrenSizeExist();
+}
+
+RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSize()
+{
+    if (childrenSize_) {
+        return childrenSize_;
+    }
+    childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>();
+    auto callback = [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([weakPattern, change, flag]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnChildrenSizeChanged(change, flag);
+        });
+        context->RequestFrame();
+    };
+    childrenSize_->SetOnDataChange(callback);
+    return childrenSize_;
+}
+
+void ListItemGroupPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag)
+{
+    if (!posMap_) {
+        posMap_ = MakeRefPtr<ListPositionMap>();
+    }
+    posMap_->MarkDirty(flag);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
 VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex()
 {
     bool isHeader = false;
@@ -188,9 +250,11 @@ VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex()
     auto startArea = ListItemGroupArea::IN_LIST_ITEM_AREA;
     if (startPositionSize == 0 && startFooterMainSize > 0) {
         startArea = ListItemGroupArea::IN_FOOTER_AREA;
+        startItemIndexInGroup = -1;
     }
-    if (startItemIndexInGroup == 0 && isHeader && startHeaderMainSize > 0) {
+    if (GetDisplayStartIndexInGroup() == 0 && isHeader && startHeaderMainSize > 0) {
         startArea = ListItemGroupArea::IN_HEADER_AREA;
+        startItemIndexInGroup = -1;
     }
     if (startHeaderMainSize == 0 && startFooterMainSize == 0 && GetTotalItemCount() == 0) {
         startArea = ListItemGroupArea::NONE_AREA;
@@ -209,9 +273,11 @@ VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
     auto endArea = ListItemGroupArea::IN_LIST_ITEM_AREA;
     if (endPositionSize == 0 && endHeaderMainSize > 0) {
         endArea = ListItemGroupArea::IN_HEADER_AREA;
+        endItemIndexInGroup = -1;
     }
     if (isFooter && endFooterMainSize > 0) {
         endArea = ListItemGroupArea::IN_FOOTER_AREA;
+        endItemIndexInGroup = -1;
     }
     if (endHeaderMainSize == 0 && endFooterMainSize == 0 && GetTotalItemCount() == 0) {
         endArea = ListItemGroupArea::NONE_AREA;

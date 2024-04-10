@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class PanelModifier extends ArkPanelComponent implements AttributeModifier<PanelAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: PanelAttribute): void {
-    applyAndMergeModifier<PanelAttribute, ArkPanelComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<PanelAttribute, ArkPanelComponent, ArkComponent>(instance, this);
   }
 }

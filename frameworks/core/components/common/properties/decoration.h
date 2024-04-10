@@ -619,6 +619,7 @@ enum class ACE_EXPORT BackgroundImageSizeType {
     CONTAIN = 0,
     COVER,
     AUTO,
+    FILL,
     LENGTH,
     PERCENT,
 };

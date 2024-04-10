@@ -23,6 +23,7 @@
 #endif
 
 #include "base/geometry/ng/vector.h"
+#include "base/image/drawing_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
@@ -502,6 +503,13 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
+#ifndef PREVIEW
+        auto drawingColorFilter = CreateDrawingColorFilter(tmpInfo);
+        if (drawingColorFilter) {
+            ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
+            return;
+        }
+#endif
         JSColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();

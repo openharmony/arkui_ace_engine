@@ -138,6 +138,12 @@ public:
         }
     }
 
+    std::string GetImageFitStr(ImageFit value);
+
+    std::string GetImageRepeatStr(ImageRepeat value);
+
+    std::string GetImageColorFilterStr(const std::vector<float>& colorFilter);
+
     void SetSyncLoad(bool value)
     {
         syncLoad_ = value;
@@ -147,6 +153,8 @@ public:
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
+    void DumpLayoutInfo();
+    void DumpRenderInfo();
     void DumpAdvanceInfo() override;
 
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
@@ -200,6 +208,7 @@ private:
      * @param dstSize The size of the image to be decoded.
      */
     void StartDecoding(const SizeF& dstSize);
+    bool CheckIfNeeedLayout();
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
@@ -209,6 +218,7 @@ private:
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
+    void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
     void RegisterVisibleAreaChange();
 
     void InitCopy();

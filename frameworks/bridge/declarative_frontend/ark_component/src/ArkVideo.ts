@@ -128,8 +128,8 @@ class VideoTransitionModifier extends ModifierWithKey<object> {
   }
 }
 class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   muted(value: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity,
@@ -188,13 +188,10 @@ class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttrib
   }
 }
 // @ts-ignore
-globalThis.Video.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkVideoComponent(nativeNode);
+globalThis.Video.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkVideoComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.VideoModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

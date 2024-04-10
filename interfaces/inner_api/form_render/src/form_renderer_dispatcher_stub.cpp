@@ -31,6 +31,8 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
         &FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_VISIBLE_CHANGE)] =
         &FormRendererDispatcherStub::HandleSetVisibleChange;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_OBSCURED)] =
+        &FormRendererDispatcherStub::HandleSetObscured;
 }
 
 FormRendererDispatcherStub::~FormRendererDispatcherStub()
@@ -101,6 +103,14 @@ int32_t FormRendererDispatcherStub::HandleSetVisibleChange(MessageParcel &data, 
 {
     bool isVisible = data.ReadBool();
     SetVisibleChange(isVisible);
+    reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleSetObscured(MessageParcel &data, MessageParcel &reply)
+{
+    bool isObscured = data.ReadBool();
+    SetObscured(isObscured);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }

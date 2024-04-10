@@ -66,11 +66,8 @@ public:
     void MarkNewFrameAvailable(void* nativeWindow) override;
     void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
     void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
-#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
-    void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isUseExtSurface = false) override;
-#else
+
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
-#endif
 
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
@@ -366,6 +363,7 @@ private:
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
+    void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) override;
 
     void OnForegroundColorUpdate(const Color& value) override;
     void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) override;
@@ -416,6 +414,7 @@ private:
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;
     void OnDynamicLightUpRateUpdate(const float rate) override;
+    void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
@@ -540,8 +539,12 @@ private:
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    float OnePixelValueRounding(float value);
+    float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint8_t flag);
+    void OnePixelRounding();
+    void OnePixelRounding(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
@@ -550,7 +553,12 @@ private:
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
 
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
-        const std::optional<ContextParam>& param, bool isUseExtSurface, bool isTextureExportNode);
+        const std::optional<ContextParam>& param, bool isTextureExportNode);
+#ifdef RENDER_EXTRACT_SUPPORTED
+    std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
+        const std::optional<ContextParam>& param, bool isTextureExportNode);
+#endif
+    
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;

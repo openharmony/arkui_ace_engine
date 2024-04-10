@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace {
 class CheckBoxGroupModel {
@@ -39,6 +40,7 @@ public:
     virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
     virtual void SetChangeEvent(NG::GroupChangeEvent&& changeEvent) {};
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
+    virtual void SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyle) {};
 
 private:
     static std::unique_ptr<CheckBoxGroupModel> instance_;

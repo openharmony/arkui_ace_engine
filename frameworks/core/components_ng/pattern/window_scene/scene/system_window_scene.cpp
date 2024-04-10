@@ -59,10 +59,6 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateSizeChangeReason(static_cast<WindowSizeChangeReason>(session_->GetSizeChangeReason()));
 }
 
 void SystemWindowScene::OnAttachToFrameNode()
@@ -118,11 +114,27 @@ void SystemWindowScene::RegisterEventCallback()
         [weakThis = WeakClaim(this), instanceId = instanceId_](std::shared_ptr<MMI::PointerEvent> PointerEvent) {
             ContainerScope Scope(instanceId);
             auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
+            if (!pipelineContext) {
+                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                    "PipelineContext GetCurrentContext null,id:%{public}d", PointerEvent->GetId());
+                PointerEvent->MarkProcessed();
+                return;
+            }
             pipelineContext->PostAsyncEvent([weakThis, PointerEvent]() {
                 auto self = weakThis.Upgrade();
+            if (!self) {
+                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                    "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
+                PointerEvent->MarkProcessed();
+                return;
+            }
                 auto host = self->GetHost();
-                CHECK_NULL_VOID(host);
+            if (!host) {
+                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                    "GetHost null,id:%{public}d", PointerEvent->GetId());
+                PointerEvent->MarkProcessed();
+                return;
+            }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
             },
                 TaskExecutor::TaskType::UI);

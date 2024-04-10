@@ -60,7 +60,6 @@ constexpr int32_t NODE_ID_1 = 1;
 constexpr int32_t NODE_ID_2 = 2;
 constexpr int32_t NODE_ID_3 = 3;
 constexpr int32_t CACHE_COUNT = 1;
-constexpr int32_t HOST_DEPTH = 0;
 constexpr int32_t ERROR_HOST_DEPTH = -1;
 const std::pair<int32_t, int32_t> RANGE { -1, 0 };
 const std::pair<int32_t, int32_t> RANGE_0 { 0, 0 };
@@ -630,7 +629,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest014, TestSize.Level1)
      * @tc.expected: the return value is equal to HOST_DEPTH.
      */
     int32_t hostDepth = layoutWrapper->GetHostDepth();
-    EXPECT_EQ(hostDepth, HOST_DEPTH);
+    EXPECT_EQ(hostDepth, INT32_MAX);
 
     /**
      * @tc.steps: step3. call GetHostDepth and set hostNode_ is null.

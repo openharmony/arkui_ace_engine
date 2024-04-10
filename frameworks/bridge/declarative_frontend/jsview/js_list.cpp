@@ -71,6 +71,37 @@ constexpr ScrollAlign ALIGN_TABLE[] = {
 };
 }
 
+namespace {
+void ParseChange(const JSRef<JSObject>& changeObject, const float defaultSize, int32_t& start,
+    int32_t& deleteCount, std::vector<float>& newChildrenSize)
+{
+    if (!JSViewAbstract::ParseJsInteger<int32_t>(changeObject->GetProperty("start"), start) || start < 0) {
+        LOGW("JSList input parameter start check failed.");
+        return;
+    }
+    if (!(changeObject->HasProperty("deleteCount"))) {
+        // If only input one parameter, set -1 to deleteCount for deleting elements after index 'start' in the array.
+        deleteCount = -1;
+    } else if (!JSViewAbstract::ParseJsInteger<int32_t>(changeObject->GetProperty("deleteCount"), deleteCount) ||
+        deleteCount < 0) {
+        deleteCount = 0;
+    }
+    auto childrenSizeValue = changeObject->GetProperty("childrenSize");
+    if (childrenSizeValue->IsArray()) {
+        auto childrenSize = JSRef<JSArray>::Cast(childrenSizeValue);
+        auto childrenSizeCount = childrenSize->Length();
+        for (size_t j = 0; j < childrenSizeCount; ++j) {
+            double childSize = 0.0f;
+            if (!JSViewAbstract::ParseJsDouble(childrenSize->GetValueAt(j), childSize) ||
+                !NonNegative(childSize) || std::isinf(childSize)) {
+                childSize = defaultSize;
+            }
+            newChildrenSize.emplace_back(Dimension(childSize, DimensionUnit::VP).ConvertToPx());
+        }
+    }
+}
+} // namespace
+
 void JSList::SetDirection(int32_t direction)
 {
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
@@ -163,6 +194,45 @@ void JSList::Create(const JSCallbackInfo& args)
     }
 
     args.ReturnSelf();
+}
+
+void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
+{
+    if (args.Length() != 1 || !(args[0]->IsObject())) {
+        return;
+    }
+    JSRef<JSObject> childrenSizeObj = JSRef<JSObject>::Cast(args[0]);
+    double defaultSize = 0.0f;
+    if (!ParseJsDouble(childrenSizeObj->GetProperty("defaultMainSize"), defaultSize) || !NonNegative(defaultSize)) {
+        LOGW("JSList input parameter defaultSize check failed.");
+        return;
+    }
+    auto listChildrenMainSize = ListModel::GetInstance()->GetOrCreateListChildrenMainSize();
+    CHECK_NULL_VOID(listChildrenMainSize);
+    listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
+
+    auto changes = childrenSizeObj->GetProperty("changeArray");
+    if (!changes->IsArray()) {
+        return;
+    }
+    auto changeArray = JSRef<JSArray>::Cast(changes);
+    auto length = changeArray->Length();
+    for (size_t i = 0; i < length; ++i) {
+        auto change = changeArray->GetValueAt(i);
+        auto changeObject = JSRef<JSObject>::Cast(change);
+        int32_t start = 0;
+        int32_t deleteCount = 0;
+        std::vector<float> newChildrenSize;
+        ParseChange(changeObject, defaultSize, start, deleteCount, newChildrenSize);
+        listChildrenMainSize->ChangeData(start, deleteCount, newChildrenSize);
+    }
+
+    auto clearFunc = childrenSizeObj->GetProperty("clearChanges");
+    if (!clearFunc->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(clearFunc);
+    JSRef<JSVal>::Cast(func->Call(childrenSizeObj));
 }
 
 void JSList::SetChainAnimation(bool enableChainAnimation)
@@ -679,11 +749,15 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::SetFadingEdge(bool fadingEdge)
+{
+    ListModel::GetInstance()->SetFadingEdge(fadingEdge);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
     JSClass<JSList>::StaticMethod("create", &JSList::Create);
-
     JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
     JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
     JSClass<JSList>::StaticMethod("clip", &JSScrollable::JsClip);
@@ -697,6 +771,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
     JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
     JSClass<JSList>::StaticMethod("chainAnimationOptions", &JSList::SetChainAnimationOptions);
+    JSClass<JSList>::StaticMethod("childrenMainSize", &JSList::SetChildrenMainSize);
     JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
@@ -707,7 +782,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
-
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
@@ -719,7 +793,19 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onScrollVisibleContentChange", &JSList::ScrollVisibleContentChangeCallback);
     JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
     JSClass<JSList>::StaticMethod("onScrollFrameBegin", &JSList::ScrollFrameBeginCallback);
+    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
+    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
+    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
+    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
+    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
+    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSList>::StaticMethod("fadingEdge", &JSList::SetFadingEdge);
+    BindInteractableViewMethods();
+    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
+}
 
+void JSList::BindInteractableViewMethods()
+{
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -727,15 +813,6 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-
-    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
-    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
-    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
-    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
-    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
-    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-
-    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSListScroller::JSBind(BindingTarget globalObj)
