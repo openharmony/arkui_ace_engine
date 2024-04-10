@@ -37,6 +37,7 @@
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "rosen_render_context.h"
 
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -625,7 +626,17 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetForegroundEffectRadius(radius);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CalcDimension value;
+    value.SetValue(static_cast<double>(radius));
+    float radiusPx = context->NormalizeToPx(value);
+#ifndef USE_ROSEN_DRAWING
+    float foreRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float foreRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    rsNode_->SetForegroundEffectRadius(foreRadius);
     RequestNextFrame();
 }
 
