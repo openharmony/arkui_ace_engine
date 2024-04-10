@@ -39,6 +39,17 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
     NG::ImageSpanView::Create();
 }
 
+void JSImageSpan::SetAlt(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (info.Length() < 1) {
+        return;
+    }
+    JSImage::SetAlt(info);
+}
+
 void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
@@ -110,6 +121,7 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::Declare("ImageSpan");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSImageSpan>::StaticMethod("create", &JSImageSpan::Create, opt);
+    JSClass<JSImageSpan>::StaticMethod("alt", &JSImageSpan::SetAlt, opt);
     JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit);
     JSClass<JSImageSpan>::StaticMethod("verticalAlign", &JSImageSpan::SetVerticalAlign);
     JSClass<JSImageSpan>::StaticMethod("textBackgroundStyle", &JSImageSpan::SetTextBackgroundStyle);

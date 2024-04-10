@@ -24,6 +24,7 @@ namespace OHOS::Ace::Framework {
 class JSImageSpan : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
+    static void SetAlt(const JSCallbackInfo& info);
     static void SetObjectFit(const JSCallbackInfo& info);
     static void SetVerticalAlign(int32_t verticalAlign);
     static void SetTextBackgroundStyle(const JSCallbackInfo& info);
