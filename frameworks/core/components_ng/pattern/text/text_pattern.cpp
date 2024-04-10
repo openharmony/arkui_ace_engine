@@ -2629,7 +2629,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 void TextPattern::CreateModifier()
 {
     if (!contentMod_) {
-        contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_);
+        contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_, WeakClaim(this));
     }
     if (!overlayMod_) {
         overlayMod_ = MakeRefPtr<TextOverlayModifier>();
