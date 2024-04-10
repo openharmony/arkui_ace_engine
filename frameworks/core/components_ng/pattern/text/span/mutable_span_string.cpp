@@ -392,6 +392,8 @@ RefPtr<SpanBase> MutableSpanString::GetDefaultSpan(SpanType type)
         case SpanType::Background:
         case SpanType::Decoration:
             return nullptr;
+        default:
+            return nullptr;
     }
 }
 } // namespace OHOS::Ace
