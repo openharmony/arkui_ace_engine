@@ -282,6 +282,11 @@ void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 
+void ImageModelNG::SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
+}
+
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);

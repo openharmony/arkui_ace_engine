@@ -71,6 +71,7 @@ public:
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
+    static void SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter);
     static void SetFitOriginSize(FrameNode *framNode, bool value);
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
