@@ -836,6 +836,16 @@ void TextFieldModelNG::SetBackBorder()
     }
 }
 
+void TextFieldModelNG::SetTextOverflow(Ace::TextOverflow value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, value);
+}
+
+void TextFieldModelNG::SetTextIndent(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value);
+}
+
 void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, InputStyle, value, frameNode);

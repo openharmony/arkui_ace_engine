@@ -95,6 +95,9 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
     JSClass<JSTextArea>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
     JSClass<JSTextArea>::StaticMethod("selectedBackgroundColor", &JSTextField::SetSelectedBackgroundColor);
+    JSClass<JSTextArea>::StaticMethod("caretStyle", &JSTextField::SetCaretStyle);
+    JSClass<JSTextArea>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
+    JSClass<JSTextArea>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

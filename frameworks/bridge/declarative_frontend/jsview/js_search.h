@@ -69,6 +69,9 @@ public:
     static void SetId(const JSCallbackInfo& info);
     static void SetKey(const std::string& key);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
+    static void SetInputFilter(const JSCallbackInfo& info);
+    static void SetOnEditChange(const JSCallbackInfo& info);
+    static void SetTextIndent(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
 };
 

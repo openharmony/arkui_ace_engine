@@ -110,6 +110,8 @@ public:
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo& info);
+    static void SetTextOverflow(const JSCallbackInfo& info);
+    static void SetTextIndent(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
