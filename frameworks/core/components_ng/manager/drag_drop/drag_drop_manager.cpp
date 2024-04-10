@@ -656,7 +656,6 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
             container->GetWindowId());
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
         ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
-        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
         ClearVelocityInfo();
         return;
     }
@@ -707,7 +706,6 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
         auto unifiedData = RequestUDMFDataWithUDKey(udKey);
         DoDropAction(dragFrameNode, point, unifiedData, udKey);
-        return;
     }
 }
 
