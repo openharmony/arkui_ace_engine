@@ -1800,7 +1800,6 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll003, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 10);
     EXPECT_TRUE(info.offsetEnd_);
     for (int i = 0; i < 10; ++i) {
-        std::cout << "iteration " << i << std::endl;
         UpdateCurrentOffset(-200.0f);
         EXPECT_LT(info.currentOffset_, -499.9f);
         EXPECT_EQ(info.startMainLineIndex_, 5);

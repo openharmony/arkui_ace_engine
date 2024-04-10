@@ -43,8 +43,13 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureToTarget();
         gridLayoutInfo_.targetIndex_.reset();
     }
+
     if (gridLayoutInfo_.jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(mainSize);
+        if (!NearZero(postJumpOffset_)) {
+            gridLayoutInfo_.currentOffset_ = postJumpOffset_;
+            MeasureOnOffset(mainSize);
+        }
     } else {
         MeasureOnOffset(mainSize);
     }
@@ -272,7 +277,7 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
         if (LessOrEqual(delta, 2 * GetPrevHeight(info, mainGap_))) {
             return false;
         }
-        info.jumpIndex_ = (info.currentOffset_ < 0.0f) ? SkipLinesForward() : SkipLinesBackward();
+        info.jumpIndex_ = Negative(info.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
         info.scrollAlign_ = ScrollAlign::START;
         info.currentOffset_ = 0.0f;
         MeasureOnJump(mainSize);
@@ -310,11 +315,6 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     info.startIndex_ = info.gridMatrix_.at(res.startRow).at(0);
     info.endMainLineIndex_ = res.endRow;
     info.endIndex_ = res.endIdx;
-
-    if (!NearZero(postJumpOffset_)) {
-        info.currentOffset_ = postJumpOffset_;
-        MeasureOnOffset(mainSize);
-    }
 }
 
 void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
@@ -335,6 +335,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     } else {
         info.offsetEnd_ = false;
     }
+    info.prevOffset_ = info.currentOffset_;
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
@@ -360,6 +361,9 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
                 continue;
             }
             auto child = wrapper_->GetOrCreateChildByIndex(row.at(c));
+            if (!child) {
+                continue;
+            }
 
             SizeF blockSize = info.axis_ == Axis::VERTICAL ? SizeF { crossLens_.at(c), info.lineHeightMap_.at(r) }
                                                            : SizeF { info.lineHeightMap_.at(r), crossLens_.at(c) };
