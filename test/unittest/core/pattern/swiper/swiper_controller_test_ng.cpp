@@ -58,8 +58,8 @@ HWTEST_F(SwiperControllerTestNg, ShowNext001, TestSize.Level1)
      * @tc.steps: step2. Set item(index:1,2) INVISIBLE and GONE
      * @tc.expected: The item still take a place
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -125,8 +125,8 @@ HWTEST_F(SwiperControllerTestNg, ShowNext003, TestSize.Level1)
      * @tc.steps: step2. Set item(index:1,2) visibility:false
      * @tc.expected: item(index:1,2) still place, have two page
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -195,8 +195,8 @@ HWTEST_F(SwiperControllerTestNg, ShowNext005, TestSize.Level1)
      * @tc.steps: step2. Set item(index:1,2) visibility:false
      * @tc.expected: item(index:1,2) still place, have two page
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -236,8 +236,8 @@ HWTEST_F(SwiperControllerTestNg, ShowNext006, TestSize.Level1)
      * @tc.steps: step2. Set item(index:1,2) visibility:false
      * @tc.expected: item(index:1,2) still place, have two page
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -272,8 +272,8 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious001, TestSize.Level1)
     /**
      * @tc.steps: step1. Set item(index:1) INVISIBLE
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -334,8 +334,8 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious003, TestSize.Level1)
      * @tc.steps: step2. Set item(index:1,2) visibility:false
      * @tc.expected: item(index:1,2) still place, have two page
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -406,8 +406,8 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious005, TestSize.Level1)
      * @tc.steps: step2. Set item(index:1,2) visibility:false
      * @tc.expected: item(index:1,2) still place, have two page
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -448,8 +448,8 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
      * @tc.steps: step2. Set item(index:1,2) visibility:false
      * @tc.expected: item(index:1,2) still place, have two page
      */
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
-    GetChildLayoutProperty<TextLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
 
     /**
