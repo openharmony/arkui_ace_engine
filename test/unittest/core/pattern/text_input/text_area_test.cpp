@@ -766,6 +766,73 @@ HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SelectTextShowMenu001
+ * @tc.desc: Test show menu after SetTextSelection()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::ALWAYS
+     */
+    SelectionOptions options;
+    options.menuPolicy = MenuPolicy::ALWAYS;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
+
+    /**
+     * @tc.steps: step3. Test menu open or close
+     * @tc.expected: text menu is open
+     */
+    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Press esc
+     */
+    KeyEvent event;
+    event.code = KeyCode::KEY_ESCAPE;
+    pattern_->OnKeyEvent(event);
+
+    /**
+     * @tc.steps: step5. Set menuPolicy to be MenuPolicy::NEVER
+     */
+    options.menuPolicy = MenuPolicy::NEVER;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
+
+    /**
+     * @tc.steps: step6. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step7. Press esc
+     */
+    event.code = KeyCode::KEY_ESCAPE;
+    pattern_->OnKeyEvent(event);
+
+    /**
+     * @tc.steps: step8. Set menuPolicy to be MenuPolicy::DEFAULT
+     */
+    options.menuPolicy = MenuPolicy::DEFAULT;
+    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
+
+    /**
+     * @tc.steps: step9. Test menu open or close
+     * @tc.expected: text menu is close
+     */
+    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: OnBackPressed001
  * @tc.desc: Test OnBackPressed
  * @tc.type: FUNC
