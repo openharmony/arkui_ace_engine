@@ -260,6 +260,7 @@ void ButtonPattern::InitFocusEvent()
     auto focusHub = host->GetOrCreateFocusHub();
     auto focusTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
         theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle focus event");
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent(property, renderContext, theme, textPorerty, node);
@@ -269,6 +270,7 @@ void ButtonPattern::InitFocusEvent()
 
     auto blurTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
         theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle blur event");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent(property, renderContext, theme, textPorerty, node);
@@ -366,10 +368,12 @@ void ButtonPattern::InitTouchEvent()
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
             buttonPattern->OnTouchUp();
         }
     };
@@ -403,6 +407,7 @@ void ButtonPattern::InitHoverEvent()
         return;
     }
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle hover %{public}d", isHover);
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleHoverEvent(isHover);
@@ -520,6 +525,7 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, i
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button animate touch from %{public}d to %{public}d", typeFrom, typeTo);
     Color blendColorFrom = GetColorFromType(theme, typeFrom);
     Color blendColorTo = GetColorFromType(theme, typeTo);
     renderContext->BlendBgColor(blendColorFrom);
