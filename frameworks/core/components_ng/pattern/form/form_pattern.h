@@ -135,8 +135,6 @@ private:
     void DeleteImageNode();
     RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
-    void RegistVisibleAreaChangeCallback();
-    void OnVisibleAreaChange(bool visible);
 
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
@@ -157,7 +155,6 @@ private:
     bool isFrsNodeDetached_ = false;
     bool needSnapshotAgain_ = false;
     bool isSnapshot_ = false;
-    bool isRegistedAreaCallback_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     int64_t snapshotTimestamp_ = 0;
     int32_t scopeId_;

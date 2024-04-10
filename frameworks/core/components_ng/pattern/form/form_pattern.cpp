@@ -121,8 +121,6 @@ void FormPattern::OnAttachToFrameNode()
     InitClickEvent();
 
     scopeId_ = Container::CurrentId();
-
-    RegistVisibleAreaChangeCallback();
 }
 
 void FormPattern::InitClickEvent()
@@ -1181,34 +1179,6 @@ void FormPattern::UpdateConfiguration()
     if (localeTag != localeTag_ && subContainer_) {
         localeTag_ = localeTag;
         subContainer_->UpdateConfiguration();
-    }
-}
-
-void FormPattern::OnVisibleAreaChange(bool visible)
-{
-    if (isFrsNodeDetached_) {
-        return;
-    }
-    
-    CHECK_NULL_VOID(formManagerBridge_);
-    formManagerBridge_->SetVisibleChange(visible);
-}
-
-void FormPattern::RegistVisibleAreaChangeCallback()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!isRegistedAreaCallback_) {
-        isRegistedAreaCallback_ = true;
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
-            auto formPattern = weak.Upgrade();
-            CHECK_NULL_VOID(formPattern);
-            formPattern->OnVisibleAreaChange(visible);
-        };
-        std::vector<double> ratioList = {0.0};
-        pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     }
 }
 } // namespace OHOS::Ace::NG

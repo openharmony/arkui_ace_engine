@@ -120,24 +120,6 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
     formRenderer->OnSurfaceChange(width, height);
 }
 
-void FormRendererDispatcherImpl::SetVisibleChange(bool isVisible)
-{
-    auto handler = eventHandler_.lock();
-    if (!handler) {
-        HILOG_ERROR("eventHandler is nullptr");
-        return;
-    }
-
-    handler->PostTask([content = uiContent_, isVisible]() {
-        auto uiContent = content.lock();
-        if (!uiContent) {
-            HILOG_ERROR("uiContent is nullptr");
-            return;
-        }
-        uiContent->ProcessFormVisibleChange(isVisible);
-    });
-}
-
 void FormRendererDispatcherImpl::SetObscured(bool isObscured)
 {
     auto handler = eventHandler_.lock();
