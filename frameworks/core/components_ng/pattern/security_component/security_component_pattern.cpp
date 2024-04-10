@@ -484,14 +484,20 @@ void SecurityComponentPattern::RegisterSecurityComponentRetry()
     LOGW("Register security component failed, retry %{public}d", MAX_RETRY_TIMES);
 }
 
-void SecurityComponentPattern::RegisterSecurityComponentAsync()
+void SecurityComponentPattern::RegisterSecurityComponentAsync(int32_t instanceID)
 {
+    ContainerScope scope(instanceID);
     if (!SecurityComponentHandler::LoadSecurityComponentService()) {
         LOGW("load security component service failed.");
         return;
     }
-    SingleTaskExecutor::Make(PipelineContext::GetCurrentContext()->GetTaskExecutor(),
-        TaskExecutor::TaskType::UI).PostTask([weak = WeakClaim(this)] {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    SingleTaskExecutor::Make(context->GetTaskExecutor(),
+        TaskExecutor::TaskType::UI).PostTask([weak = WeakClaim(this), instanceID] {
+        ContainerScope scope(instanceID);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->regStatus_ != SecurityComponentRegisterStatus::REGISTERING) {
@@ -516,13 +522,15 @@ void SecurityComponentPattern::RegisterSecurityComponent()
         return;
     }
     regStatus_ = SecurityComponentRegisterStatus::REGISTERING;
-    auto scTaskExecutor =
-        SingleTaskExecutor::Make(PipelineContext::GetCurrentContext()->GetTaskExecutor(),
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    int32_t instanceID = context->GetInstanceId();
+    auto scTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
         TaskExecutor::TaskType::BACKGROUND);
-    scTaskExecutor.PostTask([weak = WeakClaim(this)] {
+    scTaskExecutor.PostTask([weak = WeakClaim(this), instanceID] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->RegisterSecurityComponentAsync();
+        pattern->RegisterSecurityComponentAsync(instanceID);
     });
 }
 
