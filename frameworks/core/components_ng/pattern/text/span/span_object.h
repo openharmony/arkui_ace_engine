@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 
 class AttachmentImage {};
 
-enum class SpanType { Font = 0, Decoration, Background, Gesture = 7 };
+enum class SpanType { Font = 0, Decoration, Background, Gesture = 7, MAX = 8 };
 
 enum class SpanOperation {
     ADD = 0,

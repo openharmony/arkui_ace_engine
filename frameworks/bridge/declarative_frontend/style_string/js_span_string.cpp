@@ -22,8 +22,6 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 namespace OHOS::Ace::Framework {
 
-const std::vector<SpanType> types = { SpanType::Font, SpanType::Gesture };
-
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
     auto jsSpanString = Referenced::MakeRefPtr<JSSpanString>();
@@ -224,7 +222,7 @@ RefPtr<SpanBase> JSSpanString::ParseJsGestureSpan(int32_t start, int32_t length,
 
 bool JSSpanString::CheckSpanType(const int32_t& type)
 {
-    if (type < 0 || type >= static_cast<int32_t>(types.size())) {
+    if (type < 0 || type >= static_cast<int32_t>(SpanType::MAX)) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
         return false;
     }
