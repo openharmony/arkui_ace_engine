@@ -134,15 +134,21 @@ public:
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to appear state", name_.c_str());
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
                                                                      NavDestinationState::ON_APPEAR);
-        if (onAppear_) {
-            auto onAppear = onAppear_;
-            onAppear();
-        }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddBuildFinishCallBack([weakEventHub = WeakClaim(this)]() {
+            auto eventHub = weakEventHub.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            if (eventHub->onAppear_) {
+                auto onAppear = eventHub->onAppear_;
+                onAppear();
+            }
 
-        if (onJSFrameNodeAppear_) {
-            auto onJSFrameNodeAppear = onJSFrameNodeAppear_;
-            onJSFrameNodeAppear();
-        }
+            if (eventHub->onJSFrameNodeAppear_) {
+                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                onJSFrameNodeAppear();
+            }
+        });
     }
 
     void FireOnDisappear() override
