@@ -16,34 +16,7 @@
 
 #include "base/log/log_wrapper.h"
 
-#include "hilog/log.h"
-
-int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
-{
-    return 0;
-}
-
 namespace OHOS::Ace {
-LogLevel LogWrapper::level_ = LogLevel::DEBUG;
-
-const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {};
-
-char LogWrapper::GetSeparatorCharacter()
-{
-    return '/';
-}
-
+// should add implementation for the platform of unit tests run environment.
 void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args) {}
-
-#ifdef ACE_INSTANCE_LOG
-int32_t LogWrapper::GetId()
-{
-    return 0;
-}
-
-const std::string LogWrapper::GetIdWithReason()
-{
-    return "";
-}
-#endif
 } // namespace OHOS::Ace

@@ -50,6 +50,7 @@ public:
     static ArkUINativeModuleValue SetButtonStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetButtonStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetButtonControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetButtonControlSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     
 private:

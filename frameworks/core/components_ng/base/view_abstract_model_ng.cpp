@@ -161,12 +161,11 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateChainedTransition(menuParam.transition);
         }
-        if (!wrapperPattern->IsShow() && menuParam.isShow) {
-            overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
-        } else if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+        if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
             overlayManager->HideMenu(menuNode, targetId, false);
         }
-    } else if (menuParam.isShow) {
+    }
+    if (menuParam.isShow) {
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
         } else if (buildFunc) {
@@ -249,6 +248,7 @@ void BindContextMenuSingle(
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
             } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
@@ -459,7 +459,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange)
+    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
@@ -501,7 +501,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
-        std::move(onWillDisappear), std::move(onHeightDidChange), targetNode);
+        std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange), targetNode);
 }
 
 void ViewAbstractModelNG::DismissSheet()

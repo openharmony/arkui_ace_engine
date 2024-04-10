@@ -15,6 +15,7 @@
 
 /**
  * ForEach for partial update
+ * Repeat aka ForEach and LazyForEach with child update
  *
  * all definitions in this file are framework internal
  * 
@@ -32,3 +33,10 @@ declare class ForEach {
   static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void;
 }
 
+declare class RepeatNative {
+  static startRender(): void;
+  static finishRender(removedChildElmtIds: Array<number>): void;
+  static moveChild(fromIndex: number): void;
+  static createNewChildStart(id: string): void;
+  static createNewChildFinish(id: string): void;
+}

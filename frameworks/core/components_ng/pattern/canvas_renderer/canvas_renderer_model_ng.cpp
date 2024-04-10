@@ -1506,4 +1506,23 @@ void CanvasRendererModelNG::RestoreLayer(const BaseInfo& baseInfo)
         canvasPattern->RestoreLayer();
     }
 }
+
+void CanvasRendererModelNG::Reset(const BaseInfo& baseInfo)
+{
+    if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
+        auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
+        CHECK_NULL_VOID(offscreenPattern);
+        if (!offscreenPattern->IsSucceed()) {
+            return;
+        }
+        offscreenPattern->Reset();
+        return;
+    }
+
+    if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
+        auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(baseInfo.canvasPattern);
+        CHECK_NULL_VOID(canvasPattern);
+        canvasPattern->Reset();
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -158,6 +158,21 @@ public:
         return false;
     }
 
+    void UpdateOnDetentsDidChange(std::function<void(const float)>&& onDetentsDidChange)
+    {
+        onDetentsDidChange_ = std::move(onDetentsDidChange);
+    }
+
+    void OnDetentsDidChange(float currentHeight) const
+    {
+        if (onDetentsDidChange_) {
+            onDetentsDidChange_(currentHeight);
+        }
+    }
+
+    void FireOnDetentsDidChange(float height);
+
+
     void CallShouldDismiss()
     {
         if (shouldDismiss_) {
@@ -451,6 +466,7 @@ private:
     std::function<void()> onWillDisappear_;
     std::function<void()> shouldDismiss_;
     std::function<void(const float)> onHeightDidChange_;
+    std::function<void(const float)> onDetentsDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;

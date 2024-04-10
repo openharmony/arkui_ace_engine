@@ -122,6 +122,7 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     if (image->IsStatic()) {
         return;
     }
+    SetOnFinishCallback(image);
     SetRedrawCallback(image);
     RegisterVisibleAreaChange();
     auto layoutProps = GetLayoutProperty<LayoutProperty>();
@@ -130,6 +131,19 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
     if (layoutProps->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         image->ControlAnimation(false);
     }
+}
+
+void ImagePattern::SetOnFinishCallback(const RefPtr<CanvasImage>& image)
+{
+    CHECK_NULL_VOID(image);
+    image->SetOnFinishCallback([weak = WeakPtr(GetHost())] {
+        auto imageNode = weak.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+        if (eventHub) {
+            eventHub->FireFinishEvent();
+        }
+    });
 }
 
 void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
@@ -404,10 +418,6 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
         return;
     }
 
-    auto renderProps = host->GetPaintProperty<ImageRenderProperty>();
-    if (renderProps) {
-        renderProps->UpdateNeedBorderRadius(true);
-    }
     canvasImage->SetPaintConfig(config);
 }
 
@@ -659,6 +669,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
             return;
         }
         pattern->altImage_ = pattern->altLoadingCtx_->MoveCanvasImage();
+        CHECK_NULL_VOID(pattern->altImage_);
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,

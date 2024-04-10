@@ -55,6 +55,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
     }
     navDestinationNode->UpdatePrevTitleIsCustom(false);
 
+    auto theme = NavigationGetTheme();
     // create or update main title
     auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     if (hasMainTitle) {
@@ -68,7 +69,6 @@ bool NavDestinationModelNG::ParseCommonTitle(
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            auto theme = NavigationGetTheme();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
             textLayoutProperty->UpdateContent(title);
             textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
@@ -78,6 +78,11 @@ bool NavDestinationModelNG::ParseCommonTitle(
             textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
+                textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
+                textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+            }
             titleBarNode->SetTitle(mainTitle);
             titleBarNode->AddChild(mainTitle);
         }
@@ -113,6 +118,10 @@ bool NavDestinationModelNG::ParseCommonTitle(
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
+            textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
+        }
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }

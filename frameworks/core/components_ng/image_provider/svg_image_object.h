@@ -25,7 +25,9 @@ class SvgImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgImageObject, ImageObject);
 
 public:
-    SvgImageObject(const ImageSourceInfo& src, const SizeF& imageSize) : ImageObject(src, imageSize, nullptr) {}
+    SvgImageObject(const ImageSourceInfo& src, const SizeF& imageSize, const RefPtr<ImageData>& data = nullptr)
+        : ImageObject(src, imageSize, nullptr), svgImageData_(data)
+    {}
     ~SvgImageObject() override = default;
 
     static RefPtr<SvgImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
@@ -35,15 +37,14 @@ public:
     {
         return Claim(this);
     }
+    RefPtr<SvgDomBase> MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor);
+    const RefPtr<ImageData>& GetSvgImageData() const;
 
 private:
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
-
-    // return true if process is successful
-    bool MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor);
-
     RefPtr<SvgDomBase> svgDomBase_;
+    const RefPtr<ImageData> svgImageData_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SvgImageObject);
 };

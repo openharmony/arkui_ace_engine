@@ -805,6 +805,12 @@ bool ArkTSUtils::ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& j
         vm, jsValue, result, DimensionUnit::FP, isSupportPercent, enableCheckInvalidvalue);
 }
 
+bool ArkTSUtils::ParseJsDimensionFpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+    bool isSupportPercent)
+{
+    return ArkTSUtils::ParseJsDimensionNG(vm, jsValue, result, DimensionUnit::FP, isSupportPercent);
+}
+
 bool ArkTSUtils::ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
@@ -1276,6 +1282,15 @@ void ArkTSUtils::ParsePadding(
             result.value = dimen.Value();
         }
     }
+}
+
+panda::Local<panda::ObjectRef> ArkTSUtils::GetContext(EcmaVM* vm)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
+    return NapiValueToLocalValue(frontend->GetContextValue());
 }
 
 bool ArkTSUtils::ParseResponseRegion(

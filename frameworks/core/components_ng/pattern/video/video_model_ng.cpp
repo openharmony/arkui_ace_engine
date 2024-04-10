@@ -81,9 +81,10 @@ void VideoModelNG::SetProgressRate(double progressRate)
     videoPattern->UpdateProgressRate(progressRate);
 }
 
-void VideoModelNG::SetPosterSourceInfo(const std::string& posterUrl)
+void VideoModelNG::SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
+    const std::string &moduleName)
 {
-    ImageSourceInfo posterSourceInfo(posterUrl);
+    ImageSourceInfo posterSourceInfo(posterUrl, bundleName, moduleName);
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo);
 }
 

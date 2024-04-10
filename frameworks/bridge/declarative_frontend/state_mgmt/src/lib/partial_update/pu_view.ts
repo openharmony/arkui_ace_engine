@@ -151,6 +151,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: ProvidedVarsMapPU = new Map<string, ObservedPropertyAbstractPU<any>>();
 
+  // Map elmtId -> Repeat instance in this ViewPU
+  private elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
+
   // Set of dependent elmtIds that need partial update
   // during next re-render
   protected dirtDescendantElementIds_: Set<number>
@@ -624,7 +627,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    */
   public forceCompleteRerender(deep: boolean = false): void {
     stateMgmtProfiler.begin("ViewPU.forceCompleteRerender");
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - start.`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - start.`);
 
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
@@ -640,7 +643,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
         }
       });
     }
-    stateMgmtConsole.warn(`${this.debugInfo__()}: forceCompleteRerender - end`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: forceCompleteRerender - end`);
     stateMgmtProfiler.end();
   }
 
@@ -1604,7 +1607,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
       .map((component) => `- ${component}`).join('\n');
   }
 
-  
   /**
    * 
    * @param paramVariableName @param is read only, therefore, update form parent needs to be done without
@@ -1653,7 +1655,28 @@ abstract class ViewPU extends NativeViewPartialUpdate
     /* FIXME @Component freeze 
     stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
     this.computedIdsDelayedUpdate.add(watchId);
-    */
+  */
+  }
+
+  /**
+   * on first render create a new Instance of Repeat
+   * on re-render connect to existing instance 
+   * @param arr 
+   * @returns 
+   */
+  public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I>
+  = <I>(arr: Array<I>): RepeatAPI<I> => {
+      // factory is for future extensions, currently always return the same
+      const elmtId = this.getCurrentlyRenderedElmtId();
+      let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>
+      if (!repeat) {
+          repeat = new __Repeat<I>(this, arr);
+          this.elmtId2Repeat_.set(elmtId, repeat);
+      } else {
+          repeat.updateArr(arr)
+      }
+
+      return repeat;
   }
 }  // class ViewPU
 

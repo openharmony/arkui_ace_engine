@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -200,6 +201,16 @@ void ListItemPattern::SetSwiperItemForList()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItem(AceType::WeakClaim(this));
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto scrollableEvent = listPattern->GetScrollableEvent();
+        CHECK_NULL_VOID(scrollableEvent);
+        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
+            auto item = weak.Upgrade();
+            CHECK_NULL_RETURN(item, true);
+            return item->ClickJudge(localPoint);
+        };
+        scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
+    }
 }
 
 void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback)
@@ -601,6 +612,19 @@ void ListItemPattern::FireSwipeActionStateChange(SwipeActionState newState)
     listItemEventHub->FireStateChangeEvent(newState, isStart);
 }
 
+void ListItemPattern::ResetToItemChild()
+{
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    auto scrollableEvent = listPattern->GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
+    scrollableEvent->SetClickJudgeCallback(nullptr);
+    swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+    FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
+}
+
 void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 {
     if (info.GetInputEventType() == InputEventType::AXIS) {
@@ -942,6 +966,36 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, estimateHeight);
     return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis);
+}
+
+bool ListItemPattern::ClickJudge(const PointF& localPoint)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    auto offset = geometryNode->GetMarginFrameOffset();
+    auto size = geometryNode->GetMarginFrameSize();
+    auto xOffset = localPoint.GetX() - offset.GetX();
+    auto yOffset = localPoint.GetY() - offset.GetY();
+    if (GetAxis() == Axis::VERTICAL) {
+        if (yOffset > 0 && yOffset < size.Height()) {
+            if (startNodeSize_ && xOffset > 0 && xOffset < startNodeSize_) {
+                return false;
+            } else if (endNodeSize_ && xOffset > size.Width() - endNodeSize_ && xOffset < size.Width()) {
+                return false;
+            }
+        }
+    } else {
+        if (xOffset > 0 && xOffset < size.Width()) {
+            if (startNodeSize_ && yOffset > 0 && yOffset < startNodeSize_) {
+                return false;
+            } else if (endNodeSize_ && yOffset > size.Height() - endNodeSize_ && yOffset < size.Height()) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
 

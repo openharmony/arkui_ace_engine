@@ -104,6 +104,17 @@ public:
     {
         return checkboxFlag_;
     }
+
+    void SetDisallowDropForcedly(bool isDisallowDropForcedly)
+    {
+        isDisallowDropForcedly_ = isDisallowDropForcedly;
+    }
+
+    bool GetDisallowDropForcedly() const
+    {
+        return isDisallowDropForcedly_;
+    }
+
     void OnInspectorIdUpdate(const std::string& id) override;
 
     struct ZIndexComparator {
@@ -946,12 +957,13 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool needRestoreSafeArea_ = true;
+    bool isDisallowDropForcedly_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO, false, false, false, { .isShowBadge = true } };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

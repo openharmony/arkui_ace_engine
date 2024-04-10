@@ -206,6 +206,7 @@ void LazyForEachNode::OnDataChanged(size_t index)
         builder_->OnDataChanged(index);
     }
     children_.clear();
+    NotifyDataCountChanged(static_cast<int32_t>(index));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -244,6 +245,7 @@ void LazyForEachNode::OnDataMoveToNewPlace(size_t from, size_t to)
         builder_->OnDataMoveToNewPlace(from, to);
     }
     children_.clear();
+    NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -255,6 +257,7 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
         builder_->OnDataMoved(from, to);
     }
     children_.clear();
+    NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -354,9 +357,10 @@ void LazyForEachNode::RecycleItems(int32_t from, int32_t to)
     children_.clear();
     for (auto index = from; index < to; index++) {
         if (index >= startIndex_ && index < startIndex_ + count_) {
-            builder_->RecycleChildByIndex(index - startIndex_);
+            builder_->RecordOutOfBoundaryNodes(index - startIndex_);
         }
     }
+    PostIdleTask();
 }
 
 void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)

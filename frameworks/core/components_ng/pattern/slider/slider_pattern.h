@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 
@@ -37,6 +38,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (UseContentModifier()) {
+            return nullptr;
+        }
         if (!IsSliderVisible()) {
             return nullptr;
         }
@@ -131,6 +135,18 @@ public:
     void UpdateValue(float value);
     void OnVisibleChange(bool isVisible) override;
 
+    void SetBuilderFunc(SliderMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    void SetSliderValue(double value, int32_t mode);
+
 private:
     void OnModifyDone() override;
     void CalcSliderValue();
@@ -200,6 +216,10 @@ private:
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
     bool isMinResponseExceed(const std::optional<Offset>& localLocation);
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<SliderMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

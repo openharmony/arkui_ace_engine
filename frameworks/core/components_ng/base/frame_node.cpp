@@ -612,11 +612,11 @@ void FrameNode::DumpDragInfo()
                                         .append(eventHub->HasOnDragMove() ? "YES" : "NO")
                                         .append(" OnDrop: ")
                                         .append(eventHub->HasOnDrop() ? "YES" : "NO")
-                                        .append("OnDragEnd: ")
+                                        .append(" OnDragEnd: ")
                                         .append(eventHub->HasOnDragEnd() ? "YES" : "NO"));
     DumpLog::GetInstance().AddDesc(std::string("DefaultOnDragStart: ")
                                         .append(eventHub->HasDefaultOnDragStart() ? "YES" : "NO")
-                                        .append("CustomerOnDragEnter: ")
+                                        .append(" CustomerOnDragEnter: ")
                                         .append(eventHub->HasCustomerOnDragEnter() ? "YES" : "NO")
                                         .append(" CustomerOnDragLeave: ")
                                         .append(eventHub->HasCustomerOnDragLeave() ? "YES" : "NO")
@@ -1700,6 +1700,16 @@ void FrameNode::MarkDirtyNode(
         auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
         auto selfExpansiveToMark = opts && opts->ExpansiveToMark();
         if ((!isMeasureBoundary && IsNeedRequestParentMeasure()) || selfExpansiveToMark) {
+            if (CheckMeasureSelfAndParentFlag(extraFlag)) {
+                RequestParentDirty();
+                return;
+            }
+            if (CheckMeasureSelfFlag(extraFlag)) {
+                CHECK_NULL_VOID(!isLayoutDirtyMarked_);
+                isLayoutDirtyMarked_ = true;
+                context->AddDirtyLayoutNode(Claim(this));
+                return;
+            }
             bool parentStopMark = false;
             auto parent = GetAncestorNodeOfFrame();
             if (parent) {

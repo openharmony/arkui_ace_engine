@@ -136,8 +136,8 @@ public:
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
-        task->OnSuccess([successCallback = std::move(downloadCallback.successCallback),
-                            failCallback = std::move(downloadCallback.failCallback),
+        task->OnSuccess([successCallback = downloadCallback.successCallback,
+                            failCallback = downloadCallback.failCallback,
                             instanceId](const NetStackRequest& request, const NetStackResponse& response) {
             if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
                 LOGI("Async http task of url [%{private}s] failed, the responseCode = %d.", request.GetURL().c_str(),
@@ -151,13 +151,13 @@ public:
                 response.GetResponseCode());
             successCallback(std::move(response.GetResult()), true, instanceId);
         });
-        task->OnCancel([cancelCallback = std::move(downloadCallback.cancelCallback), instanceId](
+        task->OnCancel([cancelCallback = downloadCallback.cancelCallback, instanceId](
                            const NetStackRequest& request, const NetStackResponse& response) {
             LOGI("Async Http task of url [%{private}s] cancelled by netStack", request.GetURL().c_str());
             std::string errorMsg = "Http task of url " + request.GetURL() + " cancelled by netStack";
             cancelCallback(errorMsg, true, instanceId);
         });
-        task->OnFail([failCallback = std::move(downloadCallback.failCallback), instanceId](
+        task->OnFail([failCallback = downloadCallback.failCallback, instanceId](
                          const NetStackRequest& request, const NetStackResponse& response, const NetStackError& error) {
             LOGI("Async http task of url [%{private}s] failed, response code %{public}d, msg from netStack: "
                  "[%{public}s]",

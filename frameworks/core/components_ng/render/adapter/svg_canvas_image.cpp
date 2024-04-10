@@ -42,6 +42,11 @@ void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback)
     svgDom_->SetAnimationCallback(std::move(callback), WeakClaim(this));
 }
 
+void SvgCanvasImage::SetOnFinishCallback(std::function<void()>&& callback)
+{
+    svgDom_->SetAnimationOnFinishCallback(callback);
+}
+
 void SvgCanvasImage::ControlAnimation(bool play)
 {
     svgDom_->ControlAnimation(play);

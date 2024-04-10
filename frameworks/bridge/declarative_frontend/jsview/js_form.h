@@ -25,6 +25,7 @@ class JSForm : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+    static void JsObscured(const JSCallbackInfo& info);
 
     static void SetSize(const JSCallbackInfo& info);
     static void SetDimension(int32_t value);

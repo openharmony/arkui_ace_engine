@@ -112,4 +112,9 @@ void FormModelImpl::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
 {
     LOGE("Not support onLoad in old pipeline");
 }
+
+void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)
+{
+    LOGE("Not support SetObscured in old pipeline");
+}
 } // namespace OHOS::Ace::Framework

@@ -36,6 +36,11 @@ public:
         svgDom_->SetSmoothEdge(value);
     }
 
+    void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
+    {
+        svgDom_->SetColorFilter(colorFilter);
+    }
+
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
     int32_t GetWidth() const override
@@ -53,6 +58,7 @@ public:
 
     bool IsStatic() override;
     void SetRedrawCallback(std::function<void()>&& callback) override;
+    void SetOnFinishCallback(std::function<void()>&& callback) override;
 
     void ControlAnimation(bool play) override;
 

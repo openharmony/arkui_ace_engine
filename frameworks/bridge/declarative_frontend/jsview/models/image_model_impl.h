@@ -48,6 +48,7 @@ public:
     void SetResizableSlice(const ImageResizableSlice& slice) override {};
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
+    void SetDrawingColorFilter(RefPtr<DrawingColorFilter>& colorFilter) override {};
     void SetDraggable(bool draggable) override {}
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;

@@ -361,6 +361,16 @@ public:
         return isShowBadgeAnimation_;
     }
 
+    void SetBadgeNumber(int32_t badgeNumber)
+    {
+        badgeNumber_ = badgeNumber;
+    }
+
+    int32_t GetBadgeNumber() const
+    {
+        return badgeNumber_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -387,6 +397,7 @@ private:
     void NotifyDragFrameNode(
         const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
     void TransDragWindowToDragFwk(int32_t windowContainerId);
+    void ResetDragDrop(int32_t windowId, const Point& point);
     bool isDistanceLimited(const Point& point);
     bool isTimeLimited(const PointerEvent& pointerEvent, const Point& point);
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
@@ -438,6 +449,7 @@ private:
     bool hasGatherNode_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
+    int32_t badgeNumber_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

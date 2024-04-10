@@ -584,6 +584,7 @@ protected:
     void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
     bool IsSelectedBindSelectionMenu();
     bool CalculateClickedSpanPosition(const PointF& textOffset);
+    void HiddenMenu();
     std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
 
     virtual bool CanStartAITask()
@@ -630,6 +631,7 @@ protected:
     friend class TextContentModifier;
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -657,6 +659,7 @@ private:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
+    void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;

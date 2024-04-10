@@ -161,4 +161,9 @@ void CheckBoxGroupModelNG::SetWidth(FrameNode* frameNode, const Dimension& width
 {
     NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
 }
+
+void CheckBoxGroupModelNG::SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyle)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle);
+}
 } // namespace OHOS::Ace::NG

@@ -253,7 +253,7 @@ int32_t GetAstcPsnrProp()
 
 bool GetImageFileCacheConvertToAstcEnabled()
 {
-    return system::GetParameter("persist.image.filecache.astc.enable", "true") == "true";
+    return system::GetParameter("persist.image.filecache.astc.enable", "false") == "true";
 }
 
 bool IsUseMemoryMonitor()
@@ -356,6 +356,11 @@ void SystemProperties::InitDeviceType(DeviceType)
 int SystemProperties::GetArkProperties()
 {
     return system::GetIntParameter<int>("persist.ark.properties", -1);
+}
+
+std::string SystemProperties::GetMemConfigProperty()
+{
+    return system::GetParameter("persist.ark.mem_config_property", "");
 }
 
 std::string SystemProperties::GetArkBundleName()

@@ -59,6 +59,7 @@ namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
+constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -165,7 +166,7 @@ constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
-constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 3;
+constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 4;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
@@ -642,12 +643,16 @@ void WebPattern::InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureH
     gestureHub->InitDragDropEvent();
     InitWebEventHubDragDropStart(eventHub);
     InitWebEventHubDragDropEnd(eventHub);
+    InitWebEventHubDragMove(eventHub);
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub init drag event ok");
 }
 
 void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub)
 {
     auto onDragStartId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) -> NG::DragDropInfo {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag start,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         NG::DragDropInfo dragDropInfo;
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -663,6 +668,8 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
 
     auto onDragEnterId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag enter,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -676,11 +683,22 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         return pattern->HandleOnDragEnter(info);
     };
 
+    // set custom OnDragStart function
+    eventHub->SetOnDragStart(std::move(onDragStartId));
+    eventHub->SetOnDragEnter(std::move(onDragEnterId));
+}
+
+void WebPattern::InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub)
+{
     auto onDragMoveId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        static uint32_t dragMoveCnt = 0;
+        if ((dragMoveCnt % DEBUG_DRAGMOVEID_TIMER) == 0) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop  WebEventHub drag move,"
+                " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        static uint32_t dragMoveCnt = 0;
         if ((dragMoveCnt++ % DEBUG_DRAGMOVEID_TIMER) == 0) {
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragMoveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
@@ -697,8 +715,6 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         pattern->HandleOnDropMove(info);
     };
     // set custom OnDragStart function
-    eventHub->SetOnDragStart(std::move(onDragStartId));
-    eventHub->SetOnDragEnter(std::move(onDragEnterId));
     eventHub->SetOnDragMove(std::move(onDragMoveId));
 }
 
@@ -706,6 +722,8 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
 {
     auto onDragDropId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag drop,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -721,6 +739,8 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
 
     auto onDragLeaveId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag leave,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -730,6 +750,8 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
     };
 
     auto onDragEndId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop WebEventHub drag end,"
+            " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_WEB,
@@ -765,6 +787,7 @@ DragRet WebPattern::GetDragAcceptableStatus()
 bool WebPattern::NotifyStartDragTask()
 {
     if (isDisableDrag_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop disable drag in web");
         return false;
     }
     isDragging_ = true;
@@ -781,6 +804,7 @@ bool WebPattern::NotifyStartDragTask()
         // mouse drag does not need long press action
         gestureHub->StartLongPressActionForWeb();
     }
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag, and start drag task for web");
     gestureHub->StartDragTaskForWeb();
     return true;
 }
@@ -2374,7 +2398,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
 {
-    (void)info;
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowId = pipeline->GetWindowId();
@@ -2383,8 +2407,11 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
         return false;
     }
+
     if ((type == OHOS::NWeb::CursorType::CT_CONTEXTMENU) || (type == OHOS::NWeb::CursorType::CT_ALIAS)) {
         UpdateLocalCursorStyle(windowId, type);
+    } else if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
+        UpdateCustomCursor(windowId, info);
     } else {
         MouseFormat pointStyle = MouseFormat::DEFAULT;
         int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
@@ -2412,6 +2439,27 @@ void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::Curs
         pixelMap = CreatePixelMapFromString(IMAGE_POINTER_ALIAS_PATH);
         mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
     }
+}
+
+void WebPattern::UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info)
+{
+    Media::InitializationOptions opt;
+    opt.size.width = info.width;
+    opt.size.height = info.height;
+    opt.editable = true;
+    auto pixelMap = Media::PixelMap::Create(opt);
+    CHECK_NULL_VOID(pixelMap);
+    uint64_t bufferSize = info.width * info.height * IMAGE_POINTER_CUSTOM_CHANNEL;
+    uint32_t status = pixelMap->WritePixels(static_cast<const uint8_t*>(info.buff), bufferSize);
+    if (status != 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "write pixel map failed %{public}u", status);
+        return;
+    }
+    std::shared_ptr<Media::PixelMap> cursorPixelMap(pixelMap.release());
+    CHECK_NULL_VOID(cursorPixelMap);
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->SetCustomCursor(windowId, info.x, info.y, cursorPixelMap);
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)
@@ -2985,6 +3033,7 @@ bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, fl
         float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
         parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
         return true;
     }
@@ -3164,12 +3213,9 @@ void WebPattern::ReleaseResizeHold()
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     if (isNeedUpdateScrollAxis_) {
-        expectedScrollAxis_ = GetAxis();
-        if (parentsMap_.size() > 1) {
-            expectedScrollAxis_ = (x != 0 || y != 0)
-                ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
-                : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
-        }
+        expectedScrollAxis_ = (x != 0 || y != 0)
+            ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
+            : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
         isNeedUpdateScrollAxis_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
             "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
@@ -3509,6 +3555,10 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        if (!visible && !NearZero(ratio)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "Fiterate not visible when ratio=%{public}f", ratio);
+            return;
+        }
         webPattern->OnVisibleAreaChange(visible);
     };
     std::vector<double> ratioList = {0.0, 1.0};

@@ -185,6 +185,12 @@ public:
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
+    
+    void OnDetachFromMainTree() override
+    {
+        auto weak = AceType::WeakClaim(this);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
+    }
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);

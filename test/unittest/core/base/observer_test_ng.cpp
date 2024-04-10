@@ -180,4 +180,34 @@ HWTEST_F(ObserverTestNg, ObserverTestNg006, TestSize.Level1)
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(std::move(from), std::move(to), operation);
     EXPECT_TRUE(hasNotified);
 }
+
+/**
+ * @tc.name: ObserverTestNg007
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg007, TestSize.Level1)
+{
+    GestureEvent gestureEventInfo;
+    ClickInfo clickInfo = ClickInfo(0);
+    RefPtr<FrameNode> frameNode = nullptr;
+
+    UIObserverHandler::GetInstance().NotifyWillClick(gestureEventInfo, clickInfo, frameNode);
+    ASSERT_EQ(UIObserverHandler::GetInstance().willClickHandleFunc_, nullptr);
+}
+
+/**
+ * @tc.name: ObserverTestNg008
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg008, TestSize.Level1)
+{
+    GestureEvent gestureEventInfo;
+    ClickInfo clickInfo = ClickInfo(0);
+    RefPtr<FrameNode> frameNode = nullptr;
+
+    UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, frameNode);
+    ASSERT_EQ(UIObserverHandler::GetInstance().didClickHandleFunc_, nullptr);
+}
 }

@@ -1418,6 +1418,73 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest025, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ButtonPatternTest026
+ * @tc.desc: Test SetButtonPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetButtonPress
+     * @tc.expected: step2. x and y is set correct
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    GestureEventFunc callback = [](GestureEvent& info) {
+        EXPECT_EQ(info.globalPoint_.GetX(), 1.0);
+        EXPECT_EQ(info.globalPoint_.GetY(), 1.0);
+    };
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    gesture->AddClickEvent(clickEvent);
+    buttonPattern->FireBuilder();
+    buttonPattern->SetButtonPress(1.0, 1.0);
+}
+
+/**
+ * @tc.name: ButtonPatternTest027
+ * @tc.desc: Test SetBuilderFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetChangeValue
+     * @tc.expected: step2. x and y is set correct
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->OnTouchDown();
+    auto node = [](ButtonConfiguration config) -> RefPtr<FrameNode> {
+            EXPECT_EQ(CREATE_VALUE, config.label_);
+            EXPECT_EQ(true, config.pressed_);
+            return nullptr;
+        };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    buttonPattern->SetBuilderFunc(node);
+    buttonPattern->BuildContentModifierNode();
+}
+
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: Test on color configuration update
  * @tc.type: FUNC

@@ -64,6 +64,9 @@ class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
 }
 
 class ArkRatingComponent extends ArkComponent implements RatingAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  ratingNode: BuilderNode<[RatingConfiguration]> | null = null;
+  modifier: ContentModifier<RatingConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -91,6 +94,22 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   onChange(callback: (value: number) => void): this {
     throw new Error('Method not implemented.');
   }
+  setContentModifier(modifier: ContentModifier<RatingConfiguration>): this {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, ratingConfiguration: RatingConfiguration): FrameNode | null {
+    ratingConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.ratingNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.ratingNode = new xNode.BuilderNode(context);
+      this.ratingNode.build(this.builder, ratingConfiguration);
+    } else {
+      this.ratingNode.update(ratingConfiguration);
+    }
+    return this.ratingNode.getFrameNode();
+  }
 }
 // @ts-ignore
 globalThis.Rating.attributeModifier = function (modifier: ArkComponent): void {
@@ -99,4 +118,14 @@ globalThis.Rating.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.RatingModifier(nativePtr, classType);
   });
+};
+
+// @ts-ignore
+globalThis.Rating.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkRatingComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };

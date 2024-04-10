@@ -247,6 +247,7 @@ public:
     PaddingPropertyF CreatePaddingAndBorder();
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
+    BorderWidthPropertyF CreateBorder();
 
     MarginPropertyF CreateMargin();
 

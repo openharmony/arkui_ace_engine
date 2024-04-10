@@ -366,6 +366,8 @@ public:
 
     static void SetFreeze(bool freeze);
 
+    static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
+
     // useShadowBatching
     static void SetUseShadowBatching(bool useShadowBatching);
 
@@ -391,6 +393,7 @@ public:
     static void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(float value);
+    static void SetLightColor(const Color& value);
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);
@@ -551,6 +554,7 @@ public:
     static bool GetNeedFocus(FrameNode* frameNode);
     static double GetOpacity(FrameNode* frameNode);
     static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
+    static BorderWidthProperty GetLayoutBorderWidth(FrameNode* frameNode);
     static BorderRadiusProperty GetBorderRadius(FrameNode* frameNode);
     static BorderColorProperty GetBorderColor(FrameNode* frameNode);
     static BorderStyleProperty GetBorderStyle(FrameNode* frameNode);
@@ -619,6 +623,7 @@ public:
     static std::string GetBackgroundImageSrc(FrameNode* frameNode);
     static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
     static PaddingProperty GetPadding(FrameNode* frameNode);
+    static std::optional<CalcSize> GetConfigSize(FrameNode* frameNode);
     static std::string GetKey(FrameNode* frameNode);
     static bool GetEnabled(FrameNode* frameNode);
     static MarginProperty GetMargin(FrameNode* frameNode);

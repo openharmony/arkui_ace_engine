@@ -96,7 +96,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
-    if (clickEventActuator_) {
+    if (clickEventActuator_ && !redirectClick_) {
         clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
     if (userParallelClickEventActuator_) {
@@ -317,6 +317,9 @@ void GestureEventHub::UpdateGestureHierarchy()
                 break;
             }
         }
+    }
+    if (success) {
+        gestures_.clear();
         return;
     }
 
@@ -328,6 +331,7 @@ void GestureEventHub::UpdateGestureHierarchy()
         AddGestureToGestureHierarchy(gesture);
     }
     needRecollect_ = false;
+    gestures_.clear();
 }
 
 void GestureEventHub::AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture)
@@ -512,6 +516,8 @@ void GestureEventHub::ResetDragActionForWeb()
 void GestureEventHub::StartDragTaskForWeb()
 {
     if (!isReceivedDragGestureInfo_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
+            "because not recv gesture info");
         return;
     }
 
@@ -521,12 +527,14 @@ void GestureEventHub::StartDragTaskForWeb()
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
 
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop post a task to start drag for web");
     taskScheduler->PostTask(
         [weak = WeakClaim(this)]() {
             auto gestureHub = weak.Upgrade();
             CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
             CHECK_NULL_VOID(dragEventActuator);
+            TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web in async task");
             dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI);
@@ -851,6 +859,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             pixelMap = pixelMap_;
         }
     }
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        recordsSize = badgeNumber.value();
+    }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
     float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * defaultPixelMapScale;
@@ -879,7 +892,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
         }
-        auto childSize = GetSelectItemSize();
+        auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
         if (childSize > 1) {
             recordsSize = childSize;
         }
@@ -1315,7 +1328,6 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
-                dragDropManager->HideDragPreviewOverlay();
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);

@@ -358,13 +358,13 @@ public:
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-        const RefPtr<FrameNode>& targetNode);
+         std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode);
     void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-        const RefPtr<FrameNode>& targetNode);
+        std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
@@ -431,10 +431,7 @@ public:
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
-    void SetCustomKeyboardOption(bool supportAvoidance)
-    {
-        keyboardAvoidance_ = supportAvoidance;
-    }
+    void SetCustomKeyboardOption(bool supportAvoidance);
 
     void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
         RefPtr<FrameNode> customKeyboard);
@@ -482,6 +479,7 @@ public:
         return overlayNode_;
     }
     bool CheckPageNeedAvoidKeyboard() const;
+    void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
 
 private:
     void PopToast(int32_t targetId);

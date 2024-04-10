@@ -215,6 +215,17 @@ public:
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
     bool CursorMoveEnd();
+    int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
+    int32_t CalcLineBeginPosition();
+    int32_t CalcLineEndPosition();
+    bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
+    bool CursorMoveLineBegin();
+    bool CursorMoveLineEnd();
+    void HandleSelectFontStyle(KeyCode code) override;
+    void HandleOnShowMenu() override;
+    int32_t HandleSelectUpPos();
+    int32_t HandleSelectDownPos();
+    int32_t HandleSelectWrapper(CaretMoveIntent direction);
     int32_t GetLeftWordPosition(int32_t caretPosition);
     int32_t GetRightWordPosition(int32_t caretPosition);
     int32_t GetParagraphBeginPosition(int32_t caretPosition);
@@ -261,6 +272,7 @@ public:
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false);
+    bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
     void SetHandles();

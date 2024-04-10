@@ -5196,7 +5196,7 @@ void CommonBridge::GetPanGestureValue(
     Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
     if (!distanceArg.IsNull() && !distanceArg->IsUndefined()) {
         auto distanceValue = static_cast<double>(distanceArg->ToNumber(vm)->Value());
-        distance = distanceValue <= 0.0f ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceValue;
+        distance = distanceValue < 0.0f ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceValue;
     }
 }
 
@@ -5218,7 +5218,7 @@ void CommonBridge::GetSwipeGestureValue(
     Local<JSValueRef> speedArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
     if (!speedArg.IsNull() && !speedArg->IsUndefined()) {
         auto speedValue = static_cast<double>(speedArg->ToNumber(vm)->Value());
-        speed = speedValue <= 0.0 ? DEFAULT_SLIDE_SPEED : speedValue;
+        speed = LessOrEqual(speedValue, 0.0) ? DEFAULT_SLIDE_SPEED : speedValue;
     }
 }
 
@@ -5928,7 +5928,8 @@ ArkUINativeModuleValue CommonBridge::AddSwipeGesture(ArkUIRuntimeCallInfo* runti
     int32_t direction = SwipeDirection::ALL;
     double speed = DEFAULT_SLIDE_SPEED;
     GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createSwipeGesture(fingers, direction, speed);
+    auto* gesture =
+        GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(fingers, direction, speed);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_7, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNode(nativeNode, gesture, priority, mask);
@@ -6055,7 +6056,8 @@ ArkUINativeModuleValue CommonBridge::AddSwipeGestureToGroup(ArkUIRuntimeCallInfo
     int32_t direction = SwipeDirection::ALL;
     double speed = DEFAULT_SLIDE_SPEED;
     GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createSwipeGesture(fingers, direction, speed);
+    auto* gesture =
+        GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(fingers, direction, speed);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_4, gesture);
     auto* group = GetGestureGroup(runtimeCallInfo, NUM_5);

@@ -243,7 +243,8 @@ public:
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange) override
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange) override
     {}
     void DismissSheet() override {}
     void DismissContentCover() override {}
@@ -279,6 +280,7 @@ public:
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};
+    void SetLightColor(const Color& value) override {};
     void SetLightIlluminated(const uint32_t value) override {};
     void SetIlluminatedBorderWidth(const Dimension& value) override {};
     void SetBloom(const float value) override {};

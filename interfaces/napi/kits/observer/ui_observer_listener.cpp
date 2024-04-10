@@ -294,8 +294,12 @@ void UIObserverListener::AddBaseEventInfo(napi_value objValueClickEvent, const C
         static_cast<double>(clickInfo.GetTimeStamp().time_since_epoch().count()), &napiTimeStamp);
     napi_create_double(env_, static_cast<int32_t>(clickInfo.GetForce()), &napiSource);
     napi_create_double(env_, clickInfo.GetForce(), &napiPressure);
-    napi_create_double(env_, clickInfo.GetTiltX().value(), &napiTiltX);
-    napi_create_double(env_, clickInfo.GetTiltY().value(), &napiTiltY);
+    if (clickInfo.GetTiltX().has_value()) {
+        napi_create_double(env_, clickInfo.GetTiltX().value(), &napiTiltX);
+    }
+    if (clickInfo.GetTiltY().has_value()) {
+        napi_create_double(env_, clickInfo.GetTiltY().value(), &napiTiltY);
+    }
     napi_create_double(env_, static_cast<int32_t>(clickInfo.GetSourceTool()), &napiSourceTool);
 
     napi_set_named_property(env_, objValueClickEvent, "timestamp", napiTimeStamp);

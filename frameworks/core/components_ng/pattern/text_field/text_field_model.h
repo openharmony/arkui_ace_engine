@@ -262,6 +262,7 @@ public:
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
+    virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
@@ -297,6 +298,9 @@ public:
 
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetAdaptMinFontSize(const Dimension& value) {};
+    virtual void SetAdaptMaxFontSize(const Dimension& value) {};
+    virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {};
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};

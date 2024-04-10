@@ -66,8 +66,13 @@ public:
             theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color(0x99000000));
             theme->caretColor_ = pattern->GetAttr<Color>("caret_color", Color(0xff007dff));
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
-            theme->richeditorShowHandle_ = StringUtils::StringToInt(pattern->
-                GetAttr<std::string>("textfield_show_handle", "0"));
+            RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
+            if (!textfieldPattern) {
+                LOGW("find pattern of textfield fail");
+                return;
+            }
+            auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
+            theme->richeditorShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
         }
     };
 

@@ -72,6 +72,7 @@ public:
         bubbleMethod->SetArrowOffsetsFromClip(arrowOffsetsFromClip_);
         bubbleMethod->SetArrowWidth(arrowWidth_);
         bubbleMethod->SetArrowHeight(arrowHeight_);
+        bubbleMethod->SetBorder(border_);
         return bubbleMethod;
     }
 
@@ -258,6 +259,7 @@ private:
     bool showArrow_ = false;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool isSetMessageColor_ = false;
+    Border border_;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

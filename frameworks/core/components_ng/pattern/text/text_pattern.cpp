@@ -71,6 +71,7 @@ void TextPattern::OnAttachToFrameNode()
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
 }
@@ -254,6 +255,7 @@ int32_t TextPattern::GetTextContentLength()
 
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
+    HandleSpanLongPressEvent(info);
     if (copyOption_ == CopyOptions::None || isMousePressed_) {
         return;
     }
@@ -283,6 +285,53 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     CloseSelectOverlay(true);
     ShowSelectOverlay({ .animation = true });
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::HandleSpanLongPressEvent(GestureEvent& info)
+{
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
+
+    auto localLocation = info.GetLocalLocation();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(host);
+    PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
+        static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
+    if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value() && overlayMod_) {
+        textContentRect = overlayMod_->GetBoundsRect();
+        textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    }
+    auto longPressFunc = [](RefPtr<SpanItem> item, GestureEvent& info, const RectF& rect,
+                             const PointF& textOffset) -> bool {
+        if (rect.IsInRegion(textOffset)) {
+            if (item && item->onLongPress) {
+                item->onLongPress(info);
+            }
+            return true;
+        }
+        return false;
+    };
+
+    if (textContentRect.IsInRegion(
+        PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY()))) &&
+        !spans_.empty() && paragraph_) {
+        int32_t start = 0;
+        for (const auto& item : spans_) {
+            if (!item) {
+                continue;
+            }
+            std::vector<RectF> selectedRects;
+            paragraph_->GetRectsForRange(start, item->position, selectedRects);
+            for (auto && rect : selectedRects) {
+                CHECK_NULL_VOID(!longPressFunc(item, info, rect, textOffset));
+            }
+            start = item->position;
+        }
+    }
 }
 
 // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
@@ -390,18 +439,27 @@ void TextPattern::HandleOnCopy()
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (value.empty()) {
-        selectOverlay_->HideMenu();
+        HiddenMenu();
         return;
     }
     if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
-    selectOverlay_->HideMenu();
+    HiddenMenu();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
+}
+
+void TextPattern::HiddenMenu()
+{
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+    } else {
+        selectOverlay_->HideMenu();
+    }
 }
 
 void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
@@ -456,6 +514,13 @@ RefPtr<RenderContext> TextPattern::GetRenderContext()
 
 void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
 {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (textLayoutProperty->GetMaxLines() == 0) {
+        CloseSelectOverlay();
+        ResetSelection();
+        return;
+    }
     selectOverlay_->ProcessOverlay(request);
 }
 
@@ -1740,6 +1805,9 @@ void TextPattern::OnModifyDone()
     }
 
     if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        if (!renderContext->GetClipEdge().has_value()) {
+            renderContext->UpdateClipEdge(true);
+        }
         CloseSelectOverlay();
         ResetSelection();
         copyOption_ = CopyOptions::None;
@@ -2026,6 +2094,14 @@ void TextPattern::BeforeCreateLayoutWrapper()
         host->Clean();
         for (const auto& span : spans_) {
             textForDisplay_ += span->content;
+            if (span->onClick) {
+                auto gestureEventHub = host->GetOrCreateGestureEventHub();
+                InitClickEvent(gestureEventHub);
+            }
+            if (span->onLongPress) {
+                auto gestureEventHub = host->GetOrCreateGestureEventHub();
+                InitLongPressEvent(gestureEventHub);
+            }
         }
         if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
             dataDetectorAdapter_->textForAI_ = textForDisplay_;
@@ -2503,6 +2579,55 @@ void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
 
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 {
+    CreateModifier();
+    auto paintMethod = MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, paintMethod);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_RETURN(context, paintMethod);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, paintMethod);
+    auto frameSize = geometryNode->GetFrameSize();
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, paintMethod);
+    std::vector<DimensionRect> hotZoneRegions;
+    DimensionRect hotZoneRegion;
+    if (!context->GetClipEdge().value_or(false)) {
+        CHECK_NULL_RETURN(paragraph_, paintMethod);
+        RectF boundsRect = overlayMod_->GetBoundsRect();
+        auto boundsWidth = contentRect_.GetX() + std::ceil(static_cast<float>(paragraph_->GetLongestLine()));
+        auto boundsHeight =
+            contentRect_.GetY() + static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
+        boundsRect.SetWidth(boundsWidth);
+        boundsRect.SetHeight(boundsHeight);
+
+        hotZoneRegion.SetSize(DimensionSize(Dimension(std::max(boundsWidth, frameSize.Width())),
+            Dimension(std::max(frameSize.Height(), boundsRect.Height()))));
+
+        ProcessBoundRectByTextShadow(boundsRect);
+        ProcessBoundRectByTextMarquee(boundsRect);
+        if ((LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
+                LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
+            boundsWidth = std::max(frameSize.Width(), boundsRect.Width());
+            boundsHeight = std::max(frameSize.Height(), boundsRect.Height());
+            boundsRect.SetWidth(boundsWidth);
+            boundsRect.SetHeight(boundsHeight);
+        } else {
+            boundsRect.SetWidth(frameSize.Width());
+            boundsRect.SetHeight(frameSize.Height());
+        }
+        overlayMod_->SetBoundsRect(boundsRect);
+    } else {
+        hotZoneRegion.SetSize(DimensionSize(Dimension(frameSize.Width()), Dimension(frameSize.Height())));
+    }
+    hotZoneRegions.emplace_back(hotZoneRegion);
+    gestureHub->SetResponseRegion(hotZoneRegions);
+    return paintMethod;
+}
+
+void TextPattern::CreateModifier()
+{
     if (!contentMod_) {
         contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_, WeakClaim(this));
     }
@@ -2512,43 +2637,6 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     if (isCustomFont_) {
         contentMod_->SetIsCustomFont(true);
     }
-    auto paintMethod = MakeRefPtr<TextPaintMethod>(WeakClaim(this), baselineOffset_, contentMod_, overlayMod_);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, paintMethod);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_RETURN(context, paintMethod);
-    if (!context->GetClipEdge().value_or(false)) {
-        auto geometryNode = host->GetGeometryNode();
-        auto frameSize = geometryNode->GetFrameSize();
-        CHECK_NULL_RETURN(paragraph_, paintMethod);
-        RectF boundsRect = overlayMod_->GetBoundsRect();
-        auto boundsWidth = contentRect_.GetX() + static_cast<float>(paragraph_->GetLongestLine());
-        auto boundsHeight =
-            contentRect_.GetY() + static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
-        boundsRect.SetWidth(boundsWidth);
-        boundsRect.SetHeight(boundsHeight);
-        ProcessBoundRectByTextShadow(boundsRect);
-        ProcessBoundRectByTextMarquee(boundsRect);
-        if ((LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
-                LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
-            boundsWidth = std::max(frameSize.Width(), boundsRect.Width());
-            boundsHeight = std::max(frameSize.Height(), boundsRect.Height());
-            boundsRect.SetWidth(boundsWidth);
-            boundsRect.SetHeight(boundsHeight);
-            overlayMod_->SetBoundsRect(boundsRect);
-
-            auto gestureHub = host->GetOrCreateGestureEventHub();
-            CHECK_NULL_RETURN(gestureHub, paintMethod);
-            std::vector<DimensionRect> hotZoneRegions;
-            DimensionRect hotZoneRegion;
-            hotZoneRegion.SetSize(DimensionSize(Dimension(boundsWidth), Dimension(boundsHeight)));
-            hotZoneRegion.SetOffset(
-                DimensionOffset(Dimension(contentOffset_.GetX()), Dimension(contentOffset_.GetY())));
-            hotZoneRegions.emplace_back(hotZoneRegion);
-            gestureHub->SetResponseRegion(hotZoneRegions);
-        }
-    }
-    return paintMethod;
 }
 
 int32_t TextPattern::GetHandleIndex(const Offset& offset) const
