@@ -107,6 +107,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
     static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);

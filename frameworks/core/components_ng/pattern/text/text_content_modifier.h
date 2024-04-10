@@ -54,9 +54,11 @@ public:
 
     void ModifyTextStyle(TextStyle& textStyle);
 
-    void StartTextRace(const double& step, const int32_t& loop,
-        const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce = false);
+    void StartTextRace(const bool& start, const double& step, const int32_t& loop, const MarqueeDirection& direction,
+        const int32_t& delay, const bool& fadeout, const MarqueeStartPolicy& startPolicy);
     void StopTextRace();
+    void SetIsFocused(const bool& isFocused);
+    void SetIsHovered(const bool& isHovered);
 
     void SetParagraph(RefPtr<Paragraph> paragraph)
     {
@@ -112,8 +114,12 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
-    bool SetTextRace(const double& step, const int32_t& loop,
-        const MarqueeDirection& direction, const int32_t& delay);
+    bool SetTextRace(const bool& start, const double& step, const int32_t& loop, const MarqueeDirection& direction, const int32_t& delay,
+        const bool& fadeout, const MarqueeStartPolicy& startPolicy);
+    void ResumeTextRace(bool bounce);
+    void PauseTextRace();
+    bool AllowTextRace();
+    void DetermineTextRace();
     float GetTextRacePercent();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
@@ -135,6 +141,8 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
+    void UpdateFadeout(const DrawingContext& drawingContext);
+
     void ResetImageNodeList();
     void DrawImageNodeList(const float drawingContextWidth,
         const float paragraph1Offset, const float paragraph2Offset);
@@ -175,15 +183,21 @@ private:
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
 
     bool textRacing_ = false;
+    bool marqueeSet_ = false;
+    bool marqueeStart_ = false;
     int32_t marqueeCount_ = 0;
     WeakPtr<Pattern> pattern_;
     double marqueeStep_ = 1;
     int32_t marqueeLoop_ = -1;
+    bool marqueeFadeout_ = false;
+    MarqueeStartPolicy marqueeStartPolicy_ = MarqueeStartPolicy::DEFAULT;
     MarqueeDirection marqueeDirection_ = MarqueeDirection::LEFT;
     int32_t marqueeDelay_ = 0;
     int32_t marqueeDuration_ = 0;
     int32_t marqueeAnimationId_ = 0;
-    
+    bool marqueeFocused_ = false;
+    bool marqueeHovered_ = false;
+
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 

@@ -59,6 +59,7 @@ void TextPaintMethod::DoStartTextRace()
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    auto start = layoutProperty->GetTextMarqueeStart().value_or(true);
     auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
     if (GreatNotEqual(step, paragraph->GetTextWidth())) {
         step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
@@ -66,8 +67,13 @@ void TextPaintMethod::DoStartTextRace()
     auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
     auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
     auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
-
-    textContentModifier_->StartTextRace(step, loop, direction, delay);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fadeout = layoutProperty->GetTextMarqueeFadeout().value_or(theme->GetIsTextFadeout());
+    auto startPolicy = layoutProperty->GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT);
+    textContentModifier_->StartTextRace(start, step, loop, direction, delay, fadeout, startPolicy);
 }
 
 void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -100,8 +106,7 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textOverflow = layoutProperty->GetTextOverflow();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
-        paragraph->GetTextWidth() > paintWrapper->GetContentSize().Width() &&
-        layoutProperty->GetTextMarqueeStart().value_or(true)) {
+        paragraph->GetTextWidth() > contentSize.Width()) {
         DoStartTextRace();
     } else {
         textContentModifier_->StopTextRace();

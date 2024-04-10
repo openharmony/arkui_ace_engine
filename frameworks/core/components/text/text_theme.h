@@ -65,6 +65,7 @@ public:
             theme->draggable_ = StringUtils::StringToInt(draggable);
             constexpr double childMinSize = 20.0;
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
+            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
         }
     };
 
@@ -90,6 +91,10 @@ public:
         return linearSplitChildMinSize_;
     }
 
+    bool GetIsTextFadeout() const
+    {
+        return isTextFadeout_;
+    }
 protected:
     TextTheme() = default;
 
@@ -98,6 +103,7 @@ private:
     Color selectedColor_;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
+    bool isTextFadeout_ = false;
 };
 
 } // namespace OHOS::Ace

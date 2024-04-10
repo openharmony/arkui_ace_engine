@@ -32,6 +32,8 @@ struct TextMarqueeOptions {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeLoop, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDirection, MarqueeDirection);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDelay, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeFadeout, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStartPolicy, MarqueeStartPolicy);
 };
 
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
@@ -100,6 +102,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         TextMarqueeOptions, TextMarqueeDirection, MarqueeDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeDelay, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeFadeout, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeStartPolicy, MarqueeStartPolicy, PROPERTY_UPDATE_MEASURE_SELF);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);

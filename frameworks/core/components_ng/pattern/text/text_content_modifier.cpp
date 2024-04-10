@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
 constexpr float RACE_DURATION_RATIO = 85.0f;
 constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
 constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
@@ -296,8 +297,9 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             }
         } else {
             // Racing
-            float textRacePercent = marqueeDirection_ ==
-                MarqueeDirection::LEFT ? GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
+            float textRacePercent = marqueeDirection_ == MarqueeDirection::LEFT
+                                        ? GetTextRacePercent()
+                                        : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
             if (clip_ && clip_->Get()) {
                 canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
             }
@@ -315,9 +317,65 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             }
         }
         canvas.Restore();
+        UpdateFadeout(drawingContext);
     } else {
         DrawObscuration(drawingContext);
     }
+}
+
+void TextContentModifier::UpdateFadeout(const DrawingContext& drawingContext)
+{
+    CHECK_NULL_VOID(paragraph_);
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+
+    if (!marqueeSet_ || !marqueeFadeout_) {
+        textPattern->SetFadeout(false, false, 0);
+        return;
+    }
+
+    float gradientPercent = 0;
+    if (drawingContext.width > 0) {
+        gradientPercent = DEFAULT_FADEOUT_VP.ConvertToPx() / drawingContext.width;
+    }
+    if (gradientPercent > 0.5) {
+        textPattern->SetFadeout(false, false, 0);
+        return;
+    }
+    if (!marqueeStart_) {
+        textPattern->SetFadeout(false, true, gradientPercent);
+        return;
+    }
+
+    float raceLength = paragraph_->GetTextWidth() + textRaceSpaceWidth_;
+    float spacePercent = 0;
+    float textPercent = 0;
+    float drawPercent = 0;
+    if (raceLength > 0) {
+        spacePercent = textRaceSpaceWidth_ / raceLength * RACE_MOVE_PERCENT_MAX;
+        textPercent = paragraph_->GetTextWidth() / raceLength * RACE_MOVE_PERCENT_MAX;
+        drawPercent = drawingContext.width / raceLength * RACE_MOVE_PERCENT_MAX;
+    }
+
+    float racePercent = GetTextRacePercent();
+    bool leftFadeout = false;
+    bool rightFadeout = false;
+
+    if (!textRacing_) {
+        leftFadeout = false;
+        rightFadeout = paragraph_->GetTextWidth() > drawingContext.width;
+    } else {
+        if (marqueeDirection_ == MarqueeDirection::RIGHT) {
+            leftFadeout = (racePercent > spacePercent) && !NearEqual(racePercent, RACE_MOVE_PERCENT_MAX);
+            rightFadeout = !((racePercent > (drawPercent - spacePercent)) && (racePercent < drawPercent));
+        } else {
+            leftFadeout = !NearEqual(racePercent, 0.0) && (racePercent < (RACE_MOVE_PERCENT_MAX - spacePercent));
+            rightFadeout = !((racePercent > (textPercent - drawPercent)) &&
+                             (racePercent < (RACE_MOVE_PERCENT_MAX - drawPercent)));
+        }
+    }
+
+    textPattern->SetFadeout(leftFadeout, rightFadeout, gradientPercent);
 }
 
 void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
@@ -697,8 +755,22 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-bool TextContentModifier::SetTextRace(
-    const double& step, const int32_t& loop, const MarqueeDirection& direction, const int32_t& delay)
+void TextContentModifier::SetIsFocused(const bool& isFocused)
+{
+    marqueeFocused_ = isFocused;
+
+    DetermineTextRace();
+}
+
+void TextContentModifier::SetIsHovered(const bool& isHovered)
+{
+    marqueeHovered_ = isHovered;
+
+    DetermineTextRace();
+}
+
+bool TextContentModifier::SetTextRace(const double& start, const double& step, const int32_t& loop,
+    const MarqueeDirection& direction, const int32_t& delay, const bool& fadeout, const MarqueeStartPolicy& startPolicy)
 {
     CHECK_NULL_RETURN(paragraph_, false);
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
@@ -716,47 +788,72 @@ bool TextContentModifier::SetTextRace(
     if (duration <= 0) {
         return false;
     }
-    if (textRacing_ && NearEqual(step, marqueeStep_) && (loop == marqueeLoop_) && (direction == marqueeDirection_) &&
-        (delay == marqueeDelay_) && (duration == marqueeDuration_)) {
+    if (textRacing_ && (start == marqueeStart_) && NearEqual(step, marqueeStep_) && (loop == marqueeLoop_) &&
+        (direction == marqueeDirection_) && (delay == marqueeDelay_) && (duration == marqueeDuration_) &&
+        (fadeout == marqueeFadeout_) && (startPolicy == marqueeStartPolicy_)) {
         return false;
     }
-    if (textRacing_) {
-        StopTextRace();
-    }
 
+    marqueeStart_ = start;
     marqueeStep_ = step;
     marqueeDuration_ = duration;
     marqueeDirection_ = direction;
     marqueeDelay_ = delay;
     marqueeLoop_ = loop;
-    if (marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_) {
-        return false;
-    }
-
-    textRacing_ = true;
-    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(textPattern, false);
-    textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
+    marqueeFadeout_ = fadeout;
+    marqueeStartPolicy_ = startPolicy;
 
     return true;
 }
 
-void TextContentModifier::StartTextRace(const double& step, const int32_t& loop, const MarqueeDirection& direction,
-    const int32_t& delay, const bool& isBounce)
+void TextContentModifier::StartTextRace(const bool& start, const double& step, const int32_t& loop, const MarqueeDirection& direction,
+    const int32_t& delay, const bool& fadeout, const MarqueeStartPolicy& startPolicy)
 {
-    if (!isBounce && !SetTextRace(step, loop, direction, delay)) {
+    if (!SetTextRace(start, step, loop, direction, delay, fadeout, startPolicy)) {
         return;
+    }
+
+    marqueeSet_ = true;
+
+    if (textRacing_) {
+        PauseTextRace();
+    }
+
+    if(!AllowTextRace()){
+        return;
+    }
+
+    ResumeTextRace(false);
+}
+
+void TextContentModifier::StopTextRace()
+{
+    marqueeSet_ = false;
+    PauseTextRace();
+}
+
+void TextContentModifier::ResumeTextRace(bool bounce)
+{
+    if (!AllowTextRace()) {
+        return;
+    }
+
+    if (!bounce) {
+        auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+        CHECK_NULL_VOID(textPattern);
+        textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }
 
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
     option.SetDuration(marqueeDuration_);
-    option.SetDelay(isBounce ? marqueeDelay_ : 0);
+    option.SetDelay(bounce ? marqueeDelay_ : 0);
     option.SetCurve(curve);
     option.SetIteration(1);
 
     marqueeAnimationId_++;
     racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+    textRacing_ = true;
     raceAnimation_ = AnimationUtils::StartAnimation(
         option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); },
         [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()]() {
@@ -774,20 +871,18 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
                 if (marqueeAnimationId != modifier->marqueeAnimationId_) {
                     return;
                 }
-
                 modifier->marqueeCount_++;
                 auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
                 CHECK_NULL_VOID(textPattern);
 
-                if (modifier->marqueeLoop_ > 0 && modifier->marqueeCount_ >= modifier->marqueeLoop_) {
+                if (!modifier->AllowTextRace()) {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
                 } else {
                     textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
                     auto frameNode = textPattern->GetHost();
                     CHECK_NULL_VOID(frameNode);
                     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                    modifier->StartTextRace(modifier->marqueeStep_, modifier->marqueeLoop_, modifier->marqueeDirection_,
-                        modifier->marqueeDelay_, true);
+                    modifier->ResumeTextRace(true);
                 }
             };
 
@@ -799,7 +894,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
         });
 }
 
-void TextContentModifier::StopTextRace()
+void TextContentModifier::PauseTextRace()
 {
     if (!textRacing_) {
         return;
@@ -811,6 +906,39 @@ void TextContentModifier::StopTextRace()
 
     textRacing_ = false;
     racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+}
+
+bool TextContentModifier::AllowTextRace()
+{
+    if (!marqueeSet_ || !marqueeStart_) {
+        return false;
+    }
+
+    if (marqueeLoop_ > 0 && marqueeCount_ >= marqueeLoop_) {
+        return false;
+    }
+
+    if (marqueeStartPolicy_ == MarqueeStartPolicy::ON_FOCUS && !(marqueeFocused_ || marqueeHovered_)) {
+        return false;
+    }
+
+    return true;
+}
+
+void TextContentModifier::DetermineTextRace()
+{
+    if (!marqueeSet_ || !marqueeStart_ || marqueeStartPolicy_ != MarqueeStartPolicy::ON_FOCUS) {
+        return;
+    }
+
+    if (textRacing_ && !marqueeFocused_ && !marqueeHovered_) {
+        PauseTextRace();
+        return;
+    }
+
+    if (!textRacing_ && (marqueeFocused_ || marqueeHovered_)) {
+        ResumeTextRace(false);
+    }
 }
 
 float TextContentModifier::GetTextRacePercent()
