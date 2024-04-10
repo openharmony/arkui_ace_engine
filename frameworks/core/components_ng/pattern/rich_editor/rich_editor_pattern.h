@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -277,15 +278,12 @@ public:
     bool IsShowHandle();
     void SetHandles();
     bool IsEditing();
-    void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
         TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
     void CheckEditorTypeChange();
-    void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
-    void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle)override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
@@ -453,10 +451,6 @@ public:
         return true;
     }
 
-    void CheckHandles(SelectHandleInfo& handleInfo) override;
-
-    bool CheckHandleVisible(const RectF& paintRect) override;
-
     bool IsShowSelectMenuUsingMouse();
 
     bool IsShowPlaceholder() const
@@ -515,6 +509,11 @@ public:
         PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
 
+    RefPtr<Clipboard> GetClipboard() override
+    {
+        return clipboard_;
+    }
+
     int32_t GetCaretIndex() const override
     {
         return caretPosition_;
@@ -551,8 +550,9 @@ protected:
     bool CanStartAITask() override;
 
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
-    void UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation = false) override;
+    friend class RichEditorSelectOverlay;
+    RefPtr<RichEditorSelectOverlay> selectOverlay_;
+    void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
@@ -736,7 +736,6 @@ private:
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
     RectF GetSelectArea();
-    void UpdateOverlaySelectArea();
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
     void DeleteForward(int32_t currentPosition, int32_t length);
@@ -748,6 +747,7 @@ private:
     void HandleOnDragInsertValue(const std::string& str);
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
+    void CloseSystemMenu();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

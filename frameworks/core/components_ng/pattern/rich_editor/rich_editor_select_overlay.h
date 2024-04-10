@@ -13,23 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_SELECT_OVERLAY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_SELECT_OVERLAY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_SELECT_OVERLAY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_SELECT_OVERLAY_H
 #include <optional>
 
-#include "base/geometry/ng/rect_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/pattern/text/base_text_select_overlay.h"
-#include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
-class TextSelectOverlay : public BaseTextSelectOverlay {
-    DECLARE_ACE_TYPE(TextSelectOverlay, BaseTextSelectOverlay);
+class RichEditorSelectOverlay : public TextSelectOverlay {
+    DECLARE_ACE_TYPE(RichEditorSelectOverlay, TextSelectOverlay);
 
 public:
-    explicit TextSelectOverlay(const WeakPtr<TextBase>& textBase) : BaseTextSelectOverlay(textBase) {}
-    ~TextSelectOverlay() = default;
+    explicit RichEditorSelectOverlay(const WeakPtr<TextBase>& textBase) : TextSelectOverlay(textBase) {}
+    ~RichEditorSelectOverlay() = default;
 
     // override TextBaseSelectOverlay
     bool PreProcessOverlay(const OverlayRequest& request) override;
@@ -43,7 +39,6 @@ public:
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     RectF GetSelectArea() override;
-    void GetSelectAreaFromHandle(RectF& rect);
     std::string GetSelectedText() override;
 
     // override SelectOverlayCallback
@@ -52,15 +47,15 @@ public:
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
-
-protected:
-    virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, float handleHeight, bool isFirstHandle);
+    std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
 
 private:
     void RemoveAreaChangeInner();
+    void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle) override;
+    void CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType);
 
-    ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
+    ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_SELECT_OVERLAY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_SELECT_OVERLAY_H
