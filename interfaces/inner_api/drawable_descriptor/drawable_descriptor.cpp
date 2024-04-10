@@ -51,9 +51,9 @@ constexpr float SIDE = 192.0f;
 const static char PREVIEW_LOAD_RESOURCE_ID[] = "ohos_drawable_descriptor_path";
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM
-constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "\\resources\\entry\\resources.index";
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "\\resources\\resources.index";
 #else
-constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/entry/resources.index";
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/resources.index";
 #endif
 
 #ifdef LINUX_PLATFORM
