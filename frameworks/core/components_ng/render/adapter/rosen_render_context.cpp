@@ -4341,6 +4341,13 @@ void RosenRenderContext::OnLightIntensityUpdate(const float lightIntensity)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnLightColorUpdate(const Color& lightColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetLightColor(lightColor.GetValue());
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnLightIlluminatedUpdate(const uint32_t lightIlluminated)
 {
     CHECK_NULL_VOID(rsNode_);

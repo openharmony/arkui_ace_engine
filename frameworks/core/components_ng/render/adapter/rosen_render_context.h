@@ -422,6 +422,7 @@ private:
 
     void OnLightPositionUpdate(const TranslateOptions& position) override;
     void OnLightIntensityUpdate(const float lightIntensity) override;
+    void OnLightColorUpdate(const Color& lightColor) override;
     void OnLightIlluminatedUpdate(const uint32_t lightIlluminated) override;
     void OnIlluminatedBorderWidthUpdate(const Dimension& illuminatedBorderWidth) override;
     void OnBloomUpdate(const float bloomIntensity) override;
