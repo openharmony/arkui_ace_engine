@@ -64,8 +64,14 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
 constexpr int32_t SIZE_CHANGE_DUMP_SIZE = 5;
+constexpr double MIN_WIDTH = 5.0;
+constexpr double MIN_HEIGHT = 5.0;
+constexpr double MIN_OPACITY = 0.1;
 } // namespace
 namespace OHOS::Ace::NG {
+
+const std::set<std::string> FrameNode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
+    "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
 class FrameProxy {
 public:
@@ -3864,6 +3870,35 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
         frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }
+}
+
+bool FrameNode::IsContextTransparent()
+{
+    ACE_SCOPED_TRACE("Transparent detection");
+    const auto& rect = renderContext_->GetPaintRectWithTransform();
+    auto width = rect.Width();
+    auto height = rect.Height();
+    if (renderContext_->GetOpacity().has_value() && renderContext_->GetOpacity().value() <= MIN_OPACITY) {
+        return true;
+    }
+    if (layoutTags_.find(GetTag()) == layoutTags_.end()) {
+        if (width > MIN_WIDTH && height > MIN_HEIGHT &&
+            static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) {
+            return false;
+        }
+    } else {
+        if (width > MIN_WIDTH && height > MIN_HEIGHT &&
+            static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) == 0 &&
+            renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
+            return false;
+        }
+    }
+    for (const auto& item : GetChildren()) {
+        if (!item->IsContextTransparent()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

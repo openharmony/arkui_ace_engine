@@ -1204,4 +1204,15 @@ void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>
         DFSAllChild(child, res);
     }
 }
+
+bool UINode::IsContextTransparent()
+{
+    for (const auto& item : GetChildren()) {
+        if (!item->IsContextTransparent()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG
