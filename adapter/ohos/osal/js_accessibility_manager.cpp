@@ -2051,8 +2051,8 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     if (!isEnabled) {
         return false;
     }
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
-        eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
+        eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
     return client->SendEvent(eventInfo);
 }
 
@@ -2086,8 +2086,8 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     AccessibilityEventInfo eventInfoNew = eventInfo;
     eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
 #endif
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
-        eventInfoNew.GetEventType(), static_cast<int64_t>(eventInfoNew.GetAccessibilityId()));
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d accessibilityId:%{public}" PRId64,
+        eventInfoNew.GetEventType(), eventInfoNew.GetAccessibilityId());
     return client->SendEvent(eventInfoNew);
 }
 
