@@ -1390,4 +1390,4 @@ class ComponentContent {
     }
 }
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, LengthMetric, LengthUnit, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent };
