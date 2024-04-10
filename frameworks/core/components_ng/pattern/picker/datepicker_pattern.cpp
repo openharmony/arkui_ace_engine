@@ -94,14 +94,16 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void DatePickerPattern::OnModifyDone()
 {
-    if (isFiredDateChange_ && !isForceUpdate_) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(datePickerRowLayoutProperty);
+    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false))) {
         isFiredDateChange_ = false;
         return;
     }
 
     isForceUpdate_ = false;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     InitDisabled();
     if (ShowMonthDays()) {
         FlushMonthDaysColumn();
