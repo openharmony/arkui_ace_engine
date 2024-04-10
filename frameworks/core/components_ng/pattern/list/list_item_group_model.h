@@ -43,7 +43,6 @@ public:
         return nullptr;
     }
 
-
 private:
     static std::unique_ptr<ListItemGroupModel> instance_;
     static std::mutex mutex_;
