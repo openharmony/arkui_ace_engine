@@ -5124,7 +5124,6 @@ void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& o
         if (isMousePressed_ || sourceType_ == SourceType::MOUSE) {
             selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
         }
-        CalculateHandleOffsetAndShowOverlay();
         if (SelectOverlayIsOn()) {
             CloseSelectOverlay();
             auto responseType = static_cast<TextResponseType>(
@@ -5140,12 +5139,23 @@ void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& o
     }
 }
 
+bool RichEditorPattern::ResetOnInvalidSelection(int32_t start, int32_t end)
+{
+    if (start < end) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetSelection failed, the selected area is empty.");
+    CloseSelectOverlay();
+    ResetSelection();
+    StartTwinkling();
+    return true;
+}
+
 void RichEditorPattern::RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange)
 {
     if (isMousePressed && !selectedTypeChange) {
         return;
     }
-    CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay();
     auto responseType = static_cast<TextResponseType>(
         selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0));
@@ -5163,8 +5173,8 @@ bool RichEditorPattern::IsShowHandle()
 
 void RichEditorPattern::SetHandles()
 {
-    CalculateHandleOffsetAndShowOverlay();
     ResetIsMousePressed();
+    sourceType_ = SourceType::TOUCH;
     SetShowSelect(true);
     isShowMenu_ = false;
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(),
@@ -5177,29 +5187,27 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     bool hasFocus = HasFocus();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d", start, end, hasFocus);
     CHECK_NULL_VOID(hasFocus);
-    bool changeSelected = false;
-    if (start > end) {
-        changeSelected = textSelector_.IsValid();
-        ResetSelection();
+    if (start == -1 && end == -1) {
+        start = 0;
+        end = GetTextContentLength();
     } else {
-        if (start == -1 && end == -1) {
-            start = 0;
-            end = GetTextContentLength();
-        } else {
-            start = std::min(std::max(0, start), GetTextContentLength());
-            end = std::min(std::max(0, end), GetTextContentLength());
-        }
-        changeSelected = start != textSelector_.GetTextStart() || end != textSelector_.GetTextEnd();
-        textSelector_.Update(start, end);
+        start = std::clamp(start, 0, GetTextContentLength());
+        end = std::clamp(end, 0, GetTextContentLength());
     }
+    if (ResetOnInvalidSelection(start, end)) {
+        return;
+    }
+    textSelector_.Update(start, end);
 
     auto oldSelectedType = selectedType_;
     if (textSelector_.IsValid() && !textSelector_.StartEqualToDest()) {
         StopTwinkling();
-        if (changeSelected) {
+        if (start != textSelector_.GetTextStart() || end != textSelector_.GetTextEnd()) {
             FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         }
     }
+    SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
+    CalculateHandleOffsetAndShowOverlay();
     bool isNotUseDefault =
         options.has_value() && MenuPolicy::DEFAULT != options.value().menuPolicy && !textSelector_.SelectNothing();
     bool isShowHandle = IsShowHandle();
@@ -5214,7 +5222,6 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
                                   (!oldSelectedType.has_value() && selectedType_.has_value());
         RefreshSelectOverlay(isMousePressed_, selectedTypeChange);
     }
-    SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
     if (!SelectOverlayIsOn() && isShowHandle) {
         SetHandles();
         isShowMenu_ = true;
