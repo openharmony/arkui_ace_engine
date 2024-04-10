@@ -1017,6 +1017,52 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
 }
 
+
+/**
+ * @tc.name: ImageColorFilterTest001
+ * @tc.desc: Test image ColorFilter is set correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * 数组
+    */
+    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
+    image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
+
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
+    frameNode->MarkModifyDone();
+   /**
+    * 图形
+    */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+
+    auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
+    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
+    image.SetDrawingColorFilter(drawingColorFilter);
+
+    ASSERT_NE(imageRenderProperty, nullptr);
+    EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
+    frameNode->MarkModifyDone();
+}
+
 /**
  * @tc.name: ImageLayout001
  * @tc.desc: Verify that ImageComponent can resize with selfSize, whether has src or alt.
