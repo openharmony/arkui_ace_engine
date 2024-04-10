@@ -34,7 +34,6 @@ namespace {
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 const Color TMP_INACTIVE_COLOR = Color(0x337F7F7F);
-constexpr double NUM_TWO = 2.0;
 } // namespace
 
 SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX)
