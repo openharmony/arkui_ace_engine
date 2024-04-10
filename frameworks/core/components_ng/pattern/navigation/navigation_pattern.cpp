@@ -17,7 +17,6 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -41,6 +40,8 @@ constexpr int32_t EMPTY_DESTINATION_CHILD_SIZE = 1;
 constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
+constexpr int32_t PAGE_NODES = 1000;
+constexpr int32_t PAGE_DEPTH = 300;
 namespace {
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 
@@ -1749,14 +1750,11 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
 
 void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
 {
-    std::string msg;
-    if (nodeCount > AceChecker::GetPageNodes()) {
-        msg = "page node is " + std::to_string(nodeCount) + ",it's overflow.";
-        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_DEPTH_OVERFLOW, navDestinationName, msg);
+    if (nodeCount >= PAGE_NODES) {
+        EventReport::ReportPageNodeOverflow(navDestinationName, nodeCount, PAGE_NODES);
     }
-    if (depth >= AceChecker::GetPageDepth()) {
-        std::string msg = "page depth is " + std::to_string(depth) + ",it's overflow.";
-        EventReport::PerformanceEventReport(PerformanceExecpType::PAGE_DEPTH_OVERFLOW, navDestinationName, msg);
+    if (depth >= PAGE_DEPTH) {
+        EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
     }
 }
 } // namespace OHOS::Ace::NG
