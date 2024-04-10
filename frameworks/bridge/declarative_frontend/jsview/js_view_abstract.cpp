@@ -6395,6 +6395,7 @@ void JSViewAbstract::ParseSheetIsShow(
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
     }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet get isShow is: %{public}d", isShow);
 }
 
 void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)

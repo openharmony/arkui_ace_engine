@@ -492,6 +492,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         if (showInPage) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
             overlayManager = GetOverlayFromPage(pageLevelId, isNav);
         }
         CHECK_NULL_VOID(overlayManager);

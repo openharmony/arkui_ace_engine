@@ -186,6 +186,7 @@ void SheetPresentationPattern::AvoidAiBar()
     auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
+    TAG_LOGD(AceLogTag::ACE_SHEET, "AvoidAiBar function execution completed");
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
@@ -346,6 +347,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto currentSheetHeight =
         GreatNotEqual((height - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height - currentOffset_);
     start_ = currentSheetHeight;
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet HandleDragEnd is: %{public}f", currentSheetHeight);
     auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
     if (lowerIter == sheetDetentHeight_.end()) {
@@ -509,7 +511,7 @@ void SheetPresentationPattern::AvoidSafeArea()
     CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
     auto heightUp = GetSheetHeightChange();
     sheetHeightUp_ = heightUp;
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "To avoid Keyboard, sheet will go up %{public}f.", heightUp);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, sheet will go up %{public}f.", heightUp);
     auto parentOffsetY = GetRootOffsetYToWindow();
     auto offset = pageHeight_ - height_ - heightUp - parentOffsetY;
     auto renderContext = host->GetRenderContext();
@@ -588,6 +590,7 @@ void SheetPresentationPattern::CreatePropertyCallback()
 
 void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
 {
+    TAG_LOGD(AceLogTag::ACE_SHEET, "ModifyFireSheetTransition function enter");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -777,6 +780,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 void SheetPresentationPattern::UpdateCloseIconStatus()
 {
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "PlatformVersion less or equal to ten");
         return;
     }
     auto host = GetHost();
@@ -807,6 +811,8 @@ void SheetPresentationPattern::UpdateCloseIconStatus()
     }
     auto renderContext = sheetCloseIcon->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "sheet closeIcon positionOffset info, x is: %{public}s, y is: %{public}s",
+        positionOffset.GetX().ToString().c_str(), positionOffset.GetY().ToString().c_str());
     renderContext->UpdatePosition(positionOffset);
     auto iconLayoutProperty = sheetCloseIcon->GetLayoutProperty();
     CHECK_NULL_VOID(iconLayoutProperty);
@@ -1186,6 +1192,7 @@ bool SheetPresentationPattern::IsFold()
     auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
     CHECK_NULL_RETURN(foldWindow, false);
     if (foldWindow->IsFoldExpand()) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Get FoldableWindow IsFoldExpand is true");
         return true;
     } else {
         return false;
@@ -1259,12 +1266,12 @@ void SheetPresentationPattern::ClipSheetNode()
     auto path = AceType::MakeRefPtr<Path>();
     path->SetValue(clipPath);
     path->SetBasicShapeType(BasicShapeType::PATH);
-    renderContext->UpdateRenderGroup(true, true, true);
     renderContext->UpdateClipShape(path);
 }
 
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet get WindowSizeChangeReason type is: %{public}d", type);
     auto sheetType = GetSheetType();
     if ((type == WindowSizeChangeReason::ROTATION) &&
         ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE))) {
