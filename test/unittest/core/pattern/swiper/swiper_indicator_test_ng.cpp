@@ -1190,6 +1190,26 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg004, TestSize.Level1
 }
 
 /**
+ * @tc.name: SwiperIndicatorPatternTestNg005
+ * @tc.desc: HandleHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+    });
+    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    indicatorPattern->SetIndicatorInteractive(true);
+    EXPECT_TRUE(eventHub->IsEnabled());
+    indicatorPattern->SetIndicatorInteractive(false);
+    EXPECT_FALSE(eventHub->IsEnabled());
+}
+
+/**
  * @tc.name: SwiperPatternCheckMarkDirtyNodeForRenderIndicator001
  * @tc.desc: Test CheckMarkDirtyNodeForRenderIndicator
  * @tc.type: FUNC
