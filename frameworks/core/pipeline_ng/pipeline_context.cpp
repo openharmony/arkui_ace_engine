@@ -1520,19 +1520,27 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
+        float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY());
         }
-        if (NearZero(keyboardHeight)) {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (LessOrEqual(positionY, rootHeight_ - keyboardHeight)) {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (positionY > rootHeight_ - keyboardHeight) {
-            safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight) - safeHeight);
+        if (!NearZero(keyboardOffset)) {
+            auto offsetY = keyboardPosition - safeAreaManager_->GetLastKeyboardPoistion();
+            safeAreaManager_->UpdateKeyboardOffset(keyboardOffset + offsetY);
         } else {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            if (NearZero(keyboardHeight)) {
+                safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            } else if (LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
+                safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            } else if (positionY + safeHeight > rootHeight_ - keyboardHeight) {
+                safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight) - safeHeight);
+            } else {
+                safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            }
         }
+        safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
         SyncSafeArea(true);
         // layout immediately
         FlushUITasks();
