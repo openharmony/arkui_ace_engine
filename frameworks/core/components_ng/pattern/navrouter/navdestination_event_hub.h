@@ -148,8 +148,6 @@ public:
     void FireOnDisappear() override
     {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to disappear state.", name_.c_str());
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
-                                                                     NavDestinationState::ON_DISAPPEAR);
         EventHub::FireOnDisappear();
     }
 

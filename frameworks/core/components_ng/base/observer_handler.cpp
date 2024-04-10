@@ -45,11 +45,11 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(ref);
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
     CHECK_NULL_VOID(pattern);
-    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
-    CHECK_NULL_VOID(host);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
-    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, host->GetIndex(),
+    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
     CHECK_NULL_VOID(navigationHandleFunc_);
     navigationHandleFunc_(info);
