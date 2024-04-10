@@ -1566,17 +1566,16 @@ void FrameNode::MarkModifyDone()
     }
     eventHub_->MarkModifyDone();
     renderContext_->OnModifyDone();
-#if (defined(aarch64) || defined(x86_64))
-    pipeline->AddAfterRenderTask(
-        weak =
-            WeakPtr(pattern_) {
-                if (Recorder::IsCacheAvaliable()) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->OnAfterModifyDone();
-                }
-            },
-        TaskExecutor::TaskType::UI);
+#if (defined(__aarch64__) || defined(__x86_64__))
+    if (Recorder::IsCacheAvaliable()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAfterModifyDone();
+        });
+    }
 #endif
 }
 

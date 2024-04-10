@@ -83,6 +83,11 @@ public:
         return shouldCollectFull_;
     }
 
+    bool IsShareNodeEmpty() const
+    {
+        return mergedConfig_->shareNodes.empty();
+    }
+
 private:
     NodeDataCache();
     ~NodeDataCache() = default;
