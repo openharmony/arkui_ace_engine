@@ -706,10 +706,7 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(asyncCtx->env, &scope);
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
-        napi_close_handle_scope(asyncCtx->env, scope);
     };
 
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
@@ -843,10 +840,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 windowId, true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-                napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
-                napi_close_handle_scope(asyncCtx->env, scope);
             };
 
             int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData,
