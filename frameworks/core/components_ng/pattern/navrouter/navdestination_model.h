@@ -44,6 +44,7 @@ public:
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
+    virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;

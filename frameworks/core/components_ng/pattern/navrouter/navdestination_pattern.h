@@ -186,6 +186,16 @@ public:
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
 
+    void SetIsUserDefinedBgColor(bool isUserDefinedBgColor)
+    {
+        isUserDefinedBgColor_ = isUserDefinedBgColor;
+    }
+
+    bool IsUserDefinedBgColor() const
+    {
+        return isUserDefinedBgColor_;
+    }
+
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -197,6 +207,7 @@ private:
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
+    bool isUserDefinedBgColor_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };

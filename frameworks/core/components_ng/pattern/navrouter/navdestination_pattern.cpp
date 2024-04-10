@@ -108,8 +108,8 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
 {
     auto renderContext = hostNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetBackgroundColor().has_value()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
+    if (IsUserDefinedBgColor()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "User defined Background color: %{public}s",
             renderContext->GetBackgroundColor()->ColorToString().c_str());
         return;
     }
@@ -128,6 +128,8 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         return;
     }
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Default background color: %{public}s",
+        renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
 void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode)
