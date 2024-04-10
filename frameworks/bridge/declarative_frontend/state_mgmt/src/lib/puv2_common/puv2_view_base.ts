@@ -38,7 +38,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
   };
 
-  // indicates the currently re/rendered UINode's elmtIds
+  // indicates the currently rendered or rendered UINode's elmtIds
   // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
   // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
   protected currentlyRenderedElmtIdStack_: Array<number> = new Array<number>();

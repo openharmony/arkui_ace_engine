@@ -3767,7 +3767,7 @@ class UpdateFuncsByElmtId {
 class PUV2ViewBase extends NativeViewPartialUpdate {
     constructor(parent, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
         super();
-        // indicates the currently re/rendered UINode's elmtIds
+        // indicates the currently rendered or rendered UINode's elmtIds
         // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
         // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
         this.currentlyRenderedElmtIdStack_ = new Array();
@@ -5894,7 +5894,7 @@ class ViewPU extends PUV2ViewBase {
         }
         this.localStoragebackStore_ = instance;
     }
-    // FIXME 
+    // FIXME
     // indicate if this is  V2 or a V3 component
     // V2 by default, changed to V3 by the first V3 decorated variable
     // when splitting ViewPU and ViewV3
@@ -6295,7 +6295,7 @@ class ViewPU extends PUV2ViewBase {
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
             const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
                 if (this.hasRecycleManager()) {
@@ -6329,7 +6329,7 @@ class ViewPU extends PUV2ViewBase {
             
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        // in observeComponentCreation function we do not get info about the component name, in 
+        // in observeComponentCreation function we do not get info about the component name, in
         // observeComponentCreation2 we do.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc });
         // add element id -> owning ViewPU
@@ -6360,11 +6360,11 @@ class ViewPU extends PUV2ViewBase {
                 // Enable PU state tracking only in PU @Components
                 this.currentlyRenderedElmtIdStack_.push(elmtId);
             }
-            // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
+            // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
             // enable V2 object deep observation
             // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
             if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
-                // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked' 
+                // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
                 // update + initial render calls, like in if and ForEach case, convert to stack as well
                 ObserveV2.getObserve().startBind(this, elmtId);
             }
@@ -6489,7 +6489,7 @@ class ViewPU extends PUV2ViewBase {
                     }
                 }
                 else {
-                    // FIXME fix for mixed V2 - V3 Hierarchies 
+                    // FIXME fix for mixed V2 - V3 Hierarchies
                     throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
                 }
             } // if child
@@ -6510,7 +6510,7 @@ class ViewPU extends PUV2ViewBase {
                     }
                 }
                 else {
-                    // FIXME fix for mixed V2 - V3 Hierarchies 
+                    // FIXME fix for mixed V2 - V3 Hierarchies
                     throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
                 }
             } // if child
@@ -8153,11 +8153,11 @@ class ViewV2 extends PUV2ViewBase {
         // Map elmtId -> Repeat instance in this ViewPU
         this.elmtId2Repeat_ = new Map();
         /**
-       * on first render create a new Instance of Repeat
-       * on re-render connect to existing instance
-       * @param arr
-       * @returns
-       */
+        * on first render create a new Instance of Repeat
+        * on re-render connect to existing instance
+        * @param arr
+        * @returns
+        */
         this.__mkRepeatAPI = (arr) => {
             // factory is for future extensions, currently always return the same
             const elmtId = this.getCurrentlyRenderedElmtId();
@@ -8174,9 +8174,9 @@ class ViewV2 extends PUV2ViewBase {
         
     }
     finalizeConstruction() {
+        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
-        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
         // Always use ID_REFS in ViewPU
         this[ObserveV2.ID_REFS] = {};
     }
@@ -8339,7 +8339,7 @@ class ViewV2 extends PUV2ViewBase {
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
             const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
                 /*if (this hasRecycleManager()) {
@@ -8412,7 +8412,7 @@ class ViewV2 extends PUV2ViewBase {
         return retVal;
     }
     setActiveInternal(newState) {
-        throw new Error('ViewV2: setActiveInternal is unimplemented');
+        stateMgmtConsole.error('ViewV2: setActiveInternal is unimplemented');
     }
     /*
       findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
@@ -8486,8 +8486,6 @@ function ObservedV2(BaseClass) {
         }
     };
 }
-// FIXME remove the old name decorator once Compiler NT has been updated
-const observed = ObservedV2;
 /**
  * @Trace class property decorator, property inside @ObservedV2 class
  *
@@ -8501,8 +8499,6 @@ const Trace = (target, propertyKey) => {
     ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
     return trackInternal(target, propertyKey);
 };
-// FIXME remove the old name decorator once Compiler NT has been updated
-const track = Trace;
 /**
  * @Local @ComponentV2/ViewV2 variable decorator
  *
@@ -8520,8 +8516,6 @@ const Local = (target, propertyKey) => {
     ObserveV2.addVariableDecoMeta(target, propertyKey, '@state');
     return trackInternal(target, propertyKey);
 };
-// FIXME remove the old name decorator once Compiler NT has been updated
-const state = Local;
 /**
  * @Param class property decorator
  *
@@ -8555,8 +8549,6 @@ const Param = (proto, propertyKey) => {
         enumerable: true
     });
 }; // Param
-// FIXME remove the old name decorator once Compiler NT has been updated
-const param = Param;
 /**
  * @Once supplementary @ComponentV2 variable decorator to @Param decorator
  * must use like this @Param @Once varName. Can not be used without @param.
@@ -8573,8 +8565,6 @@ const Once = (proto, propertyKey) => {
     
     ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@once');
 };
-// FIXME remove the old name decorator once Compiler NT has been updated
-const once = Once;
 /**
  * @Event class variable decorator, class must be @ComponentV2
  *
@@ -8594,8 +8584,6 @@ const Event = (target, propertyKey) => {
     ObserveV2.addVariableDecoMeta(target, propertyKey, '@event');
     (_a = target[propertyKey]) !== null && _a !== void 0 ? _a : (target[propertyKey] = () => { });
 };
-// FIXME remove the old name decorator once Compiler NT has been updated
-const event = Event;
 /**
  * @Provider variable decorator of @ComponentV2 variable
  *
@@ -8620,8 +8608,6 @@ const Provider = (aliasName) => {
         trackInternal(proto, varName);
     };
 }; // @Provider
-// FIXME remove the old name decorator once Compiler NT has been updated
-const provide = Provider;
 /**
  * @Consumer variable decorator of @ComponentV2 variable
  *
@@ -8647,8 +8633,6 @@ const Consumer = (aliasName) => {
         ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@consume');
     };
 }; // @Consumer
-// FIXME remove the old name decorator once Compiler NT has been updated
-const consume = Consumer;
 /**
  * @Monitor class function decorator, inside either @ComponentV2 or @ObservedV2 class
  *
@@ -8676,8 +8660,6 @@ const Monitor = function (key, ...keys) {
         target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc };
     };
 };
-// FIXME remove the old name decorator once Compiler NT has been updated
-const monitor = Monitor;
 /**
   * @Computed TS computed class member variable decorator, inside either @ComponentV2 or @ObservedV2 class
   *
@@ -8702,8 +8684,6 @@ const Computed = (target, propertyKey, descriptor) => {
     target[watchProp] ? target[watchProp][propertyKey] = computeFunction
         : target[watchProp] = { [propertyKey]: computeFunction };
 };
-// FIXME remove the old name decorator once Compiler NT has been updated
-const computed = Computed;
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

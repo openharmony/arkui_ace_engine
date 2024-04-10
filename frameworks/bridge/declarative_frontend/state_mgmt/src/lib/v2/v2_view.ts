@@ -14,13 +14,13 @@
  */
 
 /**
- * 
- * This file includes only framework internal classes and functions 
+ *
+ * This file includes only framework internal classes and functions
  * non are part of SDK. Do not access from app.
- * 
+ *
  * Implementation of @ComponentV2 is ViewV2
  * When transpiling @ComponentV2, the transpiler generates a class that extends from ViewV2.
- * 
+ *
  */
 
 abstract class ViewV2 extends PUV2ViewBase implements IView {
@@ -37,20 +37,20 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     protected finalizeConstruction(): void {
+
+        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
         ObserveV2.getObserve().constructMonitor(this, this.constructor.name);
         ObserveV2.getObserve().constructComputed(this, this.constructor.name);
-    
-        ProvideConsumeUtilV3.setupConsumeVarsV3(this);
-    
+
         // Always use ID_REFS in ViewPU
         this[ObserveV2.ID_REFS] = {};
-      } 
+      }
 
     public debugInfo__(): string {
         return `@ComponentV2 '${this.constructor.name}'[${this.id__()}]`;
     }
 
-    
+
     private get isViewV3(): boolean {
         return true;
     }
@@ -157,24 +157,24 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     /**
-   * 
-   * @param paramVariableName 
+   *
+   * @param paramVariableName
    * @param @once paramVariableName
    * @param is read only, therefore, init from parent needs to be done without
    *        causing property setter() to be called
-   * @param newValue 
+   * @param newValue
    */
     protected initParam<Z>(paramVariableName: string, newValue: Z) {
         VariableUtilV3.initParam<Z>(this, paramVariableName, newValue);
     }
     /**
-   * 
-   * @param paramVariableName 
+   *
+   * @param paramVariableName
    * @param @once paramVariableName
    * @param is read only, therefore, update from parent needs to be done without
    *        causing property setter() to be called
    * @param @once reject any update
-    * @param newValue 
+    * @param newValue
    */
     protected updateParam<Z>(paramVariableName: string, newValue: Z) {
         VariableUtilV3.updateParam<Z>(this, paramVariableName, newValue);
@@ -184,7 +184,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
    *  inform that UINode with given elmtId needs rerender
    *  does NOT exec @Watch function.
    *  only used on V3 code path from ObserveV2.fireChange.
-   * 
+   *
    * FIXME will still use in the future?
    */
     public uiNodeNeedUpdateV3(elmtId: number): void {
@@ -233,7 +233,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
             const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+            // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
             // to newly created this.dirtDescendantElementIds_ Set
             dirtElmtIdsFromRootNode.forEach(elmtId => {
                 /*if (this hasRecycleManager()) {
@@ -297,7 +297,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     /**
-     * findViewPUInHierarchy function needed for @Component and @ComponentV2 mixed 
+     * findViewPUInHierarchy function needed for @Component and @ComponentV2 mixed
      * parent - child hierarchies. Not used by ViewV2
      */
     public findViewPUInHierarchy(id: number): ViewPU | undefined {
@@ -313,7 +313,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     public setActiveInternal(newState: boolean): void {
-        throw new Error('ViewV2: setActiveInternal is unimplemented');
+        stateMgmtConsole.error('ViewV2: setActiveInternal is unimplemented');
     }
 
     /*
@@ -351,7 +351,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return ''; // TODO DFX, read out META
     }
 
-    /**
+   /**
    * on first render create a new Instance of Repeat
    * on re-render connect to existing instance
    * @param arr

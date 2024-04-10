@@ -116,7 +116,7 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = instance;
   }
 
-  // FIXME 
+  // FIXME
   // indicate if this is  V2 or a V3 component
   // V2 by default, changed to V3 by the first V3 decorated variable
   // when splitting ViewPU and ViewV3
@@ -162,7 +162,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
-  
+
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
@@ -461,7 +461,7 @@ abstract class ViewPU extends PUV2ViewBase
  *  inform that UINode with given elmtId needs rerender
  *  does NOT exec @Watch function.
  *  only used on V3 code path from ObserveV2.fireChange.
- * 
+ *
  * FIXME will still use in the future?
  */
   public uiNodeNeedUpdateV3(elmtId: number): void {
@@ -618,7 +618,7 @@ abstract class ViewPU extends PUV2ViewBase
       // ascending order ensures parent nodes will be updated before their children
       // prior cleanup ensure no already deleted Elements have their update func executed
       const dirtElmtIdsFromRootNode = Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber);
-      // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added 
+      // if state changed during exec update lambda inside UpdateElement, then the dirty elmtIds will be added
       // to newly created this.dirtDescendantElementIds_ Set
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
@@ -654,7 +654,7 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-    // in observeComponentCreation function we do not get info about the component name, in 
+    // in observeComponentCreation function we do not get info about the component name, in
     // observeComponentCreation2 we do.
     this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc });
     // add element id -> owning ViewPU
@@ -688,11 +688,11 @@ abstract class ViewPU extends PUV2ViewBase
         this.currentlyRenderedElmtIdStack_.push(elmtId);
       }
 
-      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria), 
+      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
       if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
-        // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked' 
+        // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startBind(this, elmtId);
       }
@@ -829,7 +829,7 @@ abstract class ViewPU extends PUV2ViewBase
             child.aboutToReuseInternal();
           }
         } else {
-          // FIXME fix for mixed V2 - V3 Hierarchies 
+          // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
         }
       } // if child
@@ -850,7 +850,7 @@ abstract class ViewPU extends PUV2ViewBase
             child.aboutToRecycleInternal();
           }
         } else {
-          // FIXME fix for mixed V2 - V3 Hierarchies 
+          // FIXME fix for mixed V2 - V3 Hierarchies
           throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
         }
       } // if child
@@ -860,7 +860,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   // add current JS object to it's parent recycle manager
   public recycleSelf(name: string): void {
-    
+
     if (this.getParent() && this.getParent() instanceof ViewPU && !(this.getParent() as ViewPU).isDeleting_) {
       const parentPU : ViewPU = this.getParent() as ViewPU;
       parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
