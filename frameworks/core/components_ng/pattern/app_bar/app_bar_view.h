@@ -53,11 +53,11 @@ private:
     RefPtr<FrameNode> BuildDivider();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
-    static void BindContentCover(const RefPtr<FrameNode>& targetNode);
+    static void BindContentCover(const RefPtr<FrameNode>& targetNode, bool firstBind = true);
+    static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static std::map<std::string, std::string> CreateUIExtensionParams();
 
     WeakPtr<FrameNode> atomicService_;
-    
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

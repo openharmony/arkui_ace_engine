@@ -51,6 +51,7 @@ constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstac
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
+constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engine.bundle.name";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -684,5 +685,10 @@ void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTra
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
     debugBoundaryEnabled_ = debugBoundaryEnabled && developerModeOn_;
+}
+
+std::string SystemProperties::GetAtomicServiceBundleName()
+{
+    return system::GetParameter(DISTRIBUTE_ENGINE_BUNDLE_NAME, "");
 }
 } // namespace OHOS::Ace

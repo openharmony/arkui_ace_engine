@@ -472,6 +472,8 @@ public:
         return acePerformanceMonitorEnable_;
     }
 
+    static std::string GetAtomicServiceBundleName();
+
 private:
     static bool traceEnabled_;
     static bool developerModeOn_;
