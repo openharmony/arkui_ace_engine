@@ -4945,6 +4945,13 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
     touchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
     touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+    touchPoint.pressure = locationInfo.GetForce();
+    touchPoint.contactAreaWidth = locationInfo.GetSize();
+    touchPoint.contactAreaHeight = locationInfo.GetSize();
+    touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
+    touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
+    touchPoint.pressedTime = locationInfo.GetTimeStamp().time_since_epoch().count();
 }
 
 void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
@@ -4963,14 +4970,15 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].nodeY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetLocalLocation().GetY());
         points[i].windowX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetX());
         points[i].windowY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetY());
-        points[i].screenX = touchPoint.screenX;
-        points[i].screenY = touchPoint.screenY;
+        points[i].screenX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetScreenLocation().GetX());
+        points[i].screenY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetScreenLocation().GetY());
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
+        points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
         i++;
     }
 }
