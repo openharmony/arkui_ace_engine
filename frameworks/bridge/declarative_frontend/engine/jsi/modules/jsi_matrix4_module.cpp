@@ -302,7 +302,7 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
     for (int i = srcIndex; i < srcLastIndex; i++) {
         totalPoint.push_back(srcPoint[i]);
     }
-    int dstLastIndex = pointCount + srcIndex;
+    int dstLastIndex = pointCount + dstIndex;
     for (int i = dstIndex; i < dstLastIndex; i++) {
         totalPoint.push_back(dstPoint[i]);
     }
