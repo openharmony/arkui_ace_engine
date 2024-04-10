@@ -327,6 +327,75 @@ HWTEST_F(GridIrregularLayoutTest, SolveBackward002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutRangeSolver::SolveOverScroll001
+ * @tc.desc: Test LayoutRangeSolver with overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, SolveOverScroll001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.gridMatrix_ = MATRIX_DEMO_12;
+    info.lineHeightMap_ = { { 0, 10.0f }, { 1, 10.0f }, { 2, 10.0f }, { 3, 10.0f }, { 4, 10.0f }, { 5, 10.0f },
+        { 6, 10.0f } };
+
+    float offset = -50.0f;
+    info.currentOffset_ = offset;
+    info.startMainLineIndex_ = 1;
+    info.startIndex_ = 2;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    for (int i = 0; i < 10; ++i) {
+        auto res = solver.FindStartingRow(0.0f);
+        // can't scroll further if all items are already above viewport
+        EXPECT_EQ(res.pos, offset);
+        EXPECT_EQ(res.row, 1);
+        offset -= 10.0f;
+        info.currentOffset_ = offset;
+    }
+}
+
+/**
+ * @tc.name: LayoutRangeSolver::SolveOverScroll002
+ * @tc.desc: Test LayoutRangeSolver with overScroll upwards
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, SolveOverScroll002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.gridMatrix_ = MATRIX_DEMO_12;
+    info.lineHeightMap_ = { { 0, 10.0f }, { 1, 10.0f }, { 2, 10.0f }, { 3, 10.0f }, { 4, 10.0f }, { 5, 10.0f },
+        { 6, 10.0f } };
+
+    float offset = 0.0f;
+    info.currentOffset_ = offset;
+    info.startMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    for (int i = 0; i < 10; ++i) {
+        auto res = solver.FindStartingRow(0.0f);
+        EXPECT_EQ(res.pos, offset);
+        EXPECT_EQ(res.row, 0);
+        offset += 10.0f;
+        info.currentOffset_ = offset;
+    }
+}
+
+/**
  * @tc.name: LayoutRangeSolver::Solve001
  * @tc.desc: Test LayoutRangeSolver::FindStartingRow when matrix is empty.
  * @tc.type: FUNC
@@ -1325,11 +1394,11 @@ HWTEST_F(GridIrregularLayoutTest, TrySkipping001, TestSize.Level1)
     EXPECT_FALSE(algorithm->TrySkipping(300.0f));
     info.currentOffset_ = -300.0f;
     EXPECT_FALSE(algorithm->TrySkipping(300.0f));
-    info.currentOffset_ = -400.0f;
+    info.currentOffset_ = -800.0f;
     EXPECT_FALSE(algorithm->TrySkipping(300.0f));
-    info.currentOffset_ = -401.0f;
+    info.currentOffset_ = -801.0f;
     EXPECT_TRUE(algorithm->TrySkipping(300.0f));
-    EXPECT_EQ(info.startIndex_, 4);
+    EXPECT_EQ(info.startIndex_, 5);
     EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
 
     info.scrollAlign_ = ScrollAlign::NONE;
@@ -1343,9 +1412,9 @@ HWTEST_F(GridIrregularLayoutTest, TrySkipping001, TestSize.Level1)
     EXPECT_FALSE(algorithm->TrySkipping(300.0f));
     info.currentOffset_ = 300.0f;
     EXPECT_FALSE(algorithm->TrySkipping(300.0f));
-    info.currentOffset_ = 400.0f;
+    info.currentOffset_ = 800.0f;
     EXPECT_FALSE(algorithm->TrySkipping(300.0f));
-    info.currentOffset_ = 401.0f;
+    info.currentOffset_ = 801.0f;
     EXPECT_TRUE(algorithm->TrySkipping(300.0f));
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
@@ -1672,5 +1741,72 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll001, TestSize.Level1)
     EXPECT_EQ(info.currentOffset_, -350.0f);
     EXPECT_FALSE(info.offsetEnd_);
     EXPECT_TRUE(info.reachEnd_);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::OverScroll002
+ * @tc.desc: Test overScroll until completely out of viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, OverScroll002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 100.0f);
+        CreateItem(1, -2, 200.0f);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(5, -2, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    for (int i = 0; i < 10; ++i) {
+        UpdateCurrentOffset(200.0f);
+        EXPECT_EQ(info.startMainLineIndex_, 0);
+        EXPECT_GT(info.currentOffset_, 0.0f);
+    }
+}
+
+/**
+ * @tc.name: GridIrregularLayout::OverScroll003
+ * @tc.desc: Test overScroll until completely out of viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, OverScroll003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 100.0f);
+        CreateItem(1, -2, 200.0f);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(5, -2, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    // first move to end
+    for (int i = 0; i < 4; ++i) {
+        UpdateCurrentOffset(-200.0f);
+    }
+    EXPECT_EQ(info.currentOffset_, -300.0f);
+    EXPECT_EQ(info.endMainLineIndex_, 10);
+    EXPECT_TRUE(info.offsetEnd_);
+    for (int i = 0; i < 10; ++i) {
+        std::cout << "iteration " << i << std::endl;
+        UpdateCurrentOffset(-200.0f);
+        EXPECT_LT(info.currentOffset_, -499.9f);
+        EXPECT_EQ(info.startMainLineIndex_, 5);
+        EXPECT_EQ(info.startIndex_, 3);
+        EXPECT_EQ(info.endMainLineIndex_, 10);
+        EXPECT_EQ(info.endIndex_, 8);
+    }
 }
 } // namespace OHOS::Ace::NG

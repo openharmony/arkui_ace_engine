@@ -215,23 +215,20 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     if (info.endIndex_ == -1) {
         info.endMainLineIndex_ = -1;
     }
-    float targetLen = mainSize - info.currentOffset_;
-    float heightToFill = targetLen - GetPrevHeight(info, mainGap_);
 
-    GridLayoutRangeSolver solver(&info, wrapper_);
+    float heightToFill = mainSize - info.currentOffset_ - GetPrevHeight(info, mainGap_);
     if (Positive(heightToFill)) {
         GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-        auto fillRes = filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info.endMainLineIndex_ + 1);
-        info.endMainLineIndex_ = fillRes.endMainLineIndex;
-        info.endIndex_ = fillRes.endIndex;
-    } else {
-        auto [endMainLineIdx, endIdx] = solver.SolveForwardForEndIdx(mainGap_, targetLen, info.startMainLineIndex_);
-        info.endMainLineIndex_ = endMainLineIdx;
-        info.endIndex_ = endIdx;
+        filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info.endMainLineIndex_ + 1);
     }
 
+    GridLayoutRangeSolver solver(&info, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
     UpdateStartInfo(info, res);
+    auto [endMainLineIdx, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
+    info.endMainLineIndex_ = endMainLineIdx;
+    info.endIndex_ = endIdx;
+
     // adjust offset
     if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
         float overDis = -info.GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_), mainGap_);
@@ -269,10 +266,10 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize)
 bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 {
     auto& info = gridLayoutInfo_;
-    float offset = std::abs(info.currentOffset_);
-    if (enableSkip_ && GreatNotEqual(offset, mainSize)) {
+    float delta = std::abs(info.currentOffset_ - info.prevOffset_);
+    if (enableSkip_ && GreatNotEqual(delta, mainSize)) {
         // a more costly check, therefore perform after comparing to [mainSize]
-        if (LessOrEqual(offset, GetPrevHeight(info, mainGap_))) {
+        if (LessOrEqual(delta, 2 * GetPrevHeight(info, mainGap_))) {
             return false;
         }
         info.jumpIndex_ = (info.currentOffset_ < 0.0f) ? SkipLinesForward() : SkipLinesBackward();

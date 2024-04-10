@@ -27,12 +27,12 @@ GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper
 using Result = GridLayoutRangeSolver::StartingRowInfo;
 Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
 {
-    if (info_->gridMatrix_.empty()) {
+    if (info_->gridMatrix_.empty() || info_->lineHeightMap_.empty()) {
         return { 0, 0, 0.0f };
     }
     // Negative offset implies scrolling down, so we can start from the previous startIndex_.
     // Otherwise, we have to restart from Row 0 because of irregular items.
-    if (info_->currentOffset_ <= 0.0f) {
+    if (NonPositive(info_->currentOffset_)) {
         return SolveForward(mainGap, -info_->currentOffset_, info_->startMainLineIndex_);
     }
     return SolveBackward(mainGap, info_->currentOffset_, info_->startMainLineIndex_);
@@ -83,6 +83,9 @@ Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, const
         }
         len += it->second + mainGap;
     }
+    if (it == info_->lineHeightMap_.end()) {
+        len -= (--it)->second + mainGap;
+    }
     auto topRows = CheckMultiRow(it->first);
     for (int32_t i = 1; i < topRows; ++i) {
         --it;
@@ -132,7 +135,7 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float m
         return { -1, -1 };
     }
 
-    for (; len < targetLen && it != info_->lineHeightMap_.end(); ++it) {
+    for (; LessNotEqual(len, targetLen) && it != info_->lineHeightMap_.end(); ++it) {
         len += it->second + mainGap;
     }
     --it;
