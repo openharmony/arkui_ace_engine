@@ -83,14 +83,7 @@ public:
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
 
-    bool AboutToAddCurrentFingers(int32_t touchId) override
-    {
-        if (fingersId_.find(touchId) != fingersId_.end()) {
-            return false;
-        }
-        currentFingers_++;
-        return true;
-    }
+    bool AboutToAddCurrentFingers(int32_t touchId) override;
 
 private:
     class PanVelocity {

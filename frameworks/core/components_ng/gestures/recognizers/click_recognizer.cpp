@@ -179,6 +179,10 @@ void ClickRecognizer::OnRejected()
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
+        "%{public}d, %{public}d",
+        event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -188,13 +192,15 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
+            "%{public}s",
+            refereeState_, node ? node->GetTag().c_str() : "null",
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
         return;
     }
     InitGlobalValue(event.sourceType);
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
-        "%{public}d, %{public}d",
-        event.id, equalsToFingers_, currentTouchPointsNum_);
     if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
