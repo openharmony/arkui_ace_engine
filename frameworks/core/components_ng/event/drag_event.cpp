@@ -165,6 +165,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
+        if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
+                dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+            return;
+        }
         dragDropManager->SetHasGatherNode(false);
         dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
