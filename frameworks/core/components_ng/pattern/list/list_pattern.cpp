@@ -1279,6 +1279,33 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return true;
 }
 
+std::pair<std::function<bool(float)>, Axis> ListPattern::GetScrollOffsetAbility()
+{
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_RETURN(pattern, false);
+                pattern->ScrollBy(-moveOffset);
+                return true;
+            },
+        GetAxis() };
+}
+
+std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
+{
+    return [wp = WeakClaim(this)](int32_t index) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (index == FocusHub::SCROLL_TO_HEAD) {
+            pattern->ScrollToIndex(0, false, ScrollAlign::START);
+        } else if (index == FocusHub::SCROLL_TO_TAIL) {
+            pattern->ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, false, ScrollAlign::END);
+        } else {
+            pattern->ScrollToIndex(index, false, ScrollAlign::AUTO);
+        }
+        return true;
+    };
+}
+
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {

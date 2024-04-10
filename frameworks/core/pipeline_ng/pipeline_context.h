@@ -719,6 +719,7 @@ private:
     void FlushTouchEvents();
 
     void FlushFocusView();
+    void FlushFocusScroll();
 
     void ProcessDelayTasks();
 

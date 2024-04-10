@@ -2007,7 +2007,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0045, TestSize.Level1)
 
 /**
  * @tc.name: FocusHubTestNg0046
- * @tc.desc: Test the function HandleParentScroll.
+ * @tc.desc: Test the function TriggerFocusScroll.
  * @tc.type: FUNC
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
@@ -2030,7 +2030,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
     focusHub->onPaintFocusStateCallback_ = []() { return true; };
     focusHub->PaintAllFocusState();
-    focusHub->HandleParentScroll();
+    focusHub->TriggerFocusScroll();
     EXPECT_TRUE(focusHub->isFocusUnit_);
 }
 

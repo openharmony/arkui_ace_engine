@@ -1179,6 +1179,33 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return ret;
 }
 
+std::pair<std::function<bool(float)>, Axis> GridPattern::GetScrollOffsetAbility()
+{
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_RETURN(pattern, false);
+                pattern->ScrollBy(-moveOffset);
+                return true;
+            },
+        GetAxis() };
+}
+
+std::function<bool(int32_t)> GridPattern::GetScrollIndexAbility()
+{
+    return [wp = WeakClaim(this)](int32_t index) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (index == FocusHub::SCROLL_TO_HEAD) {
+            pattern->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+        } else if (index == FocusHub::SCROLL_TO_TAIL) {
+            pattern->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+        } else {
+            pattern->UpdateStartIndex(index);
+        }
+        return true;
+    };
+}
+
 void GridPattern::ScrollBy(float offset)
 {
     StopAnimate();
