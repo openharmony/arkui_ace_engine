@@ -106,6 +106,7 @@ public:
         if (it == posMap_.begin() || it == posMap_.end()) {
             return;
         }
+        startPos = it->second.mainPos;
         it--;
         float prevPos = it->second.mainPos + it->second.mainSize + space;
         int32_t prevIndex = it->first;

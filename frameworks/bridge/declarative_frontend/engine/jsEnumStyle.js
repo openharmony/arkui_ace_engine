@@ -2347,11 +2347,11 @@ class ChildrenMainSize {
     }
     let startValue = Math.trunc(start);
     let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
-    if (paramCount == 1) {
+    if (paramCount === 1) {
       this.changeArray.push({ start: startValue });
-    } else if (paramCount == 2) {
+    } else if (paramCount === 2) {
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
-    } else if (paramCount == 3) {
+    } else if (paramCount === 3) {
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
     }
     this.changeFlag = !this.changeFlag;
@@ -2366,7 +2366,7 @@ class ChildrenMainSize {
   }
 
   isInvalid(input) {
-    return !(Number.isFinite(input) && (Math.sign(input) == 1 || Math.sign(input) == 0));
+    return !(Number.isFinite(input) && input >= 0);
   }
 
   clearChanges() {
