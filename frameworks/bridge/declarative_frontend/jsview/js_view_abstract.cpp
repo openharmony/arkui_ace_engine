@@ -2617,6 +2617,10 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
             valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
         }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            typeX = x.Unit();
+            typeY = y.Unit();
+        }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
     }
 
