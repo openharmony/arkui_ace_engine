@@ -215,15 +215,19 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     returns undefined if variable has _not_ changed
     returns dependentElementIds_ Set if changed. This Set is empty if variable is not used to construct the UI
   */
-  public moveElmtIdsForDelayedUpdate(): Set<number> | undefined {
-    const result = (this.delayedNotification_ === ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) ?
-      this.dependentElmtIdsByProperty_.getAllPropertyDependencies() :
-      undefined;
-    stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update \
-                      ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
-    this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
-    return result;
-  }
+    public moveElmtIdsForDelayedUpdate(isReused: boolean = false): Set<number> | undefined {
+      const result = (this.delayedNotification_ === ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) ?
+        this.dependentElmtIdsByProperty_.getAllPropertyDependencies() :
+        undefined;
+      stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update \
+                        ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
+      if (isReused && !this.owningView_.isViewActive()) {
+        this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_none_pending;
+      } else {
+        this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
+      }
+      return result;
+    }
 
   protected notifyPropertyRead() {
     stateMgmtConsole.error(`${this.debugInfo()}: notifyPropertyRead, DO NOT USE with PU. Use notifyReadCb mechanism.`);
