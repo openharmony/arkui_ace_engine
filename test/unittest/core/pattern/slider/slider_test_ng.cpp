@@ -4893,4 +4893,40 @@ HWTEST_F(SliderTestNg, SliderModelNgTest003, TestSize.Level2)
     sliderModelNG.SetThickness(rawPtr, Dimension(1));
     EXPECT_TRUE(sliderLayoutProperty->GetBlockSize().has_value());
 }
+
+/**
+ * @tc.name: SliderPatternTest014
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderPatternTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    auto sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    sliderPattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    sliderPaintProperty->UpdateValue(VALUE);
+    sliderPaintProperty->UpdateMin(MIN);
+    sliderPaintProperty->UpdateMax(MAX);
+    sliderPaintProperty->UpdateStep(STEP);
+    auto node = [](SliderConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(VALUE, config.value_);
+        EXPECT_EQ(MIN, config.min_);
+        EXPECT_EQ(MAX, config.max_);
+        EXPECT_EQ(STEP, config.step_);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    sliderPattern->SetBuilderFunc(node);
+    sliderPattern->BuildContentModifierNode();
+}
 } // namespace OHOS::Ace::NG
