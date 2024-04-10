@@ -1959,6 +1959,9 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    if (GetSysTimestamp() < deadline) {
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
+    }
 }
 
 void PipelineContext::Finish(bool /*autoFinish*/) const

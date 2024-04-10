@@ -294,6 +294,22 @@ void JSBindLibs(const std::string moduleName, const std::string exportModuleName
 }
 #endif
 
+void JsUINodeRegisterCleanUp(BindingTarget globalObj)
+{
+    // globalObj is panda::Local<panda::ObjectRef>
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+
+    const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
+    if (cleanUpIdleTask->IsFunction()) {
+        LOGD("CleanUpIdleTask NG is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
+    }
+}
+
 void JsBindViews(BindingTarget globalObj)
 {
     JSViewAbstract::JSBind(globalObj);

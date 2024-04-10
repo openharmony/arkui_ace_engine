@@ -306,26 +306,6 @@ public:
      */
     void JsFinishUpdateFunc(int32_t elmtId);
 
-    // The process of Component to Element sync leads to Elements being
-    // deleted. ElementRegister keeps track of these deletions
-    // before the framework can forget about these elmtIds
-    // these need to be removed from its own book keeping
-    // state variables keep track of dependent elmtIds and
-    // View objects keep a map elmtId -> update function,
-    // both on TS side.
-    // View.purgeDeletedElmtIds cleans both state variables
-    // and update function map from deleted ElmtIds
-    // afterwards it informs the ElementRegister that elmtIds
-    // it was able to purge.
-    // only then ElementRegister can forget about these elmtIds
-    void JsGetDeletedElemtIds(const JSCallbackInfo& info);
-
-    // JS signature: View.deletedElmtIdsHaveBeenPurged(elmtIds : number[])
-    // inform ElementRegister that given deleted eltIds
-    // have been deleted from partial updates book keeping
-    // at this point ElementRegister can forget about the,
-    void JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info);
-
     /**
     JS exposed function to check from ElementRegister if given elmtId is (still) in use
     */

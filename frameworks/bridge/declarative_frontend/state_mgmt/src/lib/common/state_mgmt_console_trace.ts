@@ -37,6 +37,14 @@ class stateMgmtConsole {
     public static error (...args : any) : void {
         aceConsole.error(...args);
     }
+    public static propertyAccess (...args : any) : void {
+        // enable for fran gran debugging variables observation
+        // this code line has been left in intentionally
+        // aceConsole.debug(...args);
+    }
+    public static applicationError (...args : any) : void {
+        aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+    }
 }
 
 type TraceArgs = string | number | boolean;
