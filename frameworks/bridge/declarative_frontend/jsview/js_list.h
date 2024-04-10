@@ -64,6 +64,7 @@ public:
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetChainAnimation(bool enableChainAnimation);
     static void SetChainAnimationOptions(const JSCallbackInfo& info);
+    static void SetChildrenMainSize(const JSCallbackInfo& args);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);

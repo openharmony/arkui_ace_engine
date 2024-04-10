@@ -70,6 +70,7 @@ public:
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     void SetFadingEdge(bool fadingEdge) override;
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
     DisplayMode GetDisplayMode() const override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

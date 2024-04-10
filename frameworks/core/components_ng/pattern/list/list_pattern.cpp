@@ -135,7 +135,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    bool isJump = false;
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -146,17 +145,23 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
-    if (listLayoutAlgorithm->NeedEstimateOffset() || needReEstimateOffset_) {
-        lanes_ = listLayoutAlgorithm->GetLanes();
-        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
-        calculate.GetEstimateHeightAndOffset(GetHost());
-        currentOffset_ = calculate.GetEstimateOffset();
-        isJump = true;
-        relativeOffset = 0.0f;
-        needReEstimateOffset_ = false;
-        posMap_.clear();
+    bool isJump = listLayoutAlgorithm->NeedEstimateOffset();
+    if (childrenSize_) {
+        listTotalHeight_ = posMap_->GetTotalHeight();
+        currentOffset_ = itemPosition_.empty() ? 0.0f :
+            posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
+    } else {
+        if (isJump || needReEstimateOffset_) {
+            lanes_ = listLayoutAlgorithm->GetLanes();
+            auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+            calculate.GetEstimateHeightAndOffset(GetHost());
+            currentOffset_ = calculate.GetEstimateOffset();
+            relativeOffset = 0.0f;
+            needReEstimateOffset_ = false;
+            posMap_->ClearPosMap();
+        }
+        CalculateCurrentOffset(relativeOffset);
     }
-    CalculateCurrentOffset(relativeOffset);
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
         targetIndex_.reset();
@@ -599,6 +604,13 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     } else {
         listLayoutAlgorithm.Swap(MakeRefPtr<ListLayoutAlgorithm>());
     }
+    if (!posMap_) {
+        posMap_ = MakeRefPtr<ListPositionMap>();
+    }
+    if (childrenSize_) {
+        listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
+        listLayoutAlgorithm->SetListPositionMap(posMap_);
+    }
     if (!isInitialized_) {
         jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
         if (NeedScrollSnapAlignEffect()) {
@@ -633,11 +645,22 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     if (chainAnimation_) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
+        SetChainAnimationToPosMap();
     }
     if (predictSnapEndPos_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
     }
     return listLayoutAlgorithm;
+}
+
+void ListPattern::SetChainAnimationToPosMap()
+{
+    CHECK_NULL_VOID(posMap_);
+    posMap_->SetChainOffsetCallback([weak = AceType::WeakClaim(this)](int32_t index) {
+        auto list = weak.Upgrade();
+        CHECK_NULL_RETURN(list, 0.0f);
+        return list->GetChainDelta(index);
+    });
 }
 
 void ListPattern::SetChainAnimationLayoutAlgorithm(
@@ -1434,7 +1457,7 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
         case ScrollAlign::START:
         case ScrollAlign::NONE:
             targetPos = startPos;
-            if (!IsScrollSnapAlignCenter()) {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
                 targetPos -= contentStartOffset_;
             }
             break;
@@ -1443,7 +1466,7 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
             break;
         case ScrollAlign::END:
             targetPos = endPos - contentMainSize_;
-            if (!IsScrollSnapAlignCenter()) {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
                 targetPos += contentEndOffset_;
             }
             break;
@@ -1476,7 +1499,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
                 return false;
             }
             targetPos = startPos;
-            if (!IsScrollSnapAlignCenter()) {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
                 targetPos -= contentStartOffset_;
             }
             break;
@@ -1491,7 +1514,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
                 return false;
             }
             targetPos = endPos - contentMainSize_;
-            if (!IsScrollSnapAlignCenter()) {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
                 targetPos += contentEndOffset_;
             }
             break;
@@ -1541,7 +1564,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos -= groupPattern->GetHeaderMainSize();
             }
-            if (!IsScrollSnapAlignCenter()) {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
                 targetPos -= contentStartOffset_;
             }
             break;
@@ -1555,7 +1578,7 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos += groupPattern->GetFooterMainSize();
             }
-            if (!IsScrollSnapAlignCenter()) {
+            if (!IsScrollSnapAlignCenter() || childrenSize_) {
                 targetPos += contentEndOffset_;
             }
             break;
@@ -1715,77 +1738,18 @@ Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
         groupItemGeometry->GetFrameRect().Width(), groupItemGeometry->GetFrameRect().Height());
 }
 
-void ListPattern::UpdatePosMapStart(float delta)
-{
-    currentOffset_ += delta;
-    if (itemPosition_.empty()) {
-        return;
-    }
-
-    int32_t startIndex = itemPosition_.begin()->first;
-    if (startIndex == 0) {
-        currentOffset_ = -itemPosition_.begin()->second.startPos;
-        return;
-    }
-    auto it = posMap_.find(startIndex);
-    if (it == posMap_.begin() || it == posMap_.end()) {
-        return;
-    }
-    float startPos = it->second.mainPos;
-    it--;
-    float prevPos = it->second.mainPos + it->second.mainSize + spaceWidth_;
-    int32_t prevIndex = it->first;
-    if (prevIndex + 1 >= startIndex) {
-        if (NearEqual(prevPos, startPos)) {
-            return;
-        }
-    } else {
-        if (LessNotEqual(prevPos, startPos)) {
-            return;
-        }
-    }
-    currentOffset_ += prevPos - startPos;
-}
-
-void ListPattern::UpdatePosMapEnd()
-{
-    if (itemPosition_.empty()) {
-        return;
-    }
-    int32_t prevIndex = itemPosition_.rbegin()->first;
-    auto it = posMap_.find(prevIndex);
-    if (it == posMap_.end()) {
-        return;
-    }
-    float prevPos = it->second.mainPos + it->second.mainSize + spaceWidth_;
-    it++;
-    if (it == posMap_.end()) {
-        return;
-    }
-    if (prevIndex + 1 >= it->first) {
-        if (NearEqual(prevPos, it->second.mainPos)) {
-            return;
-        }
-    } else {
-        if (LessNotEqual(prevPos, it->second.mainPos)) {
-            return;
-        }
-    }
-    float delta = prevPos - it->second.mainPos;
-    while (it != posMap_.end()) {
-        it->second.mainPos += delta;
-        it++;
-    }
-}
-
 void ListPattern::CalculateCurrentOffset(float delta)
 {
-    UpdatePosMapStart(delta);
+    if (itemPosition_.empty()) {
+        return;
+    }
+    posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_,
+        itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
     for (auto& [index, pos] : itemPosition_) {
         float height = pos.endPos - pos.startPos;
-        posMap_[index] = { currentOffset_ + pos.startPos, height };
+        posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
     }
-    UpdatePosMapEnd();
+    posMap_->UpdatePosMapEnd(itemPosition_.rbegin()->first, spaceWidth_);
 }
 
 void ListPattern::UpdateScrollBarOffset()
@@ -1796,14 +1760,21 @@ void ListPattern::UpdateScrollBarOffset()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
-    auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
-    calculate.GetEstimateHeightAndOffset(GetHost());
-    float currentOffset = calculate.GetEstimateOffset();
-    float estimatedHeight = calculate.GetEstimateHeight();
+    float currentOffset = 0.0f;
+    float estimatedHeight = 0.0f;
+    if (childrenSize_) {
+        currentOffset = currentOffset_;
+        estimatedHeight = listTotalHeight_;
+    } else {
+        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+        calculate.GetEstimateHeightAndOffset(GetHost());
+        currentOffset = calculate.GetEstimateOffset();
+        estimatedHeight = calculate.GetEstimateHeight();
+    }
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
-    if (!IsScrollSnapAlignCenter()) {
+    if (!IsScrollSnapAlignCenter() || childrenSize_) {
         currentOffset += contentStartOffset_;
         estimatedHeight += contentStartOffset_ + contentEndOffset_;
     }
@@ -2396,5 +2367,37 @@ void ListPattern::UpdateFrameSizeToWeb()
             listenerItem->OnSlideUpdate();
         }
     }
+}
+
+RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()
+{
+    if (childrenSize_) {
+        return childrenSize_;
+    }
+    childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>();
+    auto callback =
+        [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([weakPattern, change, flag]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnChildrenSizeChanged(change, flag);
+        });
+        context->RequestFrame();
+    };
+    childrenSize_->SetOnDataChange(callback);
+    return childrenSize_;
+}
+
+void ListPattern::OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag)
+{
+    if (!posMap_) {
+        posMap_ = MakeRefPtr<ListPositionMap>();
+    }
+    posMap_->MarkDirty(flag);
+    MarkDirtyNodeSelf();
 }
 } // namespace OHOS::Ace::NG

@@ -2310,6 +2310,70 @@ class WaterFlowSections {
   }
 }
 
+class ChildrenMainSizeParamError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
+class ChildrenMainSize {
+
+  constructor(childDefaultSize) {
+    if (this.isInvalid(childDefaultSize)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = childDefaultSize;
+    this.changeFlag = true;
+    this.changeArray = [];
+  }
+
+  set childDefaultSize(value) {
+    if (this.isInvalid(value)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = value;
+  }
+
+  get childDefaultSize() {
+    return this.defaultMainSize;
+  }
+
+  // splice(start: number, deleteCount?: number, childrenSize?: Array<number>);
+  splice(start, deleteCount, childrenSize) {
+    let paramCount = arguments.length;
+    if (this.isInvalid(start)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    let startValue = Math.trunc(start);
+    let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
+    if (paramCount == 1) {
+      this.changeArray.push({ start: startValue });
+    } else if (paramCount == 2) {
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
+    } else if (paramCount == 3) {
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+    }
+    this.changeFlag = !this.changeFlag;
+  }
+
+  update(index, childSize) {
+    if (this.isInvalid(index)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.changeArray.push({ start: Math.trunc(index), deleteCount: 1, childrenSize: [childSize] });
+    this.changeFlag = !this.changeFlag;
+  }
+
+  isInvalid(input) {
+    return !(Number.isFinite(input) && (Math.sign(input) == 1 || Math.sign(input) == 0));
+  }
+
+  clearChanges() {
+    this.changeArray = [];
+  }
+}
+
 var ImageSpanAlignment;
 (function (ImageSpanAlignment) {
   ImageSpanAlignment[ImageSpanAlignment["NONE"] = 0] = "NONE";
