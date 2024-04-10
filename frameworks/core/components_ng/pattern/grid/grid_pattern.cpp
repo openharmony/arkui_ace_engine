@@ -1512,19 +1512,19 @@ float GridPattern::GetEndOffset()
 {
     float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
     float mainGap = GetMainGap();
-
+    float heightInView = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
     if (GetAlwaysEnabled()) {
         float totalHeight = gridLayoutInfo_.GetTotalLineHeight(mainGap);
         if (GreatNotEqual(contentHeight, totalHeight)) {
-            return totalHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+            return totalHeight - heightInView;
         }
     }
 
     if (UseIrregularLayout()) {
-        return gridLayoutInfo_.currentOffset_ -
-               gridLayoutInfo_.GetDistanceToBottom(contentHeight, gridLayoutInfo_.totalHeightOfItemsInView_, mainGap);
+        float disToBot = gridLayoutInfo_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
+        return gridLayoutInfo_.currentOffset_ - disToBot;
     }
-    return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    return contentHeight - heightInView;
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
