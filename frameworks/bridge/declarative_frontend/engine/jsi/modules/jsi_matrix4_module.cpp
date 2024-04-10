@@ -275,7 +275,7 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
     int32_t srcIndex = argv[0]->GetProperty(runtime, "srcIndex")->ToInt32(runtime);
     int32_t dstIndex = argv[0]->GetProperty(runtime, "dstIndex")->ToInt32(runtime);
     int32_t pointCount = srcJsValue->GetArrayLength(runtime)/2;
-    if (!pointCountJSValue->IsUndefined(runtime)) {
+    if (pointCountJSValue->IsInt32(runtime)) {
         pointCount = pointCountJSValue->ToInt32(runtime);
     }
     std::vector<OHOS::Ace::NG::PointT<int32_t>> srcPoint;
