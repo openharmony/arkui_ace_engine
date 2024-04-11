@@ -133,6 +133,16 @@ public:
         }
     }
 
+    void InitOpacityScale(bool isCheck)
+    {
+        if (opacityScale_) {
+            opacityScale_->Set(isCheck ? 1.0f : 0);
+        }
+        if (borderOpacityScale_) {
+            borderOpacityScale_->Set(isCheck ? 0 : 1.0f);
+        }
+    }
+
     void SetPointScale(const float pointScale)
     {
         if (pointScale_) {
