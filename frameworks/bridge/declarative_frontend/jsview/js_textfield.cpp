@@ -276,7 +276,6 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
             font.fontSize = Dimension(theme->GetFontSize());
         }
     }
-
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
     if (!fontWeight->IsNull()) {
@@ -287,7 +286,6 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         }
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
-
     auto fontFamily = paramObject->GetProperty("family");
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
@@ -295,7 +293,6 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
             font.fontFamilies = fontFamilies;
         }
     }
-
     auto style = paramObject->GetProperty("style");
     if (!style->IsNull()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
@@ -360,7 +357,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsObject()){
+    if (!jsValue->IsObject()) {
         return;
     }
     CaretStyle caretStyle;
@@ -837,7 +834,7 @@ void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSTextField::SetOnEditChanged(const JSCallbackInfo& info)
 {
-    auto jsValue= info[0];
+    auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
     JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnEditChanged(std::move(callback));
@@ -1377,9 +1374,7 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     // set icon src
-    std::string iconSrc;
-    std::string bundleName;
-    std::string moduleName;
+    std::string iconSrc, bundleName, moduleName;
     auto iconSrcProp = iconParam->GetProperty("src");
     if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
         iconSrc = "";
