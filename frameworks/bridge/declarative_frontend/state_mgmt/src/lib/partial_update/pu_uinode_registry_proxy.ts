@@ -99,14 +99,14 @@ class UINodeRegisterProxy {
     public unregisterElmtIdsFromIViews(): void {
         stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds newly obtained from ElementRegister: ${JSON.stringify(this.removeElementsInfo_)} .`);
         
-        if (this.removeElementsInfo_.length == 0) {
+        if (this.removeElementsInfo_.length === 0) {
             stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds needs to purgeDelete. } .`);
             return;
         }
         let owningView : IView | undefined;
         this.removeElementsInfo_.forEach((rmElmtInfo  : RemovedElementInfo) => {
             const owningViewPUWeak : WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
-            if (owningViewPUWeak != undefined) {
+            if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
                     owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);

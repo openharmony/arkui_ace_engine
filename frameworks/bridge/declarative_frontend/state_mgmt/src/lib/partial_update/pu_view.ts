@@ -645,7 +645,7 @@ abstract class ViewPU extends PUV2ViewBase
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation `);
       return;
     }
-    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+    const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
       this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -676,8 +676,8 @@ abstract class ViewPU extends PUV2ViewBase
       return;
     }
     const _componentName: string = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') as string : 'unspecified UINode';
-    const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : () => { };
-    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+    const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
+    const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
@@ -760,8 +760,8 @@ abstract class ViewPU extends PUV2ViewBase
     }
     this.recycleManager_ = new RecycleManager;
   }
-  rebuildUpdateFunc(elmtId, compilerAssignedUpdateFunc) {
-    const updateFunc = (elmtId, isFirstRender) => {
+  rebuildUpdateFunc(elmtId, compilerAssignedUpdateFunc): void {
+    const updateFunc = (elmtId, isFirstRender): void => {
       this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       this.currentlyRenderedElmtIdStack_.pop();
@@ -1052,8 +1052,9 @@ abstract class ViewPU extends PUV2ViewBase
     let retVal: ViewPU = undefined;
     for (const [key, value] of this.childrenWeakrefMap_.entries()) {
       retVal = value.deref().findViewPUInHierarchy(id);
-      if (retVal)
+      if (retVal) {
         break;
+      }
     }
     return retVal;
   }

@@ -103,7 +103,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     this.id_ = elmtId;
   }
 
-  public setParent(parent: IView) {
+  public setParent(parent: IView): void {
     if (this.parent_ && parent) {
       stateMgmtConsole.warn(`${this.debugInfo__()}: setChild: changing parent to '${parent?.debugInfo__()} (unsafe operation)`);
     }
@@ -170,7 +170,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return this.isDeleting_;
   }
   // KEEP
-  public setDeleting() {
+  public setDeleting(): void {
     this.isDeleting_ = true;
   }
 
@@ -218,7 +218,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return `@Component '${this.constructor.name}'[${this.id__()}]`;
   }
 
-  public debugInfoRegisteredElmtIds() {
+  public debugInfoRegisteredElmtIds(): string {
     return this.updateFuncByElmtId.debugInfoRegisteredElmtIds();
   }
 
@@ -315,11 +315,11 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
 
   // KEEP
-  public static pauseRendering() {
+  public static pauseRendering(): void {
     PUV2ViewBase.renderingPaused = true;
   }
   // KEEP
-  public static restoreRendering() {
+  public static restoreRendering(): void {
     PUV2ViewBase.renderingPaused = false;
   }
 
@@ -359,12 +359,14 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
    * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
    * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
    */
-  public forEachUpdateFunction(elmtId: number,
+  public forEachUpdateFunction(
+    elmtId: number,
     itemArray: Array<any>,
     itemGenFunc: (item: any, index?: number) => void,
     idGenFunc?: (item: any, index?: number) => string,
     itemGenFuncUsesIndex: boolean = false,
-    idGenFuncUsesIndex: boolean = false): void {
+    idGenFuncUsesIndex: boolean = false
+  ): void {
 
     stateMgmtProfiler.begin('ViewPU/V2.forEachUpdateFunction');
     stateMgmtConsole.debug(`${this.debugInfo__()}: forEachUpdateFunction (ForEach re-render) start ...`);
@@ -391,7 +393,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       stateMgmtConsole.debug(`${this.debugInfo__()}: forEachUpdateFunction: providing default id gen function `);
       idGenFuncUsesIndex = true;
       // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
-      idGenFunc = (item: any, index: number) => {
+      idGenFunc = (item: any, index: number): string => {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {

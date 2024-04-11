@@ -49,12 +49,12 @@ class MonitorValueV2<T> {
   }
 
   // mv newValue to oldValue, set dirty to false
-  reset() {
+  reset(): void {
     this.before = this.now;
     this.dirty = false;
   }
 
-  isDirty() {
+  isDirty(): boolean {
     return this.dirty;
   }
 }

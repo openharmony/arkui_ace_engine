@@ -5737,14 +5737,14 @@ class UINodeRegisterProxy {
     }
     unregisterElmtIdsFromIViews() {
         
-        if (this.removeElementsInfo_.length == 0) {
+        if (this.removeElementsInfo_.length === 0) {
             
             return;
         }
         let owningView;
         this.removeElementsInfo_.forEach((rmElmtInfo) => {
             const owningViewPUWeak = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId);
-            if (owningViewPUWeak != undefined) {
+            if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
                     owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
@@ -6691,8 +6691,9 @@ class ViewPU extends PUV2ViewBase {
         let retVal = undefined;
         for (const [key, value] of this.childrenWeakrefMap_.entries()) {
             retVal = value.deref().findViewPUInHierarchy(id);
-            if (retVal)
+            if (retVal) {
                 break;
+            }
         }
         return retVal;
     }
@@ -7353,7 +7354,7 @@ class ObserveV2 {
         } // if target[watchProp]
     }
     constructComputed(target, name) {
-        let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + name);
+        const watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + name);
         if (target && (typeof target === 'object') && target[watchProp]) {
             Object.entries(target[watchProp]).forEach(([propertyName, computeFunc]) => {
                 var _a;
@@ -7507,7 +7508,7 @@ ObserveV2.arraySetMapProxy = {
         }
         if (target instanceof Set || target instanceof Map) {
             if (key === 'has') {
-                return prop => {
+                return (prop) => {
                     const ret = target.has(prop);
                     if (ret) {
                         ObserveV2.getObserve().addRef(target, prop);
@@ -7519,7 +7520,7 @@ ObserveV2.arraySetMapProxy = {
                 };
             }
             if (key === 'delete') {
-                return prop => {
+                return (prop) => {
                     if (target.has(prop)) {
                         ObserveV2.getObserve().fireChange(target, prop);
                         ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
@@ -7551,16 +7552,17 @@ ObserveV2.arraySetMapProxy = {
             }
         }
         if (target instanceof Set) {
-            return key === 'add' ? val => {
-                ObserveV2.getObserve().fireChange(target, val.toString());
-                ObserveV2.getObserve().fireChange(target, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
-                if (!target.has(val)) {
-                    ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
-                    target.add(val);
-                }
-                // return proxied This
-                return receiver;
-            } : (typeof ret === 'function')
+            return key === 'add' ?
+                (val) => {
+                    ObserveV2.getObserve().fireChange(target, val.toString());
+                    ObserveV2.getObserve().fireChange(target, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
+                    if (!target.has(val)) {
+                        ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
+                        target.add(val);
+                    }
+                    // return proxied This
+                    return receiver;
+                } : (typeof ret === 'function')
                 ? ret.bind(target) : ret;
         }
         if (target instanceof Map) {

@@ -503,7 +503,7 @@ class ObserveV2 {
   }
 
   public constructComputed(target: Object, name: string): void {
-    let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + name)
+    const watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + name);
     if (target && (typeof target === 'object') && target[watchProp]) {
       Object.entries(target[watchProp]).forEach(([propertyName, computeFunc]) => {
         stateMgmtConsole.debug(`constructComputed: in ${target?.constructor?.name} found @computed ${propertyName}`);
@@ -547,12 +547,16 @@ class ObserveV2 {
     'setUTCMinutes', 'setUTCSeconds', 'setUTCMilliseconds']);
 
   public static readonly arraySetMapProxy = {
-    get(target: any, key: string | symbol, receiver: any) {
+    get(
+      target: any,
+      key: string | symbol,
+      receiver: any
+    ): any {
       if (typeof key === 'symbol') {
         if (key === Symbol.iterator) {
           ObserveV2.getObserve().fireChange(target, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
           ObserveV2.getObserve().addRef(target, ObserveV2.OB_LENGTH);
-          return (...args) => target[key](...args);
+          return (...args): any => target[key](...args);
         } else {
           return key === ObserveV2.SYMBOL_PROXY_GET_TARGET ? target : target[key];
         }
@@ -571,7 +575,7 @@ class ObserveV2 {
 
       if (Array.isArray(target)) {
         if (ObserveV2.arrayMutatingFunctions.has(key)) {
-          return function (...args) {
+          return function (...args): any {
             ret.call(target, ...args);
             ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
             // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
@@ -579,7 +583,7 @@ class ObserveV2 {
             return receiver;
           };
         } else if (ObserveV2.arrayLengthChangingFunctions.has(key)) {
-          return function (...args) {
+          return function (...args): any {
             const result = ret.call(target, ...args);
             ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
             return result;
@@ -591,7 +595,7 @@ class ObserveV2 {
 
       if (target instanceof Date) {
         if (ObserveV2.dateSetFunctions.has(key)) {
-          return function (...args) {
+          return function (...args): any {
             // execute original function with given arguments
             let result = ret.call(this, ...args);
             ObserveV2.getObserve().fireChange(target, ObserveV2.OB_DATE);
@@ -606,7 +610,7 @@ class ObserveV2 {
 
       if (target instanceof Set || target instanceof Map) {
         if (key === 'has') {
-          return prop => {
+          return (prop): boolean => {
             const ret = target.has(prop);
             if (ret) {
               ObserveV2.getObserve().addRef(target, prop);
@@ -617,7 +621,7 @@ class ObserveV2 {
           };
         }
         if (key === 'delete') {
-          return prop => {
+          return (prop): boolean => {
             if (target.has(prop)) {
               ObserveV2.getObserve().fireChange(target, prop);
               ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
@@ -628,7 +632,7 @@ class ObserveV2 {
           };
         }
         if (key === 'clear') {
-          return () => {
+          return (): void => {
             if (target.size > 0) {
               target.forEach((_, prop) => {
                 ObserveV2.getObserve().fireChange(target, prop.toString());
@@ -640,7 +644,7 @@ class ObserveV2 {
           };
         }
         if (key === 'keys' || key === 'values' || key === 'entries') {
-          return () => {
+          return (): any => {
             ObserveV2.getObserve().addRef(target, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
             ObserveV2.getObserve().addRef(target, ObserveV2.OB_LENGTH);
             return target[key]();
@@ -649,7 +653,8 @@ class ObserveV2 {
       }
 
       if (target instanceof Set) {
-        return key === 'add' ? val => {
+        return key === 'add' ?
+        (val): any => {
           ObserveV2.getObserve().fireChange(target, val.toString());
           ObserveV2.getObserve().fireChange(target, ObserveV2.OB_MAP_SET_ANY_PROPERTY);
           if (!target.has(val)) {
@@ -664,7 +669,7 @@ class ObserveV2 {
 
       if (target instanceof Map) {
         if (key === 'get') { // for Map
-          return (prop) => {
+          return (prop): any => {
             if (target.has(prop)) {
               ObserveV2.getObserve().addRef(target, prop);
             } else {
@@ -674,7 +679,7 @@ class ObserveV2 {
           };
         }
         if (key === 'set') { // for Map
-          return (prop, val) => {
+          return (prop, val): any => {
             if (!target.has(prop)) {
               ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
             } else if (target.get(prop) !== val) {
@@ -690,7 +695,11 @@ class ObserveV2 {
       return (typeof ret === 'function') ? ret.bind(target) : ret;
     },
 
-    set(target: any, key: string | symbol, value: any) {
+    set(
+      target: any,
+      key: string | symbol,
+      value: any
+    ): boolean {
       if (typeof key === 'symbol') {
         if (key !== ObserveV2.SYMBOL_PROXY_GET_TARGET) {
           target[key] = value;
@@ -760,7 +769,10 @@ class ObserveV2 {
 } // class ObserveV2
 
 
-const trackInternal = (target: any, propertyKey: string) => {
+const trackInternal = (
+  target: any,
+  propertyKey: string
+): void => {
   if (typeof target === 'function' && !Reflect.has(target, propertyKey)) {
     // dynamic track，and it not a static attribute
     target = target.prototype;

@@ -70,7 +70,7 @@ declare class WeakRef<T extends Object> {
     }
   
     public getPopFunc(): () => void {
-      return (this.classObject_ && 'pop' in this.classObject_) ? this.classObject_.pop! : () => { };
+      return (this.classObject_ && 'pop' in this.classObject_) ? this.classObject_.pop! : (): void => { };
     }
   
     public getNode(): ArkComponent | undefined {

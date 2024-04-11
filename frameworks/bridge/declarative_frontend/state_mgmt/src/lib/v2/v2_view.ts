@@ -113,8 +113,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             return;
         }
         const _componentName: string = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') as string : 'unspecified UINode';
-        const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : () => { };
-        const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+        const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
+        const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
             this.syncInstanceId();
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
 
@@ -164,7 +164,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
    *        causing property setter() to be called
    * @param newValue
    */
-    protected initParam<Z>(paramVariableName: string, newValue: Z) {
+    protected initParam<Z>(paramVariableName: string, newValue: Z): void {
         VariableUtilV3.initParam<Z>(this, paramVariableName, newValue);
     }
     /**
@@ -176,7 +176,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
    * @param @once reject any update
     * @param newValue
    */
-    protected updateParam<Z>(paramVariableName: string, newValue: Z) {
+    protected updateParam<Z>(paramVariableName: string, newValue: Z): void {
         VariableUtilV3.updateParam<Z>(this, paramVariableName, newValue);
     }
 

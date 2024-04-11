@@ -173,7 +173,7 @@ class JSBuilderNode extends BaseNode {
     const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
       classObject && "pop" in classObject ? classObject.pop! : () => { };
-    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+    const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
@@ -232,7 +232,7 @@ class JSBuilderNode extends BaseNode {
     if (idGenFunc === undefined) {
       idGenFuncUsesIndex = true;
       // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
-      idGenFunc = (item: any, index: number) => {
+      idGenFunc = (item: any, index: number): string => {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {

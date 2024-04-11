@@ -36,7 +36,7 @@
  */
 type ConstructorV2 = { new(...args: any[]): any };
 
-function ObservedV2<T extends ConstructorV2>(BaseClass: T) {
+function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass?.name);
 
   // prevent @Track inside @observed class
@@ -77,7 +77,7 @@ function ObservedV2<T extends ConstructorV2>(BaseClass: T) {
  * part of SDK
  * @from 12
  */
-const Trace = (target: Object, propertyKey: string) => {
+const Trace = (target: Object, propertyKey: string): void => {
   ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
   return trackInternal(target, propertyKey);
 };
@@ -96,7 +96,7 @@ const Trace = (target: Object, propertyKey: string) => {
  * @from 12
  *
  */
-const Local = (target: Object, propertyKey: string) => {
+const Local = (target: Object, propertyKey: string): void => {
   ObserveV2.addVariableDecoMeta(target, propertyKey, '@state');
   return trackInternal(target, propertyKey);
 };
@@ -116,7 +116,7 @@ const Local = (target: Object, propertyKey: string) => {
  * @from 12
  *
  */
-const Param = (proto: Object, propertyKey: string) => {
+const Param = (proto: Object, propertyKey: string): void => {
   stateMgmtConsole.debug(`@param ${propertyKey}`);
   ObserveV2.addParamVariableDecoMeta(proto, propertyKey, '@param', undefined);
 
@@ -148,7 +148,7 @@ const Param = (proto: Object, propertyKey: string) => {
  * @from 12
  *
  */
-const Once = (proto: Object, propertyKey: string) => {
+const Once = (proto: Object, propertyKey: string): void => {
   stateMgmtConsole.debug(`@once ${propertyKey}`);
   ObserveV2.addParamVariableDecoMeta(proto, propertyKey, undefined, '@once');
 };
@@ -168,9 +168,9 @@ const Once = (proto: Object, propertyKey: string) => {
  *
  */
 
-const Event = (target, propertyKey) => {
+const Event = (target, propertyKey): void => {
   ObserveV2.addVariableDecoMeta(target, propertyKey, '@event');
-  target[propertyKey] ??= () => { };
+  target[propertyKey] ??= (): void => { };
 };
 
 /**
@@ -191,7 +191,7 @@ const Event = (target, propertyKey) => {
  * @since 12
  */
 const Provider = (aliasName?: string) => {
-  return (proto: Object, varName: string) => {
+  return (proto: Object, varName: string): void => {
     const providedUnderName: string = aliasName || varName;
     ProvideConsumeUtilV3.addProvideConsumeVariableDecoMeta(proto, varName, providedUnderName, '@provide');
     trackInternal(proto, varName);
@@ -216,7 +216,7 @@ const Provider = (aliasName?: string) => {
  * @since 12
  */
 const Consumer = (aliasName?: string) => {
-  return (proto: object, varName: string) => {
+  return (proto: object, varName: string): void => {
     const searchForProvideWithName: string = aliasName || varName;
 
     // redefining the property happens when owning ViewV2 gets constructed
@@ -243,9 +243,9 @@ const Consumer = (aliasName?: string) => {
  * part of SDK
  * @since 12
  */
-const Monitor = function (key : string, ...keys: string[]) {
+const Monitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
-  return function (target, _, descriptor) {
+  return function (target, _, descriptor): void {
     stateMgmtConsole.debug(`@monitor('${pathsUniqueString}')`);
     let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
     const monitorFunc = descriptor.value;
@@ -289,7 +289,7 @@ interface IMonitor {
    * @from 12
    *
    */
-const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor) => {
+const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor): void => {
   stateMgmtConsole.debug(`@computed ${propertyKey}`);
   let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + target.constructor.name);
   const computeFunction = descriptor.get;
