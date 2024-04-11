@@ -247,15 +247,11 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
 
 void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
-    auto jsValue = info[0];
-    if (!jsValue->IsObject()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
     Font font;
-    auto paramObject = JSRef<JSObject>::Cast(jsValue);
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = paramObject->GetProperty("size");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = Dimension(-1);
@@ -276,6 +272,7 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
             font.fontSize = Dimension(theme->GetFontSize());
         }
     }
+
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
     if (!fontWeight->IsNull()) {
@@ -286,6 +283,7 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         }
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
+
     auto fontFamily = paramObject->GetProperty("family");
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
@@ -293,6 +291,7 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
             font.fontFamilies = fontFamilies;
         }
     }
+
     auto style = paramObject->GetProperty("style");
     if (!style->IsNull()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
@@ -1335,14 +1334,10 @@ static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
 
 void JSTextField::SetCancelButton(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
-    auto jsValue = info[0];
-    if (!jsValue->IsObject()) {
-        return;
-    }
-    auto param = JSRef<JSObject>::Cast(jsValue);
+    auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<TextFieldTheme>();
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
@@ -1374,7 +1369,9 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     // set icon src
-    std::string iconSrc, bundleName, moduleName;
+    std::string iconSrc;
+    std::string bundleName;
+    std::string moduleName;
     auto iconSrcProp = iconParam->GetProperty("src");
     if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
         iconSrc = "";
