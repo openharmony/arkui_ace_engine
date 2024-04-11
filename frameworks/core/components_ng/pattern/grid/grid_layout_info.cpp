@@ -589,10 +589,11 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap) const
     return len - mainGap;
 }
 
-float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView,  float mainGap) const
+float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const
 {
-    if (lineHeightMap_.empty() || endMainLineIndex_ < lineHeightMap_.rbegin()->first) {
-        return mainSize;
+    if (lineHeightMap_.empty() || endIndex_ < childrenCount_ - 1 ||
+        endMainLineIndex_ < lineHeightMap_.rbegin()->first) {
+        return Infinity<float>();
     }
 
     float offset = currentOffset_;

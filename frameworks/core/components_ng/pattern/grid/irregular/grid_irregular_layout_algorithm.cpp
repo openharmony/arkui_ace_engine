@@ -465,7 +465,7 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
         }
         case ScrollAlign::CENTER: {
             // because the current line's height is unknown, we can't determine the exact target length to fill.
-            // Using the full [mainSize]。
+            // Using the full [mainSize]
             float targetLen = mainSize / 2.0f;
             float backwardLen = filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, mainSize, jumpLineIdx);
             backwardLen -= info.lineHeightMap_.at(jumpLineIdx) / 2.0f;
