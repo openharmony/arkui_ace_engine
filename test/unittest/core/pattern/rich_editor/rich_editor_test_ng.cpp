@@ -1313,7 +1313,6 @@ HWTEST_F(RichEditorTestNg, OnDirtyLayoutWrapper001, TestSize.Level1)
     focusHub->currentFocus_ = true;
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
-    EXPECT_EQ(richEditorPattern->selectOverlayProxy_, nullptr);
     richEditorPattern->isRichEditorInit_ = true;
 
     richEditorPattern->textSelector_.baseOffset = -1;
@@ -3032,15 +3031,8 @@ HWTEST_F(RichEditorTestNg, MoveHandle, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    SelectOverlayInfo info;
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    richEditorPattern->selectOverlayProxy_ =
-        selectOverlayManager->CreateAndShowSelectOverlay(info, richEditorPattern, false);
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->selectOverlayManager_ = selectOverlayManager;
+    richEditorPattern->textResponseType_ = TextResponseType::LONG_PRESS;
+    richEditorPattern->selectOverlay_->ProcessOverlay({.animation = true});
 
     richEditorPattern->textSelector_.selectionBaseOffset = OffsetF(20, 20);
     richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);

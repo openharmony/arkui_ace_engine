@@ -627,6 +627,7 @@ protected:
     RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
 
     OffsetF parentGlobalOffset_;
+    std::optional<TextResponseType> textResponseType_;
 
     friend class TextContentModifier;
 private:
@@ -702,7 +703,6 @@ private:
     SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
-    std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
     mutable std::list<RefPtr<UINode>> childNodes_;
