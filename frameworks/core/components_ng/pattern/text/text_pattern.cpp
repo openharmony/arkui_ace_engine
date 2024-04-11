@@ -2887,9 +2887,9 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
     return resultObject;
 }
 
-void TextPattern::UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems)
+void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
-    spans_ = spanItems;
+    spans_ = value->GetSpanItems();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

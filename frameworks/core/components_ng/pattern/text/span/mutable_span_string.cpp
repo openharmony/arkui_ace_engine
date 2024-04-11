@@ -237,7 +237,6 @@ void MutableSpanString::ReplaceString(int32_t start, int32_t length, const std::
     ApplyReplaceStringToSpanBase(start, length, other, op);
     UpdateSpansWithOffset(start, otherLength - length);
     UpdateSpanMapWithOffset(start, otherLength - length);
-    NotifySpanWatcher();
     KeepSpansOrder();
 }
 
@@ -318,7 +317,6 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
         }
     }
     UpdateSpansAndSpanMapWithOffsetAfterInsert(start, otherLength, useFrontStyle);
-    NotifySpanWatcher();
     KeepSpansOrder();
 }
 
@@ -332,7 +330,6 @@ void MutableSpanString::ClearAllSpans()
     spansMap_.clear();
     spans_.clear();
     spans_.emplace_back(GetDefaultSpanItem(text_));
-    NotifySpanWatcher();
 }
 
 void MutableSpanString::KeepSpansOrder()

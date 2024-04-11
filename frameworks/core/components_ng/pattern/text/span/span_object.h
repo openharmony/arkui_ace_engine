@@ -46,13 +46,6 @@ struct GestureStyle {
     }
 };
 
-class SpanWatcher : public virtual AceType {
-    DECLARE_ACE_TYPE(SpanWatcher, AceType);
-
-public:
-    virtual void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) = 0;
-};
-
 class SpanBase : public virtual AceType {
     DECLARE_ACE_TYPE(SpanBase, AceType);
 

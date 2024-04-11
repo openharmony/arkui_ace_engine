@@ -27,6 +27,8 @@
 
 namespace OHOS::Ace {
 
+class SpanStringBase;
+
 enum class SpanStringOperation {
     REPLACE = 0,
     INSERT,
@@ -51,8 +53,6 @@ public:
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
     int32_t GetIndex(const std::string& subString) const;
     bool operator==(const SpanString& other) const;
-    void AddSpanWatcher(const WeakPtr<SpanWatcher>& watcher);
-    void NotifySpanWatcher();
     const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
     void AddSpan(const RefPtr<SpanBase>& span);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
@@ -71,7 +71,6 @@ protected:
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
-    std::list<WeakPtr<SpanWatcher>> watchers_;
     std::list<RefPtr<NG::SpanItem>> spans_;
 };
 } // namespace OHOS::Ace
