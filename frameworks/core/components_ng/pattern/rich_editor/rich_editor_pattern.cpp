@@ -5342,6 +5342,30 @@ void RichEditorPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
+    if (IsSelectAreaVisible()) {
+        selectOverlay_->ShowMenu();
+    }
+}
+
+bool RichEditorPattern::IsSelectAreaVisible()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
+    auto parent = host->GetAncestorNodeOfFrame();
+    visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    auto selectArea = GetSelectArea();
+    if (GreatOrEqual(selectArea.Top(), visibleContentRect.Bottom()) ||
+        GreatOrEqual(selectArea.Top(), keyboardInsert.start) ||
+        LessOrEqual(selectArea.Bottom(), visibleContentRect.Top())) {
+        return false;
+    }
+    return true;
 }
 
 bool RichEditorPattern::IsReachedBoundary(float offset)
