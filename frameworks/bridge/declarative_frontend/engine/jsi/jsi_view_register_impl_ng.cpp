@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "bridge/declarative_frontend/style_string/js_span_object.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -432,6 +433,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSMutableSpanString::JSBind(globalObj);
     JSFontSpan::JSBind(globalObj);
     JSGestureSpan::JSBind(globalObj);
+    JSTextShadowSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);

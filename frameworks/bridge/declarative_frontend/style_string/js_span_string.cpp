@@ -150,21 +150,21 @@ JSRef<JSObject> JSSpanString::CreateJSSpanBaseObject(const RefPtr<SpanBase>& spa
     resultObj->SetProperty<int32_t>("start", spanObject->GetStartIndex());
     resultObj->SetProperty<int32_t>("length", spanObject->GetLength());
     resultObj->SetProperty<int32_t>("styledKey", static_cast<int32_t>(spanObject->GetSpanType()));
+    JSRef<JSObject> obj;
     switch (spanObject->GetSpanType()) {
-        case SpanType::Font: {
-            JSRef<JSObject> obj = CreateJsFontSpan(spanObject);
-            resultObj->SetPropertyObject("styledValue", obj);
-            return resultObj;
-        }
-        case SpanType::Gesture: {
-            JSRef<JSObject> obj = CreateJsGestureSpan(spanObject);
-            resultObj->SetPropertyObject("styledValue", obj);
-            return resultObj;
-        }
+        case SpanType::Font:
+            obj = CreateJsFontSpan(spanObject);
+            break;
+        case SpanType::Gesture:
+            obj = CreateJsGestureSpan(spanObject);
+            break;
+        case SpanType::TextShadow:
+            obj = CreateJsTextShadowSpan(spanObject);
+            break;
         default:
             break;
     }
-
+    resultObj->SetPropertyObject("styledValue", obj);
     return resultObj;
 }
 
@@ -182,9 +182,19 @@ JSRef<JSObject> JSSpanString::CreateJsGestureSpan(const RefPtr<SpanBase>& spanOb
 {
     auto span = AceType::DynamicCast<GestureSpan>(spanObject);
     CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
-    JSRef<JSObject> obj = JSClass<JSFontSpan>::NewInstance();
+    JSRef<JSObject> obj = JSClass<JSGestureSpan>::NewInstance();
     auto gestureSpan = Referenced::Claim(obj->Unwrap<JSGestureSpan>());
     gestureSpan->SetGestureSpan(span);
+    return obj;
+}
+
+JSRef<JSObject> JSSpanString::CreateJsTextShadowSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<TextShadowSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSTextShadowSpan>::NewInstance();
+    auto textShadowSpan = Referenced::Claim(obj->Unwrap<JSTextShadowSpan>());
+    textShadowSpan->SetTextShadowSpan(span);
     return obj;
 }
 
@@ -195,6 +205,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsFontSpan(start, length, obj);
         case SpanType::Gesture:
             return ParseJsGestureSpan(start, length, obj);
+        case SpanType::TextShadow:
+            return ParseJsTextShadowSpan(start, length, obj);
         default:
             break;
     }
@@ -216,6 +228,16 @@ RefPtr<SpanBase> JSSpanString::ParseJsGestureSpan(int32_t start, int32_t length,
     if (gestureSpan && gestureSpan->GetGestureSpan()) {
         return AceType::MakeRefPtr<GestureSpan>(
             gestureSpan->GetGestureSpan()->GetGestureStyle(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsTextShadowSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
+{
+    auto* textShadowSpan = obj->Unwrap<JSTextShadowSpan>();
+    if (textShadowSpan && textShadowSpan->GetTextShadowSpan()) {
+        return AceType::MakeRefPtr<TextShadowSpan>(
+            textShadowSpan->GetTextShadowSpan()->GetTextShadow(), start, start + length);
     }
     return nullptr;
 }

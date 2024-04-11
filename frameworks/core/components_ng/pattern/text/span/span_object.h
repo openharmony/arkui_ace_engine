@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 
 class AttachmentImage {};
 
-enum class SpanType { Font = 0, Decoration, Background, Gesture = 7, MAX = 8 };
+enum class SpanType { Font = 0, Decoration, BaselineOffset, LetterSpacing, TextShadow = 4, Gesture = 7, MAX = 8 };
 
 enum class SpanOperation {
     ADD = 0,
@@ -118,6 +118,27 @@ private:
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
 
     GestureStyle gestureInfo_;
+};
+
+class TextShadowSpan : public SpanBase {
+    DECLARE_ACE_TYPE(TextShadowSpan, SpanBase);
+public:
+    TextShadowSpan() = default;
+    explicit TextShadowSpan(std::vector<Shadow> font);
+    TextShadowSpan(std::vector<Shadow> font, int32_t start, int32_t end);
+    std::vector<Shadow> GetTextShadow() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+    static RefPtr<SpanBase> CreateDefaultSpan();
+
+private:
+    void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
+
+    std::optional<std::vector<Shadow>> textShadow_ = std::nullopt;
 };
 
 } // namespace OHOS::Ace
