@@ -160,19 +160,20 @@ public:
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-        std::map<std::string, NG::DialogEvent> dialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
         std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
     void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
-        std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
         std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
     void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
-        std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
         std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
     void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-        std::map<std::string, NG::DialogEvent> dialogEvent,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
         std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
     void PopModalDialog(int32_t maskId);

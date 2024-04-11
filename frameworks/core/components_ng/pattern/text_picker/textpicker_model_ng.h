@@ -146,7 +146,7 @@ public:
     void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
-        TextPickerDialogEvent& textPickerDialogEvent) override;
+        TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) override;
 };
 } // namespace OHOS::Ace::NG
 

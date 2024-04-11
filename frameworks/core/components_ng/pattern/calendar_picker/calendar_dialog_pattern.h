@@ -92,6 +92,11 @@ public:
         return hoverState_;
     }
 
+    void SetUpdateOptionsButtonColor(bool isUpdate)
+    {
+        isUpdateOptionsButtonColor_ = isUpdate;
+    }
+
     void GetCalendarMonthData(int32_t year, int32_t month, ObtainedMonth& calendarMonthData);
     CalendarMonth GetNextMonth(const CalendarMonth& calendarMonth);
     CalendarMonth GetLastMonth(const CalendarMonth& calendarMonth);
@@ -144,6 +149,7 @@ private:
     bool isFocused_ = false;
     bool isCalendarFirstFocused_ = false;
     bool hoverState_ = false;
+    bool isUpdateOptionsButtonColor_ = true;
     OffsetF dialogOffset_;
     WeakPtr<FrameNode> entryNode_ = nullptr;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;

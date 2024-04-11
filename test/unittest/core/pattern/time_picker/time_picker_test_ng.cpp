@@ -611,8 +611,9 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow001, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode =
-        TimePickerDialogView::Show(dialogProperties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_NE(dialogNode, nullptr);
 }
 

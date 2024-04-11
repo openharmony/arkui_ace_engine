@@ -96,7 +96,7 @@ public:
     virtual void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
-        TextPickerDialogEvent& textPickerDialogEvent) = 0;
+        TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) = 0;
 
 private:
     static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;
