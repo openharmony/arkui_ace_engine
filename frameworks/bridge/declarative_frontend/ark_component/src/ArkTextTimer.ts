@@ -15,6 +15,9 @@
 
 /// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  textTimerNode: BuilderNode<[TextTimerConfiguration]> | null = null;
+  modifier: ContentModifier<TextTimerConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -47,6 +50,29 @@ class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTimerFormatModifier.identity, TextTimerFormatModifier, value);
     return this;
   }
+
+  setContentModifier(modifier: ContentModifier<TextTimerConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, this);
+  }
+
+  makeContentModifierNode(context: UIContext, textTimerConfiguration: TextTimerConfiguration): FrameNode | null {
+    textTimerConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.textTimerNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.textTimerNode = new xNode.BuilderNode(context);
+      this.textTimerNode.build(this.builder, textTimerConfiguration);
+    } else {
+      this.textTimerNode.update(textTimerConfiguration);
+    }
+    return this.textTimerNode.getFrameNode();
+  }
+
 
   onTimer(event: (utc: number, elapsedTime: number) => void): this {
     throw new Error('Method not implemented.');
@@ -138,4 +164,14 @@ globalThis.TextTimer.attributeModifier = function (modifier: ArkComponent): void
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.TextTimerModifier(nativePtr, classType);
   });
+};
+
+// @ts-ignore
+globalThis.TextTimer.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkTextTimerComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };

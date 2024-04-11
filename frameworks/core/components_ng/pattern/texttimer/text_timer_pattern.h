@@ -28,9 +28,12 @@
 #include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_algorithm.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+using TextTimerMakeCallback =
+    std::function<RefPtr<FrameNode>(const TextTimerConfiguration& textTimerConfiguration)>;
 class TextTimerPattern : public Pattern {
     DECLARE_ACE_TYPE(TextTimerPattern, Pattern);
 
@@ -72,6 +75,22 @@ public:
     }
     void ResetCount();
 
+    void SetBuilderFunc(TextTimerMakeCallback&& makeFunc)
+    {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier() const
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -96,7 +115,11 @@ private:
     RefPtr<FrameNode> GetTextNode();
     void RegisterVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
 
+    std::optional<TextTimerMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
     RefPtr<TextTimerController> textTimerController_;
     RefPtr<Scheduler> scheduler_;
     RefPtr<FrameNode> textNode_;
@@ -111,5 +134,4 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TextTimerPattern);
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TIMER_PATTERN_H
