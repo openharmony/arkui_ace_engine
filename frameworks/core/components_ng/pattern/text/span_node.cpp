@@ -540,6 +540,7 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
     INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
     INHERIT_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
     INHERIT_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
+    INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
     INHERIT_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
     INHERIT_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
