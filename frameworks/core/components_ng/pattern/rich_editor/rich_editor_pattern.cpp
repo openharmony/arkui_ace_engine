@@ -3163,7 +3163,8 @@ std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
         caretPosition_ = textSelector_.GetTextStart();
         CloseSelectOverlay();
         ResetSelection();
-    } else if (caretPositionForwardIsEmoji) {
+    } else if (caretPositionForwardIsEmoji && length > 0) {
+        // if text to be deleted contains emoji, transfer length to length-contains-emoji
         length = emojiLength;
     }
     std::wstringstream wss;
