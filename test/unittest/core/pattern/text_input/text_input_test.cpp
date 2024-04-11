@@ -21,6 +21,11 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#ifdef WINDOWS_PLATFORM
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "gtest/gtest.h"
 #include <unicode/uversion.h>
@@ -4408,6 +4413,25 @@ HWTEST_F(TextFieldUXTest, FontFeature004, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, HandleOnDeleteAction001, TestSize.Level1)
 {
+#if defined(__HuaweiLite__) && (!defined(__OHOS__))
+    // use system icudt .dat file
+    std::string dataPath = "/system/usr/ohos_icu";
+#else
+    // use project icudt .dat file
+#ifdef WINDOWS_PLATFORM
+    char buffer[MAX_PATH];
+    GetCurrentDirectoryA(MAX_PATH, buffer);
+    std::string currentPath = std::string(buffer);
+#else
+    char buffer[PATH_MAX];
+    getcwd(buffer, sizeof(buffer));
+    std::string currentPath = std::string(buffer);
+#endif
+    std::string dataPath = currentPath + "/../../../../../../third_party/icu/ohos_icu4j/data";
+#endif
+    u_setDataDirectory(dataPath.c_str());
+    UErrorCode code;
+    u_init(&code);
     /**
      * @tc.steps: Create Text field node
      */
@@ -4667,7 +4691,6 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction006, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
-
 }
 
 /**
