@@ -442,7 +442,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -556,7 +556,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
