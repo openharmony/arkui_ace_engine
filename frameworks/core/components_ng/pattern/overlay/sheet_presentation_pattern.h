@@ -107,6 +107,7 @@ public:
     void OnDisappear()
     {
         if (onDisappear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onDisappear state.");
             isExecuteOnDisappear_ = true;
             onDisappear_();
         }
@@ -120,6 +121,7 @@ public:
     void OnWillDisappear()
     {
         if (onWillDisappear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
             onWillDisappear_();
         }
     }
@@ -132,6 +134,7 @@ public:
     void OnAppear()
     {
         if (onAppear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onAppear state.");
             onAppear_();
         }
     }

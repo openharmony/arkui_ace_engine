@@ -137,6 +137,8 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
+        sheetOffsetX_, sheetOffsetY_);
     OffsetF positionOffset;
     positionOffset.SetX(sheetOffsetX_);
     positionOffset.SetY(0.0f);

@@ -2319,7 +2319,7 @@ bool OverlayManager::RemoveModalInOverlay()
     CHECK_NULL_RETURN(rootNode, true);
     auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
     if (overlay && overlay->GetTag() == V2::SHEET_WRAPPER_TAG && overlay->GetFirstChild() != topModalNode) {
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Refuse to back because sheet is in animation");
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Refuse to back because sheet is in animation");
         return true;
     }
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
@@ -3214,6 +3214,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     pipeline->FlushUITasks();
     ComputeSheetOffset(sheetStyle, sheetNode);
     if (onWillAppear) {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillAppear state.");
         onWillAppear();
     }
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -3404,6 +3405,7 @@ void OverlayManager::PlaySheetTransition(
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateRenderGroup(true, true, true);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetPageHeight();
@@ -3435,6 +3437,7 @@ void OverlayManager::PlaySheetTransition(
                 auto context = sheetNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
                 context->UpdateRenderGroup(false, true, true);
+                TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
                 if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
                     isFirst) {
