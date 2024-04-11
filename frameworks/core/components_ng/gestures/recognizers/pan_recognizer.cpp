@@ -190,14 +190,9 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         fingersId_.insert(event.id);
     }
 
-    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
-        return;
-    }
-
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     lastTouchEvent_ = event;
-    activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] = Offset(0.0, 0.0);
     if (event.sourceType == SourceType::MOUSE) {
@@ -266,7 +261,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer receives %{public}d touch up event", event.id);
-    if (!IsActiveFinger(event.id) || (currentFingers_ < fingers_)) {
+    if (currentFingers_ < fingers_) {
         return;
     }
     if (fingersId_.find(event.id) != fingersId_.end()) {
@@ -276,15 +271,14 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     time_ = event.time;
 
-    if (static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         UpdateTouchPointInVelocityTracker(event, true);
-    } else if (static_cast<int32_t>(activeFingers_.size()) > fingers_) {
+    } else if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event, true);
     }
 
-    if ((static_cast<int32_t>(activeFingers_.size()) < fingers_) &&
-        (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
@@ -293,7 +287,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        if (activeFingers_.size() == fingers_) {
+        if (currentFingers_  == fingers_) {
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
             averageDistance_.Reset();
@@ -315,7 +309,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             (*onActionCancel_)();
         }
     }
-    activeFingers_.remove(event.id);
 }
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
@@ -349,11 +342,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    if (!IsActiveFinger(event.id)) {
-        return;
-    }
-    if ((static_cast<int32_t>(touchPoints_.size()) < fingers_) ||
-        (static_cast<int32_t>(activeFingers_.size()) < fingers_)) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
 
@@ -371,7 +360,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     mainDelta_ = GetMainAxisDelta();
     UpdateTouchPointInVelocityTracker(event.history.empty() ? event : event.history.back());
-    averageDistance_ += delta_ / static_cast<double>(activeFingers_.size());
+    averageDistance_ += delta_ / static_cast<double>(touchPoints_.size());
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
