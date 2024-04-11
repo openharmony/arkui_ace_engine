@@ -123,6 +123,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
         }
     } else if (HasStartNode()) {
         host->RemoveChildAtIndex(startNodeIndex_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (endNodeIndex_ > startNodeIndex_) {
             endNodeIndex_--;
         }
@@ -153,6 +154,7 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
         }
     } else if (HasEndNode()) {
         host->RemoveChildAtIndex(endNodeIndex_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (startNodeIndex_ > endNodeIndex_) {
             startNodeIndex_--;
         }
