@@ -1455,17 +1455,23 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
         auto stageManager = pipelineContext->GetStageManager();
         auto stageNode = stageManager->GetStageNode();
         auto popNode = stageNode->GetChildren().back();
+        auto popIndex = stageNode->GetChildren().size() - 1;
         if (info.routerMode == RouterMode::SINGLE) {
             auto pageInfo = FindPageInStack(info.url);
             if (pageInfo.second) {
                 // find page in stack, move position and update params.
                 MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
-                popNode->MovePosition(stageNode->GetChildren().size() - 1);
-                PopPage("", true, false);
-                return;
             }
+        } else {
+            LoadPage(GenerateNextPageId(), info, false, false);
         }
-        LoadPage(GenerateNextPageId(), info, true, false);
+        if (popNode == stageNode->GetChildren().back()) {
+            return;
+        }
+        auto iter = pageRouterStack_.begin();
+        std::advance(iter, popIndex);
+        pageRouterStack_.erase(iter);
+        pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
         popNode->MovePosition(stageNode->GetChildren().size() - 1);
         PopPage("", false, false);
         return;
