@@ -96,6 +96,9 @@ bool NodeDataCache::PutString(const RefPtr<NG::FrameNode>& node, const std::stri
     if (id.empty() || value.empty() || value.length() > MAX_DATA_LENGTH) {
         return false;
     }
+    if (mergedConfig_->shareNodes.empty()) {
+        return false;
+    }
     auto pageUrl = GetPageUrlByNode(node);
     if (pageUrl.empty()) {
         return false;
