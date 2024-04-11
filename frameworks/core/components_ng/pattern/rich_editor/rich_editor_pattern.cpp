@@ -1570,6 +1570,9 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     }
 
     HandleUserClickEvent(info);
+    if (info.IsPreventDefault()) {
+        return;
+    }
     if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
         ResetSelection();
@@ -4081,6 +4084,9 @@ void RichEditorPattern::InitTouchEvent()
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (SelectOverlayIsOn()) {
+        return;
+    }
+    if (info.IsPreventDefault()) {
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();

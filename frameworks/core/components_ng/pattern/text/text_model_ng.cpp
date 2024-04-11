@@ -311,7 +311,7 @@ void TextModelNG::SetTextDetectConfig(const std::string& value,
     textPattern->SetOnResult(std::move(onResult));
 }
 
-void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
+void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

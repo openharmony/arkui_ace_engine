@@ -490,9 +490,9 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode]
-            (const BaseEventInfo* info) {
+            (BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
