@@ -144,15 +144,17 @@ void JSShape::JsSize(const JSCallbackInfo& info)
 
 void JSShape::SetStrokeDashArray(const JSCallbackInfo& info)
 {
+    std::vector<Dimension> dashArray;
     if (info.Length() < 1 || !info[0]->IsArray()) {
+        ShapeModel::GetInstance()->SetStrokeDashArray(dashArray);
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
     int32_t length = static_cast<int32_t>(array->Length());
     if (length <= 0) {
+        ShapeModel::GetInstance()->SetStrokeDashArray(dashArray);
         return;
     }
-    std::vector<Dimension> dashArray;
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dim;
