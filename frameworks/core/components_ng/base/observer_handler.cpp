@@ -24,12 +24,7 @@ namespace {
 std::string GetNavigationId(const RefPtr<NavDestinationPattern>& pattern)
 {
     CHECK_NULL_RETURN(pattern, "");
-    auto navigationNode = pattern->GetNavigationNode();
-    std::string navigationId;
-    if (navigationNode) {
-        navigationId = navigationNode->GetInspectorId().value_or("");
-    }
-    return navigationId;
+    return pattern->GetNavigationId();
 }
 } // namespace
 
