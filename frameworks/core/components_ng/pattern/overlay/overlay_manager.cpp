@@ -3427,7 +3427,6 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
-        sheetNode->GetPattern<SheetPresentationPattern>()->FireOnHeightDidChange();
         option.SetOnFinishEvent(
             [sheetWK = WeakClaim(RawPtr(sheetNode)), weak = AceType::WeakClaim(this), isFirst = isFirstTransition] {
                 auto sheetNode = sheetWK.Upgrade();
@@ -3444,6 +3443,7 @@ void OverlayManager::PlaySheetTransition(
                 auto overlay = weak.Upgrade();
                 CHECK_NULL_VOID(overlay);
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
+                pattern->FireOnHeightDidChange();
             });
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
