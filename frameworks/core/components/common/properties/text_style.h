@@ -53,6 +53,7 @@ enum class FontWeight {
 enum class FontStyle {
     NORMAL = 0,
     ITALIC,
+    NONE
 };
 
 enum class TextBaseline {

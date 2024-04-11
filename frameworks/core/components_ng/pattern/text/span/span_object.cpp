@@ -217,4 +217,80 @@ void GestureSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->onClick = nullptr;
     spanItem->onLongPress = nullptr;
 }
+
+// TextShadowSpan
+TextShadowSpan::TextShadowSpan(std::vector<Shadow> textShadow) : SpanBase(0, 0), textShadow_(std::move(textShadow)) {}
+
+TextShadowSpan::TextShadowSpan(std::vector<Shadow> textShadow, int32_t start, int32_t end)
+    : SpanBase(start, end), textShadow_(std::move(textShadow)) {}
+
+void TextShadowSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddSpanStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveSpanStyle(spanItem);
+    }
+}
+
+RefPtr<SpanBase> TextShadowSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<TextShadowSpan>(GetTextShadow(), start, end);
+    return spanBase;
+}
+
+void TextShadowSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    if (textShadow_.has_value()) {
+        spanItem->fontStyle->UpdateTextShadow(textShadow_.value());
+    }
+}
+
+void TextShadowSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
+{
+    spanItem->fontStyle->ResetTextShadow();
+}
+
+std::vector<Shadow> TextShadowSpan::GetTextShadow() const
+{
+    return textShadow_.value_or(std::vector<Shadow>());
+}
+
+SpanType TextShadowSpan::GetSpanType() const
+{
+    return SpanType::TextShadow;
+}
+
+std::string TextShadowSpan::ToString() const
+{
+    std::stringstream str;
+    str << "TextShadowSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool TextShadowSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto textShadowSpan = DynamicCast<TextShadowSpan>(other);
+    if (!textShadowSpan) {
+        return false;
+    }
+    auto textShadow = textShadowSpan->GetTextShadow();
+    auto selfTextShadow = GetTextShadow();
+    if (textShadow.size() != selfTextShadow.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < selfTextShadow.size(); ++i) {
+        if (selfTextShadow[i] != textShadow[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 } // namespace OHOS::Ace
