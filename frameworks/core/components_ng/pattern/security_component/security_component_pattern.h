@@ -106,7 +106,7 @@ private:
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
 #ifdef SECURITY_COMPONENT_ENABLE
-    void RegisterSecurityComponentAsync();
+    void RegisterSecurityComponentAsync(int32_t instanceID);
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();
     void UnregisterSecurityComponent();
