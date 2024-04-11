@@ -101,6 +101,13 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     return pattern->GetSearchController();
 }
 
+void SearchModelNG::SetDragPreviewOptions(const NG::DragPreviewOption option)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    searchTextField->SetDragPreviewOptions(option);
+}
+
 void SearchModelNG::SetCaretWidth(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

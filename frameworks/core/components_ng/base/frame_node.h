@@ -491,6 +491,7 @@ public:
     void SetDragPreviewOptions(const DragPreviewOption& previewOption)
     {
         previewOption_ = previewOption;
+        previewOption_.onApply = std::move(previewOption.onApply);
     }
 
     DragPreviewOption GetDragPreviewOption() const

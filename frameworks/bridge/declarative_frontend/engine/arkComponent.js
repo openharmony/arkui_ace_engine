@@ -4106,6 +4106,12 @@ if (globalThis.Blank !== undefined) {
   };
 }
 
+globalThis.applyImageModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkImageComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
+
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
