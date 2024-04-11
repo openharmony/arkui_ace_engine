@@ -226,7 +226,7 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
             snapshotNode_->GetPattern<ImagePattern>()->SetSyncLoad(true);
         }
     }
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
     snapshotNode_->MarkModifyDone();
 }
 
