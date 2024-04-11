@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -6157,5 +6158,15 @@ ArkUINativeModuleValue CommonBridge::ClearGestures(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getGestureModifier()->clearGestures(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
+    std::string windowName = context->GetWindow()->GetWindowName();
+    return panda::StringRef::NewFromUtf8(vm, windowName.c_str());
 }
 } // namespace OHOS::Ace::NG
