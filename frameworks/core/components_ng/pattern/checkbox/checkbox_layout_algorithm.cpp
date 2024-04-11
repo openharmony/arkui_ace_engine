@@ -41,7 +41,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+        return std::nullopt;
     }
     InitializeParam();
     // Case 1: Width and height are set in the front end.
