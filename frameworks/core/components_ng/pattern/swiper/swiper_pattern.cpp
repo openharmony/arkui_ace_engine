@@ -1592,6 +1592,9 @@ void SwiperPattern::StopTranslateAnimation()
         AnimationOption option;
         option.SetCurve(Curves::LINEAR);
         option.SetDuration(0);
+
+        // update property value, because stop animation need different endPos.
+        host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, currentOffset_ - PX_EPSILON);
         translateAnimation_ = AnimationUtils::StartAnimation(
             option, [host, weak = WeakClaim(this)]() {
                 auto swiper = weak.Upgrade();
@@ -1990,6 +1993,13 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             return;
         }
     }
+    if (!IsLoop() && GetEdgeEffect() != EdgeEffect::SPRING) {
+        if (IsOutOfStart(offset)) {
+            offset = - itemPosition_.begin()->second.startPos;
+        } else if (IsOutOfEnd(offset)) {
+            offset = CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+        }
+    }
     currentDelta_ = currentDelta_ - offset;
     currentIndexOffset_ += offset;
     if (isDragging_ || childScrolling_) {
@@ -2017,9 +2027,9 @@ bool SwiperPattern::CheckOverScroll(float offset)
             break;
         case EdgeEffect::NONE:
             if (IsOutOfBoundary(offset)) {
-                currentDelta_ = currentDelta_ - offset;
                 auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                     CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+                currentDelta_ = currentDelta_ - realOffset;
                 HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
@@ -2062,9 +2072,9 @@ bool SwiperPattern::FadeOverScroll(float offset)
         auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == 0 && offset < 0.0f) ||
                                (itemPosition_.rbegin()->first == TotalCount() - 1 && offset > 0.0f);
         if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
-            currentDelta_ = currentDelta_ - offset;
             auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                 CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+            currentDelta_ = currentDelta_ - realOffset;
             HandleSwiperCustomAnimation(realOffset);
         }
         auto host = GetHost();
