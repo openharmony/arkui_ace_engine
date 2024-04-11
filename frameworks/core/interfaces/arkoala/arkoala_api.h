@@ -2255,6 +2255,8 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupMark)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
+    void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageSpanModifier {
