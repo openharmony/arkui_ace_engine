@@ -2397,9 +2397,11 @@ void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
     float radius = 0.0;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
-        ParseJsDouble(jsOption->GetProperty("radius"), radius);
+        if (jsOption->GetProperty("radius")->IsNumber()) {
+            radius = jsOption->GetProperty("radius")->ToNumber<float>();
+        }
     }
-    radius = std::max(radius, 0.0);
+    radius = std::max(radius, 0.0f);
     ViewAbstractModel::GetInstance()->SetForegroundEffect(radius);
 }
 
