@@ -50,6 +50,8 @@ namespace {
 // TODO: move these values to theme.
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
+constexpr double DIALOG_MAX_HEIGHT_RATIO = 0.9;
+constexpr Dimension DIALOG_MIN_HEIGHT = 70.0_vp;
 constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
@@ -250,8 +252,36 @@ LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
     return childConstraint;
 }
 
+bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout)
+{
+    CHECK_NULL_RETURN(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE), false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, false);
+
+    auto maxSize = innerLayout.maxSize;
+    auto width =
+        maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
+    auto dialogMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
+    width = dialogMaxWidth < width ? dialogMaxWidth : width;
+    auto dialogMinHeight = DIALOG_MIN_HEIGHT.ConvertToPx();
+    innerLayout.minSize = SizeF(width, dialogMinHeight);
+    if (expandDisplay_) {
+        auto maxHeight = SystemProperties::GetDevicePhysicalHeight() *
+            EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO * EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO;
+        innerLayout.maxSize = SizeF(dialogMaxWidth, maxHeight);
+    } else {
+        innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_MAX_HEIGHT_RATIO);
+    }
+    // update percentRef
+    innerLayout.percentReference = innerLayout.maxSize;
+    return true;
+}
+
 void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayout)
 {
+    CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout), true);
     auto maxSize = innerLayout.maxSize;
     // Set different layout param for different devices
     // TODO: need to use theme json to replace this function.
@@ -444,9 +474,24 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
+    if (!customSize_) {
+        UpdateDialogContainerWidth(dialogProp, dialogTheme);
+    }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::UpdateDialogContainerWidth(const RefPtr<DialogLayoutProperty>& dialogProp,
+    const RefPtr<DialogTheme>& dialogTheme)
+{
+    const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
+    auto maxSize = layoutConstraint->maxSize;
+    auto width =
+        maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
+    auto dialogMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
+    width = dialogMaxWidth < width ? dialogMaxWidth : width;
+    dialogProp->UpdateWidth(width);
 }
 
 void DialogLayoutAlgorithm::SetSubWindowHotarea(
@@ -529,7 +574,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto maxSize = layoutConstraint->maxSize;
-    if (!customSize_) {
+    if (!customSize_ && !IsAlignmentByWholeScreen()) {
         maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
     }
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
@@ -543,20 +588,42 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     return AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
 }
 
+bool DialogLayoutAlgorithm::IsAlignmentByWholeScreen()
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return false;
+    }
+
+    switch (alignment_) {
+        case DialogAlignment::TOP:
+        case DialogAlignment::TOP_START:
+        case DialogAlignment::TOP_END:
+        case DialogAlignment::BOTTOM:
+        case DialogAlignment::BOTTOM_START:
+        case DialogAlignment::BOTTOM_END:
+            return false;
+        case DialogAlignment::CENTER:
+        case DialogAlignment::CENTER_START:
+        case DialogAlignment::CENTER_END:
+        default:
+            return true;
+    }
+}
+
 bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint)
 {
-    if (alignment_ != DialogAlignment::DEFAULT) {
+    if (alignment_ != DialogAlignment::DEFAULT || Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         switch (alignment_) {
             case DialogAlignment::TOP:
-                topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / 2.0, 0.0);
+                topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / HALF, 0.0);
                 break;
             case DialogAlignment::CENTER:
                 topLeftPoint =
-                    OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+                    OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
                 break;
             case DialogAlignment::BOTTOM:
                 topLeftPoint =
-                    OffsetF((maxSize.Width() - childSize.Width()) / 2.0, maxSize.Height() - childSize.Height());
+                    OffsetF((maxSize.Width() - childSize.Width()) / HALF, maxSize.Height() - childSize.Height());
                 break;
             case DialogAlignment::TOP_START:
                 topLeftPoint = OffsetF(0.0, 0.0);
@@ -565,11 +632,11 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
                 topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), 0.0);
                 break;
             case DialogAlignment::CENTER_START:
-                topLeftPoint = OffsetF(0.0, maxSize.Height() - childSize.Height()) / 2.0;
+                topLeftPoint = OffsetF(0.0, maxSize.Height() - childSize.Height()) / HALF;
                 break;
             case DialogAlignment::CENTER_END:
                 topLeftPoint =
-                    OffsetF(maxSize.Width() - childSize.Width(), (maxSize.Height() - childSize.Height()) / 2.0);
+                    OffsetF(maxSize.Width() - childSize.Width(), (maxSize.Height() - childSize.Height()) / HALF);
                 break;
             case DialogAlignment::BOTTOM_START:
                 topLeftPoint = OffsetF(0.0, maxSize.Height() - childSize.Height());
@@ -579,12 +646,18 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
                 break;
             default:
                 topLeftPoint =
-                    OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+                    OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
                 break;
         }
         return true;
     }
 
+    return SetAlignmentSwitchLessThanAPITwelve(maxSize, childSize, topLeftPoint);
+}
+
+bool DialogLayoutAlgorithm::SetAlignmentSwitchLessThanAPITwelve(const SizeF& maxSize, const SizeF& childSize,
+    OffsetF& topLeftPoint)
+{
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto displayInfo = container->GetDisplayInfo();
@@ -592,18 +665,18 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
     auto foldStatus = displayInfo->GetFoldStatus();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && displayInfo->GetIsFoldable() &&
         (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD)) {
-        topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+        topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
         return true;
     }
 
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (version10OrLarger && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-            topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+            topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
             return true;
         }
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
-            topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / 2.0,
+            topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / HALF,
                 std::max(maxSize.Height() - childSize.Height() - GetPaddingBottom(), 0.0));
             return true;
         }

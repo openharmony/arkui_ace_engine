@@ -68,7 +68,6 @@ public:
             if (!dialogPattern) {
                 return;
             }
-            theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
             theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
             theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
             theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
@@ -79,7 +78,13 @@ public:
             theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
             theme->contentTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("content_text_font_size", 16.0_fp));
             theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
-            theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("dialog_container_radius", 32.0_vp));
+                theme->backgroundColor_ = dialogPattern->GetAttr<Color>("bg_color_version_twelve", Color(0xffffff));
+            } else {
+                theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
+                theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
+            }
             theme->text_align_content_= dialogPattern->GetAttr<int>("text_align_content", 1);
             theme->text_align_title_= dialogPattern->GetAttr<int>("text_align_title", 1);
             theme->device_columns_dialog_= dialogPattern->GetAttr<int>("device_columns_dialog", 0);
@@ -221,8 +226,14 @@ public:
                 dialogPattern->GetAttr<Dimension>("dialog_divider_padding_horizon", 4.0_vp),
                 dialogPattern->GetAttr<Dimension>("dialog_divider_padding_vertical", 6.0_vp));
             theme->marginBottom_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_bottom", 16.0_vp);
-            theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_start", 12.0_vp);
-            theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_end", 12.0_vp);
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_container_margin_left", 16.0_vp);
+                theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_container_margin_right", 16.0_vp);
+            } else {
+                theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_start", 12.0_vp);
+                theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_end", 12.0_vp);
+            }
+            theme->containerMaxWidth_ = dialogPattern->GetAttr<Dimension>("dialog_container_max_width", 400.0_vp);
             theme->defaultShadowOn_ =
                 static_cast<uint32_t>(dialogPattern->GetAttr<double>("dialog_background_shadow_on",
                 static_cast<double>(ShadowStyle::None)));
@@ -593,6 +604,11 @@ public:
     {
         return buttonWithContentPadding_;
     }
+
+    const Dimension& GetContainerMaxWidth() const
+    {
+        return containerMaxWidth_;
+    }
     
     uint32_t GetDefaultShadowOn() const
     {
@@ -681,6 +697,7 @@ private:
     std::string multipleDialogDisplay_;
     bool expandDisplay_ = false;
     Dimension buttonWithContentPadding_;
+    Dimension containerMaxWidth_;
     uint32_t defaultShadowOn_ = 6;
     uint32_t defaultShadowOff_ = 6;
 };

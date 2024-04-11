@@ -685,6 +685,12 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     if (dialogAttr.shadow.has_value()) {
         dialogProperties.shadow = dialogAttr.shadow.value();
     }
+    if (dialogAttr.backgroundColor.has_value()) {
+        dialogProperties.backgroundColor = dialogAttr.backgroundColor.value();
+    }
+    if (dialogAttr.backgroundBlurStyle.has_value()) {
+        dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
@@ -716,7 +722,6 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
 {
     DialogProperties dialogProperties = { .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .onWillDismiss = dialogAttr.customOnWillDismiss,
         .backgroundColor = dialogAttr.backgroundColor,
@@ -749,6 +754,13 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        dialogProperties.isSysBlurStyle = false;
+    } else {
+        if (dialogAttr.backgroundBlurStyle.has_value()) {
+            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+        }
     }
     return dialogProperties;
 }
