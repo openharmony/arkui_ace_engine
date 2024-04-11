@@ -2799,6 +2799,11 @@ void RosenRenderContext::OnAnchorUpdate(const OffsetT<Dimension>& /*value*/)
     SetPositionToRSNode();
 }
 
+void RosenRenderContext::RecalculatePosition()
+{
+    SetPositionToRSNode();
+}
+
 void RosenRenderContext::OnZIndexUpdate(int32_t value)
 {
     CHECK_NULL_VOID(rsNode_);

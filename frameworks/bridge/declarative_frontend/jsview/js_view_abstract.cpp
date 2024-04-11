@@ -410,8 +410,15 @@ bool ParseLocationProps(const JSCallbackInfo& info, CalcDimension& x, CalcDimens
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(arg);
     JSRef<JSVal> xVal = sizeObj->GetProperty("x");
     JSRef<JSVal> yVal = sizeObj->GetProperty("y");
-    bool hasX = JSViewAbstract::ParseJsDimensionNG(xVal, x, DimensionUnit::VP);
-    bool hasY = JSViewAbstract::ParseJsDimensionNG(yVal, y, DimensionUnit::VP);
+    bool hasX = false;
+    bool hasY = false;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        hasX = JSViewAbstract::ParseJsDimensionNG(xVal, x, DimensionUnit::VP);
+        hasY = JSViewAbstract::ParseJsDimensionNG(yVal, y, DimensionUnit::VP);
+    } else {
+        hasX = JSViewAbstract::ParseJsDimension(xVal, x, DimensionUnit::VP);
+        hasY = JSViewAbstract::ParseJsDimension(yVal, y, DimensionUnit::VP);
+    }
     return hasX || hasY;
 }
 
@@ -431,19 +438,19 @@ bool ParseLocationPropsEdges(const JSCallbackInfo& info, EdgesParam& edges)
     JSRef<JSVal> leftVal = edgesObj->GetProperty("left");
     JSRef<JSVal> bottomVal = edgesObj->GetProperty("bottom");
     JSRef<JSVal> rightVal = edgesObj->GetProperty("right");
-    if (JSViewAbstract::ParseJsDimension(topVal, top, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(topVal, top, DimensionUnit::VP)) {
         edges.SetTop(top);
         useEdges = true;
     }
-    if (JSViewAbstract::ParseJsDimension(leftVal, left, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(leftVal, left, DimensionUnit::VP)) {
         edges.SetLeft(left);
         useEdges = true;
     }
-    if (JSViewAbstract::ParseJsDimension(bottomVal, bottom, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(bottomVal, bottom, DimensionUnit::VP)) {
         edges.SetBottom(bottom);
         useEdges = true;
     }
-    if (JSViewAbstract::ParseJsDimension(rightVal, right, DimensionUnit::VP)) {
+    if (JSViewAbstract::ParseJsDimensionNG(rightVal, right, DimensionUnit::VP)) {
         edges.SetRight(right);
         useEdges = true;
     }
@@ -1869,7 +1876,11 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
     } else if (ParseLocationPropsEdges(info, edges)) {
         ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
     } else {
-        ViewAbstractModel::GetInstance()->SetPosition(0.0_vp, 0.0_vp);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            ViewAbstractModel::GetInstance()->ResetPosition();
+        } else {
+            ViewAbstractModel::GetInstance()->SetPosition(0.0_vp, 0.0_vp);
+        }
     }
 }
 

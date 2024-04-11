@@ -467,6 +467,11 @@ public:
         ViewAbstract::SetPositionEdges(value);
     }
 
+    void ResetPosition() override
+    {
+        ViewAbstract::ResetPosition();
+    }
+
     void SetOffset(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::SetOffset({ x, y });

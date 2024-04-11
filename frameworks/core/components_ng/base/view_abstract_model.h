@@ -150,6 +150,7 @@ public:
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+    virtual void ResetPosition() {};
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;

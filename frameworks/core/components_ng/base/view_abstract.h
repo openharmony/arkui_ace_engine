@@ -212,11 +212,12 @@ public:
         GridSizeType type = GridSizeType::UNDEFINED);
 
     // position
-    static void SetPosition(const OffsetT<Dimension> &value);
-    static void SetOffset(const OffsetT<Dimension> &value);
+    static void SetPosition(const OffsetT<Dimension>& value);
+    static void SetOffset(const OffsetT<Dimension>& value);
     static void SetPositionEdges(const EdgesParam& value);
     static void SetOffsetEdges(const EdgesParam& value);
-    static void MarkAnchor(const OffsetT<Dimension> &value);
+    static void MarkAnchor(const OffsetT<Dimension>& value);
+    static void ResetPosition();
 
     // render position
     static void SetZIndex(int32_t value);

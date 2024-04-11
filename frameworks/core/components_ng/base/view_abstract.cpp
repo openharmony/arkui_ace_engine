@@ -47,7 +47,9 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -1276,6 +1278,29 @@ void ViewAbstract::MarkAnchor(const OffsetT<Dimension> &value)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
+}
+
+void ViewAbstract::ResetPosition()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parentNode);
+
+    // Row/Column/Flex measure and layout differently depending on whether the child nodes have position property.
+    if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RecalculatePosition();
+    }
 }
 
 void ViewAbstract::SetZIndex(int32_t value)

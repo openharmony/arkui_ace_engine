@@ -413,6 +413,7 @@ public:
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
+    virtual void RecalculatePosition() {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
