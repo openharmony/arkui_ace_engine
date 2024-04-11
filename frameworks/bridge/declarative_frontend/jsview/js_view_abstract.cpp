@@ -8080,12 +8080,14 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
     auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onTap = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), node = targetNode](
-                     GestureEvent& info) {
+                     BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* tapInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        func->Execute(*tapInfo);
     };
+    auto tmpOnTap = [func = std::move(onTap)](GestureEvent& info) { func(&info); };
     auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
                        const ClickInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -8093,7 +8095,7 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
     };
-    ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+    ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick));
 }
 
 void JSViewAbstract::JsOnGestureJudgeBegin(const JSCallbackInfo& info)

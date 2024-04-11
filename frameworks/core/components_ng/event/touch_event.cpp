@@ -170,6 +170,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         auto userCallback = userCallback_;
         (*userCallback)(event);
     }
+    if (touchAfterEvents_) {
+        auto touchAfterEvents = touchAfterEvents_;
+        (*touchAfterEvents)(event);
+    }
     if (onTouchEventCallback_) {
         // actuator->onTouchEventCallback_ may be overwritten in its invoke so we copy it first
         auto onTouchEventCallback = onTouchEventCallback_;

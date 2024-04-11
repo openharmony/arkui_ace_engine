@@ -290,9 +290,9 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
         gestureInfo.onClick = std::nullopt;
     } else {
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
-        auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+        auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc](BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("SpanString.onClick");
             func->Execute(*clickInfo);
         };
@@ -305,9 +305,9 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
         gestureInfo.onLongPress = std::nullopt;
     } else {
         auto jsOnLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
-        auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsOnLongPressFunc](const BaseEventInfo* info) {
+        auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsOnLongPressFunc](BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("SpanString.onLongPress");
             func->Execute(*longPressInfo);
         };
