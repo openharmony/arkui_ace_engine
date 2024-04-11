@@ -351,6 +351,9 @@ RefPtr<FrameNode> FormPattern::CreateImageNode()
     auto imageId = formNode->GetImageId();
     auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, nullptr);
+    imagePattern->SetSyncLoad(true);
     host->AddChild(imageNode);
     auto eventHub = imageNode->GetOrCreateGestureEventHub();
     if (eventHub != nullptr) {
