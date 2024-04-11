@@ -49,6 +49,8 @@ const TouchRestrict DRAG_TOUCH_RESTRICT_MOUSE = {
 constexpr int32_t FINGERS_NUMBER = 2;
 constexpr int32_t TOUCH_TEST_RESULT_SIZE = 1;
 constexpr int32_t TOUCH_TEST_RESULT_SIZE_2 = 2;
+constexpr int32_t NUMBER_BADGE_SIZE_3 = 3;
+constexpr int32_t NUMBER_BADGE_SIZE_100 = 100;
 constexpr float DISTANCE = 10.5f;
 constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
@@ -1155,6 +1157,101 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
     auto dragDropManager = pipelineContext->GetDragDropManager();
     EXPECT_NE(dragDropManager, nullptr);
     EXPECT_EQ(dragDropManager->IsShowBadgeAnimation(), false);
+}
+
+/**
+ * @tc.name: DragEventShowBadgeTest03
+ * @tc.desc: Test the GetCustomerBadgeNumber function of setting different NumberBadge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventShowBadgeTest03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Do not set NumberBadge.
+     * @tc.expected: badgeNumber has no value.
+     */
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), false);
+
+    /**
+     * @tc.steps: step3. Set NumberBadge value is true.
+     * @tc.expected: badgeNumber has no value.
+     */
+    NG::DragPreviewOption previewOptions;
+    previewOptions.isNumber = false;
+    previewOptions.badgeNumber = true;
+    frameNode->SetDragPreviewOptions(previewOptions);
+    dragPreviewOptions = frameNode->GetDragPreviewOption();
+    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), false);
+
+    /**
+     * @tc.steps: step4. Set NumberBadge value is false.
+     * @tc.expected: badgeNumber has value.
+     */
+    previewOptions.isNumber = false;
+    previewOptions.badgeNumber = false;
+    frameNode->SetDragPreviewOptions(previewOptions);
+    dragPreviewOptions = frameNode->GetDragPreviewOption();
+    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), true);
+    EXPECT_EQ(badgeNumber.value(), 1);
+
+    /**
+     * @tc.steps: step5. Set the NumberBadge to a special value 3.
+     * @tc.expected: badgeNumber is the set value.
+     */
+    previewOptions.isNumber = true;
+    previewOptions.badgeNumber = NUMBER_BADGE_SIZE_3;
+    frameNode->SetDragPreviewOptions(previewOptions);
+    dragPreviewOptions = frameNode->GetDragPreviewOption();
+    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), true);
+    EXPECT_EQ(badgeNumber.value(), NUMBER_BADGE_SIZE_3);
+
+    /**
+     * @tc.steps: step6. Set the NumberBadge to a special value 0.
+     * @tc.expected: badgeNumber is 1.
+     */
+    previewOptions.isNumber = true;
+    previewOptions.badgeNumber = 0;
+    frameNode->SetDragPreviewOptions(previewOptions);
+    dragPreviewOptions = frameNode->GetDragPreviewOption();
+    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), true);
+    EXPECT_EQ(badgeNumber.value(), 1);
+
+    /**
+     * @tc.steps: step7. Set the NumberBadge to a special value -1.
+     * @tc.expected: badgeNumber is 1.
+     */
+    previewOptions.isNumber = true;
+    previewOptions.badgeNumber = -1;
+    frameNode->SetDragPreviewOptions(previewOptions);
+    dragPreviewOptions = frameNode->GetDragPreviewOption();
+    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), true);
+    EXPECT_EQ(badgeNumber.value(), 1);
+
+    /**
+     * @tc.steps: step8. Set the NumberBadge to a special value 100.
+     * @tc.expected: badgeNumber is the set value.
+     */
+    previewOptions.isNumber = true;
+    previewOptions.badgeNumber = NUMBER_BADGE_SIZE_100;
+    frameNode->SetDragPreviewOptions(previewOptions);
+    dragPreviewOptions = frameNode->GetDragPreviewOption();
+    badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    EXPECT_EQ(badgeNumber.has_value(), true);
+    EXPECT_EQ(badgeNumber.value(), NUMBER_BADGE_SIZE_100);
 }
 
 /**
