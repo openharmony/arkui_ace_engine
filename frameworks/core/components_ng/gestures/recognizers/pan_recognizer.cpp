@@ -309,6 +309,10 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             (*onActionCancel_)();
         }
     }
+    // Clear All fingers' velocity when fingersId is empty.
+    if (fingersId_.empty()) {
+        panVelocity_.ResetAll();
+    }
 }
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
@@ -822,6 +826,11 @@ void PanRecognizer::PanVelocity::UpdateTouchPoint(int32_t id, const TouchEvent& 
 void PanRecognizer::PanVelocity::Reset(int32_t id)
 {
     trackerMap_.erase(id);
+}
+
+void PanRecognizer::PanVelocity::ResetAll()
+{
+    trackerMap_.clear();
 }
 
 void PanRecognizer::PanVelocity::SetDirection(int32_t directionType)
