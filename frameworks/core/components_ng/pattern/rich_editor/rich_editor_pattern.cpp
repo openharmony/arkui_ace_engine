@@ -632,7 +632,6 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     if (start > length || end < 0 || start == end) {
         return;
     }
-
     OperationRecord record;
     record.beforeCaretPosition = start;
     std::wstringstream wss;
@@ -646,7 +645,6 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     ClearRedoOperationRecords();
     record.afterCaretPosition = start;
     AddOperationRecord(record);
-
     auto startInfo = GetSpanPositionInfo(start);
     auto endInfo = GetSpanPositionInfo(end - 1);
     if (startInfo.spanIndex_ == endInfo.spanIndex_) {
@@ -662,9 +660,9 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     SetCaretOffset(start);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childrens = host->GetChildren();
-    if (childrens.empty() || GetTextContentLength() == 0) {
+    if (host->GetChildren().empty() || GetTextContentLength() == 0) {
         SetCaretPosition(0);
+        textForDisplay_.clear();
     }
     UpdateSpanPosition();
     AfterChangeText(changeValue);
@@ -4475,6 +4473,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (IsShowSelectMenuUsingMouse() || isUsingExternalKeyboard) {
         CloseSelectOverlay();
     } else {
+        CHECK_NULL_VOID(selectOverlayProxy_);
         selectOverlayProxy_->ShowOrHiddenMenu(true);
     }
 }
@@ -4967,17 +4966,19 @@ bool RichEditorPattern::IsShowHandle()
 
 void RichEditorPattern::SetHandles()
 {
+    LOGI("bbgq2 RichEditorPattern::SetHandles start");
     ResetIsMousePressed();
     sourceType_ = SourceType::TOUCH;
     SetShowSelect(true);
     isShowMenu_ = false;
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(),
-        TextResponseType::LONG_PRESS);
+    selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = true});
+    LOGI("bbgq2 RichEditorPattern::SetHandles end");
 }
 
 void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options,
     bool isForward)
 {
+    LOGI("bbgq2 RichEditorPattern::SetSelection start");
     bool hasFocus = HasFocus();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d", start, end, hasFocus);
     CHECK_NULL_VOID(hasFocus);
@@ -5016,6 +5017,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
                                   (!oldSelectedType.has_value() && selectedType_.has_value());
         RefreshSelectOverlay(isMousePressed_, selectedTypeChange);
     }
+    LOGI("bbgq2 !SelectOverlayIsOn() = %{public}d, isShowHandle = %{public}d", !SelectOverlayIsOn(), isShowHandle);
     if (!SelectOverlayIsOn() && isShowHandle) {
         SetHandles();
         isShowMenu_ = true;
@@ -5024,6 +5026,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    LOGI("bbgq2 RichEditorPattern::SetSelection end");
 }
 
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
