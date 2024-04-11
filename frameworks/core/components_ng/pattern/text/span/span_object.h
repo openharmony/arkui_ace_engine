@@ -98,6 +98,70 @@ private:
     Font font_;
 };
 
+class DecorationSpan : public SpanBase {
+    DECLARE_ACE_TYPE(DecorationSpan, SpanBase);
+
+public:
+    DecorationSpan() = default;
+    explicit DecorationSpan(TextDecoration type, std::optional<Color> color);
+    DecorationSpan(TextDecoration type, std::optional<Color> color, int32_t start, int32_t end);
+    TextDecoration GetTextDecorationType() const;
+    std::optional<Color> GetColor() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem);
+
+    TextDecoration type_;
+    std::optional<Color> color_;
+};
+
+class BaselineOffsetSpan : public SpanBase {
+    DECLARE_ACE_TYPE(BaselineOffsetSpan, SpanBase);
+
+public:
+    BaselineOffsetSpan() = default;
+    explicit BaselineOffsetSpan(Dimension baselineOffset);
+    BaselineOffsetSpan(Dimension baselineOffset, int32_t start, int32_t end);
+    Dimension GetBaselineOffset() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem);
+    Dimension baselineOffset_;
+};
+
+class LetterSpacingSpan : public SpanBase {
+    DECLARE_ACE_TYPE(LetterSpacingSpan, SpanBase);
+
+public:
+    LetterSpacingSpan() = default;
+    explicit LetterSpacingSpan(Dimension letterSpacing);
+    LetterSpacingSpan(Dimension letterSpacing, int32_t start, int32_t end);
+    Dimension GetLetterSpacing() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddLetterSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveLetterSpacingStyle(const RefPtr<NG::SpanItem>& spanItem);
+
+    Dimension letterSpacing_;
+};
+
 class GestureSpan : public SpanBase {
     DECLARE_ACE_TYPE(GestureSpan, SpanBase);
 

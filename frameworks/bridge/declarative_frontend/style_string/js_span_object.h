@@ -59,6 +59,71 @@ private:
     RefPtr<FontSpan> fontSpan_;
 };
 
+class JSDecorationSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSDecorationSpan, AceType)
+
+public:
+    JSDecorationSpan() = default;
+    ~JSDecorationSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSDecorationSpan* decorationSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<DecorationSpan> ParseJsDecorationSpan(const JSRef<JSObject>& obj);
+    void GetTextDecorationType(const JSCallbackInfo& info);
+    void SetTextDecorationType(const JSCallbackInfo& info);
+    void GetTextDecorationColor(const JSCallbackInfo& info);
+    void SetTextDecorationColor(const JSCallbackInfo& info);
+
+    RefPtr<DecorationSpan>& GetDecorationSpan();
+    void SetDecorationSpan(const RefPtr<DecorationSpan>& decorationSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSDecorationSpan);
+    RefPtr<DecorationSpan> decorationSpan_;
+};
+
+class JSBaselineOffsetSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSBaselineOffsetSpan, AceType)
+
+public:
+    JSBaselineOffsetSpan() = default;
+    ~JSBaselineOffsetSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSBaselineOffsetSpan* baselineOffsetSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<BaselineOffsetSpan> ParseJSBaselineOffsetSpan(const JSRef<JSObject>& obj);
+    void GetBaselineOffset(const JSCallbackInfo& info);
+    void SetBaselineOffset(const JSCallbackInfo& info);
+
+    RefPtr<BaselineOffsetSpan>& GetBaselineOffsetSpan();
+    void SetBaselineOffsetSpan(const RefPtr<BaselineOffsetSpan>& baselineOffsetSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSBaselineOffsetSpan);
+    RefPtr<BaselineOffsetSpan> baselineOffsetSpan_;
+};
+
+class JSLetterSpacingSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSLetterSpacingSpan, AceType)
+
+public:
+    JSLetterSpacingSpan() = default;
+    ~JSLetterSpacingSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSLetterSpacingSpan* letterSpacingSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<LetterSpacingSpan> ParseJSLetterSpacingSpan(const JSRef<JSObject>& obj);
+    void GetLetterSpacing(const JSCallbackInfo& info);
+    void SetLetterSpacing(const JSCallbackInfo& info);
+
+    RefPtr<LetterSpacingSpan>& GetLetterSpacingSpan();
+    void SetLetterSpacingSpan(const RefPtr<LetterSpacingSpan>& letterSpacingSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSLetterSpacingSpan);
+    RefPtr<LetterSpacingSpan> letterSpacingSpan_;
+};
+
 class JSGestureSpan : public virtual AceType {
     DECLARE_ACE_TYPE(JSGestureSpan, AceType)
 
