@@ -166,11 +166,25 @@ struct GridLayoutInfo {
     void ClearMapsToEnd(int32_t idx);
 
     /**
+     * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
+     *
+     * @param idx starting line index
+     */
+    void ClearMapsToEndContainsMultiLineItem(int32_t idx);
+
+    /**
      * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
      *
      * @param idx ending line index, exclusive.
      */
     void ClearMapsFromStart(int32_t idx);
+
+    /**
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStartContainsMultiLineItem(int32_t idx);
 
     /**
      * @brief clears lineHeightMap_ starting from line [idx]
@@ -283,6 +297,9 @@ struct GridLayoutInfo {
 
     // Grid has GridItem whose columnEnd - columnStart > 0
     bool hasBigItem_;
+
+    // Grid has GridItem whose rowEnd - rowStart > 0
+    bool hasMultiLineItem_;
 
     bool offsetUpdated_ = false;
     std::optional<int32_t> targetIndex_;
