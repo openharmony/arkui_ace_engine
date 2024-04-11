@@ -22,7 +22,7 @@ namespace {} // namespace
 class SwiperArrowTestNg : public SwiperTestNg {
 public:
     ImageSourceInfo GetImageInfo(const RefPtr<FrameNode>& arrowNode);
-    RefPtr<MockRenderContext> GetArrowContext(int32_t childIndex);
+    RefPtr<MockRenderContext> GetArrowContext(const RefPtr<FrameNode>& arrowNode);
     void HandleMouseEvent(Offset mousePoint);
     AssertionResult VerifyArrowVisible(bool leftArrowVisible, bool rightArrowVisible);
 };
@@ -35,10 +35,9 @@ ImageSourceInfo SwiperArrowTestNg::GetImageInfo(const RefPtr<FrameNode>& arrowNo
     return imageSourceInfo.value();
 }
 
-RefPtr<MockRenderContext> SwiperArrowTestNg::GetArrowContext(int32_t childIndex)
+RefPtr<MockRenderContext> SwiperArrowTestNg::GetArrowContext(const RefPtr<FrameNode>& arrowNode)
 {
-    auto node = GetChildFrameNode(frameNode_, childIndex);
-    auto buttonNode = AceType::DynamicCast<FrameNode>(node->GetFirstChild());
+    auto buttonNode = AceType::DynamicCast<FrameNode>(arrowNode->GetFirstChild());
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(buttonNode->renderContext_);
     return mockRenderContext;
 }
@@ -52,10 +51,8 @@ void SwiperArrowTestNg::HandleMouseEvent(Offset mousePoint)
 
 AssertionResult SwiperArrowTestNg::VerifyArrowVisible(bool leftArrowVisible, bool rightArrowVisible)
 {
-    int32_t leftArrowNodeIndex = pattern_->IsShowIndicator() ? 5 : 4;
-    int32_t rightArrowNodeIndex = pattern_->IsShowIndicator() ? 6 : 5;
-    auto leftMockRenderContext = GetArrowContext(leftArrowNodeIndex);
-    auto rightMockRenderContext = GetArrowContext(rightArrowNodeIndex);
+    auto leftMockRenderContext = GetArrowContext(leftArrowNode_);
+    auto rightMockRenderContext = GetArrowContext(rightArrowNode_);
     if (leftMockRenderContext->isVisible_ == leftArrowVisible &&
         rightMockRenderContext->isVisible_ == rightArrowVisible) {
         return AssertionSuccess();
@@ -80,10 +77,8 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    auto leftImageInfo = GetImageInfo(leftArrowNode);
-    auto rightImageInfo = GetImageInfo(rightArrowNode);
+    auto leftImageInfo = GetImageInfo(leftArrowNode_);
+    auto rightImageInfo = GetImageInfo(rightArrowNode_);
     EXPECT_EQ(leftImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
     EXPECT_EQ(rightImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
     EXPECT_EQ(leftImageInfo.GetFillColor(), ARROW_PARAMETERS.arrowColor.value());
@@ -108,10 +103,8 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent002, TestSize.Level1)
         model.SetArrowStyle(ARROW_PARAMETERS);
         model.SetEnabled(false);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    auto leftImageInfo = GetImageInfo(leftArrowNode);
-    auto rightImageInfo = GetImageInfo(rightArrowNode);
+    auto leftImageInfo = GetImageInfo(leftArrowNode_);
+    auto rightImageInfo = GetImageInfo(rightArrowNode_);
     EXPECT_EQ(leftImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG);
     EXPECT_EQ(rightImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
     EXPECT_EQ(leftImageInfo.GetFillColor(), ARROW_PARAMETERS.arrowColor.value().BlendOpacity(ARROW_DISABLED_ALPHA));
@@ -130,9 +123,8 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode->GetFirstChild());
-    auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
     auto leftMockRenderContext = AceType::DynamicCast<MockRenderContext>(leftButtonNode->renderContext_);
     EXPECT_TRUE(leftMockRenderContext->isVisible_);
 
@@ -171,9 +163,8 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode->GetFirstChild());
-    auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
     auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
     EXPECT_TRUE(rightMockRenderContext->isVisible_);
 
@@ -226,9 +217,8 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow003, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode->GetFirstChild());
-    auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
     auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
     EXPECT_TRUE(rightMockRenderContext->isVisible_);
 
@@ -280,9 +270,8 @@ HWTEST_F(SwiperArrowTestNg, HoverShow001, TestSize.Level1)
         model.SetHoverShow(true); // when not hover, hide arrow
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode->GetFirstChild());
-    auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
     auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
     EXPECT_FALSE(rightMockRenderContext->isVisible_);
 
