@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "form_skeleton_params.h"
 
 namespace OHOS {
 namespace MMI {
@@ -139,6 +140,15 @@ private:
     void InitClickEvent();
     void HandleTouchDownEvent(const TouchEventInfo& event);
     void HandleTouchUpEvent(const TouchEventInfo& event);
+
+    void LoadFormSkeleton();
+    int32_t GetFormDimensionHeight(int32_t dimension);
+    void RemoveFormSkeleton();
+    RefPtr<FrameNode> CreateColumnNode();
+    RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
+        const MarginProperty& margin, uint32_t fillColor, double opacity);
+    void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
+        int32_t dimensionHeight);
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
