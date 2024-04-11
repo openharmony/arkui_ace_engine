@@ -187,6 +187,19 @@ RefPtr<FrameNode> ListItemPattern::GetListFrameNode() const
     return frameNode;
 }
 
+RefPtr<FrameNode> ListItemPattern::GetParentFrameNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent && !frameNode) {
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    return frameNode;
+}
+
 Axis ListItemPattern::GetAxis() const
 {
     auto frameNode = GetListFrameNode();
@@ -976,8 +989,16 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
     CHECK_NULL_RETURN(host, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
-    auto offset = geometryNode->GetMarginFrameOffset();
-    auto size = geometryNode->GetMarginFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    if (indexInListItemGroup_ != -1) {
+        auto parentFrameNode = GetParentFrameNode();
+        CHECK_NULL_RETURN(parentFrameNode, true);
+        auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+        CHECK_NULL_RETURN(parentGeometryNode, true);
+        auto parentOffset = parentGeometryNode->GetFrameOffset();
+        offset = offset + parentOffset;
+    }
+    auto size = geometryNode->GetFrameSize();
     auto xOffset = localPoint.GetX() - offset.GetX();
     auto yOffset = localPoint.GetY() - offset.GetY();
     if (GetAxis() == Axis::VERTICAL) {
