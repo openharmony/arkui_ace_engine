@@ -675,6 +675,7 @@ std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
     CHECK_NULL_RETURN(eventHub, "");
     return eventHub->GetGroupName() + navId_;
 }
+
 void CheckBoxGroupPattern::UpdateCheckBoxStyle()
 {
     auto host = GetHost();
