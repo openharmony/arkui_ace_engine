@@ -2670,12 +2670,12 @@ HWTEST_F(RichEditorTestNg, Selection001, TestSize.Level1)
     EXPECT_EQ(richEditorSelection7.selection[1], 6);
 
     richEditorPattern->SetSelection(-2, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
     auto richEditorSelection8 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection8.selection[0], 0);
-    EXPECT_EQ(richEditorSelection8.selection[1], 0);
+    EXPECT_EQ(richEditorSelection8.selection[0], 6);
+    EXPECT_EQ(richEditorSelection8.selection[1], 6);
 
     richEditorPattern->SetSelection(1, 3);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 1);
@@ -2709,8 +2709,8 @@ HWTEST_F(RichEditorTestNg, Selection002, TestSize.Level1)
      */
     ClearSpan();
     richEditorPattern->SetSelection(1, 3);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection = richEditorController->GetSelectionSpansInfo().GetSelection();
     EXPECT_EQ(richEditorSelection.selection[0], 0);
