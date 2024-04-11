@@ -929,6 +929,11 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    auto shadowValue = paramObject->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        pickerDialog.shadow = shadow;
+    }
     PickerDialogEvent pickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     DatePickerDialogAppearEvent(info, pickerDialogEvent);
     DatePickerDialogDisappearEvent(info, pickerDialogEvent);
@@ -1501,6 +1506,11 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
 
+    auto shadowValue = paramObject->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        pickerDialog.shadow = shadow;
+    }
     TimePickerDialogEvent timePickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     TimePickerDialogAppearEvent(info, timePickerDialogEvent);
     TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
