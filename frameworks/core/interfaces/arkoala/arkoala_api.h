@@ -72,6 +72,15 @@ typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 
+struct ArkUICanvasArcOptions {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 radius;
+    ArkUI_Float32 startAngle;
+    ArkUI_Float32 endAngle;
+    ArkUI_Bool counterclockwise;
+};
+
 struct ArkUIRect {
     ArkUI_Float32 x;
     ArkUI_Float32 y;
@@ -3015,10 +3024,16 @@ struct ArkUITextAreaControllerModifier {
 struct ArkUICanvasRenderingContext2DModifier {
     ArkUINodeHandle (*getCanvasRenderingContext2D)(ArkUINodeHandle node);
     void (*setCanvasBeginPath)(ArkUINodeHandle node);
+    void (*setCanvasClosePath)(ArkUINodeHandle node);
     void (*setCanvasFill)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setCanvasMoveTo)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y);
-    void (*setCanvasArc)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 radius,
-        ArkUI_Float32 startAngle, ArkUI_Float32 endAngle, ArkUI_Bool counterclockwise);
+    void (*setCanvasArc)(ArkUINodeHandle node, ArkUICanvasArcOptions options);
+    void (*setCanvasLineTo)(ArkUINodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y);
+    void (*setCanvasStrokeStyle)(ArkUINodeHandle node, ArkUI_Int32 color);
+    ArkUI_Int32 (*getCanvasStrokeStyle)(ArkUINodeHandle node);
+    void (*setCanvasLineWidth)(ArkUINodeHandle node, ArkUI_Float32 width);
+    ArkUI_Float32 (*getCanvasLineWidth)(ArkUINodeHandle node);
+    void (*setCanvasStroke)(ArkUINodeHandle node);
     void (*setCanvasAntiAlias)(ArkUINodeHandle node, ArkUI_Bool antialias);
     void (*setCanvasFillColor)(ArkUINodeHandle node, ArkUI_Int32 color);
     ArkUI_Int32 (*getCanvasFillColor)(ArkUINodeHandle node);

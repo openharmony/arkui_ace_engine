@@ -30,6 +30,7 @@ template("ace_core_interfaces_native_node") {
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
       "node/calendar_picker_modifier.cpp",
+      "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
       "node/column_split_modifier.cpp",
