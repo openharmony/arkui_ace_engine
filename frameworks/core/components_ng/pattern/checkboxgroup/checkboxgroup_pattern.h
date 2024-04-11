@@ -68,16 +68,13 @@ public:
             UpdateModifierParam(paintParameters);
             checkBoxGroupModifier_ = AceType::MakeRefPtr<CheckBoxGroupModifier>(paintParameters);
         }
-        CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-        } else {
-            checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+            auto checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+            if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
+                checkboxStyle = paintProperty->GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+            }
+            checkBoxGroupModifier_->SetCheckboxGroupStyle(checkboxStyle);
         }
-        if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
-            checkboxStyle = paintProperty->GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
-        }
-        checkBoxGroupModifier_->SetCheckboxGroupStyle(checkboxStyle);
         auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(checkBoxGroupModifier_);
         paintMethod->SetEnabled(enabled);
         paintMethod->SetUiStatus(uiStatus_);

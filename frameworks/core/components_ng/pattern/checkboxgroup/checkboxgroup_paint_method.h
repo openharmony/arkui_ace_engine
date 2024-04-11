@@ -98,8 +98,10 @@ public:
         if (paintProperty->GetCheckBoxGroupUnSelectedColor().has_value()) {
             checkboxGroupModifier_->SetInactiveColor(paintProperty->GetCheckBoxGroupUnSelectedColor().value());
         }
-        if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
-            checkboxGroupModifier_->SetCheckboxGroupStyle(paintProperty->GetCheckBoxGroupSelectedStyleValue());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
+                checkboxGroupModifier_->SetCheckboxGroupStyle(paintProperty->GetCheckBoxGroupSelectedStyleValue());
+            }
         }
         if (paintProperty->GetCheckBoxGroupCheckMarkColor().has_value()) {
             checkboxGroupModifier_->SetPointColor(paintProperty->GetCheckBoxGroupCheckMarkColor().value());
