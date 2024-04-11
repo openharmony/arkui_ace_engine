@@ -1165,11 +1165,15 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
         proxy->SetIndex(item.first);
         proxy->SetPosition(position);
         proxy->SetMainAxisLength(mainAxisLength);
-        proxy->SetFinishTransitionEvent([weak = WeakClaim(this), &item]() {
+        proxy->SetFinishTransitionEvent([weak = WeakClaim(this), index = item.first]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            item.second.isFinishAnimation = true;
-            swiper->OnSwiperCustomAnimationFinish(item);
+            auto item = swiper->itemPositionInAnimation_.find(index);
+            if (item == swiper->itemPositionInAnimation_.end()) {
+                return;
+            }
+            item->second.isFinishAnimation = true;
+            swiper->OnSwiperCustomAnimationFinish(*item);
         });
         transition(proxy);
     }
