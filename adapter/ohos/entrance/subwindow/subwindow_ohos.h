@@ -178,7 +178,7 @@ private:
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 
-    void HideFilter();
+    void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
 

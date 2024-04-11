@@ -535,7 +535,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
-    InitHierarchicalParameters(isShowInSubWindow);
+    InitHierarchicalParameters(isShowInSubWindow, menuPattern);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
@@ -595,7 +595,8 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
     CHECK_NULL_RETURN(frameNode, size);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, size);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
+                                                    : pipelineContext->GetDisplayWindowRectInfo();
     for (auto& child : frameNode->GetAllChildrenWithBuild()) {
         auto hostNode = child->GetHostNode();
         auto geometryNode = child->GetGeometryNode();
@@ -1111,7 +1112,8 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<Geo
     CHECK_NULL_VOID(safeAreaManager);
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
+                                                    : pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
     float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
     float screenHeight = wrapperSize_.Height() + wrapperRect_.Top();
@@ -2240,7 +2242,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     return childPosition;
 }
 
-void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow)
+void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2251,7 +2253,25 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow)
         hierarchicalParameters_ = false;
         return;
     }
+
     hierarchicalParameters_ = expandDisplay;
+
+    RefPtr<Container> container = Container::Current();
+    auto containerId = Container::CurrentId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(parentContainerId);
+    }
+
+    if (container && container->IsUIExtensionWindow()) {
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWrapperNode = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+            hierarchicalParameters_ = true;
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

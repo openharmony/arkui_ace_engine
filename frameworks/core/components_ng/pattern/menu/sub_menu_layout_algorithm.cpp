@@ -39,7 +39,7 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto isShowInSubWindow = props->GetShowInSubWindowValue(false);
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
-    InitHierarchicalParameters(isShowInSubWindow);
+    InitHierarchicalParameters(isShowInSubWindow, menuPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         InitializePaddingAPI11(layoutWrapper);
         ModifySubMenuWrapper(layoutWrapper);
