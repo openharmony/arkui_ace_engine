@@ -2864,20 +2864,22 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 
 void WebPattern::WindowDrag(int32_t width, int32_t height)
 {
-    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
-    if (!isSmoothDragResizeEnabled) {
-        return;
-    }
-    if (last_height_ == 0 && last_width_ == 0) {
-        last_height_ = height;
-        last_width_ = width;
-    }
-    if (!GetPendingSizeStatus() && g_dragWindowFlag) {
-        int64_t pre_height = height - last_height_;
-        int64_t pre_width = width - last_width_;
-        delegate_->DragResize(width, height, pre_height, pre_width);
-        last_height_ = height;
-        last_width_ = width;
+    if (delegate_) {
+        bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
+        if (!isSmoothDragResizeEnabled) {
+            return;
+        }
+        if (last_height_ == 0 && last_width_ == 0) {
+            last_height_ = height;
+            last_width_ = width;
+        }
+        if (!GetPendingSizeStatus() && g_dragWindowFlag) {
+            int64_t pre_height = height - last_height_;
+            int64_t pre_width = width - last_width_;
+            delegate_->DragResize(width, height, pre_height, pre_width);
+            last_height_ = height;
+            last_width_ = width;
+        }
     }
 }
 

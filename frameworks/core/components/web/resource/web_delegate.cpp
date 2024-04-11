@@ -2881,7 +2881,6 @@ void WebDelegate::DragResize(const double& width, const double& height,
 
 void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "======= web_delegate drag smooth param = %{public}d", isSmoothDragResizeEnabled);
     isSmoothDragResizeEnabled_ = isSmoothDragResizeEnabled;
 }
 
