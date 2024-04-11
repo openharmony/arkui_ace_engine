@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/base/i18n/time_format.h"
 
 namespace OHOS::Ace::NG {
 const std::string DEFAULT_ERR_CODE = "-1";
@@ -249,6 +250,59 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerUseMilitaryTime(ArkUIRun
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerUseMilitaryTime(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TimepickerBridge::SetTimepickerDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> hourArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> minuteArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    ZeroPrefixType minuteType = ZeroPrefixType::AUTO;
+    ZeroPrefixType secondType = ZeroPrefixType::AUTO;
+    std::string hour = "hour";
+    if (hourArg->IsString()) {
+        std::string hour = hourArg->ToString(vm)->ToString();
+        if (hour == "2-digit") {
+            hourType = ZeroPrefixType::SHOW;
+        } else if (hour == "numeric") {
+            hourType = ZeroPrefixType::HIDE;
+        }
+    }
+    std::string minute = "minute";
+    if (minuteArg->IsString()) {
+        minuteType = ZeroPrefixType::SHOW;
+        std::string minute = minuteArg->ToString(vm)->ToString();
+        if (minute == "numeric") {
+            minuteType = ZeroPrefixType::HIDE;
+        }
+    }
+    std::string second = "second";
+    if (secondArg->IsString()) {
+        secondType = ZeroPrefixType::SHOW;
+        std::string second = secondArg->ToString(vm)->ToString();
+        if (second == "numeric") {
+            secondType = ZeroPrefixType::HIDE;
+        }
+    }
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerDateTimeOptions(
+        nativeNode, static_cast<ArkUI_Int32>(hourType), static_cast<ArkUI_Int32>(minuteType),
+        static_cast<ArkUI_Int32>(secondType));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TimepickerBridge::ResetTimepickerDateTimeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerDateTimeOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -1665,6 +1665,9 @@ struct ArkUITimepickerModifier {
     ArkUI_Int32 (*getTimepickerUseMilitaryTime)(ArkUINodeHandle node);
     void (*setTimepickerUseMilitaryTime)(ArkUINodeHandle node, ArkUI_Bool isUseMilitaryTime);
     void (*resetTimepickerUseMilitaryTime)(ArkUINodeHandle node);
+    void (*setTimepickerDateTimeOptions)(ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType,
+        ArkUI_Int32 secondType);
+    void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {

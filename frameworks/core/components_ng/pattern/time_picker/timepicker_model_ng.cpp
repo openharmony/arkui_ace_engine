@@ -546,6 +546,24 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
 }
 
+void TimePickerModelNG::SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
+    ZeroPrefixType& minuteType, ZeroPrefixType& secondType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetPrefixHour(hourType);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, static_cast<int32_t>(hourType), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute,
+        static_cast<int32_t>(minuteType), frameNode);
+    if (timePickerRowPattern->GetHasSecond()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond,
+            static_cast<int32_t>(secondType), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond,
+            static_cast<int32_t>(ZeroPrefixType::OFF), frameNode);
+    }
+}
+
 PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;
