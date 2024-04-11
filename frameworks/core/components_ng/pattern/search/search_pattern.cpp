@@ -1160,6 +1160,10 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
             textFieldLayoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
         jsonDecoration->Put("style", style.c_str());
         json->Put("decoration", jsonDecoration->ToString().c_str());
+        json->Put("minFontSize",
+            textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str());
+        json->Put("maxFontSize",
+            textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str());
     }
 }
 

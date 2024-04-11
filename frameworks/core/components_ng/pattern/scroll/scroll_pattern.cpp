@@ -730,6 +730,16 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
+std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbility()
+{
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_RETURN(pattern, false);
+                return pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+            },
+        GetAxis() };
+}
+
 std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
 {
     std::optional<float> predictSnapOffset;

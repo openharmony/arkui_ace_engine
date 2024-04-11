@@ -527,6 +527,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(PointLight, PointLightProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightPosition, TranslateOptions);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIntensity, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightColor, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIlluminated, uint32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, IlluminatedBorderWidth, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, Bloom, float);
@@ -655,6 +656,7 @@ protected:
 
     virtual void OnLightPositionUpdate(const TranslateOptions& value) {}
     virtual void OnLightIntensityUpdate(const float value) {}
+    virtual void OnLightColorUpdate(const Color& value) {}
     virtual void OnLightIlluminatedUpdate(const uint32_t value) {}
     virtual void OnIlluminatedBorderWidthUpdate(const Dimension& value) {}
     virtual void OnBloomUpdate(const float value) {}

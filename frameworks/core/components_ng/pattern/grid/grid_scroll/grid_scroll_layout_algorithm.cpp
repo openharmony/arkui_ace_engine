@@ -41,8 +41,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(gridLayoutProperty);
 
     // Pre-recycle
-    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_, gridLayoutInfo_.currentOffset_,
-                                               gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, layoutWrapper);
+    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_,
+        gridLayoutInfo_.currentOffset_ - gridLayoutInfo_.prevOffset_, gridLayoutInfo_.startIndex_,
+        gridLayoutInfo_.endIndex_, layoutWrapper);
 
     // Step1: Decide size of Grid
     Axis axis = gridLayoutInfo_.axis_;

@@ -23,8 +23,10 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkbox_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -61,6 +63,7 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
 {
     auto checkboxName = std::optional<std::string>("");
     auto checkboxGroup = std::optional<std::string>("");
+    std::optional<std::function<void()>> customBuilderFunc;
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto name = paramObject->GetProperty("name");
@@ -71,8 +74,25 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
         if (group->IsString()) {
             checkboxGroup = group->ToString();
         }
+        auto builderObject = paramObject->GetProperty("indicatorBuilder");
+        if (builderObject->IsFunction()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
+            CHECK_NULL_VOID(builderFunc);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto callbackFunc = [execCtx = info.GetExecutionContext(),
+                func = std::move(builderFunc), node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("CheckBox.builder");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute();
+            };
+            customBuilderFunc = std::move(callbackFunc);
+        }
     }
     CheckBoxModel::GetInstance()->Create(checkboxName, checkboxGroup, V2::CHECK_BOX_ETS_TAG);
+    if (customBuilderFunc.has_value()) {
+        CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
+    }
 }
 
 void JSCheckbox::JSBind(BindingTarget globalObj)

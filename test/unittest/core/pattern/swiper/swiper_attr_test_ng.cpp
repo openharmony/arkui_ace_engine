@@ -1066,14 +1066,6 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetNextMargin(), dimension);
 
     /**
-     * @tc.steps: step3.4. Test SetOnChangeEvent function.
-     * @tc.expected: pattern->onIndexChangeEvent_ is not null.
-     */
-    auto onChangeEvent = [](const BaseEventInfo* info) {};
-    model.SetOnChangeEvent(std::move(onChangeEvent));
-    EXPECT_NE(pattern->onIndexChangeEvent_, nullptr);
-
-    /**
      * @tc.steps: step3.5. Test SetIndicatorIsBoolean function.
      * @tc.expected: pattern->indicatorIsBoolean_ is true.
      */

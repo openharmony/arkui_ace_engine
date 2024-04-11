@@ -425,11 +425,14 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 return { remain, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
-            FireOnOffsetChange(Dimension(scrollOffset_).ConvertToVp());
             if (LessNotEqual(scrollOffset_, static_cast<float>(refreshOffset_.ConvertToPx())) || !pullToRefresh_) {
                 UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
+            }
+            if ((refreshStatus_ == RefreshStatus::DRAG || refreshStatus_ == RefreshStatus::OVER_DRAG) &&
+                Positive(scrollOffset_)) {
+                FireOnOffsetChange(Dimension(scrollOffset_).ConvertToVp());
             }
         }
         UpdateFirstChildPlacement();

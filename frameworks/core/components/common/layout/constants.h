@@ -689,6 +689,11 @@ enum class FunctionKey {
     F10 = 10,
     F11 = 11,
     F12 = 12,
+    TAB = 13,
+    DPAD_UP = 14,
+    DPAD_DOWN = 15,
+    DPAD_LEFT = 16,
+    DPAD_RIGHT = 17,
 };
 
 enum class ObscuredReasons {

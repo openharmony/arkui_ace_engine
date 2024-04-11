@@ -36,6 +36,11 @@ public:
         svgDom_->SetSmoothEdge(value);
     }
 
+    void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
+    {
+        svgDom_->SetColorFilter(colorFilter);
+    }
+
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
     int32_t GetWidth() const override

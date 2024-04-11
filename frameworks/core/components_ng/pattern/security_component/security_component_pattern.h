@@ -106,12 +106,14 @@ private:
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
 #ifdef SECURITY_COMPONENT_ENABLE
-    void RegisterSecurityComponentAsync();
+    void RegisterSecurityComponentAsync(int32_t instanceID);
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();
     void UnregisterSecurityComponent();
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
+    void DoTriggerOnclick(int32_t result);
+    void TriggerOnclick(int32_t instance_, int32_t result);
 #endif
     std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;

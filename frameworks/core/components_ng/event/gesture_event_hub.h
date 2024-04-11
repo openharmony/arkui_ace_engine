@@ -323,11 +323,21 @@ public:
         return clickEventActuator_->IsClickEventsEmpty();
     }
 
+    GestureEventFunc GetClickEvent()
+    {
+        return clickEventActuator_->GetClickEvent();
+    }
+
     void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const
     {
         return longPressEventActuator_ != nullptr;
+    }
+
+    void SetRedirectClick(bool redirectClick)
+    {
+        redirectClick_ = redirectClick;
     }
 
     bool ActLongClick();
@@ -687,6 +697,7 @@ private:
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;
+    bool redirectClick_  = false;
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;

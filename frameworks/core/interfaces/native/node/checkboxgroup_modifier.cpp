@@ -146,13 +146,28 @@ void ResetCheckboxGroupMark(ArkUINodeHandle node)
     CheckBoxGroupModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
+void SetCheckboxGroupStyle(ArkUINodeHandle node, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, static_cast<CheckBoxStyle>(style));
+}
+
+void ResetCheckboxGroupStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetCheckboxGroupStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
+}
+
 namespace NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
     static const ArkUICheckboxGroupModifier modifier = { SetCheckboxGroupSelectedColor,
         ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
         SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
-        SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark };
+        SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
+        SetCheckboxGroupStyle, ResetCheckboxGroupStyle };
     return &modifier;
 }
 }

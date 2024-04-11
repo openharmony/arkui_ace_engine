@@ -53,18 +53,16 @@ public:
             host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
 
-        SetDefaultBackgroundColorIfNeeded();
+        SetDefaultBackgroundColorIfNeeded(host);
     }
 
-    void OnColorConfigurationUpdate() override
-    {
-        SetDefaultBackgroundColorIfNeeded();
-    }
+    void OnColorConfigurationUpdate() override;
 
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
 
 private:
-    void SetDefaultBackgroundColorIfNeeded();
+    void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
+    void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     NavigationToolbarOptions options_;
 };

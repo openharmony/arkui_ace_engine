@@ -301,7 +301,7 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onOverrideUrlLoading(callback: OnOverrideUrlLoadingCallback): this {
     throw new Error('Method not implemented.');
   }
-  enableNativeVideoPlayer(config: NativeVideoPlayerConfig): this {
+  enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {
     throw new Error('Method not implemented.');
   }
 }

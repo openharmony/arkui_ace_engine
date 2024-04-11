@@ -1141,4 +1141,40 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged001, TestSize.Level1)
     EXPECT_TRUE(isItemActionFired);
 }
 
+/**
+ * @tc.name: TitleBarPatternAnimateToTest001
+ * @tc.desc: Test AnimateTo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternAnimateToTest001, TestSize.Level1)
+{
+    constexpr float offset = 200.0f;
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    ASSERT_EQ(titleBarPattern_->animation_, nullptr);
+    titleBarPattern_->AnimateTo(offset);
+    ASSERT_NE(titleBarPattern_->animation_, nullptr);
+    titleBarPattern_->OnCoordScrollStart();
+    ASSERT_EQ(titleBarPattern_->animation_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPatternSpringAnimationTest001
+ * @tc.desc: Test SpringAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternSpringAnimationTest001, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
+    titleBarPattern_->SpringAnimation(100.0f, 0);
+    ASSERT_NE(titleBarPattern_->springAnimation_, nullptr);
+    titleBarPattern_->OnCoordScrollStart();
+    ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
+}
 } // namespace OHOS::Ace::NG

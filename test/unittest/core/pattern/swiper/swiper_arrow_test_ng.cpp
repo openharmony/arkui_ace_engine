@@ -21,80 +21,47 @@ namespace {} // namespace
 
 class SwiperArrowTestNg : public SwiperTestNg {
 public:
+    ImageSourceInfo GetImageInfo(const RefPtr<FrameNode>& arrowNode);
+    RefPtr<MockRenderContext> GetArrowContext(int32_t childIndex);
+    void HandleMouseEvent(Offset mousePoint);
+    AssertionResult VerifyArrowVisible(bool leftArrowVisible, bool rightArrowVisible);
 };
 
-/**
- * @tc.name: ArrowOnModifyDone001
- * @tc.desc: Test ArrowOnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperArrowTestNg, ArrowOnModifyDone001, TestSize.Level1)
+ImageSourceInfo SwiperArrowTestNg::GetImageInfo(const RefPtr<FrameNode>& arrowNode)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
-    auto leftSwiperArrowLayoutProperty =
-        AceType::DynamicCast<SwiperArrowLayoutProperty>(leftArrowPattern->GetSwiperArrowLayoutProperty());
-    leftSwiperArrowLayoutProperty->UpdateBackgroundSize(3.0_vp);
-    leftSwiperArrowLayoutProperty->UpdateArrowColor(Color::BLACK);
-    leftSwiperArrowLayoutProperty->UpdateArrowSize(10.0_vp);
-    /**
-     * @tc.steps: step3. call OnModifyDone.
-     * @tc.expected: leftArrowPattern->isFirstCreate_ is false.
-     */
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    leftArrowPattern->OnModifyDone();
-    EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
+    auto buttonNode = AceType::DynamicCast<FrameNode>(arrowNode->GetFirstChild());
+    auto imageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    auto imageSourceInfo = imageNode->GetLayoutProperty<ImageLayoutProperty>()->GetImageSourceInfo();
+    return imageSourceInfo.value();
 }
 
-/**
- * @tc.name: ArrowOnModifyDone002
- * @tc.desc: Test ArrowOnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperArrowTestNg, ArrowOnModifyDone002, TestSize.Level1)
+RefPtr<MockRenderContext> SwiperArrowTestNg::GetArrowContext(int32_t childIndex)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
-    auto leftSwiperArrowLayoutProperty =
-        AceType::DynamicCast<SwiperArrowLayoutProperty>(leftArrowPattern->GetSwiperArrowLayoutProperty());
-    leftSwiperArrowLayoutProperty->UpdateBackgroundSize(3.0_vp);
-    leftSwiperArrowLayoutProperty->UpdateArrowColor(Color::BLACK);
-    leftSwiperArrowLayoutProperty->UpdateArrowSize(10.0_vp);
-    leftSwiperArrowLayoutProperty->UpdateIsShowBackground(true);
-    leftSwiperArrowLayoutProperty->UpdateEnabled(false);
-    leftSwiperArrowLayoutProperty->UpdateDirection(Axis::VERTICAL);
-    /**
-     * @tc.steps: step3. call OnModifyDone.
-     * @tc.expected: imageSourceInfo->GetResourceId() is InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG.
-     */
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    leftArrowPattern->OnModifyDone();
-    EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
+    auto node = GetChildFrameNode(frameNode_, childIndex);
+    auto buttonNode = AceType::DynamicCast<FrameNode>(node->GetFirstChild());
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(buttonNode->renderContext_);
+    return mockRenderContext;
+}
 
-    leftArrowPattern->OnModifyDone();
-    auto firstChild = AceType::DynamicCast<FrameNode>(leftArrowNode->GetFirstChild());
-    EXPECT_NE(firstChild, nullptr);
-    auto imageNode = AceType::DynamicCast<FrameNode>(firstChild->GetFirstChild());
-    EXPECT_NE(imageNode, nullptr);
-    auto imageSourceInfo = imageNode->GetLayoutProperty<ImageLayoutProperty>()->GetImageSourceInfo();
-    EXPECT_NE(imageSourceInfo, std::nullopt);
-    EXPECT_EQ(InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG, imageSourceInfo->GetResourceId());
+void SwiperArrowTestNg::HandleMouseEvent(Offset mousePoint)
+{
+    MouseInfo info;
+    info.SetLocalLocation(mousePoint);
+    pattern_->mouseEvent_->GetOnMouseEventFunc()(info);
+}
+
+AssertionResult SwiperArrowTestNg::VerifyArrowVisible(bool leftArrowVisible, bool rightArrowVisible)
+{
+    int32_t leftArrowNodeIndex = pattern_->IsShowIndicator() ? 5 : 4;
+    int32_t rightArrowNodeIndex = pattern_->IsShowIndicator() ? 6 : 5;
+    auto leftMockRenderContext = GetArrowContext(leftArrowNodeIndex);
+    auto rightMockRenderContext = GetArrowContext(rightArrowNodeIndex);
+    if (leftMockRenderContext->isVisible_ == leftArrowVisible &&
+        rightMockRenderContext->isVisible_ == rightArrowVisible) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure() << "Actual: {" << leftMockRenderContext->isVisible_ << ", " <<
+        rightMockRenderContext->isVisible_<< "} Expected: {" << leftArrowVisible << ", " << rightArrowVisible << "}";
 }
 
 /**
@@ -104,34 +71,23 @@ HWTEST_F(SwiperArrowTestNg, ArrowOnModifyDone002, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, UpdateArrowContent001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Set arrow
+     * @tc.expected: Vertify imageInfo
+     */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
     auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
-    auto leftSwiperArrowLayoutProperty =
-        AceType::DynamicCast<SwiperArrowLayoutProperty>(leftArrowPattern->GetSwiperArrowLayoutProperty());
-    leftSwiperArrowLayoutProperty->UpdateBackgroundSize(3.0_vp);
-    leftSwiperArrowLayoutProperty->UpdateArrowColor(Color::BLACK);
-    leftSwiperArrowLayoutProperty->UpdateArrowSize(10.0_vp);
-    leftArrowPattern->OnModifyDone();
-    EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
-
-    /**
-     * @tc.steps: step3. call UpdateArrowContent.
-     * @tc.expected: imageSourceInfo->GetResourceId() is InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG.
-     */
-    leftArrowPattern->UpdateArrowContent();
-    auto firstChild = AceType::DynamicCast<FrameNode>(leftArrowNode->GetFirstChild());
-    EXPECT_NE(firstChild, nullptr);
-    auto imageNode = AceType::DynamicCast<FrameNode>(firstChild->GetFirstChild());
-    EXPECT_NE(imageNode, nullptr);
-    auto imageSourceInfo = imageNode->GetLayoutProperty<ImageLayoutProperty>()->GetImageSourceInfo();
-    EXPECT_NE(imageSourceInfo, std::nullopt);
+    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
+    auto leftImageInfo = GetImageInfo(leftArrowNode);
+    auto rightImageInfo = GetImageInfo(rightArrowNode);
+    EXPECT_EQ(leftImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
+    EXPECT_EQ(rightImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
+    EXPECT_EQ(leftImageInfo.GetFillColor(), ARROW_PARAMETERS.arrowColor.value());
+    EXPECT_EQ(leftImageInfo.GetFillColor(), rightImageInfo.GetFillColor());
 }
 
 /**
@@ -141,284 +97,511 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent001, TestSize.Level1)
  */
 HWTEST_F(SwiperArrowTestNg, UpdateArrowContent002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Set VERTICAL and enabled:false
+     * @tc.expected: Vertify imageInfo
+     */
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+        model.SetEnabled(false);
+    });
+    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
+    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
+    auto leftImageInfo = GetImageInfo(leftArrowNode);
+    auto rightImageInfo = GetImageInfo(rightArrowNode);
+    EXPECT_EQ(leftImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG);
+    EXPECT_EQ(rightImageInfo.GetResourceId(), InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG);
+    EXPECT_EQ(leftImageInfo.GetFillColor(), ARROW_PARAMETERS.arrowColor.value().BlendOpacity(ARROW_DISABLED_ALPHA));
+    EXPECT_EQ(leftImageInfo.GetFillColor(), rightImageInfo.GetFillColor());
+}
+
+/**
+ * @tc.name: ClickArrow001
+ * @tc.desc: Click arrow directly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, ClickArrow001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode->GetFirstChild());
+    auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
+    auto leftMockRenderContext = AceType::DynamicCast<MockRenderContext>(leftButtonNode->renderContext_);
+    EXPECT_TRUE(leftMockRenderContext->isVisible_);
+
+    /**
+     * @tc.steps: step1. Touch down button
+     * @tc.expected: change bgColor to clickColor
+     */
+    leftArrowPattern->ButtonTouchEvent(leftButtonNode, TouchType::DOWN);
+    EXPECT_EQ(leftMockRenderContext->blendColor_, CLICK_ARROW_COLOR);
+
+    /**
+     * @tc.steps: step2. Touch up button
+     * @tc.expected: reset bgColor
+     */
+    leftArrowPattern->ButtonTouchEvent(leftButtonNode, TouchType::UP);
+    EXPECT_EQ(leftMockRenderContext->blendColor_, Color::TRANSPARENT);
+
+    /**
+     * @tc.steps: step3. Click button
+     * @tc.expected: Swipe to pre item
+     */
+    leftArrowPattern->ButtonClickEvent();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+}
+
+/**
+ * @tc.name: ClickArrow002
+ * @tc.desc: Hover and click arrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, ClickArrow002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
     auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
+    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode->GetFirstChild());
     auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
-    EXPECT_NE(rightArrowPattern, nullptr);
-    auto rightSwiperArrowLayoutProperty =
-        AceType::DynamicCast<SwiperArrowLayoutProperty>(rightArrowPattern->GetSwiperArrowLayoutProperty());
-
-    EXPECT_NE(rightSwiperArrowLayoutProperty, nullptr);
-    rightSwiperArrowLayoutProperty->UpdateBackgroundSize(3.0_vp);
-    rightSwiperArrowLayoutProperty->UpdateArrowColor(Color::BLACK);
-    rightSwiperArrowLayoutProperty->UpdateArrowSize(10.0_vp);
-    rightSwiperArrowLayoutProperty->UpdateDirection(Axis::VERTICAL);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    rightArrowPattern->OnModifyDone();
-    EXPECT_FALSE(rightArrowPattern->isFirstCreate_);
+    auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
+    EXPECT_TRUE(rightMockRenderContext->isVisible_);
 
     /**
-     * @tc.steps: step3. call UpdateArrowContent.
-     * @tc.expected: imageSourceInfo->GetResourceId() is InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG.
+     * @tc.steps: step1. Not hover button
+     * @tc.expected: BgColor is default
      */
-    rightArrowPattern->UpdateArrowContent();
-    auto firstChild = AceType::DynamicCast<FrameNode>(rightArrowNode->GetFirstChild());
-    EXPECT_NE(firstChild, nullptr);
-    auto imageNode = AceType::DynamicCast<FrameNode>(firstChild->GetFirstChild());
-    EXPECT_NE(imageNode, nullptr);
-    auto imageSourceInfo = imageNode->GetLayoutProperty<ImageLayoutProperty>()->GetImageSourceInfo();
-    EXPECT_NE(imageSourceInfo, std::nullopt);
-    EXPECT_EQ(InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG, imageSourceInfo->GetResourceId());
+    rightArrowPattern->ButtonOnHover(rightButtonNode, false);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, Color::TRANSPARENT);
+
+    /**
+     * @tc.steps: step2. Hover button
+     * @tc.expected: change bgColor to hoverColor
+     */
+    rightArrowPattern->ButtonOnHover(rightButtonNode, true);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR);
+
+    /**
+     * @tc.steps: step3. Touch down button
+     * @tc.expected: change bgColor to hoverColor+clickColor
+     */
+    rightArrowPattern->ButtonTouchEvent(rightButtonNode, TouchType::DOWN);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR.BlendColor(CLICK_ARROW_COLOR));
+
+    /**
+     * @tc.steps: step4. Touch up button
+     * @tc.expected: change bgColor to hoverColor
+     */
+    rightArrowPattern->ButtonTouchEvent(rightButtonNode, TouchType::UP);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR);
+
+    /**
+     * @tc.steps: step5. Click button
+     * @tc.expected: Swipe to next item
+     */
+    rightArrowPattern->ButtonClickEvent();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
 }
 
 /**
- * @tc.name: SwiperPatternArrowHover001
- * @tc.desc: ArrowHover
+ * @tc.name: ClickArrow003
+ * @tc.desc: Hover and move out arrow by touch
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperArrowTestNg, SwiperPatternArrowHover001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    bool hoverFlag = true;
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-
-    /**
-     * @tc.steps: step2. call ArrowHover.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->ArrowHover(hoverFlag);
-            if (i == 1) {
-                pattern_->leftButtonId_.reset();
-            }
-            pattern_->leftButtonId_ = 1;
-        }
-        pattern_->rightButtonId_ = 1;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternCheckAndSetArrowHoverState001
- * @tc.desc: CheckAndSetArrowHoverState
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperArrowTestNg, SwiperPatternCheckAndSetArrowHoverState001, TestSize.Level1)
+HWTEST_F(SwiperArrowTestNg, ClickArrow003, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayArrow(true); // show arrow
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
     auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    pattern_->currentIndex_ = 1;
-    pattern_->leftButtonId_ = 1;
-    pattern_->rightButtonId_ = 1;
-    pattern_->indicatorId_ = 1;
-    layoutProperty_->UpdateShowIndicator(false);
-    auto mousePoint = PointF(0.0f, 0.0f);
-   
-    /**
-     * @tc.steps: step2. call CheckAndSetArrowHoverState.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                pattern_->CheckAndSetArrowHoverState(mousePoint);
-                if (j == 1) {
-                    pattern_->leftButtonId_ = 1;
-                    continue;
-                }
-                pattern_->leftButtonId_.reset();
-            }
-            pattern_->rightButtonId_.reset();
-        }
-        pattern_->indicatorId_.reset();
-    }
+    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode->GetFirstChild());
+    auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+    auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
+    EXPECT_TRUE(rightMockRenderContext->isVisible_);
 
-    pattern_->leftButtonId_ = 1;
-    pattern_->rightButtonId_ = 1;
-    pattern_->indicatorId_ = 1;
-    frameNode_->AddChild(leftArrowNode);
-    frameNode_->AddChild(indicatorNode);
-    frameNode_->AddChild(rightArrowNode);
-    frameNode_->AddChild(indicatorNode);
-    layoutProperty_->UpdateIsSidebarMiddle(true);
-    pattern_->CheckAndSetArrowHoverState(mousePoint);
-    layoutProperty_->UpdateIsSidebarMiddle(false);
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->CheckAndSetArrowHoverState(mousePoint);
-            if (i == 1) {
-                pattern_->currentIndex_ = 1;
-            }
-            pattern_->currentIndex_ = 0;
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
-    layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
-    for (int i = 0; i <= 1; i++) {
-        pattern_->CheckAndSetArrowHoverState(mousePoint);
-        layoutProperty_->UpdateDirection(Axis::VERTICAL);
-    }
+    /**
+     * @tc.steps: step1. Hover button
+     * @tc.expected: change bgColor to hoverColor
+     */
+    rightArrowPattern->ButtonOnHover(rightButtonNode, true);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR);
+
+    /**
+     * @tc.steps: step2. Touch down button
+     * @tc.expected: change bgColor to hoverColor+clickColor
+     */
+    rightArrowPattern->ButtonTouchEvent(rightButtonNode, TouchType::DOWN);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR.BlendColor(CLICK_ARROW_COLOR));
+
+    /**
+     * @tc.steps: step3. Hover button
+     * @tc.expected: bgColor not change
+     */
+    rightArrowPattern->ButtonOnHover(rightButtonNode, true);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR.BlendColor(CLICK_ARROW_COLOR));
+
+    /**
+     * @tc.steps: step1. Move out of button
+     * @tc.expected: bgColor not change
+     */
+    rightArrowPattern->ButtonOnHover(rightButtonNode, false);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR.BlendColor(CLICK_ARROW_COLOR));
+
+    /**
+     * @tc.steps: step4. Touch cancel outside button
+     * @tc.expected: change bgColor to default
+     */
+    rightArrowPattern->ButtonTouchEvent(rightButtonNode, TouchType::CANCEL);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, Color::TRANSPARENT);
 }
 
 /**
- * @tc.name: SwiperInitArrow001
- * @tc.desc: Test SwiperPattern SwiperInitArrow
+ * @tc.name: HoverShow001
+ * @tc.desc: When hover arrow, show arrow. when not hover, hide arrow
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperArrowTestNg, SwiperInitArrow001, TestSize.Level1)
+HWTEST_F(SwiperArrowTestNg, HoverShow001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
+        model.SetDisplayArrow(true);
+        model.SetHoverShow(true); // when not hover, hide arrow
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-
-    layoutProperty_->UpdateDisplayArrow(true);
-    layoutProperty_->UpdateHoverShow(true);
-    layoutProperty_->UpdateIsShowBackground(true);
-    layoutProperty_->UpdateBackgroundSize(Dimension(1));
-    layoutProperty_->UpdateBackgroundColor(Color(1));
-    layoutProperty_->UpdateArrowSize(Dimension(1));
-    layoutProperty_->UpdateArrowColor(Color(1));
-    layoutProperty_->UpdateIsSidebarMiddle(true);
+    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
+    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode->GetFirstChild());
+    auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+    auto rightMockRenderContext = AceType::DynamicCast<MockRenderContext>(rightButtonNode->renderContext_);
+    EXPECT_FALSE(rightMockRenderContext->isVisible_);
 
     /**
-     * @tc.steps: step3. call InitArrow.
-     * @tc.expected: frameNode_ lastChild is SWIPER_INDICATOR_ETS_TAG
+     * @tc.steps: step1. Touch down button
+     * @tc.expected: BgColor not change because not hover, the button is inVisible
      */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->InitArrow();
-            if (i == 1) {
-                break;
-            }
-            pattern_->leftButtonId_ = 1;
-        }
-        layoutProperty_->UpdateDisplayArrow(false);
-    }
+    rightArrowPattern->ButtonTouchEvent(rightButtonNode, TouchType::DOWN);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, Color::TRANSPARENT);
 
-    pattern_->leftButtonId_ = 1;
-    pattern_->rightButtonId_ = 1;
-    pattern_->InitArrow();
-    EXPECT_TRUE(pattern_->HasLeftButtonNode());
-    EXPECT_TRUE(pattern_->HasRightButtonNode());
+    /**
+     * @tc.steps: step2. Hover button
+     * @tc.expected: Show arrow
+     */
+    rightArrowPattern->ButtonOnHover(rightButtonNode, true);
+    EXPECT_TRUE(rightMockRenderContext->isVisible_);
+
+    /**
+     * @tc.steps: step3. Touch down button
+     * @tc.expected: change bgColor to hoverColor+clickColor because hover, the button is visible
+     */
+    rightArrowPattern->ButtonTouchEvent(rightButtonNode, TouchType::DOWN);
+    EXPECT_EQ(rightMockRenderContext->blendColor_, HOVER_ARROW_COLOR.BlendColor(CLICK_ARROW_COLOR));
 }
 
 /**
- * @tc.name: SetButtonVisible001
- * @tc.desc: Test SetButtonVisible
+ * @tc.name: HoverShow002
+ * @tc.desc: When loop:false, arrow isVisible depend on currentIndex
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperArrowTestNg, SetButtonVisible001, TestSize.Level1)
+HWTEST_F(SwiperArrowTestNg, HoverShow002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
+        model.SetLoop(false);
+        model.SetDisplayArrow(true);
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
-    auto leftSwiperArrowLayoutProperty = leftArrowPattern->GetSwiperArrowLayoutProperty();
-    leftSwiperArrowLayoutProperty->UpdateBackgroundSize(3.0_vp);
-    leftSwiperArrowLayoutProperty->UpdateArrowColor(Color::BLACK);
-    leftSwiperArrowLayoutProperty->UpdateArrowSize(10.0_vp);
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    leftArrowPattern->OnModifyDone();
-    EXPECT_FALSE(leftArrowPattern->isFirstCreate_);
 
     /**
-     * @tc.cases: case3.1 Selected point is not at both ends and RenderContext.SetVisible() will be called.
+     * @tc.steps: step1. CurrentIndex is 0
+     * @tc.expected: Can not swipe left, left arrow is inVisible
      */
-    leftArrowPattern->index_ = 1;
-    leftSwiperArrowLayoutProperty->UpdateHoverShow(true);
-    leftArrowPattern->SetButtonVisible(false);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
 
     /**
-     * @tc.cases: case3.2 Selected point is not at both ends and RenderContext.SetVisible() will be called.
+     * @tc.steps: step2. CurrentIndex is last index
+     * @tc.expected: Can not swipe right, right arrow is inVisible
      */
-    leftSwiperArrowLayoutProperty->UpdateHoverShow(false);
-    leftArrowPattern->SetButtonVisible(false);
-
-    /**
-     * @tc.cases: case3.3 Selected point is first point and loop value is false RenderContext.SetVisible() will be
-     * called..
-     */
-    leftArrowPattern->index_ = 0;
-    leftSwiperArrowLayoutProperty->UpdateLoop(false);
-    leftArrowPattern->SetButtonVisible(true);
-
-    /**
-     * @tc.cases: case3.4 Selected point is first point and loop value is true RenderContext.SetVisible() will be
-     * called.
-     */
-    leftSwiperArrowLayoutProperty->UpdateLoop(true);
-    leftArrowPattern->SetButtonVisible(false);
+    ChangeIndex(3);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_TRUE(VerifyArrowVisible(true, false));
 }
 
 /**
- * @tc.name: ButtonOnHover001
- * @tc.desc: Test ButtonOnHover
+ * @tc.name: HoverEvent001
+ * @tc.desc: When has no indicator and hover swiper, will show arrow
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperArrowTestNg, ButtonOnHover001, TestSize.Level1)
+HWTEST_F(SwiperArrowTestNg, HoverEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Hide indicator
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetShowIndicator(false); // hide indicator
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(true);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+
+    /**
+     * @tc.steps: step2. Hover swiper
+     * @tc.expected: Show arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+
+    /**
+     * @tc.steps: step3. No hvoer swiper
+     * @tc.expected: Hide arrow
+     */
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: HoverEvent002
+ * @tc.desc: When has indicator, arrow visible depend on others
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, HoverEvent002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {
         model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
+        model.SetHoverShow(true);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
-    auto leftSwiperArrowLayoutProperty = leftArrowPattern->GetSwiperArrowLayoutProperty();
-    leftSwiperArrowLayoutProperty->UpdateBackgroundSize(3.0_vp);
-    leftSwiperArrowLayoutProperty->UpdateArrowColor(Color::BLACK);
-    leftSwiperArrowLayoutProperty->UpdateArrowSize(10.0_vp);
-
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId() + 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    leftArrowPattern->OnModifyDone();
-    ASSERT_NE(leftArrowPattern->isFirstCreate_, true);
 
     /**
-     * @tc.cases: case3.1 isHover is true, RenderContext.BlendBgColor() will be called.
+     * @tc.steps: step1. Hover swiper
+     * @tc.expected: Still hide arrow
      */
-    leftArrowPattern->isTouch_ = true;
-    leftArrowPattern->ButtonOnHover(buttonNode, true);
+    pattern_->hoverEvent_->GetOnHoverEventFunc()(true);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: MouseEvent001
+ * @tc.desc: When has indicator and IsSidebarMiddle:false, test mouse event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, MouseEvent001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(true); // show arrow only when hover
+        auto arrowStyle = ARROW_PARAMETERS;
+        arrowStyle.isSidebarMiddle = false;
+        model.SetArrowStyle(arrowStyle);
+    });
+    Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
+    Offset outRegionPoint = Offset(1.f, 1.f);
 
     /**
-     * @tc.cases: case3.2 isHover is true, isTouch is false, RenderContext.BlendBgColor() will be called.
+     * @tc.steps: step1. Mouse in and out navigation at first page
+     * @tc.expected: Arrow is default hide,
+     * show arrow(expect left arrow) when mouse in navigation, hide arrow when mouse out
      */
-    leftArrowPattern->isTouch_ = false;
-    leftArrowPattern->ButtonOnHover(buttonNode, true);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
 
     /**
-     * @tc.cases: case3.3 isHover is false, isTouch is true, RenderContext.BlendBgColor() will be called.
+     * @tc.steps: step2. Mouse in and out navigation at middle page
+     * @tc.expected: Arrow is default hide, show arrow when mouse in navigation, hide arrow when mouse out
      */
-    leftArrowPattern->isTouch_ = true;
-    leftArrowPattern->ButtonOnHover(buttonNode, false);
+    ChangeIndex(2);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
 
     /**
-     * @tc.cases: case3.4 isHover is false, isTouch is false, RenderContext.BlendBgColor() will be called.
+     * @tc.steps: step3. Mouse in and out navigation at last page
+     * @tc.expected: Arrow is default hide,
+     * show arrow(expect right arrow) when mouse in navigation, hide arrow when mouse out
      */
-    leftArrowPattern->isTouch_ = false;
-    leftArrowPattern->ButtonOnHover(buttonNode, false);
+    ChangeIndex(3);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(true, false));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: MouseEvent002
+ * @tc.desc: When has indicator and IsSidebarMiddle:false, test mouse event in VERTICAL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, MouseEvent002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL); // VERTICAL layout
+        model.SetLoop(false);
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(true); // show arrow only when hover
+        auto arrowStyle = ARROW_PARAMETERS;
+        arrowStyle.isSidebarMiddle = false;
+        model.SetArrowStyle(arrowStyle);
+    });
+    Offset inRegionPoint = Offset(SWIPER_WIDTH - 10.f, SWIPER_HEIGHT / 2);
+    Offset outRegionPoint = Offset(1.f, 1.f);
+
+    /**
+     * @tc.steps: step1. Mouse in and out navigation at first page
+     * @tc.expected: Arrow is default hide,
+     * show arrow(expect left arrow) when mouse in navigation, hide arrow when mouse out
+     */
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, true));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    /**
+     * @tc.steps: step2. Mouse in and out navigation at middle page
+     * @tc.expected: Arrow is default hide, show arrow when mouse in navigation, hide arrow when mouse out
+     */
+    ChangeIndex(2);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    /**
+     * @tc.steps: step3. Mouse in and out navigation at last page
+     * @tc.expected: Arrow is default hide,
+     * show arrow(expect right arrow) when mouse in navigation, hide arrow when mouse out
+     */
+    ChangeIndex(3);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(true, false));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: MouseEvent003
+ * @tc.desc: When loop:true, test mouse event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, MouseEvent003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(true);
+        auto arrowStyle = ARROW_PARAMETERS;
+        arrowStyle.isSidebarMiddle = false;
+        model.SetArrowStyle(arrowStyle);
+    });
+    Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
+    Offset outRegionPoint = Offset(1.f, 1.f);
+
+    /**
+     * @tc.steps: step1. Mouse in and out navigation at first page
+     * @tc.expected: Arrow is default hide, show arrow when mouse in navigation, hide arrow when mouse out
+     */
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    /**
+     * @tc.steps: step2. Mouse in and out navigation at last page
+     * @tc.expected: Arrow is default hide, show arrow when mouse in navigation, hide arrow when mouse out
+     */
+    ChangeIndex(3);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+
+    HandleMouseEvent(outRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: MouseEvent004
+ * @tc.desc: When IsSidebarMiddle:true, test mouse event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, MouseEvent004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(true);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+    Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
+    MouseInfo info;
+
+    /**
+     * @tc.steps: step1. Mouse in navigation
+     * @tc.expected: Arrow is still hide because IsSidebarMiddle:true
+     */
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
+
+/**
+ * @tc.name: MouseEvent005
+ * @tc.desc: When has no indicator, test mouse event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, MouseEvent005, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetShowIndicator(false); // no indicator
+        model.SetLoop(false);
+        model.SetDisplayArrow(true); // show arrow
+        model.SetHoverShow(true);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+    Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
+
+    /**
+     * @tc.steps: step1. Mouse in navigation(no navigation)
+     * @tc.expected: Arrow is still hide because has no navigation
+     */
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
 }
 } // namespace OHOS::Ace::NG

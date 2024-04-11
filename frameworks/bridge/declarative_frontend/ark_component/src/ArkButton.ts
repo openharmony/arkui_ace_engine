@@ -34,6 +34,9 @@ const FontWeightMap = {
 };
 
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  buttonNode: BuilderNode<[ButtonConfiguration]> | null = null;
+  modifier: ContentModifier<ButtonConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -84,6 +87,22 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   size(value: SizeOptions): this {
     modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, buttonConfiguration: ButtonConfiguration): FrameNode | null {
+    buttonConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.buttonNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.buttonNode = new xNode.BuilderNode(context);
+      this.buttonNode.build(this.builder, buttonConfiguration);
+    } else {
+      this.buttonNode.update(buttonConfiguration);
+    }
+    return this.buttonNode.getFrameNode();
   }
   role(value: ButtonRole): this {
     modifierWithKey(this._modifiersWithKeys, ButtonRoleModifier.identity, ButtonRoleModifier, value);
@@ -493,4 +512,14 @@ globalThis.Button.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.ButtonModifier(nativePtr, classType);
   });
+};
+
+// @ts-ignore
+globalThis.Button.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkButtonComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };

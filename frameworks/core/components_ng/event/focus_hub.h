@@ -62,6 +62,13 @@ enum class FocusStep : int32_t {
     SHIFT_TAB = 0x5,
     TAB = 0x15,
 };
+enum class RequestFocusResult : int32_t {
+    DEFAULT = 0,
+    NON_FOCUSABLE = 1,
+    NON_FOCUSABLE_ANCESTOR = 2,
+    NON_EXIST = 3,
+    NON_FOCUSABLE_BY_TAB = 4,
+};
 
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
@@ -319,6 +326,9 @@ public:
     }
     ~FocusHub() override = default;
 
+    static constexpr int32_t SCROLL_TO_HEAD = -1;
+    static constexpr int32_t SCROLL_TO_TAIL = -2;
+
     void SetFocusStyleType(FocusStyleType type)
     {
         focusStyleType_ = type;
@@ -481,9 +491,9 @@ public:
     bool HandleFocusByTabIndex(const KeyEvent& event);
     RefPtr<FocusHub> GetChildFocusNodeByType(FocusNodeType nodeType = FocusNodeType::DEFAULT);
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
-    void HandleParentScroll() const;
+    void TriggerFocusScroll();
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
-    bool RequestFocusImmediatelyById(const std::string& id);
+    bool RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest = false);
     RefPtr<FocusView> GetFirstChildFocusView();
 
     bool IsFocusableByTab();
@@ -496,6 +506,10 @@ public:
     bool IsFocusable();
     bool IsFocusableNode();
     bool IsFocusableScope();
+
+    bool IsSyncRequestFocusable();
+    bool IsSyncRequestFocusableNode();
+    bool IsSyncRequestFocusableScope();
 
     bool IsParentFocusable() const
     {
@@ -964,6 +978,9 @@ private:
     bool HasFocusStateStyle();
 
     bool IsNeedPaintFocusState();
+
+    void ScrollByOffset();
+    bool ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) const;
 
     RefPtr<FocusHub> GetNearestNodeByProjectArea(const std::list<RefPtr<FocusHub>>& allNodes, FocusStep step);
 

@@ -69,6 +69,8 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+    void SetFadingEdge(bool fadingEdge) override;
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
     DisplayMode GetDisplayMode() const override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -108,6 +110,7 @@ public:
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
+    static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);

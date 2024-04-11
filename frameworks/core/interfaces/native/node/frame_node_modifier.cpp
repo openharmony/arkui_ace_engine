@@ -267,6 +267,26 @@ ArkUINodeHandle GetFrameNodeById(ArkUI_Int32 nodeId)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
+ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
+{
+    auto node = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
+    CHECK_NULL_RETURN(node, nullptr);
+    if (node->GetTag() == "root" || node->GetTag() == "stage" || node->GetTag() == "page") {
+        return nullptr;
+    }
+
+    if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+        auto parent = node->GetParent();
+        if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+            node = parent;
+        } else {
+            node = node->GetFirstChild();
+        }
+    }
+
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
     auto node = NG::Inspector::GetFrameNodeByKey(key);
@@ -300,7 +320,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
         GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow, GetMeasuredSize,
         GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById,
-        GetFrameNodeByKey, PropertyUpdate, GetLast };
+        GetFrameNodeByUniqueId, GetFrameNodeByKey, PropertyUpdate, GetLast };
     return &modifier;
 }
 } // namespace NodeModifier

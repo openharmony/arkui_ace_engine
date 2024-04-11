@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 88
+#define ARKUI_FULL_API_VERSION 90
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 88
+#define ARKUI_NODE_API_VERSION 90
 
 #define ARKUI_BASIC_API_VERSION 7
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -1542,6 +1542,8 @@ struct ArkUIListModifier {
     ArkUI_Float32 (*getListSpace)(ArkUINodeHandle node);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
     void (*resetListSpace)(ArkUINodeHandle node);
+    void (*setFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge);
+    void (*resetFadingEdge)(ArkUINodeHandle node);
     ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
@@ -1753,6 +1755,7 @@ struct ArkUIScrollModifier {
     ArkUI_Float32 (*getScrollFriction)(ArkUINodeHandle node);
     void (*setScrollFriction)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetScrollFriction)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getScrollScrollSnap)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*setScrollScrollSnap)(ArkUINodeHandle node, const ArkUI_Float32* paginationValue, ArkUI_Int32 paginationSize,
         const ArkUI_Int32* paginationParam, ArkUI_Int32 paramSize);
     void (*resetScrollScrollSnap)(ArkUINodeHandle node);
@@ -2056,6 +2059,12 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
     void (*setTextAreaWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
     void (*resetTextAreaWordBreak)(ArkUINodeHandle node);
+    void (*setTextAreaAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaAdaptMinFontSize)(ArkUINodeHandle node);
+    void (*setTextAreaAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaAdaptMaxFontSize)(ArkUINodeHandle node);
+    void (*setTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2162,6 +2171,12 @@ struct ArkUITextInputModifier {
     void (*setTextInputEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextInputEnableAutoFill)(ArkUINodeHandle node);
     void (*resetTextInputPadding)(ArkUINodeHandle node);
+    void (*setTextInputAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputAdaptMinFontSize)(ArkUINodeHandle node);
+    void (*setTextInputAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputAdaptMaxFontSize)(ArkUINodeHandle node);
+    void (*setTextInputHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextInputHeightAdaptivePolicy)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2199,7 +2214,8 @@ struct ArkUICheckboxModifier {
     void (*setUnSelectedColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setCheckboxWidth)(ArkUINodeHandle node, ArkUI_Float32 widthVal, ArkUI_Int32 widthUnit);
     void (*setCheckboxHeight)(ArkUINodeHandle node, ArkUI_Float32 heightVal, ArkUI_Int32 heightUnit);
-    void (*setMark)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
+    void (*setMark)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit,
+        ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit);
     void (*setCheckboxPadding)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
     void (*setCheckboxResponseRegion)(
@@ -2240,6 +2256,8 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupMark)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue);
     void (*resetCheckboxGroupMark)(ArkUINodeHandle node);
+    void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageSpanModifier {
@@ -2620,6 +2638,10 @@ struct ArkUISearchModifier {
     void (*resetSearchLineHeight)(ArkUINodeHandle node);
     void (*setSearchFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetSearchFontFeature)(ArkUINodeHandle node);
+    void (*setSearchAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchAdaptMinFontSize)(ArkUINodeHandle node);
+    void (*setSearchAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchAdaptMaxFontSize)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -3125,6 +3147,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*isAttached)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getInspectorInfo)(ArkUINodeHandle node);
     ArkUINodeHandle (*getFrameNodeById)(ArkUI_Int32 nodeId);
+    ArkUINodeHandle (*getFrameNodeByUniqueId)(ArkUI_Int32 uniqueId);
     ArkUINodeHandle (*getFrameNodeByKey)(ArkUI_CharPtr key);
     void (*propertyUpdate)(ArkUINodeHandle node);
     ArkUINodeHandle (*getLast)(ArkUINodeHandle node);

@@ -3543,4 +3543,23 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest053, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
 }
+/**
+ * @tc.name: DragDropManagerTest054
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest054, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    dragDropManager->SetEventStrictReportingEnabled(true);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    dragDropManager->SetEventStrictReportingEnabled(false);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    ASSERT_TRUE(reportingEnabledTrue);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
 } // namespace OHOS::Ace::NG

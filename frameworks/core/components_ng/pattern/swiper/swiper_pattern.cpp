@@ -918,8 +918,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             }
             velocity_.reset();
         } else if (!itemPosition_.empty() && SwiperUtils::IsStretch(layoutProperty)) {
-            auto targetPos = itemPosition_.begin()->second.startPos +
-                             (targetIndexValue - itemPosition_.begin()->first) * placeItemWidth_.value();
+            auto targetPos =
+                itemPosition_.begin()->second.startPos +
+                (targetIndexValue - itemPosition_.begin()->first) * (placeItemWidth_.value() + GetItemSpace());
             PlayTranslateAnimation(
                 currentOffset_, currentOffset_ - targetPos, targetIndexValue, false, velocity_.value_or(0.0f));
         }
@@ -1718,6 +1719,9 @@ void SwiperPattern::InitIndicator()
     BorderRadiusProperty radius;
     radius.SetRadius(INDICATOR_BORDER_RADIUS);
     renderContext->UpdateBorderRadius(radius);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->SetIndicatorInteractive(isIndicatorInteractive_);
 
     indicatorNode->MarkModifyDone();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

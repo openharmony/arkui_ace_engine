@@ -713,9 +713,10 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             animationTargetIndex_ != indicator) {
             swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
             animationTargetIndex_.reset();
-        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED) {
+        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED ||
+            *windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
             // UNDEFINED currently implies window change on foldable
-            TriggerTranslateAnimation(layoutProperty, indicator_, indicator_);
+            PlayTabBarTranslateAnimation(indicator_);
             UpdateIndicator(indicator_);
         }
         windowSizeChangeReason_.reset();

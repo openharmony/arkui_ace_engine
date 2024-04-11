@@ -302,6 +302,7 @@ void SvgDom::DrawImage(
     if (GreatNotEqual(smoothEdge_, 0.0f)) {
         root_->SetSmoothEdge(smoothEdge_);
     }
+    root_->SetColorFilter(colorFilter_);
     root_->Draw(canvas, layout, fillColor_);
     canvas.Restore();
 }
@@ -388,5 +389,10 @@ void SvgDom::SetFillColor(const std::optional<Color>& color)
 void SvgDom::SetSmoothEdge(float value)
 {
     smoothEdge_ = value;
+}
+
+void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
+{
+    colorFilter_ = colorFilter;
 }
 } // namespace OHOS::Ace::NG

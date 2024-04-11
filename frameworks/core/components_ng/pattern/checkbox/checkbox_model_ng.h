@@ -38,6 +38,7 @@ public:
     void SetSelect(bool isSelected) override;
     void SetSelectedColor(const Color& color) override;
     void SetUnSelectedColor(const Color& color) override;
+    void SetBuilder(std::optional<std::function<void(void)>>& buildFunc) override;
     void SetCheckMarkColor(const Color& color) override;
     void SetCheckMarkSize(const Dimension& size) override;
     void SetCheckMarkWidth(const Dimension& width) override;

@@ -671,6 +671,53 @@ void ResetTextAreaWordBreak(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetWordBreak(frameNode, WORD_BREAK_TYPES[2]); // 2 is the default value of WordBreak::BREAK_WORD
 }
+void SetTextAreaAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAdaptMinFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextAreaAdaptMinFontSize(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
+    TextFieldModelNG::SetAdaptMinFontSize(frameNode, minFontSize);
+}
+
+void SetTextAreaAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAdaptMaxFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextAreaAdaptMaxFontSize(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    TextFieldModelNG::SetAdaptMaxFontSize(frameNode, maxFontSize);
+}
+
+void SetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, static_cast<Ace::TextHeightAdaptivePolicy>(value));
+}
+
+void ResetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node) {}
+
 } // namespace
 
 namespace NodeModifier {
@@ -693,7 +740,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
         ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
         ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak,
-        ResetTextAreaWordBreak };
+        ResetTextAreaWordBreak, SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize,
+        SetTextAreaAdaptMaxFontSize, ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy,
+        ResetTextAreaHeightAdaptivePolicy };
     return &modifier;
 }
 

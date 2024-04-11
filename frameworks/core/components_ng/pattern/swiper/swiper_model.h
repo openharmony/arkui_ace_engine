@@ -89,6 +89,7 @@ public:
     virtual RefPtr<SwiperController> Create();
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
+    virtual void SetIndicatorInteractive(bool interactive) {}
     virtual void SetAutoPlay(bool autoPlay);
     virtual void SetAutoPlayInterval(uint32_t interval);
     virtual void SetDuration(uint32_t duration);

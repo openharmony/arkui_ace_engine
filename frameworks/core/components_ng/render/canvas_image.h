@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/image/drawing_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -28,10 +29,14 @@
 
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
+struct ImageColorFilter {
+    std::shared_ptr<std::vector<float>> colorFilterMatrix_ = nullptr;
+    RefPtr<DrawingColorFilter> colorFilterDrawing_ = nullptr;
+};
 struct ImagePaintConfig {
     RectF srcRect_;
     RectF dstRect_;
-    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
+    ImageColorFilter colorFilter_;
     std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;

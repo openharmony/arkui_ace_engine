@@ -62,6 +62,7 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
 #ifdef OHOS_PLATFORM
     option.SetArkProperties(SystemProperties::GetArkProperties());
     option.SetArkBundleName(SystemProperties::GetArkBundleName());
+    option.SetMemConfigProperty(SystemProperties::GetMemConfigProperty());
     option.SetGcThreadNum(SystemProperties::GetGcThreadNum());
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
     option.SetEnableAsmInterpreter(SystemProperties::GetAsmInterpreterEnabled());

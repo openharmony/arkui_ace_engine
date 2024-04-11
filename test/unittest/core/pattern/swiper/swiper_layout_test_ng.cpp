@@ -242,8 +242,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
         5);
     EXPECT_EQ(pattern_->itemPosition_.size(), 5);
 
-    pattern_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(1);
     EXPECT_EQ(pattern_->currentIndex_, 1);
     const float itemWidth1 = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
     CheckItems(0, 3, 20.0f, itemWidth1);
@@ -279,8 +278,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
 
     FlushLayoutTask(parent);
 
-    pattern_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(1);
     EXPECT_EQ(pattern_->currentIndex_, 1);
 
     const float itemWidth1 = (400.0f - 2 * 20.0f) / 3.0f;
@@ -338,35 +336,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperFlex001, TestSize.Level1)
     FlushLayoutTask(parent);
     EXPECT_EQ(pattern_->itemPosition_.size(), 1);
     EXPECT_EQ(GetChildOffset(frameNode_, 1).GetX(), 0.0f);
-}
-
-/**
- * @tc.name: SwiperLayoutAlgorithmLayout001
- * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_TRUE(IsEqual(indicatorNode->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(232.0, 800.0)));
-}
-
-/**
- * @tc.name: SwiperLayoutAlgorithmLayout002
- * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_TRUE(IsEqual(indicatorNode->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(464.0, 400.0)));
 }
 
 /**

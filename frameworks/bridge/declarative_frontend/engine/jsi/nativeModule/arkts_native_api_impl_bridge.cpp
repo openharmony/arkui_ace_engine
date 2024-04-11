@@ -142,6 +142,20 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo*
     return panda::NativePointerRef::New(vm, nodePtr);
 }
 
+ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    int nodeId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFrameNodeByUniqueId(nodeId);
+    if (nodePtr) {
+        return panda::NativePointerRef::New(vm, nodePtr);
+    }
+    
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ArkUINativeModule::GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -171,6 +185,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeByKey(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto key = firstArg->ToString(vm)->ToString();
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFrameNodeByKey(key.c_str());
+    if (!nodePtr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     return panda::NativePointerRef::New(vm, nodePtr);
 }
 
@@ -180,6 +197,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     auto object = panda::ObjectRef::New(vm);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeById"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeById));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeByUniqueId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetFrameNodeByUniqueId));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getUIState"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetUIState));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportedUIState"),
@@ -756,6 +775,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::SetCheckboxGroupSize));
     checkboxgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCheckboxGroupSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::ResetCheckboxGroupSize));
+    checkboxgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCheckboxGroupStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::SetCheckboxGroupStyle));
+    checkboxgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCheckboxGroupStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxGroupBridge::ResetCheckboxGroupStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkboxgroup"), checkboxgroup);
 
     auto panel = panda::ObjectRef::New(vm);
@@ -975,6 +998,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFontFeature));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetFontFeature));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchMinFontSize));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchMinFontSize));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchMaxFontSize));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchMaxFontSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -1202,6 +1233,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetWordBreak));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetWordBreak));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMinFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMinFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetMaxFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetMaxFontSize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetHeightAdaptivePolicy));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetHeightAdaptivePolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
@@ -1468,6 +1511,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetWordBreak));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWordBreak"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetWordBreak));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMinFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetMinFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetMaxFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetMaxFontSize));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetHeightAdaptivePolicy));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeightAdaptivePolicy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetHeightAdaptivePolicy));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);
@@ -1967,6 +2022,8 @@ void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonStyle));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonControlSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonControlSize));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetContentModifierBuilder));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonControlSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonControlSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "button"), button);
@@ -2672,11 +2729,11 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabClip));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetWidthAuto));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabWidth"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetWidthAuto));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeight"),
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetHeightAuto));
-    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetHeightAuto));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
@@ -3418,6 +3475,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListLanes));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListLanes"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListLanes));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFadingEdge"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetFadingEdge));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFadingEdge"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetFadingEdge));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "list"), list);
 }
 

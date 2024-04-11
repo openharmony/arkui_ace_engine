@@ -220,6 +220,11 @@ void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, s
 
     for (const auto& fileName : priorityFileName) {
         auto fileFullPath = filePath + fileName + std::string(FILE_TYPE_JSON);
+        if (filePath.compare(I18N_FOLDER) == 0) {
+            GetAssetFromI18n(fileFullPath, data);
+            continue;
+        }
+
         std::string content;
         if (GetAssetContent(fileFullPath, content)) {
             auto fileData = ParseFileData(content);
@@ -228,6 +233,27 @@ void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, s
             } else {
                 data->Put(fileData);
             }
+        }
+    }
+}
+
+void FrontendDelegateImpl::GetAssetFromI18n(const std::string& fileFullPath, std::unique_ptr<JsonValue>& data)
+{
+    if (!assetManager_) {
+        return;
+    }
+    auto jsAssetVector = assetManager_->GetAssetFromI18n(fileFullPath);
+    for (auto& jsAsset : jsAssetVector) {
+        auto bufLen = jsAsset->GetSize();
+        auto buffer = jsAsset->GetData();
+        if ((buffer == nullptr) || (bufLen <= 0)) {
+            continue;
+        }
+        std::string content;
+        content.assign(buffer, buffer + bufLen);
+        auto fileData = ParseFileData(content);
+        if (fileData) {
+            data->Put(fileData);
         }
     }
 }

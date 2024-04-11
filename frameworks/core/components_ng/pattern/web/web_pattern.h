@@ -404,6 +404,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
+    void UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info);
     std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
@@ -743,6 +744,7 @@ private:
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
     ReachEdge isFlingReachEdge_ = { false, false };
+    std::queue<TouchEventInfo> touchEventQueue_;
 };
 } // namespace OHOS::Ace::NG
 

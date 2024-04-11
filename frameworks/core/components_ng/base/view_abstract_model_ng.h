@@ -1157,6 +1157,11 @@ public:
         ViewAbstract::SetLightIntensity(value);
     }
 
+    void SetLightColor(const Color& value) override
+    {
+        ViewAbstract::SetLightColor(value);
+    }
+
     void SetLightIlluminated(const uint32_t value) override
     {
         ViewAbstract::SetLightIlluminated(value);

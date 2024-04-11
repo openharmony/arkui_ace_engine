@@ -201,11 +201,13 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     auto smoothEdge = GetSmoothEdge();
+    auto colorFilter = GetColorFilter();
     for (auto& node : children_) {
         if (node && node->drawTraversed_) {
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 node->SetSmoothEdge(smoothEdge);
             }
+            node->SetColorFilter(colorFilter);
             node->Draw(canvas, viewPort, color);
         }
     }

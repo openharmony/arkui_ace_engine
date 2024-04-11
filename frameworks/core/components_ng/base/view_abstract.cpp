@@ -2636,6 +2636,14 @@ void ViewAbstract::SetLightIntensity(const float value)
     ACE_UPDATE_RENDER_CONTEXT(LightIntensity, value);
 }
 
+void ViewAbstract::SetLightColor(const Color& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightColor, value);
+}
+
 void ViewAbstract::SetLightIlluminated(const uint32_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

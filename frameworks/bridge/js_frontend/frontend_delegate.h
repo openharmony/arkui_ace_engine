@@ -120,7 +120,9 @@ public:
 
     virtual void ResetFocus();
 
-    virtual bool RequestFocus(const std::string& value);
+    virtual bool RequestFocus(const std::string& value, bool isSyncRequest);
+
+    virtual void SetRequestFocusCallback(std::function<void(NG::RequestFocusResult result)> callback);
 
     // distribute
     virtual std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo)

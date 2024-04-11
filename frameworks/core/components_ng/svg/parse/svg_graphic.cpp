@@ -170,7 +170,8 @@ void SvgGraphic::SetGradientStyle(double opacity)
 bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
 {
     const auto& strokeState = declaration_->GetStrokeState();
-    if (strokeState.GetColor() == Color::TRANSPARENT) {
+    auto colorFilter = GetColorFilter();
+    if (!colorFilter.has_value() && strokeState.GetColor() == Color::TRANSPARENT) {
         return false;
     }
     if (!GreatNotEqual(strokeState.GetLineWidth().Value(), 0.0)) {
@@ -217,6 +218,10 @@ bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
     strokePen_.SetWidth(static_cast<RSScalar>(strokeState.GetLineWidth().Value()));
     strokePen_.SetMiterLimit(static_cast<RSScalar>(strokeState.GetMiterLimit()));
     strokePen_.SetAntiAlias(antiAlias);
+
+    auto filter = strokePen_.GetFilter();
+    UpdateColorFilter(filter);
+    strokePen_.SetFilter(filter);
 #endif
     UpdateLineDash();
     return true;
@@ -244,4 +249,26 @@ void SvgGraphic::UpdateLineDash()
     }
 }
 
+void SvgGraphic::UpdateColorFilter(RSFilter& filter)
+{
+    auto colorFilter = GetColorFilter();
+    if (!colorFilter.has_value()) {
+        return;
+    }
+    if (colorFilter.value().colorFilterMatrix_) {
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(colorFilter.value().colorFilterMatrix_->data());
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        return;
+    }
+    if (!colorFilter.value().colorFilterDrawing_) {
+        return;
+    }
+    auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
+        colorFilter.value().colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
+    if (!colorFilterSptrAddr || !(*colorFilterSptrAddr)) {
+        return;
+    }
+    filter.SetColorFilter(*colorFilterSptrAddr);
+}
 } // namespace OHOS::Ace::NG

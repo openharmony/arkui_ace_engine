@@ -499,6 +499,16 @@ public:
 
     PositionMode GetPositionMode();
 
+    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    {
+        return { nullptr, Axis::NONE };
+    }
+
+    virtual std::function<bool(int32_t)> GetScrollIndexAbility()
+    {
+        return nullptr;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const

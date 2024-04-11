@@ -350,6 +350,7 @@ public:
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
     virtual void SetLightIntensity(const float value) = 0;
+    virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;

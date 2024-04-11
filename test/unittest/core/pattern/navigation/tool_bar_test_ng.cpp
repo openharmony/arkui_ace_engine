@@ -210,6 +210,6 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest006, TestSize.Level1)
     auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
     navToolbarPattern->options_.bgOptions.color = std::make_optional(FRONT_COLOR);
-    navToolbarPattern->SetDefaultBackgroundColorIfNeeded();
+    navToolbarPattern->SetDefaultBackgroundColorIfNeeded(frameNode);
 }
 } // namespace OHOS::Ace::NG

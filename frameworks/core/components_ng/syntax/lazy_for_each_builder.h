@@ -115,7 +115,7 @@ public:
 
     void ThrowRepeatOperationError(int32_t index);
 
-    void RecycleChildByIndex(int32_t index);
+    void RecordOutOfBoundaryNodes(int32_t index);
 
     void InvalidIndexOfChangedData(size_t index)
     {
@@ -363,6 +363,7 @@ public:
     bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        outOfBoundaryNodes_.clear();
         if (itemConstraint && !canRunLongPredictTask) {
             return false;
         }
@@ -556,6 +557,9 @@ protected:
     void GetAllItems(std::vector<UINode*>& items);
 
 private:
+    void RecycleItemsOutOfBoundary();
+    void RecycleChildByIndex(int32_t index);
+
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
     std::list<std::pair<std::string, RefPtr<UINode>>> nodeList_;
@@ -568,6 +572,7 @@ private:
         {"exchange", 5},
         {"reload", 6}
     };
+    std::list<int32_t> outOfBoundaryNodes_;
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

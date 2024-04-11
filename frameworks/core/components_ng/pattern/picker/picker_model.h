@@ -40,6 +40,7 @@ struct PickerDialogInfo {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<Shadow> shadow;
 };
 struct PickerDialogEvent {
     std::function<void()> onDidAppear;

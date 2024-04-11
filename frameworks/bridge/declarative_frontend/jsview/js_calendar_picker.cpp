@@ -623,6 +623,12 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             properties.backgroundBlurStyle = blurStyle;
         }
     }
+
+    auto shadowValue = paramObj->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        properties.shadow = shadow;
+    }
     properties.customStyle = false;
     properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     NG::BorderRadiusProperty dialogRadius;

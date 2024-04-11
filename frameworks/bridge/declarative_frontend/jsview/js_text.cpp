@@ -107,6 +107,15 @@ void JSText::SetFont(const JSCallbackInfo& info)
 void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 {
     auto tmpInfo = info[0];
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    font.fontSize = theme->GetTextStyle().GetFontSize();
+    font.fontWeight = theme->GetTextStyle().GetFontWeight();
+    font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
+    font.fontStyle = theme->GetTextStyle().GetFontStyle();
+    
     if (!tmpInfo->IsObject()) {
         return;
     }
@@ -115,12 +124,6 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     CalcDimension size;
     if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
         font.fontSize = size;
-    } else {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        font.fontSize = theme->GetTextStyle().GetFontSize();
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -348,9 +351,7 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
     JSRef<JSVal> args = info[0];
-    if (!ParseJsFontFamilies(args, fontFamilies)) {
-        return;
-    }
+    ParseJsFontFamilies(args, fontFamilies);
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 

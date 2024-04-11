@@ -222,6 +222,7 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
+        RefreshModel::GetInstance()->ResetOnOffsetChange();
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));

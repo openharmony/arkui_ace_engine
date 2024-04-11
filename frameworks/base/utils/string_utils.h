@@ -35,6 +35,7 @@ namespace OHOS::Ace::StringUtils {
 ACE_EXPORT extern const char DEFAULT_STRING[];
 ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
+ACE_EXPORT extern const std::u32string DEFAULT_U32STRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;
 constexpr int32_t TEXT_CASE_UPPERCASE = 2;
 constexpr double PERCENT_VALUE = 100.0;
@@ -92,6 +93,26 @@ inline std::string ToString(const std::wstring& str)
 #else
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert(DEFAULT_STRING);
 #endif
+    std::string result = convert.to_bytes(str);
+    return result == DEFAULT_STRING ? "" : result;
+}
+
+inline std::u32string ToU32string(const std::string& str)
+{
+    if (str == DEFAULT_STRING) {
+        return DEFAULT_U32STRING;
+    }
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert(DEFAULT_STRING, DEFAULT_U32STRING);
+    std::u32string result = convert.from_bytes(str);
+    return result == DEFAULT_U32STRING ? U"" : result;
+}
+
+inline std::string U32StringToString(const std::u32string& str)
+{
+    if (str == DEFAULT_U32STRING) {
+        return DEFAULT_STRING;
+    }
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert(DEFAULT_STRING);
     std::string result = convert.to_bytes(str);
     return result == DEFAULT_STRING ? "" : result;
 }

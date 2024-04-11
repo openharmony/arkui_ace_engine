@@ -27,10 +27,15 @@
 #include "core/animation/animator.h"
 #include "core/animation/spring_curve.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/button/button_theme.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -62,12 +67,13 @@ constexpr float SWIPER_HEIGHT = 800.f;
 constexpr int32_t ITEM_NUMBER = 4;
 constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
-constexpr float DRAG_SPEED = 500.0f;
-constexpr float DRAG_OFFSET_X = 50.0f;
 constexpr float CAPTURE_MARGIN_SIZE = 15.0f;
 const SwiperArrowParameters ARROW_PARAMETERS = {
     true, true, Dimension(24.f), Color::BLACK, Dimension(18.f), Color::FromString("#182431")
 };
+const Color HOVER_ARROW_COLOR = Color::GRAY;
+const Color CLICK_ARROW_COLOR = Color::FromString("#19182431");
+constexpr double ARROW_DISABLED_ALPHA = 0.5;
 
 class SwiperTestNg : public TestNG {
 public:
@@ -81,6 +87,9 @@ public:
     void CreateWithItem(const std::function<void(SwiperModelNG)>& callback = nullptr, int32_t itemNumber = ITEM_NUMBER);
     static void CreateItem(int32_t itemNumber = ITEM_NUMBER);
     static void CreateItemWithSize(float width, float height);
+    void ShowNext();
+    void ShowPrevious();
+    void ChangeIndex(int32_t index);
 
     void InitCaptureTest();
     void CreateWithCustomAnimation();

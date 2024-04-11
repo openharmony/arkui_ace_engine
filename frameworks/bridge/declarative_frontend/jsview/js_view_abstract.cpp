@@ -1098,17 +1098,6 @@ void CompleteResourceObjectFromParams(
         return;
     }
 
-    std::string bundleName;
-    std::string moduleName;
-    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-
-    if (bundleName.empty() && moduleName.empty()) {
-        // process the resource in har with obfuscation.
-    } else if (bundleName.empty()) {
-        bundleName = GetBundleNameFromContainer();
-        jsObj->SetProperty<std::string>("bundleName", bundleName);
-    }
-
     std::regex resNameRegex(RESOURCE_NAME_PATTERN);
     std::smatch resNameResults;
     if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
@@ -4018,6 +4007,14 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
             CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
         }
     }
+
+    std::string bundleName;
+    std::string moduleName;
+    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
+    if (bundleName.empty() && !moduleName.empty()) {
+        bundleName = GetBundleNameFromContainer();
+        jsObj->SetProperty<std::string>("bundleName", bundleName);
+    }
 }
 
 bool JSViewAbstract::ParseJsDimensionNG(
@@ -5046,32 +5043,43 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsSetDragPreviewOptions", info, checkList)) {
         return;
     }
+    NG::DragPreviewOption previewOption;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
-    auto dragPreviewMode = NG::DragPreviewMode::AUTO;
     if (mode->IsNumber()) {
         int32_t modeValue = mode->ToNumber<int>();
         if (modeValue >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
             modeValue <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-            dragPreviewMode = static_cast<NG::DragPreviewMode>(modeValue);
+            previewOption.mode = static_cast<NG::DragPreviewMode>(modeValue);
         }
     }
-    bool defaultAnimationBeforeLifting = false;
-    bool isMultiSelecttionEnabled = false;
+
+    auto numberBadge = obj->GetProperty("numberBadge");
+    if (!numberBadge->IsEmpty()) {
+        if (numberBadge->IsNumber()) {
+            previewOption.isNumber = true;
+            previewOption.badgeNumber = numberBadge->ToNumber<int>();
+        } else if (numberBadge->IsBoolean()) {
+            previewOption.isNumber = false;
+            previewOption.isShowBadge = numberBadge->ToBoolean();
+        }
+    } else {
+        previewOption.isNumber = false;
+        previewOption.isShowBadge = true;
+    }
+
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
         auto multiSelection = interObj->GetProperty("isMultiSelectionEnabled");
         if (multiSelection->IsBoolean()) {
-            isMultiSelecttionEnabled = multiSelection->ToBoolean();
+            previewOption.isMultiSelectionEnabled = multiSelection->ToBoolean();
         }
         auto defaultAnimation = interObj->GetProperty("defaultAnimationBeforeLifting");
         if (defaultAnimation->IsBoolean()) {
-            defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
+            previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
     }
-    NG::DragPreviewOption option { dragPreviewMode, defaultAnimationBeforeLifting,
-        isMultiSelecttionEnabled };
-    ViewAbstractModel::GetInstance()->SetDragPreviewOptions(option);
+    ViewAbstractModel::GetInstance()->SetDragPreviewOptions(previewOption);
 }
 
 void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
@@ -6945,6 +6953,7 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
         JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
         JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
+        JSRef<JSVal> color = lightSource->GetProperty("color");
 
         CalcDimension dimPositionX, dimPositionY, dimPositionZ;
         if (ParseJsDimensionVp(positionX, dimPositionX) && ParseJsDimensionVp(positionY, dimPositionY) &&
@@ -6955,6 +6964,11 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         if (intensity->IsNumber()) {
             float intensityValue = intensity->ToNumber<float>();
             ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
+        }
+
+        Color lightColor;
+        if (ParseJsColor(color, lightColor)) {
+            ViewAbstractModel::GetInstance()->SetLightColor(lightColor);
         }
     }
 
@@ -8370,16 +8384,17 @@ bool JSViewAbstract::CheckLength(
 // obscured means that the developer calls the component to be private style.
 void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined()) {
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined() || arg->IsNull()) {
         std::vector<ObscuredReasons> reasons(0);
         ViewAbstractModel::GetInstance()->SetObscured(reasons);
         return;
     }
-    if (!info[0]->IsArray()) {
+    if (!arg->IsArray()) {
         return;
     }
 
-    auto obscuredArray = JSRef<JSArray>::Cast(info[0]);
+    auto obscuredArray = JSRef<JSArray>::Cast(arg);
     size_t size = obscuredArray->Length();
     std::vector<ObscuredReasons> reasons(size);
     reasons.clear();

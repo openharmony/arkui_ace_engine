@@ -201,7 +201,7 @@ void SpanNode::DumpInfo()
     DumpLog::GetInstance().AddDesc(
         std::string("FontColor:").append(spanItem_->fontStyle->GetTextColor().value_or(Color()).ColorToString()));
     DumpLog::GetInstance().AddDesc(std::string("FontWeight:").append(
-        StringUtils::FontWeightToString(spanItem_->fontStyle->GetFontWeight().value())));
+        StringUtils::FontWeightToString(spanItem_->fontStyle->GetFontWeight().value_or(FontWeight::NORMAL))));
     if (spanItem_->unicode != 0) {
         DumpLog::GetInstance().AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
         DumpLog::GetInstance().AddDesc(std::string("SymbolRenderingStrategy:").append(
@@ -540,6 +540,7 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
     INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
     INHERIT_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
     INHERIT_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
+    INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
     INHERIT_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
     INHERIT_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);

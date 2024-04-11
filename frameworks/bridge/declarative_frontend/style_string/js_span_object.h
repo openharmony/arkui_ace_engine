@@ -35,8 +35,21 @@ public:
     static void Destructor(JSFontSpan* fontSpan);
     static void JSBind(BindingTarget globalObj);
     static RefPtr<FontSpan> ParseJsFontSpan(const JSRef<JSObject>& obj);
+    static void ParseJsFontColor(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsFontSize(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsFontFamily(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font);
     void GetFontColor(const JSCallbackInfo& info);
     void SetFontColor(const JSCallbackInfo& info);
+    void GetFontFamily(const JSCallbackInfo& info);
+    void SetFontFamily(const JSCallbackInfo& info);
+    void GetFontSize(const JSCallbackInfo& info);
+    void SetFontSize(const JSCallbackInfo& info);
+    void GetFontWeight(const JSCallbackInfo& info);
+    void SetFontWeight(const JSCallbackInfo& info);
+    void GetFontStyle(const JSCallbackInfo& info);
+    void SetFontStyle(const JSCallbackInfo& info);
 
     RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);
@@ -45,5 +58,44 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSFontSpan);
     RefPtr<FontSpan> fontSpan_;
 };
+
+class JSGestureSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSGestureSpan, AceType)
+
+public:
+    JSGestureSpan() = default;
+    ~JSGestureSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSGestureSpan* gestureSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<GestureSpan> ParseJSGestureSpan(const JSCallbackInfo& args);
+
+    RefPtr<GestureSpan>& GetGestureSpan();
+    void SetGestureSpan(const RefPtr<GestureSpan>& gestureSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSGestureSpan);
+    RefPtr<GestureSpan> gestureSpan_;
+};
+class JSTextShadowSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSTextShadowSpan, AceType)
+
+public:
+    JSTextShadowSpan() = default;
+    ~JSTextShadowSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSTextShadowSpan* textShadowSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<TextShadowSpan> ParseJSTextShadowSpan(const JSRef<JSObject>& obj);
+    void GetTextShadow(const JSCallbackInfo& info);
+    void SetTextShadow(const JSCallbackInfo& info);
+
+    RefPtr<TextShadowSpan>& GetTextShadowSpan();
+    void SetTextShadowSpan(const RefPtr<TextShadowSpan>& textShadowSpan);
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSTextShadowSpan);
+    RefPtr<TextShadowSpan> textShadowSpan_;
+};
+
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

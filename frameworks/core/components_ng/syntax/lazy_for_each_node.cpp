@@ -357,9 +357,10 @@ void LazyForEachNode::RecycleItems(int32_t from, int32_t to)
     children_.clear();
     for (auto index = from; index < to; index++) {
         if (index >= startIndex_ && index < startIndex_ + count_) {
-            builder_->RecycleChildByIndex(index - startIndex_);
+            builder_->RecordOutOfBoundaryNodes(index - startIndex_);
         }
     }
+    PostIdleTask();
 }
 
 void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)

@@ -28,6 +28,7 @@
     "src/lib/sdk/subscribable_abstract.ts",
     "src/lib/sdk/persistent_storage.ts",
     "src/lib/sdk/environment.ts",
+    "src/lib/sdk/i_repeat.ts",
 
     // ark runtime debug tools
     "src/lib/common/ark_tools.d.ts",
@@ -53,7 +54,7 @@
     "src/lib/full_update/fu_synced_property_object_nested.ts",
     "src/lib/full_update/fu_view.ts",
 
-    // partial_update specifc
+    // partial_update specific
     "src/lib/partial_update/pu_types_events.ts",
     "src/lib/partial_update/pu_tracked_object.ts",
     "src/lib/partial_update/pu_viewstack_processor.d.ts",
@@ -74,6 +75,9 @@
     "src/lib/v3/v3_monitor.ts",
     "src/lib/v3/v3_computed.ts",
     "src/lib/v3/v3_variable_decorators.ts",
+
+    // partial_update specific
+    "src/lib/partial_update/pu_repeat.ts",
 
     // init
     "src/index.ts",
