@@ -60,6 +60,7 @@ const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/conte
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
+constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -364,6 +365,13 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->touchEventInfo_ = info;
         pattern->isMouseEvent_ = false;
         const auto& changedPoint = info.GetChangedTouches().front();
+        if (changedPoint.GetTouchType() == TouchType::DOWN ||
+            changedPoint.GetTouchType() == TouchType::UP) {
+            if (pattern->touchEventQueue_.size() < TOUCH_EVENT_MAX_SIZE) {
+                pattern->touchEventQueue_.push(info);
+            }
+        }
+
         if (changedPoint.GetTouchType() == TouchType::DOWN) {
             pattern->HandleTouchDown(info, false);
             return;
@@ -3537,6 +3545,11 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
     CHECK_NULL_VOID(host);
     auto offset = host->GetOffsetRelativeToWindow();
     touchEventInfo = touchEventInfo_;
+    if ((touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) &&
+        !touchEventQueue_.empty()) {
+        touchEventInfo = touchEventQueue_.front();
+        touchEventQueue_.pop();
+    }
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));

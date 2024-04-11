@@ -744,6 +744,7 @@ private:
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
     ReachEdge isFlingReachEdge_ = { false, false };
+    std::queue<TouchEventInfo> touchEventQueue_;
 };
 } // namespace OHOS::Ace::NG
 
