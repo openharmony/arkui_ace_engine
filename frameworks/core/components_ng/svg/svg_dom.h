@@ -37,7 +37,7 @@ public:
     SvgDom();
     ~SvgDom() override;
 
-    static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color);
+    static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& src);
 
     void SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx);
     void SetAnimationCallback(std::function<void()>&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr) override;
@@ -78,6 +78,7 @@ private:
     Rect viewBox_;
     PushAttr attrCallback_;
     std::optional<Color> fillColor_;
+    std::string path_;
     float smoothEdge_ = 0.0f;
     std::optional<ImageColorFilter> colorFilter_;
     std::function<void()> onFinishCallback_;

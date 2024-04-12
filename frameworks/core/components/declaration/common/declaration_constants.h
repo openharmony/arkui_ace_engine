@@ -50,6 +50,7 @@
 #include "core/components/declaration/svg/svg_fe_offset_declaration.h"
 #include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_gradient_declaration.h"
+#include "core/components/declaration/svg/svg_image_declaration.h"
 #include "core/components/declaration/svg/svg_line_declaration.h"
 #include "core/components/declaration/svg/svg_mask_declaration.h"
 #include "core/components/declaration/svg/svg_path_declaration.h"
@@ -191,6 +192,7 @@ public:
     static const std::shared_ptr<SvgBaseAttribute> DEFAULT_SVG_BASE_ATTR;
     static const std::shared_ptr<SvgCircleAttribute> DEFAULT_SVG_CIRCLE_ATTR;
     static const std::shared_ptr<SvgEllipseAttribute> DEFAULT_SVG_ELLIPSE_ATTR;
+    static const std::shared_ptr<SvgImageAttribute> DEFAULT_SVG_IMAGE_ATTR;
     static const std::shared_ptr<SvgLineAttribute> DEFAULT_SVG_LINE_ATTR;
     static const std::shared_ptr<SvgMaskAttribute> DEFAULT_SVG_MASK_ATTR;
     static const std::shared_ptr<SvgPathAttribute> DEFAULT_SVG_PATH_ATTR;
