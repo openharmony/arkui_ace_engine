@@ -1556,6 +1556,7 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         AddOrChangeScaleModifier(
             rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
     } else {
+        Rosen::Vector2f xyPerspectiveValue { transform.perspective[0], transform.perspective[1] };
         Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
         Rosen::Quaternion quaternion { static_cast<float>(transform.quaternion.GetX()),
             static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
@@ -1563,6 +1564,8 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
         Rosen::Vector2f skewValue { transform.skew[0], transform.skew[1] };
 
+        AddOrChangePerspectiveModifier(rsNode_, transformMatrixModifier_->perspectiveXY,
+            transformMatrixModifier_->perspectiveXYValue, xyPerspectiveValue);
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
         AddOrChangeScaleModifier(
