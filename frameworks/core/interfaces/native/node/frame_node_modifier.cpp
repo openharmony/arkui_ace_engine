@@ -105,9 +105,8 @@ ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetChildByIndex(index);
-    auto childNode = AceType::DynamicCast<FrameNode>(child);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto child = frameNode->GetFrameNodeChildByIndex(index);
+    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 ArkUINodeHandle GetFirst(ArkUINodeHandle node)
@@ -116,10 +115,8 @@ ArkUINodeHandle GetFirst(ArkUINodeHandle node)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetAllChildrenWithBuild(false);
-    auto child = frameNode->GetChildByIndex(0);
-    auto childNode = AceType::DynamicCast<FrameNode>(child);
-    CHECK_NULL_RETURN(childNode, nullptr);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto child = frameNode->GetFrameNodeChildByIndex(0);
+    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 ArkUINodeHandle GetNextSibling(ArkUINodeHandle node)
@@ -130,9 +127,8 @@ ArkUINodeHandle GetNextSibling(ArkUINodeHandle node)
     CHECK_NULL_RETURN(parent, nullptr);
     parent->GetAllChildrenWithBuild(false);
     auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetChildByIndex(index + 1);
-    auto childNode = AceType::DynamicCast<FrameNode>(sibling);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto sibling = parent->GetFrameNodeChildByIndex(index + 1);
+    return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
 ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node)
@@ -143,9 +139,8 @@ ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node)
     CHECK_NULL_RETURN(parent, nullptr);
     parent->GetAllChildrenWithBuild(false);
     auto index = parent->GetChildTrueIndex(Referenced::Claim<FrameNode>(currentNode));
-    auto sibling = parent->GetChildByIndex(index - 1);
-    auto childNode = AceType::DynamicCast<FrameNode>(sibling);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto sibling = parent->GetFrameNodeChildByIndex(index - 1);
+    return reinterpret_cast<ArkUINodeHandle>(sibling);
 }
 
 ArkUINodeHandle GetParent(ArkUINodeHandle node)
@@ -308,9 +303,8 @@ ArkUINodeHandle GetLast(ArkUINodeHandle node)
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto size = frameNode->GetAllChildrenWithBuild(false).size();
-    auto child = frameNode->GetChildByIndex(size - 1);
-    auto childNode = AceType::DynamicCast<FrameNode>(child);
-    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1);
+    return reinterpret_cast<ArkUINodeHandle>(child);
 }
 
 namespace NodeModifier {

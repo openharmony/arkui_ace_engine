@@ -3246,6 +3246,12 @@ RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache);
 }
 
+FrameNode* FrameNode::GetFrameNodeChildByIndex(uint32_t index, bool isCache)
+{
+    auto frameNode = DynamicCast<FrameNode>(frameProxy_->GetFrameNodeByIndex(index, true, isCache));
+    return RawPtr(frameNode);
+}
+
 int32_t FrameNode::GetChildTrueIndex(const RefPtr<LayoutWrapper>& child) const
 {
     return frameProxy_->GetChildIndex(child);

@@ -17,6 +17,7 @@
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
+  // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private nodePtr_: NodePtr;
   constructor(uiContext: UIContext, options: RenderOptions) {
     let jsBuilderNode = new JSBuilderNode(uiContext, options);

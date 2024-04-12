@@ -141,7 +141,7 @@ struct ArkUIHistoryTouchEvent {
 };
 
 struct ArkUITouchEvent {
-    ArkUI_Int32  action;
+    ArkUI_Int32 action;
     /** Time stamp of the current event. */
     ArkUI_Int64 timeStamp;
     ArkUITouchPoint actionTouchPoint;
