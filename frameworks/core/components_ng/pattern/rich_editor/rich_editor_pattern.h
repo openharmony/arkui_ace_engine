@@ -548,6 +548,8 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
+    float GetCrossOverHeight() const;
+
 protected:
     bool CanStartAITask() override;
 

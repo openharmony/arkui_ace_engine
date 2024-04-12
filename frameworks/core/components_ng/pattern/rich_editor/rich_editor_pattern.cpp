@@ -5245,13 +5245,30 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     return true;
 }
 
+float RichEditorPattern::GetCrossOverHeight() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto rootHeight = pipeline->GetRootHeight();
+    auto keyboardY = rootHeight - pipeline->GetSafeAreaManager()->GetKeyboardInset().Length();
+    float height = contentRect_.Bottom();
+    float frameY = parentGlobalOffset_.GetY() + contentRect_.GetY();
+    float bottom = frameY + height;
+    auto crossOverHeight = bottom - keyboardY;
+    if (LessOrEqual(crossOverHeight, 0.0f)) {
+        return 0.0f;
+    }
+    return crossOverHeight;
+}
+
 float RichEditorPattern::MoveTextRect(float offset)
 {
-    if (GreatNotEqual(richTextRect_.Height(), contentRect_.Height())) {
+    auto keyboardOffset = GetCrossOverHeight();
+    if (GreatNotEqual(richTextRect_.Height(), contentRect_.Height() - keyboardOffset)) {
         if (GreatNotEqual(richTextRect_.GetY() + offset, contentRect_.GetY())) {
             offset = contentRect_.GetY() - richTextRect_.GetY();
-        } else if (LessNotEqual(richTextRect_.Bottom() + offset, contentRect_.Bottom())) {
-            offset = contentRect_.Bottom() - richTextRect_.Bottom();
+        } else if (LessNotEqual(richTextRect_.Bottom() + offset, contentRect_.Bottom() - keyboardOffset)) {
+            offset = contentRect_.Bottom() - keyboardOffset - richTextRect_.Bottom();
         }
     } else if (!NearEqual(richTextRect_.GetY(), contentRect_.GetY())) {
         offset = contentRect_.GetY() - richTextRect_.GetY();
@@ -5299,14 +5316,15 @@ void RichEditorPattern::MoveCaretToContentRect()
 
 void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight)
 {
+    auto keyboardOffset = GetCrossOverHeight();
     auto contentRect = GetTextContentRect();
     auto textRect = GetTextRect();
-    if (LessOrEqual(textRect.Height(), contentRect.Height()) || isShowPlaceholder_) {
+    if (LessOrEqual(textRect.Height(), contentRect.Height() - keyboardOffset) || isShowPlaceholder_) {
         return;
     }
     if (LessNotEqual(contentRect.GetSize().Height(), caretHeight) &&
-        !NearEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom())) {
-        OnScrollCallback(contentRect.Bottom() - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
+        !NearEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom() - keyboardOffset)) {
+        OnScrollCallback(contentRect.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
     }
     if (LessNotEqual(contentRect.GetSize().Height(), caretHeight)) {
         return;
@@ -5317,8 +5335,8 @@ void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float
         } else {
             OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
         }
-    } else if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom())) {
-        OnScrollCallback(contentRect.Bottom() - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
+    } else if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom() - keyboardOffset)) {
+        OnScrollCallback(contentRect.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
     }
 }
 
@@ -5370,8 +5388,10 @@ bool RichEditorPattern::IsSelectAreaVisible()
 
 bool RichEditorPattern::IsReachedBoundary(float offset)
 {
+    auto keyboardOffset = GetCrossOverHeight();
     return (NearEqual(richTextRect_.GetY(), contentRect_.GetY()) && GreatNotEqual(offset, 0.0f)) ||
-           (NearEqual(richTextRect_.GetY() + richTextRect_.Height(), contentRect_.GetY() + contentRect_.Height()) &&
+           (NearEqual(richTextRect_.GetY() + richTextRect_.Height(),
+                contentRect_.GetY() + contentRect_.Height() - keyboardOffset) &&
                LessNotEqual(offset, 0.0f));
 }
 
