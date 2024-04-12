@@ -98,8 +98,14 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MeasureHeaderFooter(layoutWrapper);
     totalMainSize_ = std::max(totalMainSize_, headerMainSize_ + footerMainSize_);
+    if (childrenSize_) {
+        posMap_->UpdateGroupPosMap(totalItemCount_, GetLanes(), spaceWidth_, childrenSize_,
+            headerMainSize_, footerMainSize_);
+        totalMainSize_ = posMap_->GetTotalHeight();
+    }
     MeasureListItem(layoutWrapper, childLayoutConstraint_);
     AdjustItemPosition();
+    AdjustByPosMap();
     SetActiveChildRange(layoutWrapper);
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
@@ -614,7 +620,7 @@ void ListItemGroupLayoutAlgorithm::MeasureStart(LayoutWrapper* layoutWrapper,
     }
 
     MeasureJumpToItemForward(layoutWrapper, layoutConstraint, startIndex, currentStartPos);
-    if (Positive(contentStartOffset_)) {
+    if (GreatNotEqual(currentStartPos, startPos_)) {
         MeasureJumpToItemBackward(layoutWrapper, layoutConstraint, startIndex - 1, currentStartPos);
     }
 
@@ -643,7 +649,7 @@ void ListItemGroupLayoutAlgorithm::MeasureEnd(LayoutWrapper* layoutWrapper,
     }
 
     MeasureJumpToItemBackward(layoutWrapper, layoutConstraint, endIndex, currentEndPos);
-    if (Positive(contentEndOffset_)) {
+    if (LessNotEqual(currentEndPos, endPos_)) {
         MeasureJumpToItemForward(layoutWrapper, layoutConstraint, endIndex + 1, currentEndPos);
     }
 
@@ -722,6 +728,19 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
             endPos_ = prevEndPos_;
             targetIndex_.reset();
         }
+    }
+}
+
+void ListItemGroupLayoutAlgorithm::AdjustByPosMap()
+{
+    if (!childrenSize_) {
+        return;
+    }
+    totalMainSize_ = posMap_->GetTotalHeight();
+    float offset = posMap_->GetGroupLayoutOffset(GetStartIndex(), itemPosition_.begin()->second.startPos);
+    for (auto& pos : itemPosition_) {
+        pos.second.startPos += offset;
+        pos.second.endPos += offset;
     }
 }
 

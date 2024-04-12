@@ -14,6 +14,8 @@
  */
 
 #include "grid_test_ng.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/property/calc_length.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"
@@ -24,6 +26,7 @@ void GridTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).WillRepeatedly(Return());
 
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
@@ -87,7 +90,10 @@ void GridTestNg::CreateItem(int32_t itemNumber, float width, float height, GridI
     for (int32_t i = 0; i < itemNumber; i++) {
         GridItemModelNG itemModel;
         itemModel.Create(gridItemStyle);
-        if (width != NULL_VALUE) {
+        // -2 corresponds to 100%
+        if (width == -2) {
+            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        } else if (width != NULL_VALUE) {
             ViewAbstract::SetWidth(CalcLength(width));
         }
         if (height != NULL_VALUE) {

@@ -350,4 +350,216 @@ HWTEST_F(TextInputUpdateTestNg, HandleCounterBorder001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetMaxLength(), 26);
     EXPECT_EQ(pattern_->GetTextIndexAtCursor(), 26);
 }
+
+/**
+ * @tc.name: GetShowPasswordIconString001
+ * @tc.desc: Test GetShowPasswordIconString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetShowPasswordIconString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. show password icon string.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowPasswordIcon(true);
+    });
+
+    EXPECT_EQ(pattern_->GetShowPasswordIconString(), "true");
+}
+
+/**
+ * @tc.name: GetShowPasswordIconString002
+ * @tc.desc: Test GetShowPasswordIconString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetShowPasswordIconString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. show password icon string.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowPasswordIcon(false);
+    });
+
+    EXPECT_EQ(pattern_->GetShowPasswordIconString(), "false");
+}
+
+/**
+ * @tc.name: GetErrorTextString001
+ * @tc.desc: Test GetErrorTextString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetErrorTextString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. show password icon string.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    pattern_->SearchRequestKeyboard();
+    EXPECT_EQ(pattern_->GetErrorTextString(), "");
+}
+
+/**
+ * @tc.name: GetBarStateString001
+ * @tc.desc: test GetBarStateString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetBarStateString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected: barState is DisplayMode::ON
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBarState(DisplayMode::ON);
+    });
+
+    /**
+     * @tc.step: step2. Test barState
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetBarStateString(), "BarState.ON");
+}
+
+/**
+ * @tc.name: GetBarStateString002
+ * @tc.desc: test GetBarStateString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetBarStateString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected: barState is DisplayMode::OFF
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBarState(DisplayMode::OFF);
+    });
+
+    /**
+     * @tc.step: step2. Test barState
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetBarStateString(), "BarState.OFF");
+}
+
+/**
+ * @tc.name: GetScrollBarWidth001
+ * @tc.desc: test GetScrollBarWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, GetScrollBarWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected: scrollBarWidth is 0.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Test Width
+     */
+    EXPECT_EQ(pattern_->GetScrollBarWidth(), 0);
+}
+
+/**
+ * @tc.name: AddCounterNode001
+ * @tc.desc: test AddCounterNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, AddCounterNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected: counterTextNode_ is created
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Test counterTextNode_ is null
+     */
+    EXPECT_FALSE(pattern_->counterTextNode_.Upgrade());
+
+    /**
+     * @tc.step: step3. call AddCounterNode
+     */
+    pattern_->AddCounterNode();
+    EXPECT_TRUE(pattern_->counterTextNode_.Upgrade());
+    pattern_->ClearCounterNode();
+}
+
+/**
+ * @tc.name: AdjustTextInReasonableArea
+ * @tc.desc: test AdjustTextInReasonableArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, AdjustTextInReasonableArea, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps:set textRect
+     */
+    RectF textRect = RectF(0.0f, 0.0f, 800.0f, 60.0f);
+    pattern_->SetTextRect(textRect);
+    pattern_->AdjustTextInReasonableArea();
+    EXPECT_EQ(pattern_->GetTextRect().GetOffset(), OffsetF(0.0f, 0.0f));
+
+    /**
+     * @tc.steps:set contentOffset, contentY > textY.
+     */
+    OffsetF contentOffset1(0.0f, 20.0f);
+    pattern_->contentRect_.SetOffset(contentOffset1);
+    pattern_->AdjustTextInReasonableArea();
+    EXPECT_EQ(pattern_->GetTextRect().GetOffset(), OffsetF(0.0f, 10.0f));
+
+    /**
+     * @tc.steps:set contentOffset, contentX > textX.
+     */
+    OffsetF contentOffset2(90.0f, 0.0f);
+    pattern_->contentRect_.SetOffset(contentOffset2);
+    pattern_->AdjustTextInReasonableArea();
+    EXPECT_EQ(pattern_->GetTextRect().GetOffset(), OffsetF(10.0f, 0.0f));
+}
+
+/**
+ * @tc.name: HandleTouchUp
+ * @tc.desc: test HandleTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, HandleTouchUp, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. create location info, touch type DOWN
+     */
+    TouchLocationInfo touchLocationInfo1(0);
+    touchLocationInfo1.touchType_ = TouchType::UP;
+    touchLocationInfo1.localLocation_ = Offset(0.0f, 0.0f);
+
+    /**
+     * @tc.steps: step3. create touch info, touch type DOWN
+     */
+    TouchEventInfo touchInfo1("");
+    touchInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+
+    /**
+     * @tc.steps: step4. test touch down
+     */
+    pattern_->isMousePressed_ = true;
+    pattern_->HandleTouchEvent(touchInfo1);
+    frameNode_->UpdateInspectorId("123");
+    pattern_->OnAfterModifyDone();
+    EXPECT_FALSE(pattern_->isMousePressed_);
+}
 } // namespace OHOS::Ace::NG

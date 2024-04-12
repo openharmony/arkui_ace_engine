@@ -229,6 +229,7 @@ public:
 
     bool GetLayouted() const;
     float GetEstimateHeight(float estimateHeight, Axis axis) const;
+    bool ClickJudge(const PointF& localPoint);
 
 protected:
     void OnModifyDone() override;
@@ -257,11 +258,7 @@ private:
     void DoDeleteAnimation(bool isRightDelete);
     void FireSwipeActionOffsetChange(float oldOffset, float newOffset);
     void FireSwipeActionStateChange(SwipeActionState newState);
-    void ResetToItemChild()
-    {
-        swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
-        FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
-    }
+    void ResetToItemChild();
     void ResetNodeSize()
     {
         startNodeSize_ = 0.0f;

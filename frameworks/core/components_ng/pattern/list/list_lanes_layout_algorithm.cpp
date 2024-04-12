@@ -49,7 +49,19 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
     }
 }
 
-float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex)
+float ListLanesLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex)
+{
+    CHECK_NULL_RETURN(childrenSize_, 0.0f);
+    float mainLen = 0.0f;
+    int32_t laneCeil = GetLanesCeil(layoutWrapper, childIndex);
+    for (int32_t index = GetLanesFloor(layoutWrapper, childIndex); index <= laneCeil; index++) {
+        mainLen = std::max(mainLen, childrenSize_->GetChildSize(index));
+    }
+    return mainLen;
+}
+
+float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex,
+    bool groupLayoutAll)
 {
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
     CHECK_NULL_RETURN(wrapper, 0.0f);
@@ -64,7 +76,7 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
         mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     } else {
         auto laneCeil = GetLanesCeil(layoutWrapper, childIndex);
-        for (int32_t i = childIndex; i <= laneCeil; i++) {
+        for (int32_t i = GetLanesFloor(layoutWrapper, childIndex); i <= laneCeil; i++) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(i);
             wrapper->Measure(childLayoutConstraint_);
             mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
@@ -110,7 +122,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             }
             wrapper->Measure(childLayoutConstraint_);
         }
-        mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
+        mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+            GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
         if (isGroup) {
             break;
         }
@@ -123,8 +136,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
             SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
-    float startIndex = GetLanesFloor(layoutWrapper, currentIndex);
-    OnItemPositionAddOrUpdate(layoutWrapper, startIndex);
+    OnItemPositionAddOrUpdate(layoutWrapper, GetLanesFloor(layoutWrapper, currentIndex));
     return cnt;
 }
 
@@ -170,7 +182,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
             }
             wrapper->Measure(childLayoutConstraint_);
         }
-        mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
+        mainLen = std::max(mainLen, childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+            GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
         if (isGroup || (currentIndex - FindLanesStartIndex(layoutWrapper, currentIndex)) % lanes == 0) {
             break;
         }
@@ -315,7 +328,7 @@ int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& h
 
 int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(wrapper, index);
     if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
         return index;
@@ -325,7 +338,7 @@ int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapp
         index -= lazyIndex;
     }
     for (int32_t idx = index; idx > startIndex; idx--) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(idx - 1, false);
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(idx - 1);
         CHECK_NULL_RETURN(wrapper, idx);
         if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             return idx;

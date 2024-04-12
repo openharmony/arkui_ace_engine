@@ -625,6 +625,11 @@ public:
         hasTabsAncestor_ = hasTabsAncestor;
     }
 
+    void SetIndicatorInteractive(bool isInteractive)
+    {
+        isIndicatorInteractive_ = isInteractive;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -1027,6 +1032,7 @@ private:
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;
     bool hasTabsAncestor_ = false;
+    bool isIndicatorInteractive_ = true;
 
     std::optional<int32_t> cachedCount_;
 

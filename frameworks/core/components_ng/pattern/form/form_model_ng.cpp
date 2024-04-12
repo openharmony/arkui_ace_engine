@@ -74,6 +74,22 @@ void FormModelNG::SetVisible(VisibleType visible)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
 }
 
+void FormModelNG::SetObscured(const std::vector<ObscuredReasons>& reasons)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto formPattern = frameNode->GetPattern<FormPattern>();
+    CHECK_NULL_VOID(formPattern);
+    bool isObscured = false;
+    for (const auto& reason : reasons) {
+        if (reason == ObscuredReasons::PLACEHOLDER) {
+            isObscured = true;
+            break;
+        }
+    }
+    formPattern->SetObscured(isObscured);
+}
+
 void FormModelNG::SetVisibility(VisibleType visible)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

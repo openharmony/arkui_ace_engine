@@ -62,7 +62,7 @@ enum PageEventType: int32_t {
 };
 
 struct EventSwitch {
-    bool pageEnable = false;
+    bool pageEnable = true;
     bool exposureEnable = false;
     bool componentEnable = false;
 };

@@ -133,6 +133,8 @@ public:
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
     static void SetBackgroundEffect(const EffectOption &effectOption);
+    static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
+    static void SetForegroundEffect(float radius);
     static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
@@ -365,6 +367,8 @@ public:
 
     static void SetFreeze(bool freeze);
 
+    static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
+
     // useShadowBatching
     static void SetUseShadowBatching(bool useShadowBatching);
 
@@ -390,6 +394,7 @@ public:
     static void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(float value);
+    static void SetLightColor(const Color& value);
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);
@@ -504,6 +509,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
+    static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
@@ -549,6 +555,7 @@ public:
     static bool GetNeedFocus(FrameNode* frameNode);
     static double GetOpacity(FrameNode* frameNode);
     static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
+    static BorderWidthProperty GetLayoutBorderWidth(FrameNode* frameNode);
     static BorderRadiusProperty GetBorderRadius(FrameNode* frameNode);
     static BorderColorProperty GetBorderColor(FrameNode* frameNode);
     static BorderStyleProperty GetBorderStyle(FrameNode* frameNode);
@@ -617,6 +624,7 @@ public:
     static std::string GetBackgroundImageSrc(FrameNode* frameNode);
     static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
     static PaddingProperty GetPadding(FrameNode* frameNode);
+    static std::optional<CalcSize> GetConfigSize(FrameNode* frameNode);
     static std::string GetKey(FrameNode* frameNode);
     static bool GetEnabled(FrameNode* frameNode);
     static MarginProperty GetMargin(FrameNode* frameNode);

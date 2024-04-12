@@ -156,4 +156,9 @@ float SystemProperties::GetDefaultResolution()
 {
     return 1.0f;
 }
+
+std::string SystemProperties::GetAtomicServiceBundleName()
+{
+    return {};
+}
 } // namespace OHOS::Ace

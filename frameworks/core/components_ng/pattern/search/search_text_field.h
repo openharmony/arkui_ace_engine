@@ -30,7 +30,7 @@ public:
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     TextInputAction GetDefaultTextInputAction() const override;
     void InitDragEvent() override;
-    void InitBackGroundColorAndBorderRadius() override;
+    void ApplyNormalTheme() override;
 };
 } // namespace OHOS::Ace::NG
 

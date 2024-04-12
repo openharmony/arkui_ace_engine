@@ -397,8 +397,8 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
     particle.SetLifeTime(lifeTime);
     auto lifeTimeRange = 0;
     auto lifeTimeRangeJsValue = particleJsObject->GetProperty("lifetimeRange");
-    if (lifeTimeJsValue->IsNumber()) {
-        auto lifeTimeRangeIntValue = lifeTimeJsValue->ToNumber<int64_t>();
+    if (lifeTimeRangeJsValue->IsNumber()) {
+        auto lifeTimeRangeIntValue = lifeTimeRangeJsValue->ToNumber<int64_t>();
         if (lifeTimeRangeIntValue >= 0) {
             lifeTimeRange = lifeTimeRangeIntValue;
         }

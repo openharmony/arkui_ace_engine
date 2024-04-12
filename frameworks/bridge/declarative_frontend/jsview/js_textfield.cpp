@@ -80,11 +80,15 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -467,10 +471,12 @@ void JSTextField::SetWordBreak(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetWordBreak(WordBreak::BREAK_WORD);
         return;
     }
     auto index = info[0]->ToNumber<int32_t>();
     if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        TextFieldModel::GetInstance()->SetWordBreak(WordBreak::BREAK_WORD);
         return;
     }
     TextFieldModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
@@ -619,6 +625,12 @@ bool CheckIsIllegalString(const std::string& value)
     return (pEnd == value.c_str() || errno == ERANGE);
 }
 
+void JSTextField::JsMargin(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsMargin(info);
+    TextFieldModel::GetInstance()->SetMargin();
+}
+
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
@@ -746,23 +758,6 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
         return;
-    }
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    auto valueWidth = object->GetProperty("width");
-    if (!valueWidth->IsUndefined()) {
-        ParseBorderWidth(valueWidth);
-    }
-    auto valueColor = object->GetProperty("color");
-    if (!valueColor->IsUndefined()) {
-        ParseBorderColor(valueColor);
-    }
-    auto valueRadius = object->GetProperty("radius");
-    if (!valueRadius->IsUndefined()) {
-        ParseBorderRadius(valueRadius);
-    }
-    auto valueStyle = object->GetProperty("style");
-    if (!valueStyle->IsUndefined()) {
-        ParseBorderStyle(valueStyle);
     }
     JSViewAbstract::JsBorder(info);
     TextFieldModel::GetInstance()->SetBackBorder();
@@ -1386,6 +1381,51 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
     } while (false);
 }
 
+void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension minFontSize;
+    if (!ParseJsDimensionFpNG(info[0], minFontSize, false)) {
+        TextFieldModel::GetInstance()->SetAdaptMinFontSize(CalcDimension());
+        return;
+    }
+    if (minFontSize.IsNegative()) {
+        minFontSize = CalcDimension();
+    }
+    TextFieldModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
+}
+
+void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    if (!ParseJsDimensionFpNG(info[0], maxFontSize, false)) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+        TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
+        return;
+    }
+    if (maxFontSize.IsNegative()) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    }
+    TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
+}
+
+void JSTextField::SetHeightAdaptivePolicy(int32_t value)
+{
+    if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+        return;
+    }
+    TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
+}
+
 void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -1422,5 +1462,31 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
 
     std::string fontFeatureSettings = info[0]->ToString();
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
+void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
+{
+    do {
+        auto tmpInfo = info[0];
+        if (info.Length() < 1 || !tmpInfo->IsNumber() || tmpInfo->IsUndefined()) {
+            break;
+        }
+        auto overflow = tmpInfo->ToNumber<int32_t>();
+        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+            break;
+        }
+        TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
+    } while (false);
+
+    info.SetReturnValue(info.This());
+}
+
+void JSTextField::SetTextIndent(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionVpNG(info[0], value, true)) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetTextIndent(value);
 }
 } // namespace OHOS::Ace::Framework

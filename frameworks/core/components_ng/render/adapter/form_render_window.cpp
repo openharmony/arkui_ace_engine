@@ -102,7 +102,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-    });
+    }, id);
 #else
     taskExecutor_ = nullptr;
     id_ = 0;

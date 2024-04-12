@@ -1175,6 +1175,34 @@ class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignme
   }
 }
 
+class BackgroundImageResizableModifier extends ModifierWithKey<ResizableOptions> {
+  constructor(value: ResizableOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImageResizable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageResizable(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      let sliceRight: Length | undefined;
+      if (!isUndefined(this.value.slice)) {
+        let tempSlice = this.value.slice as EdgeWidths;
+        sliceTop = tempSlice.top;
+        sliceBottom = tempSlice.bottom;
+        sliceLeft = tempSlice.left;
+        sliceRight = tempSlice.right;
+      }
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class LinearGradientBlurModifier extends ModifierWithKey<ArkLinearGradientBlur> {
   constructor(value: ArkLinearGradientBlur) {
     super(value);
@@ -2889,6 +2917,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  backgroundImageResizable(value: ResizableOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageResizableModifier.identity, BackgroundImageResizableModifier, value);
+    return this;
+  }
+
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
@@ -3791,6 +3824,9 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

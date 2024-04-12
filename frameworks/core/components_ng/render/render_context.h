@@ -465,6 +465,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
 
     // BorderImage
     ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
@@ -482,6 +483,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(NodeName, std::string);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundEffect, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
@@ -526,6 +528,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(PointLight, PointLightProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightPosition, TranslateOptions);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIntensity, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightColor, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIlluminated, uint32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, IlluminatedBorderWidth, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, Bloom, float);
@@ -626,9 +629,11 @@ protected:
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
+    virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}
 
     virtual void OnForegroundColorUpdate(const Color& value) {}
     virtual void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) {}
+    virtual void OnForegroundEffectUpdate(float radius) {};
 
     virtual void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) {}
     virtual void OnBackgroundAlignUpdate(const Alignment& align) {}
@@ -653,6 +658,7 @@ protected:
 
     virtual void OnLightPositionUpdate(const TranslateOptions& value) {}
     virtual void OnLightIntensityUpdate(const float value) {}
+    virtual void OnLightColorUpdate(const Color& value) {}
     virtual void OnLightIlluminatedUpdate(const uint32_t value) {}
     virtual void OnIlluminatedBorderWidthUpdate(const Dimension& value) {}
     virtual void OnBloomUpdate(const float value) {}

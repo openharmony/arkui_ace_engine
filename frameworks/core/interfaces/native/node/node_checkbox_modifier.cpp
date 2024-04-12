@@ -23,7 +23,6 @@
 #include "frameworks/core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
-const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
@@ -68,17 +67,16 @@ void SetCheckboxHeight(ArkUINodeHandle node, float value, int unit)
     CheckBoxModelNG::SetHeight(frameNode, height);
 }
 
-void SetMark(ArkUINodeHandle node, uint32_t color, float sizeValue,
-             float widthValue)
+void SetMark(ArkUINodeHandle node, uint32_t color, float sizeValue, int sizeUnit, float widthValue, int widthUnit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetCheckMarkColor(frameNode, Color(color));
 
-    Dimension size = Dimension(static_cast<double>(sizeValue), DEFAULT_UNIT);
+    Dimension size = Dimension(static_cast<double>(sizeValue), static_cast<OHOS::Ace::DimensionUnit>(sizeUnit));
     CheckBoxModelNG::SetCheckMarkSize(frameNode, size);
 
-    Dimension width = Dimension(static_cast<double>(widthValue), DEFAULT_UNIT);
+    Dimension width = Dimension(static_cast<double>(widthValue), static_cast<OHOS::Ace::DimensionUnit>(widthUnit));
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, width);
 }
 

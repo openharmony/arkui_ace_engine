@@ -166,6 +166,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
+    virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id);
 

@@ -28,7 +28,7 @@ void XComponentExtSurfaceCallbackClient::ProcessSurfaceChange(int32_t width, int
 {
     auto xcPattern = weakXComponentPattern_.Upgrade();
     if (xcPattern) {
-        xcPattern->XComponentSizeChange(static_cast<float>(width), static_cast<float>(height));
+        xcPattern->XComponentSizeChange({ 0, 0, width, height }, true);
     }
 }
 

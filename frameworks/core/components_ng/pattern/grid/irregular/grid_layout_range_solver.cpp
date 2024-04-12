@@ -27,6 +27,9 @@ GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper
 using Result = GridLayoutRangeSolver::StartingRowInfo;
 Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
 {
+    if (info_->gridMatrix_.empty()) {
+        return { 0, 0, 0.0f };
+    }
     // Negative offset implies scrolling down, so we can start from the previous startIndex_.
     // Otherwise, we have to restart from Row 0 because of irregular items.
     if (info_->currentOffset_ <= 0.0f) {
@@ -70,18 +73,22 @@ GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t 
     }
 }
 
-Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, int32_t idx)
+Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, const int32_t idx)
 {
     float len = -mainGap;
-    while (static_cast<size_t>(idx) < info_->gridMatrix_.size()) {
-        auto [newRows, addLen] = AddNextRows(mainGap, idx);
-        if (GreatNotEqual(len + addLen, targetLen)) {
+    auto it = info_->lineHeightMap_.find(idx);
+    for (; it != info_->lineHeightMap_.end(); ++it) {
+        if (GreatNotEqual(len + it->second + mainGap, targetLen)) {
             break;
         }
-        len += addLen;
-        idx += newRows;
+        len += it->second + mainGap;
     }
-    return { idx, len - targetLen + mainGap };
+    auto topRows = CheckMultiRow(it->first);
+    for (int32_t i = 1; i < topRows; ++i) {
+        --it;
+        len -= it->second + mainGap;
+    }
+    return { it->first, FindStartingItem(it->first), len - targetLen + mainGap };
 }
 
 std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t idx)
@@ -146,10 +153,10 @@ Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int3
     for (int i = 0; i < rowCnt - 1; ++i) {
         newOffset -= info_->lineHeightMap_.at(idx + i) + mainGap;
     }
-    return { idx, newOffset };
+    return { idx, FindStartingItem(idx), newOffset };
 }
 
-int32_t GridLayoutRangeSolver::CheckMultiRow(int32_t idx)
+int32_t GridLayoutRangeSolver::CheckMultiRow(const int32_t idx)
 {
     // check multi-row item that occupies Row [idx]
     int32_t rowCnt = 1;
@@ -186,5 +193,22 @@ int32_t GridLayoutRangeSolver::CheckMultiRow(int32_t idx)
         }
     }
     return rowCnt;
+}
+
+int32_t GridLayoutRangeSolver::FindStartingItem(int32_t rowIdx)
+{
+    if (rowIdx == 0) {
+        return 0;
+    }
+    const auto& row = info_->gridMatrix_.find(rowIdx);
+    if (row == info_->gridMatrix_.end()) {
+        return -1;
+    }
+    for (auto it : row->second) {
+        if (it.second > 0) {
+            return it.second;
+        }
+    }
+    return -1;
 }
 } // namespace OHOS::Ace::NG

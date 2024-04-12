@@ -72,34 +72,9 @@ void ButtonModelNG::SetStateEffect(const bool stateEffect)
 
 void ButtonModelNG::SetLabelStyle(ButtonParameters& buttonParameters)
 {
-    if (buttonParameters.textOverflow.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextOverflow, buttonParameters.textOverflow.value());
-    }
-    if (buttonParameters.maxLines.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, buttonParameters.maxLines.value());
-    }
-    if (buttonParameters.minFontSize.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontSize, buttonParameters.minFontSize.value());
-    }
-    if (buttonParameters.maxFontSize.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value());
-    }
-    if (buttonParameters.heightAdaptivePolicy.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(
-            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value());
-    }
-    if (buttonParameters.fontSize.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonParameters.fontSize.value());
-    }
-    if (buttonParameters.fontWeight.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, buttonParameters.fontWeight.value());
-    }
-    if (buttonParameters.fontFamily.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, buttonParameters.fontFamily.value());
-    }
-    if (buttonParameters.fontStyle.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value());
-    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetLabelStyle(frameNode, buttonParameters);
 }
 
 void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle)
@@ -480,7 +455,17 @@ void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& 
             ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value(), frameNode);
     }
     if (buttonParameters.fontSize.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonParameters.fontSize.value(), frameNode);
+        auto fontSize = buttonParameters.fontSize.value();
+        if (GreatOrEqual(fontSize.Value(), 0.0)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize, frameNode);
+        } else {
+            auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+            CHECK_NULL_VOID(buttonTheme);
+            auto themeFontSize = buttonTheme->GetTextSize(layoutProperty->GetControlSizeValue(ControlSize::NORMAL));
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, themeFontSize, frameNode);
+        }
     }
     if (buttonParameters.fontWeight.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -533,6 +518,19 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
     Color value;
     ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, value, frameNode);
     return value;
+}
+void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
+{
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetButtonPress(xPos, yPos);
 }
 
 void ButtonModelNG::ResetBorderRadius()

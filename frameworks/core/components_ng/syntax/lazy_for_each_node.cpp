@@ -15,6 +15,8 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
+#include <utility>
+
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -41,6 +43,14 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
         return node;
     }
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
+    ElementRegister::GetInstance()->AddUINode(node);
+    return node;
+}
+
+RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
+    int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
+{
+    auto node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }
@@ -168,17 +178,18 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
-        auto nodeList = builder_->OnDataBulkDeleted(index, count);
-        for (auto& node : nodeList) {
-            if (node == nullptr) {
+        const auto& nodeList = builder_->OnDataBulkDeleted(index, count);
+        for (const auto& node : nodeList) {
+            if (node.second == nullptr) {
                 continue;
             }
-            if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+            if (!node.second->OnRemoveFromParent(true)) {
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
             } else {
-                node->DetachFromMainTree();
+                node.second->DetachFromMainTree();
             }
-            builder_->ProcessOffscreenNode(node, true);
+            builder_->ProcessOffscreenNode(node.second, true);
+            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         builder_->clearDeletedNodes();
     }
@@ -195,6 +206,46 @@ void LazyForEachNode::OnDataChanged(size_t index)
         builder_->OnDataChanged(index);
     }
     children_.clear();
+    NotifyDataCountChanged(static_cast<int32_t>(index));
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
+{
+    ACE_SCOPED_TRACE("OnDataBulkChanged");
+    auto deletedIndex = static_cast<int32_t>(index);
+    if (builder_) {
+        builder_->SetUseNewInterface(false);
+        const auto& nodeList = builder_->OnDataBulkChanged(index, count);
+        for (const auto& node : nodeList) {
+            if (node.second == nullptr) {
+                continue;
+            }
+            if (!node.second->OnRemoveFromParent(true)) {
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+            } else {
+                node.second->DetachFromMainTree();
+            }
+            builder_->ProcessOffscreenNode(node.second, true);
+            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
+        }
+        builder_->clearDeletedNodes();
+    }
+    children_.clear();
+    NotifyDataCountChanged(deletedIndex);
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void LazyForEachNode::OnDataMoveToNewPlace(size_t from, size_t to)
+{
+    if (builder_) {
+        builder_->SetUseNewInterface(false);
+        builder_->OnDataMoveToNewPlace(from, to);
+    }
+    children_.clear();
+    NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -206,6 +257,7 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
         builder_->OnDataMoved(from, to);
     }
     children_.clear();
+    NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -305,9 +357,10 @@ void LazyForEachNode::RecycleItems(int32_t from, int32_t to)
     children_.clear();
     for (auto index = from; index < to; index++) {
         if (index >= startIndex_ && index < startIndex_ + count_) {
-            builder_->RecycleChildByIndex(index - startIndex_);
+            builder_->RecordOutOfBoundaryNodes(index - startIndex_);
         }
     }
+    PostIdleTask();
 }
 
 void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
@@ -321,7 +374,6 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
         MarkNeedSyncRenderTree();
         PostIdleTask();
     }
-    return;
 }
 
 void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
@@ -339,17 +391,18 @@ void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
 {
     if (children_.empty()) {
-        std::list<RefPtr<UINode>> childList;
-        auto items = builder_->GetItems(childList);
+        std::list<std::pair<std::string, RefPtr<UINode>>> childList;
+        const auto& items = builder_->GetItems(childList);
 
         for (auto& node : childList) {
-            if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+            if (!node.second->OnRemoveFromParent(true)) {
+                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
             } else {
-                node->DetachFromMainTree();
+                node.second->DetachFromMainTree();
             }
+            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
-        for (auto& [index, item] : items) {
+        for (const auto& [index, item] : items) {
             if (item.second) {
                 const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
                 children_.push_back(item.second);
@@ -363,7 +416,7 @@ void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configura
 {
     if ((configurationChange.colorModeUpdate || configurationChange.fontUpdate) && builder_) {
         auto map = builder_->GetCachedUINodeMap();
-        for (auto &it : map) {
+        for (auto& it : map) {
             auto node = DynamicCast<UINode>(it.second.second);
             if (node) {
                 node->UpdateConfigurationUpdate(configurationChange);

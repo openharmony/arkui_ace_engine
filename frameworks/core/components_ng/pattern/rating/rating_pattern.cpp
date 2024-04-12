@@ -53,24 +53,24 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             currentSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                TAG_LOGW(AceLogTag::ACE_RATING, "Rating load foreground image failed, the sourceInfo is %{public}s",
-                    sourceInfo.ToString().c_str());
+                TAG_LOGW(AceLogTag::ACE_SELECT_COMPONENT,
+                    "Rating load foreground image failed, the sourceInfo is %{public}s", sourceInfo.ToString().c_str());
             }
             break;
         case 0b010:
             currentSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                TAG_LOGW(AceLogTag::ACE_RATING, "Rating load secondary image failed, the sourceInfo is %{public}s",
-                    sourceInfo.ToString().c_str());
+                TAG_LOGW(AceLogTag::ACE_SELECT_COMPONENT,
+                    "Rating load secondary image failed, the sourceInfo is %{public}s", sourceInfo.ToString().c_str());
             }
             break;
         case 0b100:
             currentSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                TAG_LOGW(AceLogTag::ACE_RATING, "Rating load background image failed, the sourceInfo is %{public}s",
-                    sourceInfo.ToString().c_str());
+                TAG_LOGW(AceLogTag::ACE_SELECT_COMPONENT,
+                    "Rating load background image failed, the sourceInfo is %{public}s", sourceInfo.ToString().c_str());
             }
             break;
         default:
@@ -115,6 +115,7 @@ LoadFailNotifyTask RatingPattern::CreateLoadFailCallback(int32_t imageFlag)
 
 void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 {
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating load image success type %{public}d", imageFlag);
     if (imageFlag == 0b001) {
         foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
         foregroundConfig_.srcRect_ = foregroundImageLoadingCtx_->GetSrcRect();
@@ -171,6 +172,9 @@ void RatingPattern::UpdatePaintConfig()
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
 {
+    if (UseContentModifier()) {
+        return nullptr;
+    }
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
@@ -361,6 +365,7 @@ void RatingPattern::FireChangeEvent() const
     CHECK_NULL_VOID(ratingRenderProperty);
     std::stringstream ss;
     ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating score %{public}s", ss.str().c_str());
     ratingEventHub->FireChangeEvent(ss.str());
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -392,12 +397,14 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {};
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle drag update");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle drag end");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // invoke onChange callback
@@ -428,10 +435,12 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
             auto localPosition = info.GetTouches().front().GetLocalLocation();
             // handle touch down event and draw touch down effect.
             pattern->HandleTouchDown(localPosition);
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle touch down");
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
             // handle touch up event and remove touch down effect.
             pattern->HandleTouchUp();
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle touch up");
         }
     };
 
@@ -441,6 +450,9 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::HandleTouchUp()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     CHECK_NULL_VOID(!IsIndicator());
     state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -448,6 +460,9 @@ void RatingPattern::HandleTouchUp()
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     CHECK_NULL_VOID(!IsIndicator());
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
@@ -466,6 +481,9 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
+    if (UseContentModifier()) {
+        return;
+    }
     CHECK_NULL_VOID(!IsIndicator());
     auto eventPointX = info.GetLocalLocation().GetX();
     if (Negative(eventPointX)) {
@@ -481,6 +499,7 @@ void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto touchTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating handle click");
         pattern->HandleClick(info);
     };
 
@@ -655,12 +674,27 @@ void RatingPattern::OnBlurEvent()
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void RatingPattern::SetRatingScore(double ratingScore)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    UpdateRatingScore(ratingScore);
+    OnModifyDone();
+}
+
 void RatingPattern::UpdateRatingScore(double ratingScore)
 {
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     ratingRenderProperty->UpdateRatingScore(ratingScore);
     focusRatingScore_ = ratingScore;
+    FireBuilder();
 }
 
 void RatingPattern::InitMouseEvent()
@@ -826,6 +860,7 @@ void RatingPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    FireBuilder();
 }
 
 // XTS inspector code
@@ -892,5 +927,38 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
         CHECK_NULL_VOID(ratingNode);
         ratingNode->MarkNeedRenderOnly();
     });
+}
+
+void RatingPattern::FireBuilder()
+{
+    CHECK_NULL_VOID(makeFunc_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
+{
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto property = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_RETURN(property, nullptr);
+    auto renderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_RETURN(renderProperty, nullptr);
+    auto starNum = GetStarNum(property);
+    auto isIndicator = IsIndicator();
+    auto ratingScore = renderProperty->GetRatingScore().value_or(GetRatingScoreFromTheme().value_or(0.0));
+    auto stepSize = renderProperty->GetStepSizeValue(GetStepSizeFromTheme()
+        .value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);
+    return (makeFunc_.value())(ratingConfiguration);
 }
 } // namespace OHOS::Ace::NG

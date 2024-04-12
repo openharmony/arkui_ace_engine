@@ -135,10 +135,9 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
-    : id_(id), type_(type), libraryname_(libraryname), xcomponentController_(xcomponentController)
+    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
 {
-    initSize_.SetWidth(initWidth);
-    initSize_.SetHeight(initHeight);
+    SetLibraryName(libraryname);
 }
 
 void XComponentPattern::Initialize(int32_t instanceId)
@@ -181,6 +180,7 @@ void XComponentPattern::Initialize(int32_t instanceId)
         }
         renderSurface_->InitSurface();
         renderSurface_->UpdateSurfaceConfig();
+        surfaceId_ = renderSurface_->GetUniqueId();
         InitEvent();
         SetMethodCall();
     } else if (type_ == XComponentType::NODE) {
@@ -358,6 +358,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
         eventHub->FireDetachEvent(id_);
+        eventHub->FireControllerDestroyedEvent(surfaceId_);
 #ifdef RENDER_EXTRACT_SUPPORTED
         if (renderContextForSurface_) {
             renderContextForSurface_->RemoveSurfaceChangedCallBack();
@@ -386,12 +387,24 @@ void XComponentPattern::SetMethodCall()
             });
         });
 
-    xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
+    xcomponentController_->SetSurfaceId(surfaceId_);
 }
 
 void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
 {
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
+}
+
+void XComponentPattern::BeforeCreateLayoutWrapper()
+{
+    Pattern::BeforeCreateLayoutWrapper();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    auto dmRotation = displayInfo->GetRotation();
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->SetTransformHint(dmRotation);
 }
 
 bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -406,6 +419,8 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (!drawSize_.IsPositive()) {
         return false;
     }
+    globalPosition_ = geometryNode->GetFrameOffset();
+    localPosition_ = geometryNode->GetContentOffset();
 
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
@@ -413,24 +428,13 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
     if (!hasXComponentInit_) {
         initSize_ = drawSize_;
-        globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
             XComponentSizeInit();
         }
-        NativeXComponentOffset(globalPosition_.GetX(), globalPosition_.GetY());
+        auto offset = globalPosition_ + localPosition_;
+        NativeXComponentOffset(offset.GetX(), offset.GetY());
         hasXComponentInit_ = true;
-    } else {
-        if (config.frameOffsetChange || config.contentOffsetChange) {
-            globalPosition_ = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
-            NativeXComponentOffset(globalPosition_.GetX(), globalPosition_.GetY());
-        }
-        if (config.contentSizeChange) {
-            if (!SystemProperties::GetExtSurfaceEnabled()) {
-                XComponentSizeChange(drawSize_.Width(), drawSize_.Height());
-            }
-        }
     }
-    localPosition_ = geometryNode->GetContentOffset();
 #ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto host = GetHost();
@@ -442,7 +446,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
 #endif
-    UpdateSurfaceBounds();
+    UpdateSurfaceBounds(false, config.frameOffsetChange);
     // XComponentType::SURFACE has set surface default size in RSSurfaceNode->SetBounds()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetSurfaceDefaultSize(
@@ -553,17 +557,26 @@ void XComponentPattern::XComponentSizeInit()
     CHECK_NULL_VOID(eventHub);
     eventHub->FireSurfaceInitEvent(id_, host->GetId());
     eventHub->FireLoadEvent(id_);
+    eventHub->FireControllerCreatedEvent(surfaceId_);
 }
 
-void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHeight)
+void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent)
 {
-    ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto viewScale = context->GetViewScale();
-    renderSurface_->AdjustNativeWindowSize(
-        static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
-    NativeXComponentChange(textureWidth, textureHeight);
+    // do not trigger when the size is first initialized
+    if (needFireNativeEvent) {
+        ContainerScope scope(instanceId_);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto viewScale = context->GetViewScale();
+        renderSurface_->AdjustNativeWindowSize(static_cast<uint32_t>(surfaceRect.Width() * viewScale),
+            static_cast<uint32_t>(surfaceRect.Height() * viewScale));
+        NativeXComponentChange(surfaceRect.Width(), surfaceRect.Height());
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect);
 }
 
 void XComponentPattern::InitNativeNodeCallbacks()
@@ -991,10 +1004,15 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
-    auto paintRect = AdjustPaintRect(
-        localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
-    handlingSurfaceRenderContext_->SetBounds(
-        paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto paintRect = AdjustPaintRect(
+            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
+        handlingSurfaceRenderContext_->SetBounds(
+            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    } else {
+        handlingSurfaceRenderContext_->SetBounds(
+            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
+    }
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -1197,11 +1215,13 @@ void XComponentPattern::ClearIdealSurfaceOffset(bool isXAxis)
     }
 }
 
-void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
+void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange)
 {
     if (!drawSize_.IsPositive()) {
         return;
     }
+    auto preSurfaceSize = surfaceSize_;
+    auto preLocalPosition = localPosition_;
     if (selfIdealSurfaceWidth_.has_value() && Positive(selfIdealSurfaceWidth_.value()) &&
         selfIdealSurfaceHeight_.has_value() && Positive(selfIdealSurfaceHeight_.value())) {
         localPosition_.SetX(selfIdealSurfaceOffsetX_.has_value()
@@ -1215,11 +1235,23 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender)
     } else {
         surfaceSize_ = drawSize_;
     }
+    if (frameOffsetChange || preLocalPosition != localPosition_) {
+        auto offset = globalPosition_ + localPosition_;
+        NativeXComponentOffset(offset.GetX(), offset.GetY());
+    }
+    if (preSurfaceSize != surfaceSize_) {
+        XComponentSizeChange({ localPosition_, surfaceSize_ }, preSurfaceSize.IsPositive());
+    }
     if (handlingSurfaceRenderContext_) {
-        auto paintRect = AdjustPaintRect(
-            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
-        handlingSurfaceRenderContext_->SetBounds(
-            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto paintRect = AdjustPaintRect(
+                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
+            handlingSurfaceRenderContext_->SetBounds(
+                paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        } else {
+            handlingSurfaceRenderContext_->SetBounds(
+                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
+        }
 #ifdef ENABLE_ROSEN_BACKEND
         auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
@@ -1268,7 +1300,9 @@ void XComponentPattern::OnWindowHide()
     }
     CHECK_NULL_VOID(renderSurface_);
     NativeSurfaceHide();
-    renderSurface_->releaseSurfaceBuffers();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderSurface_->releaseSurfaceBuffers();
+    }
     hasReleasedSurface_ = true;
 }
 
@@ -1392,8 +1426,8 @@ RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float
 
     float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
     float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
-    roundToPixelErrorX += nodeLeftI -relativeLeft;
-    roundToPixelErrorY += nodeTopI -relativeTop;
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
     rect.SetLeft(nodeLeftI);
     rect.SetTop(nodeTopI);
 
@@ -1427,12 +1461,6 @@ RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float
     if (nodeHeightI < nodeHeightTemp) {
         roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
         nodeHeightI = nodeHeightTemp;
-    }
-    if (roundToPixelErrorX >= 1.0f || roundToPixelErrorX <= -1.0f) {
-        LOGI("roundToPixelErrorX is %{public}f", roundToPixelErrorX);
-    }
-    if (roundToPixelErrorY >= 1.0f || roundToPixelErrorY <= -1.0f) {
-        LOGI("roundToPixelErrorY is %{public}f", roundToPixelErrorY);
     }
 
     rect.SetWidth(nodeWidthI);

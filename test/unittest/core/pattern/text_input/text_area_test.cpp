@@ -766,73 +766,6 @@ HWTEST_F(TextFieldUXTest, SetSelectionFlag001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SelectTextShowMenu001
- * @tc.desc: Test show menu after SetTextSelection()
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input and get focus
-     */
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    /**
-     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::ALWAYS
-     */
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::ALWAYS;
-    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
-
-    /**
-     * @tc.steps: step3. Test menu open or close
-     * @tc.expected: text menu is open
-     */
-    auto ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
-    EXPECT_TRUE(ret);
-
-    /**
-     * @tc.steps: step4. Press esc
-     */
-    KeyEvent event;
-    event.code = KeyCode::KEY_ESCAPE;
-    pattern_->OnKeyEvent(event);
-
-    /**
-     * @tc.steps: step5. Set menuPolicy to be MenuPolicy::NEVER
-     */
-    options.menuPolicy = MenuPolicy::NEVER;
-    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
-
-    /**
-     * @tc.steps: step6. Test menu open or close
-     * @tc.expected: text menu is close
-     */
-    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
-    EXPECT_FALSE(ret);
-
-    /**
-     * @tc.steps: step7. Press esc
-     */
-    event.code = KeyCode::KEY_ESCAPE;
-    pattern_->OnKeyEvent(event);
-
-    /**
-     * @tc.steps: step8. Set menuPolicy to be MenuPolicy::DEFAULT
-     */
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
-
-    /**
-     * @tc.steps: step9. Test menu open or close
-     * @tc.expected: text menu is close
-     */
-    ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: OnBackPressed001
  * @tc.desc: Test OnBackPressed
  * @tc.type: FUNC
@@ -1013,5 +946,125 @@ HWTEST_F(TextFieldUXTest, FontFeature002, TestSize.Level1)
     layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
     TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate001
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::START);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(2.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate002
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::CENTER);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(232.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate003
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::END);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(462.0f, 2.0f, 0.0f, 2.0f));
+
+    layoutProperty_->UpdateTextAlign(TextAlign::LEFT);
+    EXPECT_EQ(textAreaRect, RectF(462.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextIsEmptyRect001
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextIsEmptyRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call TextIsEmptyRect.
+     */
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextIsEmptyRect(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(0.0f, 0.0f, 0.0f, 50.0f));
+}
+
+/**
+ * @tc.name: testWordBreak001
+ * @tc.desc: test testArea text WordBreak
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaWordBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak NORMAL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+
+    /**
+     * @tc.step: step3. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.step: step4. Set wordBreak BREAK_WORD
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
 }
 }

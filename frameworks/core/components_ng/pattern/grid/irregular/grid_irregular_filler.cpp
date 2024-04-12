@@ -210,10 +210,10 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     constraint.percentReference.SetCrossSize(crossLen, info_->axis_);
     if (info_->axis_ == Axis::VERTICAL) {
         constraint.maxSize = SizeF { crossLen, Infinity<float>() };
-        constraint.selfIdealSize = OptionalSizeF(crossLen, std::nullopt);
+        constraint.parentIdealSize = OptionalSizeF(crossLen, std::nullopt);
     } else {
         constraint.maxSize = SizeF { Infinity<float>(), crossLen };
-        constraint.selfIdealSize = OptionalSizeF(std::nullopt, crossLen);
+        constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
 
     child->Measure(constraint);

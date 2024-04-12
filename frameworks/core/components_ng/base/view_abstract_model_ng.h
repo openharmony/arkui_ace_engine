@@ -153,6 +153,11 @@ public:
         ViewAbstract::SetBackgroundEffect(effectOption);
     }
 
+    void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) override
+    {
+        ViewAbstract::SetBackgroundImageResizableSlice(slice);
+    }
+
     void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
     {
         ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
@@ -169,6 +174,11 @@ public:
     void SetLightUpEffect(double radio) override
     {
         ViewAbstract::SetLightUpEffect(radio);
+    }
+
+    void SetDisallowDropForcedly(bool isDisallowDropForcedly) override
+    {
+        ViewAbstract::SetDisallowDropForcedly(isDisallowDropForcedly);
     }
 
     void SetPadding(const CalcDimension& value) override
@@ -1056,7 +1066,8 @@ public:
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange) override;
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange) override;
     void DismissSheet() override;
     void DismissContentCover() override;
 
@@ -1075,7 +1086,12 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-
+    
+    void SetForegroundEffect(float radius) override
+    {
+        ViewAbstract::SetForegroundEffect(radius);
+    }
+    
     void DisableOnClick() override
     {
         ViewAbstract::DisableOnClick();
@@ -1144,6 +1160,11 @@ public:
     void SetLightIntensity(const float value) override
     {
         ViewAbstract::SetLightIntensity(value);
+    }
+
+    void SetLightColor(const Color& value) override
+    {
+        ViewAbstract::SetLightColor(value);
     }
 
     void SetLightIlluminated(const uint32_t value) override

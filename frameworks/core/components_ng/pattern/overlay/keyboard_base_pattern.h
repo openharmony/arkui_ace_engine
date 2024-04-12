@@ -38,11 +38,27 @@ public:
     {
         return targetId_;
     }
-
     void DumpInfo() override;
+    void OnModifyDone() override;
+    void OnAreaChangedInner() override;
+    void SetKeyboardAreaChange(bool keyboardAvoidance = false);
+    void OnDetachFromFrameNode(FrameNode* node) override;
+
+    void SetKeyboardOption(bool keyboardAvoidance)
+    {
+        supportAvoidance_ = keyboardAvoidance;
+    }
+
+    void SetKeyboardSafeHeight(const float safeHeight)
+    {
+        safeHeight_ = safeHeight;
+    }
 
 private:
     int32_t targetId_ = -1;
+    float keyboardHeight_ = 0.0f;
+    bool supportAvoidance_;
+    float safeHeight_;
 };
 } // namespace OHOS::Ace::NG
 

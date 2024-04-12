@@ -853,15 +853,10 @@ void UINode::SetActive(bool active)
 void UINode::SetJSViewActive(bool active)
 {
     for (const auto& child : GetChildren()) {
-        auto frameNodeChild = AceType::DynamicCast<FrameNode>(child);
-        // if child is framenode and its state is inactive, and the new state is active, then
-        // do not inform the state recursively
-        // List (active)
-        //   |--ListItem(inActive)
-        //     |--CustomComponent(fellow ListItem)
-        // if the List setActive(true) when doing some measuring or layout, ListItem is inActive, then
-        // the customComponent only follow the ListItem state changes
-        if (frameNodeChild && !frameNodeChild->IsActive() && active) {
+        auto customNode = AceType::DynamicCast<CustomNode>(child);
+        // do not need to recursive here, stateMgmt will recursive all children when set active
+        if (customNode) {
+            customNode->SetJSViewActive(active);
             return;
         }
         child->SetJSViewActive(active);
@@ -1147,7 +1142,6 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
     }
 }
 
-
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
@@ -1210,4 +1204,15 @@ void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>
         DFSAllChild(child, res);
     }
 }
+
+bool UINode::IsContextTransparent()
+{
+    for (const auto& item : GetChildren()) {
+        if (!item->IsContextTransparent()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

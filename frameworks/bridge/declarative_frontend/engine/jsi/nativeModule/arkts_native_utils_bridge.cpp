@@ -20,33 +20,6 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-
-struct NativeWeakRef {
-    explicit NativeWeakRef(AceType* ptr) : rawPtr(ptr)
-    {
-        weakRef = AceType::WeakClaim(ptr);
-    }
-
-    bool Invalid() const
-    {
-        return weakRef.Invalid();
-    }
-
-    AceType* rawPtr = nullptr;
-    WeakPtr<AceType> weakRef;
-};
-
-struct NativeStrongRef {
-    explicit NativeStrongRef(const RefPtr<AceType>& ref) : strongRef(ref) {}
-
-    AceType* RawPtr() const
-    {
-        return AceType::RawPtr(strongRef);
-    }
-
-    RefPtr<AceType> strongRef;
-};
-
 ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

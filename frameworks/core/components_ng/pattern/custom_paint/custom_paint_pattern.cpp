@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,9 @@ void CustomPaintPattern::OnAttachToFrameNode()
             AceType::MakeRefPtr<RenderingContext2DModifier>();
     }
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_);
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        UpdateTextDirection(TextDirection::RTL);
+    }
 }
 
 RefPtr<NodePaintMethod> CustomPaintPattern::CreateNodePaintMethod()
@@ -921,11 +924,8 @@ void CustomPaintPattern::SetTextDirection(TextDirection direction)
     if (direction == TextDirection::INHERIT) {
         direction = directionCommon;
     }
-    auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.SetTextDirection(direction);
-    };
-    paintMethod_->PushTask(task);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    UpdateTextDirection(direction);
+    isSetTextDirection_ = true;
 }
 
 void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
@@ -1086,5 +1086,35 @@ void CustomPaintPattern::DumpAdvanceInfo()
             std::string("contentOffsetChange: ").append(recordConfig_.contentOffsetChange ? "true" : "false"));
     }
     DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
+}
+
+void CustomPaintPattern::Reset()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Reset();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::OnLanguageConfigurationUpdate()
+{
+    if (isSetTextDirection_) {
+        return;
+    }
+    UpdateTextDirection(AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+}
+
+void CustomPaintPattern::UpdateTextDirection(TextDirection direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetTextDirection(direction);
+    };
+    paintMethod_->PushTask(task);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

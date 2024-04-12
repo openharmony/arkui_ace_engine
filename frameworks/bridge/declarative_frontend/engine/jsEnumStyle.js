@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 /* Load the UIContext module. */
-const UIContext = requireNapi("arkui.uicontext")
+
+if (globalThis.requireNapi === undefined) {
+    const UIContext = globalThis.requireNapiPreview('arkui.uicontext');
+} else {
+    const UIContext = globalThis.requireNapi('arkui.uicontext');
+}
 
 /* If a new value is added, add it from the end. */
 var Color;
@@ -191,6 +196,7 @@ var ImageSize;
   ImageSize[ImageSize["Contain"] = 0] = "Contain";
   ImageSize[ImageSize["Cover"] = 1] = "Cover";
   ImageSize[ImageSize["Auto"] = 2] = "Auto";
+  ImageSize[ImageSize["FILL"] = 3] = "FILL";
 })(ImageSize || (ImageSize = {}));
 
 var ImageRenderMode;
@@ -1396,6 +1402,11 @@ var FunctionKey;
   FunctionKey[FunctionKey["F10"] = 10] = "F10";
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
+  FunctionKey[FunctionKey["TAB"] = 13] = "TAB";
+  FunctionKey[FunctionKey["DPAD_UP"] = 14] = "DPAD_UP";
+  FunctionKey[FunctionKey["DPAD_DOWN"] = 15] = "DPAD_DOWN";
+  FunctionKey[FunctionKey["DPAD_LEFT"] = 16] = "DPAD_LEFT";
+  FunctionKey[FunctionKey["DPAD_RIGHT"] = 17] = "DPAD_RIGHT";
 })(FunctionKey || (FunctionKey = {}));
 
 var ContentType;
@@ -1423,6 +1434,9 @@ var ContentType;
   ContentType[ContentType['DATE'] = 20] = 'DATE';
   ContentType[ContentType['MONTH'] = 21] = 'MONTH';
   ContentType[ContentType['YEAR'] = 22] = 'YEAR';
+  ContentType[ContentType['NICKNAME'] = 23] = 'NICKNAME';
+  ContentType[ContentType['DETAIL_INFO_WITHOUT_STREET'] = 24] = 'DETAIL_INFO_WITHOUT_STREET';
+  ContentType[ContentType['FORMAT_ADDRESS'] = 25] = 'FORMAT_ADDRESS';
 })(ContentType || (ContentType = {}));
 
 var GestureJudgeResult;
@@ -2294,6 +2308,70 @@ class WaterFlowSections {
 
   length() {
     return this.sectionArray.length;
+  }
+
+  clearChanges() {
+    this.changeArray = [];
+  }
+}
+
+class ChildrenMainSizeParamError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
+class ChildrenMainSize {
+
+  constructor(childDefaultSize) {
+    if (this.isInvalid(childDefaultSize)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = childDefaultSize;
+    this.changeFlag = true;
+    this.changeArray = [];
+  }
+
+  set childDefaultSize(value) {
+    if (this.isInvalid(value)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = value;
+  }
+
+  get childDefaultSize() {
+    return this.defaultMainSize;
+  }
+
+  // splice(start: number, deleteCount?: number, childrenSize?: Array<number>);
+  splice(start, deleteCount, childrenSize) {
+    let paramCount = arguments.length;
+    if (this.isInvalid(start)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    let startValue = Math.trunc(start);
+    let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
+    if (paramCount === 1) {
+      this.changeArray.push({ start: startValue });
+    } else if (paramCount === 2) {
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
+    } else if (paramCount === 3) {
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+    }
+    this.changeFlag = !this.changeFlag;
+  }
+
+  update(index, childSize) {
+    if (this.isInvalid(index)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.changeArray.push({ start: Math.trunc(index), deleteCount: 1, childrenSize: [childSize] });
+    this.changeFlag = !this.changeFlag;
+  }
+
+  isInvalid(input) {
+    return !(Number.isFinite(input) && input >= 0);
   }
 
   clearChanges() {

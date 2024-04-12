@@ -44,7 +44,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    auto itemCount = swiperPattern->RealTotalCount();
+    auto itemCount = swiperPattern->TotalCount();
     auto direction = swiperPattern->GetDirection();
 
     auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();

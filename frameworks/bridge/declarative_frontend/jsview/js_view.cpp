@@ -920,6 +920,17 @@ void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
     info.SetReturnValue(jsVal);
 }
 
+void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
+{
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    auto nodeId = -1;
+    if (node) {
+        nodeId = node->GetId();
+    }
+    
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     JSClass<JSViewPartialUpdate>::Declare("NativeViewPartialUpdate");
@@ -945,6 +956,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

@@ -114,6 +114,7 @@ public:
     static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
+    static void JsForegroundEffect(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
     static void JsLightUpEffect(const JSCallbackInfo& info);
@@ -130,9 +131,12 @@ public:
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
+    static void ParseSheetHeightCallback(const JSRef<JSObject>& paramObj,
+        std::function<void(const float)>& heightDidChange, const char* prop);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
         std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
-        std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange);
+        std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
+        std::function<void(const float)>& onDetentsDidChange);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
@@ -369,6 +373,7 @@ public:
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
+    static void JsBackgroundImageResizable(const JSCallbackInfo& info);
 
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
 
@@ -496,7 +501,12 @@ public:
             {FunctionKey::F9, "F9"},
             {FunctionKey::F10, "F10"},
             {FunctionKey::F11, "F11"},
-            {FunctionKey::F12, "F12"}
+            {FunctionKey::F12, "F12"},
+            {FunctionKey::TAB, "TAB"},
+            {FunctionKey::DPAD_UP, "DPAD_UP"},
+            {FunctionKey::DPAD_DOWN, "DPAD_DOWN"},
+            {FunctionKey::DPAD_LEFT, "DPAD_LEFT"},
+            {FunctionKey::DPAD_RIGHT, "DPAD_RIGHT"}
         };
         auto result = keyNameMap.find(functionkey);
         return (result != keyNameMap.end()) ? result->second : std::string();

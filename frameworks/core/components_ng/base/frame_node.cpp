@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
@@ -63,8 +64,14 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t SUBSTR_LENGTH = 3;
 const char DIMENSION_UNIT_VP[] = "vp";
 constexpr int32_t SIZE_CHANGE_DUMP_SIZE = 5;
+constexpr double MIN_WIDTH = 5.0;
+constexpr double MIN_HEIGHT = 5.0;
+constexpr double MIN_OPACITY = 0.1;
 } // namespace
 namespace OHOS::Ace::NG {
+
+const std::set<std::string> FrameNode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
+    "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
 class FrameProxy {
 public:
@@ -611,11 +618,11 @@ void FrameNode::DumpDragInfo()
                                         .append(eventHub->HasOnDragMove() ? "YES" : "NO")
                                         .append(" OnDrop: ")
                                         .append(eventHub->HasOnDrop() ? "YES" : "NO")
-                                        .append("OnDragEnd: ")
+                                        .append(" OnDragEnd: ")
                                         .append(eventHub->HasOnDragEnd() ? "YES" : "NO"));
     DumpLog::GetInstance().AddDesc(std::string("DefaultOnDragStart: ")
                                         .append(eventHub->HasDefaultOnDragStart() ? "YES" : "NO")
-                                        .append("CustomerOnDragEnter: ")
+                                        .append(" CustomerOnDragEnter: ")
                                         .append(eventHub->HasCustomerOnDragEnter() ? "YES" : "NO")
                                         .append(" CustomerOnDragLeave: ")
                                         .append(eventHub->HasCustomerOnDragLeave() ? "YES" : "NO")
@@ -1312,6 +1319,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         auto self = weak.Upgrade();
         ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
+        ArkUIPerfMonitor::GetInstance().RecordRenderNode();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
 
@@ -1564,17 +1572,16 @@ void FrameNode::MarkModifyDone()
     }
     eventHub_->MarkModifyDone();
     renderContext_->OnModifyDone();
-#if (defined(aarch64) || defined(x86_64))
-    pipeline->AddAfterRenderTask(
-        weak =
-            WeakPtr(pattern_) {
-                if (Recorder::IsCacheAvaliable()) {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->OnAfterModifyDone();
-                }
-            },
-        TaskExecutor::TaskType::UI);
+#if (defined(__aarch64__) || defined(__x86_64__))
+    if (Recorder::IsCacheAvaliable()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAfterModifyDone();
+        });
+    }
 #endif
 }
 
@@ -2880,6 +2887,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+    ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
 
     if (SelfOrParentExpansive() && needRestoreSafeArea_) {
         RestoreGeoState();
@@ -3851,6 +3859,35 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
         frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }
+}
+
+bool FrameNode::IsContextTransparent()
+{
+    ACE_SCOPED_TRACE("Transparent detection");
+    const auto& rect = renderContext_->GetPaintRectWithTransform();
+    auto width = rect.Width();
+    auto height = rect.Height();
+    if (renderContext_->GetOpacity().has_value() && renderContext_->GetOpacity().value() <= MIN_OPACITY) {
+        return true;
+    }
+    if (layoutTags_.find(GetTag()) == layoutTags_.end()) {
+        if (width > MIN_WIDTH && height > MIN_HEIGHT &&
+            static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) {
+            return false;
+        }
+    } else {
+        if (width > MIN_WIDTH && height > MIN_HEIGHT &&
+            static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) == 0 &&
+            renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
+            return false;
+        }
+    }
+    for (const auto& item : GetChildren()) {
+        if (!item->IsContextTransparent()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

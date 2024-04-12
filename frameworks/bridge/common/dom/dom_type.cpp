@@ -227,6 +227,7 @@ const char DOM_BACKGROUND_IMAGE_SIZE[] = "backgroundSize";
 const char DOM_BACKGROUND_IMAGE_SIZE_CONTAIN[] = "contain";
 const char DOM_BACKGROUND_IMAGE_SIZE_COVER[] = "cover";
 const char DOM_BACKGROUND_IMAGE_SIZE_AUTO[] = "auto";
+const char DOM_BACKGROUND_IMAGE_SIZE_FILL[] = "fill";
 const char DOM_BACKGROUND_IMAGE_POSITION[] = "backgroundPosition";
 const char DOM_BACKGROUND_IMAGE_POSITION_LEFT[] = "left";
 const char DOM_BACKGROUND_IMAGE_POSITION_CENTER[] = "center";

@@ -21,8 +21,16 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#ifdef WINDOWS_PLATFORM
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "gtest/gtest.h"
+#include <unicode/uversion.h>
+#include <unicode/putil.h>
+#include <unicode/uclean.h>
 
 #define private public
 #define protected public
@@ -3657,7 +3665,7 @@ HWTEST_F(TextFieldUXTest, testTextAlign001, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node
+     * @tc.step1: Create Text filed node
      * @tc.expected: style is Inline
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
@@ -3665,21 +3673,21 @@ HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
     });
 
     /**
-     * @tc.step: step2. Set wordBreak BREAK_ALL
+     * @tc.step: step2. Set wordBreak NORMAL
      */
     layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
 
     /**
-     * @tc.step: step2. Set wordBreak BREAK_ALL
+     * @tc.step: step3. Set wordBreak BREAK_ALL
      */
     layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
 
     /**
-     * @tc.step: step2. Set wordBreak BREAK_ALL
+     * @tc.step: step4. Set wordBreak BREAK_WORD
      */
     layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
     frameNode_->MarkModifyDone();
@@ -4396,5 +4404,380 @@ HWTEST_F(TextFieldUXTest, FontFeature004, TestSize.Level1)
     layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
     TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction001
+ * @tc.desc: test testInput deleteAction for normal emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction001, TestSize.Level1)
+{
+#if defined(__HuaweiLite__) && (!defined(__OHOS__))
+    // use system icudt .dat file
+    std::string dataPath = "/system/usr/ohos_icu";
+#else
+    // use project icudt .dat file
+#ifdef WINDOWS_PLATFORM
+    char buffer[MAX_PATH];
+    GetCurrentDirectoryA(MAX_PATH, buffer);
+    std::string currentPath = std::string(buffer);
+#else
+    char buffer[PATH_MAX];
+    getcwd(buffer, sizeof(buffer));
+    std::string currentPath = std::string(buffer);
+#endif
+    std::string dataPath = currentPath + "/../../../../../../third_party/icu/ohos_icu4j/data";
+#endif
+    u_setDataDirectory(dataPath.c_str());
+    UErrorCode code;
+    u_init(&code);
+    /**
+     * @tc.steps: Create Text field node
+     */
+    std::string txt = "😄😌😎😭😄😌😎😭😄😌😎😭";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(24);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "😄😌😎😭😄😌😎😭😄😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " << pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(10);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "😄😌😎😌😎😭😄😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " << pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "😎😌😎😭😄😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(6);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "😎😌😎😌";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction002
+ * @tc.desc: test testInput deleteAction for ZWJ emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    // change line to aviod the line length exceed 120
+    const std::string txt = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
+        .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    
+    pattern_->SetCaretPosition(132);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    // change line to aviod the line length exceed 120
+    std::string result = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
+        .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(88);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(44);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction003
+ * @tc.desc: test testInput deleteAction for VS emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(36);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "👁️👁️👁️👁️👁️👁️👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(30);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️👁️👁️👁️👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️👁️👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(12);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️👁️👁️👁️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction004
+ * @tc.desc: test testInput deleteAction for RIS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(48);
+    pattern_->DeleteBackward(1);
+    FlushLayoutTask(frameNode_);
+    std::string result = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(28);
+    pattern_->DeleteBackward(3);
+    FlushLayoutTask(frameNode_);
+    result = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(3);
+    FlushLayoutTask(frameNode_);
+    result = "🇨🇳🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    
+    pattern_->SetCaretPosition(12);
+    pattern_->DeleteForward(1);
+    FlushLayoutTask(frameNode_);
+    result = "🇨🇳🇨🇳🇨🇳🇨🇳";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction005
+ * @tc.desc: test testInput deleteAction for keycap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(36);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(27);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3️⃣3️⃣3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(12);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3️⃣3️⃣3️⃣3️⃣";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction006
+ * @tc.desc: test testInput deleteAction for ZWJ&VS emoji.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(84);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    std::string result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(77);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+  
+    pattern_->SetCaretPosition(21);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction007
+ * @tc.desc: test testInput deleteAction for line break.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1\n23\n45\r\n6\n78\n9";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(15);
+    pattern_->DeleteBackward(4);
+    FlushLayoutTask(frameNode_);
+    std::string result = "1\n23\n45\r\n6\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(9);
+    pattern_->DeleteBackward(3);
+    FlushLayoutTask(frameNode_);
+    result = "1\n23\n6\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(3);
+    FlushLayoutTask(frameNode_);
+    result = "3\n6\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(2);
+    pattern_->DeleteForward(2);
+    FlushLayoutTask(frameNode_);
+    result = "3\n";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+}
+
+/**
+ * @tc.name: HandleOnDeleteAction008
+ * @tc.desc: test testInput deleteAction for all case.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnDeleteAction008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "12345📡👨‍👩‍👧‍👦👁️\n🇨🇳3️⃣👁️‍🗨️\n67890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call Delete
+     */
+    pattern_->SetCaretPosition(42);
+    pattern_->DeleteBackward(6);
+    FlushLayoutTask(frameNode_);
+    std::string result = "12345📡👨‍👩‍👧‍👦👁️\n🇨🇳3️⃣👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(29);
+    pattern_->DeleteBackward(2);
+    FlushLayoutTask(frameNode_);
+    result = "12345📡👨‍👩‍👧‍👦👁️\n👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(0);
+    pattern_->DeleteForward(6);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👧‍👦👁️\n👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+
+    pattern_->SetCaretPosition(14);
+    pattern_->DeleteForward(1);
+    FlushLayoutTask(frameNode_);
+    result = "👨‍👩‍👧‍👦👁️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
 }
 } // namespace OHOS::Ace::NG

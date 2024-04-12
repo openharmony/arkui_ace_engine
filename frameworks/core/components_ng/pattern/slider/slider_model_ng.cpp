@@ -653,4 +653,18 @@ Gradient SliderModelNG::CreateSolidGradient(Color value)
     return gradient;
 }
 
+void SliderModelNG::SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t mode)
+{
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSliderValue(value, mode);
+}
+
 } // namespace OHOS::Ace::NG

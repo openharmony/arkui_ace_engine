@@ -106,8 +106,8 @@ public:
     ~JsonUtil() = delete;
     static std::unique_ptr<JsonValue> ParseJsonData(const char* data, const char** parseEnd = nullptr);
     static std::unique_ptr<JsonValue> ParseJsonString(const std::string& content, const char** parseEnd = nullptr);
-    static std::unique_ptr<JsonValue> Create(bool isRoot);
-    static std::unique_ptr<JsonValue> CreateArray(bool isRoot);
+    static std::unique_ptr<JsonValue> Create(bool isRoot = true);
+    static std::unique_ptr<JsonValue> CreateArray(bool isRoot = true);
 };
 
 } // namespace OHOS::Ace

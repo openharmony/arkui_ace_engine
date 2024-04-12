@@ -258,6 +258,9 @@ bool JsonValue::Put(const char* key, double value)
 
 JsonObject* JsonValue::ReleaseJsonObject()
 {
+    if (!isRoot_) {
+        return nullptr;
+    }
     JsonObject* object = object_;
     object_ = nullptr;
     return object;
@@ -268,8 +271,17 @@ bool JsonValue::PutRef(const char* key, std::unique_ptr<JsonValue>&& value)
     if (key == nullptr || value == nullptr) {
         return false;
     }
-    cJSON_AddItemToObject(object_, key, value->ReleaseJsonObject());
-    return true;
+    /*
+    * If value is root, it controls the lifecycle of JsonObject, we can just move it into current object
+    * Else we need to copy the JsonObject and put the new object in current object
+    */
+    if (value->isRoot_) {
+        cJSON_AddItemToObject(object_, key, value->ReleaseJsonObject());
+        return true;
+    } else {
+        std::unique_ptr<JsonValue> lValue = std::move(value);
+        return Put(key, lValue);
+    }
 }
 
 bool JsonValue::PutRef(std::unique_ptr<JsonValue>&& value)
@@ -277,8 +289,17 @@ bool JsonValue::PutRef(std::unique_ptr<JsonValue>&& value)
     if (value == nullptr) {
         return false;
     }
-    cJSON_AddItemToArray(object_, value->ReleaseJsonObject());
-    return true;
+    /*
+    * If value is root, it controls the lifecycle of JsonObject, we can just move it into current object
+    * Else we need to copy the JsonObject and put the new object in current object
+    */
+    if (value->isRoot_) {
+        cJSON_AddItemToArray(object_, value->ReleaseJsonObject());
+        return true;
+    } else {
+        std::unique_ptr<JsonValue> lValue = std::move(value);
+        return Put(lValue);
+    }
 }
 
 bool JsonValue::Replace(const char* key, double value)

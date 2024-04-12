@@ -104,6 +104,17 @@ public:
     {
         return checkboxFlag_;
     }
+
+    void SetDisallowDropForcedly(bool isDisallowDropForcedly)
+    {
+        isDisallowDropForcedly_ = isDisallowDropForcedly;
+    }
+
+    bool GetDisallowDropForcedly() const
+    {
+        return isDisallowDropForcedly_;
+    }
+
     void OnInspectorIdUpdate(const std::string& id) override;
 
     struct ZIndexComparator {
@@ -137,9 +148,11 @@ public:
     void ProcessPropertyDiff()
     {
         // TODO: modify done need to optimize.
-        MarkModifyDone();
-        MarkDirtyNode();
-        isPropertyDiffMarked_ = false;
+        if (isPropertyDiffMarked_) {
+            MarkModifyDone();
+            MarkDirtyNode();
+            isPropertyDiffMarked_ = false;
+        }
     }
 
     void FlushUpdateAndMarkDirty() override;
@@ -200,7 +213,6 @@ public:
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
-
 
     void TriggerOnSizeChangeCallback();
 
@@ -315,6 +327,8 @@ public:
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
+
+    bool IsContextTransparent() override;
 
     bool IsVisible() const
     {
@@ -740,7 +754,7 @@ public:
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
-    
+
     ExtensionHandler* GetExtensionHandler() const
     {
         return RawPtr(extensionHandler_);
@@ -757,16 +771,16 @@ public:
 
     int32_t GetUiExtensionId();
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
-    void SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
-        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
-        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
-        int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    void FocusMoveSearchNG(int64_t elementId, int32_t direction,
-        int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset);
+    void SearchExtensionElementInfoByAccessibilityIdNG(
+        int64_t elementId, int32_t mode, int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text, int64_t offset,
+        std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(
+        int64_t elementId, int32_t focusType, int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(
+        int64_t elementId, int32_t direction, int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
@@ -899,6 +913,7 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
+    const static std::set<std::string> layoutTags_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -945,12 +960,13 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool needRestoreSafeArea_ = true;
+    bool isDisallowDropForcedly_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO, false, false, false, { .isShowBadge = true } };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

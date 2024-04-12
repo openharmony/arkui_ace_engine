@@ -20,7 +20,10 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
+#include "core/animation/animator.h"
+#include "core/animation/picture_animation.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
@@ -169,6 +172,71 @@ public:
     void EnableAnalyzer(bool value);
     bool hasSceneChanged();
 
+    //animation
+    struct CacheImageStruct {
+        CacheImageStruct() = default;
+        CacheImageStruct(const RefPtr<FrameNode>& imageNode) : imageNode(imageNode) {}
+        virtual ~CacheImageStruct() = default;
+        RefPtr<FrameNode> imageNode;
+        int32_t index = 0;
+        bool isLoaded = false;
+    };
+
+    void ImageAnimatorPattern();
+    void SetImages(std::vector<ImageProperties>&& images)
+    {
+        images_ = std::move(images);
+        durationTotal_ = 0;
+        for (const auto& childImage : images_) {
+            if ((!childImage.src.empty() || childImage.pixelMap != nullptr) && childImage.duration > 0) {
+                durationTotal_ += childImage.duration;
+            }
+        }
+        imagesChangedFlag_ = true;
+        isAnimation_ = true;
+    }
+
+    void StartAnimation() {
+        status_ = Animator::Status::RUNNING;
+    }
+
+    void StopAnimation() {
+        status_ = Animator::Status::STOPPED;
+        OnAnimatedModifyDone();
+    }
+
+    void SetIsAnimation(bool isAnimation)
+    {
+        isAnimation_ = isAnimation;
+    }
+
+    bool GetIsAnimation() const
+    {
+        return isAnimation_;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    void OnInActive() override
+    {
+        if (status_ == Animator::Status::RUNNING) {
+            animator_->Pause();
+        }
+    }
+
+    void OnActive() override
+    {
+        if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+            animator_->Forward();
+        }
+    }
+
+    void SetDuration(int32_t duration);
+    void SetIteration(int32_t iteration);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -208,6 +276,7 @@ private:
      * @param dstSize The size of the image to be decoded.
      */
     void StartDecoding(const SizeF& dstSize);
+    bool CheckIfNeeedLayout();
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
@@ -217,6 +286,7 @@ private:
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
+    void SetOnFinishCallback(const RefPtr<CanvasImage>& image);
     void RegisterVisibleAreaChange();
 
     void InitCopy();
@@ -256,6 +326,24 @@ private:
     bool IsSupportImageAnalyzerFeature();
     void InitDefaultValue();
 
+    //animation
+    RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
+    void AdaptSelfSize();
+    void SetShowingIndex(int32_t index);
+    void UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNode, int32_t index);
+    void UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index);
+    std::list<CacheImageStruct>::iterator FindCacheImageNode(const RefPtr<PixelMap>& src);
+    int32_t GetNextIndex(int32_t preIndex);
+    void GenerateCachedImages();
+    void AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode);
+    static bool IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const RefPtr<PixelMap>& src);
+    bool IsFormRender();
+    void UpdateFormDurationByRemainder();
+    void ResetFormAnimationStartTime();
+    void ResetFormAnimationFlag();
+    void OnAnimatedModifyDone();
+    void OnImageModifyDone();
+
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
 
@@ -286,6 +374,23 @@ private:
     OffsetF parentGlobalOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
+
+    //animation
+    bool isAnimation_ = false;
+    RefPtr<Animator> animator_;
+    std::vector<ImageProperties> images_;
+    std::list<CacheImageStruct> cacheImages_;
+    Animator::Status status_ = Animator::Status::IDLE;
+    int32_t durationTotal_ = 0;
+    int32_t nowImageIndex_ = 0;
+    uint64_t repeatCallbackId_ = 0;
+    bool imagesChangedFlag_ = false;
+    bool firstUpdateEvent_ = true;
+    bool isLayouted_ = false;
+    int64_t formAnimationStartTime_ = 0;
+    int32_t formAnimationRemainder_ = 0;
+    bool isFormAnimationStart_ = true;
+    bool isFormAnimationEnd_ = false;
 };
 
 } // namespace OHOS::Ace::NG

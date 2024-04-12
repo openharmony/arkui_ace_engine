@@ -24,7 +24,9 @@
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
  *
- * INVARIANT: The gridMatrix_ is always filled from the first row up to endIndex_ at the beginning of each layout.
+ * INVARIANT: gridMatrix_ is always filled from the first row up to endIndex_ at the beginning of each layout.
+ * INVARIANT: startMainLineIndex_ always corresponds to where Item [startIndex_] is placed.
+ * But endMainLineIndex_ corresponds to the last line in viewport.
  */
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
@@ -102,12 +104,6 @@ private:
      * @return A vector containing the cross positions.
      */
     std::vector<float> CalculateCrossPositions(const PaddingPropertyF& padding);
-
-    /**
-     * @brief Checks if Grid has scrolled to the end of its content.
-     * @return True if Grid has reached the end, false otherwise.
-     */
-    inline bool ReachedEnd() const;
 
     // ========================================== MeasureOnJump functions =====================================
 

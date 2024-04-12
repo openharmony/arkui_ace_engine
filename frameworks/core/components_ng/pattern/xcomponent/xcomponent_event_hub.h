@@ -25,6 +25,9 @@ using LoadEvent = std::function<void(const std::string&)>;
 using DestroyEvent = std::function<void()>;
 using ExternalEvent = std::function<void(const std::string&, const uint32_t, const bool)>;
 using DetachEvent = std::function<void(const std::string&)>;
+using SurfaceCreatedEvent = std::function<void(const std::string&)>;
+using SurfaceChangedEvent = std::function<void(const std::string&, const RectF&)>;
+using SurfaceDestroyedEvent = std::function<void(const std::string&)>;
 
 class XComponentEventHub : public EventHub {
     DECLARE_ACE_TYPE(XComponentEventHub, EventHub)
@@ -81,11 +84,50 @@ public:
         }
     }
 
+    void SetControllerCreatedEvent(SurfaceCreatedEvent&& controllerCreatedEvent)
+    {
+        controllerCreatedEvent_ = std::move(controllerCreatedEvent);
+    }
+
+    void FireControllerCreatedEvent(const std::string& surfaceId) const
+    {
+        if (controllerCreatedEvent_) {
+            controllerCreatedEvent_(surfaceId);
+        }
+    }
+
+    void SetControllerChangedEvent(SurfaceChangedEvent&& controllerChangedEvent)
+    {
+        controllerChangedEvent_ = std::move(controllerChangedEvent);
+    }
+
+    void FireControllerChangedEvent(const std::string& surfaceId, const RectF& rect) const
+    {
+        if (controllerChangedEvent_) {
+            controllerChangedEvent_(surfaceId, rect);
+        }
+    }
+
+    void SetControllerDestroyedEvent(SurfaceDestroyedEvent&& controllerDestroyedEvent)
+    {
+        controllerDestroyedEvent_ = std::move(controllerDestroyedEvent);
+    }
+
+    void FireControllerDestroyedEvent(const std::string& surfaceId) const
+    {
+        if (controllerDestroyedEvent_) {
+            controllerDestroyedEvent_(surfaceId);
+        }
+    }
+
 private:
     LoadEvent loadEvent_;
     DestroyEvent destroyEvent_;
     ExternalEvent surfaceInitEvent_;
     DetachEvent detachEvent_;
+    SurfaceCreatedEvent controllerCreatedEvent_;
+    SurfaceChangedEvent controllerChangedEvent_;
+    SurfaceDestroyedEvent controllerDestroyedEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_XCOMPONENT_XCOMPONENT_EVENT_HUB_H

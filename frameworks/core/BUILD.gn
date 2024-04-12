@@ -226,6 +226,9 @@ template("ace_core_source_set") {
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
       "common/recorder/node_data_cache.cpp",
+
+      # text
+      "text/text_emoji_processor.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {
@@ -796,6 +799,9 @@ template("ace_core_ng_source_set") {
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
       "common/recorder/node_data_cache.cpp",
+
+      # text
+      "text/text_emoji_processor.cpp",
     ]
     include_dirs = []
     if (is_arkui_x) {
@@ -832,14 +838,15 @@ template("ace_core_ng_source_set") {
       "$skia_root_new:skia_$platform",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
-    external_deps = []
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
       sources -= [ "common/task_runner_adapter_impl.cpp" ]
     }
 
     external_deps = []
-
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (defined(config.remote_window_support) && config.remote_window_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/remote_window:ace_core_components_remote_window_pattern_ng_$platform" ]

@@ -36,7 +36,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
     "$ace_root/test/mock/adapter/mock_app_bar_helper_impl.cpp",
-    "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_ace_trace.cpp",
@@ -93,6 +92,8 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "pipeline_context_test_ng.cpp",
   ]
+  extra_deps = []
+  extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]
 
   if (defined(resourceschedule_ffrt_support) && resourceschedule_ffrt_support) {
     sources += [ "$ace_root/test/mock/base/mock_long_frame_report.cpp" ]

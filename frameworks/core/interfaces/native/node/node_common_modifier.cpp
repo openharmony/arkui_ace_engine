@@ -18,6 +18,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#ifndef PREVIEW
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
+#endif
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
 #include "base/log/log_wrapper.h"
@@ -93,6 +96,7 @@ constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
+constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -1733,6 +1737,37 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     BackgroundImagePosition bgImgPosition;
     SetBgImgPosition(DimensionUnit::PX, DimensionUnit::PX, 0.0, 0.0, bgImgPosition);
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
+}
+
+void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
+{
+    std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::BOTTOM, ResizableOption::LEFT,
+        ResizableOption::RIGHT };
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, NUM_13, index);
+        if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
+            resizable.SetEdgeSlice(direction, optDimension.value());
+        }
+    }
+}
+
+void SetBackgroundImageResizable(ArkUINodeHandle node, ArkUIStringAndFloat* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice resizable;
+    SetResizableFromVec(resizable, options);
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
+}
+
+void ResetBackgroundImageResizable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice resizable;
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
 }
 
 void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
@@ -4243,6 +4278,21 @@ void GetBorderWidth(ArkUINodeHandle node, ArkUI_Float32* values)
     values[NUM_3] = width.leftDimen->Value();
 }
 
+void GetBorderWidthDimension(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto borderWidth = ViewAbstract::GetLayoutBorderWidth(frameNode);
+    values[NUM_0] = borderWidth.topDimen->Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(borderWidth.topDimen->Unit());
+    values[NUM_1] = borderWidth.rightDimen->Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(borderWidth.rightDimen->Unit());
+    values[NUM_2] = borderWidth.bottomDimen->Value();
+    units[NUM_2] = static_cast<ArkUI_Int32>(borderWidth.bottomDimen->Unit());
+    values[NUM_3] = borderWidth.leftDimen->Value();
+    units[NUM_3] = static_cast<ArkUI_Int32>(borderWidth.leftDimen->Unit());
+}
+
 void GetBorderRadius(ArkUINodeHandle node, ArkUI_Float32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4615,6 +4665,32 @@ void GetPadding(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
     length = NUM_4;
 }
 
+void GetPaddingDimension(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto padding = ViewAbstract::GetPadding(frameNode);
+    values[NUM_0] = padding.top->GetDimension().Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(padding.top->GetDimension().Unit());
+    values[NUM_1] = padding.right->GetDimension().Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(padding.right->GetDimension().Unit());
+    values[NUM_2] = padding.bottom->GetDimension().Value();
+    units[NUM_2] = static_cast<ArkUI_Int32>(padding.bottom->GetDimension().Unit());
+    values[NUM_3] = padding.left->GetDimension().Value();
+    units[NUM_3] = static_cast<ArkUI_Int32>(padding.left->GetDimension().Unit());
+}
+
+void GetConfigSize(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto size = ViewAbstract::GetConfigSize(frameNode);
+    values[NUM_0] = size->Width()->GetDimension().Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(size->Width()->GetDimension().Unit());
+    values[NUM_1] = size->Height()->GetDimension().Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(size->Height()->GetDimension().Unit());
+}
+
 ArkUI_CharPtr GetKey(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4640,6 +4716,21 @@ void GetMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length)
     values[NUM_2] = margin.bottom->GetDimension().Value();
     values[NUM_3] = margin.left->GetDimension().Value();
     length = NUM_4;
+}
+
+void GetMarginDimension(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto margin = ViewAbstract::GetMargin(frameNode);
+    values[NUM_0] = margin.top->GetDimension().Value();
+    units[NUM_0] = static_cast<ArkUI_Int32>(margin.top->GetDimension().Unit());
+    values[NUM_1] = margin.right->GetDimension().Value();
+    units[NUM_1] = static_cast<ArkUI_Int32>(margin.right->GetDimension().Unit());
+    values[NUM_2] = margin.bottom->GetDimension().Value();
+    units[NUM_2] = static_cast<ArkUI_Int32>(margin.bottom->GetDimension().Unit());
+    values[NUM_3] = margin.left->GetDimension().Value();
+    units[NUM_3] = static_cast<ArkUI_Int32>(margin.left->GetDimension().Unit());
 }
 
 void GetTranslate(ArkUINodeHandle node, ArkUI_Float32* values)
@@ -4707,16 +4798,17 @@ const ArkUICommonModifier* GetCommonModifier()
         SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth, ResetOutlineWidth,
         SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, GetFocusable, GetDefaultFocus, GetResponseRegion,
         GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
-        SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderRadius, GetBorderColor, GetBorderStyle,
-        GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow,
-        GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf,
-        GetTransformCenter, GetOpacityTransition, GetRotateTransition, GetScaleTransition, GetTranslateTransition,
-        GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle, GetBackgroundImageSize,
-        GetBackgroundImageSizeWidthStyle, GetScale, GetRotate, GetBrightness, GetSaturate, GetBackgroundImagePosition,
-        GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast,
-        GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor,
-        GetBackgroundImage, GetPadding, GetKey, GetEnabled, GetMargin, GetTranslate, SetMoveTransition,
-        GetMoveTransition, ResetMask, GetAspectRatio };
+        SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderWidthDimension,
+        GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform,
+        GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask,
+        GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition, GetRotateTransition,
+        GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle,
+        GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate, GetBrightness, GetSaturate,
+        GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale,
+        GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth,
+        GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
+        GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
+        GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable };
 
     return &modifier;
 }
@@ -4884,6 +4976,42 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
     touchPoint.screenX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
     touchPoint.screenY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+    touchPoint.pressure = locationInfo.GetForce();
+    touchPoint.contactAreaWidth = locationInfo.GetSize();
+    touchPoint.contactAreaHeight = locationInfo.GetSize();
+    touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
+    touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
+    touchPoint.pressedTime = locationInfo.GetTimeStamp().time_since_epoch().count();
+}
+
+void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
+    std::array<ArkUITouchPoint, MAX_POINTS>& points, const TouchLocationInfo& historyLoaction)
+{
+    if (touchPointes.empty()) {
+        return;
+    }
+    size_t i = 0;
+    for (auto& touchPoint : touchPointes) {
+        if (i >= MAX_POINTS) {
+            break;
+        }
+        points[i].id = touchPoint.id;
+        points[i].nodeX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetLocalLocation().GetX());
+        points[i].nodeY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetLocalLocation().GetY());
+        points[i].windowX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetX());
+        points[i].windowY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetY());
+        points[i].screenX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetScreenLocation().GetX());
+        points[i].screenY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetScreenLocation().GetY());
+        points[i].contactAreaWidth = touchPoint.size;
+        points[i].contactAreaHeight = touchPoint.size;
+        points[i].pressure = touchPoint.force;
+        points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
+        points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
+        points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
+        i++;
+    }
 }
 
 void SetOnTouch(ArkUINodeHandle node, void* extraParam)
@@ -4921,8 +5049,55 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.touchPointes = nullptr;
             event.touchEvent.touchPointSize = 0;
         }
-        event.touchEvent.historyEvents = nullptr;
-        event.touchEvent.historySize = 0;
+        std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+        std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
+        if (!eventInfo.GetHistoryPointerEvent().empty() && eventInfo.GetHistoryPointerEvent().size() ==
+            eventInfo.GetHistory().size()) {
+            auto historyLoacationIterator = std::begin(eventInfo.GetHistory());
+            auto historyMMIPointerEventIterator = std::begin(eventInfo.GetHistoryPointerEvent());
+            for (size_t i = 0; i < eventInfo.GetHistory().size() && i < MAX_HISTORY_EVENT_COUNT; i++) {
+                if (!(*historyMMIPointerEventIterator)) {
+                    historyLoacationIterator++;
+                    historyMMIPointerEventIterator++;
+                    continue;
+                }
+                #if !defined(PREVIEW)
+                    auto tempTouchEvent = Platform::ConvertTouchEvent((*historyMMIPointerEventIterator));
+                    allHistoryEvents[i].action = static_cast<int32_t>(tempTouchEvent.type);
+                    allHistoryEvents[i].sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
+                    allHistoryEvents[i].timeStamp = tempTouchEvent.time.time_since_epoch().count();
+                    allHistoryEvents[i].actionTouchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetLocalLocation().GetX());
+                    allHistoryEvents[i].actionTouchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetLocalLocation().GetY());
+                    allHistoryEvents[i].actionTouchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetGlobalLocation().GetX());
+                    allHistoryEvents[i].actionTouchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(
+                        (*historyLoacationIterator).GetGlobalLocation().GetY());
+                    allHistoryEvents[i].actionTouchPoint.screenX = tempTouchEvent.screenX;
+                    allHistoryEvents[i].actionTouchPoint.screenY = tempTouchEvent.screenY;
+                    allHistoryEvents[i].actionTouchPoint.pressure = tempTouchEvent.force;
+                    ConvertTouchPointsToPoints(tempTouchEvent.pointers, allHistoryPoints[i],
+                        *historyLoacationIterator);
+                    if (tempTouchEvent.pointers.size() > 0) {
+                        allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+                    }
+                    allHistoryEvents[i].touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
+                    tempTouchEvent.pointers.size() : MAX_POINTS;
+                #else
+                    allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+                    allHistoryEvents[i].touchPointSize = MAX_POINTS;
+                #endif
+                historyLoacationIterator++;
+                historyMMIPointerEventIterator++;
+            }
+            event.touchEvent.historyEvents = &allHistoryEvents[0];
+            event.touchEvent.historySize = eventInfo.GetHistoryPointerEvent().size() < MAX_HISTORY_EVENT_COUNT ?
+                eventInfo.GetHistoryPointerEvent().size() : MAX_HISTORY_EVENT_COUNT;
+        } else {
+            event.touchEvent.historyEvents = nullptr;
+            event.touchEvent.historySize = 0;
+        }
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));

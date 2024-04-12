@@ -971,11 +971,11 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         }
         parent = parent->GetParent();
     }
-    if (!parent) {
+    if (parent) {
+        pattern->SetParentCustomNode(parent);
+    } else {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "parent custom node is nullptr");
-        return;
     }
-    pattern->SetParentCustomNode(parent);
     bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);

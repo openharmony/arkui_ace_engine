@@ -819,7 +819,11 @@ void JSTextPicker::SetGradientHeight(const JSCallbackInfo& info)
         }
     }
     if (info.Length() >= 1) {
-        ConvertFromJSValueNG(info[0], height);
+        if (!ConvertFromJSValueNG(info[0], height)) {
+            if (pickerTheme) {
+                height = pickerTheme->GetGradientHeight();
+            }
+        }
         if ((height.Unit() == DimensionUnit::PERCENT) &&
             ((height.Value() > 1.0f) || (height.Value() < 0.0f))) {
             if (pickerTheme) {
@@ -1323,6 +1327,11 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             textPickerDialog.backgroundBlurStyle = blurStyle;
         }
+    }
+    auto shadowValue = paramObject->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        textPickerDialog.shadow = shadow;
     }
 
     TextPickerDialogEvent textPickerDialogEvent { nullptr, nullptr, nullptr, nullptr };

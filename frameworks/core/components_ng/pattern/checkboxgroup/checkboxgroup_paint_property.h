@@ -22,6 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,7 +34,7 @@ private:
 public:
     CheckBoxGroupPaintProperty() = default;
     ~CheckBoxGroupPaintProperty() override = default;
-    
+
     void SetHost(const WeakPtr<FrameNode>& host)
     {
         host_ = host;
@@ -54,6 +55,7 @@ public:
         paintProperty->propCheckBoxGroupCheckMarkColor_ = CloneCheckBoxGroupCheckMarkColor();
         paintProperty->propCheckBoxGroupCheckMarkSize_ = CloneCheckBoxGroupCheckMarkSize();
         paintProperty->propCheckBoxGroupCheckMarkWidth_ = CloneCheckBoxGroupCheckMarkWidth();
+        paintProperty->propCheckBoxGroupSelectedStyle_ = CloneCheckBoxGroupSelectedStyle();
         paintProperty->propStatus_ = propStatus_;
         paintProperty->SetHost(this->GetHost());
         return paintProperty;
@@ -68,6 +70,7 @@ public:
         ResetCheckBoxGroupCheckMarkColor();
         ResetCheckBoxGroupCheckMarkSize();
         ResetCheckBoxGroupCheckMarkWidth();
+        ResetCheckBoxGroupSelectedStyle();
 
         propStatus_ = SelectStatus::NONE;
     }
@@ -106,6 +109,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkSize, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupCheckMarkWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedStyle, CheckBoxStyle, PROPERTY_UPDATE_RENDER);
 
 private:
     SelectStatus propStatus_ = SelectStatus::NONE;

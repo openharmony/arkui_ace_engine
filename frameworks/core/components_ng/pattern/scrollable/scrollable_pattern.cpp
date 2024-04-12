@@ -2428,7 +2428,7 @@ void ScrollablePattern::InitScrollBarMouseEvent()
         if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
             pattern->isMousePressed_ = true;
             pattern->InitScrollBarClickEvent();
-        } else if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        } else {
             pattern->isMousePressed_ = false;
         }
     };

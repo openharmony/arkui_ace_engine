@@ -121,8 +121,6 @@ void FormPattern::OnAttachToFrameNode()
     InitClickEvent();
 
     scopeId_ = Container::CurrentId();
-
-    RegistVisibleAreaChangeCallback();
 }
 
 void FormPattern::InitClickEvent()
@@ -353,6 +351,9 @@ RefPtr<FrameNode> FormPattern::CreateImageNode()
     auto imageId = formNode->GetImageId();
     auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, nullptr);
+    imagePattern->SetSyncLoad(true);
     host->AddChild(imageNode);
     auto eventHub = imageNode->GetOrCreateGestureEventHub();
     if (eventHub != nullptr) {
@@ -487,6 +488,7 @@ void FormPattern::OnModifyDone()
     info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
+    info.obscuredMode = isFormObscured_;
     HandleFormComponent(info);
 }
 
@@ -507,6 +509,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     layoutProperty->UpdateRequestFormInfo(info);
 
     UpdateBackgroundColorWhenUnTrustForm();
+    info.obscuredMode = isFormObscured_;
     HandleFormComponent(info);
     return false;
 }
@@ -577,9 +580,14 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             formManagerBridge_->SetAllowUpdate(cardInfo_.allowUpdate);
         }
     }
-
     if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
         UpdateFormComponentSize(info);
+    }
+    if (cardInfo_.obscuredMode != info.obscuredMode) {
+        cardInfo_.obscuredMode = info.obscuredMode;
+        if (formManagerBridge_) {
+            formManagerBridge_->SetObscured(info.obscuredMode);
+        }
     }
     if (isLoaded_) {
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
@@ -1120,9 +1128,12 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
-            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
-            // still dispatch 'up' event to finish this pointer event
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW ||
+            pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+            // still dispatch 'up' or 'cancel' event to finish this pointer event
             formManagerBridge_->DispatchPointerEvent(pointerEvent, serializedGesture);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_FORM, "form invisible, not dispatch pointerEvent: %{public}d.", pointerAction);
         }
         return;
     }
@@ -1171,34 +1182,6 @@ void FormPattern::UpdateConfiguration()
     if (localeTag != localeTag_ && subContainer_) {
         localeTag_ = localeTag;
         subContainer_->UpdateConfiguration();
-    }
-}
-
-void FormPattern::OnVisibleAreaChange(bool visible)
-{
-    if (isFrsNodeDetached_) {
-        return;
-    }
-    
-    CHECK_NULL_VOID(formManagerBridge_);
-    formManagerBridge_->SetVisibleChange(visible);
-}
-
-void FormPattern::RegistVisibleAreaChangeCallback()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!isRegistedAreaCallback_) {
-        isRegistedAreaCallback_ = true;
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
-            auto formPattern = weak.Upgrade();
-            CHECK_NULL_VOID(formPattern);
-            formPattern->OnVisibleAreaChange(visible);
-        };
-        std::vector<double> ratioList = {0.0};
-        pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     }
 }
 } // namespace OHOS::Ace::NG

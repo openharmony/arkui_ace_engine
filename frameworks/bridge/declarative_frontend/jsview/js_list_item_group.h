@@ -28,6 +28,7 @@ public:
     static void Create(const JSCallbackInfo& args);
     static void SetDivider(const JSCallbackInfo& args);
     static void SetAspectRatio(const JSCallbackInfo& args);
+    static void SetChildrenMainSize(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

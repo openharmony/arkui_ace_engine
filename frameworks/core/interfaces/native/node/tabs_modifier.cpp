@@ -280,7 +280,7 @@ void SetTabWidthAuto(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::ClearWidthOrHeight(frameNode, true);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
     TabsModelNG::SetWidthAuto(frameNode, true);
 }
 
@@ -295,7 +295,7 @@ void SetTabHeightAuto(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstractModelNG::ClearWidthOrHeight(frameNode, false);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
     TabsModelNG::SetHeightAuto(frameNode, true);
 }
 

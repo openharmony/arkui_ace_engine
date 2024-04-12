@@ -23,6 +23,7 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -80,6 +81,7 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     incomingDegreeMap_.clear();
     horizontalChainNodeMap_.clear();
     verticalChainNodeMap_.clear();
+    renderList_.clear();
     auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint.has_value());
     bool idealWidthValid = layoutConstraint.value().selfIdealSize.Width().has_value();
@@ -814,6 +816,9 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             result = result.substr(0, result.length() - 1);
         }
         result += "]";
+        auto pattern = layoutWrapper->GetHostNode()->GetPattern<RelativeContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTopologicalResult(result);
     }
 
     for (const auto& nodeName : renderList_) {

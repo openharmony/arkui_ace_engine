@@ -90,7 +90,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         ContainerScope scope(id);
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-    });
+    }, id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
@@ -127,9 +127,11 @@ void RosenWindow::RequestFrame()
         lastRequestVsyncTime_ = GetSysTimestamp();
     #ifdef VSYNC_TIMEOUT_CHECK
         if (taskExecutor) {
-            auto task = []() {
+            auto windowId = rsWindow_->GetWindowId();
+            auto instanceId = Container::CurrentIdSafely();
+            auto task = [windowId, instanceId, timeStamp = lastRequestVsyncTime_]() {
                 LOGE("VsyncCallback not executed!");
-                EventReport::SendVsyncException(VsyncExcepType::VSYNC_TIMEOUT);
+                EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
             };
             onVsyncEventCheckTimer_.Reset(task);
             taskExecutor->PostDelayedTask(onVsyncEventCheckTimer_, TaskExecutor::TaskType::JS,

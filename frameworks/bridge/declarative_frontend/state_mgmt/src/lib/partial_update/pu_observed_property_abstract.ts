@@ -55,7 +55,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         this.subscriberRefs_.add(subscriber);
       }
     }
-    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
   }
 
   aboutToBeDeleted() {
@@ -153,6 +152,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return result;
   }
 
+  /**/
+  public hasDependencies(): boolean {
+    return this.dependentElmtIdsByProperty_.hasDependencies();
+  }
+
   /* for @Prop value from source we need to generate a @State
      that observes when this value changes. This ObservedPropertyPU
      sits inside SynchedPropertyOneWayPU.
@@ -245,8 +249,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
       }
-    } else {
-      stateMgmtConsole.warn(`${this.debugInfo()}: will not notify change, because its owning view is destroyed already`);
     }
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
@@ -571,4 +573,7 @@ class PropertyDependencies {
     return result;
   }
 
+  public hasDependencies() : boolean {
+    return this.propertyDependencies_.size > 0 || this.trackedObjectPropertyDependencies_.size > 0;
+  }
 }

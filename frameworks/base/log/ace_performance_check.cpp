@@ -42,6 +42,7 @@ namespace {
 constexpr int32_t BASE_YEAR = 1900;
 constexpr char DATE_FORMAT[] = "MM-dd HH:mm:ss";
 constexpr int32_t CONVERT_NANOSECONDS = 1000000;
+constexpr int32_t FUNCTION_TIMEOUT = 150;
 } // namespace
 
 // ============================== survival interval of JSON files ============================================
@@ -85,12 +86,8 @@ AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& name)
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
 {
     auto time = static_cast<int64_t>((GetSysTimestamp() - markTime_) / CONVERT_NANOSECONDS);
-    if (time > AceChecker::GetFunctionTimeout()) {
-        auto codeInfo = GetCodeInfo(1, 1);
-        if (!codeInfo.sources.empty()) {
-            std::string msg = "Function " + name_ + " execute " + std::to_string(time) + "ms,it's timeout.";
-            EventReport::PerformanceEventReport(PerformanceExecpType::FUNCTION_TIMEOUT, codeInfo.sources, msg);
-        }
+    if (time >= FUNCTION_TIMEOUT) {
+        EventReport::ReportFunctionTimeout(name_, time, FUNCTION_TIMEOUT);
     }
     if (AcePerformanceCheck::performanceInfo_) {
         // convert micro time to ms with 1000.

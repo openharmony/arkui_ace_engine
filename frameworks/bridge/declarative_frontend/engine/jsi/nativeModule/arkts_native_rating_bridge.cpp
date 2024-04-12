@@ -14,6 +14,8 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/rating/rating_model_ng.h"
 
 namespace OHOS::Ace::NG {
 constexpr double STEPS_DEFAULT = 0.5;
@@ -23,6 +25,29 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
+const char* NODEPTR_OF_UINODE = "nodePtr_";
+panda::Local<panda::JSValueRef> JsRatingChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    auto vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    double value = firstArg->ToNumber(vm)->Value();
+    auto ref = runtimeCallInfo->GetThisRef();
+    auto obj = ref->ToObject(vm);
+    if (obj->GetNativePointerFieldCount() < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    RatingModelNG::SetChangeValue(frameNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -60,7 +85,7 @@ ArkUINativeModuleValue RatingBridge::SetRatingStepSize(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getRatingModifier()->resetRatingStepSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto steps  = secondArg->ToNumber(vm)->Value();
+    auto steps = secondArg->ToNumber(vm)->Value();
     if (LessNotEqual(steps, STEPS_MIN_SIZE)) {
         steps = STEPS_DEFAULT;
     }
@@ -119,6 +144,54 @@ ArkUINativeModuleValue RatingBridge::ResetStarStyle(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRatingModifier()->resetStarStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RatingBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        RatingModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    auto containerId = Container::CurrentId();
+    RatingModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, obj = std::move(obj), containerId](
+            RatingConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
+            const char* keys[] = { "stars", "indicator", "rating", "stepSize", "enabled", "triggerChange" };
+            Local<JSValueRef> values[] = { panda::NumberRef::New(vm, config.starNum_),
+                panda::BooleanRef::New(vm, config.isIndicator_),
+                panda::NumberRef::New(vm, config.rating_),
+                panda::NumberRef::New(vm, config.stepSize_),
+                panda::BooleanRef::New(vm, config.enabled_),
+                panda::FunctionRef::New(vm, JsRatingChangeCallback) };
+            auto rating = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+            rating->SetNativePointerFieldCount(vm, 1);
+            rating->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[NUM_2] = { context, rating };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto makeFunc = obj.ToLocal()->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, obj.ToLocal(), params, 2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            panda::Local<panda::JSValueRef> nodeptr =
+                result->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

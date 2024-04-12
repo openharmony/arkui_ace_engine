@@ -104,7 +104,11 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
     auto colorFilterMatrix = renderProps->GetColorFilter();
     if (colorFilterMatrix.has_value()) {
-        config.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
+        config.colorFilter_.colorFilterMatrix_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
+    }
+    auto drawingColorFilter = renderProps->GetDrawingColorFilter();
+    if (drawingColorFilter.has_value()) {
+        config.colorFilter_.colorFilterDrawing_ = drawingColorFilter.value();
     }
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
@@ -119,14 +123,23 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
 {
     CHECK_NULL_RETURN(canvasImage_, nullptr);
     auto contentSize = paintWrapper->GetContentSize();
+    auto&& paintConfig = canvasImage_->GetPaintConfig();
 
     // update render props to ImagePaintConfig
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props, paintWrapper);
-    if (InstanceOf<SvgCanvasImage>(canvasImage_)) {
-        DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(props->GetSvgFillColor());
-        DynamicCast<SvgCanvasImage>(canvasImage_)->SetSmoothEdge(props->GetSmoothEdge().value_or(0.0f));
+    auto svgCanvas = DynamicCast<SvgCanvasImage>(canvasImage_);
+    if (svgCanvas && InstanceOf<SvgCanvasImage>(canvasImage_)) {
+        svgCanvas->SetFillColor(props->GetSvgFillColor());
+        svgCanvas->SetSmoothEdge(props->GetSmoothEdge().value_or(0.0f));
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
+            if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {
+                imageColorFilter = paintConfig.colorFilter_;
+            }
+            svgCanvas->SetColorFilter(imageColorFilter);
+        }
     }
     ImagePainter imagePainter(canvasImage_);
     return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };

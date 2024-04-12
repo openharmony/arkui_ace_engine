@@ -122,7 +122,7 @@ AccessibilityHoverTestPath AccessibilityProperty::HoverTest(
 std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const RefPtr<FrameNode>& node,
     const PointF& parentPoint)
 {
-    auto nodeInfo = JsonUtil::Create(false);
+    auto nodeInfo = JsonUtil::Create();
     nodeInfo->Put("id", node->GetAccessibilityId());
     nodeInfo->Put("tag", node->GetTag().c_str());
     if (!node->IsRootNode()) {

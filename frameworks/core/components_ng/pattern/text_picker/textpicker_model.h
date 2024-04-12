@@ -34,6 +34,7 @@ struct TextPickerDialog {
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<Shadow> shadow;
 };
 struct TextPickerDialogEvent {
     std::function<void()> onDidAppear;

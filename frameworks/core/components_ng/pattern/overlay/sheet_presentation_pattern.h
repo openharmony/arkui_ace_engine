@@ -107,6 +107,7 @@ public:
     void OnDisappear()
     {
         if (onDisappear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onDisappear state.");
             isExecuteOnDisappear_ = true;
             onDisappear_();
         }
@@ -120,6 +121,7 @@ public:
     void OnWillDisappear()
     {
         if (onWillDisappear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
             onWillDisappear_();
         }
     }
@@ -132,6 +134,7 @@ public:
     void OnAppear()
     {
         if (onAppear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onAppear state.");
             onAppear_();
         }
     }
@@ -157,6 +160,21 @@ public:
         }
         return false;
     }
+
+    void UpdateOnDetentsDidChange(std::function<void(const float)>&& onDetentsDidChange)
+    {
+        onDetentsDidChange_ = std::move(onDetentsDidChange);
+    }
+
+    void OnDetentsDidChange(float currentHeight) const
+    {
+        if (onDetentsDidChange_) {
+            onDetentsDidChange_(currentHeight);
+        }
+    }
+
+    void FireOnDetentsDidChange(float height);
+
 
     void CallShouldDismiss()
     {
@@ -451,6 +469,7 @@ private:
     std::function<void()> onWillDisappear_;
     std::function<void()> shouldDismiss_;
     std::function<void(const float)> onHeightDidChange_;
+    std::function<void(const float)> onDetentsDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
@@ -486,6 +505,7 @@ private:
 
     bool show_ = true;
     bool isDrag_ = false;
+    bool isNeedProcessHeight_ = false;
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;

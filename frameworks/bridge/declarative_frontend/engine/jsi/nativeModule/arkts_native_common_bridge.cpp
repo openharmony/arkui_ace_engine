@@ -1158,6 +1158,29 @@ bool ParseCalcDimension(const EcmaVM* vm,
     return true;
 }
 
+void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
+    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
+{
+    auto end = offset + count;
+    auto argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (end > argsNumber) {
+        return;
+    }
+    CalcDimension defaultDimension(defValue);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    for (uint32_t index = offset; index < end; index++) {
+        auto arg = runtimeCallInfo->GetCallArgRef(index);
+        std::optional<CalcDimension> optCalcDimension;
+        CalcDimension dimension(defValue);
+        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, false)) {
+            optCalcDimension = dimension;
+        } else {
+            optCalcDimension = defaultDimension;
+        }
+        results.push_back(optCalcDimension);
+    }
+}
+
 bool ParseJsAlignRule(const EcmaVM* vm, const Local<JSValueRef> &arg, std::string& anchor, ArkUI_Int32 &direction)
 {
     if (arg->IsString()) {
@@ -2641,6 +2664,30 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImagePosition(ArkUIRuntimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImagePosition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBackgroundImageResizable(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    std::vector<ArkUIStringAndFloat> options;
+    std::vector<std::optional<CalcDimension>> sliceDimensions;
+    ParseResizableCalcDimensions(runtimeCallInfo, NUM_1, NUM_4, sliceDimensions, CalcDimension(0.0));
+    PushDimensionsToVector(options, sliceDimensions);
+
+    GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageResizable(nativeNode, options.data());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackgroundImageResizable(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageResizable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5196,7 +5243,7 @@ void CommonBridge::GetPanGestureValue(
     Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
     if (!distanceArg.IsNull() && !distanceArg->IsUndefined()) {
         auto distanceValue = static_cast<double>(distanceArg->ToNumber(vm)->Value());
-        distance = distanceValue <= 0.0f ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceValue;
+        distance = distanceValue < 0.0f ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceValue;
     }
 }
 
@@ -5218,7 +5265,7 @@ void CommonBridge::GetSwipeGestureValue(
     Local<JSValueRef> speedArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
     if (!speedArg.IsNull() && !speedArg->IsUndefined()) {
         auto speedValue = static_cast<double>(speedArg->ToNumber(vm)->Value());
-        speed = speedValue <= 0.0 ? DEFAULT_SLIDE_SPEED : speedValue;
+        speed = LessOrEqual(speedValue, 0.0) ? DEFAULT_SLIDE_SPEED : speedValue;
     }
 }
 
@@ -5928,7 +5975,8 @@ ArkUINativeModuleValue CommonBridge::AddSwipeGesture(ArkUIRuntimeCallInfo* runti
     int32_t direction = SwipeDirection::ALL;
     double speed = DEFAULT_SLIDE_SPEED;
     GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_4);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createSwipeGesture(fingers, direction, speed);
+    auto* gesture =
+        GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(fingers, direction, speed);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_7, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNode(nativeNode, gesture, priority, mask);
@@ -6055,7 +6103,8 @@ ArkUINativeModuleValue CommonBridge::AddSwipeGestureToGroup(ArkUIRuntimeCallInfo
     int32_t direction = SwipeDirection::ALL;
     double speed = DEFAULT_SLIDE_SPEED;
     GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_1);
-    auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createSwipeGesture(fingers, direction, speed);
+    auto* gesture =
+        GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(fingers, direction, speed);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
     SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_4, gesture);
     auto* group = GetGestureGroup(runtimeCallInfo, NUM_5);
