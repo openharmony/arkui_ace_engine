@@ -43,6 +43,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
   protected currentlyRenderedElmtIdStack_: Array<number> = new Array<number>();
 
+  // Map elmtId -> Repeat instance in this ViewPU
+  private elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
+
   private id_: number;
 
   protected parent_: IView | undefined = undefined;
@@ -535,5 +538,25 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected debugInfoInactiveComponents(): string {
     return Array.from(PUV2ViewBase.inactiveComponents_)
       .map((component) => `- ${component}`).join('\n');
+  }
+
+  /**
+   * on first render create a new Instance of Repeat
+   * on re-render connect to existing instance
+   * @param arr
+   * @returns
+   */
+  public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
+    // factory is for future extensions, currently always return the same
+    const elmtId = this.getCurrentlyRenderedElmtId();
+    let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>
+    if (!repeat) {
+        repeat = new __Repeat<I>(this, arr);
+        this.elmtId2Repeat_.set(elmtId, repeat);
+    } else {
+        repeat.updateArr(arr)
+    }
+
+    return repeat;
   }
 } // class PUV2ViewBase

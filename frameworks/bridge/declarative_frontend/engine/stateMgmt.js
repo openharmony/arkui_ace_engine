@@ -3771,6 +3771,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
         // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
         this.currentlyRenderedElmtIdStack_ = new Array();
+        // Map elmtId -> Repeat instance in this ViewPU
+        this.elmtId2Repeat_ = new Map();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
         // flag if active of inActive
@@ -3784,6 +3786,25 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this.extraInfo_ = undefined;
+        /**
+         * on first render create a new Instance of Repeat
+         * on re-render connect to existing instance
+         * @param arr
+         * @returns
+         */
+        this.__mkRepeatAPI = (arr) => {
+            // factory is for future extensions, currently always return the same
+            const elmtId = this.getCurrentlyRenderedElmtId();
+            let repeat = this.elmtId2Repeat_.get(elmtId);
+            if (!repeat) {
+                repeat = new __Repeat(this, arr);
+                this.elmtId2Repeat_.set(elmtId, repeat);
+            }
+            else {
+                repeat.updateArr(arr);
+            }
+            return repeat;
+        };
         // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU/V2 object by given elmtId
@@ -5967,9 +5988,6 @@ class ViewPU extends PUV2ViewBase {
         });
         return result;
     }
-    isViewActive() {
-        return this.isActive_;
-    }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
    * @param active true for active, false for inactive
@@ -8152,27 +8170,6 @@ class ViewV2 extends PUV2ViewBase {
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
-        // Map elmtId -> Repeat instance in this ViewPU
-        this.elmtId2Repeat_ = new Map();
-        /**
-        * on first render create a new Instance of Repeat
-        * on re-render connect to existing instance
-        * @param arr
-        * @returns
-        */
-        this.__mkRepeatAPI = (arr) => {
-            // factory is for future extensions, currently always return the same
-            const elmtId = this.getCurrentlyRenderedElmtId();
-            let repeat = this.elmtId2Repeat_.get(elmtId);
-            if (!repeat) {
-                repeat = new __Repeat(this, arr);
-                this.elmtId2Repeat_.set(elmtId, repeat);
-            }
-            else {
-                repeat.updateArr(arr);
-            }
-            return repeat;
-        };
         
     }
     finalizeConstruction() {
@@ -8837,7 +8834,7 @@ class __Repeat {
         return key2Item;
     }
     mkRepeatItem(item, index) {
-        if (ObservedObject.IsObservedObject(item)) {
+        if (ObserveV2.IsObservedObjectV3(item)) {
             return new __RepeatItemDeep(item, index);
         }
         else {

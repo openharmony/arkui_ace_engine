@@ -28,9 +28,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
-    // Map elmtId -> Repeat instance in this ViewPU
-    private elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
-
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
         stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
@@ -351,23 +348,4 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return ''; // TODO DFX, read out META
     }
 
-   /**
-   * on first render create a new Instance of Repeat
-   * on re-render connect to existing instance
-   * @param arr
-   * @returns
-   */
-  public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
-      // factory is for future extensions, currently always return the same
-      const elmtId = this.getCurrentlyRenderedElmtId();
-      let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>
-      if (!repeat) {
-          repeat = new __Repeat<I>(this, arr);
-          this.elmtId2Repeat_.set(elmtId, repeat);
-      } else {
-          repeat.updateArr(arr)
-      }
-
-      return repeat;
-  }
 }

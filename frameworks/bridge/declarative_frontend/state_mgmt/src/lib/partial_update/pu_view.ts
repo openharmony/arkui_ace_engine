@@ -244,10 +244,6 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
-  public isViewActive(): boolean {
-    return this.isActive_;
-  }
-
   /**
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
  * @param active true for active, false for inactive
@@ -1094,5 +1090,6 @@ abstract class ViewPU extends PUV2ViewBase
     }
     return retVaL;
   }
+
 }  // class ViewPU
 
