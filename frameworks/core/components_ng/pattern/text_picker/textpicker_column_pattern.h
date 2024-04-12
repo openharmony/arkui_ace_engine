@@ -400,6 +400,7 @@ private:
 
     void ResetOptionPropertyHeight();
 
+    bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
