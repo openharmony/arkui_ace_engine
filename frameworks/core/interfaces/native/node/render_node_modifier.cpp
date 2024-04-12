@@ -104,7 +104,10 @@ void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 ro
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetRotation(rotationX, rotationY, rotationZ);
+    Dimension first = Dimension(rotationX, DimensionUnit::VP);
+    Dimension second = Dimension(rotationY, DimensionUnit::VP);
+    Dimension third = Dimension(rotationZ, DimensionUnit::VP);
+    renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
     renderContext->RequestNextFrame();
 }
 
@@ -122,7 +125,9 @@ void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetShadowOffset(offsetX, offsetY);
+    Dimension first = Dimension(offsetX, DimensionUnit::VP);
+    Dimension second = Dimension(offsetY, DimensionUnit::VP);
+    renderContext->SetShadowOffset(first.ConvertToPx(), second.ConvertToPx());
     renderContext->RequestNextFrame();
 }
 
