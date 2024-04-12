@@ -56,6 +56,7 @@ public:
         value->propAutoCollapse_ = CloneAutoCollapse();
         value->propPopupHorizontalSpace_ = ClonePopupHorizontalSpace();
         value->propIsPopup_ = CloneIsPopup();
+        value->propAdaptiveWidth_ = CloneAdaptiveWidth();
         return value;
     }
 
@@ -80,6 +81,7 @@ public:
         ResetAutoCollapse();
         ResetPopupHorizontalSpace();
         ResetIsPopup();
+        ResetAdaptiveWidth();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -102,6 +104,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCollapse, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupHorizontalSpace, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsPopup, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptiveWidth, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);

@@ -167,8 +167,8 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     if (actualIndexerHeight_ != height && autoCollapse_) {
         actualIndexerHeight_ = height;
         isNewHeightCalculated_ = true;
-        dirty->GetHostNode()->MarkModifyDone();
-        dirty->GetHostNode()->MarkDirtyNode();
+        auto hostNode = dirty->GetHostNode();
+        StartCollapseDelayTask(hostNode, INDEXER_COLLAPSE_WAIT_DURATION);
     }
     return true;
 }
@@ -644,6 +644,9 @@ void IndexerPattern::ApplyIndexChanged(
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetAdaptiveWidthValue(false)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1710,6 +1713,21 @@ void IndexerPattern::StartDelayTask(uint32_t duration)
         });
     context->GetTaskExecutor()->PostDelayedTask(
         delayTask_, TaskExecutor::TaskType::UI, duration);
+}
+
+void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetTaskExecutor());
+    delayCollapseTask_.Reset([hostNode] {
+        hostNode->MarkModifyDone();
+        hostNode->MarkDirtyNode();
+        });
+    context->GetTaskExecutor()->PostDelayedTask(
+        delayCollapseTask_, TaskExecutor::TaskType::UI, duration);
 }
 
 void IndexerPattern::StartBubbleDisappearAnimation()
