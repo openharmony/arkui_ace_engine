@@ -268,13 +268,17 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize)
     info.endIndex_ = endIdx;
 }
 
+namespace {
+constexpr float SKIP_THRESHOLD = 2.0f;
+}
+
 bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
 {
     auto& info = gridLayoutInfo_;
     float delta = std::abs(info.currentOffset_ - info.prevOffset_);
     if (enableSkip_ && GreatNotEqual(delta, mainSize)) {
         // a more costly check, therefore perform after comparing to [mainSize]
-        if (LessOrEqual(delta, 2 * GetPrevHeight(info, mainGap_))) {
+        if (LessOrEqual(delta, SKIP_THRESHOLD * GetPrevHeight(info, mainGap_))) {
             return false;
         }
         info.jumpIndex_ = Negative(info.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
