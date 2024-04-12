@@ -631,10 +631,12 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         properties.shadow = shadow;
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    NG::BorderRadiusProperty dialogRadius;
-    dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
-    properties.borderRadius = dialogRadius;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+        NG::BorderRadiusProperty dialogRadius;
+        dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
+        properties.borderRadius = dialogRadius;
+    }
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
