@@ -505,6 +505,7 @@ private:
 
     bool show_ = true;
     bool isDrag_ = false;
+    bool isNeedProcessHeight_ = false;
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;

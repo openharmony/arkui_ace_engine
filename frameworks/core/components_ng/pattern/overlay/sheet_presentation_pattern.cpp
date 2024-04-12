@@ -336,6 +336,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 {
+    isNeedProcessHeight_ = true;
     SetIsDragging(false);
     auto sheetDetentsSize = sheetDetentHeight_.size();
     if ((sheetDetentsSize == 0) || (GetSheetType() == SheetType::SHEET_POPUP)) {
@@ -600,7 +601,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = pageHeight_ - (height_ + sheetHeightUp_);
+    auto offset = GetPageHeight() - (height_ + sheetHeightUp_);
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
@@ -613,7 +614,10 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
             ref->SetAnimationProcess(false);
         } else {
             ref->isAnimationBreak_ = false;
+            ref->ChangeSheetPage(ref->height_);
         }
+        ref->AvoidAiBar();
+        ref->isNeedProcessHeight_ = false;
     };
 
     isAnimationProcess_ = true;
@@ -634,7 +638,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
 
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
-    if (HasOnHeightDidChange() && sheetType_ == SheetType::SHEET_BOTTOM && isTransitionIn) {
+    if (HasOnHeightDidChange() && sheetType_ == SheetType::SHEET_BOTTOM && isTransitionIn && isNeedProcessHeight_) {
         ModifyFireSheetTransition(dragVelocity);
         return;
     }
