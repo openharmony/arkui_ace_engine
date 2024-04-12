@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "irregular_matrices.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutTest : public GridTestNg {};
@@ -135,6 +138,7 @@ HWTEST_F(GridIrregularLayoutTest, SolveForward001, TestSize.Level1)
     info.startMainLineIndex_ = 3;
     auto res = solver.FindStartingRow(1.0f);
     EXPECT_EQ(res.row, 3);
+    EXPECT_EQ(res.idx, 4);
     EXPECT_EQ(res.pos, 0.0f);
 
     info.currentOffset_ = -20.0f;
@@ -163,6 +167,7 @@ HWTEST_F(GridIrregularLayoutTest, SolveForward001, TestSize.Level1)
         info.startMainLineIndex_ = 3;
         res = solver.FindStartingRow(1.0f);
         EXPECT_EQ(res.row, 4);
+        EXPECT_EQ(res.idx, 5);
         EXPECT_EQ(res.pos, 1.0f - i * 1.0f);
     }
 
@@ -575,15 +580,18 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
         EXPECT_EQ(info.endIndex_, 4);
     }
 
-    info.startMainLineIndex_ = 2;
-    info.startIndex_ = 2;
-    info.currentOffset_ = -400.0f;
+    info.startMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+    info.currentOffset_ = -1000.0f;
     algorithm->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info.currentOffset_, -303.5f);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
+    std::map<int32_t, float> EXPECTED_MAP = { { 0, 99.5 }, { 1, 99.5 }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f },
+        { 5, 99.5f } };
+    EXPECT_EQ(info.lineHeightMap_, EXPECTED_MAP);
 }
 
 /**
@@ -924,6 +932,7 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
     });
     frameNode_->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF { .left = 1.0f, .top = 1.0f });
     frameNode_->GetGeometryNode()->SetFrameSize(SizeF { 200.0f, 500.0f });
+    frameNode_->GetGeometryNode()->SetContentSize(SizeF { 200.0f, 500.0f });
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->crossLens_ = { 50.0f, 50.0f, 50.0f };
@@ -943,6 +952,7 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
     info.endIndex_ = 9;
     info.currentOffset_ = 10.0f;
     algorithm->Layout(AceType::RawPtr(frameNode_));
+    algorithm->UpdateLayoutInfo();
 
     EXPECT_TRUE(info.reachStart_);
     EXPECT_TRUE(info.reachEnd_);
@@ -1453,23 +1463,112 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo8());
         model.SetColumnsGap(Dimension { 5.0f });
-        model.SetRowsGap(Dimension { 1.0f });
         CreateFixedItem(7);
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
     });
+    const std::map<int32_t, float> HEIGHT_MAP = { { 0, 200.0f }, { 1, 100.0f }, { 2, 100.0f }, { 3, 200.0f },
+        { 4, 200.0f }, { 5, 200.0f / 3 } };
     auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.currentOffset_, 0.0f);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 6);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 4);
+    EXPECT_EQ(info.lineHeightMap_, HEIGHT_MAP);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
 
-    UpdateCurrentOffset(-1000.0f);
-    EXPECT_EQ(info.currentOffset_, -70.0f);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_FLOAT_EQ(info.currentOffset_, -200.0f / 3);
     EXPECT_EQ(info.endIndex_, 6);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
-    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_8);
+    EXPECT_TRUE(info.offsetEnd_);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Integrated002
+ * @tc.desc: Test full layout process
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 100.0f);
+        CreateItem(1, -2, 200.0f);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(5, -2, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 0);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 2);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(-5.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 2);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+    UpdateCurrentOffset(3.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 2);
+    EXPECT_EQ(info.endMainLineIndex_, 3);
+    for (int i = 0; i < 5; ++i) {
+        UpdateCurrentOffset(3.0f);
+        EXPECT_EQ(info.startIndex_, 0);
+        EXPECT_EQ(info.endIndex_, 0);
+    }
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 2);
+    EXPECT_TRUE(info.reachStart_);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::GetOverScrollOffset001
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, GetOverScrollOffset001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo13());
+        model.SetColumnsGap(Dimension { 5.0f });
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 100.0f);
+        CreateItem(1, -2, 200.0f);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(5, -2, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(-200.0f);
+    UpdateCurrentOffset(-200.0f);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(info.endIndex_, 8);
+
+    UpdateCurrentOffset(-150.0f);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_EQ(info.endIndex_, 8);
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.startMainLineIndex_, 5);
+    EXPECT_EQ(info.endMainLineIndex_, 10);
+    UpdateCurrentOffset(-50.0f);
+    EXPECT_TRUE(info.offsetEnd_);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(-50).end, -50.0f);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(-10).end, -10.0f);
+    EXPECT_EQ(
+        info.GetDistanceToBottom(info.lastMainSize_, info.totalHeightOfItemsInView_, pattern_->GetMainGap()), 0.0f);
+    UpdateCurrentOffset(-50.0f);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(60).end, 50.0f);
+    EXPECT_EQ(pattern_->GetOverScrollOffset(20).end, 20.0f);
 }
 
 /**
@@ -1484,7 +1583,7 @@ HWTEST_F(GridIrregularLayoutTest, Gaps001, TestSize.Level1)
         model.SetLayoutOptions(GetOptionDemo6());
         model.SetColumnsGap(Dimension { 1.0f });
         model.SetRowsGap(Dimension { 1.0f });
-        CreateItem(12, -1, 200.0f);
+        CreateItem(12, -2, 200.0f);
     });
 
     EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 240.5f);
@@ -1500,5 +1599,78 @@ HWTEST_F(GridIrregularLayoutTest, Gaps001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildRect(frameNode_, 1).GetX(), 242.5f);
     EXPECT_EQ(GetChildRect(frameNode_, 4).GetY(), 406.0f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Width001
+ * @tc.desc: Test width priority of gridItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Width001, TestSize.Level1)
+{
+    // GridItem's own ideal size has higher priority
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo6());
+        model.SetColumnsGap(Dimension { 1.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateItem(12, 300.0f, 200.0f);
+    });
+
+    FlushLayoutTask(frameNode_);
+    for (int32_t i = 0; i < 6; i++) {
+        EXPECT_EQ(GetChildSize(frameNode_, i).Width(), 300.0f);
+    }
+    EXPECT_EQ(GetChildSize(frameNode_, 1).Width(), 300.0f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::OverScroll001
+ * @tc.desc: Test overScroll disabled with long item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, OverScroll001, TestSize.Level1)
+{
+    // GridItem's own ideal size has higher priority
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetColumnsGap(Dimension { 1.0f });
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateItem(1, -2, 600.0f);
+        CreateItem(1, -2, 300.0f);
+        CreateItem(1, -2, 1800.0f);
+        CreateItem(4, -2, 300.0f);
+    });
+
+    FlushLayoutTask(frameNode_);
+    UpdateCurrentOffset(-450.0f);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_12);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.currentOffset_, -450.0f);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_TRUE(info.reachEnd_);
+
+    UpdateCurrentOffset(200.0f);
+    EXPECT_EQ(info.currentOffset_, -250.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.currentOffset_, -550.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_TRUE(info.reachEnd_);
+
+    UpdateCurrentOffset(200.0f);
+    EXPECT_EQ(info.currentOffset_, -350.0f);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.currentOffset_, -350.0f);
+    EXPECT_FALSE(info.offsetEnd_);
+    EXPECT_TRUE(info.reachEnd_);
 }
 } // namespace OHOS::Ace::NG

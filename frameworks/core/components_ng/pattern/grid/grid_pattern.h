@@ -160,6 +160,7 @@ public:
     }
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
     bool OutBoundaryCallback() override;
 
@@ -266,6 +267,8 @@ private:
     void OnScrollEndCallback() override;
 
     void FireOnScrollStart() override;
+
+    inline bool UseIrregularLayout() const;
 
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);

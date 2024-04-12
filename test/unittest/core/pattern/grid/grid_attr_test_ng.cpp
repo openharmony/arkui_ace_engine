@@ -1024,7 +1024,7 @@ HWTEST_F(GridAttrTestNg, LayoutOptions001, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateFixedItem(10);
+        CreateItem(10, -2, ITEM_HEIGHT);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, ITEM_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
@@ -1057,7 +1057,7 @@ HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateFixedItem(10);
+        CreateItem(10, -2, ITEM_HEIGHT);
     });
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, GRID_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));

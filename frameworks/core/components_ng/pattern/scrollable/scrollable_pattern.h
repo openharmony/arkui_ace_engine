@@ -236,6 +236,12 @@ public:
     void GetParentNavigation();
     void GetParentModalSheet();
 
+    /**
+     * @brief Return the portion of delta that's in overScroll range.
+     *
+     * @param delta incoming offset change.
+     * @return the portion of delta in overScroll range. Both top overScroll and bottom overScroll.
+     */
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
         return { 0, 0 };
