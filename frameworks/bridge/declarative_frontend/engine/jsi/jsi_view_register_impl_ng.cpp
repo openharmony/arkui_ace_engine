@@ -432,6 +432,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSpanString::JSBind(globalObj);
     JSMutableSpanString::JSBind(globalObj);
     JSFontSpan::JSBind(globalObj);
+    JSDecorationSpan::JSBind(globalObj);
+    JSBaselineOffsetSpan::JSBind(globalObj);
+    JSLetterSpacingSpan::JSBind(globalObj);
     JSGestureSpan::JSBind(globalObj);
     JSTextShadowSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);

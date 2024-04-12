@@ -251,6 +251,212 @@ void JSFontSpan::SetFontSpan(const RefPtr<FontSpan>& fontSpan)
     fontSpan_ = fontSpan;
 }
 
+void JSDecorationSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSDecorationSpan>::Declare("DecorationStyle");
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "type", &JSDecorationSpan::GetTextDecorationType, &JSDecorationSpan::SetTextDecorationType);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "color", &JSDecorationSpan::GetTextDecorationColor, &JSDecorationSpan::SetTextDecorationColor);
+    JSClass<JSDecorationSpan>::Bind(globalObj, JSDecorationSpan::Constructor, JSDecorationSpan::Destructor);
+}
+
+void JSDecorationSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto decorationSpan = Referenced::MakeRefPtr<JSDecorationSpan>();
+    decorationSpan->IncRefCount();
+
+    RefPtr<DecorationSpan> span;
+    if (args.Length() <= 0) {
+        span = AceType::MakeRefPtr<DecorationSpan>();
+    } else {
+        span = JSDecorationSpan::ParseJsDecorationSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    decorationSpan->decorationSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(decorationSpan));
+}
+
+void JSDecorationSpan::Destructor(JSDecorationSpan* decorationSpan)
+{
+    if (decorationSpan != nullptr) {
+        decorationSpan->DecRefCount();
+    }
+}
+
+RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObject>& obj)
+{
+    std::optional<Color> colorOption;
+    Color color;
+    JSRef<JSVal> colorObj = JSRef<JSVal>::Cast(obj->GetProperty("color"));
+    if (!colorObj->IsNull() && JSViewAbstract::ParseJsColor(colorObj, color)) {
+        colorOption = color;
+    }
+    TextDecoration type = TextDecoration::NONE;
+    JSRef<JSVal> typeObj = JSRef<JSVal>::Cast(obj->GetProperty("type"));
+    if (!typeObj->IsNull() && typeObj->IsNumber()) {
+        type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
+    }
+    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption);
+}
+
+void JSDecorationSpan::GetTextDecorationType(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationType()))));
+    info.SetReturnValue(ret);
+}
+
+void JSDecorationSpan::SetTextDecorationType(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetTextDecorationColor(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetColor().has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(decorationSpan_->GetColor()->ColorToString())));
+    info.SetReturnValue(ret);
+}
+
+void JSDecorationSpan::SetTextDecorationColor(const JSCallbackInfo& info) {}
+
+RefPtr<DecorationSpan>& JSDecorationSpan::GetDecorationSpan()
+{
+    return decorationSpan_;
+}
+
+void JSDecorationSpan::SetDecorationSpan(const RefPtr<DecorationSpan>& decorationSpan)
+{
+    decorationSpan_ = decorationSpan;
+}
+
+void JSBaselineOffsetSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSBaselineOffsetSpan>::Declare("BaselineOffsetStyle");
+    JSClass<JSBaselineOffsetSpan>::CustomProperty(
+        "baselineOffset", &JSBaselineOffsetSpan::GetBaselineOffset, &JSBaselineOffsetSpan::SetBaselineOffset);
+    JSClass<JSBaselineOffsetSpan>::Bind(globalObj, JSBaselineOffsetSpan::Constructor, JSBaselineOffsetSpan::Destructor);
+}
+
+void JSBaselineOffsetSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto baselineOffsetSpan = Referenced::MakeRefPtr<JSBaselineOffsetSpan>();
+    baselineOffsetSpan->IncRefCount();
+    RefPtr<BaselineOffsetSpan> span;
+    if (args.Length() <= 0) {
+        span = AceType::MakeRefPtr<BaselineOffsetSpan>();
+    } else {
+        span = JSBaselineOffsetSpan::ParseJSBaselineOffsetSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    baselineOffsetSpan->baselineOffsetSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(baselineOffsetSpan));
+}
+
+void JSBaselineOffsetSpan::Destructor(JSBaselineOffsetSpan* baselineOffsetSpan)
+{
+    if (baselineOffsetSpan != nullptr) {
+        baselineOffsetSpan->DecRefCount();
+    }
+}
+
+RefPtr<BaselineOffsetSpan> JSBaselineOffsetSpan::ParseJSBaselineOffsetSpan(const JSRef<JSObject>& obj)
+{
+    auto value = 0.0;
+    auto valueObj = obj->GetProperty("value");
+    if (!valueObj->IsNull() && valueObj->IsNumber()) {
+        value = valueObj->ToNumber<float>();
+    }
+    auto unit = DimensionUnit::VP;
+    auto unitObj = obj->GetProperty("unit");
+    if (!unitObj->IsNull() && unitObj->IsNumber()) {
+        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
+    }
+    return AceType::MakeRefPtr<BaselineOffsetSpan>(CalcDimension(value, unit));
+}
+
+void JSBaselineOffsetSpan::GetBaselineOffset(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(baselineOffsetSpan_);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(baselineOffsetSpan_->GetBaselineOffset().ConvertToPx())));
+    info.SetReturnValue(ret);
+}
+
+void JSBaselineOffsetSpan::SetBaselineOffset(const JSCallbackInfo& info) {}
+
+RefPtr<BaselineOffsetSpan>& JSBaselineOffsetSpan::GetBaselineOffsetSpan()
+{
+    return baselineOffsetSpan_;
+}
+
+void JSBaselineOffsetSpan::SetBaselineOffsetSpan(const RefPtr<BaselineOffsetSpan>& baselineOffsetSpan)
+{
+    baselineOffsetSpan_ = baselineOffsetSpan;
+}
+
+void JSLetterSpacingSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSLetterSpacingSpan>::Declare("LetterSpacingStyle");
+    JSClass<JSLetterSpacingSpan>::CustomProperty(
+        "letterSpacing", &JSLetterSpacingSpan::GetLetterSpacing, &JSLetterSpacingSpan::SetLetterSpacing);
+    JSClass<JSLetterSpacingSpan>::Bind(globalObj, JSLetterSpacingSpan::Constructor, JSLetterSpacingSpan::Destructor);
+}
+
+void JSLetterSpacingSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto letterSpacingSpan = Referenced::MakeRefPtr<JSLetterSpacingSpan>();
+    letterSpacingSpan->IncRefCount();
+
+    RefPtr<LetterSpacingSpan> span;
+    if (args.Length() <= 0) {
+        span = AceType::MakeRefPtr<LetterSpacingSpan>();
+    } else {
+        span = JSLetterSpacingSpan::ParseJSLetterSpacingSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    letterSpacingSpan->letterSpacingSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(letterSpacingSpan));
+}
+
+void JSLetterSpacingSpan::Destructor(JSLetterSpacingSpan* letterSpacingSpan)
+{
+    if (letterSpacingSpan != nullptr) {
+        letterSpacingSpan->DecRefCount();
+    }
+}
+
+RefPtr<LetterSpacingSpan> JSLetterSpacingSpan::ParseJSLetterSpacingSpan(const JSRef<JSObject>& obj)
+{
+    auto value = 0.0;
+    auto valueObj = obj->GetProperty("value");
+    if (!valueObj->IsNull() && valueObj->IsNumber()) {
+        value = valueObj->ToNumber<float>();
+    }
+    auto unit = DimensionUnit::VP;
+    auto unitObj = obj->GetProperty("unit");
+    if (!unitObj->IsNull() && unitObj->IsNumber()) {
+        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
+    }
+    return AceType::MakeRefPtr<LetterSpacingSpan>(CalcDimension(value, unit));
+}
+
+void JSLetterSpacingSpan::GetLetterSpacing(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(letterSpacingSpan_);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(letterSpacingSpan_->GetLetterSpacing().ConvertToPx())));
+    info.SetReturnValue(ret);
+}
+
+void JSLetterSpacingSpan::SetLetterSpacing(const JSCallbackInfo& info) {}
+
+RefPtr<LetterSpacingSpan>& JSLetterSpacingSpan::GetLetterSpacingSpan()
+{
+    return letterSpacingSpan_;
+}
+
+void JSLetterSpacingSpan::SetLetterSpacingSpan(const RefPtr<LetterSpacingSpan>& letterSpacingSpan)
+{
+    letterSpacingSpan_ = letterSpacingSpan;
+}
+
 void JSGestureSpan::Constructor(const JSCallbackInfo& args)
 {
     auto gestureSpan = Referenced::MakeRefPtr<JSGestureSpan>();
