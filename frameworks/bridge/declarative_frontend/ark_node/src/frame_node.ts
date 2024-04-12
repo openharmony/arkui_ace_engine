@@ -312,41 +312,41 @@ class FrameNode {
     return { x: position[0], y: position[1] };
   }
 
-  getUserConfigBorderWidth(): EdgesT<LengthMetric> {
+  getUserConfigBorderWidth(): EdgesT<LengthMetrics> {
     const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.nodePtr_);
     return {
-      top: new LengthMetric(borderWidth[0], borderWidth[1]),
-      right: new LengthMetric(borderWidth[2], borderWidth[3]),
-      bottom: new LengthMetric(borderWidth[4], borderWidth[5]),
-      left: new LengthMetric(borderWidth[6], borderWidth[7])
+      top: new LengthMetrics(borderWidth[0], borderWidth[1]),
+      right: new LengthMetrics(borderWidth[2], borderWidth[3]),
+      bottom: new LengthMetrics(borderWidth[4], borderWidth[5]),
+      left: new LengthMetrics(borderWidth[6], borderWidth[7])
     };
   }
 
-  getUserConfigPadding(): EdgesT<LengthMetric> {
+  getUserConfigPadding(): EdgesT<LengthMetrics> {
     const borderWidth = getUINativeModule().frameNode.getConfigPadding(this.nodePtr_);
     return {
-      top: new LengthMetric(borderWidth[0], borderWidth[1]),
-      right: new LengthMetric(borderWidth[2], borderWidth[3]),
-      bottom: new LengthMetric(borderWidth[4], borderWidth[5]),
-      left: new LengthMetric(borderWidth[6], borderWidth[7])
+      top: new LengthMetrics(borderWidth[0], borderWidth[1]),
+      right: new LengthMetrics(borderWidth[2], borderWidth[3]),
+      bottom: new LengthMetrics(borderWidth[4], borderWidth[5]),
+      left: new LengthMetrics(borderWidth[6], borderWidth[7])
     };
   }
 
-  getUserConfigMargin(): EdgesT<LengthMetric> {
+  getUserConfigMargin(): EdgesT<LengthMetrics> {
     const margin = getUINativeModule().frameNode.getConfigMargin(this.nodePtr_);
     return {
-      top: new LengthMetric(margin[0], margin[1]),
-      right: new LengthMetric(margin[2], margin[3]),
-      bottom: new LengthMetric(margin[4], margin[5]),
-      left: new LengthMetric(margin[6], margin[7])
+      top: new LengthMetrics(margin[0], margin[1]),
+      right: new LengthMetrics(margin[2], margin[3]),
+      bottom: new LengthMetrics(margin[4], margin[5]),
+      left: new LengthMetrics(margin[6], margin[7])
     };
   }
 
-  getUserConfigSize(): SizeT<LengthMetric> {
+  getUserConfigSize(): SizeT<LengthMetrics> {
       const size = getUINativeModule().frameNode.getConfigSize(this.nodePtr_);
       return {
-        width: new LengthMetric(size[0], size[1]),
-        height: new LengthMetric(size[2], size[3])
+        width: new LengthMetrics(size[0], size[1]),
+        height: new LengthMetrics(size[2], size[3])
     };
   }
 

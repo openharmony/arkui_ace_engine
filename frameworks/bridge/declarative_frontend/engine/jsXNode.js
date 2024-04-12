@@ -684,10 +684,10 @@ class FrameNode {
         const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.nodePtr_);
         if (borderWidth) {
             return {
-                top: new LengthMetric(borderWidth[0], borderWidth[1]),
-                right: new LengthMetric(borderWidth[2], borderWidth[3]),
-                bottom: new LengthMetric(borderWidth[4], borderWidth[5]),
-                left: new LengthMetric(borderWidth[6], borderWidth[7])
+                top: new LengthMetrics(borderWidth[0], borderWidth[1]),
+                right: new LengthMetrics(borderWidth[2], borderWidth[3]),
+                bottom: new LengthMetrics(borderWidth[4], borderWidth[5]),
+                left: new LengthMetrics(borderWidth[6], borderWidth[7])
               };
         }
         return null;
@@ -696,10 +696,10 @@ class FrameNode {
         const padding = getUINativeModule().frameNode.getConfigPadding(this.nodePtr_);
         if (padding) {
             return {
-                top: new LengthMetric(padding[0], padding[1]),
-                right: new LengthMetric(padding[2], padding[3]),
-                bottom: new LengthMetric(padding[4], padding[5]),
-                left: new LengthMetric(padding[6], padding[7])
+                top: new LengthMetrics(padding[0], padding[1]),
+                right: new LengthMetrics(padding[2], padding[3]),
+                bottom: new LengthMetrics(padding[4], padding[5]),
+                left: new LengthMetrics(padding[6], padding[7])
               };
         }
         return null;
@@ -708,10 +708,10 @@ class FrameNode {
         const margin = getUINativeModule().frameNode.getConfigMargin(this.nodePtr_);
         if (margin) {
             return {
-                top: new LengthMetric(margin[0], margin[1]),
-                right: new LengthMetric(margin[2], margin[3]),
-                bottom: new LengthMetric(margin[4], margin[5]),
-                left: new LengthMetric(margin[6], margin[7])
+                top: new LengthMetrics(margin[0], margin[1]),
+                right: new LengthMetrics(margin[2], margin[3]),
+                bottom: new LengthMetrics(margin[4], margin[5]),
+                left: new LengthMetrics(margin[6], margin[7])
               };
         }
         return null;
@@ -720,8 +720,8 @@ class FrameNode {
         const size = getUINativeModule().frameNode.getConfigSize(this.nodePtr_);
         if (size) {
             return {
-                width: new LengthMetric(size[0], size[1]),
-                height: new LengthMetric(size[2], size[3])
+                width: new LengthMetrics(size[0], size[1]),
+                height: new LengthMetrics(size[2], size[3])
             };
         }
         return null;
@@ -849,6 +849,33 @@ class LengthMetric {
     }
     static lpx(value) {
         return new LengthMetric(value, LengthUnit.LPX);
+    }
+}
+
+class LengthMetrics {
+    constructor(value, unit) {
+        if (unit in LengthUnit) {
+            this.unit = unit;
+            this.value = value;
+        } else {
+            this.unit = LengthUnit.VP;
+            this.value = 0;
+        }
+    }
+    static px(value) {
+        return new LengthMetrics(value, LengthUnit.PX);
+    }
+    static vp(value) {
+        return new LengthMetrics(value, LengthUnit.VP);
+    }
+    static fp(value) {
+        return new LengthMetrics(value, LengthUnit.FP);
+    }
+    static percent(value) {
+        return new LengthMetrics(value, LengthUnit.PERCENT);
+    }
+    static lpx(value) {
+        return new LengthMetrics(value, LengthUnit.LPX);
     }
 }
 class ShapeMask {
@@ -1390,4 +1417,4 @@ class ComponentContent {
     }
 }
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, LengthMetric, LengthUnit, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils, NodeRenderType, XComponentNode, LengthMetric, LengthMetrics, LengthUnit, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent };
