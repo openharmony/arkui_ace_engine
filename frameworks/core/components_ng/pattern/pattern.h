@@ -268,6 +268,8 @@ public:
         return false;
     }
 
+    virtual void BeforeSyncGeometryProperties() {}
+
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*changeConfig*/)
