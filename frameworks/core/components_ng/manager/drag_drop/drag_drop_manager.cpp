@@ -1517,7 +1517,8 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     auto maxDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager, gatherNodeCenter.GetX(),
         gatherNodeCenter.GetY());
     constexpr decltype(distance) MAX_DIS = 5.0;
-    if (distance < MAX_DIS && maxDistance < MAX_DIS) {
+    if ((distance < MAX_DIS || !IsNeedScaleDragPreview()) &&
+        (maxDistance < MAX_DIS || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_))) {
         auto containerId = Container::CurrentId();
         TransDragWindowToDragFwk(containerId);
         return;
