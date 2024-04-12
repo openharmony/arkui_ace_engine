@@ -11552,6 +11552,22 @@ class ArkLoadingProgressComponent extends ArkComponent {
       LoadingProgressForegroundColorModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, loadingProgressConfiguration) {
+    loadingProgressConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.loadingProgressNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.loadingProgressNode = new xNode.BuilderNode(context);
+      this.loadingProgressNode.build(this.builder, loadingProgressConfiguration);
+    } else {
+      this.loadingProgressNode.update(loadingProgressConfiguration);
+    }
+    return this.loadingProgressNode.getFrameNode();
+  }
 }
 class LoadingProgressColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -11611,6 +11627,15 @@ if (globalThis.LoadingProgress !== undefined) {
     });
   };
 }
+
+globalThis.LoadingProgress.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkLoadingProgressComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
+};
 
 /// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent {

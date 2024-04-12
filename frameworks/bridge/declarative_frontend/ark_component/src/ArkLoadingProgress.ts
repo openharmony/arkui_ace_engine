@@ -15,6 +15,9 @@
 
 /// <reference path='./import.ts' />
 class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgressAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  loadingProgressNode: BuilderNode<[LoadingProgressConfiguration]> | null = null;
+  modifier: ContentModifier<LoadingProgressConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -30,6 +33,25 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
     modifierWithKey(this._modifiersWithKeys, LoadingProgressForegroundColorModifier.identity,
       LoadingProgressForegroundColorModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<LoadingProgressConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+        return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, loadingProgressConfiguration: LoadingProgressConfiguration): FrameNode | null {
+    loadingProgressConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.loadingProgressNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.loadingProgressNode = new xNode.BuilderNode(context);
+      this.loadingProgressNode.build(this.builder, loadingProgressConfiguration);
+    } else {
+      this.loadingProgressNode.update(loadingProgressConfiguration);
+    }
+    return this.loadingProgressNode.getFrameNode();
   }
 }
 
@@ -89,4 +111,15 @@ globalThis.LoadingProgress.attributeModifier = function (modifier: ArkComponent)
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.LoadingProgressModifier(nativePtr, classType);
   });
+};
+
+
+// @ts-ignore
+globalThis.LoadingProgress.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkLoadingProgressComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };
