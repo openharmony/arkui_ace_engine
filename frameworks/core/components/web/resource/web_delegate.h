@@ -790,7 +790,7 @@ public:
         TouchEventInfo& touchEventInfo);
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
-    void DragResize(const double& width, const double& height, const double& preHeight, const double& preWidth);
+    void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
