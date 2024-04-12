@@ -79,8 +79,8 @@ std::string AccessibilityProperty::GetAccessibilityText(bool isParentGroup)
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
     auto level = GetAccessibilityLevel();
-    if (level != AccessibilityProperty::Level::AUTO &&
-        level != AccessibilityProperty::Level::YES) {
+    if (level != AccessibilityProperty::Level::AUTO_STR &&
+        level != AccessibilityProperty::Level::YES_STR) {
         return text;
     }
     if (accessibilityText_.has_value()) {
@@ -258,7 +258,7 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
             bool hasGroupOrVirtualNode = accessibilityProperty->IsAccessibilityGroup() ||
                 accessibilityProperty->HasAccessibilityVirtualNode();
             bool hasAccessibilityText = accessibilityProperty->HasAccessibilityTextOrDescription();
-            if (level == AccessibilityProperty::Level::YES) {
+            if (level == AccessibilityProperty::Level::YES_STR) {
                 if (hasGroupOrVirtualNode) {
                     shouldSearchChildren = false;
                 }
@@ -268,7 +268,7 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
                 shouldSearchChildren = false;
                 break;
             } else {
-                if (level == AccessibilityProperty::Level::NO) {
+                if (level == AccessibilityProperty::Level::NO_STR) {
                     shouldSearchSelf = false;
                 } else {
                     // shouldSearchSelf is true here
@@ -365,11 +365,11 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty != nullptr) {
             auto level = accessibilityProperty->GetAccessibilityLevel();
-            if (level == AccessibilityProperty::Level::YES) {
+            if (level == AccessibilityProperty::Level::YES_STR) {
                 focusable = true;
                 break;
             }
-            if (level == AccessibilityProperty::Level::NO) {
+            if (level == AccessibilityProperty::Level::NO_STR) {
                 break;
             }
             if (accessibilityProperty->IsAccessibilityGroup() ||
