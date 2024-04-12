@@ -109,7 +109,7 @@ const std::wstring lineSeparator = L"\n";
 // hen do ai anaylsis, we should limit the left an right limit of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
-constexpr int32_t noneSelectType = -1;
+constexpr static int32_t NONE_SELECT_TYPE = -1;
 } // namespace
 
 RichEditorPattern::RichEditorPattern()
@@ -6847,40 +6847,33 @@ bool RichEditorPattern::CursorMoveLineEnd()
 
 void RichEditorPattern::HandleSelectFontStyle(KeyCode code)
 {
+    if (!textSelector_.IsValid() && !SelectOverlayIsOn()) {
+        return;
+    }
     TextStyle spanStyle;
     struct UpdateSpanStyle updateSpanStyle;
     ImageSpanAttribute imageStyle;
-    int32_t position = caretPosition_;
-    position = std::clamp(position, 0, GetTextContentLength());
-    auto it = std::find_if(spans_.begin(), spans_.end(), [position](const RefPtr<SpanItem> &spanItem) {
-        return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
-            position) && (position < spanItem->position);
-    });
-    if (it == spans_.end()) {
-        return;
+    int32_t position;
+    if (textSelector_.GetEnd() > textSelector_.GetStart()) {
+        position = caretPosition_;
+    } else {
+        position = textSelector_.GetStart();
     }
-
+    position = std::clamp(position, 0, GetTextContentLength());
+    auto it = std::find_if(spans_.begin(), spans_.end(), [position](const RefPtr<SpanItem>& spanItem) {
+        return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
+                   position) &&
+               (position <= spanItem->position);
+    });
     auto spanIndex = std::distance(spans_.begin(), it);
     auto host = GetHost();
     auto nextit = host->GetChildren().begin();
     std::advance(nextit, spanIndex);
     auto spanNode = DynamicCast<SpanNode>(*nextit);
+    CHECK_NULL_VOID(spanNode);
     std::optional<TextStyle> spanStyle_t = (spanNode->GetSpanItem())->GetTextStyle();
     spanStyle = spanStyle_t.value();
-    switch (code) {
-        case KeyCode::KEY_B:
-            spanStyle.SetFontWeight(Ace::FontWeight::BOLD);
-            break;
-        case KeyCode::KEY_I:
-            spanStyle.SetFontStyle(OHOS::Ace::FontStyle::ITALIC);
-            break;
-        case KeyCode::KEY_U:
-            spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-            break;
-        default:
-            LOGW("Unsupported select operation for HandleSelectFrontStyle");
-            return;
-    }
+    HandleSelectFontStyleWrapper(code, spanStyle);
     updateSpanStyle.updateTextColor = spanStyle.GetTextColor();
     updateSpanStyle.updateFontSize = spanStyle.GetFontSize();
     updateSpanStyle.updateItalicFontStyle = spanStyle.GetFontStyle();
@@ -6888,20 +6881,22 @@ void RichEditorPattern::HandleSelectFontStyle(KeyCode code)
     updateSpanStyle.updateFontFamily = spanStyle.GetFontFamilies();
     updateSpanStyle.updateTextDecoration = spanStyle.GetTextDecoration();
     richEditorController_->SetUpdateSpanStyle(updateSpanStyle);
-    richEditorController_->UpdateSpanStyle(textSelector_.GetStart(), textSelector_.GetEnd(), spanStyle, imageStyle);
+    richEditorController_->UpdateSpanStyle(
+        textSelector_.GetTextStart(), textSelector_.GetTextEnd(), spanStyle, imageStyle);
     StartTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorPattern::HandleOnShowMenu()
 {
-    float caretHeight = 0.0f;
-    OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    auto caretOffsetOverlay = overlayMod->GetCaretOffset();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    selectionMenuOffsetByMouse_ = OffsetF(caretOffset.GetX(), richTextRect_.GetY() + caretHeight);
+    selectionMenuOffsetByMouse_ = OffsetF(
+        parentGlobalOffset_.GetX() + caretOffsetOverlay.GetX(), parentGlobalOffset_.GetY() + caretOffsetOverlay.GetY());
     focusHub->RequestFocusImmediately();
     StartTwinkling();
     ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), TextResponseType::RIGHT_CLICK);
@@ -6927,7 +6922,7 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction)
         case CaretMoveIntent::LineEnd:
             return CalcLineEndPosition();
         default:
-            return noneSelectType;
+            return NONE_SELECT_TYPE;
     }
 }
 
@@ -6963,5 +6958,62 @@ int32_t RichEditorPattern::HandleSelectDownPos()
         newPos = caretPosition_ + sizePos;
     }
     return newPos;
+}
+
+void RichEditorPattern::HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle)
+{
+    switch (code) {
+        case KeyCode::KEY_B:
+            if (spanStyle.GetFontWeight() == Ace::FontWeight::BOLD) {
+                spanStyle.SetFontWeight(Ace::FontWeight::NORMAL);
+            } else {
+                spanStyle.SetFontWeight(Ace::FontWeight::BOLD);
+            }
+            break;
+        case KeyCode::KEY_I:
+            if (spanStyle.GetFontStyle() == OHOS::Ace::FontStyle::ITALIC) {
+                spanStyle.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
+            } else {
+                spanStyle.SetFontStyle(OHOS::Ace::FontStyle::ITALIC);
+            }
+            break;
+        case KeyCode::KEY_U:
+            if (spanStyle.GetTextDecoration() == TextDecoration::UNDERLINE) {
+                spanStyle.SetTextDecoration(TextDecoration::NONE);
+            } else {
+                spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+            }
+            break;
+        default:
+            LOGW("Unsupported select operation for HandleSelectFrontStyle");
+            return;
+    }
+}
+
+bool RichEditorPattern::HandleOnDeleteComb(bool backward)
+{
+    CloseSelectOverlay();
+    ResetSelection();
+    int32_t newPos;
+    if (backward) {
+        newPos = GetLeftWordPosition(caretPosition_);
+        if (newPos == caretPosition_) {
+            return false;
+        }
+        DeleteBackward(caretPosition_ - newPos);
+        SetCaretPosition(newPos);
+    } else {
+        newPos = GetRightWordPosition(caretPosition_);
+        if (newPos == caretPosition_) {
+            return false;
+        }
+        DeleteForward(newPos - caretPosition_);
+    }
+    MoveCaretToContentRect();
+    StartTwinkling();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return true;
 }
 } // namespace OHOS::Ace::NG
