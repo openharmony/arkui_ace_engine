@@ -1593,15 +1593,22 @@ void SwiperPattern::StopTranslateAnimation()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         translateAnimationIsRunning_ = false;
-        AnimationOption option;
-        option.SetCurve(Curves::LINEAR);
-        option.SetDuration(0);
-        translateAnimation_ = AnimationUtils::StartAnimation(
-            option, [host, weak = WeakClaim(this)]() {
-                auto swiper = weak.Upgrade();
-                CHECK_NULL_VOID(swiper);
-                host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
-            });
+
+        if (NearZero(translateAnimationEndPos_ - currentOffset_)) {
+            AnimationUtils::StopAnimation(translateAnimation_);
+            targetIndex_.reset();
+        } else {
+            AnimationOption option;
+            option.SetCurve(Curves::LINEAR);
+            option.SetDuration(0);
+            translateAnimation_ = AnimationUtils::StartAnimation(
+                option, [host, weak = WeakClaim(this)]() {
+                    auto swiper = weak.Upgrade();
+                    CHECK_NULL_VOID(swiper);
+                    host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
+                });
+            }
+
         OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_, true);
     }
 }
@@ -1994,6 +2001,13 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             return;
         }
     }
+    if (!IsLoop() && GetEdgeEffect() != EdgeEffect::SPRING) {
+        if (IsOutOfStart(offset)) {
+            offset = - itemPosition_.begin()->second.startPos;
+        } else if (IsOutOfEnd(offset)) {
+            offset = CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+        }
+    }
     currentDelta_ = currentDelta_ - offset;
     currentIndexOffset_ += offset;
     if (isDragging_ || childScrolling_) {
@@ -2021,9 +2035,9 @@ bool SwiperPattern::CheckOverScroll(float offset)
             break;
         case EdgeEffect::NONE:
             if (IsOutOfBoundary(offset)) {
-                currentDelta_ = currentDelta_ - offset;
                 auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                     CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+                currentDelta_ = currentDelta_ - realOffset;
                 HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
@@ -2066,9 +2080,9 @@ bool SwiperPattern::FadeOverScroll(float offset)
         auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == 0 && offset < 0.0f) ||
                                (itemPosition_.rbegin()->first == TotalCount() - 1 && offset > 0.0f);
         if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
-            currentDelta_ = currentDelta_ - offset;
             auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                 CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+            currentDelta_ = currentDelta_ - realOffset;
             HandleSwiperCustomAnimation(realOffset);
         }
         auto host = GetHost();
@@ -2932,6 +2946,7 @@ void SwiperPattern::PlayTranslateAnimation(
     host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, startPos);
     translateAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
+    translateAnimationEndPos_ = endPos;
     translateAnimation_ = AnimationUtils::StartAnimation(
         option, [host, weak, startPos, endPos, nextIndex, velocity]() {
             host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);
