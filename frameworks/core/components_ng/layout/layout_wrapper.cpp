@@ -96,14 +96,16 @@ bool LayoutWrapper::CheckPageNeedAvoidKeyboard() const
     return overlay->CheckPageNeedAvoidKeyboard();
 }
 
-void LayoutWrapper::AvoidKeyboard(bool isFocusOnPageOrOverlay)
+void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
-    // apply keyboard avoidance on Page
-    if ((GetHostTag() == V2::PAGE_ETS_TAG && CheckPageNeedAvoidKeyboard()) || GetHostTag() == V2::OVERLAY_ETS_TAG) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
+    // apply keyboard avoidance on Page or Overlay
+    if ((GetHostTag() == V2::PAGE_ETS_TAG && CheckPageNeedAvoidKeyboard() && !isFocusOnOverlay) ||
+        GetHostTag() == V2::OVERLAY_ETS_TAG) {
         auto manager = pipeline->GetSafeAreaManager();
-        if (!isFocusOnPageOrOverlay && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+        if (!(isFocusOnPage || isFocusOnOverlay) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
             return;
         }
         auto safeArea = manager->GetSafeArea();
