@@ -3547,19 +3547,61 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto offset = host->GetOffsetRelativeToWindow();
-    touchEventInfo = touchEventInfo_;
+    TouchEventInfo tempTouchInfo = touchEventInfo_;
     if ((touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) &&
         !touchEventQueue_.empty()) {
-        touchEventInfo = touchEventQueue_.front();
+        tempTouchInfo = touchEventQueue_.front();
         touchEventQueue_.pop();
     }
+    touchEventInfo.SetSourceDevice(tempTouchInfo.GetSourceDevice());
+    touchEventInfo.SetTarget(tempTouchInfo.GetTarget());
+    touchEventInfo.SetForce(tempTouchInfo.GetForce());
+    touchEventInfo.SetSourceTool(tempTouchInfo.GetSourceTool());
+    touchEventInfo.SetTargetDisplayId(tempTouchInfo.GetTargetDisplayId());
+    touchEventInfo.SetDeviceId(tempTouchInfo.GetDeviceId());
+
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
     changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
     changedInfo.SetTouchType(touchEvent.type);
 
+    SetTouchLocationInfo(touchEvent, changedInfo, tempTouchInfo, touchEventInfo);
+
     touchEventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
+}
+
+void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchLocationInfo& changedInfo,
+    const TouchEventInfo& tempTouchInfo, TouchEventInfo& touchEventInfo)
+{
+    float scaleX = 0.0f;
+    float scaleY = 0.0f;
+    const std::list<TouchLocationInfo>& touchList = tempTouchInfo.GetTouches();
+    for (const TouchLocationInfo& location : touchList) {
+        if (touchEvent.id == location.GetFingerId()) {
+            const OHOS::Ace::Offset& localLocation = location.GetLocalLocation();
+            scaleX = localLocation.GetX() - touchEvent.x;
+            scaleY = localLocation.GetY() - touchEvent.y;
+        }
+    }
+    for (const TouchLocationInfo& location : touchList) {
+        TouchLocationInfo info("onTouch", location.GetFingerId());
+        if (touchEvent.id == location.GetFingerId()) {
+            info.SetGlobalLocation(changedInfo.GetGlobalLocation());
+            info.SetLocalLocation(changedInfo.GetLocalLocation());
+            info.SetScreenLocation(changedInfo.GetScreenLocation());
+            info.SetTouchType(changedInfo.GetTouchType());
+        } else {
+            const OHOS::Ace::Offset& localLocation = location.GetLocalLocation();
+            const OHOS::Ace::Offset& globalLocation = location.GetGlobalLocation();
+            const OHOS::Ace::Offset& screenLocation = location.GetScreenLocation();
+            info.SetGlobalLocation(Offset(globalLocation.GetX() - scaleX, globalLocation.GetY() - scaleY));
+            info.SetLocalLocation(Offset(localLocation.GetX() - scaleX, localLocation.GetY() - scaleY));
+            info.SetScreenLocation(Offset(screenLocation.GetX() - scaleX, screenLocation.GetY() - scaleY));
+            info.SetTouchType(location.GetTouchType());
+        }
+        touchEventInfo.AddTouchLocationInfo(std::move(info));
+    }
 }
 
 void WebPattern::RegisterVisibleAreaChangeCallback()
