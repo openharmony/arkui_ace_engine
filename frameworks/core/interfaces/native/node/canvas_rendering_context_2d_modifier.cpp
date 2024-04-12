@@ -79,23 +79,24 @@ void SetCanvasMoveTo(ArkUINodeHandle node, float x, float y)
     canvasPattern->MoveTo(x, y);
 }
 
-void SetCanvasArc(ArkUINodeHandle node, ArkUICanvasArcOptions options)
+void SetCanvasArc(ArkUINodeHandle node, ArkUICanvasArcOptions *options)
 {
+    CHECK_NULL_VOID(options);
     TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasArc:node:%{public}p, x: %{public}f, y: %{public}f, \
-        radius: %{public}f, startAngle: %{public}f, endAngle: %{public}f", node, options.x, options.y, options.radius,
-        options.startAngle, options.endAngle);
+        radius: %{public}f, startAngle: %{public}f, endAngle: %{public}f", node, options->x, options->y,
+        options->radius, options->startAngle, options->endAngle);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
     auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     ArcParam param;
-    param.x = Dimension(options.x, DimensionUnit::VP).ConvertToPx();
-    param.y = Dimension(options.y, DimensionUnit::VP).ConvertToPx();
-    param.radius = Dimension(options.radius, DimensionUnit::VP).ConvertToPx();
-    param.startAngle = options.startAngle;
-    param.endAngle = options.endAngle;
-    param.anticlockwise = static_cast<bool>(options.counterclockwise);
+    param.x = Dimension(options->x, DimensionUnit::VP).ConvertToPx();
+    param.y = Dimension(options->y, DimensionUnit::VP).ConvertToPx();
+    param.radius = Dimension(options->radius, DimensionUnit::VP).ConvertToPx();
+    param.startAngle = options->startAngle;
+    param.endAngle = options->endAngle;
+    param.anticlockwise = static_cast<bool>(options->counterclockwise);
     canvasPattern->Arc(param);
 }
 
