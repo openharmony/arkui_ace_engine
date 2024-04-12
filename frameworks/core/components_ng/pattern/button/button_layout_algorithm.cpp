@@ -190,21 +190,18 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
 
+        float leftPadding = 0.0f;
+        float rightPadding = 0.0f;
         ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
         ControlSize controlSize = buttonLayoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
         if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::SMALL) {
-            padding.left =  buttonTheme->GetPaddingText().ConvertToPx();
-            padding.right = buttonTheme->GetPaddingText().ConvertToPx();
+            leftPadding =  buttonTheme->GetPaddingText().ConvertToPx();
+            rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
         } else {
-            padding.left = buttonTheme->GetPadding(controlSize).Left().ConvertToPx();
-            padding.right = buttonTheme->GetPadding(controlSize).Right().ConvertToPx();
+            leftPadding = buttonTheme->GetPadding(controlSize).Left().ConvertToPx();
+            rightPadding = buttonTheme->GetPadding(controlSize).Right().ConvertToPx();
         }
-        PaddingProperty defaultPadding = {
-            CalcLength(padding.left.value_or(0)),
-            CalcLength(padding.right.value_or(0)),
-            CalcLength(padding.top.value_or(0)),
-            CalcLength(padding.bottom.value_or(0)) };
-        layoutWrapper->GetLayoutProperty()->UpdatePadding(defaultPadding);
+        frameSize.SetWidth(frameSize.Width() + leftPadding + rightPadding);
 
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {

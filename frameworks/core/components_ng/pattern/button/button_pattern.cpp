@@ -187,16 +187,21 @@ void ButtonPattern::HandleFocusEvent(RefPtr<ButtonLayoutProperty> layoutProperty
 
     if (buttonStyle != ButtonStyleMode::TEXT) {
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme->GetShadowNormal()));
-        shadowModify_ = (graphics->GetBackShadowValue() == shadow);
+        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
+            shadowModify_ = true;
+        }
         if (shadowModify_) {
             ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowFocus());
             buttonRenderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
         }
     }
-    VectorF scale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
-    scaleModify_ = transform->GetTransformScale() == scale;
+    float scaleFocus = buttonTheme->GetScaleFocus();
+    VectorF scale(scaleFocus, scaleFocus);
+    if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+        scaleModify_ = true;
+    }
     if (scaleModify_) {
-        buttonRenderContext->SetScale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
+        buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
     if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
         bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
@@ -226,14 +231,18 @@ void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
         Shadow shadow = Shadow::CreateShadow(shadowStyle);
         buttonRenderContext->UpdateBackShadow(shadow);
+        shadowModify_ = false;
     }
     if (scaleModify_) {
+        scaleModify_ = false;
         buttonRenderContext->SetScale(1.0f, 1.0f);
     }
     if (bgColorModify_) {
+        bgColorModify_ = false;
         buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
     if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
+        focusTextColorModify_ = false;
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode();
     }
