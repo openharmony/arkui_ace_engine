@@ -551,9 +551,9 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         auto fadeEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
         CHECK_NULL_VOID(fadeEdgeEffect);
         fadeEdgeEffect->SetHandleOverScrollCallback([weakScroll = AceType::WeakClaim(this)]() -> void {
-            auto list = weakScroll.Upgrade();
-            CHECK_NULL_VOID(list);
-            auto host = list->GetHost();
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         });
@@ -1701,6 +1701,9 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
     }
     if (GetEdgeEffect() == EdgeEffect::NONE) {
         result = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
+        if (NearZero(result.remain)) {
+            offset -= overOffset;
+        }
     }
     SetCanOverScroll(!NearZero(overOffset) || (NearZero(offset) && result.reachEdge));
     return { 0, GetCanOverScroll() };
@@ -1844,7 +1847,11 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 
 bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
-    if (!OutBoundaryCallback()) {
+    // if edgeEffect is None and scrollable try to over scroll when it is at the boundary,
+    // scrollable does not start fling animation.
+    auto needFlingAtEdge = !(GetEdgeEffect() == EdgeEffect::NONE &&
+                             ((IsAtTop() && Positive(velocity)) || (IsAtBottom() && Negative(velocity))));
+    if (!OutBoundaryCallback() && needFlingAtEdge) {
         // trigger scroll animation if edge not reached
         if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
             scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
