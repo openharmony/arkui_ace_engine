@@ -1587,12 +1587,12 @@ void OH_ArkUI_WaterFlowSectionOption_SetItemCount(ArkUI_WaterFlowSectionOption* 
 /**
 * @brief Obtains the number of items in the water flow section that matches the specified index.
 *
-* @param Constraint Indicates the pointer to a water flow section configuration.
+* @param option Indicates the pointer to a water flow section configuration.
 * @param index Indicates the index of the target water flow section.
 * @return Returns the number of items in the water flow section.
 * @since 12
 */
-int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOption* Constraint, int32_t index);
+int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOption* option, int32_t index);
 
 /**
 * @brief Sets the number of columns (in a vertical layout) or rows (in a horizontal layout) of a water flow.

@@ -8570,14 +8570,14 @@ int32_t SetRowsTemplate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (!CheckAttributeString(item)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    fullImpl->getNodeModifiers()->getWaterFlowModifier()->setColumnsTemplate(node->uiNodeHandle, item->string);
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->setRowsTemplate(node->uiNodeHandle, item->string);
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetRowsTemplate(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getWaterFlowModifier()->setColumnsTemplate(node->uiNodeHandle, "1fr");
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->setRowsTemplate(node->uiNodeHandle, "1fr");
 }
 
 const ArkUI_AttributeItem* GetRowsTemplate(ArkUI_NodeHandle node)
