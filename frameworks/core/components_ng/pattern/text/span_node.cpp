@@ -643,6 +643,7 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
 
 void ImageSpanNode::DumpInfo()
 {
+    FrameNode::DumpInfo();
     auto& dumpLog = DumpLog::GetInstance();
     auto& run = imageSpanItem_->run_;
     dumpLog.AddDesc("--------------- print run info ---------------");
