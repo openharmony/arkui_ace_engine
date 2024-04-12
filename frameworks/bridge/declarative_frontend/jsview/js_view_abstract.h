@@ -114,6 +114,7 @@ public:
     static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
+    static void JsForegroundEffect(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
     static void JsLightUpEffect(const JSCallbackInfo& info);

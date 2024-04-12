@@ -102,6 +102,7 @@ struct ForegroundProperty {
     }
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundEffect, float);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
