@@ -174,6 +174,9 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     direction_ = newDirection_;
 
     if (direction_.type == PanDirection::NONE) {
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, node tag = %{public}s, id = %{public}s",
+            node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -842,6 +845,20 @@ void PanRecognizer::PanVelocity::SetDirection(int32_t directionType)
         axis = Axis::VERTICAL;
     }
     axis_ = axis;
+}
+
+bool PanRecognizer::AboutToAddCurrentFingers(int32_t touchId)
+{
+    if (fingersId_.find(touchId) != fingersId_.end()) {
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "Pan recognizer has already receive touchId: %{public}d event, node tag = %{public}s, id = %{public}s",
+            touchId, node ? node->GetTag().c_str() : "null",
+            node ? std::to_string(node->GetId()).c_str() : "invalid");
+        return false;
+    }
+    currentFingers_++;
+    return true;
 }
 
 } // namespace OHOS::Ace::NG
