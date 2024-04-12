@@ -507,6 +507,8 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> property_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
+
+    float preDetentsHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
