@@ -820,6 +820,18 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, false);
     if (navigationModeChange_) {
+        if (NavigationMode::STACK == navigationMode_) {
+            auto newTopNavPath = navigationStack_->GetTopNavPath();
+            if (newTopNavPath.has_value()) {
+                auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+                    NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
+                CHECK_NULL_RETURN(newTopNavDestination, false);
+                auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
+                CHECK_NULL_RETURN(navDestinationFocusView, false);
+                navDestinationFocusView->SetIsViewRootScopeFocused(false);
+                navDestinationFocusView->FocusViewShow();
+            }
+        }
         AbortAnimation(hostNode);
     }
     auto context = PipelineContext::GetCurrentContext();
