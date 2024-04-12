@@ -423,6 +423,8 @@ struct TouchRestrict final {
 
     SourceType hitTestType = SourceType::TOUCH;
 
+    InputEventType inputEventType = InputEventType::TOUCH_SCREEN;
+
     TouchEvent touchEvent;
 
     std::list<std::string> childTouchTestList;
