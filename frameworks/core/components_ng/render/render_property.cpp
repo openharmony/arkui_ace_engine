@@ -191,7 +191,7 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
     auto jsonOption = JsonUtil::Create(true);
-    jsonOption->Put("radius",  std::to_string(propForegroundEffect.value()).c_str());
+    jsonOption->Put("radius", std::to_string(propForegroundEffect.value_or(0.0f)).c_str());
     json->Put("foregroundEffect", jsonOption);
 }
 
