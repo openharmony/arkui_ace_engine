@@ -1991,10 +1991,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void TextPattern::ProcessOverlayAfterLayout()
 {
-    if (processOverlayDelayTask_) {
-        processOverlayDelayTask_();
-        processOverlayDelayTask_ = nullptr;
-    } else if (selectOverlay_->SelectOverlayIsOn()) {
+    if (selectOverlay_->SelectOverlayIsOn()) {
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
     }
@@ -2244,16 +2241,18 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
-    if (selectOverlay_->SelectOverlayIsOn()) {
-        if (selectOverlay_->IsShowMouseMenu()) {
-            CloseSelectOverlay();
-        } else {
-            processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+    CHECK_NULL_VOID(selectOverlay_->SelectOverlayIsOn());
+    if (selectOverlay_->IsShowMouseMenu()) {
+        CloseSelectOverlay();
+    } else {
+        auto context = PipelineContext::GetCurrentContextSafely();
+        if (context) {
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->CalculateHandleOffsetAndShowOverlay();
                 pattern->ShowSelectOverlay({ .menuIsShow = false });
-            };
+            });
         }
     }
 }
