@@ -25,6 +25,7 @@
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -58,6 +59,7 @@ private:
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
 
+    bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout);
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
@@ -65,6 +67,8 @@ private:
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
     bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
+    bool SetAlignmentSwitchLessThanAPITwelve(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
+    bool IsAlignmentByWholeScreen();
     bool IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize);
     void MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize,
         const RefPtr<OverlayManager> subOverlayManager);
@@ -84,6 +88,8 @@ private:
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     double GetRealSize(Dimension dialogFrame, double size);
+    void UpdateDialogContainerWidth(const RefPtr<DialogLayoutProperty>& dialogProp,
+        const RefPtr<DialogTheme>& dialogTheme);
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;

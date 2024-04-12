@@ -602,7 +602,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
 
     DialogProperties properties;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         properties.alignment = DialogAlignment::BOTTOM;
     } else {
         properties.alignment = DialogAlignment::CENTER;
