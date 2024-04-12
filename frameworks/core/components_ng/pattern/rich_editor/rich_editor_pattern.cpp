@@ -6541,17 +6541,15 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
         ++spanIndex; // create a new span When the span is not a textSpan(Image/Symbol/other)
         offsetInSpan = 0;
     }
-    if (!style.has_value()) {
-        if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
-            style = typingTextStyle_;
-        }
-    }
 
     auto wInsertValue = StringUtils::ToWstring(insertValue);
     std::wstring textTemp = L"";
     if (style) {
         textTemp = wInsertValue;
     } else {
+        if (typingStyle_.has_value() && spanNode && !HasSameTypingStyle(spanNode)) {
+            style = typingTextStyle_;
+        }
         if (spanNode && spanNode->GetSpanItem()) {
             textTemp = StringUtils::ToWstring(spanNode->GetSpanItem()->content);
         }
@@ -6563,7 +6561,6 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     auto content = StringUtils::ToString(textTemp);
 
     if (style || containNextLine) { // SpanNode Fission
-        offsetInSpan = 0;
         GetReplacedSpanFission(changeValue, innerPosition, content, spanIndex, offsetInSpan, style);
     } else {
         std::optional<TextStyle> spanTextStyle;
