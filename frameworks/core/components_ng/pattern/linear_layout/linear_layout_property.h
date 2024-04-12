@@ -105,7 +105,12 @@ public:
         if (pos != std::string::npos) {
             ++pos;
             alignItems = alignItems.substr(pos, alignItems.length() - pos);
-            UpdateCrossAxisAlign(uMap.count(alignItems) ? uMap.at(alignItems) : FlexAlign::CENTER);
+            FlexAlign flexAlign = FlexAlign::CENTER;
+            auto iter = uMap.find(alignItems);
+            if (iter != uMap.end()) {
+                flexAlign = iter->second;
+            }
+            UpdateCrossAxisAlign(flexAlign);
         }
         UpdateMainAxisAlign(V2::ConvertStringToFlexAlign(json->GetString("justifyContent")));
 

@@ -141,7 +141,12 @@ public:
         UpdateItemSpace(Dimension::FromString(json->GetString("itemSpace")));
         UpdateCachedCount(json->GetInt("cachedCount"));
         auto displayMode = json->GetString("displayMode");
-        UpdateDisplayMode(uMap.count(displayMode) ? uMap.at(displayMode) : SwiperDisplayMode::STRETCH);
+        SwiperDisplayMode swiperDisplayMode = SwiperDisplayMode::STRETCH;
+        auto iter = uMap.find(displayMode);
+        if (iter != uMap.end()) {
+            swiperDisplayMode = iter->second;
+        }
+        UpdateDisplayMode(swiperDisplayMode);
         UpdateDisplayCount(json->GetInt("displayCount"));
         UpdateDisableSwipe(json->GetBool("disableSwipe"));
         LayoutProperty::FromJson(json);

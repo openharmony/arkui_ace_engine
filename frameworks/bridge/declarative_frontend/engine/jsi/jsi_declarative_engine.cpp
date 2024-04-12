@@ -653,17 +653,18 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
 {
     CHECK_RUN_ON(JS);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-    if (rootViewMap_.count(pageId) != 0) {
+    auto iter = rootViewMap_.find(pageId);
+    if (iter != rootViewMap_.end()) {
         auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
         if (!arkRuntime) {
             return;
         }
-        panda::Local<panda::ObjectRef> rootView = rootViewMap_[pageId].ToLocal(arkRuntime->GetEcmaVm());
+        panda::Local<panda::ObjectRef> rootView = iter->second.ToLocal(arkRuntime->GetEcmaVm());
         auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
-        rootViewMap_[pageId].FreeGlobalHandleAddr();
+        iter->second.FreeGlobalHandleAddr();
         rootViewMap_.erase(pageId);
     }
 }
