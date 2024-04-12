@@ -987,9 +987,9 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddImageSpan();
+    AddSpan("a");
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    richEditorPattern->DeleteBackward(1);
+    richEditorPattern->DeleteBackward(1, false);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
@@ -1003,18 +1003,18 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddImageSpan();
+    AddSpan("h");
     richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->DeleteBackward(1);
+    richEditorPattern->DeleteBackward(1, false);
     EXPECT_NE(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
     richEditorPattern->textSelector_ = TextSelector(0, 1);
     richEditorPattern->caretPosition_ = 1;
-    richEditorPattern->DeleteBackward(1);
+    richEditorPattern->DeleteBackward(1, false);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
     while (!richEditorPattern->spans_.empty()) {
         richEditorPattern->spans_.pop_back();
     }
-    richEditorPattern->DeleteBackward(1);
+    richEditorPattern->DeleteBackward(1, false);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
@@ -1050,9 +1050,9 @@ HWTEST_F(RichEditorTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level1)
     AddSpan("😄3😄😄");
     richEditorPattern->caretPosition_ = 2;
     richEditorPattern->textSelector_ = TextSelector(2, 5);
-    richEditorPattern->DeleteBackward(1);
+    richEditorPattern->DeleteBackward(1, false);
     ASSERT_EQ(richEditorPattern->caretPosition_, 2);
-    richEditorPattern->DeleteBackward(1);
+    richEditorPattern->DeleteBackward(1, false);
     ASSERT_EQ(richEditorPattern->caretPosition_, 0);
 }
 

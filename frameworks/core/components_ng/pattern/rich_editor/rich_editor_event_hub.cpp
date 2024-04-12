@@ -308,6 +308,16 @@ const std::list<RichEditorAbstractSpanResult>& RichEditorDeleteValue::GetRichEdi
     return richEditorDeleteSpans_;
 }
 
+void RichEditorDeleteValue::SetKeyboardType(KeyboardType Keyboard)
+{
+    Keyboard_ = Keyboard;
+}
+
+KeyboardType RichEditorDeleteValue::GetKeyboardType() const
+{
+    return Keyboard_;
+}
+
 void RichEditorChangeValue::SetRichEditorOriginalSpans(const RichEditorAbstractSpanResult& span)
 {
     originalSpans_.emplace_back(span);
