@@ -3925,12 +3925,17 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       returns undefined if variable has _not_ changed
       returns dependentElementIds_ Set if changed. This Set is empty if variable is not used to construct the UI
     */
-    moveElmtIdsForDelayedUpdate() {
+    moveElmtIdsForDelayedUpdate(isReused = false) {
         const result = (this.delayedNotification_ === ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) ?
             this.dependentElmtIdsByProperty_.getAllPropertyDependencies() :
             undefined;
         
-        this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
+        if (isReused && !this.owningView_.isViewActive()) {
+            this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_none_pending;
+        }
+        else {
+            this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
+        }
         return result;
     }
     notifyPropertyRead() {
@@ -6196,6 +6201,16 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.aboutToReuse(params);
             }
         }, "aboutToReuse", this.constructor.name);
+        for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
+            const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
+            if (changedElmtIds) {
+                if (changedElmtIds.size && !this.isFirstRender()) {
+                    for (const elmtId of changedElmtIds) {
+                        this.dirtDescendantElementIds_.add(elmtId);
+                    }
+                }
+            }
+        }
         this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();

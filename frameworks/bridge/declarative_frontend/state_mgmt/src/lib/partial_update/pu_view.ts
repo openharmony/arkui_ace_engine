@@ -1148,6 +1148,17 @@ abstract class ViewPU extends NativeViewPartialUpdate
         this.aboutToReuse(params);
       }
     }, "aboutToReuse", this.constructor.name);
+
+    for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
+      const changedElmtIds =  stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
+      if (changedElmtIds) {
+        if (changedElmtIds.size && !this.isFirstRender()) {
+          for (const elmtId of changedElmtIds) {
+            this.dirtDescendantElementIds_.add(elmtId);
+          }
+        }
+      }
+    }
     this.updateDirtyElements();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
