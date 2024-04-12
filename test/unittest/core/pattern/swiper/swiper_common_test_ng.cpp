@@ -149,7 +149,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
 
 /**
  * @tc.name: HandleTouchEvent005
- * @tc.desc: When touch down on indicatorNode, the animation will not stop
+ * @tc.desc: When touch down on indicatorNode_, the animation will not stop
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
@@ -158,7 +158,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
     pattern_->springAnimationIsRunning_ = true;
 
     /**
-     * @tc.steps: step1. Touch down on indicatorNode
+     * @tc.steps: step1. Touch down on indicatorNode_
      * @tc.expected: Animation still running
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
@@ -176,7 +176,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
 
 /**
  * @tc.name: HandleTouchEvent006
- * @tc.desc: When touch down on indicatorNode area, but no indicatorNode, the animation will stop
+ * @tc.desc: When touch down on indicatorNode_ area, but no indicatorNode_, the animation will stop
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
@@ -187,7 +187,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
     pattern_->translateAnimationIsRunning_ = true;
 
     /**
-     * @tc.steps: step1. Touch down on indicatorNode area
+     * @tc.steps: step1. Touch down on indicatorNode_ area
      * @tc.expected: Animation stoped
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
@@ -403,39 +403,36 @@ HWTEST_F(SwiperCommonTestNg, FocusStep001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
 
     /**
-     * @tc.cases: GetNextFocusNode from indicatorNode
+     * @tc.cases: GetNextFocusNode from indicatorNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, rightArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode, rightArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode_, rightArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode_, nullptr));
 
     /**
-     * @tc.cases: GetNextFocusNode from leftArrowNode
+     * @tc.cases: GetNextFocusNode from leftArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode_, nullptr));
 
     /**
-     * @tc.cases: GetNextFocusNode from rightArrowNode
+     * @tc.cases: GetNextFocusNode from rightArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode_, nullptr));
 }
 
 /**
@@ -451,39 +448,36 @@ HWTEST_F(SwiperCommonTestNg, FocusStep002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
 
     /**
-     * @tc.cases: GetNextFocusNode from indicatorNode
+     * @tc.cases: GetNextFocusNode from indicatorNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode, rightArrowNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode_, rightArrowNode_));
 
     /**
-     * @tc.cases: GetNextFocusNode from leftArrowNode
+     * @tc.cases: GetNextFocusNode from leftArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode_, indicatorNode_));
 
     /**
-     * @tc.cases: GetNextFocusNode from rightArrowNode
+     * @tc.cases: GetNextFocusNode from rightArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode_, nullptr));
 }
 
 /**
@@ -499,49 +493,46 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
 
     /**
      * @tc.cases: LoopIndex is first item(index:0)
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, rightArrowNode)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_)); // NextFocus
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is middle item(index:1)
      */
     ChangeIndex(1);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, rightArrowNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is last item(index:3)
      */
     ChangeIndex(3);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 }
 
 /**
@@ -558,37 +549,35 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 4);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 5);
 
     /**
      * @tc.cases: LoopIndex is last item(index:0)
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, rightArrowNode)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_)); // NextFocus
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is middle item(index:1)
      */
     ChangeIndex(1);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, rightArrowNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is last item(index:3)
      */
     ChangeIndex(3);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, nullptr));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 }
 
 /**
@@ -599,13 +588,12 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
 HWTEST_F(SwiperCommonTestNg, FocusStep005, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
 
     /**
-     * @tc.cases: GetNextFocusNode from indicatorNode
+     * @tc.cases: GetNextFocusNode from indicatorNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, nullptr)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr)); // NextFocus
 }
 
 /**
@@ -621,20 +609,18 @@ HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 4);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 5);
     
     /**
-     * @tc.cases: GetNextFocusNode from leftArrowNode
+     * @tc.cases: GetNextFocusNode from leftArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, rightArrowNode)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_)); // NextFocus
     
     /**
-     * @tc.cases: GetNextFocusNode from rightArrowNode
+     * @tc.cases: GetNextFocusNode from rightArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 }
 
 /**

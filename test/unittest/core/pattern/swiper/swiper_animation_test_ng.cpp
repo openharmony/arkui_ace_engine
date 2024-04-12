@@ -541,7 +541,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnForceStop001, 
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
     pattern_->UpdateIndexOnSwipePageStop(1);
     pattern_->currentIndex_ = 0;
     pattern_->pauseTargetIndex_ = 2;
@@ -556,7 +555,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnForceStop001, 
             pattern_->TriggerAnimationEndOnForceStop();
             pattern_->currentIndex_ = 1;
         }
-            frameNode_->AddChild(rightArrowNode);
+            frameNode_->AddChild(rightArrowNode_);
         pattern_->currentIndex_ = 0;
     }
 }
