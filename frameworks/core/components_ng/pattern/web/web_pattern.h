@@ -627,7 +627,8 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
-
+    void SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchLocationInfo& changedInfo,
+        const TouchEventInfo& tempTouchInfo, TouchEventInfo& touchEventInfo);
     struct TouchInfo {
         float x = -1.0f;
         float y = -1.0f;
