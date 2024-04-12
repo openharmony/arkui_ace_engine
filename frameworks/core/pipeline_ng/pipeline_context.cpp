@@ -2590,7 +2590,10 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             TouchRestrict touchRestrict { TouchRestrict::NONE };
             touchRestrict.sourceType = event.sourceType;
             touchRestrict.hitTestType = SourceType::TOUCH;
-            eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+            // If received rotate event, no need to touchtest.
+            if (!event.isRotationEvent) {
+                eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+            }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
     } else if (isBeforeDragHandleAxis_ && event.action == AxisAction::END) {

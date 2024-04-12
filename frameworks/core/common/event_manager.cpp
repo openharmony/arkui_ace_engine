@@ -668,7 +668,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         LOGI("the %{public}d axis test result does not exist!", event.id);
         return false;
     }
-    if (event.action == AxisAction::BEGIN) {
+    // rotate event is no need to add scope.
+    if (event.action == AxisAction::BEGIN && !event.isRotationEvent) {
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
@@ -683,7 +684,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
             break;
         }
     }
-    if (event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) {
+    if ((event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) &&
+        !event.isRotationEvent) {
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
                 refereeNG_->CleanGestureScope(event.id);
