@@ -182,8 +182,8 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest002, TestSize.Lev
     EXPECT_TRUE(props.ActActionScrollForward());
     props.SetActionSelect([]() {});
     EXPECT_TRUE(props.ActActionSelect());
-    props.SetActionSetSelection([](int32_t start, int32_t end) {});
-    EXPECT_TRUE(props.ActActionSetSelection(0, 1));
+    props.SetActionSetSelection([](int32_t start, int32_t end, int32_t dir) {});
+    EXPECT_TRUE(props.ActActionSetSelection(0, 1, 1));
     props.SetActionSetText([](std::string text) {});
     EXPECT_TRUE(props.ActActionSetText("abc"));
 }
@@ -385,5 +385,25 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest006, TestSize.Lev
     columnAccessibilityProperty1->SetAccessibilityLevel("yes");
     text = columnAccessibilityProperty1->GetAccessibilityText();
     EXPECT_EQ(text, "test");
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest007
+ * @tc.desc: Set action and execute it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. actions is empty
+     * @tc.expected: act every action return false
+     */
+    AccessibilityProperty props;
+    props.SetActionSetSelection([](int32_t start, int32_t end, int32_t dir) {});
+    EXPECT_TRUE(props.ActActionSetSelection(0, 1, 1));
+    props.SetActionSetIndex([](int32_t start) {});
+    EXPECT_TRUE(props.ActActionSetIndex(1));
+    props.SetActionGetIndex([]() {return 2;});
+    EXPECT_TRUE(props.ActActionGetIndex());
 }
 } // namespace OHOS::Ace::NG

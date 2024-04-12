@@ -161,6 +161,8 @@ enum class AceAction : uint32_t {
     ACTION_SELECT,
     ACTION_SET_SELECTION,
     ACTION_CLEAR_SELECTION,
+    ACTION_SET_CURSOR_INDEX,
+    ACTION_GET_CURSOR_INDEX
 };
 
 struct AccessibilityValue {

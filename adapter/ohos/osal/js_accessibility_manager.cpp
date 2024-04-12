@@ -37,6 +37,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -74,6 +75,8 @@ struct AccessibilityActionParam {
     std::string setTextArgument = "";
     int32_t setSelectionStart = -1;
     int32_t setSelectionEnd = -1;
+    NG::SelectionDirection setSelectionDir = NG::DIR_NULL;
+    int32_t setCursorIndex = -1;
     TextMoveUnit moveUnit = TextMoveUnit::STEP_CHARACTER;
 };
 
@@ -88,7 +91,8 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         } },
     { ActionType::ACCESSIBILITY_ACTION_SET_SELECTION,
         [](const AccessibilityActionParam& param) {
-            return param.accessibilityProperty->ActActionSetSelection(param.setSelectionStart, param.setSelectionEnd);
+            return param.accessibilityProperty->ActActionSetSelection(param.setSelectionStart,
+                                                                      param.setSelectionEnd, param.setSelectionDir);
         } },
     { ActionType::ACCESSIBILITY_ACTION_COPY,
         [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionCopy(); } },
@@ -108,6 +112,12 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         [](const AccessibilityActionParam& param) {
             return param.accessibilityProperty->ActActionMoveText(static_cast<int32_t>(param.moveUnit), false);
         } },
+    { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_INDEX,
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionSetIndex(static_cast<int32_t>(param.setCursorIndex));
+        } },
+    { ActionType::ACCESSIBILITY_ACTION_GET_CURSOR_INDEX,
+        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionGetIndex(); } },
 };
 
 bool IsUIExtensionOrEmbeddedComponent(const RefPtr<NG::UINode>& node)
@@ -194,6 +204,8 @@ ActionType ConvertAceAction(AceAction aceAction)
         { AceAction::ACTION_SELECT, ActionType::ACCESSIBILITY_ACTION_SELECT },
         { AceAction::ACTION_CLEAR_SELECTION, ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION },
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
+        { AceAction::ACTION_SET_CURSOR_INDEX, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_INDEX },
+        { AceAction::ACTION_GET_CURSOR_INDEX, ActionType::ACCESSIBILITY_ACTION_GET_CURSOR_INDEX },
     };
     for (const auto& item : actionTable) {
         if (aceAction == item.aceAction) {
@@ -1754,6 +1766,10 @@ static std::string ConvertActionTypeToString(ActionType action)
             return "ACCESSIBILITY_ACTION_NEXT_TEXT";
         case ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT:
             return "ACCESSIBILITY_ACTION_PREVIOUS_TEXT";
+        case ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_INDEX:
+            return "ACCESSIBILITY_ACTION_SET_CURSOR_INDEX";
+        case ActionType::ACCESSIBILITY_ACTION_GET_CURSOR_INDEX:
+            return "ACCESSIBILITY_ACTION_GET_CURSOR_INDEX";
         default:
             return "ACCESSIBILITY_ACTION_INVALID";
     }
@@ -1779,6 +1795,8 @@ static AceAction ConvertAccessibilityAction(ActionType accessibilityAction)
         { AceAction::ACTION_SELECT, ActionType::ACCESSIBILITY_ACTION_SELECT },
         { AceAction::ACTION_CLEAR_SELECTION, ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION },
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
+        { AceAction::ACTION_SET_CURSOR_INDEX, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_INDEX },
+        { AceAction::ACTION_GET_CURSOR_INDEX, ActionType::ACCESSIBILITY_ACTION_GET_CURSOR_INDEX },
     };
     for (const auto& item : actionTable) {
         if (accessibilityAction == item.action) {
@@ -2216,15 +2234,19 @@ void JsAccessibilityManager::ProcessParameters(
     }
 
     if (op == ActionType::ACCESSIBILITY_ACTION_SET_SELECTION) {
-        if (params.size() == EVENT_DUMP_PARAM_LENGTH_LOWER) {
-            paramsMap[ACTION_ARGU_SELECT_TEXT_START] = "-1";
-            paramsMap[ACTION_ARGU_SELECT_TEXT_END] = "-1";
-        } else if (params.size() == EVENT_DUMP_PARAM_LENGTH_UPPER) {
+        paramsMap[ACTION_ARGU_SELECT_TEXT_START] = "-1";
+        paramsMap[ACTION_ARGU_SELECT_TEXT_END] = "-1";
+        paramsMap[ACTION_ARGU_SELECT_TEXT_DIR] = "-1";
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER) {
             paramsMap[ACTION_ARGU_SELECT_TEXT_START] = params[EVENT_DUMP_ACTION_PARAM_INDEX];
-            paramsMap[ACTION_ARGU_SELECT_TEXT_END] = "-1";
-        } else {
-            paramsMap[ACTION_ARGU_SELECT_TEXT_START] = params[EVENT_DUMP_ACTION_PARAM_INDEX];
-            paramsMap[ACTION_ARGU_SELECT_TEXT_END] = params[EVENT_DUMP_PARAM_LENGTH_UPPER];
+        }
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER + 1) {
+            paramsMap[ACTION_ARGU_SELECT_TEXT_END] = params[EVENT_DUMP_ACTION_PARAM_INDEX + 1];
+        }
+        // 2 means params number Offset
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER + 2) {
+            // 2 means params number Offset
+            paramsMap[ACTION_ARGU_SELECT_TEXT_DIR] = params[EVENT_DUMP_ACTION_PARAM_INDEX + 2];
         }
     }
 
@@ -2233,6 +2255,10 @@ void JsAccessibilityManager::ProcessParameters(
             paramsMap[ACTION_ARGU_MOVE_UNIT] = std::to_string(TextMoveUnit::STEP_CHARACTER);
         }
         paramsMap[ACTION_ARGU_MOVE_UNIT] = std::to_string(TextMoveUnit::STEP_CHARACTER);
+    }
+
+    if (op == ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_INDEX) {
+        paramsMap[ACTION_ARGU_SET_CURSOR_INDEX] = params[EVENT_DUMP_ACTION_PARAM_INDEX];
     }
 }
 
@@ -2364,6 +2390,7 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
             if (mode == DumpMode::NODE) {
                 mode = DumpMode::HANDLE_EVENT;
                 action = StringUtils::StringToInt(*arg);
+                break;
             } else {
                 mode = DumpMode::NODE;
                 nodeId = StringUtils::StringToLongInt(*arg);
@@ -3374,6 +3401,17 @@ void JsAccessibilityManager::SendActionEvent(const Accessibility::ActionType& ac
     SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+NG::SelectionDirection conversionDirection(int32_t dir)
+{
+    if (dir == 0) {
+            return NG::DIR_DOWN;
+    } else if (dir == 1) {
+            return NG::DIR_UP;
+    } else {
+            return NG::DIR_NULL;
+    }
+}
+
 bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std::string, std::string> actionArguments,
     RefPtr<NG::AccessibilityProperty> accessibilityProperty)
 {
@@ -3381,6 +3419,7 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
     if (action == ActionType::ACCESSIBILITY_ACTION_SET_SELECTION) {
         int start = -1;
         int end = -1;
+        int dir = -1;
         auto iter = actionArguments.find(ACTION_ARGU_SELECT_TEXT_START);
         if (iter != actionArguments.end()) {
             std::stringstream str_start;
@@ -3393,8 +3432,15 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
             str_end << iter->second;
             str_end >> end;
         }
+        iter = actionArguments.find(ACTION_ARGU_SELECT_TEXT_DIR);
+        if (iter != actionArguments.end()) {
+            std::stringstream str_dir;
+            str_dir << iter->second;
+            str_dir >> dir;
+        }
         param.setSelectionStart = start;
         param.setSelectionEnd = end;
+        param.setSelectionDir = conversionDirection(dir);
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SET_TEXT) {
         auto iter = actionArguments.find(ACTION_ARGU_SET_TEXT);
@@ -3412,6 +3458,16 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
             str_moveUnit >> moveUnit;
         }
         param.moveUnit = static_cast<TextMoveUnit>(moveUnit);
+    }
+    if (action == ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_INDEX) {
+        auto iter = actionArguments.find(ACTION_ARGU_SET_CURSOR_INDEX);
+        int32_t index = -1;
+        if (iter != actionArguments.end()) {
+            std::stringstream str_index;
+            str_index << iter->second;
+            str_index >> index;
+        }
+        param.setCursorIndex = index;
     }
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {

@@ -5402,7 +5402,8 @@ void TextFieldPattern::SetAccessibilityAction()
         pattern->InsertValue(value);
     });
 
-    accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
+    accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start,
+                                                                             int32_t end, SelectionDirection dir) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetSelectionFlag(start, end, std::nullopt);
