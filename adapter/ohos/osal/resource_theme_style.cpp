@@ -159,7 +159,15 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
         if (attrValue.find(RES_HAP_PREFIX) == std::string::npos) {
             mediaPath.append(RES_HAP_PATH);
         }
+#ifdef PREVIEW
+        auto pos = attrValue.find(MEDIA_VALUE_PREFIX);
+        if (pos == std::string::npos) {
+            return;
+        }
+        mediaPath += attrValue.substr(pos + 1);
+#else
         mediaPath += attrValue;
+#endif
     } else {
         // hap is not unzip, should use resource name to read file
         auto pos = attrValue.find_last_of(MEDIA_VALUE_PREFIX);

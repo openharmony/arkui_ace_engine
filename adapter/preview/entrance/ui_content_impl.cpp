@@ -299,7 +299,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     }
     AceContainer::AddAssetPath(instanceId_, "", paths);
     AceContainer::SetResourcesPathAndThemeStyle(
-        instanceId_, systemResourcesPath_ + "/entry", appResourcesPath_, themeId_, deviceConfig_.colorMode);
+        instanceId_, systemResourcesPath_, appResourcesPath_, themeId_, deviceConfig_.colorMode);
 
     auto view = AceViewPreview::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     UIEnvCallback callback = [window = rsWindow_, id = instanceId_](
