@@ -34,15 +34,15 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+class ACE_EXPORT SpanStringBase : public AceType {
+    DECLARE_ACE_TYPE(SpanStringBase, AceType);
+};
 class ACE_EXPORT TextControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextControllerBase, AceType);
 
 public:
     virtual void CloseSelectionMenu() = 0;
-};
-
-class ACE_EXPORT SpanStringBase : public AceType {
-    DECLARE_ACE_TYPE(SpanStringBase, AceType);
+    virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
 };
 
 class ACE_EXPORT TextModel {

@@ -575,18 +575,22 @@ void JSTextShadowSpan::GetTextShadow(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(textShadowSpan_);
     auto shadows = textShadowSpan_->GetTextShadow();
-    std::stringstream ss;
-    ss << "TextShadows: [";
-    for (int32_t index = 0; index < shadows.size(); ++index) {
-        ss << "radius: " << shadows[index].GetBlurRadius()
-            << "color: " << shadows[index].GetColor().ColorToString()
-            << "type:" << static_cast<int32_t>(shadows[index].GetShadowType())
-            << "offsetX:" << shadows[index].GetOffset().GetX()
-            << "offsetY:" << shadows[index].GetOffset().GetY() << ", ";
+
+    JSRef<JSArray> result = JSRef<JSArray>::New();
+    uint32_t index = 0;
+    for (auto iterator = shadows.begin(); iterator != shadows.end(); ++iterator) {
+        auto shadow = *iterator;
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> shadowObj = objectTemplate->NewInstance();
+        shadowObj->SetProperty<double>("radius", shadow.GetBlurRadius());
+        shadowObj->SetProperty<double>("offsetX", shadow.GetOffset().GetX());
+        shadowObj->SetProperty<double>("offsetY", shadow.GetOffset().GetY());
+        shadowObj->SetProperty<std::string>("color", shadow.GetColor().ColorToString());
+        shadowObj->SetProperty<int32_t>("type", static_cast<int32_t>(shadow.GetShadowType()));
+        result->SetValueAt(index++, shadowObj);
     }
-    ss << "]";
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue((ss.str()))));
-    info.SetReturnValue(ret);
+    info.SetReturnValue(result);
 }
 
 void JSTextShadowSpan::SetTextShadow(const JSCallbackInfo& info) {}
