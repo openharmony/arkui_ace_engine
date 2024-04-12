@@ -602,6 +602,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
+    void HandleTouchUp();
     void HandleTouchMove(const Offset& offset);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();

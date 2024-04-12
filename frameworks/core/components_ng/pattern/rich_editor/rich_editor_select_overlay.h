@@ -48,6 +48,7 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
+    bool IsSingleHandleShow();
 
 private:
     void RemoveAreaChangeInner();

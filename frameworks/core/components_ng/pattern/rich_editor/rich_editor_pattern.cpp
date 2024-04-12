@@ -4084,22 +4084,11 @@ void RichEditorPattern::InitTouchEvent()
 
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    if (SelectOverlayIsOn()) {
-        return;
-    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
-        isTouchCaret_ = false;
-        if (magnifierController_->GetShowMagnifier()) {
-            magnifierController_->UpdateShowMagnifier();
-        }
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-        if (isLongPress_) {
-            isLongPress_ = false;
-        }
-#endif
+        HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
         HandleTouchMove(info.GetTouches().front().GetLocalLocation());
     }
@@ -4115,6 +4104,22 @@ void RichEditorPattern::HandleTouchDown(const Offset& offset)
     isTouchCaret_ = RepeatClickCaret(offset, caretPosition_, lastCaretRect);
 }
 
+void RichEditorPattern::HandleTouchUp()
+{
+    if (isTouchCaret_ && selectOverlay_->IsSingleHandleShow()) {
+        selectOverlay_->ShowMenu();
+    }
+    isTouchCaret_ = false;
+    if (magnifierController_->GetShowMagnifier()) {
+        magnifierController_->UpdateShowMagnifier();
+    }
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (isLongPress_) {
+        isLongPress_ = false;
+    }
+#endif
+}
+
 void RichEditorPattern::HandleTouchMove(const Offset& offset)
 {
     CHECK_NULL_VOID(isTouchCaret_);
@@ -4125,6 +4130,12 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
     auto lastClickOffset = paragraphs_.ComputeCursorInfoByClick(position, caretHeight,
         OffsetF(static_cast<float>(textOffset.GetX()), static_cast<float>(textOffset.GetY())));
     SetLastClickOffset(lastClickOffset + richTextRect_.GetOffset());
+    if (selectOverlay_->IsSingleHandleShow()) {
+        textSelector_.Update(caretPosition_);
+        CalculateHandleOffsetAndShowOverlay();
+        selectOverlay_->HideMenu();
+        selectOverlay_->UpdateSecondHandleOffset();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
