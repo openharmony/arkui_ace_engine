@@ -606,7 +606,7 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     }
     Dimension startFontSize = animationProperties_[index].fontSize;
     Color startColor = animationProperties_[index].currentColor;
-    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
+    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown && scale)) {
         textLayoutProperty->UpdateFontSize(startFontSize);
         textLayoutProperty->UpdateTextColor(startColor);
         return;
