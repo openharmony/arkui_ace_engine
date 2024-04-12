@@ -120,5 +120,6 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
     textContext->UpdateBackgroundColor(toastBackgroundColor);
     textContext->UpdateBorderRadius(borderRadius);
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
+    textContext->UpdateClipEdge(false);
 }
 } // namespace OHOS::Ace::NG

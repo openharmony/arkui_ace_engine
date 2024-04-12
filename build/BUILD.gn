@@ -94,7 +94,17 @@ config("reduce_eh_frame_config") {
   }
 }
 
+config("ace_engine_public_config") {
+  if (use_hilog) {
+    defines = [ "USE_HILOG" ]
+  }
+}
+
 ohos_shared_library("libace_compatible") {
+  public_configs = [ ":ace_engine_public_config" ]
+  if (use_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
   if (is_ohos) {
     sanitize = {
       integer_overflow = true
@@ -112,13 +122,16 @@ ohos_shared_library("libace_compatible") {
   } else if (use_linux) {
     deps = [ "$ace_root/build:libace_static_linux" ]
   }
-
+  public_external_deps = external_deps
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem
 }
 
 if (!is_asan) {
   ohos_shared_library("libace") {
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
     if (is_ohos) {
       sanitize = {
         integer_overflow = true
@@ -136,7 +149,7 @@ if (!is_asan) {
     } else if (use_linux) {
       deps = [ "$ace_root/build:libace_static_linux" ]
     }
-
+    public_external_deps = external_deps
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem
   }

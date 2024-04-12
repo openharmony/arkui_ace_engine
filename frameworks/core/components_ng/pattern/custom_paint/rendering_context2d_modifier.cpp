@@ -55,8 +55,8 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
 
     if (needResetSurface_) {
-        CHECK_NULL_VOID(renderContext_);
-        renderContext_->ResetSurface();
+        CHECK_NULL_VOID(renderContext_.Upgrade());
+        renderContext_.Upgrade()->ResetSurface();
         needResetSurface_ = false;
     }
 
@@ -89,8 +89,8 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
 
     if (needResetSurface_) {
-        CHECK_NULL_VOID(renderContext_);
-        renderContext_->ResetSurface();
+        CHECK_NULL_VOID(renderContext_.Upgrade());
+        renderContext_.Upgrade()->ResetSurface();
         needResetSurface_ = false;
     }
 

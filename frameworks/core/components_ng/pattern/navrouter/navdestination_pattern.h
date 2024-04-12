@@ -74,6 +74,9 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetName(name);
     }
 
     const std::string& GetName()
@@ -148,10 +151,10 @@ public:
     std::string GetEntryFocusViewName() override
     {
         /*
-        |-> Navigation (root focus view)
+        |-> Any FocusView (entry focus view)
           |-> NavDestination
         */
-        return V2::NAVIGATION_VIEW_ETS_TAG;
+        return ENTRY_ANY_FOCUSVIEW;
     }
 
     void SetIsOnShow(bool isOnShow)
@@ -182,6 +185,22 @@ public:
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
+    
+    void OnDetachFromMainTree() override
+    {
+        auto weak = AceType::WeakClaim(this);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
+    }
+
+    void SetNavigationId(const std::string& id)
+    {
+        inspectorId_ = id;
+    }
+
+    std::string GetNavigationId() const
+    {
+        return inspectorId_;
+    }
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -190,6 +209,7 @@ private:
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
+    std::string inspectorId_;
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;

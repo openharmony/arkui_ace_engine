@@ -72,6 +72,16 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (opts && opts->Expansive() && navDestinationContentNode) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "Navdestination SafArea expand as %{public}s", opts->ToString().c_str());
+            navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+            navDestinationContentNode->MarkModifyDone();
+    }
+
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     UpdateTitlebarVisibility(hostNode);
@@ -118,8 +128,6 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         return;
     }
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
-        renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
 void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode)
@@ -130,13 +138,6 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-
-    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
-    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-    if (opts && opts->Expansive() && navDestinationContentNode) {
-        navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navDestinationContentNode->MarkModifyDone();
-    }
 
     if (navDestinationLayoutProperty->HasNoPixMap()) {
         if (navDestinationLayoutProperty->HasImageSource()) {
@@ -154,6 +155,7 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetJSViewActive(true);
+        auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
         if (opts && opts->Expansive()) {
             titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
         }

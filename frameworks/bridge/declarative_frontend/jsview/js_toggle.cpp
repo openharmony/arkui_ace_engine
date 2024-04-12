@@ -67,11 +67,11 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("responseRegion", &JSToggle::JsResponseRegion);
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
+    JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
     JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
-    JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
-
+    JSClass<JSToggle>::StaticMethod("switchStyle", &JSToggle::SwitchStyle);
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -406,5 +406,53 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
 void JSToggle::Pop()
 {
     ToggleModel::GetInstance()->Pop();
+}
+
+void JSToggle::SwitchStyle(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || !info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+
+    CalcDimension pointRadius;
+    if (jsObj->HasProperty("pointRadius") &&
+        ParseJsDimensionVpNG(jsObj->GetProperty("pointRadius"), pointRadius, false) && !pointRadius.IsNegative()) {
+        ToggleModel::GetInstance()->SetPointRadius(pointRadius);
+    } else {
+        ToggleModel::GetInstance()->ResetPointRadius();
+    }
+
+    Color unselectedColor;
+    if (jsObj->HasProperty("unselectedColor") &&
+        ParseJsColor(jsObj->GetProperty("unselectedColor"), unselectedColor)) {
+        ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
+    } else {
+        auto theme = GetTheme<SwitchTheme>();
+        if (theme) {
+            unselectedColor = theme->GetInactiveColor();
+        }
+        ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
+    }
+
+    Color pointColor;
+    if (jsObj->HasProperty("pointColor") && ParseJsColor(jsObj->GetProperty("pointColor"), pointColor)) {
+        ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
+    } else {
+        auto theme = GetTheme<SwitchTheme>();
+        if (theme) {
+            pointColor = theme->GetPointColor();
+        }
+        ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
+    }
+
+    CalcDimension trackRadius;
+    if (jsObj->HasProperty("trackBorderRadius") &&
+        ParseJsDimensionVpNG(jsObj->GetProperty("trackBorderRadius"), trackRadius, false) &&
+        !trackRadius.IsNegative()) {
+        ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
+    } else {
+        ToggleModel::GetInstance()->ResetTrackBorderRadius();
+    }
 }
 } // namespace OHOS::Ace::Framework

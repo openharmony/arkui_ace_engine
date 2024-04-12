@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -41,6 +42,7 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
             return AceType::MakeRefPtr<WebPattern>(src, webController, renderMode,
                 incognitoMode);
         });
+    frameNode->AddFlag(NodeFlag::WEB_TAG);
     stack->Push(frameNode);
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
@@ -71,6 +73,7 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
         [src, setWebIdCallback, renderMode, incognitoMode]() {
             return AceType::MakeRefPtr<WebPattern>(src, std::move(setWebIdCallback), renderMode, incognitoMode);
         });
+    frameNode->AddFlag(NodeFlag::WEB_TAG);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
@@ -1024,5 +1027,13 @@ void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateTextAutosizing(isTextAutosizing);
+}
+
+void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 } // namespace OHOS::Ace::NG

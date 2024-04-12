@@ -49,15 +49,16 @@ public:
         Gradient colors;
         if (HasTrackBackgroundColor()) {
             colors = GetTrackBackgroundColor().value();
+            if (GetTrackBackgroundIsResourceColor()) {
+                return colors.GetColors()[0].GetLinearColor().ToColor().ColorToString();
+            }
             return GradientToJson(colors);
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, "");
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_RETURN(theme, "");
-
-        colors = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
-        return GradientToJson(colors);
+        return theme->GetTrackBgColor().ColorToString();
     }
 
     std::string GradientToJson(Gradient colors) const
@@ -100,6 +101,9 @@ public:
         if (GetTrackBorderRadius().has_value()) {
             json->Put("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str());
         }
+        if (GetSelectedBorderRadius().has_value()) {
+            json->Put("selectedBorderRadius", GetSelectedBorderRadius().value().ToString().c_str());
+        }
         static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
             "BlockStyleType.DEFAULT",
             "BlockStyleType.IMAGE",
@@ -112,6 +116,15 @@ public:
         if (GetCustomContent().has_value()) {
             json->Put("content", GetCustomContent().value().c_str());
         }
+        static const std::array<std::string, 2> SLIDER_INTERACTION_MODE_TO_STRING = {
+            "SliderInteraction.SLIDE_AND_CLICK",
+            "SliderInteraction.SLIDE_ONLY",
+        };
+        json->Put("sliderInteractionMode",
+            SLIDER_INTERACTION_MODE_TO_STRING
+                .at(static_cast<int>(GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK)))
+                .c_str());
+        json->Put("minResponsiveDistance", std::to_string(GetMinResponsiveDistance().value_or(0.0f)).c_str());
     }
 
     SizeF GetBlockSizeValue(const SizeF& defaultValue)
@@ -131,16 +144,21 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Min, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Max, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Step, float, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, MinResponsiveDistance, float, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Reverse, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, Direction, Axis, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, SliderInteractionMode, SliderModel::SliderInteraction, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderWidth, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectedBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, BlockType, SliderModel::BlockStyleType, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImage, std::string, PROPERTY_UPDATE_RENDER)

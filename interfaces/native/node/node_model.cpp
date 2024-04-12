@@ -29,6 +29,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -114,21 +115,24 @@ ArkUIFullNodeAPI* GetFullImpl()
 }
 
 struct InnerEventExtraParam {
-    int32_t eventId;
+    int32_t targetId;
     ArkUI_NodeHandle nodePtr;
+    void* userData;
 };
 
 struct ExtraData {
     std::unordered_map<int64_t, InnerEventExtraParam*> eventMap;
 };
 
+std::set<ArkUI_NodeHandle> g_nodeSet;
+
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
-    static const ArkUINodeType nodes[] = { ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE,
-        ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS, ARKUI_CHECKBOX,
-        ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER, ARKUI_CALENDAR_PICKER,
-        ARKUI_SLIDER, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP,
-        ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW };
+    static const ArkUINodeType nodes[] = { ARKUI_CUSTOM, ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE,
+        ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
+        ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
+        ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
+        ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM };
     // already check in entry point.
     int32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     auto* impl = GetFullImpl();
@@ -138,13 +142,16 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     }
 
     ArkUI_Int32 id = ARKUI_AUTO_GENERATE_NODE_ID;
-    auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType - 1], id, 0);
+    auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType], id, 0);
     if (!uiNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
         return nullptr;
     }
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    return new ArkUI_Node({ type, uiNode });
+    ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode });
+    impl->getExtendedAPI()->setAttachNodePtr(uiNode, reinterpret_cast<void*>(arkUINode));
+    g_nodeSet.emplace(arkUINode);
+    return arkUINode;
 }
 
 void DisposeNode(ArkUI_NodeHandle nativePtr)
@@ -153,6 +160,7 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     // already check in entry point.
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
+    g_nodeSet.erase(nativePtr);
     delete nativePtr;
 }
 
@@ -160,8 +168,11 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
     CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
-    // already check in entry point.
     auto* impl = GetFullImpl();
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
+    // already check in entry point.
     impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return ERROR_CODE_NO_ERROR;
@@ -173,6 +184,9 @@ int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     impl->getBasicAPI()->removeChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return ERROR_CODE_NO_ERROR;
@@ -184,6 +198,9 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     impl->getBasicAPI()->insertChildAfter(
         parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
@@ -196,6 +213,9 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     impl->getBasicAPI()->insertChildBefore(
         parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
@@ -208,6 +228,9 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
     CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
     // already check in entry point.
     auto* impl = GetFullImpl();
+    if (impl->getBasicAPI()->isBuilderNode(parentNode->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position);
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return ERROR_CODE_NO_ERROR;
@@ -220,11 +243,19 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
 
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
+    auto* impl = GetFullImpl();
+    if (impl->getBasicAPI()->isBuilderNode(node->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     return SetNodeAttribute(node, attribute, value);
 }
 
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
+    auto* impl = GetFullImpl();
+    if (impl->getBasicAPI()->isBuilderNode(node->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
     return ResetNodeAttribute(node, attribute);
 }
 
@@ -233,21 +264,25 @@ const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttribu
     return GetNodeAttribute(node, attribute);
 }
 
-int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
+int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
 {
-    auto originEventType = ConvertOriginEventType(eventType);
+    auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
     if (originEventType < 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event is not supported %{public}d", eventType);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     // already check in entry point.
     auto* impl = GetFullImpl();
-    auto* extraParam = new InnerEventExtraParam({eventId});
+    if (impl->getBasicAPI()->isBuilderNode(nodePtr->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
+    }
+    auto* extraParam = new InnerEventExtraParam({targetId, nodePtr, userData});
     if (nodePtr->extraData) {
         auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
         auto result = extraData->eventMap.try_emplace(eventType, extraParam);
         if (!result.second) {
-            result.first->second->eventId = eventId;
+            result.first->second->targetId = targetId;
+            result.first->second->userData = userData;
             delete extraParam;
         }
     } else {
@@ -263,6 +298,9 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
 {
     if (!nodePtr->extraData) {
+        return;
+    }
+    if (impl->getBasicAPI()->isBuilderNode(nodePtr->uiNodeHandle)) {
         return;
     }
     auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
@@ -292,12 +330,19 @@ void UnregisterOnEvent()
 
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
+    if (!innerEvent) {
+        return;
+    }
     if (!g_eventReceiver) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event receiver is not register");
         return;
     }
+
     ArkUI_NodeEvent event;
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    if (g_nodeSet.count(nodePtr) == 0) {
+        return;
+    }
     if (!nodePtr->extraData) {
         return;
     }
@@ -314,7 +359,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             subKind = ON_TOUCH;
             break;
         default:
-            ; /* Empty */
+            break; /* Empty */
     }
     ArkUI_NodeEventType eventType = static_cast<ArkUI_NodeEventType>(ConvertToNodeEventType(subKind));
     auto innerEventExtraParam = extraData->eventMap.find(eventType);
@@ -323,10 +368,20 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         return;
     }
     event.node = nodePtr;
-    event.eventId = innerEventExtraParam->second->eventId;
+    event.eventId = innerEventExtraParam->second->targetId;
+    event.userData = innerEventExtraParam->second->userData;
     if (ConvertEvent(innerEvent, &event)) {
+        event.targetId = innerEvent->nodeId;
+        ArkUI_UIInputEvent uiEvent;
+        if (eventType == NODE_TOUCH_EVENT) {
+            uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+            uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+            uiEvent.inputEvent = &(innerEvent->touchEvent);
+            event.origin = &uiEvent;
+        } else {
+            event.origin = innerEvent;
+        }
         g_eventReceiver(&event);
-        ConvertEventResult(&event, innerEvent);
     }
 }
 
@@ -339,6 +394,9 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 {
     // already check in entry point.
+    if (!nodePtr) {
+        return;
+    }
     auto* impl = GetFullImpl();
     impl->getBasicAPI()->applyModifierFinish(nodePtr->uiNodeHandle);
 }
@@ -346,6 +404,9 @@ void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
     // spanNode inherited from UINode
+    if (!nodePtr) {
+        return;
+    }
     ArkUIDirtyFlag flag = ARKUI_DIRTY_FLAG_MEASURE;
     switch (dirtyFlag) {
         case NODE_NEED_MEASURE: {

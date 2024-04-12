@@ -13,65 +13,58 @@
  * limitations under the License.
  */
 
+/**
+ * ConfigureStateMgmt keeps track if V2 @Observed and @Track are used. 
+ * If yes, it enables object deep observation mechanisms need with ObservedV3.
+ */
 class ConfigureStateMgmt {
-    
+
     private static readonly HOW_TO_SAY = `Your application uses both state management V2 and V3 features! - It is strongly recommended not to mix V2 and V3. Consult the rules how state management V2 and V3 can be mixed in the same app.`;
 
-    private v2InUse_ : boolean = false;
-    private v3InUse_ : boolean = false;
-    private static instance__? : ConfigureStateMgmt;
+    private static instance__?: ConfigureStateMgmt;
 
-    public static get instance() : ConfigureStateMgmt {
+    private v2ObservedTrackInUse_: boolean = false;
+    private puObservedTrackInUse_: boolean = false;
+
+    public static get instance(): ConfigureStateMgmt {
         return ConfigureStateMgmt.instance__
-            ? ConfigureStateMgmt.instance__ 
+            ? ConfigureStateMgmt.instance__
             : (ConfigureStateMgmt.instance__ = new ConfigureStateMgmt());
     }
 
     /**
-     * framework code call this function when it sees use of a stateMgmt V3 feature
+     * framework code call this function when it sees use of a stateMgmt V2 @Observed @Track
      * 
      * @param feature specify feature separately from context of use, so that in future decision can be made 
      *                for individual features, not use permit either use of V2 or V3.
      * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
      * @returns true if no mix of features detected, false if mix is detected
      */
-    public intentUsingV3(feature: string, contextOfUse: string = ""): boolean {
-        this.v3InUse_ = true;
-        const ret = !this.v2InUse_ && this.v3InUse_;
-        if (ret) {
-            stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of ${feature} ${contextOfUse} - configure to use stateMgmt v3`);
-        } else {
-            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
-        }
-        return ret;
+    public usingV2ObservedTrack(feature: string, contextOfUse: string = "") {
+        this.v2ObservedTrackInUse_ = true;
+        stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of stateMgmt V2 feature ${feature} ${contextOfUse} - enable V2 state observation.`);
     }
 
     /**
-     * framework code call this function when it sees use of a stateMgmt V2 feature
-     * 
-     * @param feature specify feature separately from context of use, so that in future decision can be made 
-     *                for individual features, not use permit either use of V2 or V3.
-     * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
-     * @returns true if no mix of features detected, false if mix is detected
-     */
-    public intentUsingV2(feature : string, contextOfUse : string = "") : boolean {
-        this.v2InUse_ = true;
-        const ret = this.v2InUse_ && !this.v3InUse_;
-        if (ret) {
-            stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of ${feature} ${contextOfUse} - configure to use stateMgmt v2`);
-        } else {
-            stateMgmtConsole.featureCombinationError(`Found ${feature} ${contextOfUse} - ${ConfigureStateMgmt.HOW_TO_SAY}`);
-        }
-        return ret;
+ * framework code call this function when it sees use of a stateMgmt PU Observed / @Track
+ * 
+ * @param feature specify feature separately from context of use, so that in future decision can be made 
+ *                for individual features, not use permit either use of V2 or V3.
+ * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
+ * @returns true if no mix of features detected, false if mix is detected
+ */
+    public usingPUObservedTrack(feature: string, contextOfUse: string = "") {
+        this.puObservedTrackInUse_ = true;
+        stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of stateMgmt PU feature ${feature} ${contextOfUse} - enable PU state observation.`);
     }
 
     /**
-     * Return true if object deep observation mechanisms need to be enabled 
-     * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
-     * (we could but we do not check for class object instance creation for performance reasons)
-     * @returns 
-     */
-    public needsV3Observe() : boolean {
-        return this.v3InUse_;
+      * Return true if object deep observation mechanisms need to be enabled 
+      * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
+      * (we could but we do not check for class object instance creation for performance reasons)
+      * @returns 
+      */
+    public needsV2Observe(): boolean {
+        return this.v2ObservedTrackInUse_;
     }
 } // ConfigureStateMgmt

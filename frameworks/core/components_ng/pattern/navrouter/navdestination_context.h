@@ -95,9 +95,20 @@ public:
         navDestinationId_ = id;
     }
 
+    void SetIsEmpty(bool isEmpty)
+    {
+        isEmpty_ = isEmpty;
+    }
+
+    bool GetIsEmpty() const
+    {
+        return isEmpty_;
+    }
+
 protected:
     int32_t index_ = -1;
     uint64_t navDestinationId_ = 0;
+    bool isEmpty_ = false;
     RefPtr<NavPathInfo> pathInfo_;
     WeakPtr<NavigationStack> navigationStack_;
 };

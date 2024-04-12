@@ -64,8 +64,8 @@ class ColumnSplitClipModifier extends ModifierWithKey<boolean | CircleAttribute 
   }
 }
 class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<ColumnSplitAttribute> {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   resizeable(value: boolean): ColumnSplitAttribute {
     modifierWithKey(this._modifiersWithKeys, ColumnSplitResizeableModifier.identity, ColumnSplitResizeableModifier, value);
@@ -81,12 +81,10 @@ class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<Colum
   }
 }
 // @ts-ignore
-globalThis.ColumnSplit.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkColumnSplitComponent(nativeNode);
+globalThis.ColumnSplit.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkColumnSplitComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ColumnSplitModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

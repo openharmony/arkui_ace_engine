@@ -20,6 +20,7 @@
 #include "include/utils/SkParsePath.h"
 
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/painter/rosen_svg_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
@@ -150,6 +151,18 @@ void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
     }
 }
 
+void SvgNode::PushAnimatorOnFinishCallback(const std::function<void()>& onFinishCallback)
+{
+    for (auto& child : children_) {
+        auto svgAnimate = DynamicCast<SvgAnimation>(child);
+        if (svgAnimate) {
+            svgAnimate->AddOnFinishCallBack(onFinishCallback);
+        } else {
+            child->PushAnimatorOnFinishCallback(onFinishCallback);
+        }
+    }
+}
+
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     if (!OnCanvas(canvas)) {
@@ -188,11 +201,13 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     auto smoothEdge = GetSmoothEdge();
+    auto colorFilter = GetColorFilter();
     for (auto& node : children_) {
         if (node && node->drawTraversed_) {
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 node->SetSmoothEdge(smoothEdge);
             }
+            node->SetColorFilter(colorFilter);
             node->Draw(canvas, viewPort, color);
         }
     }
@@ -236,6 +251,9 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
 {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_VOID(svgContext);
     auto refFilter = svgContext->GetSvgNodeById(hrefFilterId_);

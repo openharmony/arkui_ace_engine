@@ -28,6 +28,7 @@ common_napi_libs = [
   "grid",
   "measure",
   "mediaquery",
+  "overlay",
   "prompt",
   "promptaction",
   "router",
@@ -64,14 +65,18 @@ template("ace_napi_lib") {
       }
     }
     deps = [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
-
     cflags = []
     ldflags = []
+    sources = []
+    defines = []
+    include_dirs = []
     if (ace_engine_feature_enable_coverage) {
       cflags += [ "--coverage" ]
       ldflags += [ "--coverage" ]
     }
-
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
     relative_install_dir = "module" + install_dir
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem

@@ -48,7 +48,7 @@ int32_t SetCornerRadius(ArkUI_NativeDialogHandle handle, float topLeft, float to
 int32_t SetGridColumnCount(ArkUI_NativeDialogHandle handle, int32_t gridCount);
 int32_t EnableCustomStyle(ArkUI_NativeDialogHandle handle, bool enableCustomStyle);
 int32_t EnableCustomAnimation(ArkUI_NativeDialogHandle handle, bool enableCustomAnimation);
-int32_t RegiesterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler);
+int32_t RegisterOnWillDismiss(ArkUI_NativeDialogHandle handle, ArkUI_OnWillDismissEvent eventHandler);
 int32_t Show(ArkUI_NativeDialogHandle handle, bool showInSubWindow);
 int32_t Close(ArkUI_NativeDialogHandle handle);
 } // namespace OHOS::Ace::NG::DialogModel

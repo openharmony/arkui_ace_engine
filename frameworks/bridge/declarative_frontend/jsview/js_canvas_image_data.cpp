@@ -37,32 +37,8 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
         jsCanvasImageData->height_ = height;
     }
 
-    if (args.Length() >= 3 && args[2]->IsArray()) {
-        std::vector<uint32_t> array;
-        JSViewAbstract::ParseJsIntegerArray(args[2], array);
-
-        uint32_t count = 0;
-        JSRef<JSArray> colorArray = JSRef<JSArray>::New();
-
-        int64_t tmp = static_cast<int64_t>(4) * ((int64_t)width * (int64_t)height + (int64_t)width)
-            + static_cast<int64_t>(3);
-        if ((int64_t)((int32_t)tmp) != tmp) {
-            return;
-        }
-
-        for (int32_t i = 0; i < height; ++i) {
-            for (int32_t j = 0; j < width; ++j) {
-                int32_t flag = j + width * i;
-                if (array.size() > static_cast<uint32_t>(4 * flag + 3)) {
-                    colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(array[4 * flag])));
-                    colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(array[4 * flag + 1])));
-                    colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(array[4 * flag + 2])));
-                    colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(array[4 * flag + 3])));
-                    count += 4;
-                }
-            }
-        }
-        jsCanvasImageData->colorArray_ = colorArray;
+    if (args.Length() >= 3 && args[2]->IsUint8ClampedArray()) {
+        jsCanvasImageData->colorArray_ = args[2];
     }
 }
 

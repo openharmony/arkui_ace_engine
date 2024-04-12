@@ -79,7 +79,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
-        algo->SetEnableSkip(ScrollablePattern::AnimateRunning());
+        algo->SetEnableSkip(!ScrollablePattern::AnimateRunning());
         return algo;
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
@@ -112,16 +112,6 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     return paint;
 }
 
-void GridPattern::InitScrollableEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
-    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
-}
-
 void GridPattern::OnModifyDone()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
@@ -143,7 +133,6 @@ void GridPattern::OnModifyDone()
     SetAxis(gridLayoutInfo_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
-        InitScrollableEvent();
     }
 
     SetEdgeEffect();
@@ -266,8 +255,8 @@ bool GridPattern::IsItemSelected(const GestureEvent& info)
 
 void GridPattern::FireOnScrollStart()
 {
-    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(AceType::WeakClaim(this),
-        ScrollEventType::SCROLL_START);
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
@@ -352,10 +341,16 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
-    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
+    float mainGap = GetMainGap();
+    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
     if (gridLayoutInfo_.offsetEnd_) {
-        auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
+            float overScroll = 0.0f;
+            if (UseIrregularLayout()) {
+                overScroll = gridLayoutInfo_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
+            } else {
+                overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+            }
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
@@ -1190,6 +1185,33 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return ret;
 }
 
+std::pair<std::function<bool(float)>, Axis> GridPattern::GetScrollOffsetAbility()
+{
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_RETURN(pattern, false);
+                pattern->ScrollBy(-moveOffset);
+                return true;
+            },
+        GetAxis() };
+}
+
+std::function<bool(int32_t)> GridPattern::GetScrollIndexAbility()
+{
+    return [wp = WeakClaim(this)](int32_t index) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (index == FocusHub::SCROLL_TO_HEAD) {
+            pattern->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+        } else if (index == FocusHub::SCROLL_TO_TAIL) {
+            pattern->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+        } else {
+            pattern->UpdateStartIndex(index);
+        }
+        return true;
+    };
+}
+
 void GridPattern::ScrollBy(float offset)
 {
     StopAnimate();
@@ -1502,17 +1524,30 @@ bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
     auto scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
                       (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
                       GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
-    return scrollable && (gridLayoutInfo_.IsOutOfStart() || gridLayoutInfo_.IsOutOfEnd());
+
+    bool outOfEnd = false;
+    if (UseIrregularLayout()) {
+        outOfEnd = gridLayoutInfo_.offsetEnd_;
+    } else {
+        outOfEnd = gridLayoutInfo_.IsOutOfEnd();
+    }
+
+    return scrollable && (gridLayoutInfo_.IsOutOfStart() || outOfEnd);
 }
 
 float GridPattern::GetEndOffset()
 {
     float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
     float mainGap = GetMainGap();
-    if (GetAlwaysEnabled() &&
-        GreatNotEqual(contentHeight, gridLayoutInfo_.GetTotalLineHeight(mainGap))) {
-        return gridLayoutInfo_.GetTotalLineHeight(mainGap) -
-                gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+
+    float totalHeight = gridLayoutInfo_.GetTotalLineHeight(mainGap);
+    if (GetAlwaysEnabled() && GreatNotEqual(contentHeight, totalHeight)) {
+        return totalHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    }
+
+    if (UseIrregularLayout()) {
+        return gridLayoutInfo_.currentOffset_ -
+               gridLayoutInfo_.GetDistanceToBottom(contentHeight, gridLayoutInfo_.totalHeightOfItemsInView_, mainGap);
     }
     return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
 }
@@ -1543,10 +1578,23 @@ bool GridPattern::OutBoundaryCallback()
     return IsOutOfBoundary();
 }
 
+void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
+{
+    const auto& info = gridLayoutInfo_;
+    float disToBot = info.GetDistanceToBottom(info.lastMainSize_, info.totalHeightOfItemsInView_, GetMainGap());
+    if (!info.offsetEnd_) {
+        offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
+    } else if (Negative(delta)) {
+        offset.end = delta;
+    } else {
+        offset.end = std::min(static_cast<float>(delta), -disToBot);
+    }
+}
+
 OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
-    if (gridLayoutInfo_.startIndex_ == 0) {
+    if (gridLayoutInfo_.startIndex_ == 0 && gridLayoutInfo_.startMainLineIndex_ == 0) {
         auto startPos = gridLayoutInfo_.currentOffset_;
         auto newStartPos = startPos + delta;
         if (startPos > 0 && newStartPos > 0) {
@@ -1559,13 +1607,17 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
             offset.start = newStartPos;
         }
     }
+    if (UseIrregularLayout()) {
+        GetEndOverScrollIrregular(offset, static_cast<float>(delta));
+        return offset;
+    }
     if (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) {
-        auto endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
+        float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
         if (GreatNotEqual(GetMainContentSize(),
             gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_)) {
             endPos = gridLayoutInfo_.currentOffset_ + GetMainContentSize();
         }
-        auto newEndPos = endPos + delta;
+        float newEndPos = endPos + delta;
         if (endPos < gridLayoutInfo_.lastMainSize_ && newEndPos < gridLayoutInfo_.lastMainSize_) {
             offset.end = delta;
         }
@@ -1833,4 +1885,9 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
     return index < gridLayoutInfo_.startIndex_ - cacheCount || index > gridLayoutInfo_.endIndex_ + cacheCount;
 }
 
+inline bool GridPattern::UseIrregularLayout() const
+{
+    return SystemProperties::GetGridIrregularLayoutEnabled() &&
+           GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions();
+}
 } // namespace OHOS::Ace::NG

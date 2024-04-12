@@ -25,6 +25,10 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float SWITCH_ERROR_RADIUS = -1.0f;
+constexpr double NUM_TWO = 2.0;
+} // namespace
 class ACE_EXPORT SwitchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod)
 public:
@@ -43,11 +47,24 @@ public:
         CHECK_NULL_VOID(switchModifier_);
         switchModifier_->InitializeParam();
         auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+        if (paintProperty->HasUnselectedColor()) {
+            switchModifier_->SetInactiveColor(paintProperty->GetUnselectedColor().value());
+        }
         if (paintProperty->HasSelectedColor()) {
             switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
         }
         if (paintProperty->HasSwitchPointColor()) {
             switchModifier_->SetPointColor(paintProperty->GetSwitchPointColor().value());
+        }
+        auto pointRadius = SWITCH_ERROR_RADIUS;
+        if (paintProperty->HasPointRadius()) {
+            pointRadius = paintProperty->GetPointRadius().value().ConvertToPx();
+        }
+        switchModifier_->SetPointRadius(pointRadius);
+        if (paintProperty->HasTrackBorderRadius()) {
+            switchModifier_->SetTrackRadius(paintProperty->GetTrackBorderRadius().value().ConvertToPx());
+        } else {
+            switchModifier_->SetTrackRadius(SWITCH_ERROR_RADIUS);
         }
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
@@ -66,6 +83,8 @@ public:
         auto switchTheme = pipeline->GetTheme<SwitchTheme>();
         auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding().ConvertToPx();
         auto verticalPadding = switchTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        horizontalPadding += (pointRadius * NUM_TWO > size.Height()) ? (pointRadius - size.Height() / NUM_TWO) : 0.0;
+        verticalPadding += (pointRadius * NUM_TWO > size.Height()) ? (pointRadius - size.Height() / NUM_TWO) : 0.0;
         float boundsRectOriginX = offset.GetX() - horizontalPadding;
         float boundsRectOriginY = offset.GetY() - verticalPadding;
         float boundsRectWidth = size.Width() + 2 * horizontalPadding;

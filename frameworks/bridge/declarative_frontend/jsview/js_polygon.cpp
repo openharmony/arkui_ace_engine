@@ -74,11 +74,12 @@ void JSPolygon::JSBind(BindingTarget globalObj)
 
 void JSPolygon::JsPoints(const JSCallbackInfo& info)
 {
+    ShapePoints shapePoints;
+    PolygonModel::GetInstance()->SetPoints(shapePoints);
     if (info.Length() < 1 || !info[0]->IsArray()) {
         return;
     }
     ShapePoint shapePoint;
-    ShapePoints shapePoints;
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
     if (pointsArray->Length() < 2) {
         return;

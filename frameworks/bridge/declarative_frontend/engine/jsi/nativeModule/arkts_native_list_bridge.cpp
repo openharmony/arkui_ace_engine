@@ -538,7 +538,7 @@ ArkUINativeModuleValue ListBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     auto listTheme = themeManager->GetTheme<ListTheme>();
     CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
 
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
         LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
         dividerStrokeWidth.Reset();
     }
@@ -661,4 +661,31 @@ ArkUINativeModuleValue ListBridge::ResetChainAnimationOptions(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getListModifier()->resetFadingEdge(nativeNode);
+    } else {
+        bool fadingEdge = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getListModifier()->setFadingEdge(nativeNode, fadingEdge);
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetFadingEdge(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class ShapeModifier extends ArkShapeComponent implements AttributeModifier<ShapeAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: ShapeAttribute): void {
-    applyAndMergeModifier<ShapeAttribute, ArkShapeComponent, ArkCommonShapeComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<ShapeAttribute, ArkShapeComponent, ArkComponent>(instance, this);
   }
 }

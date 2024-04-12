@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
@@ -65,7 +66,12 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
     shadowWidth_ = parameters.shadowWidth;
     hoverDuration_ = parameters.hoverDuration;
     hoverToTouchDuration_ = parameters.hoverToTouchDuration;
-
+    checkBoxGroupShape_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(CheckBoxStyle::CIRCULAR_STYLE));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        checkBoxGroupStyle_ = CheckBoxStyle::CIRCULAR_STYLE;
+    } else {
+        checkBoxGroupStyle_ = CheckBoxStyle::SQUARE_STYLE;
+    }
     AttachProperty(activeColor_);
     AttachProperty(pointColor_);
     AttachProperty(inactiveColor_);
@@ -77,6 +83,7 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
     AttachProperty(offset_);
     AttachProperty(size_);
     AttachProperty(animateTouchHoverColor_);
+    AttachProperty(checkBoxGroupShape_);
 }
 
 void CheckBoxGroupModifier::PaintCheckBox(
@@ -183,7 +190,7 @@ void CheckBoxGroupModifier::DrawUnselected(
     RSRect rect(originX, originY, endX, endY);
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachPen(pen);
-    canvas.DrawRoundRect(rrect);
+    DrawRectOrCircle(canvas, rrect);
 #ifdef USE_ROSEN_DRAWING
     canvas.DetachPen();
 #endif
@@ -199,7 +206,7 @@ void CheckBoxGroupModifier::DrawActiveBorder(
     RSRect rect(originX, originY, endX, endY);
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
-    canvas.DrawRoundRect(rrect);
+    DrawRectOrCircle(canvas, rrect);
     canvas.DetachBrush();
 }
 
@@ -213,7 +220,7 @@ void CheckBoxGroupModifier::DrawUnselectedBorder(
     RSRect rect(originX, originY, endX, endY);
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
-    canvas.DrawRoundRect(rrect);
+    DrawRectOrCircle(canvas, rrect);
 #ifdef USE_ROSEN_DRAWING
     canvas.DetachBrush();
 #endif
@@ -268,9 +275,24 @@ void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF
     float endY = size.Height() + originY + CHECKBOX_GROUP_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
-    canvas.DrawRoundRect(rrect);
+    DrawRectOrCircle(canvas, rrect);
 #ifdef USE_ROSEN_DRAWING
     canvas.DetachBrush();
 #endif
+}
+
+void CheckBoxGroupModifier::DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const
+{
+    if (CheckBoxStyle::SQUARE_STYLE == checkBoxGroupStyle_) {
+        canvas.DrawRoundRect(rrect);
+    } else {
+        RSScalar halfDenominator = 2.0f;
+        RSRect rect = rrect.GetRect();
+        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
+        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
+        RSPoint centerPt(x, y);
+        RSScalar radius = std::min(rect.GetWidth(), rect.GetHeight()) / halfDenominator;
+        canvas.DrawCircle(centerPt, radius);
+    }
 }
 } // namespace OHOS::Ace::NG

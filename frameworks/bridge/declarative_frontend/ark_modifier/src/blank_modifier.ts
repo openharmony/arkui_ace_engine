@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class BlankModifier extends ArkBlankComponent implements AttributeModifier<BlankAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: BlankAttribute): void {
-    applyAndMergeModifier<BlankAttribute, ArkBlankComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<BlankAttribute, ArkBlankComponent, ArkComponent>(instance, this);
   }
 }

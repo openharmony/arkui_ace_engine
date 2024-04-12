@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class AlphabetIndexerModifier extends ArkAlphabetIndexerComponent implements AttributeModifier<AlphabetIndexerAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
-
+  
   applyNormalAttribute(instance: AlphabetIndexerAttribute): void {
-    applyAndMergeModifier<AlphabetIndexerAttribute, ArkAlphabetIndexerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<AlphabetIndexerAttribute, ArkAlphabetIndexerComponent, ArkComponent>(instance, this);
   }
 }

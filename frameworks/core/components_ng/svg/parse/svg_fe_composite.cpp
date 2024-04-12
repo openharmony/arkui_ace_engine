@@ -57,13 +57,14 @@ RSBlendMode SvgFeComposite::BlendModeForOperator(FeOperatorType op) const
 }
 
 void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor,
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
     auto mode = declaration->GetOperatorType();
-    auto foreImageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
-    auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter);
+    auto foreImageFilter = MakeImageFilter(declaration->GetIn(), imageFilter, resultHash);
+    auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter, resultHash);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
     if (mode != FeOperatorType::FE_ARITHMETIC) {
@@ -77,6 +78,7 @@ void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter
     imageFilter =
         RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter, foreImageFilter);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
+    RegisterResult(declaration->GetResult(), imageFilter, resultHash);
 }
 
 } // namespace OHOS::Ace::NG

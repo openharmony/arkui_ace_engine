@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class NavigatorModifier extends ArkNavigatorComponent implements AttributeModifier<NavigatorAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: NavigatorAttribute): void {
-    applyAndMergeModifier<NavigatorAttribute, ArkNavigatorComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<NavigatorAttribute, ArkNavigatorComponent, ArkComponent>(instance, this);
   }
 }

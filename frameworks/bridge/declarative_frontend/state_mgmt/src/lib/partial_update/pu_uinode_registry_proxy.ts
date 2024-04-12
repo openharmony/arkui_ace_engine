@@ -70,9 +70,8 @@ class UINodeRegisterProxy {
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
     }
 
-     // unregisters all the received removedElements in func parameter
-     public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void {
-
+    // unregisters all the received removedElements in func parameter
+    public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs elmtIds ${removedElements}`);
         UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();

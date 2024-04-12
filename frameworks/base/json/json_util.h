@@ -78,6 +78,10 @@ public:
     virtual bool Put(const char* key, const std::unique_ptr<JsonValue>& value);
     bool Put(const std::unique_ptr<JsonValue>& value);
 
+    JsonObject* ReleaseJsonObject();
+    bool PutRef(const char* key, std::unique_ptr<JsonValue>&& value);
+    bool PutRef(std::unique_ptr<JsonValue>&& value);
+
     // replace functions
     bool Replace(const char* key, const char* value);
     bool Replace(const char* key, int32_t value);
@@ -102,8 +106,8 @@ public:
     ~JsonUtil() = delete;
     static std::unique_ptr<JsonValue> ParseJsonData(const char* data, const char** parseEnd = nullptr);
     static std::unique_ptr<JsonValue> ParseJsonString(const std::string& content, const char** parseEnd = nullptr);
-    static std::unique_ptr<JsonValue> Create(bool isRoot);
-    static std::unique_ptr<JsonValue> CreateArray(bool isRoot);
+    static std::unique_ptr<JsonValue> Create(bool isRoot = true);
+    static std::unique_ptr<JsonValue> CreateArray(bool isRoot = true);
 };
 
 } // namespace OHOS::Ace

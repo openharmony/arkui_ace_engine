@@ -16,6 +16,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -24,6 +26,29 @@ constexpr uint32_t INDEX_ARGUMENT_1 = 1;
 constexpr uint32_t INDEX_ARGUMENT_2 = 2;
 constexpr uint32_t INDEX_ARGUMENT_3 = 3;
 constexpr uint32_t INDEX_ARGUMENT_4 = 4;
+const char* TOGGLE_NODEPTR_OF_UINODE = "nodePtr_";
+panda::Local<panda::JSValueRef> JsToggleChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    auto vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsBoolean()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool value = firstArg->ToBoolean(vm)->Value();
+    auto ref = runtimeCallInfo->GetThisRef();
+    auto obj = ref->ToObject(vm);
+    if (obj->GetNativePointerFieldCount() < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ToggleModelNG::SetChangeValue(frameNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 void SetHeightInner(const EcmaVM* vm, const Local<JSValueRef>& nodeArg, const Local<JSValueRef>& heightArg)
 {
@@ -74,6 +99,55 @@ void PutToggleDimensionParameters(
     }
 }
 } // namespace
+
+ArkUINativeModuleValue ToggleBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (!secondArg->IsObject()) {
+        ToggleModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    auto containerId = Container::CurrentId();
+    ToggleModelNG::SetBuilderFunc(frameNode, [vm, frameNode, obj = std::move(obj), containerId](
+                                  ToggleConfiguration config) -> RefPtr<FrameNode> {
+        ContainerScope scope(containerId);
+        auto context = ArkTSUtils::GetContext(vm);
+        CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
+        const char* keysOfToggle[] = { "isOn", "enabled", "triggerChange"};
+            Local<JSValueRef> valuesOfToggle[] = { panda::BooleanRef::New(vm, config.isOn_),
+                panda::BooleanRef::New(vm, config.enabled_),
+                panda::FunctionRef::New(vm, JsToggleChangeCallback)};
+        auto toggle = panda::ObjectRef::NewWithNamedProperties(vm,
+            ArraySize(keysOfToggle), keysOfToggle, valuesOfToggle);
+        toggle->SetNativePointerFieldCount(vm, 1);
+        toggle->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+        panda::Local<panda::JSValueRef> params[INDEX_ARGUMENT_2] = { context, toggle };
+        LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto jsObject = obj.ToLocal();
+        auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+        CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+        panda::Local<panda::FunctionRef> func = makeFunc;
+        auto result = func->Call(vm, jsObject, params, 2);
+        JSNApi::ExecutePendingJob(vm);
+        CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+        auto resultObj = result->ToObject(vm);
+        panda::Local<panda::JSValueRef> nodeptr =
+            resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, TOGGLE_NODEPTR_OF_UINODE));
+        CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+        auto* node = nodeptr->ToNativePointer(vm)->Value();
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return AceType::Claim(frameNode);
+    });
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue ToggleBridge::SetSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -127,6 +201,64 @@ ArkUINativeModuleValue ToggleBridge::ResetSwitchPointColor(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::SetSwitchStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> pointRadiusArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
+    Local<JSValueRef> unselectedColorArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_2);
+    Local<JSValueRef> pointColorArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_3);
+    Local<JSValueRef> trackRadiusArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_4);
+    CalcDimension pointRadius;
+    if (!pointRadiusArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionNG(vm, pointRadiusArg, pointRadius, DimensionUnit::VP) &&
+        !pointRadius.IsNegative()) {
+        GetArkUINodeModifiers()->getToggleModifier()->setTogglePointRadius(
+            nativeNode, pointRadius.Value(), static_cast<int>(pointRadius.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->resetTogglePointRadius(nativeNode);
+    }
+    Color unselectedColor;
+    if (unselectedColorArg->IsNull() || unselectedColorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, unselectedColorArg, unselectedColor)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleUnselectedColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleUnselectedColor(nativeNode, unselectedColor.GetValue());
+    }
+    Color pointColor;
+    if (pointColorArg->IsNull() || pointColorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, pointColorArg, pointColor)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleSwitchPointColor(nativeNode, pointColor.GetValue());
+    }
+    CalcDimension trackRadius;
+    if (!trackRadiusArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionNG(vm, trackRadiusArg, trackRadius, DimensionUnit::VP) &&
+        !trackRadius.IsNegative()) {
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleTrackBorderRadius(
+            nativeNode, trackRadius.Value(), static_cast<int>(trackRadius.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleTrackBorderRadius(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::ResetSwitchStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetTogglePointRadius(nativeNode);
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleUnselectedColor(nativeNode);
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleTrackBorderRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

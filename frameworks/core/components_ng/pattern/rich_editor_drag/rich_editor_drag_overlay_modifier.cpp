@@ -43,10 +43,11 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     } else {
         canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
     }
-    canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     auto hostPattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(hostPattern);
 
+    canvas.Save();
+    canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     auto richEditor = DynamicCast<RichEditorPattern>(hostPattern);
     if (richEditor) {
         OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
@@ -58,6 +59,7 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
         auto&& paragraph = hostPattern->GetParagraph();
         paragraph->Paint(canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
     }
+    canvas.Restore();
     PaintImage(context);
 }
 

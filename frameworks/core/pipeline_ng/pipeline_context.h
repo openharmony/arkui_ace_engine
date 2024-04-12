@@ -38,7 +38,7 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
-#include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -78,6 +78,8 @@ public:
     static RefPtr<PipelineContext> GetCurrentContext();
 
     static RefPtr<PipelineContext> GetCurrentContextSafely();
+
+    static PipelineContext* GetCurrentContextPtrSafely();
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
@@ -267,6 +269,8 @@ public:
         dragWindowVisibleCallback_ = std::move(task);
     }
 
+    void FlushOnceVsyncTask() override;
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
@@ -327,6 +331,8 @@ public:
 
     const RefPtr<FocusManager>& GetFocusManager() const;
 
+    const RefPtr<FocusManager>& GetOrCreateFocusManager();
+
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
         return frameRateManager_;
@@ -350,10 +356,9 @@ public:
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
 
-    void AddNavigationStateCallback(
-        int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow);
+    void AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode);
 
-    void RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId);
+    void RemoveNavigationNode(int32_t pageId, int32_t nodeId);
 
     void FirePageChanged(int32_t pageId, bool isOnShow);
 
@@ -395,9 +400,9 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
 
-    bool RequestFocus(const std::string& targetNodeId) override;
+    bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
@@ -409,6 +414,7 @@ public:
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
+    void FlushModifier() override;
     void FlushMessages() override;
 
     void FlushUITasks() override;
@@ -536,6 +542,7 @@ public:
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
     bool CheckNeedAutoSave();
     bool CheckPageFocus();
+    bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
@@ -643,9 +650,18 @@ public:
         vsyncListener_ = std::move(vsync);
     }
 
-    const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
+    void SetOnceVsyncListener(VsyncCallbackFun vsync)
     {
-        return navigationDumpMgr_;
+        onceVsyncListener_ = std::move(vsync);
+    }
+
+    bool HasOnceVsyncListener() {
+        return onceVsyncListener_ != nullptr;
+    }
+
+    const RefPtr<NavigationManager>& GetNavigationManager() const
+    {
+        return navigationMgr_;
     }
 
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
@@ -657,6 +673,8 @@ public:
     {
         privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
     }
+
+    void FlushRequestFocus();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -673,10 +691,21 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
-    void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        const bool supportAvoidance = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+
+    void SetIsLayouting(bool layouting)
+    {
+        taskScheduler_->SetIsLayouting(layouting);
+    }
+
+    void AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const float safeHeight = 0.0f, const bool supportAvoidance = false);
+    void OriginalAvoidanceLogic(
+        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -690,10 +719,13 @@ private:
     void FlushTouchEvents();
 
     void FlushFocusView();
+    void FlushFocusScroll();
 
     void ProcessDelayTasks();
 
     void InspectDrew();
+
+    bool TriggerKeyEventDispatch(const KeyEvent& event);
 
     void FlushBuildFinishCallbacks();
 
@@ -780,11 +812,11 @@ private:
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
 
+    bool isOnAreaChangeNodesCacheVaild_ = false;
+    std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnShowMap_;
-    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnHideMap_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -837,7 +869,7 @@ private:
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
-
+    std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
     std::list<FrameInfo> dumpFrameInfos_;
@@ -854,11 +886,12 @@ private:
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 
     VsyncCallbackFun vsyncListener_;
+    VsyncCallbackFun onceVsyncListener_;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
 
-    RefPtr<NavigationDumpManager> navigationDumpMgr_ = MakeRefPtr<NavigationDumpManager>();
+    RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
 };
 } // namespace OHOS::Ace::NG
 

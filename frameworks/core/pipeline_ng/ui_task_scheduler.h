@@ -134,6 +134,11 @@ public:
         syncGeometryNodeTasks_.emplace_back(task);
     }
 
+    void SetIsLayouting(bool layouting)
+    {
+        isLayouting_ = layouting;
+    }
+
     void FlushSyncGeometryNodeTasks();
 
 private:
@@ -175,8 +180,6 @@ private:
     bool isLayouting_ = false;
 
     FrameInfo* frameInfo_ = nullptr;
-
-    std::map<WeakPtr<CustomNode>, bool> delayJsActiveNodes_;
 
     static uint64_t frameId_;
 

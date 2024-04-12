@@ -18,5 +18,6 @@ ace_unittest("scrollable_test_ng") {
   sources = [
     "scrollable_event_test.cpp",
     "scrollable_test_ng.cpp",
+    "scrollable_utils_test.cpp",
   ]
 }

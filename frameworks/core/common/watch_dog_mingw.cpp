@@ -20,7 +20,6 @@
 #include <pthread.h>
 #include <shared_mutex>
 
-
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
@@ -282,7 +281,10 @@ bool ThreadWatcher::IsThreadStuck()
                  "checktime: %{public}d",
                 abilityName.c_str(), instanceId_, threadName_.c_str(), loopTime_, threadTag_);
             // or threadTag_ != loopTime_ will always be true
-            threadTag_ = loopTime_;
+            {
+                std::unique_lock<std::shared_mutex> lock(mutex_);
+                threadTag_ = loopTime_;
+            }
             res = true;
         }
     }

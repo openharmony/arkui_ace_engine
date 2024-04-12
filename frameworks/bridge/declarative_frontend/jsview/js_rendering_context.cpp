@@ -159,6 +159,7 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("createConicGradient", &JSCanvasRenderer::JsCreateConicGradient);
     JSClass<JSRenderingContext>::CustomMethod("saveLayer", &JSCanvasRenderer::JsSaveLayer);
     JSClass<JSRenderingContext>::CustomMethod("restoreLayer", &JSCanvasRenderer::JsRestoreLayer);
+    JSClass<JSRenderingContext>::CustomMethod("reset", &JSCanvasRenderer::JsReset);
     JSClass<JSRenderingContext>::CustomMethod("startImageAnalyzer", &JSRenderingContext::JsStartImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
@@ -260,11 +261,41 @@ napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& er
     return error;
 }
 
-void HandleReject(const shared_ptr<CanvasAsyncCxt>& ctx, int32_t errCode, const std::string& errMsg = "")
+void HandleDeferred(const shared_ptr<CanvasAsyncCxt>& asyncCtx, ImageAnalyzerState state)
 {
+    auto env = asyncCtx->env;
+    CHECK_NULL_VOID(env);
+    auto deferred = asyncCtx->deferred;
+    CHECK_NULL_VOID(deferred);
+
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
     napi_value result = nullptr;
-    result = CreateErrorValue(ctx->env, errCode, errMsg);
-    napi_reject_deferred(ctx->env, ctx->deferred, result);
+    switch (state) {
+        case ImageAnalyzerState::UNSUPPORTED:
+            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_UNSUPPORTED);
+            napi_reject_deferred(env, deferred, result);
+            break;
+        case ImageAnalyzerState::ONGOING:
+            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_ONGOING);
+            napi_reject_deferred(env, deferred, result);
+            break;
+        case ImageAnalyzerState::STOPPED:
+            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_STOPPED);
+            napi_reject_deferred(env, deferred, result);
+            break;
+        case ImageAnalyzerState::FINISHED:
+            napi_get_null(env, &result);
+            napi_resolve_deferred(env, deferred, result);
+            break;
+        default:
+            break;
+    }
+    napi_close_handle_scope(env, scope);
 }
 
 void ReturnPromise(const JSCallbackInfo& info, napi_value result)
@@ -280,24 +311,24 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
 void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
-    napi_value promise = nullptr;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        ReturnPromise(info, promise);
-        return;
-    }
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
-    ScopeRAII scopeRaii(env);
-
-    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
-    JSValueWrapper valueWrapper = value;
-    napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
     auto asyncCtx = std::make_shared<CanvasAsyncCxt>();
     asyncCtx->env = env;
+    napi_value promise = nullptr;
     napi_create_promise(env, &asyncCtx->deferred, &promise);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        ReturnPromise(info, promise);
+        return;
+    }
+
+    ScopeRAII scopeRaii(env);
+    panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value configNativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     if (isImageAnalyzing_) {
         napi_value result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_IS_ONGOING);
         napi_reject_deferred(env, asyncCtx->deferred, result);
@@ -305,26 +336,12 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
         return;
     }
 
-    onAnalyzedCallback onAnalyzed_ = [asyncCtx, weakCtx = WeakClaim(this)](bool isSucceed) {
+    onAnalyzedCallback onAnalyzed_ = [asyncCtx, weakCtx = WeakClaim(this)] (ImageAnalyzerState state) {
+        CHECK_NULL_VOID(asyncCtx);
+        HandleDeferred(asyncCtx, state);
         auto ctx = weakCtx.Upgrade();
         CHECK_NULL_VOID(ctx);
-        auto env = asyncCtx->env;
-        napi_handle_scope scope = nullptr;
-        auto status = napi_open_handle_scope(asyncCtx->env, &scope);
-        if (status != napi_ok) {
-            return;
-        }
-
-        napi_value result = nullptr;
-        if (isSucceed) {
-            napi_get_null(env, &result);
-            napi_resolve_deferred(env, asyncCtx->deferred, result);
-        } else {
-            result = CreateErrorValue(env, ERROR_CODE_AI_ANALYSIS_UNSUPPORTED);
-            napi_reject_deferred(env, asyncCtx->deferred, result);
-        }
         ctx->isImageAnalyzing_ = false;
-        napi_close_handle_scope(env, scope);
     };
     isImageAnalyzing_ = true;
     RenderingContextModel::GetInstance()->StartImageAnalyzer(canvasPattern_, configNativeValue, onAnalyzed_);

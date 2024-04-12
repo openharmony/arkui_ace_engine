@@ -148,6 +148,13 @@ public:
         }
     }
 
+    void SetSelectedBorderRadius(float selectedBorderRadius)
+    {
+        if (selectedBorderRadius_) {
+            selectedBorderRadius_->Set(selectedBorderRadius);
+        }
+    }
+
     void SetStepSize(float stepSize)
     {
         if (stepSize_) {
@@ -166,6 +173,20 @@ public:
     {
         if (isShowStep_) {
             isShowStep_->Set(showSteps);
+        }
+    }
+
+    void SetSliderInteractionMode(SliderModelNG::SliderInteraction mode)
+    {
+        if (sliderInteractionMode_) {
+            sliderInteractionMode_->Set(static_cast<int>(mode));
+        }
+    }
+
+    void SetMinResponsiveDistance(float minResponse)
+    {
+        if (minResponse_) {
+            minResponse_->Set(minResponse);
         }
     }
 
@@ -242,6 +263,7 @@ public:
     }
 
     void UpdateContentDirtyRect(const SizeF& frameSize);
+
 private:
     void InitializeShapeProperty();
     RSRect GetTrackRect();
@@ -277,6 +299,7 @@ private:
     RefPtr<AnimatablePropertyColor> boardColor_;
 
     RefPtr<AnimatablePropertyFloat> trackBorderRadius_;
+    RefPtr<AnimatablePropertyFloat> selectedBorderRadius_;
     RefPtr<AnimatablePropertyFloat> stepSize_;
     RefPtr<AnimatablePropertyColor> stepColor_;
     RefPtr<AnimatablePropertySizeF> blockSize_;
@@ -300,6 +323,8 @@ private:
     RefPtr<PropertyInt> sliderMode_;
     RefPtr<PropertyInt> directionAxis_;
     RefPtr<PropertyBool> isShowStep_;
+    RefPtr<PropertyInt> sliderInteractionMode_;
+    RefPtr<PropertyFloat> minResponse_;
     RefPtr<PropertyInt> blockType_;
 
     // others

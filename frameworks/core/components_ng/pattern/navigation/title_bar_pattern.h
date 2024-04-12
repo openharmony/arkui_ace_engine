@@ -217,6 +217,40 @@ public:
         isTitleChanged_ = isTitleChanged;
     }
 
+    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
+    {
+        titleBarMenuItems_ = menuItems;
+    }
+
+    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
+    {
+        return titleBarMenuItems_;
+    }
+
+    int32_t GetMenuNodeId() const
+    {
+        return menuNodeId_.value();
+    }
+
+    void SetMenuNodeId(const int32_t menuNodeId)
+    {
+        menuNodeId_ = menuNodeId;
+    }
+
+    bool HasMenuNodeId() const
+    {
+        return menuNodeId_.has_value();
+    }
+
+    int32_t GetMaxMenuNum() const
+    {
+        return maxMenuNums_;
+    }
+
+    void SetMaxMenuNum(int32_t maxMenu)
+    {
+        maxMenuNums_ = maxMenu;
+    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -235,6 +269,8 @@ private:
     void AnimateTo(float offset);
 
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -253,23 +289,33 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
+    void MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange = false);
 
     void UpdateTitleBarByCoordScroll(float offset);
     void SetTitleStyleByCoordScrollOffset(float offset);
     float CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetMaxTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetBetweenMinAndMaxTitle(float offset, float lastCordScrollOffset);
+    void CleanSpringAnimation()
+    {
+        springAnimation_.reset();
+    }
+    void CleanAnimation()
+    {
+        animation_.reset();
+    }
+    void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
 
     RefPtr<PanEvent> panEvent_;
-    RefPtr<SpringMotion> springMotion_;
-    RefPtr<Animator> springController_;
-    RefPtr<Animator> animator_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<Dimension> fontSize_ = 0.0_fp;
     std::optional<float> opacity_;
 
     float overDragOffset_ = 0.0f;
     float maxTitleBarHeight_ = 0.0f;
     float defaultTitleBarHeight_ = 0.0f;
+    Dimension titleSpaceVertical_;
     Dimension tempTitleBarHeight_ = 0.0_vp;
     float minTitleOffsetY_ = 0.0f;
     float maxTitleOffsetY_ = 0.0f;
@@ -309,6 +355,10 @@ private:
     float currentTitleBarHeight_ = 0.0f;
 
     NavigationTitlebarOptions options_;
+
+    std::vector<NG::BarItem> titleBarMenuItems_;
+    std::optional<int32_t> menuNodeId_;
+    int32_t maxMenuNums_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

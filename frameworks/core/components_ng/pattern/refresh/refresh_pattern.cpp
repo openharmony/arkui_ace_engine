@@ -430,6 +430,10 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
             } else {
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
+            if ((refreshStatus_ == RefreshStatus::DRAG || refreshStatus_ == RefreshStatus::OVER_DRAG) &&
+                Positive(scrollOffset_)) {
+                FireOnOffsetChange(Dimension(scrollOffset_).ConvertToVp());
+            }
         }
         UpdateFirstChildPlacement();
     } else {
@@ -504,6 +508,13 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
     auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireChangeEvent(value);
+}
+
+void RefreshPattern::FireOnOffsetChange(float value)
+{
+    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(refreshEventHub);
+    refreshEventHub->FireOnOffsetChange(value);
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)

@@ -19,23 +19,16 @@ template("napi_dragcontroller_static") {
 
   ohos_source_set(target_name) {
     defines += invoker.defines
-
     defines += [ "USE_ARK_ENGINE" ]
     cflags_cc += invoker.cflags_cc
-    if (is_mac) {
-      cflags_cc += [ "-O0" ]
-    }
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     include_dirs = [
-      "$ace_root",
-      "$ace_root/frameworks",
-      "$root_out_dir/arkui/framework",
       "$ark_ets_path",
       "$ark_runtime_path",
     ]
 
     sources = [ "js_drag_controller.cpp" ]
-
     deps = [ "../utils:napi_utils_static_${platform}" ]
     external_deps = []
     if (defined(config.libace_target)) {
@@ -50,10 +43,12 @@ template("napi_dragcontroller_static") {
         "napi:ace_napi",
       ]
     }
-
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (is_arkui_x) {
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
-        configs = [ "$crossplatform_multimedia_root/image_framework/interfaces/innerkits:image_external_config" ]
+        configs += [ "$crossplatform_multimedia_root/image_framework/interfaces/innerkits:image_external_config" ]
       }
     } else {
       if (defined(config.pixel_map_support)) {

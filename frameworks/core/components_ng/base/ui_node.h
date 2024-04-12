@@ -65,6 +65,9 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
+    void AttachContext(PipelineContext* context, bool recursive = false);
+    void DetachContext(bool recursive = false);
+
     virtual int32_t FrameCount() const;
 
     virtual RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
@@ -83,12 +86,14 @@ public:
         bool addDefaultTransition = false);
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
+    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean(bool cleanDirectly = false, bool allowTransition = false);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
-    void AttachToMainTree(bool recursive = false);
+    [[deprecated]] void AttachToMainTree(bool recursive = false);
+    void AttachToMainTree(bool recursive, PipelineContext* context);
     void DetachFromMainTree(bool recursive = false);
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
@@ -148,7 +153,10 @@ public:
     }
     // Tree operation end.
 
-    static RefPtr<PipelineContext> GetContext();
+    // performance.
+    PipelineContext* GetContext();
+
+    RefPtr<PipelineContext> GetContextRefPtr();
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
@@ -158,6 +166,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
+    virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id);
 
@@ -313,7 +322,7 @@ public:
 
     virtual void SetJSViewActive(bool active);
 
-    virtual void OnVisibleChange(bool isVisible);
+    virtual void TryVisibleChangeOnDescendant(bool isVisible);
 
     // call by recycle framework.
     virtual void OnRecycle();
@@ -497,6 +506,16 @@ public:
         attachToMainTreeTasks_.emplace_back(std::move(func));
     }
 
+    void* GetExternalData() const
+    {
+        return externalData_;
+    }
+
+    void SetExternalData(void* externalData)
+    {
+        externalData_ = externalData;
+    }
+
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
@@ -534,7 +553,40 @@ public:
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
+    static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
 
+    void AddFlag(uint32_t flag)
+    {
+        nodeFlag_ |= flag;
+    }
+
+    bool IsNodeHasFlag(uint32_t flag) const
+    {
+        return (flag & nodeFlag_) == flag;
+    }
+
+    void SetPageLevelNodeId(int32_t pageLevelId)
+    {
+        pageLevelId_ = pageLevelId;
+    }
+
+    int32_t GetPageLevelNodeId() const
+    {
+        return pageLevelId_;
+    }
+
+    void SetPageLevelToNav(bool isLevelNavDest)
+    {
+        isLevelNavDest_ = isLevelNavDest;
+    }
+
+    bool PageLevelIsNavDestination() const
+    {
+        return isLevelNavDest_;
+    }
+
+    void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
+    
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -598,12 +650,14 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = 0;
+    int32_t depth_ = INT32_MAX;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
+    int32_t pageLevelId_ = 0; // host is Page or NavDestination
+    bool isLevelNavDest_ = false;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
@@ -613,6 +667,7 @@ private:
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
+    uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int64_t currentAccessibilityId_;
@@ -624,6 +679,9 @@ private:
 
     std::string debugLine_;
     std::string viewId_;
+    void* externalData_ = nullptr;
+
+    PipelineContext* context_ = nullptr;
 
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);

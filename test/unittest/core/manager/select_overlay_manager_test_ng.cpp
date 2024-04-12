@@ -1208,4 +1208,37 @@ HWTEST_F(SelectOverlayManagerTestNg, UpdateShowingSelectOverlay02, TestSize.Leve
     client.UpdateShowingSelectOverlay(clientInfo);
     EXPECT_TRUE(clientInfo.isUpdateMenu);
 }
+
+/**
+ * @tc.name: GetSelectOverlayInfo01
+ * @tc.desc: test GetSelectOverlayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, GetSelectOverlayInfo01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init client and clientInfo
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+    clientInfo.isUpdateMenu = false;
+
+    /**
+     * @tc.steps: step2.call GetSelectOverlayInfo
+     * @tc.expected: handlerColor equals the default handlerColor
+     */
+    client.selectOverlayInfo_.handlerColor = Color::BLUE;
+    auto selectOverlayInfo = client.GetSelectOverlayInfo(clientInfo);
+    ASSERT_TRUE(selectOverlayInfo->handlerColor.has_value());
+    EXPECT_TRUE(selectOverlayInfo->handlerColor.value() == client.selectOverlayInfo_.handlerColor.value());
+
+    /**
+     * @tc.steps: step3.set handlerColor and call GetSelectOverlayInfo
+     * @tc.expected: handlerColor equals the setting handlerColor
+     */
+    clientInfo.handlerColor = Color::RED;
+    selectOverlayInfo = client.GetSelectOverlayInfo(clientInfo);
+    ASSERT_TRUE(selectOverlayInfo->handlerColor.has_value());
+    EXPECT_TRUE(selectOverlayInfo->handlerColor.value() == Color::RED);
+}
 } // namespace OHOS::Ace::NG

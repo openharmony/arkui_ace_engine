@@ -47,7 +47,7 @@ public:
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
-    void SetOnTerminated(std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& onTerminated) override;
+    void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated) override;
     void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) override;
     void SetOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError) override;

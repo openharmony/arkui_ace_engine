@@ -134,8 +134,8 @@ class MenuItemSelectIconModifier extends ModifierWithKey<boolean | ResourceStr> 
 }
 
 class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   selected(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, MenuItemSelectedModifier.identity, MenuItemSelectedModifier, value);
@@ -166,12 +166,10 @@ class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   }
 }
 // @ts-ignore
-globalThis.MenuItem.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkMenuItemComponent(nativeNode);
+globalThis.MenuItem.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkMenuItemComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.MenuItemModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

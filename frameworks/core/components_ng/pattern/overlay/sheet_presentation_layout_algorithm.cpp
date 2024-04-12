@@ -38,39 +38,50 @@ constexpr int32_t SHEET_HALF_SIZE = 2;
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    const auto& pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    const auto& overlay = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    const auto& overlayNode = AceType::DynamicCast<FrameNode>((overlay->GetRootNode()).Upgrade());
+    CHECK_NULL_VOID(overlayNode);
+    const auto& overlayLayoutProp = overlayNode->GetLayoutProperty();
+    CHECK_NULL_VOID(overlayLayoutProp);
+    auto layoutConstraint = overlayLayoutProp->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     sheetStyle_ = layoutProperty->GetSheetStyleValue();
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
-    if (!layoutConstraint) {
-        LOGE("fail to measure sheet due to layoutConstraint is nullptr");
-        return;
-    }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
     auto maxSize = layoutConstraint->maxSize;
     if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
-        auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-        layoutConstraint = parentConstraint.value();
-        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
         maxSize = layoutConstraint->maxSize;
         sheetMaxHeight_ = maxSize.Height();
         sheetMaxWidth_ = maxSize.Width();
         sheetWidth_ = GetWidthByScreenSizeType(maxSize);
         sheetHeight_ = GetHeightByScreenSizeType(maxSize);
+        if (sheetStyle_.width.has_value()) {
+            float width = 0.0f;
+            if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
+                width = sheetStyle_.width->ConvertToPxWithSize(sheetWidth_);
+            } else {
+                width = sheetStyle_.width->ConvertToPx();
+            }
+            if (width > sheetWidth_ || width < 0.0f) {
+                width = sheetWidth_;
+            }
+            sheetWidth_ = width;
+        }
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
         auto childConstraint = CreateSheetChildConstraint(layoutProperty);
         layoutConstraint->percentReference = SizeF(sheetWidth_, sheetHeight_);
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
         auto scrollNode = layoutWrapper->GetChildByIndex(1);
         CHECK_NULL_VOID(scrollNode);
-        childConstraint.selfIdealSize = OptionalSizeF(childConstraint.maxSize);
+        childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
             && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
@@ -109,10 +120,9 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    const auto& pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
+    sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
         sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     } else if (sheetType_ == SheetType::SHEET_CENTER) {
@@ -127,6 +137,8 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
+        sheetOffsetX_, sheetOffsetY_);
     OffsetF positionOffset;
     positionOffset.SetX(sheetOffsetX_);
     positionOffset.SetY(0.0f);

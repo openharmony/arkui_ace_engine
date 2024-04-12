@@ -188,12 +188,12 @@ public:
     void HandleClickEvent(GestureEvent& info);
     void InitLongPressEvent();
     void HandleLongPress(bool smooth);
-    void InitTouchEvent();
-    void OnTouchUp();
-    void OnTouchDown();
+    void InitMouseEvent();
     bool IsInScrollBar();
     void ScheduleCaretLongPress();
     void StartLongPressEventTimer();
+    void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
 
 private:
     void OnModifyDone() override;
@@ -235,8 +235,8 @@ private:
     std::shared_ptr<AnimationUtils::Animation> disappearAnimation_;
     bool isMousePressed_ = false;
     RefPtr<ClickEvent> clickListener_;
-    RefPtr<LongPressEvent> longPressEvent_;
-    RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<InputEvent> mouseEvent_;
     Offset locationInfo_;
     //Determine whether the current scroll direction is scrolling upwards or downwards
     bool scrollingUp_ = false;

@@ -32,11 +32,14 @@ void BlankPaintMethod::PaintRect(RSCanvas& canvas, PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipelineContext);
     auto color = paintProperty->GetColor().value_or(Color::TRANSPARENT);
     auto layoutSize = paintWrapper->GetContentSize();
+    auto offset = paintWrapper->GetContentOffset();
     canvas.Save();
     RSBrush brush;
     brush.SetColor(color.GetValue());
     canvas.AttachBrush(brush);
-    canvas.DrawRect(RSRect(0.0, 0.0, layoutSize.Width(), layoutSize.Height()));
+    // extra 1px for pixel round
+    canvas.DrawRect(RSRect(offset.GetX(), offset.GetY(), layoutSize.Width() + offset.GetX() + 1,
+        layoutSize.Height() + offset.GetY() + 1));
     canvas.DetachBrush();
     canvas.Restore();
 }

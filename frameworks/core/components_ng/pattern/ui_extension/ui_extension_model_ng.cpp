@@ -91,7 +91,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
         [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -165,8 +165,7 @@ void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Wa
     pattern->SetOnResultCallback(std::move(onResult));
 }
 
-void UIExtensionModelNG::SetOnTerminated(
-    std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>&)>&& onTerminated)
+void UIExtensionModelNG::SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

@@ -32,6 +32,10 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
+    void CalcHeightAndWidth(float& height, float& width, float frameHeight, float frameWidth);
+
     void OnReset() override {}
 
     float GetHeight() const

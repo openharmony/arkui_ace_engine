@@ -161,6 +161,13 @@ public:
         const std::string &realm) override;
     bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error) override;
+    bool OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
+        OHOS::NWeb::SslError error,
+        const std::string& url,
+        const std::string& originalUrl,
+        const std::string& referrer,
+        bool isFatalError,
+        bool isMainFrame) override;
     bool OnSslSelectCertRequestByJS(
         std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
         const std::string& host,
@@ -177,7 +184,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
-    bool OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt) override;
+    bool OnDragAndDropData(const void* data, size_t len, std::shared_ptr<NWeb::NWebImageOptions> opt) override;
     bool OnDragAndDropDataUdmf(std::shared_ptr<NWeb::NWebDragData> dragData) override;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op) override;
     void OnWindowNewByJS(
@@ -206,9 +213,9 @@ public:
     void OnSafeBrowsingCheckResult(int threat_type) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
-    void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
+    void OnGetTouchHandleHotZone(std::shared_ptr<NWeb::NWebTouchHandleHotZone> hotZone) override;
     void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
+        std::shared_ptr<NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
     void OnDateTimeChooserClose() override;
@@ -218,11 +225,13 @@ public:
     void OnOverScrollFlingEnd() override;
     void OnScrollState(bool scrollState) override;
     void OnRootLayerChanged(int width, int height) override;
+    void ReleaseResizeHold() override;
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
     void OnNativeEmbedLifecycleChange(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo) override;
     void OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEmbedTouchEvent> event) override;
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost) override;
+    void OnTooltip(const std::string& tooltip) override;
     bool OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)

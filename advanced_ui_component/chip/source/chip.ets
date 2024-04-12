@@ -475,7 +475,7 @@ export struct ChipComponent {
   }
 
   private getChipActive(): boolean {
-    return this.chipActivated || this.chipActivated === void (0)
+    return this.chipActivated
   }
 
   private getChipNodeOpacity(): number {
@@ -690,9 +690,6 @@ export struct ChipComponent {
         .textAlign(TextAlign.Center)
         .visibility(this.getVisibility())
         .draggable(false)
-        .stateStyles({
-          focused: {}
-        })
 
       Image(this.getSuffixIconSrc())
         .opacity(this.getChipNodeOpacity())
@@ -740,7 +737,14 @@ export struct ChipComponent {
     .focusable(true)
     .colorBlend(this.chipBlendColor)
     .opacity(this.getChipNodeOpacity())
-    .overlay(this.focusOverlay, { align: Alignment.Center })
+    .stateStyles({
+      normal: {
+        .overlay(undefined)
+      },
+      focused: {
+        .overlay(this.focusOverlay, { align: Alignment.Center })
+      }
+    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })
@@ -758,9 +762,7 @@ export struct ChipComponent {
         this.deleteChipNodeAnimate()
       }
     })
-    .onClick(() => {
-      this.onClicked()
-    })
+    .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))
   }
 
   build() {

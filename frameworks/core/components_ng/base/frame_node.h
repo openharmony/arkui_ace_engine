@@ -33,6 +33,7 @@
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
@@ -103,6 +104,17 @@ public:
     {
         return checkboxFlag_;
     }
+
+    void SetDisallowDropForcedly(bool isDisallowDropForcedly)
+    {
+        isDisallowDropForcedly_ = isDisallowDropForcedly;
+    }
+
+    bool GetDisallowDropForcedly() const
+    {
+        return isDisallowDropForcedly_;
+    }
+
     void OnInspectorIdUpdate(const std::string& id) override;
 
     struct ZIndexComparator {
@@ -136,9 +148,11 @@ public:
     void ProcessPropertyDiff()
     {
         // TODO: modify done need to optimize.
-        MarkModifyDone();
-        MarkDirtyNode();
-        isPropertyDiffMarked_ = false;
+        if (isPropertyDiffMarked_) {
+            MarkModifyDone();
+            MarkDirtyNode();
+            isPropertyDiffMarked_ = false;
+        }
     }
 
     void FlushUpdateAndMarkDirty() override;
@@ -197,6 +211,8 @@ public:
     void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
+
+    void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
     void TriggerOnSizeChangeCallback();
 
@@ -269,7 +285,7 @@ public:
 
     RefPtr<FocusHub> GetOrCreateFocusHub() const;
 
-    RefPtr<FocusHub> GetFocusHub() const
+    const RefPtr<FocusHub>& GetFocusHub() const
     {
         return eventHub_->GetFocusHub();
     }
@@ -284,7 +300,7 @@ public:
         return type;
     }
 
-    static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
+    void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
 
     void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
 
@@ -311,6 +327,8 @@ public:
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
+
+    bool IsContextTransparent() override;
 
     bool IsVisible() const
     {
@@ -406,8 +424,8 @@ public:
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
-    void OnVisibleChange(bool isVisible) override;
-
+    void TryVisibleChangeOnDescendant(bool isVisible) override;
+    void NotifyVisibleChange(bool isVisible);
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
@@ -516,11 +534,11 @@ public:
 
     void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
     {
-        drawModifier_ = drawModifier;
-        auto contentModifier = GetContentModifier();
-        if (contentModifier) {
-            contentModifier->SetDrawModifier(drawModifier);
+        if (!extensionHandler_) {
+            extensionHandler_ = MakeRefPtr<ExtensionHandler>();
+            extensionHandler_->AttachFrameNode(this);
         }
+        extensionHandler_->SetDrawModifier(drawModifier);
     }
 
     bool IsSupportDrawModifier();
@@ -569,6 +587,7 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+    static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
     double GetPreviewScaleVal() const;
 
@@ -680,17 +699,12 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode(bool needSkipSync = false);
+    void SyncGeometryNode(bool needSyncRsNode);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
     bool SetParentLayoutConstraint(const SizeF& size) const override;
-    void ForceSyncGeometryNode()
-    {
-        CHECK_NULL_VOID(renderContext_);
-        oldGeometryNode_.Reset();
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
-    }
+    void ForceSyncGeometryNode();
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()
@@ -740,21 +754,33 @@ public:
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetNodeContainer();
     RefPtr<ContentModifier> GetContentModifier();
+
+    ExtensionHandler* GetExtensionHandler() const
+    {
+        return RawPtr(extensionHandler_);
+    }
+
+    void SetExtensionHandler(const RefPtr<ExtensionHandler>& handler)
+    {
+        extensionHandler_ = handler;
+        extensionHandler_->AttachFrameNode(this);
+    }
+
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);
 
     int32_t GetUiExtensionId();
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
-    void SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
-        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
-        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
-        int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    void FocusMoveSearchNG(int64_t elementId, int32_t direction,
-        int64_t offset, Accessibility::AccessibilityElementInfo& output);
-    bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset);
+    void SearchExtensionElementInfoByAccessibilityIdNG(
+        int64_t elementId, int32_t mode, int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text, int64_t offset,
+        std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(
+        int64_t elementId, int32_t focusType, int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(
+        int64_t elementId, int32_t direction, int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
@@ -813,6 +839,7 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+    void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpSafeAreaInfo();
@@ -826,6 +853,7 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
+    bool OnLayoutFinish(bool& needSyncRsNode);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
@@ -860,6 +888,10 @@ private:
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
+    RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
+
+    void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -873,12 +905,15 @@ private:
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
 
+    RefPtr<ExtensionHandler> extensionHandler_;
+
     RefPtr<FrameNode> backgroundNode_;
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
+    const static std::set<std::string> layoutTags_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -925,13 +960,13 @@ private:
     bool isRestoreInfoUsed_ = false;
     bool checkboxFlag_ = false;
     bool needRestoreSafeArea_ = true;
+    bool isDisallowDropForcedly_ = false;
 
     RefPtr<FrameNode> overlayNode_;
-    RefPtr<NG::DrawModifier> drawModifier_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO, false, false, false, { .isShowBadge = true } };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

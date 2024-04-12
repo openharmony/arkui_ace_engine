@@ -36,8 +36,8 @@ class ListItemGroupDividerModifier extends ModifierWithKey<DividerStyle> {
 }
 
 class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   divider(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null): this {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
@@ -46,12 +46,10 @@ class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAtt
 }
 
 // @ts-ignore
-globalThis.ListItemGroup.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkListItemGroupComponent(nativeNode);
+globalThis.ListItemGroup.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkListItemGroupComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ListItemGroupModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

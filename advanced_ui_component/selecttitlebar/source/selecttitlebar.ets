@@ -15,10 +15,10 @@
 
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 
-export declare class SelectTitleBarMenuItem {
-  value: ResourceStr
-  isEnabled?: boolean
-  action?: () => void
+export interface SelectTitleBarMenuItem {
+  value: ResourceStr;
+  isEnabled?: boolean;
+  action?: () => void;
 }
 
 const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' +
@@ -63,26 +63,26 @@ const PUBLIC_BACK = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAY' 
 export struct SelectTitleBar {
   @State selected: number = 0
 
-  options: Array<SelectOption> = []
-  menuItems: Array<SelectTitleBarMenuItem> = []
+  options: Array<SelectOption> = [];
+  menuItems: Array<SelectTitleBarMenuItem> = [];
 
-  subtitle: ResourceStr = ''
-  badgeValue: number = 0
-  hidesBackButton: boolean = false
+  subtitle: ResourceStr = '';
+  badgeValue: number = 0;
+  hidesBackButton: boolean = false;
 
-  onSelected: ((index: number) => void) = () => {}
+  onSelected: ((index: number) => void) = () => {};
 
-  private static readonly badgeSize = 16
-  private static readonly totalHeight = 56
-  private static readonly leftPadding = 24
-  private static readonly leftPaddingWithBack = 12
-  private static readonly rightPadding = 24
-  private static readonly badgePadding = 16
-  private static readonly subtitleLeftPadding = 4
-  private static instanceCount = 0
+  private static readonly badgeSize = 16;
+  private static readonly totalHeight = 56;
+  private static readonly leftPadding = 24;
+  private static readonly leftPaddingWithBack = 12;
+  private static readonly rightPadding = 24;
+  private static readonly badgePadding = 16;
+  private static readonly subtitleLeftPadding = 4;
+  private static instanceCount = 0;
 
-  @State selectMaxWidth: number = 0
-  @State backActive: boolean = false
+  @State selectMaxWidth: number = 0;
+  @State backActive: boolean = false;
 
   build() {
     Flex({
@@ -92,13 +92,13 @@ export struct SelectTitleBar {
       Row() {
         if (!this.hidesBackButton) {
           Navigator()
-            .active(this.backActive)
+            .active(this.backActive);
 
           ImageMenuItem({ item: {
             value: PUBLIC_BACK,
             isEnabled: true,
             action: () => this.backActive = true
-          }, index: -1 })
+          }, index: -1 });
         }
 
         Column() {
@@ -116,7 +116,7 @@ export struct SelectTitleBar {
               Row() {
                 Select(this.options)
                   .selected(this.selected)
-                  .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : "")
+                  .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
                   .font({ size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')
                     : $r('sys.float.ohos_id_text_size_headline8') })
@@ -124,16 +124,16 @@ export struct SelectTitleBar {
                   .backgroundColor(Color.Transparent)
                   .onSelect(this.onSelected)
                   .constraintSize({ maxWidth: this.selectMaxWidth })
-                  .offset({ x: -4 })
+                  .offset({ x: -4 });
               }
               .justifyContent(FlexAlign.Start)
-              .margin({ right: $r('sys.float.ohos_id_elements_margin_horizontal_l') })
+              .margin({ right: $r('sys.float.ohos_id_elements_margin_horizontal_l') });
             }
           } else {
             Row() {
               Select(this.options)
                 .selected(this.selected)
-                .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : "")
+                .value(this.selected < this.options.length ? this.options[this.selected].value.toString() : '')
                 .font({ size: this.hidesBackButton && !this.subtitle
                   ? $r('sys.float.ohos_id_text_size_headline7')
                   : $r('sys.float.ohos_id_text_size_headline8') })
@@ -141,9 +141,9 @@ export struct SelectTitleBar {
                 .backgroundColor(Color.Transparent)
                 .onSelect(this.onSelected)
                 .constraintSize({ maxWidth: this.selectMaxWidth })
-                .offset({ x: -4 })
+                .offset({ x: -4 });
             }
-            .justifyContent(FlexAlign.Start)
+            .justifyContent(FlexAlign.Start);
           }
           if (this.subtitle !== undefined) {
             Row() {
@@ -153,44 +153,46 @@ export struct SelectTitleBar {
                 .maxLines(1)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .constraintSize({ maxWidth: this.selectMaxWidth })
-                .offset({ y: -4 })
+                .offset({ y: -4 });
             }
             .justifyContent(FlexAlign.Start)
-            .margin({ left: SelectTitleBar.subtitleLeftPadding })
+            .margin({ left: SelectTitleBar.subtitleLeftPadding });
           }
         }
         .justifyContent(FlexAlign.Start)
         .alignItems(HorizontalAlign.Start)
-        .constraintSize({ maxWidth: this.selectMaxWidth })
+        .constraintSize({ maxWidth: this.selectMaxWidth });
       }
-      .margin({ left: this.hidesBackButton ? $r('sys.float.ohos_id_max_padding_start') : $r('sys.float.ohos_id_default_padding_start') })
+      .margin({ left: this.hidesBackButton ? $r('sys.float.ohos_id_max_padding_start') :
+      $r('sys.float.ohos_id_default_padding_start') });
 
       if (this.menuItems !== undefined && this.menuItems.length > 0) {
-        CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + SelectTitleBar.instanceCount++ })
+        CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + SelectTitleBar.instanceCount++ });
       }
     }
     .width('100%')
     .height(SelectTitleBar.totalHeight)
     .backgroundColor($r('sys.color.ohos_id_color_background'))
     .onAreaChange((_oldValue: Area, newValue: Area) => {
-      let newWidth = Number(newValue.width)
+      let newWidth = Number(newValue.width);
       if (!this.hidesBackButton) {
-        newWidth -= ImageMenuItem.imageHotZoneWidth
-        newWidth += SelectTitleBar.leftPadding
-        newWidth -= SelectTitleBar.leftPaddingWithBack
+        newWidth -= ImageMenuItem.imageHotZoneWidth;
+        newWidth += SelectTitleBar.leftPadding;
+        newWidth -= SelectTitleBar.leftPaddingWithBack;
       }
       if (this.menuItems !== undefined) {
-        let menusLength = this.menuItems.length
+        let menusLength = this.menuItems.length;
         if (menusLength >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          newWidth -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems
+          newWidth -= ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
         } else if (menusLength > 0) {
-          newWidth -= ImageMenuItem.imageHotZoneWidth * menusLength
+          newWidth -= ImageMenuItem.imageHotZoneWidth * menusLength;
         }
       }
       if (this.badgeValue) {
-        this.selectMaxWidth = newWidth - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding - SelectTitleBar.badgePadding
+        this.selectMaxWidth = newWidth - SelectTitleBar.badgeSize - SelectTitleBar.leftPadding -
+        SelectTitleBar.rightPadding - SelectTitleBar.badgePadding;
       } else {
-        this.selectMaxWidth = newWidth - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding
+        this.selectMaxWidth = newWidth - SelectTitleBar.leftPadding - SelectTitleBar.rightPadding;
       }
     })
   }
@@ -198,8 +200,8 @@ export struct SelectTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
-  menuItems: Array<SelectTitleBarMenuItem> = []
-  index: number = 0
+  menuItems: Array<SelectTitleBarMenuItem> = [];
+  index: number = 0;
 
   static readonly maxCountOfVisibleItems = 3
   private static readonly focusPadding = 4
@@ -230,7 +232,8 @@ struct CollapsibleMenuSection {
 
   aboutToAppear() {
     this.menuItems.forEach((item, index) => {
-      if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+      if (item.isEnabled && this.firstFocusableIndex == -1 &&
+        index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
         this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
@@ -244,9 +247,10 @@ struct CollapsibleMenuSection {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item: SelectTitleBarMenuItem, index) => {
-            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
-          })
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+            (item: SelectTitleBarMenuItem, index) => {
+              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+            })
 
           Row() {
             Image(PUBLIC_MORE)
@@ -322,9 +326,10 @@ struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item: SelectTitleBarMenuItem, index) => {
-        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
-      })
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
+        (item: SelectTitleBarMenuItem, index) => {
+          ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
+        })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
@@ -336,15 +341,15 @@ struct CollapsibleMenuSection {
 
 @Component
 struct ImageMenuItem {
-  item: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem
-  index: number = 0
+  item: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem;
+  index: number = 0;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
   static readonly buttonBorderRadius = 8
   static readonly focusBorderWidth = 2
   static readonly disabledImageOpacity = 0.4
-  static readonly focusablePrefix = "Id-SelectTitleBar-ImageMenuItem-"
+  static readonly focusablePrefix = 'Id-SelectTitleBar-ImageMenuItem-';
 
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false

@@ -24,7 +24,8 @@
 
 namespace OHOS::Ace::NG {
 
-void RadioModelNG::Create(const std::optional<std::string>& value, const std::optional<std::string>& group)
+void RadioModelNG::Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
+    const std::optional<int32_t>& indicator)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
@@ -40,12 +41,31 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
     if (group.has_value()) {
         eventHub->SetGroup(group.value());
     }
+    if (indicator.has_value()) {
+        SetRadioIndicator(indicator.value());
+    }
+}
+
+void RadioModelNG::SetBuilder(std::function<void()>&& buildFunc)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto radioPattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(radioPattern);
+    radioPattern->SetBuilder(std::move(buildFunc));
+}
+
+void RadioModelNG::SetRadioIndicator(int32_t indicator)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator);
 }
 
 void RadioModelNG::SetChecked(bool isChecked)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
@@ -172,5 +192,19 @@ void RadioModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
+}
+
+void RadioModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRadioChecked(value);
 }
 } // namespace OHOS::Ace::NG

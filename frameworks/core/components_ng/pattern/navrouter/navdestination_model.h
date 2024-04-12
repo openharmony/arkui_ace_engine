@@ -42,6 +42,8 @@ public:
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
     virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
+    virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
+    virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;

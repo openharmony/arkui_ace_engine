@@ -263,6 +263,8 @@ public:
             theme->optionTextStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->optionTextStyle_.SetTextColor(pattern->GetAttr<Color>("select_font_color", Color(0xe5000000)));
             theme->optionTextStyle_.SetTextDecoration(TextDecoration::NONE);
+            theme->menuLargeMargin_ = pattern->GetAttr<Dimension>("menu_large_margin", theme->menuLargeMargin_);
+            theme->menuMediumMargin_ = pattern->GetAttr<Dimension>("menu_medium_margin", theme->menuMediumMargin_);
         }
     };
 
@@ -360,6 +362,8 @@ public:
         theme->expandDisplay_ = expandDisplay_;
         theme->maxPaddingStart_ = maxPaddingStart_;
         theme->maxPaddingEnd_ = maxPaddingEnd_;
+        theme->menuLargeMargin_ = menuLargeMargin_;
+        theme->menuMediumMargin_ = menuMediumMargin_;
         return theme;
     }
 
@@ -991,6 +995,14 @@ public:
     {
         return maxPaddingEnd_;
     }
+    const Dimension& GetMenuLargeMargin() const
+    {
+        return menuLargeMargin_;
+    }
+    const Dimension& GetMenuMediumMargin() const
+    {
+        return menuMediumMargin_;
+    }
 
 private:
     Color disabledColor_;
@@ -1101,6 +1113,8 @@ private:
     std::unordered_map<ControlSize, Dimension> selectSpinnerWidthMap_;
     std::unordered_map<ControlSize, Dimension> selectSpinnerHeightMap_;
     std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
+    Dimension menuLargeMargin_;
+    Dimension menuMediumMargin_;
 };
 
 } // namespace OHOS::Ace

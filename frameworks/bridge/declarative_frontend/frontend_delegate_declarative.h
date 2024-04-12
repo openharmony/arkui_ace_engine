@@ -210,6 +210,11 @@ public:
     void RemoveCustomDialog() override;
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;
+    void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
+        std::function<void(int32_t)> &&callback) override;
+
+    RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(void* value) override;
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;
 
@@ -273,6 +278,14 @@ public:
     void CreateSnapshot(std::function<void()>&& customBuilder,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector) override;
+
+    void AddFrameNodeToOverlay(
+        const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
+    void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
+    void ShowAllNodesOnOverlay() override;
+    void HideAllNodesOnOverlay() override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 
@@ -419,6 +432,9 @@ private:
     bool IsNavigationStage(const PageTarget& target);
     void RecycleSinglePage();
     void ClearAlertCallback(PageInfo pageInfo);
+    bool CheckIndexValid(int32_t index) const;
+
+    DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;

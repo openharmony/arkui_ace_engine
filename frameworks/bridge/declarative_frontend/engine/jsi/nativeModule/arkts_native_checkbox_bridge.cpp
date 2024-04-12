@@ -14,10 +14,35 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 const bool DEFAULT_SELECTED = false;
+const char* CHECKBOX_NODEPTR_OF_UINODE = "nodePtr_";
+panda::Local<panda::JSValueRef> JsCheckboxChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    auto vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsBoolean()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool value = firstArg->ToBoolean(vm)->Value();
+    auto ref = runtimeCallInfo->GetThisRef();
+    auto obj = ref->ToObject(vm);
+    if (obj->GetNativePointerFieldCount() < 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    CheckBoxModelNG::SetChangeValue(frameNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
 
 ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -47,8 +72,8 @@ ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCall
         strokeWidth = theme->GetCheckStroke();
     }
 
-    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(
-        nativeNode, strokeColor.GetValue(), size.Value(), strokeWidth.Value());
+    GetArkUINodeModifiers()->getCheckboxModifier()->setMark(nativeNode, strokeColor.GetValue(), size.Value(),
+        static_cast<int>(size.Unit()), strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -297,6 +322,53 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxSize(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        CheckBoxModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    CheckBoxModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
+            CheckBoxConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
+            const char* keysOfCheckbox[] = { "name", "selected", "enabled", "triggerChange"};
+            Local<JSValueRef> valuesOfCheckbox[] = { panda::StringRef::NewFromUtf8(vm, config.name_.c_str()),
+                panda::BooleanRef::New(vm, config.selected_), panda::BooleanRef::New(vm, config.enabled_),
+                panda::FunctionRef::New(vm, JsCheckboxChangeCallback)};
+            auto checkbox = panda::ObjectRef::NewWithNamedProperties(vm,
+                ArraySize(keysOfCheckbox), keysOfCheckbox, valuesOfCheckbox);
+            checkbox->SetNativePointerFieldCount(vm, 1);
+            checkbox->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[2] = { context, checkbox };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = obj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, 2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr =
+                resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, CHECKBOX_NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 

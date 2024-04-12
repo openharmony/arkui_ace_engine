@@ -22,7 +22,8 @@ namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT RadioModelImpl : public OHOS::Ace::RadioModel {
 public:
-    void Create(const std::optional<std::string>& value, const std::optional<std::string>& group) override;
+    void Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
+        const std::optional<int32_t>& indicator) override;
     void SetChecked(bool isChecked) override;
     void SetOnChange(NG::ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;

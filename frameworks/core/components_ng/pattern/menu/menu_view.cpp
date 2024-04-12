@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -51,6 +52,22 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
+
+void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
+{
+    CHECK_NULL_VOID(customNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
+    if (frameNode) {
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->SetDragForbiddenForcely(true);
+    }
+    for (const auto& child : customNode->GetChildren()) {
+        SetSelfAndChildDraggableFalse(child);
+    }
+}
 
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
@@ -86,6 +103,19 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
         previewNode->AddChild(previewCustomNode);
         previewNode->MountToParent(wrapperNode);
         previewNode->MarkModifyDone();
+        SetSelfAndChildDraggableFalse(previewCustomNode);
+        
+        auto pipeline = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_RETURN(pipeline, std::make_pair(wrapperNode, menuNode));
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_RETURN(manager, std::make_pair(wrapperNode, menuNode));
+        auto gatherNode = manager->GetGatherNode();
+        CHECK_NULL_RETURN(gatherNode, std::make_pair(wrapperNode, menuNode));
+        auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_RETURN(textNode, std::make_pair(wrapperNode, menuNode));
+        textNode->MountToParent(wrapperNode);
+        textNode->MarkModifyDone();
     }
 
     return { wrapperNode, menuNode };
@@ -274,6 +304,28 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
 }
 
+void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto gatherNode = manager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textNode);
+    textNode->MountToParent(menuNode);
+    textNode->MarkModifyDone();
+    auto menuPattern = GetMenuPattern(menuNode);
+    CHECK_NULL_VOID(menuPattern);
+    mainPipeline->AddAfterRenderTask([imageNode, manager, textNode, menuPattern]() {
+        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
+        DragAnimationHelper::ShowBadgeAnimation(textNode);
+    });
+}
+
 void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
 {
     if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
@@ -341,52 +393,18 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = imageNode->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
     } else {
         ShowPixelMapAnimation(imageNode, menuNode);
+        ShowGatherAnimation(imageNode, menuNode);
     }
 }
 
-void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
-{
-    CHECK_NULL_VOID(columnNode);
-
-    auto filterRenderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(filterRenderContext);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-
-    auto maskColor = menuTheme->GetPreviewMenuMaskColor();
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
-    styleOption.colorMode = ThemeColorMode::SYSTEM;
-
-    AnimationOption option;
-    option.SetDuration(menuTheme->GetFilterAnimationDuration());
-    option.SetCurve(Curves::SHARP);
-    option.SetOnFinishEvent([] {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        auto manager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->SetFilterActive(false);
-    });
-    filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
-    AnimationUtils::Animate(
-        option,
-        [filterRenderContext, styleOption, maskColor]() {
-            CHECK_NULL_VOID(filterRenderContext);
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-                filterRenderContext->UpdateBackBlurStyle(styleOption);
-            } else {
-                filterRenderContext->UpdateBackgroundColor(maskColor);
-            }
-        },
-        option.GetOnFinishEvent());
-}
-
-void SetFilter(const RefPtr<FrameNode>& targetNode)
+void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
 {
     auto parent = targetNode->GetParent();
     CHECK_NULL_VOID(parent);
@@ -408,17 +426,25 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
         columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         // set filter
         auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow()) {
+        CHECK_NULL_VOID(container);
+        if (container->IsScenceBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
+            manager->ShowFilterAnimation(columnNode);
+        } else if (container->IsUIExtensionWindow()) {
+            // mount filter node on subwindow to ensure filter node's size equals to host window's size
+            CHECK_NULL_VOID(menuWrapperNode);
+            auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(menuWrapperPattern);
+            menuWrapperPattern->SetFilterColumnNode(columnNode);
         } else {
             columnNode->MountToParent(parent);
             columnNode->OnMountToParentDone();
             manager->SetHasFilter(true);
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            manager->ShowFilterAnimation(columnNode);
         }
-        ShowFilterAnimation(columnNode);
     }
 }
 } // namespace
@@ -534,7 +560,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     }
     if (type == MenuType::CONTEXT_MENU && menuParam.previewMode != MenuPreviewMode::NONE) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode);
+        SetFilter(targetNode, wrapperNode);
         if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
             SetPixelMap(targetNode, wrapperNode);
         }
@@ -545,9 +571,16 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 void MenuView::UpdateMenuPaintProperty(
     const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& type)
 {
-    if (!(type == MenuType::CONTEXT_MENU)) {
-        return;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!(type == MenuType::CONTEXT_MENU || type == MenuType::MENU)) {
+            return;
+        }
+    } else {
+        if (!(type == MenuType::CONTEXT_MENU)) {
+            return;
+        }
     }
+
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateEnableArrow(menuParam.enableArrow.value_or(false));

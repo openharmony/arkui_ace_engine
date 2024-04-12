@@ -78,6 +78,7 @@ class FrameNodeModifier extends ArkComponent {
         return;
       }
       value.applyStage(this.nativePtr);
+      getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
     })
   }
   setNodePtr(nodePtr: NodePtr): void {
@@ -212,7 +213,7 @@ class FrameNode {
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
-    this._childList.set(sibling.nodeId_,sibling);
+    this._childList.set(child.nodeId_,child);
   }
   removeChild(node: FrameNode): void {
     this.checkType();
@@ -299,6 +300,84 @@ class FrameNode {
   getPositionToWindow(): Position {
     const position = getUINativeModule().frameNode.getPositionToWindow(this.nodePtr_);
     return { x: position[0], y: position[1] };
+  }
+
+  getMeasuredSize(): Size {
+    const size = getUINativeModule().frameNode.getMeasuredSize(this.nodePtr_);
+    return { width: size[0], height: size[1] };
+  }
+
+  getLayoutPosition(): Position {
+    const position = getUINativeModule().frameNode.getLayoutPosition(this.nodePtr_);
+    return { x: position[0], y: position[1] };
+  }
+
+  getUserConfigBorderWidth(): EdgesT<LengthMetric> {
+    const borderWidth = getUINativeModule().frameNode.getConfigBorderWidth(this.nodePtr_);
+    return {
+      top: new LengthMetric(borderWidth[0], borderWidth[1]),
+      right: new LengthMetric(borderWidth[2], borderWidth[3]),
+      bottom: new LengthMetric(borderWidth[4], borderWidth[5]),
+      left: new LengthMetric(borderWidth[6], borderWidth[7])
+    };
+  }
+
+  getUserConfigPadding(): EdgesT<LengthMetric> {
+    const borderWidth = getUINativeModule().frameNode.getConfigPadding(this.nodePtr_);
+    return {
+      top: new LengthMetric(borderWidth[0], borderWidth[1]),
+      right: new LengthMetric(borderWidth[2], borderWidth[3]),
+      bottom: new LengthMetric(borderWidth[4], borderWidth[5]),
+      left: new LengthMetric(borderWidth[6], borderWidth[7])
+    };
+  }
+
+  getUserConfigMargin(): EdgesT<LengthMetric> {
+    const margin = getUINativeModule().frameNode.getConfigMargin(this.nodePtr_);
+    return {
+      top: new LengthMetric(margin[0], margin[1]),
+      right: new LengthMetric(margin[2], margin[3]),
+      bottom: new LengthMetric(margin[4], margin[5]),
+      left: new LengthMetric(margin[6], margin[7])
+    };
+  }
+
+  getUserConfigSize(): SizeT<LengthMetric> {
+      const size = getUINativeModule().frameNode.getConfigSize(this.nodePtr_);
+      return {
+        width: new LengthMetric(size[0], size[1]),
+        height: new LengthMetric(size[2], size[3])
+    };
+  }
+
+  getId(): string {
+      return getUINativeModule().frameNode.getId(this.nodePtr_);
+  }
+
+  getNodeType(): string {
+      return getUINativeModule().frameNode.getNodeType(this.nodePtr_);
+  }
+
+  getOpacity(): number {
+      return getUINativeModule().frameNode.getOpacity(this.nodePtr_);
+  }
+
+  isVisible(): boolean {
+      return getUINativeModule().frameNode.isVisible(this.nodePtr_);
+  }
+
+  isClipToFrame(): boolean {
+      return getUINativeModule().frameNode.isClipToFrame(this.nodePtr_);
+  }
+
+  isAttached(): boolean {
+      return getUINativeModule().frameNode.isAttached(this.nodePtr_);
+  }
+
+  getInspectorInfo(): Object {
+      const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.nodePtr_);
+      const inspectorInfo = JSON.parse(inspectorInfoStr);
+      return inspectorInfo;
   }
 
   get commonAttribute(): ArkComponent {

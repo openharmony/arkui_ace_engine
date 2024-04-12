@@ -50,6 +50,9 @@ template("declarative_frontend") {
       "ets_runtime:libark_jsruntime",
       "napi:ace_napi",
     ]
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
   }
 }
 
@@ -75,7 +78,6 @@ base_output_path = get_label_info(":gen_js_proxyclass", "target_out_dir")
 jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
-jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
 gen_obj("js_proxyclass") {
@@ -117,15 +119,6 @@ if (!is_arkui_x) {
   }
 }
 
-gen_obj("js_uicontext") {
-  input = "engine/jsUIContext.js"
-  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    jsuicontext_obj_path = base_output_path + "/jsUIContext.c"
-  }
-  output = jsuicontext_obj_path
-  snapshot_dep = []
-}
-
 # build declarative javascript engine source
 template("declarative_js_engine") {
   forward_variables_from(invoker, "*")
@@ -143,7 +136,17 @@ template("declarative_js_engine") {
       defines += [ "SIMULATOR_64" ]
     }
 
-    deps = []
+    deps = [
+      ":ark_modifier",
+      ":gen_obj_src_ark_component",
+      ":gen_obj_src_js_enum_style",
+      ":gen_obj_src_js_proxyclass",
+      ":shape",
+      ":uicontext",
+      ":x_node",
+      "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+    ]
+
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
@@ -275,6 +278,7 @@ template("declarative_js_engine") {
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
+      "jsview/js_repeat.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -425,6 +429,9 @@ template("declarative_js_engine") {
     ]
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
@@ -565,21 +572,6 @@ template("declarative_js_engine") {
       }
     }
 
-    deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
-
-    deps += [
-      ":gen_obj_src_ark_component",
-      ":gen_obj_src_js_enum_style",
-      ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
-    ]
-
-    deps += [ ":x_node" ]
-
-    deps += [ ":ark_modifier" ]
-
-    deps += [ ":shape" ]
-
     include_dirs +=
         [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
@@ -655,7 +647,17 @@ template("declarative_js_engine_ng") {
       defines += [ "SIMULATOR_64" ]
     }
 
-    deps = []
+    deps = [
+      ":ark_modifier",
+      ":gen_obj_src_ark_component",
+      ":gen_obj_src_js_enum_style",
+      ":gen_obj_src_js_proxyclass",
+      ":shape",
+      ":uicontext",
+      ":x_node",
+      "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+    ]
+
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
@@ -790,6 +792,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
+      "jsview/js_repeat.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -842,7 +845,11 @@ template("declarative_js_engine_ng") {
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
 
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
       sources += [
@@ -984,21 +991,6 @@ template("declarative_js_engine_ng") {
       ]
     }
 
-    deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
-
-    deps += [
-      ":gen_obj_src_ark_component",
-      ":gen_obj_src_js_enum_style",
-      ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
-    ]
-
-    deps += [ ":x_node" ]
-
-    deps += [ ":ark_modifier" ]
-
-    deps += [ ":shape" ]
-
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
@@ -1064,6 +1056,15 @@ foreach(item, ace_platforms) {
 ohos_abc("x_node") {
   sources = [ "engine/jsXNode.js" ]
   output_name = "node"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("uicontext") {
+  sources = [ "engine/jsUIContext.js" ]
+  output_name = "uicontext"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

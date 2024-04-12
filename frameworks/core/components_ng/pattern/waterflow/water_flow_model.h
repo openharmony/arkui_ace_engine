@@ -84,6 +84,8 @@ public:
         return nullptr;
     }
 
+    virtual void ResetSections() {}
+
 private:
     static std::unique_ptr<WaterFlowModel> instance_;
     static std::mutex mutex_;

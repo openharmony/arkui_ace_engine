@@ -60,6 +60,10 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetShowCount(showCount);
     timePickerRowPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ZeroPrefixType hourType = ZeroPrefixType::SHOW;
+        timePickerRowPattern->SetPrefixHour(hourType);
+    }
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();

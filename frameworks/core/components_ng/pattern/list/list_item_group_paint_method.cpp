@@ -84,8 +84,8 @@ void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& dgInfo,
                     laneIdx * ((dgInfo.crossSize - fSpacingTotal_) / dgInfo.lanes + laneGutter_);
                 OffsetF offset = vertical_ ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
                 dividerPainter.DrawLine(canvas, offset);
-                laneIdx++;
             }
+            laneIdx++;
         }
     }
 }

@@ -113,12 +113,12 @@ ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index)
 ArkUINodeHandle GetFirst(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetAllChildrenWithBuild(false);
     auto child = frameNode->GetChildByIndex(0);
     auto childNode = AceType::DynamicCast<FrameNode>(child);
+    CHECK_NULL_RETURN(childNode, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
 }
 
@@ -187,9 +187,103 @@ ArkUI_Float32* GetPositionToWindow(ArkUINodeHandle node)
     return ret;
 }
 
+ArkUI_Float32* GetMeasuredSize(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto offset = currentNode->GetGeometryNode()->GetFrameSize();
+    ArkUI_Float32* ret = new ArkUI_Float32[2];
+    ret[0] = offset.Width();
+    ret[1] = offset.Height();
+    return ret;
+}
+
+ArkUI_Float32* GetLayoutPosition(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto offset = currentNode->GetGeometryNode()->GetMarginFrameOffset();
+    ArkUI_Float32* ret = new ArkUI_Float32[2];
+    ret[0] = offset.GetX();
+    ret[1] = offset.GetY();
+    return ret;
+}
+
+ArkUI_CharPtr GetInspectorId(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, "");
+    auto inspectorIdProp = currentNode->GetInspectorId();
+    if (inspectorIdProp.has_value()) {
+        static std::string inspectorId;
+        inspectorId = inspectorIdProp.value();
+        return inspectorId.c_str();
+    }
+    
+    return "";
+}
+
+ArkUI_CharPtr GetNodeType(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, "");
+    static std::string nodeType;
+    nodeType = currentNode->GetTag();
+    return nodeType.c_str();
+}
+
+ArkUI_Bool IsVisible(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    auto isVisible = currentNode->IsVisible();
+    auto parentNode = currentNode->GetParent();
+    while(isVisible && parentNode && AceType::InstanceOf<FrameNode>(*parentNode)){
+        isVisible = isVisible && AceType::DynamicCast<FrameNode>(parentNode)->IsVisible();
+        parentNode = parentNode->GetParent();
+    }
+    return isVisible;
+}
+
+ArkUI_Bool IsAttached(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    return currentNode->IsOnMainTree();
+}
+
+ArkUI_CharPtr GetInspectorInfo(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, "{}");
+    static std::string inspectorInfo;
+    inspectorInfo = NG::Inspector::GetInspectorOfNode(OHOS::Ace::AceType::Claim<FrameNode>(currentNode));
+    return inspectorInfo.c_str();
+}
+
 ArkUINodeHandle GetFrameNodeById(ArkUI_Int32 nodeId)
 {
     auto node = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
+ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
+{
+    auto node = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(uniqueId));
+    CHECK_NULL_RETURN(node, nullptr);
+    if (node->GetTag() == "root" || node->GetTag() == "stage" || node->GetTag() == "page") {
+        return nullptr;
+    }
+
+    if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+        auto parent = node->GetParent();
+        if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+            node = parent;
+        } else {
+            node = node->GetFirstChild();
+        }
+    }
+
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -199,13 +293,34 @@ ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
+void PropertyUpdate(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    if (uiNode) {
+        uiNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    }
+}
+
+ArkUINodeHandle GetLast(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto size = frameNode->GetAllChildrenWithBuild(false).size();
+    auto child = frameNode->GetChildByIndex(size - 1);
+    auto childNode = AceType::DynamicCast<FrameNode>(child);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(childNode));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
         RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
-        GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow,
-        GetFrameNodeById, GetFrameNodeByKey };
+        GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow, GetMeasuredSize,
+        GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById,
+        GetFrameNodeByUniqueId, GetFrameNodeByKey, PropertyUpdate, GetLast };
     return &modifier;
 }
 } // namespace NodeModifier

@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -47,8 +46,13 @@ constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension LUNARSWITCH_MARGIN_TO_BUTTON = 8.0_vp;
+constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
+constexpr int32_t RATIO_SEVEN = 7;
+constexpr int32_t RATIO_FOUR = 4;
+constexpr int32_t RATIO_THREE = 3;
+constexpr int32_t RATIO_TWO = 2;
 constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
@@ -61,166 +65,33 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto pickerStack = CreateStackNode();
-    auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dateNode =
-        CreateDateNode(dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
-    ViewStackProcessor::GetInstance()->Push(dateNode);
-    dateNode->MountToParent(pickerStack);
+    auto dateNode = CreateAndMountDateNode(settingData, pickerStack);
     auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     pickerPattern->SetIsShowInDialog(true);
-
-    // create title node and bind title text id to date picker, then mark picker node modify done
-    auto buttonTitleNode = CreateTitleButtonNode(dateNode);
+    auto buttonTitleNode = CreateAndMountButtonTitleNode(dateNode, contentColumn);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
 
-    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
-    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
-
-    buttonTitleNode->MountToParent(contentColumn);
-    std::function<void(bool)> lunarChangeEvent = [weak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
-        auto datePicker = weak.Upgrade();
-        CHECK_NULL_VOID(datePicker);
-        auto layoutProp = datePicker->GetLayoutProperty<DataPickerRowLayoutProperty>();
-        CHECK_NULL_VOID(layoutProp);
-        layoutProp->UpdateLunar(selected);
-        datePicker->MarkModifyDone();
-    };
+    std::function<void(bool)> lunarChangeEvent = CreateLunarChangeEvent(dateNode);
     RefPtr<FrameNode> acceptNode = dateNode;
     if (settingData.showTime) {
         switchFlag_ = false;
         auto pickerRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_RETURN(pickerRow, nullptr);
-        auto layoutProperty = dateNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, nullptr);
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-        auto monthDaysNode = CreateDateNode(
-            monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
-        lunarChangeEvent = [monthDaysNodeWeak = AceType::WeakClaim(AceType::RawPtr(monthDaysNode)),
-                               dateNodeWeak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
-            auto monthDaysNode = monthDaysNodeWeak.Upgrade();
-            auto dateNode = dateNodeWeak.Upgrade();
-            CHECK_NULL_VOID(monthDaysNode);
-            CHECK_NULL_VOID(dateNode);
-            SetShowLunar(monthDaysNode, selected);
-            SetShowLunar(dateNode, selected);
-            monthDaysNode->MarkModifyDone();
-            dateNode->MarkModifyDone();
-        };
-        auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
-        CHECK_NULL_RETURN(monthDaysPickerPattern, nullptr);
-        monthDaysPickerPattern->SetTitleId(pickerPattern->GetTitleId());
-        monthDaysPickerPattern->SetShowTimeFlag(true);
-        pickerPattern->SetShowTimeFlag(true);
-        auto monthDaysLayoutProperty = monthDaysNode->GetLayoutProperty();
-        CHECK_NULL_RETURN(monthDaysLayoutProperty, nullptr);
-        monthDaysLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(NG::CalcLength(
-                         Dimension(settingData.useMilitary ? MONTHDAYS_WIDTH_PERCENT_ONE : MONTHDAYS_WIDTH_PERCENT_TWO,
-                             DimensionUnit::PERCENT)),
-                std::nullopt));
-        monthDaysNode->MarkModifyDone();
-        monthDaysNode->MountToParent(pickerRow);
-        auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
-        auto timePickerEventHub = timeNode->GetEventHub<TimePickerEventHub>();
-        CHECK_NULL_RETURN(timePickerEventHub, nullptr);
-        auto onChangeCallback = [weak = WeakPtr<FrameNode>(monthDaysNode)]() {
-            auto monthDaysNode = weak.Upgrade();
-            CHECK_NULL_VOID(monthDaysNode);
-            auto pickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
-            CHECK_NULL_VOID(pickerPattern);
-            auto str = pickerPattern->GetSelectedObject(true);
-            auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
-            CHECK_NULL_VOID(datePickerEventHub);
-            datePickerEventHub->FireDialogChangeEvent(str);
-        };
-        timePickerEventHub->SetOnChangeForDatePicker(std::move(onChangeCallback));
-        auto timeLayoutProperty = timeNode->GetLayoutProperty();
-        CHECK_NULL_RETURN(timeLayoutProperty, nullptr);
-        timeLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(NG::CalcLength(Dimension(settingData.useMilitary ? TIME_WIDTH_PERCENT_ONE : TIME_WIDTH_PERCENT_TWO,
-                         DimensionUnit::PERCENT)),
-                std::nullopt));
-        timeNode->MarkModifyDone();
-        timeNode->MountToParent(pickerRow);
+
+        auto monthDaysNode = CreateAndMountMonthDaysNode(settingData, dateNode, pickerRow, std::move(lunarChangeEvent));
+        CHECK_NULL_RETURN(monthDaysNode, nullptr);
+        auto timeNode = CreateAndMountTimeNode(settingData, monthDaysNode, pickerRow);
+        CHECK_NULL_RETURN(timeNode, nullptr);
+
         pickerRow->MountToParent(pickerStack);
 
         CreateTitleIconNode(buttonTitleNode);
         SetTitleMouseHoverEvent(buttonTitleNode);
         buttonTitleNode->MarkModifyDone();
-        RefPtr<DateTimeAnimationController> animationController = AceType::MakeRefPtr<DateTimeAnimationController>();
-        auto titleSwitchEvent = [weakContentColumn = AceType::WeakClaim(AceType::RawPtr(contentColumn)),
-                                weakPickerStack = AceType::WeakClaim(AceType::RawPtr(pickerStack)),
-                                animationController]() {
-            auto contentColumn = weakContentColumn.Upgrade();
-            CHECK_NULL_VOID(contentColumn);
-            auto pickerStack = weakPickerStack.Upgrade();
-            CHECK_NULL_VOID(pickerStack);
-            // switch picker page.
-            auto pickerRow = pickerStack->GetLastChild();
-            CHECK_NULL_VOID(pickerRow);
-            auto dateNode = AceType::DynamicCast<FrameNode>(pickerStack->GetChildAtIndex(0));
-            CHECK_NULL_VOID(dateNode);
-            auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
-            CHECK_NULL_VOID(datePickerPattern);
-            auto monthDaysNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(0));
-            auto timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
-            CHECK_NULL_VOID(monthDaysNode);
-            CHECK_NULL_VOID(timeNode);
-            auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
-            CHECK_NULL_VOID(timePickerPattern);
-            auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
-            CHECK_NULL_VOID(monthDaysPickerPattern);
-
-            PickerDate selectedDate =
-                switchFlag_ ? datePickerPattern->GetCurrentDate() : monthDaysPickerPattern->GetCurrentDate();
-            SetSelectedDate(switchFlag_ ? monthDaysNode : dateNode, selectedDate);
-            if (switchFlag_) {
-                datePickerPattern->SetFocusDisable();
-                timePickerPattern->SetFocusEnable();
-                monthDaysPickerPattern->SetFocusEnable();
-                monthDaysNode->MarkModifyDone();
-            } else {
-                monthDaysPickerPattern->SetFocusDisable();
-                timePickerPattern->SetFocusDisable();
-                datePickerPattern->SetFocusEnable();
-                dateNode->MarkModifyDone();
-            }
-
-            auto contentRow = AceType::DynamicCast<FrameNode>(contentColumn->GetLastChild());
-            auto titleRow = AceType::DynamicCast<FrameNode>(contentColumn->GetChildAtIndex(0));
-            CHECK_NULL_VOID(titleRow);
-            auto titleButtonNode = AceType::DynamicCast<FrameNode>(titleRow->GetFirstChild());
-            CHECK_NULL_VOID(titleButtonNode);
-            auto titleButtonRowNode = AceType::DynamicCast<FrameNode>(titleButtonNode->GetFirstChild());
-            CHECK_NULL_VOID(titleButtonRowNode);
-            auto spinnerNode = AceType::DynamicCast<FrameNode>(titleButtonRowNode->GetLastChild());
-            CHECK_NULL_VOID(spinnerNode);
-            animationController->SetButtonIcon(spinnerNode);
-            animationController->SetMonthDays(monthDaysNode);
-            animationController->SetDatePicker(dateNode);
-            animationController->SetTimePicker(timeNode);
-            animationController->SetButtonRow(contentRow);
-            switchFlag_ = !switchFlag_;
-
-            animationController->Play(switchFlag_);
-        };
-        auto switchEvent = [func = titleSwitchEvent]() {
-            if (switchFlag_) {
-                func();
-                return true;
-            }
-            return false;
-        };
-        SetDialogSwitchEvent(switchEvent);
-        auto titleClickEvent = [func = std::move(titleSwitchEvent)](const GestureEvent& /* info */) { func(); };
-        auto titleButtonNode = AceType::DynamicCast<FrameNode>(buttonTitleNode->GetFirstChild());
-        CHECK_NULL_RETURN(titleButtonNode, nullptr);
-        auto titleEventHub = titleButtonNode->GetOrCreateGestureEventHub();
-        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(titleClickEvent));
-        titleEventHub->AddClickEvent(onClick);
+        auto titleSwitchEvent = CreateAndSetDialogSwitchEvent(pickerStack, contentColumn);
+        CreateAndAddTitleClickEvent(titleSwitchEvent, buttonTitleNode);
         acceptNode = monthDaysNode;
     }
     dateNode->MarkModifyDone();
@@ -233,41 +104,62 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     pickerStack->MountToParent(contentColumn);
     // build lunarswitch Node
     if (settingData.lunarswitch) {
-        CreateLunarswitchNode(contentColumn, std::move(lunarChangeEvent), settingData.isLunar);
+        CreateLunarswitchNode(contentColumn, dateNode, std::move(lunarChangeEvent), settingData.isLunar);
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
 
     // build dialog accept and cancel button
-    auto changeEvent = dialogEvent["changeId"];
-    auto dateChangeEvent = dialogEvent["dateChangeId"];
-    if (settingData.showTime) {
-        auto changeEventSame = changeEvent;
-        auto dateChangeEventSame = dateChangeEvent;
-        SetDialogChange(acceptNode, std::move(changeEventSame));
-        SetDialogDateChange(acceptNode, std::move(dateChangeEventSame));
-    }
-    SetDialogChange(dateNode, std::move(changeEvent));
-    SetDialogDateChange(dateNode, std::move(dateChangeEvent));
-    auto contentRow = CreateButtonNode(acceptNode, dateNode, dialogEvent, std::move(dialogCancelEvent));
-    CHECK_NULL_RETURN(contentRow, nullptr);
-    auto event = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
-        auto dialogNode = weak.Upgrade();
-        CHECK_NULL_VOID(dialogNode);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        auto overlayManager = pipeline->GetOverlayManager();
-        overlayManager->CloseDialog(dialogNode);
-    };
-    for (const auto& child : contentRow->GetChildren()) {
-        auto firstChild = AceType::DynamicCast<FrameNode>(child);
-        auto gesturHub = firstChild->GetOrCreateGestureEventHub();
-        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
-        gesturHub->AddClickEvent(onClick);
-    }
-    contentRow->AddChild(CreateDividerNode(dateNode), 1);
-    contentRow->MountToParent(contentColumn);
+    BuildDialogAcceptAndCancelButton(
+        settingData, acceptNode, dateNode, dialogNode, contentColumn, dialogEvent, dialogCancelEvent);
+    UpdateContentPadding(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void DatePickerDialogView::SetTimeNodeColumnWeight(
+    const RefPtr<FrameNode>& timeNode, const DatePickerSettingData& settingData)
+{
+    auto timeLayoutProperty = timeNode->GetLayoutProperty();
+    CHECK_NULL_VOID(timeLayoutProperty);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        timeLayoutProperty->UpdateLayoutWeight(settingData.useMilitary ? RATIO_FOUR : RATIO_SEVEN);
+        for (const auto& child : timeNode->GetChildren()) {
+            auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+            auto timeColumnLayoutProperty = frameNodeChild->GetLayoutProperty();
+            timeColumnLayoutProperty->UpdateLayoutWeight(RATIO_TWO);
+        }
+        if (!settingData.useMilitary) {
+            auto child = timeNode->GetFirstChild();
+            auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+            auto timeColumnLayoutProperty = frameNodeChild->GetLayoutProperty();
+            timeColumnLayoutProperty->UpdateLayoutWeight(RATIO_THREE);
+        }
+    } else {
+        timeLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(NG::CalcLength(Dimension(settingData.useMilitary ? TIME_WIDTH_PERCENT_ONE : TIME_WIDTH_PERCENT_TWO,
+                DimensionUnit::PERCENT)),
+            std::nullopt));
+    }
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    textLayoutProperty->UpdateFontSize(pickerTheme->GetLunarSwitchTextSize());
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
+    textNode->MarkModifyDone();
+    return textNode;
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateStackNode()
@@ -302,11 +194,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto titleRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(titleRow, nullptr);
-    auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProps, nullptr);
-    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
-    layoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    UpdateTitleRowLayoutProps(titleRow);
 
     auto buttonTitleNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, pickerPattern->GetButtonTitleId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -341,6 +229,15 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     buttonTitleNode->MountToParent(titleRow);
     titleRow->SetNeedCallChildrenUpdate(false);
     return titleRow;
+}
+
+void DatePickerDialogView::UpdateTitleRowLayoutProps(const RefPtr<FrameNode>& titleRow)
+{
+    auto layoutProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    layoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonRowNode()
@@ -426,6 +323,11 @@ RefPtr<FrameNode> DatePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        MarginProperty margin;
+        margin.top = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+        layoutProps->UpdateMargin(margin);
+    }
 
     contentRow->SetNeedCallChildrenUpdate(false);
     SetDialogDateAcceptEvent(dateNode, std::move(dateAcceptEvent));
@@ -590,9 +492,15 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(monthColumnNode);
     datePickerPattern->SetColumn(dayColumnNode);
 
-    MountColumnNodeToPicker(yearColumnNode, dateNode);
-    MountColumnNodeToPicker(monthColumnNode, dateNode);
-    MountColumnNodeToPicker(dayColumnNode, dateNode);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        MountColumnNodeToPicker(yearColumnNode, dateNode, RATIO_THREE);
+        MountColumnNodeToPicker(monthColumnNode, dateNode, RATIO_TWO);
+        MountColumnNodeToPicker(dayColumnNode, dateNode, RATIO_TWO);
+    } else {
+        MountColumnNodeToPicker(yearColumnNode, dateNode);
+        MountColumnNodeToPicker(monthColumnNode, dateNode);
+        MountColumnNodeToPicker(dayColumnNode, dateNode);
+    }
 }
 
 void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount)
@@ -608,7 +516,11 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(monthDaysColumnNode);
     datePickerPattern->SetColumn(yearColumnNode);
 
-    MountColumnNodeToPicker(monthDaysColumnNode, dateNode);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        MountColumnNodeToPicker(monthDaysColumnNode, dateNode, RATIO_FOUR);
+    } else {
+        MountColumnNodeToPicker(monthDaysColumnNode, dateNode);
+    }
 
     {
         auto stackYearNode = CreateStackNode();
@@ -630,8 +542,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TIME_PICKER_ETS_TAG, nodeId);
-    auto timePickerNode = FrameNode::GetOrCreateFrameNode(V2::TIME_PICKER_ETS_TAG,
-        nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
+    auto timePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
     CHECK_NULL_RETURN(timePickerNode, nullptr);
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
@@ -642,6 +554,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     timePickerRowPattern->SetShowCount(showCount);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ZeroPrefixType hourType = ZeroPrefixType::SHOW;
+        timePickerRowPattern->SetPrefixHour(hourType);
+    }
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -671,7 +587,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
 }
 
 void DatePickerDialogView::MountColumnNodeToPicker(
-    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode)
+    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& pickerNode, uint32_t columnWeight)
 {
     auto stackNode = CreateStackNode();
     auto blendNode = CreateColumnNode();
@@ -681,7 +597,7 @@ void DatePickerDialogView::MountColumnNodeToPicker(
     blendNode->MountToParent(stackNode);
     auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateAlignment(Alignment::CENTER);
-    layoutProperty->UpdateLayoutWeight(1);
+    layoutProperty->UpdateLayoutWeight(columnWeight);
     stackNode->MountToParent(pickerNode);
     columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
 }
@@ -736,8 +652,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(
     return buttonCancelNode;
 }
 
-void DatePickerDialogView::CreateLunarswitchNode(
-    const RefPtr<FrameNode>& contentColumn, std::function<void(const bool)>&& changeEvent, bool isLunar)
+void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn,
+    const RefPtr<FrameNode>& dateNode, std::function<void(const bool)>&& changeEvent, bool isLunar)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -748,9 +664,11 @@ void DatePickerDialogView::CreateLunarswitchNode(
     CHECK_NULL_VOID(contentRow);
     auto layoutProps = contentRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
-    MarginProperty margin;
-    margin.bottom = CalcLength(LUNARSWITCH_MARGIN_TO_BUTTON);
-    layoutProps->UpdateMargin(margin);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        MarginProperty margin;
+        margin.bottom = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+        layoutProps->UpdateMargin(margin);
+    }
     layoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(LUNARSWITCH_HEIGHT)));
 
@@ -766,24 +684,21 @@ void DatePickerDialogView::CreateLunarswitchNode(
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
-    marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    }
     marginCheckbox.right = CalcLength(LUNARSWITCH_MARGIN_TO_BUTTON);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
     checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
     checkbox->MarkModifyDone();
     checkbox->MountToParent(contentRow);
 
-    auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textNode = CreateLunarSwitchTextNode();
     CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    // the unicode encoding of chinese string of lunarSwitch.
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetLunarSwitchTextSize());
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
-    textNode->MarkModifyDone();
     textNode->MountToParent(contentRow);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetLunarSwitchTextNode(textNode);
 
     contentRow->MountToParent(contentColumn);
 }
@@ -1002,5 +917,248 @@ void DatePickerDialogView::PlayHoverAnimation(const RefPtr<FrameNode>& titleButt
         buttonTitleRenderContext->UpdateBackgroundColor(color);
         buttonTitleNode->MarkDirtyNode();
     });
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateAndMountDateNode(
+    const DatePickerSettingData& settingData, const RefPtr<FrameNode>& pickerStack)
+{
+    auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dateNode =
+        CreateDateNode(dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    ViewStackProcessor::GetInstance()->Push(dateNode);
+    dateNode->MountToParent(pickerStack);
+    return dateNode;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateAndMountButtonTitleNode(
+    const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& contentColumn)
+{
+    // create title node and bind title text id to date picker, then mark picker node modify done
+    auto buttonTitleNode = CreateTitleButtonNode(dateNode);
+    CHECK_NULL_RETURN(buttonTitleNode, nullptr);
+
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto layoutProps = buttonTitleNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        MarginProperty margin;
+        margin.bottom = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+        layoutProps->UpdateMargin(margin);
+    }
+
+    buttonTitleNode->MountToParent(contentColumn);
+    return buttonTitleNode;
+}
+
+std::function<void(bool)> DatePickerDialogView::CreateLunarChangeEvent(const RefPtr<FrameNode>& dateNode)
+{
+    return [weak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
+        auto datePicker = weak.Upgrade();
+        CHECK_NULL_VOID(datePicker);
+        auto layoutProp = datePicker->GetLayoutProperty<DataPickerRowLayoutProperty>();
+        CHECK_NULL_VOID(layoutProp);
+        layoutProp->UpdateLunar(selected);
+        datePicker->MarkModifyDone();
+    };
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePickerSettingData& settingData,
+    const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow, std::function<void(bool)>&& lunarChangeEvent)
+{
+    auto layoutProperty = dateNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto monthDaysNode = CreateDateNode(
+        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    lunarChangeEvent = [monthDaysNodeWeak = AceType::WeakClaim(AceType::RawPtr(monthDaysNode)),
+                           dateNodeWeak = AceType::WeakClaim(AceType::RawPtr(dateNode))](bool selected) {
+        auto monthDaysNode = monthDaysNodeWeak.Upgrade();
+        auto dateNode = dateNodeWeak.Upgrade();
+        CHECK_NULL_VOID(monthDaysNode);
+        CHECK_NULL_VOID(dateNode);
+        SetShowLunar(monthDaysNode, selected);
+        SetShowLunar(dateNode, selected);
+        monthDaysNode->MarkModifyDone();
+        dateNode->MarkModifyDone();
+    };
+    auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(monthDaysPickerPattern, nullptr);
+    auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, nullptr);
+    monthDaysPickerPattern->SetTitleId(pickerPattern->GetTitleId());
+    monthDaysPickerPattern->SetShowTimeFlag(true);
+    pickerPattern->SetShowTimeFlag(true);
+    auto monthDaysLayoutProperty = monthDaysNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(monthDaysLayoutProperty, nullptr);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        monthDaysLayoutProperty->UpdateLayoutWeight(settingData.useMilitary ? RATIO_THREE : RATIO_FOUR);
+    } else {
+        monthDaysLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(NG::CalcLength(
+                Dimension(settingData.useMilitary ? MONTHDAYS_WIDTH_PERCENT_ONE : MONTHDAYS_WIDTH_PERCENT_TWO,
+                DimensionUnit::PERCENT)),
+            std::nullopt));
+    }
+    monthDaysNode->MarkModifyDone();
+    monthDaysNode->MountToParent(pickerRow);
+    return monthDaysNode;
+}
+
+RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerSettingData& settingData,
+    const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& pickerRow)
+{
+    auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
+    auto timePickerEventHub = timeNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_RETURN(timePickerEventHub, nullptr);
+    auto onChangeCallback = [weak = WeakPtr<FrameNode>(monthDaysNode)]() {
+        auto monthDaysNode = weak.Upgrade();
+        CHECK_NULL_VOID(monthDaysNode);
+        auto pickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(pickerPattern);
+        auto str = pickerPattern->GetSelectedObject(true);
+        auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
+        CHECK_NULL_VOID(datePickerEventHub);
+        datePickerEventHub->FireDialogChangeEvent(str);
+    };
+    timePickerEventHub->SetOnChangeForDatePicker(std::move(onChangeCallback));
+    timeNode->MarkModifyDone();
+    SetTimeNodeColumnWeight(timeNode, settingData);
+    timeNode->MountToParent(pickerRow);
+    return timeNode;
+}
+
+std::function<void()> DatePickerDialogView::CreateAndSetDialogSwitchEvent(
+    const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn)
+{
+    RefPtr<DateTimeAnimationController> animationController = AceType::MakeRefPtr<DateTimeAnimationController>();
+    auto titleSwitchEvent = [weakContentColumn = AceType::WeakClaim(AceType::RawPtr(contentColumn)),
+                                weakPickerStack = AceType::WeakClaim(AceType::RawPtr(pickerStack)),
+                                animationController]() {
+        auto contentColumn = weakContentColumn.Upgrade();
+        CHECK_NULL_VOID(contentColumn);
+        auto pickerStack = weakPickerStack.Upgrade();
+        CHECK_NULL_VOID(pickerStack);
+        // switch picker page.
+        SwitchPickerPage(pickerStack, contentColumn, animationController);
+    };
+    auto switchEvent = [func = titleSwitchEvent]() {
+        if (switchFlag_) {
+            func();
+            return true;
+        }
+        return false;
+    };
+    SetDialogSwitchEvent(switchEvent);
+    return titleSwitchEvent;
+}
+
+void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack,
+    const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController)
+{
+    auto pickerRow = pickerStack->GetLastChild();
+    CHECK_NULL_VOID(pickerRow);
+    auto dateNode = AceType::DynamicCast<FrameNode>(pickerStack->GetChildAtIndex(0));
+    CHECK_NULL_VOID(dateNode);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    auto monthDaysNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(0));
+    auto timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
+    CHECK_NULL_VOID(monthDaysNode);
+    CHECK_NULL_VOID(timeNode);
+    auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerPattern);
+    auto monthDaysPickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(monthDaysPickerPattern);
+
+    PickerDate selectedDate =
+        switchFlag_ ? datePickerPattern->GetCurrentDate() : monthDaysPickerPattern->GetCurrentDate();
+    SetSelectedDate(switchFlag_ ? monthDaysNode : dateNode, selectedDate);
+    if (switchFlag_) {
+        datePickerPattern->SetFocusDisable();
+        timePickerPattern->SetFocusEnable();
+        monthDaysPickerPattern->SetFocusEnable();
+        monthDaysNode->MarkModifyDone();
+    } else {
+        monthDaysPickerPattern->SetFocusDisable();
+        timePickerPattern->SetFocusDisable();
+        datePickerPattern->SetFocusEnable();
+        dateNode->MarkModifyDone();
+    }
+
+    auto contentRow = AceType::DynamicCast<FrameNode>(contentColumn->GetLastChild());
+    auto titleRow = AceType::DynamicCast<FrameNode>(contentColumn->GetChildAtIndex(0));
+    CHECK_NULL_VOID(titleRow);
+    auto titleButtonNode = AceType::DynamicCast<FrameNode>(titleRow->GetFirstChild());
+    CHECK_NULL_VOID(titleButtonNode);
+    auto titleButtonRowNode = AceType::DynamicCast<FrameNode>(titleButtonNode->GetFirstChild());
+    CHECK_NULL_VOID(titleButtonRowNode);
+    auto spinnerNode = AceType::DynamicCast<FrameNode>(titleButtonRowNode->GetLastChild());
+    CHECK_NULL_VOID(spinnerNode);
+    animationController->SetButtonIcon(spinnerNode);
+    animationController->SetMonthDays(monthDaysNode);
+    animationController->SetDatePicker(dateNode);
+    animationController->SetTimePicker(timeNode);
+    animationController->SetButtonRow(contentRow);
+    switchFlag_ = !switchFlag_;
+
+    animationController->Play(switchFlag_);
+}
+
+void DatePickerDialogView::CreateAndAddTitleClickEvent(
+    std::function<void()>& titleSwitchEvent, const RefPtr<FrameNode>& buttonTitleNode)
+{
+    auto titleClickEvent = [func = std::move(titleSwitchEvent)](const GestureEvent& /* info */) { func(); };
+    auto titleButtonNode = AceType::DynamicCast<FrameNode>(buttonTitleNode->GetFirstChild());
+    CHECK_NULL_VOID(titleButtonNode);
+    auto titleEventHub = titleButtonNode->GetOrCreateGestureEventHub();
+    auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(std::move(titleClickEvent));
+    titleEventHub->AddClickEvent(onClick);
+}
+
+void DatePickerDialogView::BuildDialogAcceptAndCancelButton(const DatePickerSettingData& settingData,
+    const RefPtr<FrameNode>& acceptNode, const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& dialogNode,
+    const RefPtr<FrameNode>& contentColumn, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+{
+    auto changeEvent = dialogEvent["changeId"];
+    auto dateChangeEvent = dialogEvent["dateChangeId"];
+    if (settingData.showTime) {
+        auto changeEventSame = changeEvent;
+        auto dateChangeEventSame = dateChangeEvent;
+        SetDialogChange(acceptNode, std::move(changeEventSame));
+        SetDialogDateChange(acceptNode, std::move(dateChangeEventSame));
+    }
+    SetDialogChange(dateNode, std::move(changeEvent));
+    SetDialogDateChange(dateNode, std::move(dateChangeEvent));
+    auto contentRow = CreateButtonNode(acceptNode, dateNode, dialogEvent, std::move(dialogCancelEvent));
+    CHECK_NULL_VOID(contentRow);
+    auto event = [weak = WeakPtr<FrameNode>(dialogNode)](const GestureEvent& /* info */) {
+        auto dialogNode = weak.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+    };
+    for (const auto& child : contentRow->GetChildren()) {
+        auto firstChild = AceType::DynamicCast<FrameNode>(child);
+        auto gesturHub = firstChild->GetOrCreateGestureEventHub();
+        auto onClick = AceType::MakeRefPtr<NG::ClickEvent>(event);
+        gesturHub->AddClickEvent(onClick);
+    }
+    contentRow->AddChild(CreateDividerNode(dateNode), 1);
+    contentRow->MountToParent(contentColumn);
+}
+
+void DatePickerDialogView::UpdateContentPadding(const RefPtr<FrameNode>& contentColumn)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        PaddingProperty contentPadding;
+        contentPadding.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+        contentPadding.right = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+        contentColumn->GetLayoutProperty()->UpdatePadding(contentPadding);
+    }
 }
 } // namespace OHOS::Ace::NG

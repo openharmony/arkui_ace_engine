@@ -41,8 +41,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(gridLayoutProperty);
 
     // Pre-recycle
-    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_, gridLayoutInfo_.currentOffset_,
-                                               gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, layoutWrapper);
+    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_,
+        gridLayoutInfo_.currentOffset_ - gridLayoutInfo_.prevOffset_, gridLayoutInfo_.startIndex_,
+        gridLayoutInfo_.endIndex_, layoutWrapper);
 
     // Step1: Decide size of Grid
     Axis axis = gridLayoutInfo_.axis_;
@@ -242,8 +243,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (!wrapper) {
                 continue;
             }
-            startIndex = startIndex == -1 ? itemIdex : startIndex;
-            endIndex = itemIdex;
+            startIndex = startIndex == -1 ? itemIdex : std::min(startIndex, itemIdex);
+            endIndex = std::max(itemIdex, endIndex);
             auto frSize = itemsCrossSize_.at(iter->first);
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = OffsetF(0.0f, 0.0f);
@@ -1859,7 +1860,7 @@ void GridScrollLayoutAlgorithm::FillCacheLineAtEnd(float mainSize, float crossSi
 
     for (; currentMainLineIndex_ <= tempEndMainLineIndex + cacheCount; currentMainLineIndex_++) {
         float lineHeight = FillNewCacheLineBackward(crossSize, mainSize, layoutWrapper, currentMainLineIndex_);
-        if (LessOrEqual(lineHeight, 0.0)) {
+        if (LessNotEqual(lineHeight, 0.0)) {
             break;
         }
     }
@@ -2022,7 +2023,10 @@ void GridScrollLayoutAlgorithm::CompeleteItemCrossPosition(
         auto currentIndex = item.second;
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-            continue;
+            for (auto i = item.first; i < crossCount_; ++i) {
+                predictBuildList_.emplace_back(currentIndex++);
+            }
+            break;
         }
         itemsCrossPosition_.try_emplace(currentIndex, ComputeItemCrossPosition(layoutWrapper, item.first));
     }

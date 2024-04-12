@@ -86,7 +86,7 @@ void NodeDataCache::OnBeforePagePop(bool destroy)
 
 void NodeDataCache::UpdateConfig(std::shared_ptr<MergedConfig>&& mergedConfig)
 {
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::unique_lock<std::shared_mutex> lock(configMutex_);
     mergedConfig_ = mergedConfig;
     shouldCollectFull_ = false;
 }
@@ -96,16 +96,20 @@ bool NodeDataCache::PutString(const RefPtr<NG::FrameNode>& node, const std::stri
     if (id.empty() || value.empty() || value.length() > MAX_DATA_LENGTH) {
         return false;
     }
+    if (mergedConfig_->shareNodes.empty()) {
+        return false;
+    }
     auto pageUrl = GetPageUrlByNode(node);
     if (pageUrl.empty()) {
         return false;
     }
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::shared_lock<std::shared_mutex> configLock(configMutex_);
     auto iter = mergedConfig_->shareNodes.find(pageUrl);
     if (!shouldCollectFull_ && iter == mergedConfig_->shareNodes.end()) {
         return false;
     }
     if (shouldCollectFull_ || iter->second.find(id) != iter->second.end()) {
+        std::unique_lock<std::shared_mutex> cacheLock(cacheMutex_);
         auto iter = container_->find(pageUrl);
         if (iter == container_->end()) {
             auto pageContainer = std::unordered_map<std::string, std::string>();
@@ -165,7 +169,7 @@ bool NodeDataCache::PutMultiple(const RefPtr<NG::FrameNode>& node, const std::st
 {
     auto json = JsonUtil::Create(true);
     json->Put(KEY_TEXT, name.c_str());
-    auto jsonArray = JsonUtil::CreateArray(false);
+    auto jsonArray = JsonUtil::CreateArray(true);
     for (size_t i = 0; i < value.size(); i++) {
         jsonArray->Put(std::to_string(i).c_str(), value.at(i).c_str());
     }
@@ -178,12 +182,11 @@ void NodeDataCache::GetNodeData(const std::string& pageUrl, std::unordered_map<s
     if (pageUrl.empty()) {
         return;
     }
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::shared_lock<std::shared_mutex> lock(cacheMutex_);
     auto iter = container_->find(pageUrl);
     if (iter == container_->end()) {
         return;
     }
-    lock.unlock();
     for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++) {
         auto it = iter->second.find(nodeIter->first);
         if (it != iter->second.end()) {
@@ -197,7 +200,7 @@ void NodeDataCache::Clear(const std::string& pageUrl)
     if (pageUrl.empty()) {
         return;
     }
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::unique_lock<std::shared_mutex> lock(cacheMutex_);
     auto iter = container_->find(pageUrl);
     if (iter != container_->end()) {
         container_->erase(iter);
@@ -206,7 +209,7 @@ void NodeDataCache::Clear(const std::string& pageUrl)
 
 void NodeDataCache::Reset()
 {
-    std::unique_lock<std::mutex> lock(cacheLock_);
+    std::unique_lock<std::shared_mutex> lock(cacheMutex_);
     container_->clear();
     pageUrl_ = "";
     prePageUrl_ = "";
@@ -217,6 +220,7 @@ void NodeDataCache::GetExposureCfg(const std::string& pageUrl, const std::string
     if (pageUrl.empty()) {
         return;
     }
+    std::shared_lock<std::shared_mutex> configLock(configMutex_);
     auto iter = mergedConfig_->exposureNodes.find(pageUrl);
     if (iter == mergedConfig_->exposureNodes.end()) {
         return;

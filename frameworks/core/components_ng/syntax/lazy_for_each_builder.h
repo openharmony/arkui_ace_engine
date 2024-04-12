@@ -38,6 +38,17 @@
 
 namespace OHOS::Ace::NG {
 
+typedef struct OperationInfo {
+    OperationInfo():node(nullptr) {}
+    int32_t changeCount;
+    std::string key;
+    RefPtr<UINode> node;
+    bool isDeleting;
+    bool isChanged;
+    bool moveIn;
+    std::vector<std::string> extraKey;
+} OperationInfo;
+
 using LazyForEachChild = std::pair<std::string, RefPtr<UINode>>;
 using LazyForEachCacheChild = std::pair<int32_t, RefPtr<UINode>>;
 
@@ -67,13 +78,44 @@ public:
 
     RefPtr<UINode> OnDataDeleted(size_t index);
 
-    std::list<RefPtr<UINode>>& OnDataBulkDeleted(size_t index, size_t count);
+    std::list<std::pair<std::string, RefPtr<UINode>>>& OnDataBulkDeleted(size_t index, size_t count);
 
     bool OnDataChanged(size_t index);
 
+    std::list<std::pair<std::string, RefPtr<UINode>>>& OnDataBulkChanged(size_t index, size_t count);
+
+    void OnDataMoveToNewPlace(size_t from, size_t to);
+
     bool OnDataMoved(size_t from, size_t to);
 
-    void RecycleChildByIndex(int32_t index);
+    std::pair<int32_t, std::list<RefPtr<UINode>>> OnDatasetChange(std::list<V2::Operation> DataOperations);
+
+    void RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
+        std::map<int32_t, LazyForEachChild>& expiringTempItem_, std::map<int32_t, int32_t>& indexChangedMap);
+
+    void CollectIndexChangedCount(std::map<int32_t, int32_t>& indexChangedMap);
+
+    bool ClassifyOperation(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateAdd(V2::Operation& operation, int32_t& initialIndex);
+
+    void OperateDelete(V2::Operation& operation, int32_t& initialIndex);
+
+    void OperateMove(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateChange(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateExchange(V2::Operation& operation, int32_t& initialIndex,
+        std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
+
+    void OperateReload(V2::Operation& operation, int32_t& initialIndex);
+
+    void ThrowRepeatOperationError(int32_t index);
+
+    void RecordOutOfBoundaryNodes(int32_t index);
 
     void InvalidIndexOfChangedData(size_t index)
     {
@@ -90,7 +132,7 @@ public:
         return nullptr;
     }
 
-    std::map<int32_t, LazyForEachChild>& GetItems(std::list<RefPtr<UINode>>& childList)
+    std::map<int32_t, LazyForEachChild>& GetItems(std::list<std::pair<std::string, RefPtr<UINode>>>& childList)
     {
         startIndex_ = -1;
         endIndex_ = -1;
@@ -139,7 +181,7 @@ public:
                 }
                 auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
                 if (frameNode && frameNode->IsOnMainTree()) {
-                    childList.push_back(node.second);
+                    childList.emplace_back(key, node.second);
                 }
             }
             needTransition = false;
@@ -321,6 +363,7 @@ public:
     bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        outOfBoundaryNodes_.clear();
         if (itemConstraint && !canRunLongPredictTask) {
             return false;
         }
@@ -367,6 +410,7 @@ public:
             } else {
                 NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
                 ProcessOffscreenNode(node.second, true);
+                NotifyItemDeleted(RawPtr(node.second), key);
             }
         }
     }
@@ -419,9 +463,14 @@ public:
         isLoop_ = isLoop;
     }
 
-    void clearBulkDeletedNodes()
+    void clearDeletedNodes()
     {
         nodeList_.clear();
+    }
+
+    void SetUseNewInterface(bool useNewInterface)
+    {
+        useNewInterface_ = useNewInterface;
     }
 
     const std::unordered_map<std::string, LazyForEachCacheChild>& GetCachedUINodeMap()
@@ -477,27 +526,53 @@ public:
         }
     }
 
+    void NotifyItemDeleted(UINode* node, const std::string& key)
+    {
+        OnItemDeleted(node, key);
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
+    virtual void OnItemDeleted(UINode* node, const std::string& key) {};
+
     virtual LazyForEachChild OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
+    
+    virtual LazyForEachChild OnGetChildByIndexNew(int32_t index,
+        std::map<int32_t, LazyForEachChild>& cachedItems,
+        std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) = 0;
 
     virtual void OnExpandChildrenOnInitialInNG() = 0;
 
-    virtual void NotifyDataChanged(size_t index, RefPtr<UINode>& lazyForEachNode, bool isRebuild = true) = 0;
+    virtual void NotifyDataChanged(size_t index, const RefPtr<UINode>& lazyForEachNode, bool isRebuild = true) = 0;
 
-    virtual void NotifyDataDeleted(RefPtr<UINode>& lazyForEachNode, size_t index, bool removeIds) = 0;
+    virtual void NotifyDataDeleted(const RefPtr<UINode>& lazyForEachNode, size_t index, bool removeIds) = 0;
 
     virtual void NotifyDataAdded(size_t index) = 0;
 
     virtual void KeepRemovedItemInCache(NG::LazyForEachChild node,
         std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) = 0;
 
+    void GetAllItems(std::vector<UINode*>& items);
+
 private:
+    void RecycleItemsOutOfBoundary();
+    void RecycleChildByIndex(int32_t index);
+
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
-    std::list<RefPtr<UINode>> nodeList_;
+    std::list<std::pair<std::string, RefPtr<UINode>>> nodeList_;
+    std::map<int32_t, OperationInfo> operationList_;
+    std::map<std::string, int32_t> operationTypeMap = {
+        {"add", 1},
+        {"delete", 2},
+        {"change", 3},
+        {"move", 4},
+        {"exchange", 5},
+        {"reload", 6}
+    };
+    std::list<int32_t> outOfBoundaryNodes_;
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
@@ -505,6 +580,7 @@ private:
     int32_t preBuildingIndex_ = -1;
     bool needTransition = false;
     bool isLoop_ = false;
+    bool useNewInterface_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG

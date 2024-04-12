@@ -64,7 +64,6 @@ public:
     }
 
 protected:
-    explicit Storage(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}
     Storage() = default;
     RefPtr<TaskExecutor> taskExecutor_;
     DataOnChange dataOnChange_;

@@ -35,6 +35,16 @@ struct LeadingMargin {
     {
         return size == other.size && pixmap == other.pixmap;
     }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, size);
+        jsonValue->Put("pixmap", pixmap
+            ? ("size=" + std::to_string(pixmap->GetWidth()) + "," + std::to_string(pixmap->GetHeight())).c_str()
+            : "nullptr");
+        return jsonValue->ToString();
+    }
 };
 
 struct ParagraphStyle {

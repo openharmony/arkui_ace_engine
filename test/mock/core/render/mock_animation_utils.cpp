@@ -93,4 +93,6 @@ void AnimationUtils::BlendBgColorAnimation(
 void AnimationUtils::PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 
 void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
+
+void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback) {}
 } // namespace OHOS::Ace

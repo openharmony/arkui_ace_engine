@@ -123,10 +123,12 @@ private:
     void InitInputEvent();
     void InitCurrentInputEvent();
     void InitChildInputEvent();
+    void InitPopupInputEvent();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnHover(bool isHover);
     void OnChildHover(int32_t index, bool isHover);
+    void OnPopupHover(bool isHover);
     void ResetStatus();
     void OnKeyEventDisapear();
     void UpdateBubbleListItem(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
@@ -140,7 +142,7 @@ private:
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
     void UpdateBubbleSize();
-    void UpdateBubbleLetterView(bool showDivider);
+    void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
     void CreateBubbleListView(std::vector<std::string>& currentListData);
     void UpdateBubbleListView(std::vector<std::string>& currentListData);
     void UpdatePopupOpacity(float ratio);
@@ -185,6 +187,7 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isPopup_ = false;
+    bool isPopupHover_ = false;
 
      // the array of displayed items, ths second param in the pair
      // indicates whether the item should be hidden and displayed as dot

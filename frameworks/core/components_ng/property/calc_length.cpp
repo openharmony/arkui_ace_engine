@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 ScaleProperty ScaleProperty::CreateScaleProperty()
 {
     ScaleProperty scaleProperty;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, scaleProperty);
     scaleProperty.fpScale = pipeline->GetFontScale();
     scaleProperty.vpScale = static_cast<float>(pipeline->GetDipScale());

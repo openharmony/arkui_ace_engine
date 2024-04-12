@@ -162,6 +162,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void SetIndicatorInteractive(bool isInteractive);
 
 private:
     void OnModifyDone() override;

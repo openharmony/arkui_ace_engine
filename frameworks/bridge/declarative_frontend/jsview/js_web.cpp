@@ -1783,6 +1783,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
+    JSClass<JSWeb>::StaticMethod("enableNativeMediaPlayer", &JSWeb::EnableNativeVideoPlayer);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2157,6 +2158,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
+        CHECK_NULL_VOID(jsWebController);
         WebModel::GetInstance()->Create(dstSrc.value(),
             jsWebController->GetController(), renderMode, incognitoMode);
     }
@@ -4516,4 +4518,28 @@ void JSWeb::TextAutosizing(const JSCallbackInfo& args)
     bool isTextAutosizing = args[0]->ToBoolean();
     WebModel::GetInstance()->SetTextAutosizing(isTextAutosizing);
 }
+
+void JSWeb::EnableNativeVideoPlayer(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    std::optional<bool> enable;
+    std::optional<bool> shouldOverlay;
+    JSRef<JSVal> enableJsValue = paramObject->GetProperty("enable");
+    if (enableJsValue->IsBoolean()) {
+        enable = enableJsValue->ToBoolean();
+    }
+    JSRef<JSVal> shouldOverlayJsValue = paramObject->GetProperty("shouldOverlay");
+    if (shouldOverlayJsValue->IsBoolean()) {
+        shouldOverlay = shouldOverlayJsValue->ToBoolean();
+    }
+    if (!enable || !shouldOverlay) {
+        // invalid NativeVideoPlayerConfig
+        return;
+    }
+    WebModel::GetInstance()->SetNativeVideoPlayerConfig(*enable, *shouldOverlay);
+}
+
 } // namespace OHOS::Ace::Framework

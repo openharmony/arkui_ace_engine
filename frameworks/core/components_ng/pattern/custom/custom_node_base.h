@@ -193,6 +193,19 @@ public:
         return false;
     }
 
+    void SetThisFunc(std::function<void*()>&& getThisFunc)
+    {
+        getThisFunc_ = std::move(getThisFunc);
+    }
+
+    void* FireThisFunc()
+    {
+        if (getThisFunc_) {
+            return getThisFunc_();
+        }
+        return nullptr;
+    }
+
 protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
@@ -209,6 +222,7 @@ private:
     std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
+    std::function<void*()> getThisFunc_;
     bool needRebuild_ = false;
     bool executeFireOnAppear_ = false;
 };

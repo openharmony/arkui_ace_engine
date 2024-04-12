@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -56,5 +57,16 @@ void CanvasModelNG::EnableAnalyzer(bool enable)
     auto pattern = frameNode->GetPattern<CustomPaintPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->EnableAnalyzer(enable);
+}
+
+//static
+void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CustomPaintEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto func = onReady;
+    auto onReadyEvent = [func]() { func(); };
+    eventHub->SetOnReady(std::move(onReadyEvent));
 }
 } // namespace OHOS::Ace::NG

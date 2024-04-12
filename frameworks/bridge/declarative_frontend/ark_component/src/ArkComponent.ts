@@ -22,13 +22,20 @@ function getUINativeModule(): any {
   return arkUINativeModule;
 }
 
+enum ModifierType {
+  ORIGIN = 0,
+  STATE = 1
+}
+
+type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
+
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
-function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
+function applyUIAttributesInit(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode): void {
   let state = 0;
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
@@ -44,6 +51,10 @@ function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeN
   }
 
   getUINativeModule().setSupportedUIState(nativeNode, state);
+}
+
+function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
+  applyUIAttributesInit(modifier, nativeNode);
   const currentUIState = getUINativeModule().getUIState(nativeNode);
 
   if (modifier.applyNormalAttribute !== undefined) {
@@ -136,7 +147,7 @@ class Modifier<T extends number | string | boolean | Equable | Resource | object
   applyPeer(node: KNode, reset: boolean): void { }
 }
 
-class ModifierWithKey<T extends number | string | boolean | object> {
+class ModifierWithKey<T extends number | string | boolean | object | Function> {
   stageValue?: T;
   value?: T;
   constructor(value: T) {
@@ -222,10 +233,10 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
         getUINativeModule().common.setBorderWidth(node, this.value, this.value, this.value, this.value);
       } else {
         getUINativeModule().common.setBorderWidth(node,
-          (this.value as EdgeWidths).left,
-          (this.value as EdgeWidths).right,
           (this.value as EdgeWidths).top,
-          (this.value as EdgeWidths).bottom);
+          (this.value as EdgeWidths).right,
+          (this.value as EdgeWidths).bottom,
+          (this.value as EdgeWidths).left);
       }
     }
   }
@@ -328,9 +339,9 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
         getUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).left,
-          (this.value as EdgeColors).right, (this.value as EdgeColors).top,
-          (this.value as EdgeColors).bottom);
+        getUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).top,
+          (this.value as EdgeColors).right, (this.value as EdgeColors).bottom,
+          (this.value as EdgeColors).left);
       }
 
     }
@@ -505,8 +516,8 @@ class AlignModifier extends ModifierWithKey<number> {
   }
 }
 
-class BackdropBlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
+  constructor(value: ArkBlurOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('backdropBlur');
@@ -514,8 +525,12 @@ class BackdropBlurModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetBackdropBlur(node);
     } else {
-      getUINativeModule().common.setBackdropBlur(node, this.value);
+      getUINativeModule().common.setBackdropBlur(node, this.value.value, this.value.options?.grayscale);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 
@@ -533,8 +548,8 @@ class HueRotateModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class InvertModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class InvertModifier extends ModifierWithKey<number | InvertOptions> {
+  constructor(value: number | InvertOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('invert');
@@ -542,8 +557,22 @@ class InvertModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetInvert(node);
     } else {
-      getUINativeModule().common.setInvert(node, this.value);
+      if(isNumber(this.value)) {
+        getUINativeModule().common.setInvert(node, this.value, undefined, undefined, undefined, undefined);
+      } else {
+        getUINativeModule().common.setInvert(node, undefined,
+          (this.value as InvertOptions).low,
+          (this.value as InvertOptions).high,
+          (this.value as InvertOptions).threshold,
+          (this.value as InvertOptions).thresholdRange);
+      }
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as InvertOptions).high == (this.value as InvertOptions).high &&
+      (this.stageValue as InvertOptions).low == (this.value as InvertOptions).low &&
+      (this.stageValue as InvertOptions).threshold == (this.value as InvertOptions).threshold &&
+      (this.stageValue as InvertOptions).thresholdRange == (this.value as InvertOptions).thresholdRange);
   }
 }
 
@@ -635,8 +664,8 @@ class BrightnessModifier extends ModifierWithKey<number> {
   }
 }
 
-class BlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class BlurModifier extends ModifierWithKey<ArkBlurOptions> {
+  constructor(value: ArkBlurOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('blur');
@@ -644,8 +673,12 @@ class BlurModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().common.resetBlur(node);
     } else {
-      getUINativeModule().common.setBlur(node, this.value);
+      getUINativeModule().common.setBlur(node, this.value.value, this.value.options?.grayscale);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
   }
 }
 
@@ -1106,7 +1139,8 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
       getUINativeModule().common.resetForegroundBlurStyle(node);
     } else {
       getUINativeModule().common.setForegroundBlurStyle(node,
-        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale);
     }
   }
 
@@ -1114,7 +1148,8 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
     return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
       (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
       (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
-      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
+      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale &&
+      (this.stageValue as ArkForegroundBlurStyle).blurOptions === (this.value as ArkForegroundBlurStyle).blurOptions);
   }
 }
 
@@ -1137,6 +1172,34 @@ class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignme
   checkObjectDiff(): boolean {
     return !((this.value as Position)?.x === (this.stageValue as Position)?.x &&
       (this.value as Position)?.y === (this.stageValue as Position)?.y);
+  }
+}
+
+class BackgroundImageResizableModifier extends ModifierWithKey<ResizableOptions> {
+  constructor(value: ResizableOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImageResizable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageResizable(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      let sliceRight: Length | undefined;
+      if (!isUndefined(this.value.slice)) {
+        let tempSlice = this.value.slice as EdgeWidths;
+        sliceTop = tempSlice.top;
+        sliceBottom = tempSlice.bottom;
+        sliceLeft = tempSlice.left;
+        sliceRight = tempSlice.right;
+      }
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1186,7 +1249,8 @@ class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle
       getUINativeModule().common.resetBackgroundBlurStyle(node);
     } else {
       getUINativeModule().common.setBackgroundBlurStyle(node,
-        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+          this.value.blurOptions?.grayscale);
     }
   }
 }
@@ -1282,8 +1346,8 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
   }
 }
 
-class GeometryTransitionModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> {
+  constructor(value: ArkGeometryTransition) {
     super(value);
   }
   static identity: Symbol = Symbol('geometryTransition');
@@ -1291,7 +1355,8 @@ class GeometryTransitionModifier extends ModifierWithKey<string> {
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     } else {
-      getUINativeModule().common.setGeometryTransition(node, this.value);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
+        (this.value.options as GeometryTransitionOptions)?.follow);
     }
   }
 }
@@ -1456,6 +1521,183 @@ class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringSt
   }
 }
 
+declare type ClickCallback = (event: ClickEvent) => void;
+class OnClickModifier extends ModifierWithKey<ClickCallback> {
+  constructor(value: ClickCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onClick');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnClick(node);
+    } else {
+      getUINativeModule().common.setOnClick(node, this.value);
+    }
+  }
+}
+
+declare type TouchCallback = (event: TouchEvent) => void;
+class OnTouchModifier extends ModifierWithKey<TouchCallback> {
+  constructor(value: TouchCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTouch');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnTouch(node);
+    } else {
+      getUINativeModule().common.setOnTouch(node, this.value);
+    }
+  }
+}
+
+declare type VoidCallback = () => void;
+class OnAppearModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAppear');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAppear(node);
+    } else {
+      getUINativeModule().common.setOnAppear(node, this.value);
+    }
+  }
+}
+
+class OnDisappearModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onDisappear');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnDisappear(node);
+    } else {
+      getUINativeModule().common.setOnDisappear(node, this.value);
+    }
+  }
+}
+
+declare type KeyEventCallback = (event: KeyEvent) => void;
+class OnKeyEventModifier extends ModifierWithKey<KeyEventCallback> {
+  constructor(value: KeyEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onKeyEvent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyEvent(node);
+    } else {
+      getUINativeModule().common.setOnKeyEvent(node, this.value);
+    }
+  }
+}
+
+class OnFocusModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnFocus(node);
+    } else {
+      getUINativeModule().common.setOnFocus(node, this.value);
+    }
+  }
+}
+
+class OnBlurModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnBlur(node);
+    } else {
+      getUINativeModule().common.setOnBlur(node, this.value);
+    }
+  }
+}
+
+declare type HoverEventCallback = (isHover: boolean, event: HoverEvent) => void
+class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
+  constructor(value: HoverEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onHover');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnHover(node);
+    } else {
+      getUINativeModule().common.setOnHover(node, this.value);
+    }
+  }
+}
+
+declare type MouseEventCallback = (event: MouseEvent) => void
+class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
+  constructor(value: MouseEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onMouse');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnMouse(node);
+    } else {
+      getUINativeModule().common.setOnMouse(node, this.value);
+    }
+  }
+}
+
+declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void
+class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
+  constructor(value: SizeChangeEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onSizeChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnSizeChange(node);
+    } else {
+      getUINativeModule().common.setOnSizeChange(node, this.value);
+    }
+  }
+}
+
+declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void
+class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
+  constructor(value: AreaChangeEventCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAreaChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnAreaChange(node);
+    } else {
+      getUINativeModule().common.setOnAreaChange(node, this.value);
+    }
+  }
+}
+
+declare type GestureJudgeBeginCallback = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult
+class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallback> {
+  constructor(value: GestureJudgeBeginCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onGestureJudgeBegin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureJudgeBegin(node);
+    } else {
+      getUINativeModule().common.setOnGestureJudgeBegin(node, this.value);
+    }
+  }
+}
+
 class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   constructor(value: MotionPathOptions) {
     super(value);
@@ -1574,11 +1816,7 @@ class FocusableModifier extends ModifierWithKey<boolean> {
   }
   static identity: Symbol = Symbol('focusable');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().common.resetFocusable(node);
-    } else {
-      getUINativeModule().common.setFocusable(node, this.value);
-    }
+    getUINativeModule().common.setFocusable(node, this.value);
   }
 }
 
@@ -2379,7 +2617,7 @@ function modifier<T extends number | string | boolean | Equable, M extends Modif
 }
 
 function modifierWithKey<T extends number | string | boolean | object, M extends ModifierWithKey<T>>(
-  modifiers: Map<Symbol, ModifierWithKey<number | string | boolean | object>>,
+  modifiers: Map<Symbol, AttributeModifierWithKey>,
   identity: Symbol,
   modifierClass: new (value: T) => M,
   value: T
@@ -2395,24 +2633,49 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
 
 class ArkComponent implements CommonMethod<CommonAttribute> {
   _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
-  _modifiersWithKeys: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
+  _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
+  _weakPtr: JsPointerClass;
+  _classType: ModifierType | undefined;
+  _nativePtrChanged: boolean;
+  _gestureEvent: UIGestureEvent;
 
-  constructor(nativePtr: KNode) {
+  constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
+    this._classType = classType;
+    if (classType === ModifierType.STATE) {
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
+    }
+    this._nativePtrChanged = false;
   }
 
-  cleanStageValue(){
+  getOrCreateGestureEvent() {
+    if (this._gestureEvent !== null) {
+      this._gestureEvent = new UIGestureEvent();
+      this._gestureEvent.setNodePtr(this.nativePtr);
+    }
+    return this._gestureEvent;
+  }
+
+  cleanStageValue(): void {
     if (!this._modifiersWithKeys){
       return;
     }
     this._modifiersWithKeys.forEach((value, key) => {
         value.stageValue = undefined;
     });
+  }
+
+  applyStateUpdatePtr(instance: ArkComponent): void {
+    if (this.nativePtr !== instance.nativePtr) {
+      this.nativePtr = instance.nativePtr;
+      this._nativePtrChanged = true;
+      this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(instance.nativePtr);
+    }
   }
 
   applyModifierPatch(): void {
@@ -2436,7 +2699,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     });
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
+    return this;
+  }
+  onSizeChange(callback: (oldValue: SizeOptions, newValue: SizeOptions) => void): this {
+    modifierWithKey(this._modifiersWithKeys, OnSizeChangeModifier.identity, OnSizeChangeModifier, callback);
+    return this;
   }
   outline(value: OutlineOptions): this {
     modifierWithKey(this._modifiersWithKeys, OutlineModifier.identity, OutlineModifier, value);
@@ -2479,6 +2747,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         }
         if (safeAreaType) {
           safeAreaType += '|';
+          safeAreaType += param.toString();
         } else {
           safeAreaType += param.toString();
         }
@@ -2494,6 +2763,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         }
         if (safeAreaEdge) {
           safeAreaEdge += '|';
+          safeAreaEdge += param.toString();
         } else {
           safeAreaEdge += param.toString();
         }
@@ -2647,6 +2917,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  backgroundImageResizable(value: ResizableOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageResizableModifier.identity, BackgroundImageResizableModifier, value);
+    return this;
+  }
+
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
@@ -2659,6 +2934,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.colorMode = options.colorMode;
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
+      arkBackgroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
       BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
@@ -2677,6 +2953,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkForegroundBlurStyle.colorMode = options.colorMode;
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
+      arkForegroundBlurStyle.blurOptions = options.blurOptions;
     }
     modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
       ForegroundBlurStyleModifier, arkForegroundBlurStyle);
@@ -2785,11 +3062,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onClick(event: (event?: ClickEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnClickModifier.identity, OnClickModifier, event);
+    return this;
   }
 
   onHover(event: (isHover?: boolean, event?: HoverEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
+    return this;
   }
 
   hoverEffect(value: HoverEffect): this {
@@ -2798,15 +3077,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onMouse(event: (event?: MouseEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnMouseModifier.identity, OnMouseModifier, event);
+    return this;
   }
 
   onTouch(event: (event?: TouchEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
+    return this;
   }
 
   onKeyEvent(event: (event?: KeyEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
+    return this;
   }
 
   focusable(value: boolean): this {
@@ -2819,11 +3101,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onFocus(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    return this;
   }
 
   onBlur(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnBlurModifier.identity, OnBlurModifier, event);
+    return this;
   }
 
   tabIndex(index: number): this {
@@ -2883,12 +3167,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  blur(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, value);
-    }
+  blur(value: number, options?: BlurOptions): this {
+    let blur: ArkBlurOptions = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, blur);
     return this;
   }
 
@@ -2957,11 +3240,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  invert(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
-    } else {
+  invert(value: number | InvertOptions): this {
+    if (!isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
     }
     return this;
   }
@@ -2980,12 +3263,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backdropBlur(value: number): this {
-    if (!isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, value);
-    }
+  backdropBlur(value: number, options?: BlurOptions): this {
+    let blur: ArkBlurOptions = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, blur);
     return this;
   }
 
@@ -3032,15 +3314,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onAppear(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnAppearModifier.identity, OnAppearModifier, event);
+    return this;
   }
 
   onDisAppear(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnDisappearModifier.identity, OnDisappearModifier, event);
+    return this;
   }
 
   onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    return this;
   }
 
   visibility(value: Visibility): this {
@@ -3347,10 +3632,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  geometryTransition(id: string): this {
-    if (isString(id)) {
-      modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, id);
-    }
+  geometryTransition(id: string, options?: GeometryTransitionOptions): this {
+    let arkGeometryTransition = new ArkGeometryTransition();
+    arkGeometryTransition.id = id;
+    arkGeometryTransition.options = options;
+    modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, arkGeometryTransition);
     return this;
   }
 
@@ -3493,7 +3779,6 @@ const isInteger = (val: any) => Number.isInteger(val);
 const isNonEmptyMap = (val: any) => val instanceof Map && val.size > 0;
 const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '';
 
-
 class UICommonEvent {
   private _nodePtr: Object | null;
   private _instanceId: number;
@@ -3504,30 +3789,212 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   setOnClick(callback: (event?: ClickEvent) => void): void {
-    getUINativeModule().frameNode.setOnClick(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
   }
   setOnTouch(callback: (event?: TouchEvent) => void): void {
-    getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback, this._instanceId);
   }
   setOnAppear(callback: () => void): void {
-    getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback, this._instanceId);
   }
   setOnDisappear(callback: () => void): void {
-    getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback: (event?: KeyEvent) => void): void {
-    getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback, this._instanceId);
   }
   setOnFocus(callback: () => void): void {
-    getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback, this._instanceId);
   }
   setOnBlur(callback: () => void): void {
-    getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback, this._instanceId);
   }
   setOnHover(callback: (isHover?: boolean, event?: HoverEvent) => void): void {
-    getUINativeModule().frameNode.setOnHover(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback: (event?: MouseEvent) => void): void {
-    getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback);
+    getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
   }
+  setOnSizeChange(callback: SizeChangeCallback): void {
+    getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
+  componentBuilder: (nativePtr: KNode) => ArkComponent,
+  modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
+{
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      applyUIAttributesInit(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      applyUIAttributes(modifier, nativeNode, component);
+      component.applyModifierPatch();
+    }
+  } else {
+    applyUIAttributes(modifier, nativeNode, component);
+    component.applyModifierPatch();
+  }
+}
+
+class UIGestureEvent {
+  private _nodePtr: Object | null;
+  setNodePtr(nodePtr: Object | null): void {
+    this._nodePtr = nodePtr;
+  }
+  addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
+    switch (gesture.gestureType) {
+      case CommonGestureType.TAP_GESTURE: {
+        let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
+        getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
+          tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
+        break;
+      }
+      case CommonGestureType.LONG_PRESS_GESTURE: {
+        let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
+        getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
+          longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+          longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.PAN_GESTURE: {
+        let panGesture: PanGestureHandler = gesture as PanGestureHandler;
+        getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
+          panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+          panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.SWIPE_GESTURE: {
+        let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
+        getUINativeModule().common.addSwipeGesture(this._nodePtr, priority, mask, swipeGesture.gestureTag,
+          swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
+        break;
+      }
+      case CommonGestureType.PINCH_GESTURE: {
+        let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
+        getUINativeModule().common.addPinchGesture(this._nodePtr, priority, mask, pinchGesture.gestureTag,
+          pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+          pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.ROTATION_GESTURE: {
+        let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
+        getUINativeModule().common.addRotationGesture(this._nodePtr, priority, mask, rotationGesture.gestureTag,
+          rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+          rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
+          rotationGesture.onActionCancelCallback);
+        break;
+      }
+      case CommonGestureType.GESTURE_GROUP: {
+        let gestureGroup: GestureGroupHandler = gesture as GestureGroupHandler;
+        let groupPtr = getUINativeModule().common.addGestureGroup(
+          gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode);
+        gestureGroup.gestures.forEach((item) => {
+          addGestureToGroup(item, groupPtr);
+        });
+        getUINativeModule().common.attachGestureGroup(this._nodePtr, priority, mask, groupPtr);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+  addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
+    this.addGesture(gesture, GesturePriority.PARALLEL, mask);
+  }
+  removeGestureByTag(tag: string): void {
+    getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
+  }
+  clearGestures(): void {
+    getUINativeModule().common.clearGestures(this._nodePtr);
+  }
+}
+
+function addGestureToGroup(gesture: any, gestureGroupPtr: any) {
+  switch (gesture.gestureType) {
+    case CommonGestureType.TAP_GESTURE: {
+      let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
+      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag,
+        tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.LONG_PRESS_GESTURE: {
+      let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
+      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag,
+        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+        longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.PAN_GESTURE: {
+      let panGesture: PanGestureHandler = gesture as PanGestureHandler;
+      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag,
+        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+        panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.SWIPE_GESTURE: {
+      let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
+      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag,
+        swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.PINCH_GESTURE: {
+      let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
+      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag,
+        pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+        pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.ROTATION_GESTURE: {
+      let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
+      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag,
+        rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+        rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
+        rotationGesture.onActionCancelCallback, gestureGroupPtr);
+      break;
+    }
+    case CommonGestureType.GESTURE_GROUP: {
+      let gestureGroup: GestureGroupHandler = gesture as GestureGroupHandler;
+      let groupPtr = getUINativeModule().common.addGestureGroupToGroup(gestureGroup.gestureTag,
+        gestureGroup.onCancelCallback, gestureGroup.mode, gestureGroupPtr);
+      gestureGroup.gestures.forEach((item) => {
+        addGestureToGroup(item, groupPtr);
+      });
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+function applyGesture(modifier: GestureModifier, component: ArkComponent): void {
+
+  if (modifier.applyGesture !== undefined) {
+    let gestureEvent: UIGestureEvent = component.getOrCreateGestureEvent();
+    gestureEvent.clearGestures();
+    modifier.applyGesture(gestureEvent);
+  }
+}
+
+function __gestureModifier__(modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = new ArkComponent(nativeNode);
+  applyGesture(modifier, component);
 }

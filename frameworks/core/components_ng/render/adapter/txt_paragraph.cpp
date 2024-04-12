@@ -147,9 +147,9 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #else
     builder_->AppendPlaceholder(txtSpan);
 #endif
-    auto position = static_cast<size_t>(placeholderIndex_) + text_.length() + 1;
+    auto position = static_cast<size_t>(placeholderCnt_) + text_.length();
     placeholderPosition_.emplace_back(position);
-    return ++placeholderIndex_;
+    return placeholderCnt_++;
 }
 
 void TxtParagraph::Build()
@@ -172,8 +172,8 @@ TxtParagraph::~TxtParagraph()
 {
     if (destructCount % 100 == 0) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "destroy TxtParagraph with placeholderIndex_ %{public}d, textAlign_ %{public}d, count %{public}u",
-            placeholderIndex_, static_cast<int>(textAlign_), destructCount);
+            "destroy TxtParagraph with placeholderCnt_ %{public}d, textAlign_ %{public}d, count %{public}u",
+            placeholderCnt_, static_cast<int>(textAlign_), destructCount);
     }
     destructCount++;
 }
@@ -373,13 +373,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     if (!paragraph_) {
         return false;
     }
-    if (text_.empty() && placeholderIndex_ == -1) {
-        if (paragraph_->GetLineCount() > 0) {
-            result.offset.Reset();
-            result.height = paragraph_->GetHeight();
-            return true;
-        }
-        return false;
+    if (empty()) {
+        return HandleCaretWhenEmpty(result);
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {
         extent = GetParagraphLength();
@@ -460,7 +455,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 #else
     double caretStart = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
 #endif
-    double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
+    float offsetX = std::min(
+        static_cast<float>(caretStart), std::max(GetLongestLine(), static_cast<float>(paragraph_->GetMaxWidth())));
     result.offset.SetX(offsetX);
 #ifndef USE_GRAPHIC_TEXT_GINE
     result.offset.SetY(textBox.rect.fTop);
@@ -660,6 +656,45 @@ bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
     start = static_cast<int32_t>(range.leftIndex);
     end = static_cast<int32_t>(range.rightIndex);
 #endif
+    return true;
+}
+
+void TxtParagraph::HandleTextAlign(CaretMetricsF& result, TextAlign align)
+{
+    auto width = GetMaxWidth();
+    float offsetX = 0.0f;
+    switch (align) {
+        case TextAlign::CENTER:
+            offsetX = width * 0.5f;
+            break;
+        case TextAlign::END:
+            offsetX = width;
+            break;
+        case TextAlign::START:
+        default:
+            break;
+    }
+    result.offset.SetX(offsetX);
+}
+
+void TxtParagraph::HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin)
+{
+    result.offset.SetX(leadingMargin.size.Width());
+}
+
+bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
+{
+    if (!paragraph_ || paragraph_->GetLineCount() == 0) {
+        return false;
+    }
+
+    result.offset.Reset();
+    result.height = paragraph_->GetHeight();
+    if (paraStyle_.align != TextAlign::START) {
+        HandleTextAlign(result, paraStyle_.align);
+    } else if (paraStyle_.leadingMargin) {
+        HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
+    }
     return true;
 }
 

@@ -93,6 +93,8 @@ public:
                 theme->insetTrackThickness_ = pattern->GetAttr<Dimension>("inset_track_thickness", 20.0_vp);
                 theme->insetBlockSize_ = pattern->GetAttr<Dimension>("inset_block_size", 12.0_vp);
                 theme->insetBlockHotSize_ = pattern->GetAttr<Dimension>("inset_block_hot_region_size", 32.0_vp);
+                theme->noneTrackThickness_ = pattern->GetAttr<Dimension>("none_track_thickness", 4.0_vp);
+                theme->noneBlockHotSize_ = pattern->GetAttr<Dimension>("none_block_hot_region_size", 40.0_vp);
                 theme->markerSize_ = pattern->GetAttr<Dimension>("marker_size", 4.0_vp);
                 theme->tipFontSize_ = pattern->GetAttr<Dimension>("tip_font_size", 14.0_fp);
                 theme->tipTextPadding_ = pattern->GetAttr<Dimension>("tip_text_padding_size", 8.0_vp);
@@ -143,6 +145,15 @@ public:
     Dimension GetOutsetTrackThickness() const
     {
         return outsetTrackThickness_;
+    }
+
+    Dimension GetNoneBlockHotSize() const
+    {
+        return noneBlockHotSize_;
+    }
+    Dimension GetNoneTrackThickness() const
+    {
+        return noneTrackThickness_;
     }
 
     Dimension GetMarkerSize() const
@@ -260,6 +271,10 @@ private:
     Dimension insetBlockHotSize_;
     Dimension insetTrackThickness_;
     Dimension insetHotBlockShadowWidth_;
+
+    //none slider mode
+    Dimension noneBlockHotSize_;
+    Dimension noneTrackThickness_;
 
     // common
     Dimension markerSize_;

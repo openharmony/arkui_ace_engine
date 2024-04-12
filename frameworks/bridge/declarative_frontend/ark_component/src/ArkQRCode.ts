@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
@@ -87,12 +87,10 @@ class QRContentOpacityModifier extends ModifierWithKey<number | Resource> {
 }
 
 // @ts-ignore
-globalThis.QRCode.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkQRCodeComponent(nativeNode);
+globalThis.QRCode.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkQRCodeComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.QRCodeModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

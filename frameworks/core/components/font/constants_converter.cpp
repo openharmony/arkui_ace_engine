@@ -516,7 +516,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
     }
 
     txtStyle.letterSpacing = NormalizeToPx(textStyle.GetLetterSpacing());
-
+    txtStyle.baseLineShift = -NormalizeToPx(textStyle.GetBaselineOffset());
     if (textStyle.isSymbolGlyph_) {
         txtStyle.isSymbolGlyph = true;
         const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
@@ -619,6 +619,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     if (pipelineContext) {
         txtStyle.letterSpacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
+        txtStyle.baseLineShift = -pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
     }
 
     if (textStyle.isSymbolGlyph_) {

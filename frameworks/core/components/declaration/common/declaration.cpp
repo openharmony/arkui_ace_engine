@@ -2904,6 +2904,7 @@ void Declaration::SetBackgroundImageSize(const std::string& value, Declaration& 
         { DOM_BACKGROUND_IMAGE_SIZE_AUTO, BackgroundImageSizeType::AUTO },
         { DOM_BACKGROUND_IMAGE_SIZE_CONTAIN, BackgroundImageSizeType::CONTAIN },
         { DOM_BACKGROUND_IMAGE_SIZE_COVER, BackgroundImageSizeType::COVER },
+        { DOM_BACKGROUND_IMAGE_SIZE_FILL, BackgroundImageSizeType::FILL },
     };
     BackgroundImageSize bgImgSize;
     auto spaceIndex = value.find(' ', 0);

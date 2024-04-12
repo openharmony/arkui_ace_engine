@@ -41,6 +41,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     this.obsObject_ = obsObject;
     this.createSourceDependency(obsObject);
     this.setValueInternal(obsObject);
+    this.setDecoratorInfo("@ObjectLink");
   }
 
   /*
@@ -151,8 +152,8 @@ class SynchedPropertyNestedObjectPU<C extends Object>
         ObservedObject.addOwningProperty(this.obsObject_, this);
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.obsObject_);
       } else {
-        stateMgmtConsole.applicationError(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is neither ObservedObject nor SubscribableAbstract. \
-      value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);
+        stateMgmtConsole.applicationWarn(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is not
+          be decorated by @Observed. Value changes will not be observed and UI will not update.`);
       }
     }
     return true;

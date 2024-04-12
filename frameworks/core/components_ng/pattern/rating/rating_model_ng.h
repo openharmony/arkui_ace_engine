@@ -16,10 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/rating/rating_model.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+class RatingConfiguration : public CommonConfiguration {
+public:
+    RatingConfiguration(int32_t starNum, bool isIndicator, double rating, double stepSize, bool enabled)
+        : CommonConfiguration(enabled), starNum_(starNum), isIndicator_(isIndicator),
+        rating_(rating), stepSize_(stepSize) {}
+    int32_t starNum_;
+    bool isIndicator_;
+    double rating_;
+    double stepSize_;
+};
+using RatingMakeCallback =
+    std::function<RefPtr<FrameNode>(const RatingConfiguration& ratingConfiguration)>;
 class ACE_EXPORT RatingModelNG : public OHOS::Ace::RatingModel {
 public:
     void Create(double rating = .0, bool indicator = false) override;
@@ -38,6 +51,8 @@ public:
     static void SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
     static void SetSecondarySrc(FrameNode* frameNode, const std::string& value, bool flag = false);
     static void SetBackgroundSrc(FrameNode* frameNode, const std::string& value, bool flag = false);
+    static void SetBuilderFunc(FrameNode* frameNode, NG::RatingMakeCallback&& jsMake);
+    static void SetChangeValue(FrameNode* frameNode, double value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RATING_RATING_MODEL_NG_H

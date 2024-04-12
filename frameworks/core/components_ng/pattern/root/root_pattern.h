@@ -56,27 +56,6 @@ public:
         host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     }
 
-    void SetAppBgColor(const Color& color, bool isContainerModal)
-    {
-        auto rootNode = GetHost();
-        CHECK_NULL_VOID(rootNode);
-        RefPtr<FrameNode> stage;
-        if (isContainerModal) {
-            auto container = DynamicCast<FrameNode>(rootNode->GetChildren().front());
-            CHECK_NULL_VOID(container);
-            auto column = DynamicCast<FrameNode>(container->GetChildren().front());
-            CHECK_NULL_VOID(column);
-            auto stack = DynamicCast<FrameNode>(column->GetChildren().back());
-            CHECK_NULL_VOID(stack);
-            stage = DynamicCast<FrameNode>(stack->GetChildren().front());
-        } else {
-            stage = DynamicCast<FrameNode>(rootNode->GetChildren().front());
-        }
-        CHECK_NULL_VOID(stage);
-        LOGI("SetAppBgColor in page node successfully, bgColor is %{public}u", color.GetValue());
-        stage->GetRenderContext()->UpdateBackgroundColor(color);
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };

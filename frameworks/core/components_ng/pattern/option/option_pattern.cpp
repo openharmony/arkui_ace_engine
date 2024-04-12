@@ -260,7 +260,7 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
         UpdateNextNodeDivider(false);
     }
     // leave press status
-    else if (touchType == TouchType::UP) {
+    else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         if (IsHover()) {
             SetBgBlendColor(theme->GetHoverColor());
         } else {

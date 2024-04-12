@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   lunar(value: boolean): DatePickerAttribute {
     modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
@@ -169,12 +169,10 @@ class DatePickerBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 //@ts-ignore
-globalThis.DatePicker.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkDatePickerComponent(nativeNode);
+globalThis.DatePicker.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkDatePickerComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.DatePickerModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

@@ -145,7 +145,7 @@ void SetImages(ArkUINodeHandle node, struct ArkUIImagePropertiesStruct* images, 
         CHECK_NULL_VOID(image);
         CalcDimension dimension[IMAGES_LENGTH];
         ParseImage(dimension, IMAGES_LENGTH, image);
-        ImageProperties property { std::string(image->src), "", "", dimension[0], dimension[1], dimension[2],
+        ImageProperties property { std::string(image->src), nullptr, "", "", dimension[0], dimension[1], dimension[2],
             dimension[3], image->duration };
         imageList.emplace_back(property);
     }

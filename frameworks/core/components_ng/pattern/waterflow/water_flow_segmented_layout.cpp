@@ -93,11 +93,14 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
     size_t segmentCnt = itemsCrossSize_.size();
     std::vector<std::vector<float>> crossPos(segmentCnt);
+    auto crossSize = wrapper_->GetGeometryNode()->GetFrameSize().CrossSize(axis_);
+    auto layoutDirection = wrapper_->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    auto isRtl = layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL;
     // prepare crossPos
     for (size_t i = 0; i < segmentCnt; ++i) {
         float pos = ((axis_ == Axis::VERTICAL) ? info_.margins_[i].left : info_.margins_[i].top).value_or(0.0f);
         for (const auto& len : itemsCrossSize_[i]) {
-            crossPos[i].push_back(pos);
+            crossPos[i].push_back(!isRtl ? pos : crossSize - pos - len);
             pos += len + crossGaps_[i];
         }
     }
@@ -305,8 +308,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
         // measure appearing items when scrolling upwards
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
         for (int32_t i = info_.startIndex_; i < oldStart; ++i) {
-            auto item = MeasureItem(
-                props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, info_.GetSegment(i), i));
+            MeasureItem(props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, info_.GetSegment(i), i));
         }
     }
 }
@@ -341,7 +343,7 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     for (int32_t i = info_.startIndex_; i < jumpIdx; ++i) {
         auto seg = info_.GetSegment(i);
         if (sections_->GetSectionInfo()[seg].onGetItemMainSizeByIndex) {
-            auto item = MeasureItem(props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, seg, i));
+            MeasureItem(props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, seg, i));
         }
     }
 }
@@ -395,8 +397,9 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
         float itemHeight = GetUserDefHeight(sections_, seg, i);
         if (itemHeight < 0.0f) {
             auto item = MeasureItem(props, i, position.crossIndex, -1.0f);
-
-            itemHeight = GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_);
+            if (item) {
+                itemHeight = GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_);
+            }
         }
         info_.RecordItem(i, position, itemHeight);
     }
@@ -412,6 +415,9 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
         }
         float itemHeight = GetUserDefHeight(sections_, info_.GetSegment(i), i);
         auto item = MeasureItem(props, i, position.crossIndex, itemHeight);
+        if (!item) {
+            continue;
+        }
         if (info_.itemInfos_.size() <= static_cast<size_t>(i)) {
             info_.RecordItem(i, position, GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_));
         }
@@ -422,6 +428,7 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, int32_t crossIdx, float userDefMainSize) const
 {
     auto item = wrapper_->GetOrCreateChildByIndex(idx);
+    CHECK_NULL_RETURN(item, nullptr);
     // override user-defined main size
     if (userDefMainSize >= 0.0f) {
         auto props = item->GetLayoutProperty();
@@ -472,6 +479,7 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
 
     OffsetF offset = (axis_ == Axis::VERTICAL) ? OffsetF(crossPos, mainOffset) : OffsetF(mainOffset, crossPos);
     auto wrapper = wrapper_->GetOrCreateChildByIndex(idx);
+    CHECK_NULL_VOID(wrapper);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + padding);
     if (wrapper->CheckNeedForceMeasureAndLayout()) {
         wrapper->Layout();

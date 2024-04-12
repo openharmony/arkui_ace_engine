@@ -40,7 +40,7 @@ public:
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
     void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
-    bool isOverlayCreated();
+    bool IsOverlayCreated();
 
 private:
     RefPtr<NG::FrameNode> frameNode_;

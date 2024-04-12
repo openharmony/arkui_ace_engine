@@ -40,6 +40,8 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+
+            theme->backBtnResourceId_ = InternalResource::ResourceId::TITLEBAR_BACK;
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
 
@@ -116,6 +118,43 @@ public:
             theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
             theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
             theme->backgroundBlurColor_ = pattern->GetAttr<Color>("background_blur_color", Color(0x19E6E6E6));
+            theme->mainTitleFontColor_ = pattern->GetAttr<Color>("title_primary_color", Color(0xe5000000));
+            theme->subTitleFontColor_ = pattern->GetAttr<Color>("title_subheader_color", Color(0x99000000));
+            theme->compBackgroundColor_ =
+                pattern->GetAttr<Color>("icon_background_color", Color(0x0c000000));
+            theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color(0xe5000000));
+            theme->marginLeft_ = pattern->GetAttr<Dimension>("title_margin_left", 16.0_vp);
+            theme->marginRight_ = pattern->GetAttr<Dimension>("title_margin_right", 16.0_vp);
+            theme->mainTitleFontSizeL_ = pattern->GetAttr<Dimension>("title_primary_size", 30.0_fp);
+            theme->mainTitleFontSizeM_ = pattern->GetAttr<Dimension>("title_secondary_size", 26.0_fp);
+            theme->mainTitleFontSizeS_ = pattern->GetAttr<Dimension>("title_tertiary_size", 20.0_fp);
+            theme->subTitleFontSizeS_ = pattern->GetAttr<Dimension>("title_subheader_size", 14.0_fp);
+            theme->cornerRadius_ = pattern->GetAttr<Dimension>("icon_background_shape", 20.0_vp);
+            theme->compPadding_ = pattern->GetAttr<Dimension>("icon_background_space_horizontal", 8.0_vp);
+            constexpr double mainTitleDefaultFontWeit = 6.0; // 6.0 is main title default fontweight:FontWeight::W700
+            theme->mainTitleFontWeight_ = FontWeight(static_cast<int32_t>(
+                pattern->GetAttr<double>("title_primary_weight", mainTitleDefaultFontWeit)));
+            constexpr double subTitleDefaultFontWeit = 3.0; // 3.0 is sub title default fontweight:FontWeight::W400
+            theme->subTitleFontWeight_ = FontWeight(static_cast<int32_t>(
+                pattern->GetAttr<double>("title_subheader_weight", subTitleDefaultFontWeit)));
+            theme->iconWidth_ = pattern->GetAttr<Dimension>("icon_width", 24.0_vp);
+            theme->iconHeight_ = pattern->GetAttr<Dimension>("icon_height", 24.0_vp);
+            theme->backButtonWidth_ = pattern->GetAttr<Dimension>("icon_background_width", 40.0_vp);
+            theme->backButtonHeight_ = pattern->GetAttr<Dimension>("icon_background_height", 40.0_vp);
+            theme->iconBackgroundWidth_ = pattern->GetAttr<Dimension>("icon_background_width", 40.0_vp);
+            theme->iconBackgroundHeight_ = pattern->GetAttr<Dimension>("icon_background_height", 40.0_vp);
+            theme->paddingTopTwolines_ = pattern->GetAttr<Dimension>("padding_top_twolines", 8.0_vp);
+            theme->titleSpaceVertical_ = pattern->GetAttr<Dimension>("title_sapce_vertical", 2.0_vp);
+            theme->iconDisableAlpha_ = pattern->GetAttr<double>("icon_disable_alpha", 0.0);
+            theme->backgroundFocusOutlineColor_ = pattern->GetAttr<Color>(
+                "icon_background_focus_outline_color", Color(0x0A59F7));
+            theme->backgroundFocusOutlineWeight_ = pattern->GetAttr<Dimension>(
+                "icon_background_focus_outline_weight", 2.0_vp);
+            theme->backgroundDisableAlpha_ = pattern->GetAttr<double>("icon_background_disable_alpha", 0.0);
+            theme->backgroundHoverColor_ = pattern->GetAttr<Color>("icon_background_hover_color",
+                Color(0x0c000000));
+            theme->backgroundPressedColor_ = pattern->GetAttr<Color>("icon_background_pressed_color",
+                Color(0x19000000));
         }
     };
 
@@ -156,6 +195,10 @@ public:
     const Dimension& GetHeightEmphasize() const
     {
         return heightEmphasize_;
+    }
+    InternalResource::ResourceId GetBackBtnResourceId() const
+    {
+        return backBtnResourceId_;
     }
     InternalResource::ResourceId GetBackResourceId() const
     {
@@ -364,6 +407,118 @@ public:
     {
         return backgroundBlurColor_;
     }
+    const Dimension& GetMarginLeft() const
+    {
+        return marginLeft_;
+    }
+    const Dimension& GetMarginRight() const
+    {
+        return marginRight_;
+    }
+    const Dimension& GetMainTitleFontSizeL() const
+    {
+        return mainTitleFontSizeL_;
+    }
+    const Dimension& GetMainTitleFontSizeM() const
+    {
+        return mainTitleFontSizeM_;
+    }
+    const Dimension& GetMainTitleFontSizeS() const
+    {
+        return mainTitleFontSizeS_;
+    }
+    const Dimension& GetSubTitleFontSizeS() const
+    {
+        return subTitleFontSizeS_;
+    }
+    const Color& GetMainTitleFontColor() const
+    {
+        return mainTitleFontColor_;
+    }
+    const Color& GetSubTitleFontColor() const
+    {
+        return subTitleFontColor_;
+    }
+    const FontWeight& GetMainTitleFontWeight() const
+    {
+        return mainTitleFontWeight_;
+    }
+    const FontWeight& GetSubTitleFontWeight() const
+    {
+        return subTitleFontWeight_;
+    }
+    const Dimension& GetCornerRadius() const
+    {
+        return cornerRadius_;
+    }
+    const Color& GetCompBackgroundColor() const
+    {
+        return compBackgroundColor_;
+    }
+    const Color& GetIconColor() const
+    {
+        return iconColor_;
+    }
+    const Dimension& GetCompPadding() const
+    {
+        return compPadding_;
+    }
+    const Dimension& GetIconWidth() const
+    {
+        return iconWidth_;
+    }
+    const Dimension& GetIconHeight() const
+    {
+        return iconHeight_;
+    }
+    const Dimension& GetIconBackgroundWidth() const
+    {
+        return iconBackgroundWidth_;
+    }
+    const Dimension& GetIconBackgroundHeight() const
+    {
+        return iconBackgroundHeight_;
+    }
+    const Dimension& GetBackButtonWidth() const
+    {
+        return backButtonWidth_;
+    }
+    const Dimension& GetBackButtonHeight() const
+    {
+        return backButtonHeight_;
+    }
+    const Dimension& GetPaddingTopTwolines() const
+    {
+        return paddingTopTwolines_;
+    }
+    const Dimension& GetTitleSpaceVertical() const
+    {
+        return titleSpaceVertical_;
+    }
+    const double& GetIconDisableAlpha() const
+    {
+        return iconDisableAlpha_;
+    }
+    const Color& GetBackgroundFocusOutlineColor() const
+    {
+        return backgroundFocusOutlineColor_;
+    }
+    const Dimension& GetBackgroundFocusOutlineWeight() const
+    {
+        return backgroundFocusOutlineWeight_;
+    }
+    const double& GetBackgroundDisableAlpha() const
+    {
+        return backgroundDisableAlpha_;
+    }
+    const Color& GetBackgroundHoverColor() const
+    {
+        return backgroundHoverColor_;
+    }
+    const Color& GetBackgroundPressedColor() const
+    {
+        return backgroundPressedColor_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -376,6 +531,7 @@ private:
     Dimension subTitleFontSize_;
     Dimension height_;
     Dimension heightEmphasize_;
+    InternalResource::ResourceId backBtnResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
     Dimension menuZoneSize_;
@@ -430,6 +586,34 @@ private:
     uint32_t navBarUnfocusEffectEnable_ = 0;
     Color navBarUnfocusColor_ = Color::TRANSPARENT;
     Color backgroundBlurColor_;
+    Dimension marginLeft_;
+    Dimension marginRight_;
+    Dimension mainTitleFontSizeL_;
+    Dimension mainTitleFontSizeM_;
+    Dimension mainTitleFontSizeS_;
+    Dimension subTitleFontSizeS_;
+    Color mainTitleFontColor_;
+    Color subTitleFontColor_;
+    FontWeight mainTitleFontWeight_ { FontWeight::W700 };
+    FontWeight subTitleFontWeight_ { FontWeight::W400 };
+    Dimension cornerRadius_;
+    Color compBackgroundColor_;
+    Dimension compPadding_;
+    Color iconColor_;
+    Dimension iconWidth_;
+    Dimension iconHeight_;
+    Dimension backButtonWidth_;
+    Dimension backButtonHeight_;
+    Dimension iconBackgroundWidth_;
+    Dimension iconBackgroundHeight_;
+    Dimension paddingTopTwolines_;
+    Dimension titleSpaceVertical_;
+    double iconDisableAlpha_ = 0.4;
+    Color backgroundFocusOutlineColor_;
+    Dimension backgroundFocusOutlineWeight_;
+    double backgroundDisableAlpha_ = 0.4;
+    Color backgroundHoverColor_;
+    Color backgroundPressedColor_;
 };
 
 } // namespace OHOS::Ace

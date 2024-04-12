@@ -123,6 +123,8 @@ public:
 
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
+    void SetTransformHint(Rotation dmRotation) override;
+
 private:
     void PostRenderOnlyTaskToUI();
     void RegisterSurface() const;

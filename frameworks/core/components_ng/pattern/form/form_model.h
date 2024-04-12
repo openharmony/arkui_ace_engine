@@ -39,6 +39,7 @@ public:
     virtual void SetOnLoad(std::function<void(const std::string&)>&& onLoad) = 0;
     virtual void SetVisible(VisibleType visible) = 0;
     virtual void SetVisibility(VisibleType visible) = 0;
+    virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
 
 private:
     static std::unique_ptr<FormModel> instance_;

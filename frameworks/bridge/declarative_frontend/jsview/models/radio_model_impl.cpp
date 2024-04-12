@@ -26,7 +26,8 @@
 
 namespace OHOS::Ace::Framework {
 
-void RadioModelImpl::Create(const std::optional<std::string>& value, const std::optional<std::string>& group)
+void RadioModelImpl::Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
+    const std::optional<int32_t>& indicator)
 {
     RefPtr<RadioTheme> radioTheme = JSViewAbstract::GetTheme<RadioTheme>();
     auto radioComponent = AceType::MakeRefPtr<OHOS::Ace::RadioComponent<std::string>>(radioTheme);

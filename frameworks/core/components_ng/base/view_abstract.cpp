@@ -347,6 +347,19 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetForegroundEffect(float radius)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateForegroundEffect(radius);
+    }
+}
+
 void ViewAbstract::SetBackgroundEffect(const EffectOption &effectOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -835,6 +848,75 @@ void ViewAbstract::DisableOnBlur()
     focusHub->ClearUserOnBlur();
 }
 
+void ViewAbstract::DisableOnClick(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnClick();
+}
+
+void ViewAbstract::DisableOnTouch(FrameNode* frameNode)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnTouch();
+}
+
+void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnKey();
+}
+
+void ViewAbstract::DisableOnHover(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHover();
+}
+
+void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnMouse();
+}
+
+void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAppear();
+}
+
+void ViewAbstract::DisableOnDisappear(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnDisAppear();
+}
+
+void ViewAbstract::DisableOnFocus(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnFocus();
+}
+
+void ViewAbstract::DisableOnBlur(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnBlur();
+}
+
+void ViewAbstract::DisableOnAreaChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->ClearUserOnAreaChange();
+}
+
 void ViewAbstract::SetOnClick(GestureEventFunc &&clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -1239,6 +1321,7 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension> &value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
     ACE_UPDATE_RENDER_CONTEXT(Position, value);
 }
 
@@ -1247,6 +1330,7 @@ void ViewAbstract::SetPositionEdges(const EdgesParam& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
     ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
 }
 
@@ -1255,6 +1339,7 @@ void ViewAbstract::SetOffset(const OffsetT<Dimension> &value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, OffsetEdges);
     ACE_UPDATE_RENDER_CONTEXT(Offset, value);
 }
 
@@ -1263,6 +1348,7 @@ void ViewAbstract::SetOffsetEdges(const EdgesParam& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
     ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
 }
 
@@ -1601,7 +1687,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension &radius, const BlurOption &bl
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius)
+void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -1609,7 +1695,7 @@ void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlurRadius(radius);
+        target->UpdateBackBlur(radius, blurOption);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -1649,12 +1735,20 @@ void ViewAbstract::SetFrontBlur(const Dimension &radius, const BlurOption &blurO
     }
 }
 
-void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius)
+void ViewAbstract::SetDynamicDim(float DimDegree)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DynamicDimDegree, DimDegree);
+}
+
+void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurRadius(radius);
+        target->UpdateFrontBlur(radius, blurOption);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -1767,6 +1861,19 @@ void ViewAbstract::SetTransition(const TransitionOptions &options)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
+}
+
+void ViewAbstract::CleanTransition()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->CleanTransition();
+    }
 }
 
 void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect> &effect)
@@ -2046,6 +2153,45 @@ void ViewAbstract::SetOverlay(const OverlayOptions &overlay)
     ACE_UPDATE_RENDER_CONTEXT(OverlayText, overlay);
 }
 
+void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (buildFunc) {
+        auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
+            ScopedViewStackProcessor builderViewStackProcessor;
+            func();
+            auto customNode = ViewStackProcessor::GetInstance()->Finish();
+            return customNode;
+        };
+        auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+        CHECK_NULL_VOID(overlayNode);
+        frameNode->SetOverlayNode(overlayNode);
+        overlayNode->SetParent(AceType::WeakClaim(frameNode));
+        overlayNode->SetActive(true);
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->SetIsOverlayNode(true);
+        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+        layoutProperty->SetOverlayOffset(offsetX, offsetY);
+        auto renderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(INT32_MAX);
+        auto focusHub = overlayNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(false);
+    } else {
+        frameNode->SetOverlayNode(nullptr);
+    }
+}
+
 void ViewAbstract::SetMotionPath(const MotionPathOption &motionPath)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2121,9 +2267,15 @@ void ViewAbstract::SetForegroundColor(const Color &color)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
-    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
-    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
+    renderContext->UpdateForegroundColor(color);
+    renderContext->UpdateForegroundColorFlag(true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy &strategy)
@@ -2147,8 +2299,8 @@ void ViewAbstract::SetKeyboardShortcut(const std::string &value, const std::vect
     CHECK_NULL_VOID(eventHub);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (value.empty() || (keys.size() == 0 && value.length() == 1)) {
-        eventHub->SetKeyboardShortcut("", 0, nullptr);
+    if (value.empty()) {
+        eventHub->ClearSingleKeyboardShortcut();
         return;
     }
     auto key = eventManager->GetKeyboardShortcutKeys(keys);
@@ -2404,7 +2556,7 @@ void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradie
 
 void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
 {
-    const auto& target = frameNode->GetRenderContext();
+    const auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateFrontBlurStyle(fgBlurStyle);
         if (target->GetFrontBlurRadius().has_value()) {
@@ -2464,9 +2616,13 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect)
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
-    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->GetForegroundColorStrategy().has_value()) {
+        renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
+        renderContext->ResetForegroundColorStrategy();
+    }
+    renderContext->UpdateForegroundColor(color);
+    renderContext->UpdateForegroundColorFlag(true);
 }
 
 void ViewAbstract::SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy)
@@ -2491,6 +2647,14 @@ void ViewAbstract::SetLightIntensity(const float value)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LightIntensity, value);
+}
+
+void ViewAbstract::SetLightColor(const Color& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightColor, value);
 }
 
 void ViewAbstract::SetLightIlluminated(const uint32_t value)
@@ -2858,6 +3022,15 @@ void ViewAbstract::SetTransition(FrameNode* frameNode, const TransitionOptions& 
     ACE_UPDATE_NODE_RENDER_CONTEXT(Transition, options, frameNode);
 }
 
+void ViewAbstract::CleanTransition(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->CleanTransition();
+    }
+}
+
 void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(ChainedTransition, effect, frameNode);
@@ -2941,8 +3114,8 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     CHECK_NULL_VOID(eventHub);
     CHECK_NULL_VOID(frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
-    if (value.empty() || (keys.empty() && value.length() == 1)) {
-        eventHub->SetKeyboardShortcut("", 0, nullptr);
+    if (value.empty() || keys.empty()) {
+        eventHub->ClearSingleKeyboardShortcut();
         return;
     }
     auto key = eventManager->GetKeyboardShortcutKeys(keys);
@@ -2976,9 +3149,10 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
 }
 
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
@@ -3007,6 +3181,27 @@ void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventF
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
+}
+
+void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyCallbackFunc &&onKeyCallback)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyCallback(std::move(onKeyCallback));
 }
 
 bool ViewAbstract::GetFocusable(FrameNode* frameNode)
@@ -3076,6 +3271,25 @@ BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderWidths);
     return target->GetBorderWidthValue(borderWidths);
+}
+
+BorderWidthProperty ViewAbstract::GetLayoutBorderWidth(FrameNode* frameNode)
+{
+    Dimension defaultDimen = Dimension(0, DimensionUnit::VP);
+    BorderWidthProperty borderWidths;
+    borderWidths.topDimen = std::optional<Dimension>(defaultDimen);
+    borderWidths.rightDimen = std::optional<Dimension>(defaultDimen);
+    borderWidths.bottomDimen = std::optional<Dimension>(defaultDimen);
+    borderWidths.leftDimen = std::optional<Dimension>(defaultDimen);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, borderWidths);
+    const auto& property = layoutProperty->GetBorderWidthProperty();
+    CHECK_NULL_RETURN(property, borderWidths);
+    borderWidths.topDimen = std::optional<Dimension>(property->topDimen);
+    borderWidths.rightDimen = std::optional<Dimension>(property->rightDimen);
+    borderWidths.bottomDimen = std::optional<Dimension>(property->bottomDimen);
+    borderWidths.leftDimen = std::optional<Dimension>(property->leftDimen);
+    return borderWidths;
 }
 
 BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
@@ -3204,7 +3418,7 @@ RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
 {
-    BlendMode value = BlendMode::CLEAR;
+    BlendMode value = BlendMode::NONE;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetBackBlendModeValue(value);
@@ -3457,7 +3671,7 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
 
 float ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    float value = -1.0f;
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3474,7 +3688,7 @@ float ViewAbstract::GetWidth(FrameNode* frameNode)
 
 float ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    float value = -1.0f;
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3501,7 +3715,10 @@ std::string ViewAbstract::GetBackgroundImageSrc(FrameNode* frameNode)
 {
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, "");
-    return target->GetBackgroundImage()->GetSrc();
+    if (target->GetBackgroundImage().has_value()) {
+        return target->GetBackgroundImage()->GetSrc();
+    }
+    return "";
 }
 
 ImageRepeat ViewAbstract::GetBackgroundImageRepeat(FrameNode* frameNode)
@@ -3509,7 +3726,10 @@ ImageRepeat ViewAbstract::GetBackgroundImageRepeat(FrameNode* frameNode)
     ImageRepeat value = ImageRepeat::NO_REPEAT;
     auto target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
-    return target->GetBackgroundImageRepeat().value();
+    if (target->GetBackgroundImageRepeat().has_value()) {
+        return target->GetBackgroundImageRepeat().value();
+    }
+    return value;
 }
 
 PaddingProperty ViewAbstract::GetPadding(FrameNode* frameNode)
@@ -3524,15 +3744,25 @@ PaddingProperty ViewAbstract::GetPadding(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, paddings);
     const auto& property = layoutProperty->GetPaddingProperty();
     CHECK_NULL_RETURN(property, paddings);
-    CalcLength top = CalcLength(property->top->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength right = CalcLength(property->right->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength bottom = CalcLength(property->bottom->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength left = CalcLength(property->left->GetDimension().Value(), DimensionUnit::VP);
-    paddings.top = std::optional<CalcLength>(top);
-    paddings.right = std::optional<CalcLength>(right);
-    paddings.bottom = std::optional<CalcLength>(bottom);
-    paddings.left = std::optional<CalcLength>(left);
+    paddings.top = std::optional<CalcLength>(property->top);
+    paddings.right = std::optional<CalcLength>(property->right);
+    paddings.bottom = std::optional<CalcLength>(property->bottom);
+    paddings.left = std::optional<CalcLength>(property->left);
     return paddings;
+}
+
+std::optional<CalcSize> ViewAbstract::GetConfigSize(FrameNode* frameNode)
+{
+    auto value = std::optional<CalcSize>();
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& property = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(property, value);
+    auto size = property->selfIdealSize;
+    if (size.has_value()) {
+        value = size;
+    }
+    return value;
 }
 
 std::string ViewAbstract::GetKey(FrameNode* frameNode)
@@ -3561,14 +3791,10 @@ MarginProperty ViewAbstract::GetMargin(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, margins);
     const auto& property = layoutProperty->GetMarginProperty();
     CHECK_NULL_RETURN(property, margins);
-    CalcLength top = CalcLength(property->top->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength right = CalcLength(property->right->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength bottom = CalcLength(property->bottom->GetDimension().Value(), DimensionUnit::VP);
-    CalcLength left = CalcLength(property->left->GetDimension().Value(), DimensionUnit::VP);
-    margins.top = std::optional<CalcLength>(top);
-    margins.right = std::optional<CalcLength>(right);
-    margins.bottom = std::optional<CalcLength>(bottom);
-    margins.left = std::optional<CalcLength>(left);
+    margins.top = std::optional<CalcLength>(property->top);
+    margins.right = std::optional<CalcLength>(property->right);
+    margins.bottom = std::optional<CalcLength>(property->bottom);
+    margins.left = std::optional<CalcLength>(property->left);
     return margins;
 }
 
@@ -3731,5 +3957,72 @@ void ViewAbstract::ClearJSFrameNodeOnMouse(FrameNode* frameNode)
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearJSFrameNodeOnMouse();
+}
+
+BlendApplyType ViewAbstract::GetBlendApplyType(FrameNode* frameNode)
+{
+    BlendApplyType value = BlendApplyType::FAST;
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetBackBlendApplyTypeValue(value);
+}
+
+void ViewAbstract::SetJSFrameNodeOnSizeChange(
+    FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetJSFrameNodeOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnSizeChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnSizeChange();
+}
+
+void ViewAbstract::SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnGestureJudgeBegin(std::move(gestureJudgeFunc));
+}
+
+void ViewAbstract::SetOnSizeChanged(
+    FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnSizeChangeCallback(std::move(onSizeChanged));
+}
+
+void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
+
+void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDisallowDropForcedly(isDisallowDropForcedly);
+}
+
+void ViewAbstract::SetBackgroundImageResizableSlice(const ImageResizableSlice& slice)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice);
+}
+
+void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -48,14 +49,23 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
     if (!args[0]->IsFunction()) {
         return;
     }
-    RefPtr<JsTouchFunction> jsOnTouchFunc = AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(args[0]));
+    EcmaVM* vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnTouchFunc = JSRef<JSFunc>::Cast(args[0]);
+    if (jsOnTouchFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnTouchFuncLocalHandle = jsOnTouchFunc->GetLocalHandle();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onTouch = [execCtx = args.GetExecutionContext(), func = std::move(jsOnTouchFunc), node = frameNode](
-                       TouchEventInfo& info) {
+    auto onTouch = [vm, execCtx = args.GetExecutionContext(),
+                       func = panda::CopyableGlobal(vm, jsOnTouchFuncLocalHandle),
+                       node = frameNode](TouchEventInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onTouch");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, info);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnTouch(std::move(onTouch));
 }
@@ -79,6 +89,28 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
         func->Execute(info);
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
+}
+
+void JSInteractableView::JsOnKeyPreIme(const JSCallbackInfo& args)
+{
+    if (args[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->DisableOnKeyPreIme();
+        return;
+    }
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsKeyFunction> JsOnPreImeEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onPreImeEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnPreImeEvent), node = frameNode](
+                          KeyEventInfo& info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onKeyPreIme");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(info);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
+    };
+    ViewAbstractModel::GetInstance()->SetOnKeyPreIme(std::move(onPreImeEvent));
 }
 
 void JSInteractableView::JsOnHover(const JSCallbackInfo& info)

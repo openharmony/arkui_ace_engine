@@ -681,16 +681,16 @@ shared_ptr<JsValue> AppLogPrint(
     std::string content = GetLogContent(runtime, argv, argc);
     switch (level) {
         case JsLogLevel::DEBUG:
-            APP_LOGD("app Log: %{public}s", content.c_str());
+            APP_LOGD("%{public}s", content.c_str());
             break;
         case JsLogLevel::INFO:
-            APP_LOGI("app Log: %{public}s", content.c_str());
+            APP_LOGI("%{public}s", content.c_str());
             break;
         case JsLogLevel::WARNING:
-            APP_LOGW("app Log: %{public}s", content.c_str());
+            APP_LOGW("%{public}s", content.c_str());
             break;
         case JsLogLevel::ERROR:
-            APP_LOGE("app Log: %{public}s", content.c_str());
+            APP_LOGE("%{public}s", content.c_str());
             break;
     }
 
@@ -736,16 +736,16 @@ shared_ptr<JsValue> JsLogPrint(
     std::string content = GetLogContent(runtime, argv, argc);
     switch (level) {
         case JsLogLevel::DEBUG:
-            LOGD("ace Log: %{public}s", content.c_str());
+            TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
         case JsLogLevel::INFO:
-            LOGI("ace Log: %{public}s", content.c_str());
+            TAG_LOGI(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
         case JsLogLevel::WARNING:
-            LOGW("ace Log: %{public}s", content.c_str());
+            TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
         case JsLogLevel::ERROR:
-            LOGE("ace Log: %{public}s", content.c_str());
+            TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
     }
 
@@ -860,16 +860,16 @@ napi_value AppLogPrint(napi_env env, napi_callback_info info, JsLogLevel level)
     std::string content = GetLogContent(env, info);
     switch (level) {
         case JsLogLevel::DEBUG:
-            APP_LOGD("app Log: %{public}s", content.c_str());
+            APP_LOGD("%{public}s", content.c_str());
             break;
         case JsLogLevel::INFO:
-            APP_LOGI("app Log: %{public}s", content.c_str());
+            APP_LOGI("%{public}s", content.c_str());
             break;
         case JsLogLevel::WARNING:
-            APP_LOGW("app Log: %{public}s", content.c_str());
+            APP_LOGW("%{public}s", content.c_str());
             break;
         case JsLogLevel::ERROR:
-            APP_LOGE("app Log: %{public}s", content.c_str());
+            APP_LOGE("%{public}s", content.c_str());
             break;
     }
 

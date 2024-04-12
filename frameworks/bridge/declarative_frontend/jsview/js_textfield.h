@@ -55,6 +55,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
     static Edge GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
@@ -103,8 +104,14 @@ public:
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
     static void SetDecoration(const JSCallbackInfo& info);
+    static void SetMinFontSize(const JSCallbackInfo& info);
+    static void SetMaxFontSize(const JSCallbackInfo& info);
+    static void SetHeightAdaptivePolicy(int32_t value);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetFontFeature(const JSCallbackInfo& info);
+    static void SetTextOverflow(const JSCallbackInfo& info);
+    static void SetTextIndent(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

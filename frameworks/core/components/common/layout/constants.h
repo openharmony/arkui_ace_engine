@@ -217,6 +217,12 @@ enum class TextOverflow {
     MARQUEE,
 };
 
+enum class TextMarqueeState {
+    START = 0,
+    BOUNCE,
+    FINISH,
+};
+
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;
 enum class TextFieldOverflowX {
     VISIBLE,
@@ -279,6 +285,7 @@ enum class ImageFit {
     NONE,
     SCALE_DOWN,
     TOP_LEFT,
+    COVER_TOP_LEFT,
 };
 
 enum class ImageRenderMode {
@@ -683,6 +690,11 @@ enum class FunctionKey {
     F10 = 10,
     F11 = 11,
     F12 = 12,
+    TAB = 13,
+    DPAD_UP = 14,
+    DPAD_DOWN = 15,
+    DPAD_LEFT = 16,
+    DPAD_RIGHT = 17,
 };
 
 enum class ObscuredReasons {
@@ -748,6 +760,12 @@ enum class NodeRenderType : uint32_t {
     RENDER_TYPE_DISPLAY = 0,
     RENDER_TYPE_TEXTURE,
 };
+
+enum class MarqueeUpdateStrategy : uint32_t {
+    DEFAULT = 0,
+    PRESERVE_POSITION,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

@@ -48,7 +48,7 @@ T fromJsiValue(const EcmaVM* vm, Local<panda::JSValueRef> val)
         "Cannot convert values to reference or cv-qualified types!");
 
     if constexpr (std::is_integral<T>::value && std::is_signed<T>::value && !std::is_same<T, bool>::value) {
-        return val->Int32Value(vm);
+        return std::is_same<T, int64_t>::value ? val->IntegerValue(vm) : val->Int32Value(vm);
     } else if constexpr (std::is_unsigned_v<T>) {
         return val->Uint32Value(vm);
     } else if constexpr (std::is_floating_point_v<T>) {

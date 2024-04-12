@@ -15,21 +15,24 @@
 
 #include "core/components_ng/image_provider/svg_image_object.h"
 
+#include "core/components_ng/render/canvas_image.h"
+
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #else
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
-    auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF());
+    auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF(), data);
     if (!obj->MakeSvgDom(data, src.GetFillColor())) {
         return nullptr;
-    };
+    }
     return obj;
 }
 
@@ -39,35 +42,50 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
 }
 
 void SvgImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
+    const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool /*forceResize*/, bool /*syncLoad*/)
 {
-    CHECK_NULL_VOID(GetSVGDom());
-    // just set svgDom to canvasImage
-    auto canvasImage = MakeRefPtr<SvgCanvasImage>(GetSVGDom());
+    auto src = GetSourceInfo();
+    auto key = ImageUtils::GenerateImageKey(src, resizeTarget);
+
+    if (!svgImageData_) {
+        ctx->FailCallback("svgImageData is null when SvgImageObject try MakeSvgDom");
+        return;
+    }
+    auto svgDomBase = MakeSvgDom(svgImageData_, src.GetFillColor());
+    if (!svgDomBase) {
+        ctx->FailCallback("MakeSvgDom failed");
+        return;
+    }
+    auto canvasImage = MakeRefPtr<SvgCanvasImage>(svgDomBase);
     ctx->SuccessCallback(canvasImage);
 }
 
-bool SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor)
+RefPtr<SvgDomBase> SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor)
 {
+    RefPtr<SvgDomBase> svgDomBase;
 #ifndef USE_ROSEN_DRAWING
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
-    CHECK_NULL_RETURN(skiaImageData, false);
-    // update SVGSkiaDom
-    svgDomBase_ = skiaImageData->MakeSvgDom(svgFillColor);
+    CHECK_NULL_RETURN(skiaImageData, nullptr);
+    svgDomBase = skiaImageData->MakeSvgDom(svgFillColor);
 #else
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
-    CHECK_NULL_RETURN(rosenImageData, false);
+    CHECK_NULL_RETURN(rosenImageData, nullptr);
     // update SVGSkiaDom
-    svgDomBase_ = rosenImageData->MakeSvgDom(svgFillColor);
+    svgDomBase = rosenImageData->MakeSvgDom(svgFillColor);
 #endif
-    CHECK_NULL_RETURN(svgDomBase_, false);
-    imageSize_ = svgDomBase_->GetContainerSize();
+    CHECK_NULL_RETURN(svgDomBase, nullptr);
+    imageSize_ = svgDomBase->GetContainerSize();
 
     if (imageSize_.IsNonPositive()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
             "[Engine Log] [Image] %{public}s doesn't have an intrinsic size. The developer must set a size for it.",
             GetSourceInfo().ToString().c_str());
     }
-    return true;
+    return svgDomBase;
+}
+
+const RefPtr<ImageData>& SvgImageObject::GetSvgImageData() const
+{
+    return svgImageData_;
 }
 } // namespace OHOS::Ace::NG

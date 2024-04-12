@@ -21,12 +21,13 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
     const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     : TextOverlayModifier(), pattern_(pattern), edgeEffect_(edgeEffect),
-      scrollBarOverlayModifier_(scrollbarOverlayModifier)
+      scrollBarOverlayModifier_(scrollbarOverlayModifier), magnifierPainter_(pattern)
 {
     caretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(caretVisible_);
@@ -158,6 +159,7 @@ void RichEditorOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas
 
 void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
+    ACE_SCOPED_TRACE("RichEditorOverlayOnDraw");
     if (!showSelect_->Get()) {
         PaintScrollBar(drawingContext);
         PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
@@ -180,6 +182,7 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     PaintCaret(drawingContext);
     SetSelectedColor(selectedBackgroundColor_->Get());
     TextOverlayModifier::onDraw(drawingContext);
+    magnifierPainter_.PaintMagnifier(drawingContext.canvas);
     drawingContext.canvas.Restore();
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);

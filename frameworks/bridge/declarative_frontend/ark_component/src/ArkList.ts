@@ -315,9 +315,23 @@ class ListClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class ListFadingEdgeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('fadingEdge');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetFadingEdge(node);
+    } else {
+      getUINativeModule().list.setFadingEdge(node, this.value!);
+    }
+  }
+}
+
 class ArkListComponent extends ArkComponent implements ListAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   lanes(value: number | LengthConstrain, gutter?: any): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
@@ -451,15 +465,17 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
     throw new Error('Method not implemented.');
   }
+  fadingEdge(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
+    return this;
+  }
 }
 
 // @ts-ignore
-globalThis.List.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkListComponent(nativeNode);
+globalThis.List.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkListComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.ListModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

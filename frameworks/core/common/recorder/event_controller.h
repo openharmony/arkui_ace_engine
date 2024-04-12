@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_EVENT_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_EVENT_CONTROLLER_H
 
-#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -49,7 +49,7 @@ private:
     ~EventController() = default;
     void NotifyConfigChange();
 
-    std::mutex cacheLock_;
+    std::shared_mutex cacheLock_;
     std::vector<UIEventClient> clientList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventController);

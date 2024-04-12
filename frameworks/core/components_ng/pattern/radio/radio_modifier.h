@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing_forward.h"
 
@@ -55,14 +56,23 @@ public:
     void onDraw(DrawingContext& context) override
     {
         RSCanvas& canvas = context.canvas;
-        PaintRadio(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            PaintIndicator(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
+        } else {
+            PaintRadio(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
+        }
     }
 
     void UpdateAnimatableProperty();
+    void UpdateTotalScaleOnAnimatable(
+        bool isCheck, const AnimationOption& delayOption, const AnimationOption& halfDurationOption);
     void UpdateIsOnAnimatableProperty(bool isCheck);
+    void UpdateIndicatorAnimation(bool isCheck);
     void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve);
     void InitializeParam();
     void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void PaintIndicator(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void PaintUnselectedIndicator(RSCanvas& canvas, float outCircleRadius, float centerX, float centerY) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
 
     void SetPointColor(const Color& pointColor)
@@ -194,6 +204,8 @@ private:
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<RadioModifier> radioModifier_;
     RefPtr<AnimatablePropertyFloat> totalScale_;
+    RefPtr<AnimatablePropertyFloat> opacityScale_;
+    RefPtr<AnimatablePropertyFloat> borderOpacityScale_;
     RefPtr<AnimatablePropertyFloat> pointScale_;
     RefPtr<AnimatablePropertyFloat> ringPointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;

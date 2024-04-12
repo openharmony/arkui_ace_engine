@@ -127,7 +127,10 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
         Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
         if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER ||
             alignment == Alignment::TOP_RIGHT) {
-            offsetY = Dimension(0.0);
+            // Top Needs Avoid System Navigation Bar
+            auto safeAreaManager = context->GetSafeAreaManager();
+            auto sysTop = safeAreaManager ? safeAreaManager->GetSystemSafeArea().top_.Length() : 0.0f;
+            offsetY = Dimension(sysTop);
         } else if (alignment == Alignment::CENTER_LEFT || alignment == Alignment::CENTER ||
                    alignment == Alignment::CENTER_RIGHT) {
             offsetY = Dimension((rootHeight - textHeight - safeAreaOffset) / 2.0f);
@@ -174,7 +177,7 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto textHeight = GetTextHeight(textNode);
-    if (textHeight > toastTheme->GetMinHeight().ConvertToPx()) {
+    if (GreatNotEqual(textHeight, toastTheme->GetMinHeight().ConvertToPx())) {
         textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
     }
 }

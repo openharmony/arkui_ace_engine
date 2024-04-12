@@ -15,8 +15,11 @@
 
 #include "core/interfaces/native/node/view_model.h"
 
+#include <optional>
+
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -52,12 +55,12 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
-
 namespace OHOS::Ace::NG::ViewModel {
-std::map<void*, std::shared_ptr<ExtensionCompanionNode>> registeredNodes;
+
 ArkUIAPICallbackMethod* callbacks = nullptr;
 
 void* createTextNode(ArkUI_Int32 nodeId)
@@ -290,6 +293,13 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createFlowItemNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = WaterFlowItemModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createCircleNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CircleModelNG::CreateFrameNode(nodeId);
@@ -345,6 +355,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr, // GridItem
         createCustomNode,
         createWaterFlowNode,
+        createFlowItemNode,
         createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
@@ -358,13 +369,18 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
     return createArkUIFrameNodes[tag](nodeId);
 }
 
+ArkUI_CharPtr GetName(void* nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
+    return frameNode->GetTag().c_str();
+}
+
 void DisposeNode(void* nativePtr)
 {
     CHECK_NULL_VOID(nativePtr);
     auto* frameNode = reinterpret_cast<UINode*>(nativePtr);
     frameNode->DecRefCount();
-
-    registeredNodes.erase(nativePtr);
 }
 
 void AddChild(void* parentNode, void* childNode)
@@ -454,25 +470,31 @@ void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode)
 
 void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags)
 {
-    auto companion = std::make_shared<ExtensionCompanionNode>(peerId, flags);
-    companion->peer = node;
-    registeredNodes[node] = std::move(companion);
+    if (flags == ArkUIAPINodeFlags::NONE) {
+        return;
+    }
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    if (frameNode) {
+        // create extension and set to frameNode extension holder.
+        auto companion = AceType::MakeRefPtr<ExtensionCompanionNode>(peerId, flags, node);
+        frameNode->SetExtensionHandler(companion);
+    }
 }
 
 ExtensionCompanionNode* GetCompanion(void* nodePtr)
 {
-    auto it = registeredNodes.find(nodePtr);
-    if (it != registeredNodes.end()) {
-        return it->second.get();
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
+    if (frameNode) {
+        return AceType::DynamicCast<ExtensionCompanionNode>(frameNode->GetExtensionHandler());
     }
     return nullptr;
 }
 
-void SetCustomCallback(void* nodePtr, ArkUI_Int32 callback)
+void SetCustomCallback(ArkUIVMContext context, void* nodePtr, ArkUI_Int32 callback)
 {
     auto* node = GetCompanion(nodePtr);
     CHECK_NULL_VOID(node);
-    node->setCallbackId(callback);
+    node->SetCallbackId(context, callback);
 }
 
 void SetCallbackMethod(ArkUIAPICallbackMethod* method)
@@ -487,23 +509,82 @@ ArkUIAPICallbackMethod* GetCallbackMethod()
 
 ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
 {
-    auto node = GetCompanion(nodePtr);
-    CHECK_NULL_RETURN(node, 0);
-    return node->measure(context, data, callbacks);
+    // call frameNode measure.
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
+    if (frameNode) {
+        std::optional<LayoutConstraintF> constraint = std::make_optional<LayoutConstraintF>();
+        //minWidth
+        constraint->minSize.SetWidth(data[0]);
+        //minHeight
+        constraint->minSize.SetHeight(data[1]);
+        //maxWidth
+        constraint->maxSize.SetWidth(data[2]);
+        //maxHeight
+        constraint->maxSize.SetHeight(data[3]);
+        //minWidth == maxWidth
+        if (data[0] == data[2]) {
+            constraint->selfIdealSize.SetWidth(data[0]);
+        }
+        //minHeight == maxHeight
+        if (data[1] == data[3]) {
+            constraint->selfIdealSize.SetHeight(data[0]);
+        }
+        //percentReferenceWidth
+        constraint->percentReference.SetWidth(data[4]);
+        //percentReferenceHeight
+        constraint->percentReference.SetHeight(data[5]);
+        frameNode->SetActive(true);
+        frameNode->Measure(constraint);
+    }
+    return 0;
 }
 
 ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
 {
-    auto node = GetCompanion(nodePtr);
-    CHECK_NULL_RETURN(node, 0);
-    return node->layout(context, data, callbacks);
+    // call frameNode layout.
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
+    if (frameNode) {
+        frameNode->SetActive(true);
+        frameNode->GetGeometryNode()->SetMarginFrameOffsetX(data[0]);
+        frameNode->GetGeometryNode()->SetMarginFrameOffsetY(data[1]);
+        frameNode->Layout();
+    }
+    return 0;
 }
 
 ArkUI_Int32 DrawNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
 {
-    auto node = GetCompanion(nodePtr);
-    CHECK_NULL_RETURN(node, 0);
-    return node->draw(context, data, callbacks);
+    // rsnode draw by data, no need to directly call.
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
+    if (frameNode) {
+        frameNode->SetActive(true);
+        auto task = frameNode->CreateRenderTask();
+        if (task) {
+            (*task)();
+        }
+    }
+    return 0;
 }
 
+void SetAttachNodePtr(ArkUINodeHandle nodePtr, void* attachNode)
+{
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
+    if (frameNode) {
+        frameNode->SetExternalData(attachNode);
+    }
+}
+
+void* GetAttachNodePtr(ArkUINodeHandle nodePtr)
+{
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetExternalData();
+}
+
+ArkUI_Bool IsBuilderNode(void* nodePtr)
+{
+    CHECK_NULL_RETURN(nodePtr, false);
+    auto* node = reinterpret_cast<UINode*>(nodePtr);
+    return static_cast<ArkUI_Int32>(node->GetNodeStatus()) != 0 ;
+}
 } // namespace OHOS::Ace::NG::ViewModel

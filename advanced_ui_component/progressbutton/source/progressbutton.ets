@@ -17,6 +17,7 @@ const EMPTY_STRING: string = ''
 const MAX_PROGRESS: number = 100
 const MAX_PERCENTAGE: string = '100%'
 const MIN_PERCENTAGE: string = '0%'
+const BUTTON_NORMARL_WIDTH = 44;
 
 @Component
 export struct ProgressButton {
@@ -24,8 +25,8 @@ export struct ProgressButton {
   @State textProgress: string = EMPTY_STRING
   @Prop content: string = EMPTY_STRING
   @State isLoading: boolean = false
-  progressButtonWidth?: Length = 44
-  clickCallback: () => void = null
+  progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH
+  clickCallback: () => void = () => {}
   @Prop enable: boolean = true
 
   private getButtonProgress(): number {
@@ -84,7 +85,7 @@ export struct ProgressButton {
     .hoverEffect(HoverEffect.None)
     .backgroundColor($r("sys.color.ohos_id_color_foreground_contrary"))
     .constraintSize({minWidth: 44})
-    .width(this.progressButtonWidth < 44? 44: this.progressButtonWidth)
+    .width((this.progressButtonWidth && this.progressButtonWidth < BUTTON_NORMARL_WIDTH) ? BUTTON_NORMARL_WIDTH : this.progressButtonWidth)
     .stateEffect(this.enable)
     .onClick(() => {
       if(!this.enable){

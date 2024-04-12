@@ -22,6 +22,7 @@
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 #include "ui/rs_surface_node.h"
 #include "want_params.h"
 #include "wm/wm_common.h"
@@ -33,11 +34,9 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transaction/rs_transaction.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,6 +51,10 @@ constexpr char PULL_FAIL_NAME[] = "extension_pulling_up_fail";
 constexpr char PULL_FAIL_MESSAGE[] = "pulling another embedded component failed, not allowed to cascade.";
 constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
+constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
+constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
+constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
+constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out processing the key event.";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 // Set the UIExtension type of the EmbeddedComponent.
@@ -89,6 +92,13 @@ public:
         auto sessionWrapper = sessionWrapper_.Upgrade();
         CHECK_NULL_VOID(sessionWrapper);
         sessionWrapper->OnDisconnect(true);
+    }
+
+    void OnExtensionTimeout(int32_t errorCode) override
+    {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        CHECK_NULL_VOID(sessionWrapper);
+        sessionWrapper->OnExtensionTimeout(errorCode);
     }
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
@@ -324,11 +334,17 @@ bool SessionWrapperImpl::NotifyPointerEventSync(const std::shared_ptr<OHOS::MMI:
     return false;
 }
 
-bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(session_, false);
     bool isConsumed = false;
-    session_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+    bool isTimeout = false;
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreIme);
+    auto pattern = hostPattern_.Upgrade();
+    if (isTimeout && pattern) {
+        pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT, EVENT_TIMEOUT_NAME, EVENT_TIMEOUT_MESSAGE);
+        return false;
+    }
     UIEXT_LOGD("The key evnet is notified to the provider and %{public}s consumed.", isConsumed ? "is" : "is not");
     return isConsumed;
 }
@@ -411,14 +427,24 @@ void SessionWrapperImpl::NotifyDestroy()
 void SessionWrapperImpl::NotifyConfigurationUpdate() {}
 /************************************************ End: The lifecycle interface ****************************************/
 
-/************************* Begin: The interface to control the display area and the avoid area ************************/
+/************************************************ Begin: The interface for responsing provider ************************/
 void SessionWrapperImpl::OnConnect()
 {
     taskExecutor_->PostTask(
-        [weak = hostPattern_]() {
+        [weak = hostPattern_, wrapperWeak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnConnect();
+            auto wrapper = wrapperWeak.Upgrade();
+            CHECK_NULL_VOID(wrapper && wrapper->session_);
+            ContainerScope scope(wrapper->instanceId_);
+            if (auto hostWindowNode = WindowSceneHelper::FindWindowScene(pattern->GetHost())) {
+                auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
+                CHECK_NULL_VOID(hostNode);
+                auto hostPattern = hostNode->GetPattern<SystemWindowScene>();
+                CHECK_NULL_VOID(hostPattern);
+                wrapper->session_->SetParentSession(hostPattern->GetSession());
+            }
         },
         TaskExecutor::TaskType::UI);
 }
@@ -438,8 +464,20 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
                 pattern->FireOnErrorCallback(
                     ERROR_CODE_UIEXTENSION_EXITED_ABNORMALLY, EXIT_ABNORMALLY_NAME, EXIT_ABNORMALLY_MESSAGE);
             } else {
-                pattern->FireOnTerminatedCallback(std::nullopt, nullptr);
+                pattern->FireOnTerminatedCallback(0, nullptr);
             }
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
+{
+    taskExecutor_->PostTask(
+        [weak = hostPattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireOnErrorCallback(
+                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT, LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -454,7 +492,7 @@ void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::Accessibility
         },
         TaskExecutor::TaskType::UI);
 }
-/*************************** End: The interface to control the display area and the avoid area ************************/
+/************************************************** End: The interface for responsing provider ************************/
 
 /************************************************ Begin: The interface about the accessibility ************************/
 bool SessionWrapperImpl::TransferExecuteAction(
@@ -491,7 +529,14 @@ void SessionWrapperImpl::FocusMoveSearch(
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
 }
-/************************************************ Begin: The interface about the accessibility ************************/
+
+void SessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+/************************************************ End: The interface about the accessibility **************************/
 
 /***************************** Begin: The interface to control the display area and the avoid area ********************/
 std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const
@@ -509,17 +554,19 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
     UIEXT_LOGD("The display area with '%{public}s' is notified to the provider.", displayArea_.ToString().c_str());
     std::shared_ptr<Rosen::RSTransaction> transaction;
-    if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-        transaction = transactionController->GetRSTransaction();
-#ifdef ENABLE_ROSEN_BACKEND
-        if (transaction) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+    auto parentSession = session_->GetParentSession();
+    auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    if (reason == Rosen::SizeChangeReason::ROTATION) {
+        if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+            transaction = transactionController->GetRSTransaction();
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            if (transaction && parentSession && pipelineContext) {
+                transaction->SetDuration(pipelineContext->GetSyncAnimationOption().GetDuration());
+            }
         }
-#endif
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-                             std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
-        session_->GetSizeChangeReason(), transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
 }
 
 void SessionWrapperImpl::NotifySizeChangeReason(

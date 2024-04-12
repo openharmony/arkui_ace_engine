@@ -16,15 +16,15 @@
 import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import MeasureText from '@ohos.measure'
 
-export declare type TabTitleBarMenuItem = {
-  value: ResourceStr
-  isEnabled: boolean
-  action?: () => void
+export interface TabTitleBarMenuItem {
+  value: ResourceStr;
+  isEnabled?: boolean;
+  action?: () => void;
 }
 
-export declare type TabTitleBarTabItem = {
-  title: ResourceStr
-  icon?: ResourceStr
+export interface TabTitleBarTabItem {
+  title: ResourceStr;
+  icon?: ResourceStr;
 }
 
 const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+' +
@@ -46,8 +46,8 @@ const PUBLIC_MORE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAA
 
 @Component
 export struct TabTitleBar {
-  tabItems: Array<TabTitleBarTabItem>
-  menuItems: Array<TabTitleBarMenuItem>
+  tabItems: Array<TabTitleBarTabItem> = [];
+  menuItems: Array<TabTitleBarMenuItem> = [];
   @BuilderParam swiperContent: () => void
 
   @State tabWidth: number = 0
@@ -75,7 +75,7 @@ export struct TabTitleBar {
         .width(TabTitleBar.gradientMaskWidth)
         .height(TabTitleBar.totalHeight)
         .onReady(() => {
-          var grad = context2D.createLinearGradient(x0, y0, x1, y1)
+          let grad = context2D.createLinearGradient(x0, y0, x1, y1);
           grad.addColorStop(0.0, '#ffffffff')
           grad.addColorStop(1, '#00ffffff')
           context2D.fillStyle = grad
@@ -130,7 +130,7 @@ export struct TabTitleBar {
           Stack({ alignContent: Alignment.Start }) {
             Column() {
               List({ initialIndex: 0, scroller: this.scroller, space: 0 }) {
-                ForEach(this.tabItems, (tabItem, index) => {
+                ForEach(this.tabItems, (tabItem: TabTitleBarTabItem, index: number) => {
                   ListItem() {
                     TabContentItem({
                       item: tabItem,
@@ -205,8 +205,8 @@ export struct TabTitleBar {
 
 @Component
 struct CollapsibleMenuSection {
-  menuItems: Array<TabTitleBarMenuItem>
-  index: number
+  menuItems: Array<TabTitleBarMenuItem> = [];
+  index: number = 0;
 
   static readonly maxCountOfVisibleItems = 1
   private static readonly focusPadding = 4
@@ -247,11 +247,12 @@ struct CollapsibleMenuSection {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item, index) => {
+          ForEach(this.menuItems, (item: TabTitleBarMenuItem, index: number) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item, index) => {
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
+            (item: TabTitleBarMenuItem, index: number) => {
             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
 
@@ -328,7 +329,8 @@ struct CollapsibleMenuSection {
   @Builder
   popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, index) => {
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
+        (item: TabTitleBarMenuItem, index: number) => {
         ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
       })
     }
@@ -342,9 +344,9 @@ struct CollapsibleMenuSection {
 
 @Component
 struct TabContentItem {
-  item: TabTitleBarTabItem
-  index: number
-  maxIndex: number
+  item: TabTitleBarTabItem = { title: '' };
+  index: number = 0;
+  maxIndex: number = 0;
   onCustomClick?: (index: number) => void
   onImageComplete?: (width: number) => void
 
@@ -377,7 +379,7 @@ struct TabContentItem {
     }
   }
 
-  getBorderAttr() {
+  getBorderAttr(): BorderOptions {
     if (this.isOnFocus) {
       return {
         radius: $r('sys.float.ohos_id_corner_radius_clicked'),
@@ -459,10 +461,10 @@ struct TabContentItem {
                   if (!this.onImageComplete) {
                     return
                   }
-                  this.imageWidth = px2vp(event.width)
-                  this.imageHeight = px2vp(event.height)
-                  this.onImageComplete(px2vp(event.componentWidth)
-                    + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+                  this.imageWidth = px2vp(event?.width);
+                  this.imageHeight = px2vp(event?.height);
+                  this.onImageComplete(px2vp(event?.componentWidth)
+                    + TabContentItem.paddingLeft + TabContentItem.paddingRight);
                 })
                 .onError((event) => {
                   if (!this.onImageComplete) {
@@ -544,8 +546,8 @@ struct TabContentItem {
 
 @Component
 struct ImageMenuItem {
-  item: TabTitleBarMenuItem
-  index: number
+  item: TabTitleBarMenuItem = { value: '' };
+  index: number = 0;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -646,5 +648,3 @@ struct ImageMenuItem {
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
   }
 }
-
-export default { TabTitleBar }

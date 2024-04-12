@@ -42,6 +42,7 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::FA_CLOCK_WIDGET_SECOND, "fa_clock_widget_second" },
     { InternalResource::ResourceId::FULLSCREEN_SVG, "full_screen" },
     { InternalResource::ResourceId::HIDE_PASSWORD_SVG, "hide_password" },
+    { InternalResource::ResourceId::TITLEBAR_BACK, "titlebar_back" },
     { InternalResource::ResourceId::IC_BACK, "ic_back" },
     { InternalResource::ResourceId::IC_MORE, "ic_more" },
     { InternalResource::ResourceId::INDEXER_ARROW_PNG, "indexer_arrow" },
@@ -108,7 +109,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" },
     { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" },
     { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" },
-    { InternalResource::ResourceId::MOON_PROGRESS_FG_CIRCLE_SHADOW, "moon_progress_fg_circle_shadow" }
+    { InternalResource::ResourceId::RADIO_TICK_SVG, "radio_tick_svg" },
+    { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" }
 };
 }
 

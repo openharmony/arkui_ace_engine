@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
@@ -124,6 +125,19 @@ public:
         auto preview = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_RETURN(preview, nullptr);
         return preview;
+    }
+
+    // used to obtain the Badge node and delete it.
+    RefPtr<FrameNode> GetBadgeNode() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto badgeNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+        CHECK_NULL_RETURN(badgeNode, nullptr);
+        if (badgeNode->GetTag() != V2::TEXT_ETS_TAG) {
+            return nullptr;
+        }
+        return badgeNode;
     }
 
     OffsetT<Dimension> GetAnimationOffset();
@@ -239,6 +253,16 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+    {
+        filterColumnNode_ = columnNode;
+    }
+
+    RefPtr<FrameNode> GetFilterColumnNode()
+    {
+        return filterColumnNode_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -278,6 +302,7 @@ private:
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
+    RefPtr<FrameNode> filterColumnNode_;
 };
 } // namespace OHOS::Ace::NG
 

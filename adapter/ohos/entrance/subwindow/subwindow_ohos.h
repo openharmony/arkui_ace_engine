@@ -79,6 +79,9 @@ public:
     void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) override;
     void OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback) override;
     void CloseCustomDialogNG(int32_t dialogId) override;
+    void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
+    void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        std::function<void(int32_t)>&& callback) override;
     void HideSubWindowNG() override;
     bool GetShown() override
     {
@@ -101,6 +104,7 @@ public:
     void CloseDialog(int32_t instanceId) override;
     void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
+    void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
     const RefPtr<NG::OverlayManager> GetOverlayManager() override;
 
     int32_t GetChildContainerId() const override
@@ -135,6 +139,7 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
     void DeletePopupHotAreas(int32_t overlayId) override;
+    void MarkDirtyDialogSafeArea() override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -173,7 +178,7 @@ private:
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 
-    void HideFilter();
+    void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
 

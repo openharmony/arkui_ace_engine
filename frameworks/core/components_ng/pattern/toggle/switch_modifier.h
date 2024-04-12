@@ -211,6 +211,31 @@ public:
         }
     }
 
+    void SetPointRadius(float pointRadius)
+    {
+        animatePointRadius_->Set(pointRadius);
+    }
+
+    float GetPointRadius()
+    {
+        return animatePointRadius_->Get();
+    }
+
+    void SetInactiveColor(const Color& color)
+    {
+        inactiveColor_ = color;
+    }
+
+    void SetTrackRadius(float borderRadius)
+    {
+        animateTrackRadius_->Set(borderRadius);
+    }
+
+    float GetTrackRadius()
+    {
+        return animateTrackRadius_->Get();
+    }
+
 private:
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
@@ -247,6 +272,8 @@ private:
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyFloat> animatePointRadius_;
+    RefPtr<PropertyFloat> animateTrackRadius_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchModifier);
 };

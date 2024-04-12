@@ -19,11 +19,7 @@
 #include "include/core/SkSamplingOptions.h"
 #include "modules/svg/include/SkSVGDOM.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/paragraph.h"
-#else
 #include "rosen_text/typography.h"
-#endif
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
 
@@ -55,6 +51,11 @@ enum class FilterType {
     DROP_SHADOW,
     SATURATE,
     HUE_ROTATE
+};
+
+struct FilterProperty {
+    FilterType filterType_;
+    std::string filterParam_;
 };
 
 // BT.709
@@ -331,19 +332,12 @@ public:
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;
-#ifndef USE_ROSEN_DRAWING
-    void UpdateLineDash(SkPaint& paint);
-    void UpdatePaintShader(const OffsetF& offset, SkPaint& paint, const Ace::Gradient& gradient);
-    void InitPaintBlend(SkPaint& paint);
-    sk_sp<SkShader> MakeConicGradient(SkPaint& paint, const Ace::Gradient& gradient);
-#else
     void UpdateLineDash(RSPen& pen);
     void UpdatePaintShader(const OffsetF& offset, RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
     std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
-#endif
 
     void Path2DFill(const OffsetF& offset);
     void Path2DStroke(const OffsetF& offset);
@@ -360,21 +354,6 @@ protected:
     void Path2DBezierCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DQuadraticCurveTo(const OffsetF& offset, const PathArgs& args);
     void Path2DSetTransform(const OffsetF& offset, const PathArgs& args);
-#ifndef USE_ROSEN_DRAWING
-    SkMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
-
-    void SetGrayFilter(const std::string& percent, SkPaint& paint);
-    void SetSepiaFilter(const std::string& percent, SkPaint& paint);
-    void SetSaturateFilter(const std::string& percent, SkPaint& paint);
-    void SetHueRotateFilter(const std::string& percent, SkPaint& paint);
-    void SetInvertFilter(const std::string& percent, SkPaint& paint);
-    void SetOpacityFilter(const std::string& percent, SkPaint& paint);
-    void SetBrightnessFilter(const std::string& percent, SkPaint& paint);
-    void SetContrastFilter(const std::string& percent, SkPaint& paint);
-    void SetBlurFilter(const std::string& percent, SkPaint& paint);
-
-    void SetColorFilter(float matrix[20], SkPaint& paint);
-#else
     RSMatrix GetMatrixFromPattern(const Ace::Pattern& pattern);
 
     void SetGrayFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
@@ -388,66 +367,43 @@ protected:
     void SetBlurFilter(const std::string& percent, RSPen* pen, RSBrush* brush);
 
     void SetColorFilter(float matrix[20], RSPen* pen, RSBrush* brush);
-#endif
 
-    bool GetFilterType(FilterType& filterType, std::string& filterParam);
+    bool GetFilterType(std::vector<FilterProperty>& filters);
     bool IsPercentStr(std::string& percentStr);
     double PxStrToDouble(const std::string& str);
     double BlurStrToDouble(const std::string& str);
     bool CheckNumberAndPercentage(const std::string& param, bool isClamped, float& result);
-#ifndef USE_ROSEN_DRAWING
-
-    void InitImagePaint(SkPaint& paint, SkSamplingOptions& options);
-    void GetStrokePaint(SkPaint& paint, SkSamplingOptions& options);
-#else
     void InitImagePaint(RSPen* pen, RSBrush* brush, RSSamplingOptions& options);
     void GetStrokePaint(RSPen& pen, RSSamplingOptions& options);
-#endif
     void InitImageCallbacks();
 
-#ifndef USE_ROSEN_DRAWING
-    void SetPaintImage(SkPaint& paint);
-    void ClearPaintImage(SkPaint& paint);
-#else
     void SetPaintImage(RSPen* pen, RSBrush* brush);
     void ClearPaintImage(RSPen* pen, RSBrush* brush);
-#endif
     float PercentStrToFloat(const std::string& percentStr);
+    bool CheckFilterProperty(FilterType filterType, const std::string& filterParam);
+    bool ParseFilter(std::string& filter, std::vector<FilterProperty>& filters);
     FilterType FilterStrToFilterType(const std::string& filterStr);
     bool HasImageShadow() const;
 
     virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> GetImage(const std::string& src);
-#else
     std::shared_ptr<RSImage> GetImage(const std::string& src);
-#endif
     void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
         RSRect* srcRect, RSRect* dstRect);
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
-#ifndef USE_ROSEN_DRAWING
-    virtual SkCanvas* GetRawPtrOfSkCanvas() = 0;
-    virtual void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint) = 0;
-#else
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush, const RSPen* pen) = 0;
-#endif
     virtual OffsetF GetContentOffset(PaintWrapper* paintWrapper) const
     {
         return OffsetF(0.0f, 0.0f);
     }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
-    txt::TextAlign GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const;
-#else
     double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
     OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
-#endif
     double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
     double GetFontAlign(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph) const;
+    void ResetStates();
 
     PaintState fillState_;
     StrokePaintState strokeState_;
@@ -464,27 +420,15 @@ protected:
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     Shadow shadow_;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::unique_ptr<txt::Paragraph> paragraph_;
-#else
     std::unique_ptr<Rosen::Typography> paragraph_;
-#endif
 
     WeakPtr<PipelineBase> context_;
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath skPath_;
-    SkPath skPath2d_;
-    SkPaint imagePaint_;
-    SkSamplingOptions sampleOptions_;
-    std::shared_ptr<SkCanvas> skCanvas_;
-#else
     RSPath rsPath_;
     RSPath rsPath2d_;
     RSBrush imageBrush_;
     RSSamplingOptions sampleOptions_;
     std::shared_ptr<RSCanvas> rsCanvas_;
-#endif
 
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     Ace::CanvasImage canvasImage_;
@@ -499,11 +443,7 @@ protected:
     FailedCallback failedCallback_;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
-#ifndef USE_ROSEN_DRAWING
-    std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas_;
-#else
     std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
-#endif
 
     SizeF lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;
@@ -514,6 +454,8 @@ protected:
     };
     static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&, RSMatrix&)>
         staticPattern[];
+    std::vector<FilterProperty> lastFilters_;
+    const float defaultOpacity = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 

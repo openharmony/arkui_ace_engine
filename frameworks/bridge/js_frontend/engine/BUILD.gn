@@ -32,6 +32,9 @@ template("js_engine") {
     }
     deps = []
     external_deps = []
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
     configs = [ "$ace_root:ace_config" ]
 
     if (use_js_debug) {

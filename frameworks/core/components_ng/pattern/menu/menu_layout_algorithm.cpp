@@ -341,7 +341,11 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewScale_ = LessOrEqual(scale, 0.0f) ? previewScale_ : scale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
-    InitializePadding(layoutWrapper);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        InitializePaddingAPI11(layoutWrapper);
+    } else {
+        InitializePadding(layoutWrapper);
+    }
     InitWrapperRect(props, menuPattern);
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
     ModifyPositionToWrapper(layoutWrapper, position_);
@@ -464,19 +468,17 @@ void MenuLayoutAlgorithm::InitializePaddingAPI11(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    if (!menuPattern->IsSelectOverlayExtensionMenu() && !hierarchicalParameters_) {
+    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
         optionPadding_ = margin_;
-        paddingStart_ = static_cast<float>(theme->GetMaxPaddingStart().ConvertToPx());
-        paddingEnd_ = static_cast<float>(theme->GetMaxPaddingEnd().ConvertToPx());
-        paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
-        paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
+        if (!hierarchicalParameters_) {
+            paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
+            paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
+        } else {
+            paddingStart_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
+            paddingEnd_ = static_cast<float>(theme->GetMenuMediumMargin().ConvertToPx());
+        }
     } else {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-        paddingStart_ = margin_;
-        paddingEnd_ = margin_;
-        paddingTop_ = margin_;
-        paddingBottom_ = margin_;
         optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
     }
 }
@@ -533,7 +535,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
-    InitHierarchicalParameters(isShowInSubWindow);
+    InitHierarchicalParameters(isShowInSubWindow, menuPattern);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
@@ -593,7 +595,8 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
     CHECK_NULL_RETURN(frameNode, size);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, size);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
+                                                    : pipelineContext->GetDisplayWindowRectInfo();
     for (auto& child : frameNode->GetAllChildrenWithBuild()) {
         auto hostNode = child->GetHostNode();
         auto geometryNode = child->GetGeometryNode();
@@ -1109,7 +1112,8 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<Geo
     CHECK_NULL_VOID(safeAreaManager);
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
+                                                    : pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
     float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
     float screenHeight = wrapperSize_.Height() + wrapperRect_.Top();
@@ -1403,6 +1407,10 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
             arrowInMenu_ = true;
             targetSpace_ = targetSpaceReal;
         }
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return (menuPattern->IsContextMenu() || menuPattern->IsMenu()) && !targetTag_.empty() && arrowInMenu_;
     }
 
     return menuPattern->IsContextMenu() && !targetTag_.empty() && arrowInMenu_;
@@ -2234,7 +2242,7 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     return childPosition;
 }
 
-void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow)
+void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -2245,7 +2253,25 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow)
         hierarchicalParameters_ = false;
         return;
     }
+
     hierarchicalParameters_ = expandDisplay;
+
+    RefPtr<Container> container = Container::Current();
+    auto containerId = Container::CurrentId();
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(parentContainerId);
+    }
+
+    if (container && container->IsUIExtensionWindow()) {
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWrapperNode = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
+            hierarchicalParameters_ = true;
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

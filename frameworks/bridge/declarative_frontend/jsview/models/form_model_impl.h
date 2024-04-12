@@ -33,6 +33,7 @@ public:
     void SetOnLoad(std::function<void(const std::string&)>&& onLoad) override;
     void SetVisible(VisibleType visible) override;
     void SetVisibility(VisibleType visible) override;
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_FORM_MODEL_IMPL_H

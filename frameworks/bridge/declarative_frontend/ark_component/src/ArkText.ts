@@ -49,6 +49,24 @@ class FontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {
+  constructor(value: ResourceColor | ColoringStrategy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textForegroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetTextForegroundColor(node);
+    } else {
+      getUINativeModule().text.setTextForegroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -505,18 +523,32 @@ class TextClipModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
+class TextFontFeatureModifier extends ModifierWithKey<FontFeature> {
+  constructor(value: FontFeature) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textFontFeature');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetFontFeature(node);
+    } else {
+      getUINativeModule().text.setFontFeature(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   enableDataDetector(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
     return this;
   }
   dataDetectorConfig(config: any): this {
-    throw new Error('Method not implemented.');
-  }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
   font(value: Font): TextAttribute {
@@ -623,19 +655,25 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
     return this;
   }
+  fontFeature(value: FontFeature): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
     return this;
   }
+  foregroundColor(value: ResourceColor | ColoringStrategy) {
+    modifierWithKey(
+      this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
-globalThis.Text.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkTextComponent(nativeNode);
+globalThis.Text.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

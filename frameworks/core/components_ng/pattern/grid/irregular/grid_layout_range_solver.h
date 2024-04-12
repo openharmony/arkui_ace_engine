@@ -36,6 +36,7 @@ public:
      */
     struct StartingRowInfo {
         int32_t row; /**< Row index of the starting row. */
+        int32_t idx; /**< Index of the starting GridItem in the starting row. */
         float pos;   /**< Main position of the starting row in ViewBox. The new currentOffset_ */
     };
     /**
@@ -108,6 +109,8 @@ private:
      * @return The maximum row count upwards of multi-row items in Row [idx].
      */
     int32_t CheckMultiRow(int32_t idx);
+
+    int32_t FindStartingItem(int32_t rowIdx);
 
     const GridLayoutInfo* info_;
     const LayoutWrapper* wrapper_;

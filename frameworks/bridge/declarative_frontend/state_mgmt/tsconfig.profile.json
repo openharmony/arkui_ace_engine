@@ -32,6 +32,7 @@
     "src/lib/sdk/subscribable_abstract.ts",
     "src/lib/sdk/persistent_storage.ts",
     "src/lib/sdk/environment.ts",
+    "src/lib/sdk/i_repeat.ts",
 
     // common
     "src/lib/common/state_mgmt_console_trace.ts",
@@ -72,7 +73,11 @@
     // stateMgmt vers 3
     "src/lib/v3/v3_observed_track.ts",
     "src/lib/v3/v3_monitor.ts",
+    "src/lib/v3/v3_computed.ts",
+    "src/lib/v3/v3_variable_decorators.ts",
 
+    // partial_update specific
+    "src/lib/partial_update/pu_repeat.ts",
 
     // init
     "src/index.ts",

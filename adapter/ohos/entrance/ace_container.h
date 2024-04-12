@@ -549,6 +549,9 @@ public:
         int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset);
 
+    void HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs);
+
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {
         isUIExtensionSubWindow_ = isUIExtensionSubWindow;

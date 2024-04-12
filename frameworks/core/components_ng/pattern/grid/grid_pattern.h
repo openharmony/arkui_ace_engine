@@ -109,6 +109,10 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
+    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+
+    std::function<bool(int32_t)> GetScrollIndexAbility() override;
+
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
 
     RefPtr<EventHub> CreateEventHub() override
@@ -156,6 +160,7 @@ public:
     }
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
     bool OutBoundaryCallback() override;
 
@@ -262,7 +267,8 @@ private:
     void OnScrollEndCallback() override;
 
     void FireOnScrollStart() override;
-    void InitScrollableEvent();
+
+    inline bool UseIrregularLayout() const;
 
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);

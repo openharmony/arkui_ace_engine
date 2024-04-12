@@ -59,7 +59,9 @@ UIExtensionPattern::UIExtensionPattern(
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
-        sessionType, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
+        sessionType, WeakClaim(this), instanceId_, isTransferringCaller_);
+    accessibilitySessionAdapter_ =
+        AceType::MakeRefPtr<AccessibilitySessionAdapterUIExtension>(sessionWrapper_);
     UIEXT_LOGI("The %{public}smodal UIExtension is created.", isModal_ ? "" : "non");
 }
 
@@ -84,6 +86,11 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 FocusPattern UIExtensionPattern::GetFocusPattern() const
 {
     return { FocusType::NODE, true, FocusStyleType::NONE };
+}
+
+RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionAdapter()
+{
+    return accessibilitySessionAdapter_;
 }
 
 void UIExtensionPattern::InitializeDynamicComponent(
@@ -441,11 +448,7 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline && pipeline->GetIsFocusActive()) {
-        DispatchFocusActiveEvent(true);
-    }
-    return DispatchKeyEventSync(event.rawKeyEvent);
+    return DispatchKeyEventSync(event);
 }
 
 void UIExtensionPattern::HandleFocusEvent()
@@ -529,20 +532,20 @@ void UIExtensionPattern::HandleHoverEvent(bool isHover)
     DispatchPointerEvent(lastPointerEvent_);
 }
 
-void UIExtensionPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+void UIExtensionPattern::DispatchKeyEvent(const KeyEvent& event)
 {
-    CHECK_NULL_VOID(keyEvent);
+    CHECK_NULL_VOID(event.rawKeyEvent);
     if (componentType_ == ComponentType::DYNAMIC) {
         CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->TransferKeyEvent(keyEvent);
+        dynamicComponentRenderer_->TransferKeyEvent(event.rawKeyEvent);
     } else if (sessionWrapper_) {
-        sessionWrapper_->NotifyKeyEventAsync(keyEvent);
+        sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent);
     }
 }
 
-bool UIExtensionPattern::DispatchKeyEventSync(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+bool UIExtensionPattern::DispatchKeyEventSync(const KeyEvent& event)
 {
-    return sessionWrapper_ && sessionWrapper_->NotifyKeyEventSync(keyEvent);
+    return sessionWrapper_ && sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
 }
 
 void UIExtensionPattern::DispatchFocusActiveEvent(bool isFocusActive)
@@ -704,12 +707,12 @@ void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& w
 }
 
 void UIExtensionPattern::SetOnTerminatedCallback(
-    const std::function<void(std::optional<int32_t>, const RefPtr<WantWrap>& wantWrap)>&& callback)
+    const std::function<void(int32_t, const RefPtr<WantWrap>& wantWrap)>&& callback)
 {
     onTerminatedCallback_ = std::move(callback);
 }
 
-void UIExtensionPattern::FireOnTerminatedCallback(std::optional<int32_t> code, const RefPtr<WantWrap>& wantWrap)
+void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap)
 {
     UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onTerminatedCallback_ && (state_ != AbilityState::DESTRUCTION)) {

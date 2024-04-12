@@ -254,7 +254,7 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
-    virtual bool RequestFocus(const std::string& targetNodeId)
+    virtual bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false)
     {
         return false;
     }
@@ -781,10 +781,10 @@ public:
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
-    void OnVirtualKeyboardAreaChange(
-        Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void OnVirtualKeyboardAreaChange(
-        Rect keyboardArea, double positionY, double height,
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        bool supportAvoidance = false);
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void OnFoldStatusChanged(FoldStatus foldStatus);
@@ -894,6 +894,7 @@ public:
     {
         return displayWindowRectInfo_;
     }
+    virtual void FlushModifier() {}
     virtual void FlushMessages() = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {
@@ -903,6 +904,8 @@ public:
     virtual void FlushUITasks() = 0;
 
     virtual void FlushPipelineImmediately() = 0;
+
+    virtual void FlushOnceVsyncTask() = 0;
 
     // get animateTo closure option
     AnimationOption GetSyncAnimationOption()
@@ -1143,8 +1146,9 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
-    virtual void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        const bool supportAvoidance = false)
     {}
     virtual void OnVirtualKeyboardHeightChange(
         float keyboardHeight, double positionY, double height,

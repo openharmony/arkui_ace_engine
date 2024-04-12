@@ -1077,7 +1077,7 @@ void ProgressModifier::PaintEndHalf(RSCanvas& canvas, RSBrush& brush, const Ring
 
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
-    colors.emplace_back(gradientColors[1].GetLinearColor().GetValue());
+    colors.emplace_back(gradientColors[gradientColors.size() - 1].GetLinearColor().GetValue());
     pos.emplace_back(additionalAngle / ANGLE_360);
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());

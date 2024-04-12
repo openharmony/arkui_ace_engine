@@ -137,6 +137,7 @@ public:
     virtual void SetId(const std::string& id) = 0;
     virtual void SetOnWillShow(std::function<void()>&& onWillShow) {}
     virtual void SetOnWillHide(std::function<void()>&& onWillHide) {}
+    virtual void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) {}
 
 private:
     static std::unique_ptr<TabContentModel> instance_;

@@ -29,6 +29,7 @@ public:
     void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
+    void SetGradientHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override;
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
@@ -113,6 +114,8 @@ public:
     static int32_t getTextPickerSelectedIndex(FrameNode* frameNode);
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
+    static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
+    static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
     static int32_t isSingleRange()
     {
         return isSingleRange_;

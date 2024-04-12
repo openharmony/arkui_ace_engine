@@ -28,7 +28,7 @@ public:
     void SetReverse(bool value) override;
     void SetBlockColor(const Color& value) override;
     void SetTrackBackgroundColor(const Color& value) override;
-    void SetTrackBackgroundColor(const NG::Gradient& value) override {};
+    void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetSelectColor(const Color& value) override;
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
@@ -39,6 +39,7 @@ public:
     void SetBlockBorderWidth(const Dimension& value) override;
     void SetStepColor(const Color& value) override;
     void SetTrackBorderRadius(const Dimension& value) override;
+    void SetSelectedBorderRadius(const Dimension& value) override {};
     void SetBlockSize(const Dimension& width, const Dimension& height) override;
     void SetBlockType(BlockStyleType value) override;
     void SetBlockImage(const std::string& value, const std::string& bundleName, const std::string& moduleName) override;
@@ -51,11 +52,14 @@ public:
     void ResetBlockBorderWidth() override {};
     void ResetStepColor() override {};
     void ResetTrackBorderRadius() override {};
+    void ResetSelectedBorderRadius() override {};
     void ResetBlockSize() override {};
     void ResetBlockType() override {};
     void ResetBlockImage() override {};
     void ResetBlockShape() override {};
     void ResetStepSize() override {};
+    void ResetSliderInteractionMode() override {};
+    void ResetMinResponsiveDistance() override {};
 };
 
 } // namespace OHOS::Ace::Framework

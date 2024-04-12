@@ -61,6 +61,7 @@ public:
     void SetOnScrollStart(OnScrollStopEvent&& onScrollStop) override {}
     void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) override;
     void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex) override;
+    void SetOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange) override {};
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnItemDelete(OnItemDeleteEvent&& onItemDelete) override;
@@ -70,6 +71,7 @@ public:
     void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) override;
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
+    void SetFadingEdge(bool fadingEdge) override {};
 
     DisplayMode GetDisplayMode() const override
     {

@@ -116,13 +116,14 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
     eventHub->SetOnDeleteComplete(std::move(func));
 }
 
-void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func)
+void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
         pattern->SetCustomKeyboard(std::move(func));
+        pattern->SetCustomKeyboardOption(supportAvoidance);
     }
 }
 
@@ -231,5 +232,58 @@ void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCaretColor(color);
+}
+
+void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditingChange(std::move(func));
+}
+
+void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (action == TextInputAction::UNSPECIFIED) {
+        action = TextInputAction::NEW_LINE;
+    }
+    pattern->UpdateTextInputAction(action);
+}
+
+void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(func));
+}
+
+void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChange(std::move(func));
+}
+
+void RichEditorModelNG::SetOnDidChange(std::function<void(const std::list<RichEditorAbstractSpanResult>&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidChange(std::move(func));
+}
+
+void RichEditorModelNG::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
+
+void RichEditorModelNG::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
 }
 } // namespace OHOS::Ace::NG

@@ -59,6 +59,14 @@ public:
         json->Put("Bottom", GetBottom()->ToString().c_str());
         json->Put("ToastShowMode",
             GetShowModeValue(ToastShowMode::DEFAULT) == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST");
+        if (HasToastAlignment()) {
+            json->Put("alignment",
+                GetToastAlignmentValue(Alignment::BOTTOM_CENTER).GetAlignmentStr(TextDirection::AUTO).c_str());
+        }
+        auto offsetValue = JsonUtil::Create(true);
+        offsetValue->Put("dX", propToastOffset_.value_or(DimensionOffset()).GetX().ConvertToVp());
+        offsetValue->Put("dY", propToastOffset_.value_or(DimensionOffset()).GetY().ConvertToVp());
+        json->Put("offset", offsetValue);
     }
 
 private:

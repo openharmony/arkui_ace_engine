@@ -37,6 +37,7 @@ using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const G
     const RefPtr<FrameNode>&, const RefPtr<TargetComponent>&)>;
 using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
 using GetAnimateVelocityCallback = std::function<double()>;
+using ClickJudgeCallback = std::function<bool(const PointF&)>;
 
 class ScrollableEvent : public AceType {
     DECLARE_ACE_TYPE(ScrollableEvent, AceType)
@@ -132,13 +133,50 @@ public:
         }
     }
 
+    void SetBarCollectLongPressTargetCallback(const BarCollectTouchTargetCallback&& barCollectLongPressTarget)
+    {
+        barCollectLongPressTarget_ = std::move(barCollectLongPressTarget);
+    }
+
+    void SetInBarRectRegionCallback(const InBarRegionCallback&& inBarRectRegionCallback)
+    {
+        inBarRectRegionCallback_ = std::move(inBarRectRegionCallback);
+    }
+
+    bool InBarRectRegion(const PointF& localPoint, SourceType source) const
+    {
+        CHECK_NULL_RETURN(inBarRectRegionCallback_, false);
+        return inBarRectRegionCallback_ && barCollectLongPressTarget_ && inBarRectRegionCallback_(localPoint, source);
+    }
+
+    void BarCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+    {
+        if (barCollectLongPressTarget_) {
+            barCollectLongPressTarget_(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+        }
+    }
+
+    bool ClickJudge(const PointF& localPoint) const
+    {
+        return clickJudgeCallback_ && clickJudgeCallback_(localPoint);
+    }
+
+    void SetClickJudgeCallback(const ClickJudgeCallback&& clickJudgeCallback)
+    {
+        clickJudgeCallback_ = std::move(clickJudgeCallback);
+    }
+
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
+    BarCollectTouchTargetCallback barCollectLongPressTarget_;
     InBarRegionCallback inBarRegionCallback_;
+    InBarRegionCallback inBarRectRegionCallback_;
     GetAnimateVelocityCallback getAnimateVelocityCallback_;
+    ClickJudgeCallback clickJudgeCallback_;
 };
 
 class ScrollableActuator : public GestureEventActuator {

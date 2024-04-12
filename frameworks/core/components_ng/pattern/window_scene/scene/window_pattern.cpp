@@ -74,6 +74,8 @@ public:
 
     void OnExtensionDied() override {}
 
+    void OnExtensionTimeout(int32_t errorCode) override {}
+
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevelVec) override {};
 
@@ -220,9 +222,11 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
             imageCache->ClearCacheImage(
                 ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
             imageCache->ClearCacheImage(sourceInfo.GetKey());
+        } else {
+            snapshotNode_->GetPattern<ImagePattern>()->SetSyncLoad(true);
         }
     }
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
     snapshotNode_->MarkModifyDone();
 }
 

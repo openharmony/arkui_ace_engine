@@ -20,7 +20,9 @@
 
 #include "base/image/image_packer.h"
 #include "base/image/image_source.h"
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/system_properties.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
@@ -143,6 +145,27 @@ void ImageFileCache::SaveCacheInner(const std::string& cacheKey, const std::stri
     }
 }
 
+void ImageFileCache::EraseCacheFile(const std::string &url)
+{
+    auto fileCacheKey = std::to_string(std::hash<std::string> {}(url));
+    {
+        std::scoped_lock<std::mutex> lock(cacheFileInfoMutex_);
+        // 1. first check if file has been cached.
+        auto iter = fileNameToFileInfoPos_.find(fileCacheKey);
+        if (iter != fileNameToFileInfoPos_.end()) {
+            auto infoIter = iter->second;
+            auto removeFile = ConstructCacheFilePath(infoIter->fileName);
+            if (remove(removeFile.c_str()) != 0) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "remove file %{private}s failed.", removeFile.c_str());
+                return;
+            }
+            cacheFileInfo_.erase(infoIter);
+            cacheFileSize_ -= infoIter->fileSize;
+            fileNameToFileInfoPos_.erase(fileCacheKey);
+        }
+    }
+}
+
 void ImageFileCache::WriteCacheFile(
     const std::string& url, const void* const data, size_t size, const std::string& suffix)
 {
@@ -171,7 +194,7 @@ void ImageFileCache::WriteCacheFile(
     unsigned int magicVal = static_cast<const uint8_t*>(data)[0] + (static_cast<const uint8_t*>(data)[1] << 8) +
         (static_cast<const uint8_t*>(data)[2] << 16) + (static_cast<const uint8_t*>(data)[3] << 24);
     if (SystemProperties::IsImageFileCacheConvertAstcEnabled() && suffix == "" && magicVal != ASTC_MAGIC_ID) {
-        if (ConvertToAstcAndWriteToFile(data, size, fileCacheKey, astcSize)) {
+        if (ConvertToAstcAndWriteToFile(data, size, fileCacheKey, astcSize, url)) {
             convertToAstc = true;
         }
     }
@@ -203,16 +226,26 @@ void ImageFileCache::WriteCacheFile(
 }
 
 bool ImageFileCache::ConvertToAstcAndWriteToFile(const void* const data, size_t size, const std::string& fileCacheKey,
-    size_t& astcSize)
+    size_t& astcSize, const std::string& url)
 {
-    auto astcFilePath = ConstructCacheFilePath(fileCacheKey + ASTC_SUFFIX);
-
+    ACE_FUNCTION_TRACE();
     RefPtr<ImageSource> imageSource = ImageSource::Create(static_cast<const uint8_t*>(data), size);
+    if (!imageSource || imageSource->GetFrameCount() != 1) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Image frame count is not 1, will not convert to astc. %{public}s",
+            fileCacheKey.c_str());
+        return false;
+    }
     RefPtr<ImagePacker> imagePacker = ImagePacker::Create();
     PackOption option;
     option.format = CONVERT_ASTC_FORMAT;
     auto pixelMap = imageSource->CreatePixelMap({-1, -1});
+    if (pixelMap == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get pixel map failed, will not convert to astc. %{public}s",
+            fileCacheKey.c_str());
+        return false;
+    }
 
+    auto astcFilePath = ConstructCacheFilePath(fileCacheKey + ASTC_SUFFIX);
     imagePacker->StartPacking(astcFilePath, option);
     imagePacker->AddImage(*pixelMap);
     int64_t packedSize = 0;
@@ -222,6 +255,7 @@ bool ImageFileCache::ConvertToAstcAndWriteToFile(const void* const data, size_t 
     }
 
     astcSize = packedSize;
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "write image astc cache: %{public}s %{private}s", url.c_str(), astcFilePath.c_str());
     return true;
 }
 

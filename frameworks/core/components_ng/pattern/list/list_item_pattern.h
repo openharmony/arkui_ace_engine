@@ -114,6 +114,36 @@ public:
         return endNodeIndex_ >= 0;
     }
 
+    int32_t GetStartNodeIndex()
+    {
+        return startNodeIndex_;
+    }
+
+    int32_t GetEndNodeIndex()
+    {
+        return endNodeIndex_;
+    }
+
+    int32_t GetChildNodeIndex()
+    {
+        return childNodeIndex_;
+    }
+
+    float GetStartNodeSize()
+    {
+        return startNodeSize_;
+    }
+
+    float GetEndNodeSize()
+    {
+        return endNodeSize_;
+    }
+
+    float GetCurOffset()
+    {
+        return curOffset_;
+    }
+
     ListItemSwipeIndex GetSwiperIndex()
     {
         return swiperIndex_;
@@ -199,6 +229,7 @@ public:
 
     bool GetLayouted() const;
     float GetEstimateHeight(float estimateHeight, Axis axis) const;
+    bool ClickJudge(const PointF& localPoint);
 
 protected:
     void OnModifyDone() override;
@@ -227,11 +258,7 @@ private:
     void DoDeleteAnimation(bool isRightDelete);
     void FireSwipeActionOffsetChange(float oldOffset, float newOffset);
     void FireSwipeActionStateChange(SwipeActionState newState);
-    void ResetToItemChild()
-    {
-        swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
-        FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
-    }
+    void ResetToItemChild();
     void ResetNodeSize()
     {
         startNodeSize_ = 0.0f;

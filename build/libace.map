@@ -56,6 +56,7 @@
       "OHOS::Ace::KeyToString(int)";
       OHOS::Ace::Localization::*;
       OHOS::Ace::LogWrapper::*;
+      OHOS::Ace::g_DOMAIN_CONTENTS_MAP;
       OHOS::Ace::Platform::AceApplicationInfoImpl::*;
       OHOS::Ace::Platform::AceContainer::*;
       OHOS::Ace::Platform::FlutterAceView::*;
@@ -79,6 +80,8 @@
       OHOS::Ace::Color::*;
       OHOS::Ace::NG::UIObserverHandler::*;
       OHOS::Ace::UIDisplaySync::*;
+      OHOS::Ace::Dimension::*;
+      OHOS::Ace::Matrix4::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

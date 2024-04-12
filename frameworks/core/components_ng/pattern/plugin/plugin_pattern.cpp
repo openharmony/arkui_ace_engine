@@ -116,7 +116,7 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     loadFialState_ = false;
     CreatePluginSubContainer();
     if (pluginManagerBridge_) {
-        pluginManagerBridge_->AddPlugin(host->GetContext(), info);
+        pluginManagerBridge_->AddPlugin(host->GetContextRefPtr(), info);
     }
     return false;
 }
@@ -126,7 +126,7 @@ void PluginPattern::InitPluginManagerDelegate()
     CHECK_NULL_VOID(!pluginManagerBridge_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     pluginManagerBridge_ = AceType::MakeRefPtr<PluginManagerDelegate>(context);
     int32_t instanceID = context->GetInstanceId();
@@ -181,7 +181,7 @@ void PluginPattern::CreatePluginSubContainer()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<PluginLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -260,7 +260,10 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
     drawDelegate->SetDrawRSFrameCallback(
         [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
             auto plugin = weak.Upgrade();
-            CHECK_NULL_VOID(plugin);
+            if (!plugin) {
+                TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT, "Failed to draw rs frame with invalid plugin pattern.");
+                return;
+            }
             auto host = plugin->GetHost();
             CHECK_NULL_VOID(host);
             auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
@@ -269,6 +272,8 @@ std::unique_ptr<DrawDelegate> PluginPattern::GetDrawDelegate()
             CHECK_NULL_VOID(rsNode);
             if (node) {
                 node->SetBackgroundColor(Color::TRANSPARENT.GetValue());
+            } else {
+                TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT, "Failed to draw rs frame with invalid rs node.");
             }
             rsNode->AddChild(node, -1);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

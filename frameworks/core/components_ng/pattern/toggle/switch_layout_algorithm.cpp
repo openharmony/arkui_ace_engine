@@ -16,10 +16,12 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "core/common/container.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
@@ -29,6 +31,11 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+    }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     float frameHeight = 0.0f;
@@ -56,17 +63,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     }
     float width = 0.0f;
     float height = 0.0f;
-    auto ratio = switchTheme->GetRatio();
-    if ((frameWidth / frameHeight) < ratio) {
-        width = frameWidth;
-        height = width / ratio;
-    } else if ((frameWidth / frameHeight) > ratio) {
-        height = frameHeight;
-        width = height * ratio;
-    } else {
-        height = frameHeight;
-        width = frameWidth;
-    }
+    CalcHeightAndWidth(height, width, frameHeight, frameWidth);
 
     width_ = width;
     height_ = height;
@@ -74,4 +71,48 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     return SizeF(width, height);
 }
 
+void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        return;
+    }
+    // switch does not have child nodes. If a child is added to a toggle, then hide the child.
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->GetGeometryNode()->SetFrameSize(SizeF());
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
+void SwitchLayoutAlgorithm::CalcHeightAndWidth(float& height, float& width, float frameHeight, float frameWidth)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        width = frameWidth;
+        height = frameHeight;
+    } else {
+        auto ratio = switchTheme->GetRatio();
+        if (frameWidth < (frameHeight * ratio)) {
+            width = frameWidth;
+            if (ratio == 0) {
+                height = 0.0f;
+            } else {
+                height = NearZero(ratio) ? 0 : width / ratio;
+            }
+        } else if (frameWidth > (frameHeight * ratio)) {
+            height = frameHeight;
+            width = height * ratio;
+        } else {
+            height = frameHeight;
+            width = frameWidth;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

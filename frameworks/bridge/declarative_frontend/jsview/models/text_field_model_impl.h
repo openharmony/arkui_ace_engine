@@ -80,7 +80,7 @@ public:
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
     void SetFocusableAndFocusNode() override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override {};
-    void SetCustomKeyboard(const std::function<void()>&& buildFunc) override {};
+    void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override {};
     void SetPasswordRules(const std::string& passwordRules) override {};
     void SetEnableAutoFill(bool enableAutoFill) override {};
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override {};
@@ -90,6 +90,7 @@ public:
     void SetCancelIconColor(const Color& iconColor) override {};
     void SetIsShowCancelButton(bool isShowCancelButton) override {};
     void SetSelectAllValue(bool isSetSelectAllValue) override {};
+    void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

@@ -63,6 +63,14 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(
         V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pattern = frameNode->GetPattern<RefreshPattern>();
+        CHECK_NULL_RETURN(pattern, frameNode);
+        pattern->UpdateNestedModeForChildren(NestedScrollOptions({
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        }));
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     layoutProperty->UpdateIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
     layoutProperty->UpdateFriction(DEFAULT_FRICTION_RATIO);
@@ -131,6 +139,24 @@ void RefreshModelNG::SetChangeEvent(RefreshChangeEvent&& changeEvent)
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
 
+void RefreshModelNG::SetOnOffsetChange(OffsetChangeEvent&& dragOffset)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnOffsetChange(std::move(dragOffset));
+}
+
+void RefreshModelNG::ResetOnOffsetChange()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ResetOnOffsetChange();
+}
+
 void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -162,6 +188,22 @@ void RefreshModelNG::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& ref
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRefreshing(std::move(refreshing));
+}
+
+void RefreshModelNG::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnOffsetChange(std::move(dragOffset));
+}
+
+void RefreshModelNG::ResetOnOffsetChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ResetOnOffsetChange();
 }
 
 void RefreshModelNG::SetRefreshing(FrameNode* frameNode, bool isRefreshing)

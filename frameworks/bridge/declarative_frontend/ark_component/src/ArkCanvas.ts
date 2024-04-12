@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   onReady(event: () => void): this {
     throw new Error('Method not implemented.');
@@ -24,12 +24,10 @@ class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
 }
 
 // @ts-ignore
-globalThis.Canvas.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkCanvasComponent(nativeNode);
+globalThis.Canvas.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkCanvasComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.CommonModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

@@ -28,6 +28,7 @@
 namespace OHOS::Ace::Framework {
 
 class DefaultDataChangeListener : public V2::DataChangeListener {
+    DECLARE_ACE_TYPE(DefaultDataChangeListener, DataChangeListener)
 public:
     explicit DefaultDataChangeListener(JSView* parentView) : parentView_(parentView) {}
     ~DefaultDataChangeListener() override = default;
@@ -69,6 +70,12 @@ public:
         }
     }
     void OnDataMoved(size_t from, size_t to) override
+    {
+        if (parentView_ != nullptr) {
+            parentView_->MarkNeedUpdate();
+        }
+    }
+    void OnDatasetChange(const std::list<V2::Operation>& DataOperations) override
     {
         if (parentView_ != nullptr) {
             parentView_->MarkNeedUpdate();

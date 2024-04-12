@@ -46,6 +46,9 @@ void ResponseCtrl::TrySetFirstResponse(const WeakPtr<NG::FrameNode>& frameNode)
 
 void ResponseCtrl::Reset()
 {
+    if (state_ == MonopolizeState::ON) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "monopolize reset from on");
+    }
     state_ = MonopolizeState::INIT;
     firstResponseNode_.Reset();
 }

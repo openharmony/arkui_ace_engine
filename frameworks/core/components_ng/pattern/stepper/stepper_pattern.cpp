@@ -225,24 +225,20 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     auto labelStatus =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
     if (labelStatus == "normal") {
-        isRightLabelDisable_ = false;
         if (index == maxIndex_) {
             CreateArrowlessRightButtonNode(index, false, Localization::GetInstance()->GetEntryLetters("stepper.start"));
         } else {
             CreateArrowRightButtonNode(index, false);
         }
     } else if (labelStatus == "disabled") {
-        isRightLabelDisable_ = true;
         if (index == maxIndex_) {
             CreateArrowlessRightButtonNode(index, true, Localization::GetInstance()->GetEntryLetters("stepper.start"));
         } else {
             CreateArrowRightButtonNode(index, true);
         }
     } else if (labelStatus == "waiting") {
-        isRightLabelDisable_ = false;
         CreateWaitingRightButtonNode();
     } else if (labelStatus == "skip") {
-        isRightLabelDisable_ = false;
         CreateArrowlessRightButtonNode(index, false, Localization::GetInstance()->GetEntryLetters("stepper.skip"));
     }
 }
@@ -284,7 +280,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isRightLabelDisable_ ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
                          : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     buttonNode->MarkModifyDone();
 
@@ -381,7 +377,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isRightLabelDisable_ ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
+    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
                          : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
     buttonNode->MarkModifyDone();
 

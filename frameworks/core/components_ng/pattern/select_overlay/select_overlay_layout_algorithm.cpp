@@ -336,23 +336,11 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
-    // the menu is too far away.
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto hostFrameNode = info_->callerFrameNode.Upgrade();
-    if (pipeline && hostFrameNode) {
-        auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
-        auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset();
-        auto centerX = menuRect.Width() / 2.0f;
-        if (GreatNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX() + hostFrameRect.Width())) {
-            menuOffset.SetX(hostGlobalOffset.GetX() + hostFrameRect.Width() - centerX);
-        } else if (LessNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX())) {
-            menuOffset.SetX(hostGlobalOffset.GetX() - centerX);
-        }
-    }
+    AdjustMenuTooFarAway(menuOffset, menuRect);
     // menu cover up handle
     auto upPaint = upHandle.paintRect - offset;
     auto downPaint = downHandle.paintRect - offset;
-    if (upHandle.isShow && !downHandle.isShow) {
+    if (!info_->isSingleHandle && upHandle.isShow && !downHandle.isShow) {
         auto circleOffset = OffsetF(
             upPaint.GetX() - (spaceBetweenHandle - upPaint.Width()) / 2.0f, upPaint.GetY() - spaceBetweenHandle);
         auto upCircleRect = RectF(circleOffset, SizeF(spaceBetweenHandle, spaceBetweenHandle));
@@ -363,6 +351,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     }
     // avoid soft keyboard and root bottom
     if ((!upHandle.isShow && downHandle.isShow) || info_->menuInfo.menuBuilder) {
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, menuOffset);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -378,6 +367,25 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         }
     }
     return menuOffset;
+}
+
+void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect)
+{
+    // the menu is too far away.
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto hostFrameNode = info_->callerFrameNode.Upgrade();
+    CHECK_NULL_VOID(hostFrameNode);
+    auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
+    auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset();
+    auto centerX = menuRect.Width() / 2.0f;
+    if (GreatNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX() + hostFrameRect.Width())) {
+        menuOffset.SetX(hostGlobalOffset.GetX() + hostFrameRect.Width() - centerX);
+        return;
+    }
+    if (LessNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX())) {
+        menuOffset.SetX(hostGlobalOffset.GetX() - centerX);
+    }
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset)
@@ -420,35 +428,41 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
-    OffsetF menuPosition;
 
     // Calculate the spacing with text and handle, menu is fixed up the handle and
     // text.
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
+    double safeSpacing = theme->GetMenuSafeSpacing().ConvertToPx();
     auto selectArea = info_->selectArea;
     // 安全区域
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, OffsetF());
     auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
-    // 顶部避让
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
-    auto menuSpacing =
-        static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
-    menuPosition =
-        OffsetF(positionX, selectArea.Top() - menuSpacing - menuHeight);
-    if (LessNotEqual(menuPosition.GetY(), topArea)) { // 顶部避让失败，实行底部避让
-        menuPosition = OffsetF(positionX, selectArea.Bottom() + menuSpacing);
+    auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
+    auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
+    auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
+    // 顶部避让
+    auto offsetY = selectArea.Top() - menuSpacing - menuHeight;
+    if (!upHandle.isShow || LessOrEqual(offsetY, topArea)) {
+        // 上手柄不可见或顶部避让失败 -> 底部避让
+        auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
+        if (downHandle.isShow) {
+            offsetY = selectArea.Bottom() + menuSpacing;
+            auto viewPort = pipeline->GetRootRect();
+            if ((hasKeyboard && (offsetY + menuHeight + safeSpacing) > keyboardInsert.start) ||
+                (offsetY + menuHeight) > viewPort.Bottom()) {
+                // 底部避让失败 -> 选区中间位置
+                selectArea = selectArea.IntersectRectT(viewPort);
+                offsetY = std::max((float)topArea, (selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f);
+            }
+        } else {
+            // 上下手柄均不可见 -> 选区底部并且满足安全距离
+            offsetY = std::min((double)selectArea.Bottom(), keyboardInsert.start - safeSpacing) - menuHeight;
+        }
     }
-    menuPosition = OffsetF(positionX, std::max((float)topArea, menuPosition.GetY()));
-    auto viewPort = pipeline->GetRootRect();
-    if ((hasKeyboard && (menuPosition.GetY() + menuHeight) > keyboardInsert.start) ||
-        (menuPosition.GetY() + menuHeight) > viewPort.Bottom()) { // 底部避让失败，实行选中区避让
-        selectArea = selectArea.IntersectRectT(viewPort);
-        menuPosition = OffsetF(positionX, (selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f);
-    }
-    return menuPosition;
+    return OffsetF(positionX, offsetY);
 }
 } // namespace OHOS::Ace::NG

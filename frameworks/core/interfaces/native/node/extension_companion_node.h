@@ -16,64 +16,77 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_EXTENSION_COMPANION_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_EXTENSION_COMPANION_NODE_H
 
-#include <algorithm>
-#include <string>
-#include <vector>
-#include <unordered_map>
-
+#include "core/components_ng/base/extension_handler.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/components_ng/base/frame_node.h"
 
-using std::string;
+namespace OHOS::Ace::NG {
 
-class ExtensionCompanionNode {
-private:
-    ArkUI_Int32 peerId_;
-    ArkUI_Int32 customCallbackId_;
-    ArkUI_Int32 flags_;
-    std::vector<ExtensionCompanionNode*> children_;
-    ExtensionCompanionNode* parent_;
-    ArkUI_Float32 width_;
-    ArkUI_Float32 height_;
-    ArkUI_Float32 x_;
-    ArkUI_Float32 y_;
-
-    ArkUICanvasHandle getCanvas();
-    ArkUIEventCallbackArg arg(ArkUI_Float32 f32);
-    ArkUIEventCallbackArg arg(ArkUI_Int32 i32);
+class ExtensionCompanionNode : public ExtensionHandler {
+    DECLARE_ACE_TYPE(ExtensionCompanionNode, ExtensionHandler);
 
 public:
-    ExtensionCompanionNode(int peerId, int flags) : peerId_(peerId), flags_(flags), parent_(nullptr) {}
+    ExtensionCompanionNode(int peerId, int flags, void* peer)
+        : peerId_(peerId), flags_(flags), peer_(peer)
+    {}
 
     ~ExtensionCompanionNode() = default;
 
-    void* peer = nullptr;
-    ArkUI_Int32 alignment = 0;
-    ArkUI_Float32 measureResult[4] = { 0, 0, 0, 0 };
-    ArkUI_Float32 layoutResult[4] = { 0, 0, 0, 0 };
+    ArkUI_Int32 GetPeerId() const;
+    ArkUI_Int32 GetCallbackId() const;
+    void SetCallbackId(ArkUIVMContext context, int id);
 
-    ArkUI_Int32 getPeerId() const;
-    ArkUI_Int32 getCallbackId() const;
-    void setCallbackId(int id);
+    void SetAlignmentValue(ArkUI_Int32 value)
+    {
+        alignment_ = value;
+    }
+    ArkUI_Int32 GetAlignmentValue() const
+    {
+        return alignment_;
+    }
 
-    void setParent(ExtensionCompanionNode* parent);
-    ExtensionCompanionNode* getParent() const;
-    const std::vector<ExtensionCompanionNode*>* getChildren();
+    void SetFlags(ArkUI_Int32 flags)
+    {
+        flags_ = flags;
+    }
 
-    void addChild(ExtensionCompanionNode* node);
-    void removeChild(ExtensionCompanionNode* node);
-    void insertChildAfter(ExtensionCompanionNode* node, ExtensionCompanionNode* sibling);
+    ArkUI_Int32 GetFlags() const
+    {
+        return flags_;
+    }
 
-    void setMeasureWidthValue(ArkUI_Float32 value);
-    ArkUI_Float32 getMeasureWidthValue();
-    void setMeasureHeightValue(ArkUI_Float32 value);
-    ArkUI_Float32 getMeasureHeightValue();
-    void setXValue(ArkUI_Float32 value);
-    void setYValue(ArkUI_Float32 value);
+    void SetPeer(void* peer)
+    {
+        peer_ = peer;
+    }
 
-    ArkUI_Int32 measure(ArkUIVMContext context, ArkUI_Float32* data, ArkUIAPICallbackMethod* callbacks);
-    ArkUI_Int32 layout(ArkUIVMContext context, ArkUI_Float32* data, ArkUIAPICallbackMethod* callbacks);
-    ArkUI_Int32 draw(ArkUIVMContext context, ArkUI_Float32* data, ArkUIAPICallbackMethod* callbacks);
+    void SetExtraParam(ArkUI_Int32 type, void* extraParam);
+    ArkUI_Int64 GetExtraParam(ArkUI_Int32 type);
+    void EraseExtraParam(ArkUI_Int32 type);
+
+protected:
+    // FrameNode measure, layout, draw process stump function.
+    // call InnerMeasure InnerLayout InnerDraw to process origin logic.
+    void OnMeasure(const ExtensionLayoutConstraint& layoutConstraint) override;
+    void OnLayout(int32_t width, int32_t height, int32_t positionX, int32_t positionY) override;
+    void OnForegroundDraw(DrawingContext& context) override;
+    void OnDraw(DrawingContext& context) override;
+    void OnOverlayDraw(DrawingContext& context) override;
+
+private:
+    ArkUI_Int32 peerId_ = 0;
+    ArkUI_Int32 customCallbackId_ = 0;
+    ArkUI_Int32 flags_ = 0;
+    void* peer_ = nullptr;
+    ArkUIVMContext context_ = nullptr;
+    ArkUI_Int32 alignment_ = 0;
+
+    ArkUICanvasHandle GetCanvas();
+    ArkUIEventCallbackArg Arg(ArkUI_Float32 f32);
+    ArkUIEventCallbackArg Arg(ArkUI_Int32 i32);
+
+    std::unordered_map<ArkUI_Int32, void*> extraParamMap_;
 };
+
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_EXTENSION_COMPANION_NODE_H

@@ -40,6 +40,8 @@ public:
     void SetNavDestinationMode(NavDestinationMode mode) override;
     bool ParseCommonTitle(
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
+    void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
+    void SetCustomMenu(const RefPtr<AceType>& customNode) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

@@ -3104,5 +3104,69 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg073, TestSize.Level1)
     EXPECT_EQ(context_->safeAreaManager_->GetSafeArea(), emptySafeAreaInsets);
     EXPECT_EQ(context_->safeAreaManager_->GetSafeAreaWithoutProcess(), safeAreaInsets);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg074
+ * @tc.desc: Test the function SetOnceVsyncListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg074, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Set a non-null function to context.
+     * @tc.expected: The onceVsyncListener_ is non-null.
+     */
+    bool flag = false;
+    auto getVsyncFunc = [&flag]() { flag = !flag; };
+    context_->SetOnceVsyncListener(getVsyncFunc);
+    EXPECT_TRUE(context_->HasOnceVsyncListener());
+
+    /**
+     * @tc.steps2: Set a null function to context.
+     * @tc.expected: The onceVsyncListener_ is null.
+     */
+    context_->SetOnceVsyncListener(nullptr);
+    EXPECT_FALSE(context_->HasOnceVsyncListener());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg075
+ * @tc.desc: Test the function FlushOnceVsyncTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg075, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Set a non-null function to context and call FlushOnceVsyncTask.
+     * @tc.expected: The onceVsyncListener_ is null and flag changes to true.
+     */
+    bool flag = false;
+    auto getVsyncFunc = [&flag]() { flag = !flag; };
+    context_->SetOnceVsyncListener(getVsyncFunc);
+    context_->FlushOnceVsyncTask();
+    EXPECT_FALSE(context_->HasOnceVsyncListener());
+    EXPECT_TRUE(flag);
+
+    /**
+     * @tc.steps2: Set a non-null function to context and call FlushOnceVsyncTask.
+     * @tc.expected: The onceVsyncListener_ is null and flag is still true.
+     */
+    context_->SetOnceVsyncListener(nullptr);
+    context_->FlushOnceVsyncTask();
+    EXPECT_FALSE(context_->HasOnceVsyncListener());
+    EXPECT_TRUE(flag);
+}
 } // namespace NG
 } // namespace OHOS::Ace

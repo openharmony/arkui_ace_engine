@@ -139,6 +139,7 @@ public:
     }
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
@@ -152,6 +153,19 @@ public:
     void OnAnimateStop() override;
     bool UpdateCurrentOffset(float offset, int32_t source) override;
     void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+
+    void CheckScrollToEdge(float oldScrollableDistance, float newScrollableDistance);
+
+    ScrollEdgeType GetScrollEdgeType() const override
+    {
+        return scrollEdgeType_;
+    }
+
+    void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) override
+    {
+        scrollEdgeType_ = scrollEdgeType;
+    }
+
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
     void ScrollPage(bool reverse, bool smooth = false) override;
     void ScrollTo(float position) override;
@@ -332,7 +346,6 @@ private:
     void HandleCrashTop() const;
     void HandleCrashBottom() const;
 
-    void RegisterScrollEventTask();
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
     void ValidateOffset(int32_t source);
@@ -379,6 +392,9 @@ private:
 
     //initialOffset
     OffsetT<CalcDimension> initialOffset_;
+
+    //scrollToEdge
+    ScrollEdgeType scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
 };
 
 } // namespace OHOS::Ace::NG

@@ -50,10 +50,11 @@ private:
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    bool InsertUseFrontStyle(int32_t start);
     void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);
-    void UpdateSpansWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
-    void UpdateSpanMapWithOffset(int32_t start, int32_t offset, SpanStringOperation op);
-    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset, SpanStringOperation op);
+    void UpdateSpansWithOffset(int32_t start, int32_t offset);
+    void UpdateSpanMapWithOffset(int32_t start, int32_t offset);
+    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset);
 };
 } // namespace OHOS::Ace
 

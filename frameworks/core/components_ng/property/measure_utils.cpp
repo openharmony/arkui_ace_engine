@@ -28,7 +28,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const static int32_t PLATFORM_VERSION_TEN = 10;
-constexpr float HALF_PX = 0.5f;
 }
 
 SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
@@ -162,21 +161,20 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
-    if (left.has_value()) {
-        left =
-          (GreatOrEqual(left.value(), 1.0f) || NearEqual(left.value(), 0.0f)) ? floor(left.value()) : HALF_PX;
-    }
-    if (right.has_value()) {
-        right =
-          (GreatOrEqual(right.value(), 1.0f) || NearEqual(right.value(), 0.0f)) ? floor(right.value()) : HALF_PX;
-    }
-    if (top.has_value()) {
-        top =
-          (GreatOrEqual(top.value(), 1.0f) || NearEqual(top.value(), 0.0f)) ? floor(top.value()) : HALF_PX;
-    }
-    if (bottom.has_value()) {
-        bottom =
-          (GreatOrEqual(bottom.value(), 1.0f) || NearEqual(bottom.value(), 0.0f)) ? floor(bottom.value()) : HALF_PX;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (left.has_value()) {
+            left = (GreatOrEqual(left.value(), 1.0f) || NearEqual(left.value(), 0.0f)) ? floor(left.value()) : 1.0f;
+        }
+        if (right.has_value()) {
+            right = (GreatOrEqual(right.value(), 1.0f) || NearEqual(right.value(), 0.0f)) ? floor(right.value()) : 1.0f;
+        }
+        if (top.has_value()) {
+            top = (GreatOrEqual(top.value(), 1.0f) || NearEqual(top.value(), 0.0f)) ? floor(top.value()) : 1.0f;
+        }
+        if (bottom.has_value()) {
+            bottom =
+                (GreatOrEqual(bottom.value(), 1.0f) || NearEqual(bottom.value(), 0.0f)) ? floor(bottom.value()) : 1.0f;
+        }
     }
     return BorderWidthPropertyF { left, top, right, bottom };
 }

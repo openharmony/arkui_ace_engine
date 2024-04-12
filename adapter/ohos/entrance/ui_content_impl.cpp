@@ -33,6 +33,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -56,6 +57,7 @@
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_checker.h"
@@ -611,7 +613,9 @@ void UIContentImpl::RunFormPage()
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "", false);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
-    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDistributedUI(distributedUI);
 }
 
 UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
@@ -1280,6 +1284,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
+        LOGI("[%{public}s][%{public}s][%{public}d]: Set SystemProperties language: %{public}s, colorMode: %{public}s, "
+             "deviceAccess: %{public}d",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_,
+            AceApplicationInfo::GetInstance().GetLanguage().c_str(),
+            SystemProperties::GetColorMode() == ColorMode::DARK ? "dark" : "light",
+            SystemProperties::GetDeviceAccess());
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -1431,6 +1441,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetToken(token);
     container->SetParentToken(parentToken_);
     container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
+    container->SetNavigationRoute(AceType::MakeRefPtr<NavigationRouteOhos>(context->GetBundleName()));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -1462,6 +1473,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
+    container->SetBundleName(hapModuleInfo->bundleName);
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
 
@@ -1514,7 +1526,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                     [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
                         ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                    });
+                    }, id);
                 auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
@@ -1794,6 +1806,9 @@ bool UIContentImpl::ProcessBackPressed()
         instanceId_);
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
+    if (container->IsUIExtensionWindow() && !container->WindowIsShow()) {
+        return false;
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -1859,7 +1874,7 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
     return true;
 }
 
-bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
+bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent, bool isPreIme)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
@@ -1869,7 +1884,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
-    return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent);
+    return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent, isPreIme);
 }
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
@@ -2131,7 +2146,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
-    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
+    auto context = context_.lock();
     if (isDialog) {
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -2140,7 +2155,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-            runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+            context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                 // Sub-window ,just return.
                 LOGI("Content event callback");
             }),
@@ -2148,14 +2163,14 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
 #else
         if (Container::IsCurrentUseNewPipeline()) {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }),
                 false, true, true);
         } else {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
-                runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                context, abilityInfo, std::make_unique<ContentEventCallback>([] {
                     // Sub-window ,just return.
                     LOGI("Content event callback");
                 }),
@@ -2594,6 +2609,17 @@ bool UIContentImpl::NotifyExecuteAction(
     return container->NotifyExecuteAction(elementId, actionArguments, action, offset);
 }
 
+void UIContentImpl::HandleAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
+    int32_t eventType, int64_t timeMs)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "HandleAccessibilityHoverEvent Point:[%{public}f, %{public}f] "
+        "source:%{public}d type:%{public}d time:%{public}" PRId64,
+        pointX, pointY, sourceType, eventType, timeMs);
+    container->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
 std::string UIContentImpl::RecycleForm()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2716,6 +2742,13 @@ void UIContentImpl::OnPopupStateChange(
     taskExecutor->PostDelayedTask([config, nodeId]() { RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId); },
         TaskExecutor::TaskType::UI, 100); // delay 100ms
     customPopupConfigMap_.erase(nodeId);
+    popupUIExtensionRecords_.erase(nodeId);
+}
+
+void UIContentImpl::SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId)
+{
+    customPopupConfigMap_[nodeId] = config;
+    popupUIExtensionRecords_[nodeId] = popupId;
 }
 
 int32_t UIContentImpl::CreateCustomPopupUIExtension(
@@ -2763,9 +2796,8 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             nodeId = nodeIdLabel;
             popupParam->SetOnStateChange(
                 [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
-
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
-            customPopupConfigMap_[nodeId] = config;
+            SetCustomPopupConfig(nodeId, config, uiExtNode->GetId());
         },
         TaskExecutor::TaskType::UI);
     LOGI("Create custom popup with UIExtension end, nodeId=%{public}d", nodeId);
@@ -2796,6 +2828,41 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
             RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId);
             customPopupConfigMap_.erase(nodeId);
+            popupUIExtensionRecords_.erase(nodeId);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [config, this]() {
+            int32_t targetId = config.nodeId;
+            auto record = popupUIExtensionRecords_.find(targetId);
+            int32_t uiExtNodeId = (record != popupUIExtensionRecords_.end()) ? record->second : 0;
+            auto uiExtNode = NG::FrameNode::GetFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtNodeId);
+            if (config.targetSize.has_value()) {
+                auto layoutProperty = uiExtNode->GetLayoutProperty();
+                CHECK_NULL_VOID(layoutProperty);
+                PopupSize targetSize = config.targetSize.value();
+                DimensionUnit unit = static_cast<DimensionUnit>(targetSize.unit);
+                auto width = NG::CalcLength(targetSize.width, unit);
+                auto height = NG::CalcLength(targetSize.height, unit);
+                layoutProperty->UpdateUserDefinedIdealSize(NG::CalcSize(width, height));
+            }
+            auto popupParam = CreateCustomPopupParam(true, config);
+            auto popupConfig = customPopupConfigMap_.find(targetId);
+            if (popupConfig != customPopupConfigMap_.end()) {
+                auto createConfig = popupConfig->second;
+                popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
+            }
+            auto targetNode =
+                AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(targetId));
+            CHECK_NULL_VOID(targetNode);
+            NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
         },
         TaskExecutor::TaskType::UI);
 }

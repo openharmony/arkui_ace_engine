@@ -14,10 +14,12 @@
  */
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_position_controller.h"
@@ -124,6 +126,22 @@ void ResetScrollFriction(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
+}
+
+ArkUI_Int32 GetScrollScrollSnap(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    ScrollSnapOptions options = ScrollModelNG::GetScrollSnap(frameNode);
+    values[0] = static_cast<ArkUI_Int32>(options.snapAlign);
+    values[1] = static_cast<ArkUI_Int32>(options.enableSnapToStart);
+    values[2] = static_cast<ArkUI_Int32>(options.enableSnapToEnd);
+    auto index = 3;
+    for (auto item : options.paginationParams) {
+        values[index] = item.ConvertToVp();
+        index++;
+    }
+    return index;
 }
 
 void SetScrollScrollSnap(ArkUINodeHandle node, const ArkUI_Float32* paginationValue, ArkUI_Int32 paginationSize,
@@ -280,8 +298,8 @@ ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    values[SCROLL_TO_INDEX_0] = ScrollModelNG::GetScrollEnabled(frameNode);
-    values[SCROLL_TO_INDEX_1] = ScrollModelNG::GetEdgeEffectAlways(frameNode);
+    values[SCROLL_TO_INDEX_0] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffect(frameNode));
+    values[SCROLL_TO_INDEX_1] = static_cast<ArkUI_Int32>(ScrollModelNG::GetEdgeEffectAlways(frameNode));
     return SCROLL_TO_INDEX_2;
 }
 
@@ -313,7 +331,12 @@ void SetEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool enableScrollInt
     ScrollModelNG::SetScrollEnabled(frameNode, enableScrollInteraction);
 }
 
-void ResetEnableScrollInteraction(ArkUINodeHandle node) {}
+void ResetEnableScrollInteraction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetScrollEnabled(frameNode, true);
+}
 
 void SetScrollTo(ArkUINodeHandle node, const ArkUI_Float32* values)
 {
@@ -420,6 +443,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         GetScrollFriction,
         SetScrollFriction,
         ResetScrollFriction,
+        GetScrollScrollSnap,
         SetScrollScrollSnap,
         ResetScrollScrollSnap,
         GetScrollScrollBar,

@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 class ArkFlexComponent extends ArkComponent implements FlexAttribute {
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType?: ModifierType) {
+    super(nativePtr, classType);
   }
   pointLight(value: PointLightStyle): this {
     throw new Error('Method not implemented.');
@@ -24,12 +24,10 @@ class ArkFlexComponent extends ArkComponent implements FlexAttribute {
 }
 
 // @ts-ignore
-globalThis.Flex.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkFlexComponent(nativeNode);
+globalThis.Flex.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkFlexComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.FlexModifier(nativePtr, classType);
   });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
 };

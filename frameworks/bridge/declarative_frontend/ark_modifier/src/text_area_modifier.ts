@@ -16,12 +16,13 @@
 /// <reference path='./import.ts' />
 class TextAreaModifier extends ArkTextAreaComponent implements AttributeModifier<TextAreaAttribute> {
 
-  constructor(nativePtr: KNode) {
-    super(nativePtr);
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
   applyNormalAttribute(instance: TextAreaAttribute): void {
-    applyAndMergeModifier<TextAreaAttribute, ArkTextAreaComponent, ArkComponent>(instance, this);
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<TextAreaAttribute, ArkTextAreaComponent, ArkComponent>(instance, this);
   }
 }

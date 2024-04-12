@@ -160,6 +160,9 @@ protected:
     RSPen strokePen_;
 #endif
     FillState fillState_;
+
+private:
+    void UpdateColorFilter(RSFilter& filter);
 };
 
 } // namespace OHOS::Ace::NG

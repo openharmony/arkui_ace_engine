@@ -27,7 +27,7 @@ constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
 
 bool IsCacheAvaliable()
 {
-    return NodeDataCache::Get().ShouldCollectData() || EventRecorder::Get().IsComponentRecordEnable();
+    return EventRecorder::Get().IsComponentRecordEnable() && !NodeDataCache::Get().IsShareNodeEmpty();
 }
 
 EventParamsBuilder::EventParamsBuilder()

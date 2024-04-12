@@ -29,6 +29,11 @@
 #else
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
+#include "test/mock/core/image_provider/mock_image_file_cache.cpp"
+#include "test/mock/core/image_provider/mock_image_loader.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_data.h"
@@ -37,13 +42,10 @@
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
-#include "test/mock/core/image_provider/mock_image_loader.h"
-#include "core/image/image_source_info.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/image/sk_image_cache.h"
-#include "base/utils/system_properties.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/image/image_source_info.h"
+#include "core/image/sk_image_cache.h"
 
 using namespace testing;
 using namespace testing::ext;

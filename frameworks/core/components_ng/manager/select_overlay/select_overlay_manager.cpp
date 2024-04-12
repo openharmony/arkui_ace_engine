@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -35,6 +36,9 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             selectedByMouseInfo_.onResetSelection();
         }
         selectedByMouseInfo_.clear();
+        if (selectContentManager_) {
+            selectContentManager_->ResetSelectionRect();
+        }
     }
     if (current) {
         if (info.isUsingMouse && IsSameSelectOverlayInfo(info)) {
@@ -47,6 +51,9 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             NotifyOverlayClosed(true);
         }
         DestroySelectOverlay(current->GetId());
+    }
+    if (selectContentManager_) {
+        selectContentManager_->CloseCurrent(false, CloseReason::CLOSE_REASON_HOLD_BY_OTHER);
     }
     selectOverlayInfo_ = info;
     SelectOverlayInfo selectInfo = info;
@@ -154,7 +161,10 @@ bool SelectOverlayManager::DestroySelectOverlay(bool animation)
 bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool animation)
 {
     NotifyOverlayClosed(true);
-    return DestroySelectOverlay(animation);
+    auto isDestroyed = DestroySelectOverlay(animation);
+    CHECK_NULL_RETURN(selectContentManager_, isDestroyed);
+    auto isClosed = selectContentManager_->CloseCurrent(animation, CloseReason::CLOSE_REASON_BACK_PRESSED);
+    return isDestroyed || isClosed;
 }
 
 void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation)
@@ -243,6 +253,9 @@ RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t ove
     if (current && (current->GetId() == overlayId)) {
         return DynamicCast<SelectOverlayNode>(current);
     }
+    if (selectContentManager_) {
+        return selectContentManager_->GetSelectOverlayNode();
+    }
     return nullptr;
 }
 
@@ -263,31 +276,14 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
 void SelectOverlayManager::HandleGlobalEvent(
     const TouchEvent& touchPoint, const NG::OffsetF& rootOffset, bool isMousePressAtSelectedNode)
 {
+    if (selectContentManager_) {
+        selectContentManager_->HandleGlobalEvent(touchPoint, rootOffset);
+    }
     ResetSelection(touchPoint, isMousePressAtSelectedNode);
     CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
-    if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {
-        if (touchDownPoints_.empty() && !IsTouchInCallerArea(point) && !IsInSelectedOrSelectOverlayArea(point)) {
-            touchDownPoints_.emplace_back(touchPoint);
-        }
-        return;
-    }
-    if (touchPoint.type == TouchType::MOVE && touchPoint.sourceType == SourceType::TOUCH) {
-        if (touchDownPoints_.empty()) {
-            return;
-        }
-        auto lastTouchDownPoint = touchDownPoints_.back();
-        if (lastTouchDownPoint.id != touchPoint.id) {
-            return;
-        }
-        auto deltaOffset = touchPoint.GetOffset() - lastTouchDownPoint.GetOffset();
-        auto deltaDistance = deltaOffset.GetDistance();
-        auto context = PipelineBase::GetCurrentContext();
-        auto thresholdDistance = context ? context->NormalizeToPx(Dimension(5, DimensionUnit::VP)) : 5;
-        if (deltaDistance > thresholdDistance) {
-            touchDownPoints_.clear();
-        }
+    if (PreProcessTouchEvent(point, touchPoint)) {
         return;
     }
     bool acceptTouchUp = !touchDownPoints_.empty();
@@ -309,6 +305,30 @@ void SelectOverlayManager::HandleGlobalEvent(
         NotifyOverlayClosed(true);
         DestroySelectOverlay();
     }
+}
+
+bool SelectOverlayManager::PreProcessTouchEvent(const NG::PointF& point, const TouchEvent& touchPoint)
+{
+    if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {
+        if (touchDownPoints_.empty() && !IsTouchInCallerArea(point) && !IsInSelectedOrSelectOverlayArea(point)) {
+            touchDownPoints_.emplace_back(touchPoint);
+        }
+        return true;
+    }
+    if (touchPoint.type == TouchType::MOVE && touchPoint.sourceType == SourceType::TOUCH) {
+        if (touchDownPoints_.empty() || touchDownPoints_.back().id != touchPoint.id) {
+            return true;
+        }
+        auto deltaOffset = touchPoint.GetOffset() - touchDownPoints_.back().GetOffset();
+        auto deltaDistance = deltaOffset.GetDistance();
+        auto context = PipelineBase::GetCurrentContext();
+        auto thresholdDistance = context ? context->NormalizeToPx(Dimension(5, DimensionUnit::VP)) : 5;
+        if (deltaDistance > thresholdDistance) {
+            touchDownPoints_.clear();
+        }
+        return true;
+    }
+    return false;
 }
 
 void SelectOverlayManager::ResetSelection(const TouchEvent& touchPoint, bool isMousePressAtSelectedNode)
@@ -413,5 +433,37 @@ void SelectOverlayManager::RemoveScrollCallback(int32_t callbackId)
             ++it;
         }
     }
+}
+
+void SelectOverlayManager::CloseSelectContentOverlay(int32_t overlayId, CloseReason reason, bool animation)
+{
+    CHECK_NULL_VOID(selectContentManager_);
+    selectContentManager_->CloseWithOverlayId(overlayId, reason, animation);
+}
+
+const RefPtr<SelectContentOverlayManager>& SelectOverlayManager::GetSelectContentOverlayManager()
+{
+    if (!selectContentManager_) {
+        selectContentManager_ = AceType::MakeRefPtr<SelectContentOverlayManager>(rootNodeWeak_.Upgrade());
+        LegacyManagerCallbacks callbacks;
+        callbacks.closeCallback = [weak = WeakClaim(this)](bool animation, bool fireCloseEvent) {
+            auto manager = weak.Upgrade();
+            CHECK_NULL_VOID(manager);
+            if (fireCloseEvent) {
+                manager->NotifyOverlayClosed(fireCloseEvent);
+            }
+            manager->DestroySelectOverlay(animation);
+        };
+        callbacks.selectionResetCallback = [weak = WeakClaim(this)]() {
+            auto manager = weak.Upgrade();
+            CHECK_NULL_VOID(manager);
+            if (manager->selectedByMouseInfo_.onResetSelection) {
+                manager->selectedByMouseInfo_.onResetSelection();
+            }
+            manager->selectedByMouseInfo_.clear();
+        };
+        selectContentManager_->SetLegacyManagerBridge(callbacks);
+    }
+    return selectContentManager_;
 }
 } // namespace OHOS::Ace::NG

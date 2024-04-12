@@ -264,6 +264,9 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     std::lock_guard<std::mutex> Lock(mMutex);
     int64_t inputTime = GetInputTime(sceneId, type, note);
     SceneRecord* record = GetRecord(sceneId);
+    if (IsSceneIdInSceneWhiteList(sceneId)) {
+        isExceptAnimator = true;
+    }
     if (record == nullptr) {
         record = new SceneRecord();
         record->InitRecord(sceneId, type, mSourceType, note, inputTime);
@@ -278,6 +281,9 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     std::lock_guard<std::mutex> Lock(mMutex);
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
+        if (IsSceneIdInSceneWhiteList(sceneId)) {
+            isExceptAnimator = false;
+        }
         RecordBaseInfo(record);
         record->Report(sceneId, mVsyncTime, isRsRender);
         ReportAnimateEnd(sceneId, record);
@@ -326,6 +332,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
         if (it->second != nullptr) {
             (it->second)->RecordFrame(vsyncTime, duration, skippedFrames);
             if ((it->second)->IsTimeOut(vsyncTime + duration)) {
+                CheckTimeOutOfExceptAnimatorStatus(it->second->sceneId);
                 delete it->second;
                 mRecords.erase(it++);
                 continue;
@@ -510,7 +517,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
-    return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow;
+    return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
 void PerfMonitor::SetAppStartStatus()
@@ -570,6 +577,27 @@ void PerfMonitor::ReportJankFrame(double jank, const std::string& windowName)
         RecordBaseInfo(nullptr);
         jankInfo.baseInfo = baseInfo;
         EventReport::ReportJankFrameFiltered(jankInfo);
+    }
+}
+
+bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
+{
+    if (sceneId == PerfConstants::LAUNCHER_APP_LAUNCH_FROM_ICON ||
+        sceneId == PerfConstants::LAUNCHER_APP_LAUNCH_FROM_DOCK ||
+        sceneId == PerfConstants::LAUNCHER_APP_LAUNCH_FROM_MISSON ||
+        sceneId == PerfConstants::LAUNCHER_APP_SWIPE_TO_HOME ||
+        sceneId == PerfConstants::LAUNCHER_APP_BACK_TO_HOME ||
+        sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
+        sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+            return true;
+        }
+    return false;
+}
+
+void PerfMonitor::CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId)
+{
+    if (IsSceneIdInSceneWhiteList(sceneId)) {
+        isExceptAnimator = false;
     }
 }
 } // namespace OHOS::Ace

@@ -131,6 +131,54 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListLayoutProperty002
+ * @tc.desc: Test List layout properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListLayoutProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.step1: create list
+     */
+    ListModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+    RefPtr<ScrollControllerBase> scrollController = model.CreateScrollController();
+    RefPtr<ScrollProxy> proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    model.SetScroller(scrollController, proxy);
+    CreateItem(19);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step2: set invalid values for LaneMinLength and LaneMaxLength
+     * @tc.expected: default value
+     */
+    model.SetListFriction(AceType::RawPtr(frameNode_), 0);
+    model.SetListScrollBar(AceType::RawPtr(frameNode_), 3);
+    model.SetLaneConstrain(AceType::RawPtr(frameNode_), Dimension(0), Dimension(0));
+    EXPECT_EQ(paintProperty_->GetScrollBarModeValue(DisplayMode::OFF), DisplayMode::AUTO);
+    EXPECT_EQ(pattern_->friction_, FRICTION);
+    EXPECT_FALSE(layoutProperty_->HasLaneMinLength());
+    EXPECT_FALSE(layoutProperty_->HasLaneMaxLength());
+
+    /**
+     * @tc.step3: set valid values for LaneMinLength and LaneMaxLength
+     * @tc.expected: the set value
+     */
+    model.SetListFriction(AceType::RawPtr(frameNode_), NEW_FRICTION);
+    model.SetLaneConstrain(AceType::RawPtr(frameNode_), Dimension(40), Dimension(60));
+    model.SetListScrollBar(AceType::RawPtr(frameNode_), 2);
+    EXPECT_EQ(paintProperty_->GetScrollBarModeValue(DisplayMode::OFF), DisplayMode::ON);
+    EXPECT_EQ(pattern_->friction_, NEW_FRICTION);
+    EXPECT_EQ(layoutProperty_->GetLaneMinLengthValue(), Dimension(40));
+    EXPECT_EQ(layoutProperty_->GetLaneMaxLengthValue(), Dimension(60));
+    model.SetListScrollBar(AceType::RawPtr(frameNode_), -1);
+    EXPECT_EQ(paintProperty_->GetScrollBarModeValue(DisplayMode::OFF), DisplayMode::AUTO);
+}
+
+/**
  * @tc.name: ListItemLayoutProperty001
  * @tc.desc: Test ListItem layout properties.
  * @tc.type: FUNC
@@ -559,6 +607,27 @@ HWTEST_F(ListAttrTestNg, AttrLanes005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrLanes006
+ * @tc.desc: Test LayoutProperty about minLaneLength, maxLaneLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrLanes006, TestSize.Level1)
+{
+    /**
+     * @tc.cases: set invalid values for LaneMinLength and LaneMaxLength
+     * @tc.expected: default value
+     */
+    Create([](ListModelNG model) {
+        model.SetLaneMinLength(Dimension(0.f));
+        model.SetLaneMaxLength(Dimension(0.f));
+        CreateItem(19);
+    });
+
+    EXPECT_FALSE(layoutProperty_->HasLaneMinLength());
+    EXPECT_FALSE(layoutProperty_->HasLaneMinLength());
+}
+
+/**
  * @tc.name: AttrAlignListItem001
  * @tc.desc: Test LayoutProperty about alignListItem
  * @tc.type: FUNC
@@ -839,8 +908,14 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction002, TestSize.Level1)
      * @tc.cases: UnScrollable list, Not set ScrollEnabled
      * @tc.expected: Default by list scrollable_
      */
-    Create([](ListModelNG model) { model.SetScrollEnabled(true); });
+    Create([](ListModelNG model) {
+        model.SetScrollEnabled(true);
+        model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    });
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
+    EXPECT_TRUE(pattern_->IsScrollSnapAlignCenter());
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_TRUE(pattern_->IsAtBottom());
 }
 
 /**

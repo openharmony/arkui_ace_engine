@@ -1,0 +1,283 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/interfaces/native/node/node_adapter_impl.h"
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include "base/error/error_code.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/pipeline/base/element_register.h"
+
+namespace OHOS::Ace::NG {
+
+void NativeLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener)
+{
+    listener_ = RawPtr(listener);
+    if (!receiver_) {
+        return;
+    }
+    ArkUINodeAdapterEvent event { .type = ON_ATTACH_TO_NODE };
+    event.extraParam = reinterpret_cast<intptr_t>(userData_);
+    auto lazyForEachNode = DynamicCast<LazyForEachNode>(listener);
+    if (lazyForEachNode) {
+        auto parent = lazyForEachNode->GetParent();
+        if (parent) {
+            event.handle = reinterpret_cast<ArkUINodeHandle>(RawPtr(parent));
+        }
+    }
+    receiver_(&event);
+}
+
+void NativeLazyForEachBuilder::UnregisterDataChangeListener(V2::DataChangeListener* listener)
+{
+    listener_ = nullptr;
+    if (!receiver_) {
+        return;
+    }
+    ArkUINodeAdapterEvent event { .type = ON_DETACH_FROM_NODE };
+    event.extraParam = reinterpret_cast<intptr_t>(userData_);
+    receiver_(&event);
+}
+
+int32_t NativeLazyForEachBuilder::OnGetTotalCount()
+{
+    return totalCount_;
+}
+
+LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
+    int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems)
+{
+    LazyForEachChild child;
+    if (!receiver_) {
+        return child;
+    }
+    ArkUINodeAdapterEvent getIdevent { .index = index, .idSet = false, .type = ON_GET_NODE_ID, .nodeSet = false };
+    getIdevent.extraParam = reinterpret_cast<intptr_t>(userData_);
+    receiver_(&getIdevent);
+    std::string idStr;
+    if (getIdevent.idSet) {
+        idStr = std::to_string(getIdevent.id);
+    } else {
+        idStr = std::to_string(index);
+    }
+    child.first = idStr;
+    const auto& itemIter = cachedItems.find(idStr);
+    if (itemIter != cachedItems.end()) {
+        child.second = itemIter->second.second;
+        cachedItems.erase(itemIter);
+        return child;
+    }
+    ArkUINodeAdapterEvent getChildEvent {
+        .index = index, .idSet = false, .type = ON_ADD_NODE_TO_ADAPTER, .nodeSet = false
+    };
+    getChildEvent.extraParam = reinterpret_cast<intptr_t>(userData_);
+    receiver_(&getChildEvent);
+    if (getChildEvent.nodeSet) {
+        child.second = Claim(reinterpret_cast<UINode*>(getChildEvent.handle));
+    }
+    return child;
+}
+
+void NativeLazyForEachBuilder::OnItemDeleted(UINode* node, const std::string& key)
+{
+    if (!receiver_) {
+        return;
+    }
+    ArkUINodeAdapterEvent event {
+        .id = std::stoi(key), .idSet = false, .type = ON_REMOVE_NODE_FROM_ADAPTER, .nodeSet = false
+    };
+    event.extraParam = reinterpret_cast<intptr_t>(userData_);
+    event.handle = reinterpret_cast<ArkUINodeHandle>(node);
+    receiver_(&event);
+}
+
+ArkUI_Int32 NativeLazyForEachBuilder::GetAllItem(ArkUINodeHandle** items, ArkUI_Uint32* size)
+{
+    std::vector<UINode*> childList;
+    GetAllItems(childList);
+    *size = childList.size();
+    *items = new ArkUINodeHandle[*size];
+    for (uint32_t i = 0; i < *size; i++) {
+        (*items)[i] = reinterpret_cast<ArkUINodeHandle>(childList[i]);
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+} // namespace OHOS::Ace::NG
+
+struct _ArkUINodeAdapter {
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::LazyForEachNode> node;
+};
+
+namespace OHOS::Ace::NodeAdapter {
+namespace {
+
+ArkUINodeAdapterHandle Create()
+{
+    return new _ArkUINodeAdapter { .builder = AceType::MakeRefPtr<NG::NativeLazyForEachBuilder>() };
+}
+
+void Dispose(ArkUINodeAdapterHandle handle)
+{
+    if (!handle) {
+        return;
+    }
+    if (handle->node) {
+        const auto& parent = handle->node->GetParent();
+        if (parent) {
+            parent->RemoveChild(handle->node);
+        }
+    }
+    delete handle;
+}
+
+ArkUI_Int32 SetTotalNodeCount(ArkUINodeAdapterHandle handle, ArkUI_Uint32 size)
+{
+    if (handle) {
+        handle->builder->SetNodeTotalCount(size);
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_PARAM_INVALID;
+}
+
+ArkUI_Uint32 GetTotalNodeCount(ArkUINodeAdapterHandle handle)
+{
+    if (handle) {
+        return handle->builder->GetNodeTotalCount();
+    }
+    return 0;
+}
+
+ArkUI_Int32 RegisterEventReceiver(
+    ArkUINodeAdapterHandle handle, void* userData, void (*receiver)(ArkUINodeAdapterEvent* event))
+{
+    if (!handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    handle->builder->SetUserData(userData);
+    handle->builder->SetReceiver(receiver);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void UnregisterEventReceiver(ArkUINodeAdapterHandle handle)
+{
+    if (!handle) {
+        return;
+    }
+    handle->builder->SetUserData(nullptr);
+    handle->builder->SetReceiver(nullptr);
+}
+
+ArkUI_Int32 NotifyItemReloaded(ArkUINodeAdapterHandle handle)
+{
+    if (!handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return handle->builder->NotifyItemReloaded();
+}
+
+ArkUI_Int32 NotifyItemChanged(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount)
+{
+    if (!handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return handle->builder->NotifyItemChanged(startPosition, itemCount);
+}
+
+ArkUI_Int32 NotifyItemRemoved(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount)
+{
+    if (!handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return handle->builder->NotifyItemRemoved(startPosition, itemCount);
+}
+
+ArkUI_Int32 NotifyItemInserted(ArkUINodeAdapterHandle handle, ArkUI_Uint32 startPosition, ArkUI_Uint32 itemCount)
+{
+    if (!handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return handle->builder->NotifyItemInserted(startPosition, itemCount);
+}
+
+ArkUI_Int32 NotifyItemMoved(ArkUINodeAdapterHandle handle, ArkUI_Uint32 from, ArkUI_Uint32 to)
+{
+    if (!handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return handle->builder->NotifyItemMoved(from, to);
+}
+
+ArkUI_Int32 GetAllItem(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, ArkUI_Uint32* size)
+{
+    if (!handle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return handle->builder->GetAllItem(items, size);
+}
+
+void AttachHostNode(ArkUINodeAdapterHandle handle, ArkUINodeHandle host)
+{
+    CHECK_NULL_VOID(handle);
+    CHECK_NULL_VOID(host);
+    if (!handle->node) {
+        handle->node =
+            NG::LazyForEachNode::CreateLazyForEachNode(ElementRegister::GetInstance()->MakeUniqueId(), handle->builder);
+    }
+    auto* uiNode = reinterpret_cast<NG::UINode*>(host);
+    uiNode->AddChild(handle->node);
+}
+
+void DetachHostNode(ArkUINodeHandle host)
+{
+    CHECK_NULL_VOID(host);
+    auto* uiNode = reinterpret_cast<NG::UINode*>(host);
+    const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(child);
+    uiNode->RemoveChild(child);
+}
+
+ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)
+{
+    CHECK_NULL_RETURN(host, nullptr);
+    auto* uiNode = reinterpret_cast<NG::UINode*>(host);
+    const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(child, nullptr);
+    const auto& builder = AceType::DynamicCast<NG::NativeLazyForEachBuilder>(child->GetBuilder());
+    CHECK_NULL_RETURN(builder, nullptr);
+    return builder->GetHostHandle();
+}
+
+} // namespace
+
+const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
+{
+    static const ArkUINodeAdapterAPI impl { Create, Dispose, SetTotalNodeCount, GetTotalNodeCount,
+        RegisterEventReceiver, UnregisterEventReceiver, NotifyItemReloaded, NotifyItemChanged, NotifyItemRemoved,
+        NotifyItemInserted, NotifyItemMoved, GetAllItem, AttachHostNode, DetachHostNode, GetNodeAdapter };
+    return &impl;
+}
+
+} // namespace OHOS::Ace::NodeAdapter

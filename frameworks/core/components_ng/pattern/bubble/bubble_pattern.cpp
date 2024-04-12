@@ -71,6 +71,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowOffsetsFromClip_ = bubbleLayoutAlgorithm->GetArrowOffsetsFromClip();
     arrowWidth_ = bubbleLayoutAlgorithm->GetArrowWidth();
     arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
+    border_ = bubbleLayoutAlgorithm->GetBorder();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -411,6 +412,8 @@ void BubblePattern::StartEnteringTransitionEffects(
     const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
 {
     auto popupId = popupNode->GetId();
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    pattern->transitionStatus_ = TransitionStatus::ENTERING;
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     layoutProp->UpdateVisibility(VisibleType::VISIBLE, true);
@@ -450,6 +453,8 @@ void BubblePattern::StartEnteringTransitionEffects(
 void BubblePattern::StartExitingTransitionEffects(
     const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
 {
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    pattern->transitionStatus_ = TransitionStatus::EXITING;
     auto layoutProperty = popupNode->GetLayoutProperty();
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
     auto renderContext = popupNode->GetRenderContext();

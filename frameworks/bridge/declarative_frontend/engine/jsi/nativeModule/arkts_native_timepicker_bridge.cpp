@@ -25,7 +25,7 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
-constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF007DFF;
+constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF0A59F7;
 
 ArkUINativeModuleValue TimepickerBridge::SetTimepickerBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

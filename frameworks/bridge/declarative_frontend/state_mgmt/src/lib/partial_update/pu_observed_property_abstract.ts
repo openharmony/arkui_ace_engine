@@ -55,7 +55,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         this.subscriberRefs_.add(subscriber);
       }
     }
-    ConfigureStateMgmt.instance.intentUsingV2(`V2 Decorated variable`, this.debugInfo());
   }
 
   aboutToBeDeleted() {
@@ -64,9 +63,17 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.owningView_ = undefined;
   }
 
+  private decoratorInfo_: string = "";
+
+  public setDecoratorInfo(decorate: string) {
+    this.decoratorInfo_ = decorate;
+  }
+
   // dump info about variable decorator to string
-  // e.g. @State/Provide, @Link/Consume, etc.
-  public abstract debugInfoDecorator() : string;
+  // e.g. @State, @Link, etc.
+  public debugInfoDecorator() : string {
+    return this.decoratorInfo_;
+  }
 
   // dump basic info about this variable to a string, non-recursive, no subscriber info
   public debugInfo() : string {
@@ -143,6 +150,11 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       });
     }
     return result;
+  }
+
+  /**/
+  public hasDependencies(): boolean {
+    return this.dependentElmtIdsByProperty_.hasDependencies();
   }
 
   /* for @Prop value from source we need to generate a @State
@@ -561,4 +573,7 @@ class PropertyDependencies {
     return result;
   }
 
+  public hasDependencies() : boolean {
+    return this.propertyDependencies_.size > 0 || this.trackedObjectPropertyDependencies_.size > 0;
+  }
 }
