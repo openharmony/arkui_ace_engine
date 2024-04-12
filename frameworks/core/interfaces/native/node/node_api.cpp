@@ -27,6 +27,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
@@ -915,7 +916,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     ARKUI_EXTENDED_API_VERSION,
 
     NodeModifier::GetUtilsModifier, // getUtilsModifier
-    nullptr, // getCanvasRenderingContext2DModifier
+    NodeModifier::GetCanvasRenderingContext2DModifier,
 
     SetCallbackMethod,
     SetCustomMethodFlag,
