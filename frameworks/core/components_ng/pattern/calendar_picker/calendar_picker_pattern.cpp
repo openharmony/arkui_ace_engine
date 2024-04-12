@@ -1002,7 +1002,7 @@ void CalendarPickerPattern::InitDialogProperties(DialogProperties& properties)
 
 void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (type != WindowSizeChangeReason::ROTATION) {
+    if (type != WindowSizeChangeReason::ROTATION && type != WindowSizeChangeReason::DRAG) {
         return;
     }
 
