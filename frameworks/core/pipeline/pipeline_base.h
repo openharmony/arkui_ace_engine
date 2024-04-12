@@ -894,7 +894,6 @@ public:
     {
         return displayWindowRectInfo_;
     }
-    virtual void FlushModifier() {}
     virtual void FlushMessages() = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {

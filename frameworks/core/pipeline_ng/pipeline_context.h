@@ -414,7 +414,6 @@ public:
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
-    void FlushModifier() override;
     void FlushMessages() override;
 
     void FlushUITasks() override;

@@ -150,7 +150,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     if (immediately) {
-        pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
     } else {
         pipelineContext->RequestFrame();
@@ -171,7 +170,6 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     if (immediately) {
-        pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
     } else {
         pipelineContext->RequestFrame();
