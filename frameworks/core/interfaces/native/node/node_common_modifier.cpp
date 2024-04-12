@@ -1739,6 +1739,37 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 
+void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
+{
+    std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::BOTTOM, ResizableOption::LEFT,
+        ResizableOption::RIGHT };
+    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+        std::optional<CalcDimension> optDimension;
+        SetCalcDimension(optDimension, options, NUM_13, index);
+        if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
+            resizable.SetEdgeSlice(direction, optDimension.value());
+        }
+    }
+}
+
+void SetBackgroundImageResizable(ArkUINodeHandle node, ArkUIStringAndFloat* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice resizable;
+    SetResizableFromVec(resizable, options);
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
+}
+
+void ResetBackgroundImageResizable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageResizableSlice resizable;
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
+}
+
 void SetBackgroundImageSize(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
     ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight)
 {
@@ -4777,7 +4808,7 @@ const ArkUICommonModifier* GetCommonModifier()
         GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth,
         GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
-        GetAspectRatio };
+        GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable };
 
     return &modifier;
 }

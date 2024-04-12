@@ -363,6 +363,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundImagePosition));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundImagePosition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBackgroundImagePosition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundImageResizable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundImageResizable));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundImageResizable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBackgroundImageResizable));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundImageSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundImageSize));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundImageSize"),

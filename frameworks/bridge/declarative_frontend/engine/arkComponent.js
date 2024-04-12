@@ -1116,6 +1116,31 @@ class BackgroundImagePositionModifier extends ModifierWithKey {
   }
 }
 BackgroundImagePositionModifier.identity = Symbol('backgroundImagePosition');
+class BackgroundImageResizableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageResizable(node);
+    }
+    else {
+      let sliceTop, sliceBottom, sliceLeft, sliceRight;
+      if (!isUndefined(this.value.slice)) {
+        let tempSlice = this.value.slice;
+        sliceTop = tempSlice.top;
+        sliceBottom = tempSlice.bottom;
+        sliceLeft = tempSlice.left;
+        sliceRight = tempSlice.right;
+      }
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+BackgroundImageResizableModifier.identity = Symbol('backgroundImageResizable');
 class LinearGradientBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2794,6 +2819,10 @@ class ArkComponent {
   }
   backgroundImagePosition(value) {
     modifierWithKey(this._modifiersWithKeys, BackgroundImagePositionModifier.identity, BackgroundImagePositionModifier, value);
+    return this;
+  }
+  backgroundImageResizable(value) {
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageResizableModifier.identity, BackgroundImageResizableModifier, value);
     return this;
   }
   backgroundBlurStyle(value, options) {
