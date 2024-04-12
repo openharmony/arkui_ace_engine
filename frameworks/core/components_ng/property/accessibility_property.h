@@ -384,6 +384,11 @@ public:
         return accessibilityDescription_.value_or("");
     }
 
+    virtual float GetScrollOffSet()
+    {
+        return 0.0f;
+    }
+
     class Level {
     public:
         inline static const std::string AUTO = "auto";
@@ -463,11 +468,6 @@ private:
     bool HasAccessibilityTextOrDescription() const;
 
     bool HasAction() const;
-
-    virtual float GetScrollOffSet()
-    {
-        return 0.0f;
-    }
 
 protected:
     virtual void SetSpecificSupportAction() {}
