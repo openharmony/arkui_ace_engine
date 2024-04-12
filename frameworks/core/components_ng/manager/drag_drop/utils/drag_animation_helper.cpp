@@ -179,6 +179,9 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     actuator->ClearGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     pipeline->FlushSyncGeometryNodeTasks();
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetIsTouchGatherAnimationPlaying(true);
     PlayGatherNodeOpacityAnimation(manager);
     PlayGatherNodeTranslateAnimation(actuator, manager);
 }
@@ -259,6 +262,14 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(GATHER_SPRING_RESPONSE,
         GATHER_SPRING_DAMPING_FRACTION, 0.0f);
     option.SetCurve(curve);
+
+    option.SetOnFinishEvent([]() {
+        auto pipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto dragDropManager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetIsTouchGatherAnimationPlaying(false);
+    });
     AnimationUtils::Animate(
         option,
         [overlayManager, gatherNodeCenter]() {
@@ -333,7 +344,12 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
-    auto childSize = manager->GetGatherNodeChildrenInfo().size() + 1;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto badgeNumber = dragDropManager->GetBadgeNumber();
+    auto childSize = badgeNumber > 0 ? badgeNumber : manager->GetGatherNodeChildrenInfo().size() + 1;
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();

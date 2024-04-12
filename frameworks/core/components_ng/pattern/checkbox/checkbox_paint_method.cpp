@@ -56,6 +56,8 @@ CheckBoxModifier::CheckBoxModifier(
     animatableCheckColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(checkColor));
     animatableBorderColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(borderColor));
     animatableShadowColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(shadowColor));
+    opacityScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    borderOpacityScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     checkStroke_ =
         AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetCheckStroke().ConvertToPx()));
     strokeSize_ =
@@ -73,6 +75,8 @@ CheckBoxModifier::CheckBoxModifier(
     AttachProperty(animatableBorderColor_);
     AttachProperty(animatableShadowColor_);
     AttachProperty(animateTouchHoverColor_);
+    AttachProperty(opacityScale_);
+    AttachProperty(borderOpacityScale_);
     AttachProperty(checkStroke_);
     AttachProperty(strokeSize_);
     AttachProperty(isSelect_);
@@ -126,6 +130,9 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
     RSPen shadowPen = RSPen(pen);
     RSBrush brush;
     brush.SetColor(ToRSColor(animatableBoardColor_->Get()));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        brush.SetColor(ToRSColor(animatableBoardColor_->Get().BlendOpacity(opacityScale_->Get())));
+    }
     brush.SetAntiAlias(true);
     if (!enabled_->Get()) {
         brush.SetColor(
@@ -138,6 +145,9 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
 
     // draw border
     pen.SetColor(ToRSColor(animatableBorderColor_->Get()));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        pen.SetColor(ToRSColor(animatableBorderColor_->Get().BlendOpacity(borderOpacityScale_->Get())));
+    }
     if (!enabled_->Get()) {
         pen.SetColor(
             ToRSColor(animatableBorderColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
@@ -151,8 +161,13 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
 
     // draw check
     pen.SetColor(ToRSColor(animatableCheckColor_->Get()));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        pen.SetColor(ToRSColor(animatableCheckColor_->Get().BlendOpacity(opacityScale_->Get())));
+    }
     shadowPen.SetColor(ToRSColor(animatableShadowColor_->Get()));
-    DrawCheck(canvas, paintOffset, pen, shadowPen, contentSize);
+    if (!hasBuilder_) {
+        DrawCheck(canvas, paintOffset, pen, shadowPen, contentSize);
+    }
 }
 
 void CheckBoxModifier::DrawFocusBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const

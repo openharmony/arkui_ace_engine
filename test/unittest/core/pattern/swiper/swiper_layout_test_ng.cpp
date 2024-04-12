@@ -98,8 +98,7 @@ HWTEST_F(SwiperLayoutTestNg, Arrow001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(swiperArrowParameters);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto leftArrowLayoutProperty = leftArrowNode->GetLayoutProperty<SwiperArrowLayoutProperty>();
+    auto leftArrowLayoutProperty = leftArrowNode_->GetLayoutProperty<SwiperArrowLayoutProperty>();
     EXPECT_FALSE(leftArrowLayoutProperty->GetIsShowBackgroundValue());
     EXPECT_FALSE(leftArrowLayoutProperty->GetIsSidebarMiddleValue());
     EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundSizeValue(), Dimension(24.f));
@@ -137,8 +136,7 @@ HWTEST_F(SwiperLayoutTestNg, Arrow002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(swiperArrowParameters);
     });
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    auto leftArrowLayoutProperty = rightArrowNode->GetLayoutProperty<SwiperArrowLayoutProperty>();
+    auto leftArrowLayoutProperty = rightArrowNode_->GetLayoutProperty<SwiperArrowLayoutProperty>();
     EXPECT_TRUE(leftArrowLayoutProperty->GetIsShowBackgroundValue());
     EXPECT_TRUE(leftArrowLayoutProperty->GetIsSidebarMiddleValue());
     EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundSizeValue(), Dimension(32.f));
@@ -242,8 +240,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
         5);
     EXPECT_EQ(pattern_->itemPosition_.size(), 5);
 
-    pattern_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(1);
     EXPECT_EQ(pattern_->currentIndex_, 1);
     const float itemWidth1 = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
     CheckItems(0, 3, 20.0f, itemWidth1);
@@ -279,8 +276,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
 
     FlushLayoutTask(parent);
 
-    pattern_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(1);
     EXPECT_EQ(pattern_->currentIndex_, 1);
 
     const float itemWidth1 = (400.0f - 2 * 20.0f) / 3.0f;
@@ -341,35 +337,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperFlex001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperLayoutAlgorithmLayout001
- * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_TRUE(IsEqual(indicatorNode->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(232.0, 800.0)));
-}
-
-/**
- * @tc.name: SwiperLayoutAlgorithmLayout002
- * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_TRUE(IsEqual(indicatorNode->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(464.0, 400.0)));
-}
-
-/**
  * @tc.name: SwiperLayoutAlgorithmLayout003
  * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
  * @tc.type: FUNC
@@ -423,12 +390,9 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
-    auto indicatorGeometryNode = indicatorNode->GetGeometryNode();
-    auto leftArrowGeometryNode = leftArrowNode->GetGeometryNode();
-    auto rightArrowGeometryNode = rightArrowNode->GetGeometryNode();
+    auto indicatorGeometryNode = indicatorNode_->GetGeometryNode();
+    auto leftArrowGeometryNode = leftArrowNode_->GetGeometryNode();
+    auto rightArrowGeometryNode = rightArrowNode_->GetGeometryNode();
 
     /**
      * @tc.cases: case1. Axis is HORIZONTAL, arrow is in the switch.
@@ -497,8 +461,6 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasure001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
 
     /**
      * @tc.steps: step4. call Measure.
@@ -506,8 +468,8 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasure001, TestSize.Level1)
      */
     layoutProperty_->UpdateBackgroundSize(3.0_vp);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(leftArrowNode->GetGeometryNode()->GetFrameSize(), SizeF(3.0f, 3.0f));
-    EXPECT_EQ(rightArrowNode->GetGeometryNode()->GetFrameSize(), SizeF(3.0f, 3.0f));
+    EXPECT_EQ(leftArrowNode_->GetGeometryNode()->GetFrameSize(), SizeF(3.0f, 3.0f));
+    EXPECT_EQ(rightArrowNode_->GetGeometryNode()->GetFrameSize(), SizeF(3.0f, 3.0f));
 }
 
 /**
@@ -545,10 +507,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternCreateLayoutAlgorithm001, TestSize.Lev
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -562,7 +524,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSiz
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     swiperLayoutAlgorithm->isLoop_ = true;
     auto firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     layoutWrapper.AppendChild(firstLayoutWrapper);
 
     /**
@@ -583,18 +545,18 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackwardItem001, TestSiz
     }
 
     currentIndex = 1;
-    indicatorNode->tag_ = V2::SWIPER_LEFT_ARROW_ETS_TAG;
+    indicatorNode_->tag_ = V2::SWIPER_LEFT_ARROW_ETS_TAG;
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             swiperLayoutAlgorithm->LayoutBackwardItem(
                 &layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
             if (i == 1) {
-                indicatorNode->tag_ = V2::SWIPER_RIGHT_ARROW_ETS_TAG;
+                indicatorNode_->tag_ = V2::SWIPER_RIGHT_ARROW_ETS_TAG;
                 continue;
             }
-            indicatorNode->tag_ = V2::SWIPER_INDICATOR_ETS_TAG;
+            indicatorNode_->tag_ = V2::SWIPER_INDICATOR_ETS_TAG;
         }
-        indicatorNode->tag_ = V2::SWIPER_ETS_TAG;
+        indicatorNode_->tag_ = V2::SWIPER_ETS_TAG;
     }
 }
 
@@ -607,10 +569,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward001, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -641,10 +603,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward001, TestSize.Le
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -675,11 +637,11 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmSetInactive001, TestSize.Level
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     CreateWithItem([](SwiperModelNG model) {});
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, layoutProperty_);
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty_);
     float startMainPos = 0.1f;
     float endMainPos = 0.0f;
     int32_t targetIndex = 1;
@@ -718,15 +680,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward002, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     auto indicatorNode_test = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(1,
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode_->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -784,10 +746,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Le
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -818,7 +780,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Le
                         []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
                 layoutWrapper.childrenMap_.emplace(
                     std::make_pair(1, AceType::MakeRefPtr<LayoutWrapperNode>(
-                                          indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
+                                          indicatorNode_test, geometryNode, indicatorNode_->GetLayoutProperty())));
                 continue;
             }
             swiperLayoutAlgorithm->SetIsLoop(true);
@@ -837,20 +799,19 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Le
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmPlaceDigitChild001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto indicatorWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     auto layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode);
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
     firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
     RefPtr<LayoutWrapperNode> firstLayoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
     indicatorWrapper->AppendChild(firstLayoutWrapper);
-    auto lastChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode);
+    auto lastChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> lastGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     lastGeometryNode->Reset();
     lastGeometryNode->SetFrameSize(SizeF(30.0, 30.0));
@@ -897,17 +858,17 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetNodeLayoutWrapperByTag001, 
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     string tagName = V2::SWIPER_INDICATOR_ETS_TAG;
     layoutWrapper.currentChildCount_ = 0;
-    indicatorNode->pattern_ = AceType::MakeRefPtr<SwiperPattern>();
-    ASSERT_NE(indicatorNode->pattern_, nullptr);
-    AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->indicatorId_ = 1;
-    AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->leftButtonId_ = 1;
-    AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->rightButtonId_ = 1;
+    indicatorNode_->pattern_ = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(indicatorNode_->pattern_, nullptr);
+    AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->indicatorId_ = 1;
+    AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->leftButtonId_ = 1;
+    AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->rightButtonId_ = 1;
 
     /**
      * @tc.steps: step2. call GetNodeLayoutWrapperByTag.
@@ -916,27 +877,27 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetNodeLayoutWrapperByTag001, 
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             if (i == 1 && j == 1) {
-                AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->indicatorId_.reset();
-                AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->leftButtonId_ = 1;
+                AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->indicatorId_.reset();
+                AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->leftButtonId_ = 1;
             }
             for (int k = 0; k <= 1; k++) {
                 swiperLayoutAlgorithm->GetNodeLayoutWrapperByTag(&layoutWrapper, tagName);
                 if (i == 0 && j == 1) {
-                    AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->leftButtonId_.reset();
+                    AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->leftButtonId_.reset();
                     continue;
                 } else if (i == 1 && j == 0) {
-                    AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->indicatorId_ = 1;
+                    AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->indicatorId_ = 1;
                     continue;
                 } else if (i == 1 && j == 1) {
                     break;
                 }
                 layoutWrapper.currentChildCount_ = 1;
             }
-            AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->indicatorId_.reset();
+            AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->indicatorId_.reset();
         }
-        AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->rightButtonId_.reset();
+        AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->rightButtonId_.reset();
     }
-    AceType::DynamicCast<SwiperPattern>(indicatorNode->pattern_)->leftButtonId_.reset();
+    AceType::DynamicCast<SwiperPattern>(indicatorNode_->pattern_)->leftButtonId_.reset();
     swiperLayoutAlgorithm->GetNodeLayoutWrapperByTag(&layoutWrapper, tagName);
 }
 
@@ -949,15 +910,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize001, TestSize.L
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(
-        0, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty())));
+        0, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty())));
     layoutWrapper.childrenMap_.emplace(std::make_pair(
-        1, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, nullptr, indicatorNode->GetLayoutProperty())));
+        1, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, nullptr, indicatorNode_->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -990,10 +951,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     layoutWrapper.currentChildCount_ = 2;
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
@@ -1159,10 +1120,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper002, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     layoutWrapper.currentChildCount_ = 2;
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
@@ -1230,10 +1191,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper003, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     layoutWrapper.currentChildCount_ = 2;
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
@@ -1260,7 +1221,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmMeasureSwiper003, TestSize.Lev
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
@@ -1277,11 +1238,11 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     swiperLayoutAlgorithm->isLoop_ = true;
     auto firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     layoutWrapper.currentChildCount_ = 1;
     layoutWrapper.AppendChild(firstLayoutWrapper);
     swiperLayoutAlgorithm->totalItemCount_ = 2;
-    indicatorNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    indicatorNode_->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->ResetDisplayCount();
     AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())
         ->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
@@ -1302,11 +1263,11 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutBackward004, TestSize.Le
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    indicatorNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    indicatorNode_->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -1375,15 +1336,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward003, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     auto indicatorNode_test = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(1,
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode_->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -1423,15 +1384,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward004, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     auto indicatorNode_test = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(1,
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode_->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -1480,15 +1441,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward005, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     auto indicatorNode_test = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(1,
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode_->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -1532,15 +1493,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     auto indicatorNode_test = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(1,
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode_->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -1589,15 +1550,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Lev
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     auto indicatorNode_test = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(1,
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode->GetLayoutProperty())));
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_test, geometryNode, indicatorNode_->GetLayoutProperty())));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -1670,8 +1631,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout006, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorGeometryNode = indicatorNode->GetGeometryNode();
+    auto indicatorGeometryNode = indicatorNode_->GetGeometryNode();
     indicatorGeometryNode->SetFrameOffset(OffsetF(250.0f, 190.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(144.0f, 48.0f));
 
@@ -1696,7 +1656,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout006, TestSize.Level1)
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode =
+    auto indicatorNode_ =
         FrameNode::GetOrCreateFrameNode("test", 1, []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
@@ -1713,11 +1673,11 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayoutForwardItem002, TestSize
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     swiperLayoutAlgorithm->isLoop_ = true;
     auto firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     layoutWrapper.currentChildCount_ = 1;
     layoutWrapper.AppendChild(firstLayoutWrapper);
     swiperLayoutAlgorithm->totalItemCount_ = 2;
-    indicatorNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    indicatorNode_->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->ResetDisplayCount();
     AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())
         ->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
@@ -1778,16 +1738,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmGetChildMaxSize002, TestSize.L
     CreateWithItem([](SwiperModelNG model) {});
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
 
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
 
     layoutWrapper.currentChildCount_ = 2;
     layoutWrapper.childrenMap_.emplace(std::make_pair(
-        0, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty())));
+        0, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty())));
     layoutWrapper.childrenMap_.emplace(std::make_pair(
-        1, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, nullptr, indicatorNode->GetLayoutProperty())));
+        1, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode_, nullptr, indicatorNode_->GetLayoutProperty())));
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
@@ -1862,11 +1822,10 @@ HWTEST_F(SwiperLayoutTestNg, SwiperPatternAlgorithmMeasure003, TestSize.Level1)
 HWTEST_F(SwiperLayoutTestNg, ItemWidth001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateItemWidth(Dimension(-1.0, DimensionUnit::PX));
 
     /**
@@ -1874,7 +1833,7 @@ HWTEST_F(SwiperLayoutTestNg, ItemWidth001, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -1888,11 +1847,10 @@ HWTEST_F(SwiperLayoutTestNg, ItemWidth002, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateItemWidth(Dimension(-1000.0, DimensionUnit::PX));
 
     /**
@@ -1900,7 +1858,7 @@ HWTEST_F(SwiperLayoutTestNg, ItemWidth002, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -1912,11 +1870,10 @@ HWTEST_F(SwiperLayoutTestNg, ItemWidth002, TestSize.Level1)
 HWTEST_F(SwiperLayoutTestNg, ItemHeight001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateItemHeight(Dimension(-1.0, DimensionUnit::PX));
 
     /**
@@ -1924,7 +1881,7 @@ HWTEST_F(SwiperLayoutTestNg, ItemHeight001, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -1938,11 +1895,10 @@ HWTEST_F(SwiperLayoutTestNg, ItemHeight002, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateItemHeight(Dimension(-1000.0, DimensionUnit::PX));
 
     /**
@@ -1950,7 +1906,7 @@ HWTEST_F(SwiperLayoutTestNg, ItemHeight002, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -1962,11 +1918,10 @@ HWTEST_F(SwiperLayoutTestNg, ItemHeight002, TestSize.Level1)
 HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateSelectedItemWidth(Dimension(-1.0, DimensionUnit::PX));
 
     /**
@@ -1974,7 +1929,7 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth001, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -1988,11 +1943,10 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth002, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateSelectedItemWidth(Dimension(-1000.0, DimensionUnit::PX));
 
     /**
@@ -2000,7 +1954,7 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth002, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -2012,11 +1966,10 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemWidth002, TestSize.Level1)
 HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateSelectedItemHeight(Dimension(-1.0, DimensionUnit::PX));
 
     /**
@@ -2024,7 +1977,7 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight001, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -2038,11 +1991,10 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight002, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateSelectedItemHeight(Dimension(-1000.0, DimensionUnit::PX));
 
     /**
@@ -2050,7 +2002,7 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight002, TestSize.Level1)
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -2062,11 +2014,10 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight002, TestSize.Level1)
 HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateSize(Dimension(-1.0, DimensionUnit::PX));
 
     /**
@@ -2074,7 +2025,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmMeasure001, TestSize.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -2089,10 +2040,9 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmMeasure002, TestSize.
         model.SetDirection(Axis::VERTICAL);
     });
     layoutProperty_->UpdateDirection(Axis::VERTICAL);
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
     paintProperty->UpdateSize(Dimension(-1000.0, DimensionUnit::PX));
 
     /**
@@ -2100,7 +2050,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmMeasure002, TestSize.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
 
@@ -2114,17 +2064,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout001, TestSize.L
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     layoutProperty->UpdateLeft(Dimension(100.0, DimensionUnit::PX));
 
     /**
      * @tc.steps: step3. layoutProperty is avaible.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty);
 
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
@@ -2146,17 +2095,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout001, TestSize.L
 HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     layoutProperty->UpdateRight(Dimension(100.0, DimensionUnit::PX));
 
     /**
      * @tc.steps: step3. layoutProperty right is avaible.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -2176,17 +2124,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout002, TestSize.L
 HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout003, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     layoutProperty->UpdateRight(Dimension(100.0, DimensionUnit::PX));
 
     /**
      * @tc.steps: step3. layoutProperty is default.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -2208,17 +2155,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout004, TestSize.L
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     layoutProperty->UpdateTop(Dimension(100.0, DimensionUnit::PX));
 
     /**
      * @tc.steps: step3. layoutProperty top is avaible.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -2239,17 +2185,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout005, TestSize.L
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     layoutProperty->UpdateBottom(Dimension(100.0, DimensionUnit::PX));
 
     /**
      * @tc.steps: step3. layoutProperty bottom is avaible.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -2270,16 +2215,15 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmLayout006, TestSize.L
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
 
     /**
      * @tc.steps: step3. layoutProperty is default.
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, layoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(720.f, 1136.f);
     layoutConstraint.percentReference = SizeF(720.f, 1136.f);
@@ -2300,8 +2244,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmGetValidEdgeLength001
     CreateWithItem([](SwiperModelNG model) {
         model.SetDirection(Axis::VERTICAL);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     RefPtr<DotIndicatorLayoutAlgorithm> algorithm =
         AceType::DynamicCast<DotIndicatorLayoutAlgorithm>(indicatorPattern->CreateLayoutAlgorithm());
 
@@ -2310,7 +2253,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperIndicatorLayoutAlgorithmGetValidEdgeLength001
      */
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+        LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     EXPECT_EQ(algorithm->GetValidEdgeLength(100.0, 40.0, Dimension(0.7, DimensionUnit::PERCENT)), 60.0);
     EXPECT_EQ(algorithm->GetValidEdgeLength(100.0, 40.0, Dimension(0.5, DimensionUnit::PERCENT)), 50.0);
     EXPECT_EQ(algorithm->GetValidEdgeLength(100.0, 20.0, Dimension(0.0, DimensionUnit::PERCENT)), 0.0);

@@ -134,6 +134,7 @@ public:
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
     static void SetBackgroundEffect(const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
+    static void SetForegroundEffect(float radius);
     static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
@@ -393,6 +394,7 @@ public:
     static void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(float value);
+    static void SetLightColor(const Color& value);
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);

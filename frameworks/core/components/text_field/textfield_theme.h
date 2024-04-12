@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
+#include "core/components/swiper/render_swiper.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -72,6 +73,11 @@ public:
                 pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp));
+            theme->underlinePadding_ =
+                Edge(pattern->GetAttr<Dimension>("textfield_underline_padding_horizontal", 0.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_underline_padding_vertical", 12.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_underline_padding_horizontal", 0.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_underline_padding_vertical", 12.0_vp));
             theme->fontWeight_ =
                 FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_font_weight", 0.0)));
             theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("textfield_border_radius", 0.0_vp));
@@ -159,8 +165,8 @@ public:
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
-            // The default height is 48VP, of which 12VP is 12VP each for the upper and lower padding
             theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 24.0_vp);
+            theme->contentHeight_ = pattern->GetAttr<Dimension>("textfield_content_height", 0.0_vp);
             auto showPasswordDirectly = pattern->GetAttr<std::string>("show_password_directly", "0");
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
             auto textfield_show_handle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
@@ -182,9 +188,19 @@ public:
         return padding_;
     }
 
+    const Edge& GetUnderlinePadding() const
+    {
+        return underlinePadding_;
+    }
+
     const Dimension& GetHeight() const
     {
         return height_;
+    }
+
+    const Dimension& GetContentHeight() const
+    {
+        return contentHeight_;
     }
 
     const Dimension& GetFontSize() const
@@ -517,7 +533,9 @@ protected:
 
 private:
     Edge padding_;
+    Edge underlinePadding_;
     Dimension height_;
+    Dimension contentHeight_;
     Dimension fontSize_;
     Dimension underlineFontSize_;
     FontWeight fontWeight_ = FontWeight::NORMAL;

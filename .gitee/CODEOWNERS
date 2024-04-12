@@ -13,6 +13,9 @@ adapter/ohos/capability/window_connection_ng/  @lushi1202
 adapter/ohos/entrance/pa_engine/  @jayleehw
 adapter/ohos/osal/ace_trace.cpp  @lushi1202
 adapter/ohos/osal/anr_thread.cpp  @lushi1202
+adapter/ohos/osal/js_accessibility_manager.h  @jayleehw
+adapter/ohos/osal/js_accessibility_manager.cpp  @jayleehw
+adapter/ohos/osal/layout_inspector.cpp  @jayleehw
 adapter/ohos/osal/log_wrapper.cpp  @lushi1202
 
 [Preview adapter]
@@ -25,16 +28,21 @@ interfaces/ @sunfei2021
 frameworks/core/pipeline/  @yan-shuifeng @lightningHo
 frameworks/core/pipeline_ng/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/base/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/base/inspector.h  @jayleehw
+frameworks/core/components_ng/base/inspector.cpp  @jayleehw
 frameworks/core/components_ng/layout/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/render/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
+frameworks/core/components_ng/property/accessibility_property.h  @jayleehw
+frameworks/core/components_ng/property/accessibility_property.cpp  @jayleehw
 frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo @houhaoyu
 frameworks/core/components_ng/manager/safe_area/  @xiexiyun
 
 [Common source]
 frameworks/core/common/  @yan-shuifeng @sunfei2021
+frameworks/core/common/layout_inspector.h  @jayleehw
 
 [State Management]
 frameworks/bridge/declarative_frontend/state_mgmt/   @guido_grassel @s10021109
@@ -259,7 +267,7 @@ frameworks/core/components/wrap/  @yangfan229
 frameworks/core/components/xcomponent/  @sunbees
 
 [Accessibility source]
-frameworks/core/accessibility/  @zcdqs
+frameworks/core/accessibility/  @jayleehw
 
 [Animations source]
 frameworks/core/animation/  @hehongyang9

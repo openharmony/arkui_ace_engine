@@ -33,9 +33,11 @@ public:
 private:
     static napi_value InitDrawable(napi_env env);
     static napi_value InitLayeredDrawable(napi_env env);
+    static napi_value InitAnimatedDrawable(napi_env env);
 
     static napi_value Constructor(napi_env env, napi_callback_info info);
     static void Destructor(napi_env env, void* nativeObject, void* finalize);
+    static napi_value AnimatedConstructor(napi_env env, napi_callback_info info);
 
     // methods
     static napi_value GetPixelMap(napi_env env, napi_callback_info info);
@@ -47,6 +49,7 @@ private:
 
     static thread_local napi_ref baseConstructor_;
     static thread_local napi_ref layeredConstructor_;
+    static thread_local napi_ref animatedConstructor_;
 };
 } // namespace OHOS::Ace::Napi
 #endif // INTERFACES_INNER_API_DRAWABLE_DESCRIPTOR_JS_DRAWABLE_DESCRIPTOR_H_

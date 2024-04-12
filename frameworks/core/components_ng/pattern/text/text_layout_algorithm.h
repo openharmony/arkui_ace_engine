@@ -25,6 +25,7 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
@@ -41,8 +42,8 @@ struct DragSpanPosition {
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
-class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(TextLayoutAlgorithm, BoxLayoutAlgorithm);
+class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm, public TextAdaptFontSizer {
+    DECLARE_ACE_TYPE(TextLayoutAlgorithm, BoxLayoutAlgorithm, TextAdaptFontSizer);
 
 public:
     TextLayoutAlgorithm();
@@ -62,7 +63,9 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    const RefPtr<Paragraph>& GetParagraph();
+    const RefPtr<Paragraph>& GetParagraph() const override;
+    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
     std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
 
@@ -112,8 +115,6 @@ private:
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
     void UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents);
-    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
     bool DidExceedMaxLines(const SizeF& maxSize);

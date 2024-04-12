@@ -114,6 +114,7 @@ public:
     static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
+    static void JsForegroundEffect(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
     static void JsLightUpEffect(const JSCallbackInfo& info);
@@ -500,7 +501,12 @@ public:
             {FunctionKey::F9, "F9"},
             {FunctionKey::F10, "F10"},
             {FunctionKey::F11, "F11"},
-            {FunctionKey::F12, "F12"}
+            {FunctionKey::F12, "F12"},
+            {FunctionKey::TAB, "TAB"},
+            {FunctionKey::DPAD_UP, "DPAD_UP"},
+            {FunctionKey::DPAD_DOWN, "DPAD_DOWN"},
+            {FunctionKey::DPAD_LEFT, "DPAD_LEFT"},
+            {FunctionKey::DPAD_RIGHT, "DPAD_RIGHT"}
         };
         auto result = keyNameMap.find(functionkey);
         return (result != keyNameMap.end()) ? result->second : std::string();

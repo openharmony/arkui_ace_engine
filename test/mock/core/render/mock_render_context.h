@@ -59,6 +59,11 @@ public:
         return rect_;
     }
 
+    RectF GetPaintRectWithoutTransform() override
+    {
+        return paintRect_;
+    }
+
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
     {
         const auto& groupProperty = GetOrCreateBackground();
@@ -72,6 +77,7 @@ public:
 
     bool isVisible_ = true;
     RectF rect_;
+    RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
     std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 };

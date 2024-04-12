@@ -26,7 +26,8 @@ public:
     void Create(const RefPtr<VideoControllerV2>& videoController) override;
     void SetSrc(const std::string& src) override;
     void SetProgressRate(double progressRate) override;
-    void SetPosterSourceInfo(const std::string& posterUrl) override;
+    void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
+        const std::string &moduleName) override;
     void SetPosterSourceByPixelMap(RefPtr<PixelMap>& pixMap) override;
     void SetMuted(bool muted) override;
     void SetAutoPlay(bool autoPlay) override;

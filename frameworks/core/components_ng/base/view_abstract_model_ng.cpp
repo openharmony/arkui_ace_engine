@@ -161,12 +161,11 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateChainedTransition(menuParam.transition);
         }
-        if (!wrapperPattern->IsShow() && menuParam.isShow) {
-            overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
-        } else if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+        if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
             overlayManager->HideMenu(menuNode, targetId, false);
         }
-    } else if (menuParam.isShow) {
+    }
+    if (menuParam.isShow) {
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
         } else if (buildFunc) {
@@ -249,6 +248,7 @@ void BindContextMenuSingle(
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
             } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
@@ -492,6 +492,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         if (showInPage) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
             overlayManager = GetOverlayFromPage(pageLevelId, isNav);
         }
         CHECK_NULL_VOID(overlayManager);

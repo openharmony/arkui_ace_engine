@@ -35,6 +35,7 @@ public:
     virtual void SetContainerSize(const SizeF& containerSize) = 0;
     virtual void SetFillColor(const std::optional<Color>& color) {}
     virtual void SetSmoothEdge(float value) {}
+    virtual void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter) {}
 
     void SetRadius(const BorderRadiusArray& radiusXY)
     {

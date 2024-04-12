@@ -847,8 +847,8 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
                     return result;
                 }
 #endif
-                nodes.push(frameNode);
             }
+            nodes.push(Referenced::RawPtr(child));
         }
     }
     return nullptr;

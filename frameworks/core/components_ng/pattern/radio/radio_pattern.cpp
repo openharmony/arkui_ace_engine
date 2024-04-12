@@ -212,6 +212,7 @@ void RadioPattern::UpdateSelectStatus(bool isSelected)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d update status %d", host->GetId(), isSelected);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
     MarkIsSelected(isSelected);
@@ -229,6 +230,8 @@ void RadioPattern::MarkIsSelected(bool isSelected)
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire change event %{public}d", host->GetId(),
+        isSelected);
     if (isSelected) {
         eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
         host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
@@ -334,6 +337,8 @@ void RadioPattern::HandleMouseEvent(bool isHover)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d handle mouse hover %{public}d", host->GetId(), isHover);
     host->MarkNeedRenderOnly();
 }
 
@@ -344,6 +349,7 @@ void RadioPattern::OnClick()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d handle click event", host->GetId());
     auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     bool check = false;
@@ -370,6 +376,7 @@ void RadioPattern::OnTouchDown()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d onTouch Down", host->GetId());
     isTouch_ = true;
     host->MarkNeedRenderOnly();
 }
@@ -386,6 +393,7 @@ void RadioPattern::OnTouchUp()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d onTouch Up", host->GetId());
     isTouch_ = false;
     host->MarkNeedRenderOnly();
 }
@@ -498,6 +506,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
     if (preCheck_) {
         auto radioEventHub = GetEventHub<RadioEventHub>();
         CHECK_NULL_VOID(radioEventHub);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire unselect event", frameNode->GetId());
         radioEventHub->UpdateChangeEvent(false);
         isOnAnimationFlag_ = false;
     }
@@ -687,6 +696,8 @@ void RadioPattern::UpdateGroupCheckStatus(
     }
 
     if (!isFirstCreated_) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d fire group change event %{public}d",
+            frameNode->GetId(), check);
         radioEventHub->UpdateChangeEvent(check);
     }
 }

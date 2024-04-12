@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 
@@ -46,7 +47,7 @@ public:
     }
 
     bool hierarchicalParameters_ = false;
-    void InitHierarchicalParameters(bool isShowInSubWindow);
+    void InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);

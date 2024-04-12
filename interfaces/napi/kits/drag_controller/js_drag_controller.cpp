@@ -100,6 +100,7 @@ struct DragControllerAsyncCtx {
     DimensionOffset touchPoint = DimensionOffset(0.0_vp, 0.0_vp);
     bool hasTouchPoint = false;
     DragAction *dragAction = nullptr;
+    NG::DragPreviewOption dragPreviewOption;
     ~DragControllerAsyncCtx();
 };
 } // namespace
@@ -682,9 +683,14 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
+    int32_t recordSize = (dataSize != 0 ? dataSize : shadowInfos.size());
+    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        recordSize = badgeNumber.value();
+    }
     auto windowId = container->GetWindowId();
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
-        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY,
+        recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
         asyncCtx->displayId, windowId, true, false, summary };
 }
 
@@ -700,10 +706,7 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(asyncCtx->env, &scope);
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
-        napi_close_handle_scope(asyncCtx->env, scope);
     };
 
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
@@ -810,6 +813,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
+            auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
+            if (badgeNumber.has_value()) {
+                dataSize = badgeNumber.value();
+            }
             asyncCtx->pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
             int32_t width = asyncCtx->pixelMap->GetWidth();
             int32_t height = asyncCtx->pixelMap->GetHeight();
@@ -833,10 +840,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 windowId, true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-                napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
-                napi_close_handle_scope(asyncCtx->env, scope);
             };
 
             int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData,
@@ -1112,6 +1116,54 @@ bool ParseDragParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
     return ParseDragItemInfoParam(asyncCtx, errMsg);
 }
 
+bool ParsePreviewOptions(
+    DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType, std::string& errMsg)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(asyncCtx->env, &scope);
+    asyncCtx->dragPreviewOption.isNumber = false;
+    asyncCtx->dragPreviewOption.isShowBadge = true;
+    napi_value previewOptionsNApi = nullptr;
+    napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "previewOptions", &previewOptionsNApi);
+    napi_typeof(asyncCtx->env, previewOptionsNApi, &valueType);
+    if (valueType == napi_object) {
+        napi_value modeNApi = nullptr;
+        napi_get_named_property(asyncCtx->env, previewOptionsNApi, "mode", &modeNApi);
+        napi_typeof(asyncCtx->env, modeNApi, &valueType);
+        if (valueType == napi_number) {
+            int32_t dragPreviewMode = 0;
+            napi_get_value_int32(asyncCtx->env, modeNApi, &dragPreviewMode);
+            asyncCtx->dragPreviewOption.mode = static_cast<NG::DragPreviewMode>(dragPreviewMode);
+        } else if (valueType != napi_undefined) {
+            errMsg = "mode type is wrong";
+            napi_close_handle_scope(asyncCtx->env, scope);
+            return false;
+        }
+
+        napi_value numberBadgeNApi = nullptr;
+        napi_get_named_property(asyncCtx->env, previewOptionsNApi, "numberBadge", &numberBadgeNApi);
+        napi_typeof(asyncCtx->env, numberBadgeNApi, &valueType);
+        if (valueType == napi_number) {
+            asyncCtx->dragPreviewOption.isNumber = true;
+            napi_get_value_int32(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.badgeNumber);
+        } else if (valueType == napi_boolean) {
+            asyncCtx->dragPreviewOption.isNumber = false;
+            napi_get_value_bool(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.isShowBadge);
+        } else if (valueType != napi_undefined) {
+            errMsg = "numberBadge type is wrong.";
+            napi_close_handle_scope(asyncCtx->env, scope);
+            return false;
+        }
+    } else if (valueType != napi_undefined) {
+        errMsg = "previewOptions type is wrong";
+        napi_close_handle_scope(asyncCtx->env, scope);
+        return false;
+    }
+    napi_close_handle_scope(asyncCtx->env, scope);
+    return true;
+}
+
 bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
@@ -1155,13 +1207,10 @@ bool ParseDragInfoParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
         return false;
     }
 
-    napi_value previewOptionsNApi = nullptr;
-    napi_get_named_property(asyncCtx->env, asyncCtx->argv[1], "previewOptions", &previewOptionsNApi);
-    
-    napi_value modeNApi = nullptr;
-    napi_get_named_property(asyncCtx->env, previewOptionsNApi, "mode", &modeNApi);
-    int32_t dragviewMode = 0;
-    napi_get_value_int32(asyncCtx->env, modeNApi, &dragviewMode);
+    if (!ParsePreviewOptions(asyncCtx, valueType, errMsg)) {
+        return false;
+    }
+
     asyncCtx->hasTouchPoint = ParseTouchPoint(asyncCtx, valueType);
     return true;
 }
@@ -1421,6 +1470,29 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
 }
 #endif
 
+// The default empty implementation function setForegroundColor for dragPreview.
+static napi_value JsDragPreviewSetForegroundColor(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
+// The default empty implementation function animate for dragPreview.
+static napi_value JsDragPreviewAnimate(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
+// The default empty constructor for dragPreview.
+static napi_value DragPreviewConstructor(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+    napi_value global = nullptr;
+    napi_get_global(env, &global);
+    return thisArg;
+}
+
 static napi_value DragControllerExport(napi_env env, napi_value exports)
 {
     napi_value dragStatus = nullptr;
@@ -1431,11 +1503,20 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
     napi_create_uint32(env, DRAG_ENDED, &prop);
     napi_set_named_property(env, dragStatus, "ENDED", prop);
 
+    napi_property_descriptor dragPreviewDesc[] = {
+        DECLARE_NAPI_FUNCTION("setForegroundColor", JsDragPreviewSetForegroundColor),
+        DECLARE_NAPI_FUNCTION("animate", JsDragPreviewAnimate),
+    };
+    napi_value classDragPreview = nullptr;
+    napi_define_class(env, "DragPreview", NAPI_AUTO_LENGTH, DragPreviewConstructor, nullptr,
+        sizeof(dragPreviewDesc) / sizeof(*dragPreviewDesc), dragPreviewDesc, &classDragPreview);
+
     napi_property_descriptor dragControllerDesc[] = {
         DECLARE_NAPI_FUNCTION("executeDrag", JSExecuteDrag),
         DECLARE_NAPI_FUNCTION("getDragPreview", JSGetDragPreview),
         DECLARE_NAPI_FUNCTION("createDragAction", JSCreateDragAction),
         DECLARE_NAPI_PROPERTY("DragStatus", dragStatus),
+        DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };
     NAPI_CALL(env, napi_define_properties(
                        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));

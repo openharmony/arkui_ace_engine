@@ -45,6 +45,7 @@ const std::string SHORT_CUT_VALUE_Z = "Z";
 const std::string SHORT_CUT_VALUE_A = "A";
 const std::string SHORT_CUT_VALUE_C = "C";
 const std::string SHORT_CUT_VALUE_V = "V";
+const std::string SHORT_CUT_VALUE_TAB = "TAB";
 enum class CtrlKeysBit {
     CTRL = 1,
     SHIFT = 2,
@@ -1195,6 +1196,9 @@ bool EventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t ke
     }
     if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT))) &&
         value == SHORT_CUT_VALUE_Z) {
+        return true;
+    }
+    if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::SHIFT))) && value == SHORT_CUT_VALUE_TAB) {
         return true;
     }
     return false;

@@ -551,7 +551,7 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             }
         }
     }
-    return {};
+    return { .itemIdx = 0, .y = 0, .x = 0 };
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
@@ -591,5 +591,39 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
         }
     }
     gridMatrix_.erase(it, gridMatrix_.end());
+}
+
+float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap) const
+{
+    float len = 0.0f;
+    float offset = currentOffset_;
+
+    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
+    for (auto it = lineHeightMap_.find(startMainLineIndex_); it != endIt; ++it) {
+        // skip adding starting lines that are outside viewport in LayoutIrregular
+        if (Negative(it->second + offset + mainGap)) {
+            offset += it->second + mainGap;
+            continue;
+        }
+        len += it->second + mainGap;
+    }
+    return len - mainGap;
+}
+
+float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView,  float mainGap) const
+{
+    if (lineHeightMap_.empty() || endMainLineIndex_ < lineHeightMap_.rbegin()->first) {
+        return mainSize;
+    }
+
+    float offset = currentOffset_;
+    // currentOffset_ is relative to startMainLine, which might be entirely above viewport
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    while (it != lineHeightMap_.end() && Negative(offset + it->second + mainGap)) {
+        offset += it->second + mainGap;
+        ++it;
+    }
+    float bottomPos = offset + heightInView;
+    return bottomPos - mainSize;
 }
 } // namespace OHOS::Ace::NG

@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 
 class AttachmentImage {};
 
-enum class SpanType { Font = 0, Decoration, Background, Gesture = 7 };
+enum class SpanType { Font = 0, Decoration, BaselineOffset, LetterSpacing, TextShadow = 4, Gesture = 7, MAX = 8 };
 
 enum class SpanOperation {
     ADD = 0,
@@ -98,6 +98,70 @@ private:
     Font font_;
 };
 
+class DecorationSpan : public SpanBase {
+    DECLARE_ACE_TYPE(DecorationSpan, SpanBase);
+
+public:
+    DecorationSpan() = default;
+    explicit DecorationSpan(TextDecoration type, std::optional<Color> color);
+    DecorationSpan(TextDecoration type, std::optional<Color> color, int32_t start, int32_t end);
+    TextDecoration GetTextDecorationType() const;
+    std::optional<Color> GetColor() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem);
+
+    TextDecoration type_;
+    std::optional<Color> color_;
+};
+
+class BaselineOffsetSpan : public SpanBase {
+    DECLARE_ACE_TYPE(BaselineOffsetSpan, SpanBase);
+
+public:
+    BaselineOffsetSpan() = default;
+    explicit BaselineOffsetSpan(Dimension baselineOffset);
+    BaselineOffsetSpan(Dimension baselineOffset, int32_t start, int32_t end);
+    Dimension GetBaselineOffset() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem);
+    Dimension baselineOffset_;
+};
+
+class LetterSpacingSpan : public SpanBase {
+    DECLARE_ACE_TYPE(LetterSpacingSpan, SpanBase);
+
+public:
+    LetterSpacingSpan() = default;
+    explicit LetterSpacingSpan(Dimension letterSpacing);
+    LetterSpacingSpan(Dimension letterSpacing, int32_t start, int32_t end);
+    Dimension GetLetterSpacing() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddLetterSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveLetterSpacingStyle(const RefPtr<NG::SpanItem>& spanItem);
+
+    Dimension letterSpacing_;
+};
+
 class GestureSpan : public SpanBase {
     DECLARE_ACE_TYPE(GestureSpan, SpanBase);
 
@@ -118,6 +182,27 @@ private:
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
 
     GestureStyle gestureInfo_;
+};
+
+class TextShadowSpan : public SpanBase {
+    DECLARE_ACE_TYPE(TextShadowSpan, SpanBase);
+public:
+    TextShadowSpan() = default;
+    explicit TextShadowSpan(std::vector<Shadow> font);
+    TextShadowSpan(std::vector<Shadow> font, int32_t start, int32_t end);
+    std::vector<Shadow> GetTextShadow() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+    static RefPtr<SpanBase> CreateDefaultSpan();
+
+private:
+    void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
+
+    std::optional<std::vector<Shadow>> textShadow_ = std::nullopt;
 };
 
 } // namespace OHOS::Ace

@@ -142,6 +142,8 @@ public:
 
     virtual void HandleSelect(CaretMoveIntent direction) {}
 
+    virtual void HandleSelectFontStyle(KeyCode code) {}
+
     virtual void HandleOnSelectAll() {}
 
     virtual void HandleOnEnter() {}
@@ -159,6 +161,11 @@ public:
     virtual void HandleOnRedoAction() {}
 
     virtual void HandleOnDelete(bool backward) {}
+
+    virtual bool HandleOnDeleteComb(bool backward)
+    {
+        return false;
+    }
 
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 

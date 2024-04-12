@@ -53,9 +53,6 @@ class XComponentPattern : public Pattern {
 
 public:
     XComponentPattern() = default;
-    XComponentPattern(const std::string& id, XComponentType type,
-        const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
-        float initHeight = 0.0f);
     XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
         float initHeight = 0.0f);

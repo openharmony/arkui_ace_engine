@@ -36,6 +36,7 @@ public:
 class JSList : public JSScrollableBase {
 public:
     static void JSBind(BindingTarget globalObj);
+    static void BindInteractableViewMethods();
     static void SetScroller(RefPtr<JSScroller> scroller);
     static void Create(const JSCallbackInfo& args);
 
@@ -63,6 +64,7 @@ public:
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetChainAnimation(bool enableChainAnimation);
     static void SetChainAnimationOptions(const JSCallbackInfo& info);
+    static void SetChildrenMainSize(const JSCallbackInfo& args);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);
@@ -79,6 +81,7 @@ public:
     static void ItemDragMoveCallback(const JSCallbackInfo& info);
     static void ItemDragLeaveCallback(const JSCallbackInfo& info);
     static void ItemDropCallback(const JSCallbackInfo& info);
+    static void SetFadingEdge(bool fadingEdge);
     static void SetListItemIndex(JSRef<JSObject> listItemInfo, ListItemIndex indexInfo);
 };
 

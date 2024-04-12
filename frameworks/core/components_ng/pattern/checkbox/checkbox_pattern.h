@@ -86,6 +86,7 @@ public:
             checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         }
         checkboxModifier_->SetCheckboxStyle(checkboxStyle);
+        checkboxModifier_->SetHasBuilder(builder_.has_value());
         host->SetCheckboxFlag(true);
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
         auto eventHub = host->GetEventHub<EventHub>();
@@ -171,6 +172,11 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
+    void SetIndicatorBuilder(const std::optional<std::function<void()>>& buildFunc)
+    {
+        builder_ = buildFunc.value_or(nullptr);
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
@@ -221,6 +227,12 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
     void CheckPageNode();
+    void StartCustomNodeAnimation(bool select);
+    void LoadBuilder();
+    void UpdateIndicator();
+    void SetBuilderNodeHidden();
+    void StartEnterAnimation();
+    void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
@@ -271,6 +283,9 @@ private:
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
+    RefPtr<FrameNode> builderNode_;
+    std::optional<std::function<void()>> builder_;
+
     RefPtr<CheckBoxModifier> checkboxModifier_;
     WeakPtr<GroupManager> groupManager_;
 

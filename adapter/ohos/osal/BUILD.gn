@@ -141,6 +141,7 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "drawing_color_filter_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_packer_ohos.cpp",
       "image_source_ohos.cpp",
@@ -155,6 +156,8 @@ template("ace_osal_ohos_source_set") {
       "ability_runtime:app_manager",
       "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_core",
+      "graphic_2d:2d_graphics",
+      "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",

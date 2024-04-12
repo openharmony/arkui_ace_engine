@@ -25,6 +25,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -115,6 +116,9 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
     if (!curRecognizer) {
+        if (point.type == TouchType::DOWN) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "SequencedRecognizer curRecognizer is invalid");
+        }
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return true;
     }

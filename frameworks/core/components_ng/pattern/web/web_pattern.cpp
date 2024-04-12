@@ -59,6 +59,8 @@ namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
+constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
+constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -363,6 +365,13 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->touchEventInfo_ = info;
         pattern->isMouseEvent_ = false;
         const auto& changedPoint = info.GetChangedTouches().front();
+        if (changedPoint.GetTouchType() == TouchType::DOWN ||
+            changedPoint.GetTouchType() == TouchType::UP) {
+            if (pattern->touchEventQueue_.size() < TOUCH_EVENT_MAX_SIZE) {
+                pattern->touchEventQueue_.push(info);
+            }
+        }
+
         if (changedPoint.GetTouchType() == TouchType::DOWN) {
             pattern->HandleTouchDown(info, false);
             return;
@@ -2391,13 +2400,16 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             UpdateTouchHandleForOverlay();
         } else {
             UpdateSelectHandleInfo();
+            if (!IsSelectOverlayDragging()) {
+                UpdateTouchHandleForOverlay();
+            }
         }
     }
 }
 
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
 {
-    (void)info;
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowId = pipeline->GetWindowId();
@@ -2406,8 +2418,11 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
     if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) == -1) {
         return false;
     }
+
     if ((type == OHOS::NWeb::CursorType::CT_CONTEXTMENU) || (type == OHOS::NWeb::CursorType::CT_ALIAS)) {
         UpdateLocalCursorStyle(windowId, type);
+    } else if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
+        UpdateCustomCursor(windowId, info);
     } else {
         MouseFormat pointStyle = MouseFormat::DEFAULT;
         int64_t idx = BinarySearchFindIndex(g_cursorTypeMap, ArraySize(g_cursorTypeMap), type);
@@ -2435,6 +2450,27 @@ void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::Curs
         pixelMap = CreatePixelMapFromString(IMAGE_POINTER_ALIAS_PATH);
         mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
     }
+}
+
+void WebPattern::UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info)
+{
+    Media::InitializationOptions opt;
+    opt.size.width = info.width;
+    opt.size.height = info.height;
+    opt.editable = true;
+    auto pixelMap = Media::PixelMap::Create(opt);
+    CHECK_NULL_VOID(pixelMap);
+    uint64_t bufferSize = info.width * info.height * IMAGE_POINTER_CUSTOM_CHANNEL;
+    uint32_t status = pixelMap->WritePixels(static_cast<const uint8_t*>(info.buff), bufferSize);
+    if (status != 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "write pixel map failed %{public}u", status);
+        return;
+    }
+    std::shared_ptr<Media::PixelMap> cursorPixelMap(pixelMap.release());
+    CHECK_NULL_VOID(cursorPixelMap);
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+    mouseStyle->SetCustomCursor(windowId, info.x, info.y, cursorPixelMap);
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)
@@ -3008,6 +3044,7 @@ bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, fl
         float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
         parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
         return true;
     }
@@ -3187,12 +3224,9 @@ void WebPattern::ReleaseResizeHold()
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     if (isNeedUpdateScrollAxis_) {
-        expectedScrollAxis_ = GetAxis();
-        if (parentsMap_.size() > 1) {
-            expectedScrollAxis_ = (x != 0 || y != 0)
-                ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
-                : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
-        }
+        expectedScrollAxis_ = (x != 0 || y != 0)
+            ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
+            : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
         isNeedUpdateScrollAxis_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,"WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
             "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
@@ -3514,6 +3548,11 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
     CHECK_NULL_VOID(host);
     auto offset = host->GetOffsetRelativeToWindow();
     touchEventInfo = touchEventInfo_;
+    if ((touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) &&
+        !touchEventQueue_.empty()) {
+        touchEventInfo = touchEventQueue_.front();
+        touchEventQueue_.pop();
+    }
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
@@ -3532,6 +3571,10 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        if (!visible && !NearZero(ratio)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "Fiterate not visible when ratio=%{public}f", ratio);
+            return;
+        }
         webPattern->OnVisibleAreaChange(visible);
     };
     std::vector<double> ratioList = {0.0, 1.0};

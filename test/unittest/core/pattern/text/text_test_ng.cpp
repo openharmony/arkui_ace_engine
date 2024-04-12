@@ -3721,12 +3721,17 @@ HWTEST_F(TextTestNg, HandleOnCopy001, TestSize.Level1)
      * @tc.steps: step3. call HandleOnCopy function when textSelector is not valid and textStart < 0
      * @tc.expected: selectOverlay is closed
      */
-    std::vector<std::vector<int32_t>> params = { { 2, 2 }, { -1, 20 } };
+    std::vector<std::vector<int32_t>> params = { { 2, 2 }, { 1, 20 } };
     for (int turn = 0; turn < params.size(); turn++) {
         pattern->textSelector_.Update(params[turn][0], params[turn][1]);
         pattern->HandleOnCopy();
-        EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
-        EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+        if (turn == 0) {
+            EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+            EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+        } else {
+            EXPECT_EQ(pattern->textSelector_.GetTextStart(), 1);
+            EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+        }
     }
 }
 
@@ -6055,11 +6060,35 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. test CreateNodePaintMethod.
-     * @tc.expect: RenderContext ClipEdge is true, expect gestureHub ResponseRegion list is empty.
+     * @tc.expect: RenderContext ClipEdge is true, expect gestureHub ResponseRegion equal to content size.
      */
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     pattern->CreateNodePaintMethod();
-    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
+    EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
+
+    auto geometryNode = frameNode->GetGeometryNode();
+    auto frameSize = geometryNode->GetFrameSize();
+    auto responseRegion = gestureHub->GetResponseRegion().front();
+
+    EXPECT_EQ(responseRegion.GetWidth().Value(), frameSize.Width());
+    EXPECT_EQ(responseRegion.GetHeight().Value(), 80.0);
+
+    /**
+     * @tc.steps: step3. test CreateNodePaintMethod.
+     * @tc.expect: RenderContext ClipEdge is false, expect gestureHub ResponseRegion equal to framesize.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateClipEdge(true);
+    pattern->CreateNodePaintMethod();
+    EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
+
+    frameSize = geometryNode->GetFrameSize();
+    responseRegion = gestureHub->GetResponseRegion().front();
+
+    EXPECT_EQ(responseRegion.GetWidth().Value(), frameSize.Width());
+    EXPECT_EQ(responseRegion.GetHeight().Value(), frameSize.Height());
+    EXPECT_EQ(responseRegion.GetWidth().Value(), 240.0);
+    EXPECT_EQ(responseRegion.GetHeight().Value(), 60.0);
 }
 
 /**

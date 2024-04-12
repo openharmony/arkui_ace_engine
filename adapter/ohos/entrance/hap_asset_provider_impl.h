@@ -37,6 +37,7 @@ public:
 
     bool Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths, bool useCache = true);
     std::unique_ptr<AssetMapping> GetAsMapping(const std::string& assetName) const override;
+    std::vector<std::unique_ptr<AssetMapping>> GetAsMappingFromI18n(const std::string& assetName) const override;
     bool IsValid() const override;
     std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;

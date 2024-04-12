@@ -260,9 +260,10 @@ void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
     }
 }
 
-void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
+void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode, bool firstBind)
 {
-    if (OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
+    if (OHOS::Ace::SystemProperties::GetAtomicServiceBundleName().empty() &&
+        OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName().empty()) {
         LOGE("UIExtension BundleName is empty.");
         return;
     }
@@ -279,39 +280,51 @@ void AppBarView::BindContentCover(const RefPtr<FrameNode>& targetNode)
     }
     NG::ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
-    auto buildNodeFunc = [targetNode, overlayManager, modalStyle, stageAbilityName]() -> RefPtr<UINode> {
+    auto buildNodeFunc = [targetNode, overlayManager, modalStyle, stageAbilityName, firstBind]() -> RefPtr<UINode> {
         auto onRelease = [overlayManager, modalStyle, targetNode](int32_t releaseCode) {
             auto style = modalStyle;
-            overlayManager->BindContentCover(false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr,
-                ContentCoverParam(), targetNode);
+            overlayManager->BindContentCover(
+                false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr, ContentCoverParam(), targetNode);
         };
-        auto onError = [overlayManager, modalStyle, targetNode](
+        auto onError = [overlayManager, modalStyle, targetNode, firstBind](
                            int32_t code, const std::string& name, const std::string& message) {
             auto style = modalStyle;
-            overlayManager->BindContentCover(false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr,
-                ContentCoverParam(), targetNode);
+            overlayManager->BindContentCover(
+                false, nullptr, nullptr, style, nullptr, nullptr, nullptr, nullptr, ContentCoverParam(), targetNode);
+            // if pull up new service panel failed, try to pull up the old one.
+            if (firstBind) {
+                BindContentCover(targetNode, false);
+            }
         };
-
         // Create parameters of UIExtension.
         std::map<std::string, std::string> params = CreateUIExtensionParams();
 
         // Create UIExtension node.
-        auto appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
+        auto appGalleryBundleName = OHOS::Ace::SystemProperties::GetAtomicServiceBundleName();
+        if (!firstBind) {
+            appGalleryBundleName = OHOS::Ace::AppBarHelper::QueryAppGalleryBundleName();
+            params.erase("ability.want.params.uiExtensionType");
+            params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
+        }
         auto uiExtNode = OHOS::Ace::AppBarHelper::CreateUIExtensionNode(
             appGalleryBundleName, stageAbilityName, params, std::move(onRelease), std::move(onError));
         LOGI("UIExtension BundleName: %{public}s, AbilityName: %{public}s", appGalleryBundleName.c_str(),
             stageAbilityName.c_str());
-
-        // Update ideal size of UIExtension.
-        auto layoutProperty = uiExtNode->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProperty, uiExtNode);
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(Dimension(1.0, DimensionUnit::PERCENT))));
-        uiExtNode->MarkModifyDone();
+        InitUIExtensionNode(uiExtNode);
         return uiExtNode;
     };
     overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr,
         nullptr, ContentCoverParam(), targetNode);
+}
+
+void AppBarView::InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode)
+{
+    CHECK_NULL_VOID(uiExtNode);
+    // Update ideal size of UIExtension.
+    auto layoutProperty = uiExtNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(
+        CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(Dimension(1.0, DimensionUnit::PERCENT))));
+    uiExtNode->MarkModifyDone();
 }
 
 std::map<std::string, std::string> AppBarView::CreateUIExtensionParams()
@@ -324,7 +337,7 @@ std::map<std::string, std::string> AppBarView::CreateUIExtensionParams()
     if (missionId != -1) {
         params.try_emplace("missionId", std::to_string(missionId));
     }
-    params.try_emplace("ability.want.params.uiExtensionType", "sys/commonUI");
+    params.try_emplace("ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel");
     LOGI("BundleName: %{public}s, AbilityName: %{public}s, Module: %{public}s",
         AceApplicationInfo::GetInstance().GetProcessName().c_str(),
         AceApplicationInfo::GetInstance().GetAbilityName().c_str(), Container::Current()->GetModuleName().c_str());

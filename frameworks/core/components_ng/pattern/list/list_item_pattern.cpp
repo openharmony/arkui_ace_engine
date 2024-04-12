@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float SWIPER_TH = 0.25f;
 constexpr float SWIPER_SPEED_TH = 1200.f;
-constexpr float SWIPE_RATIO = 1.848f;
+constexpr float SWIPE_RATIO = 0.6f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
@@ -123,6 +123,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
         }
     } else if (HasStartNode()) {
         host->RemoveChildAtIndex(startNodeIndex_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (endNodeIndex_ > startNodeIndex_) {
             endNodeIndex_--;
         }
@@ -153,6 +154,7 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
         }
     } else if (HasEndNode()) {
         host->RemoveChildAtIndex(endNodeIndex_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (startNodeIndex_ > endNodeIndex_) {
             startNodeIndex_--;
         }
@@ -201,30 +203,14 @@ void ListItemPattern::SetSwiperItemForList()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItem(AceType::WeakClaim(this));
-    auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
-        auto item = weak.Upgrade();
-        CHECK_NULL_RETURN(item, true);
-        auto host = item->GetHost();
-        CHECK_NULL_RETURN(host, true);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, true);
-        auto offset = geometryNode->GetMarginFrameOffset();
-        auto size = geometryNode->GetMarginFrameSize();
-        double xOffset = static_cast<double>(localPoint.GetX()) - offset.GetX();
-        double yOffset = static_cast<double>(localPoint.GetY()) - offset.GetY();
-        if (yOffset > 0 && yOffset < size.Height()) {
-            if (item->startNodeSize_ && xOffset > 0 && xOffset < item->startNodeSize_) {
-                return false;
-            }
-            if (item->endNodeSize_ && xOffset > size.Width() - item->endNodeSize_ && xOffset < size.Width()) {
-                return false;
-            }
-        }
-        return true;
-    };
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto scrollableEvent = listPattern->GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
+        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
+            auto item = weak.Upgrade();
+            CHECK_NULL_RETURN(item, true);
+            return item->ClickJudge(localPoint);
+        };
         scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
     }
 }
@@ -384,7 +370,11 @@ float ListItemPattern::CalculateFriction(float gamma)
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
-    return exp(-ratio * gamma);
+    float result = ratio * std::pow(1.0 - gamma, SQUARE);
+    if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
+        return result;
+    }
+    return 1.0f;
 }
 
 float ListItemPattern::GetFriction()
@@ -978,6 +968,36 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, estimateHeight);
     return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis);
+}
+
+bool ListItemPattern::ClickJudge(const PointF& localPoint)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    auto offset = geometryNode->GetMarginFrameOffset();
+    auto size = geometryNode->GetMarginFrameSize();
+    auto xOffset = localPoint.GetX() - offset.GetX();
+    auto yOffset = localPoint.GetY() - offset.GetY();
+    if (GetAxis() == Axis::VERTICAL) {
+        if (yOffset > 0 && yOffset < size.Height()) {
+            if (startNodeSize_ && xOffset > 0 && xOffset < startNodeSize_) {
+                return false;
+            } else if (endNodeSize_ && xOffset > size.Width() - endNodeSize_ && xOffset < size.Width()) {
+                return false;
+            }
+        }
+    } else {
+        if (xOffset > 0 && xOffset < size.Width()) {
+            if (startNodeSize_ && yOffset > 0 && yOffset < startNodeSize_) {
+                return false;
+            } else if (endNodeSize_ && yOffset > size.Height() - endNodeSize_ && yOffset < size.Height()) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
 

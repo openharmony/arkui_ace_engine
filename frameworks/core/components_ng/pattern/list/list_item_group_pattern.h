@@ -20,9 +20,11 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -191,6 +193,10 @@ public:
         }
     }
 
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
+    void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
+    bool ListChildrenSizeExist();
+    RefPtr<FrameNode> GetListFrameNode() const;
     VisibleContentInfo GetStartListItemIndex();
     VisibleContentInfo GetEndListItemIndex();
 
@@ -205,6 +211,8 @@ private:
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     void CheckListDirectionInCardStyle();
     RefPtr<ShallowBuilder> shallowBuilder_;
+    RefPtr<ListPositionMap> posMap_;
+    RefPtr<ListChildrenMainSize> childrenSize_;
     V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
 
     int32_t indexInList_ = 0;

@@ -102,6 +102,7 @@ struct ForegroundProperty {
     }
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundEffect, float);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 
@@ -150,6 +151,7 @@ struct BorderProperty {
 struct PointLightProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LightPosition, TranslateOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LightIntensity, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LightColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LightIlluminated, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IlluminatedBorderWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Bloom, float);

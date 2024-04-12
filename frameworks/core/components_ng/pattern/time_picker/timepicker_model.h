@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "base/i18n/time_format.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
@@ -40,6 +41,8 @@ public:
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
     virtual void SetHour24(bool isUseMilitaryTime) = 0;
+    virtual void SetDateTimeOptions(ZeroPrefixType& hourType,
+        ZeroPrefixType& minuteType, ZeroPrefixType& secondType) {};
     virtual void SetWheelModeEnabled(bool wheelModeEnabled) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;

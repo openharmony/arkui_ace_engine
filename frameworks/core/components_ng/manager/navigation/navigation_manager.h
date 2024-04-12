@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_NAVIGATION_DUMP_MANAGER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_NAVIGATION_DUMP_MANAGER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_NAVIGATION_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_NAVIGATION_MANAGER_H
 
 #include <cstdint>
 #include <functional>
@@ -23,18 +23,25 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-class NavigationDumpManager : public virtual AceType {
-    DECLARE_ACE_TYPE(NavigationDumpManager, AceType);
+class NavigationManager : public virtual AceType {
+    DECLARE_ACE_TYPE(NavigationManager, AceType);
 public:
     using DumpLogDepth = int;
     using DumpCallback = std::function<void(DumpLogDepth)>;
-    NavigationDumpManager() = default;
-    ~NavigationDumpManager() = default;
+    NavigationManager() = default;
+    ~NavigationManager() = default;
 
     void AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback);
     void RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth);
 
     void OnDumpInfo();
+
+    void AddNavigationUpdateCallback(std::function<void()> callback)
+    {
+        updateCallbacks_.emplace_back(callback);
+    }
+
+    void FireNavigationUpdateCallback();
 
 private:
     struct DumpMapKey {
@@ -51,7 +58,8 @@ private:
         }
     };
     std::map<DumpMapKey, DumpCallback> dumpMap_;
+    std::vector<std::function<void()>> updateCallbacks_;
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_NAVIGATION_DUMP_MANAGER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_NAVIGATION_MANAGER_H

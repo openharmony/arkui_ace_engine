@@ -27,6 +27,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/render/drawing_forward.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
@@ -122,6 +123,16 @@ public:
         return smoothEdge_;
     }
 
+    void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
+    {
+        colorFilter_ = colorFilter;
+    }
+
+    std::optional<ImageColorFilter> GetColorFilter() const
+    {
+        return colorFilter_;
+    }
+
     RefPtr<SvgBaseDeclaration> GetDeclaration()
     {
         return declaration_;
@@ -186,6 +197,7 @@ protected:
     std::string hrefFilterId_;
     uint8_t opacity_ = 0xFF;
     float smoothEdge_ = 0.0f;
+    std::optional<ImageColorFilter> colorFilter_;
 
     bool hrefFill_ = true;   // get fill attributes from reference
     bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference
