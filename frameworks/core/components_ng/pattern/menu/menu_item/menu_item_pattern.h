@@ -178,6 +178,7 @@ protected:
 
 private:
     // register menu item's callback
+    void InitFocusEvent();
     void RegisterOnClick();
     void RegisterOnHover();
     virtual void OnTouch(const TouchEventInfo& info);
@@ -189,6 +190,8 @@ private:
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty);
+    bool IsTextFadeOut();
 
     bool IsDisabled();
     void UpdateDisabledStyle();
@@ -210,6 +213,7 @@ private:
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
+    bool isTextFadeOut_ = false;
     bool isSelected_ = false;
     bool isSubMenuShowed_ = false;
     bool isSubMenuHovered_ = false;
