@@ -746,9 +746,9 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset003, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, -10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 0.f);
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 20.f);
 }
 
 /**
@@ -765,9 +765,9 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, -10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 0.f);
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 20.f);
 }
 
 /**
