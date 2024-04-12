@@ -557,7 +557,7 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
     if (hasMultiLineItem_) {
-        ClearMapsToEndContainsMultiLineItem(idx);
+        ClearMapsToEndContainsMultiLineItem(idx - 1);
         return;
     }
     auto gridIt = gridMatrix_.lower_bound(idx);
@@ -573,7 +573,7 @@ void GridLayoutInfo::ClearMapsToEndContainsMultiLineItem(int32_t idx)
     }
 
     int targetLine = idx;
-    while (targetLine < gridMatrix_.rbegin()->first - 1) {
+    while (targetLine < gridMatrix_.rbegin()->first) {
         int32_t minIndex = INT_MAX;
         for (const auto& col : gridMatrix_[targetLine + 1]) {
             minIndex = std::min(minIndex, col.second);
