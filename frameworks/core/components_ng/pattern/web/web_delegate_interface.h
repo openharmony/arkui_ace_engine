@@ -114,8 +114,8 @@ public:
     virtual int GetWebId() = 0;
     virtual void DragResize(const double& width,
                             const double& height,
-                            const double& pre_height,
-                            const double& pre_width) = 0;
+                            const double& preHeight,
+                            const double& preWidth) = 0;
 };
 }
 #endif
