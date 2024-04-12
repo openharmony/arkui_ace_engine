@@ -64,7 +64,9 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
         int32_t res = 1;
 #ifdef SECURITY_COMPONENT_ENABLE
         res = ReportSecurityComponentClickEvent(event);
-        if (res != 0) {
+        if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
+            res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
+        } else if (res != 0) {
             LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
             res = 1;
         }
@@ -133,6 +135,10 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     gestureInfo.SetDisplayY(item.GetDisplayY());
     gestureInfo.SetPointerEvent(info.GetPointerEvent());
     int res = ReportSecurityComponentClickEvent(gestureInfo);
+    if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
+        LOGI("wait for dialog, drop current click");
+        return;
+    }
     if (res != 0) {
         LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
         res = 1;
