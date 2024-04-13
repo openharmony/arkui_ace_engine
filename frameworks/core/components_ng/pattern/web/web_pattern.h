@@ -578,7 +578,6 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
-    void UpdateRelativeOffset();
     void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(bool isNeedReset);
     void CalculateVerticalDrawRect(bool isNeedReset);
@@ -721,8 +720,7 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
-    bool isParentHasScroll_ = false;
-    OffsetF relativeOffsetOfScroll_;
+    OffsetF fitContentOffset_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;

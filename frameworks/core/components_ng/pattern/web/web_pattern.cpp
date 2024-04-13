@@ -3340,31 +3340,6 @@ void WebPattern::UpdateFlingReachEdgeState(const float value, bool status)
     }
 }
 
-void WebPattern::UpdateRelativeOffset()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (isParentHasScroll_) {
-        relativeOffsetOfScroll_.Reset();
-    }
-    relativeOffsetOfScroll_ += host->GetGeometryNode()->GetFrameOffset();
-    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
-        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
-            continue;
-        }
-        bool hasTargetParent =
-            std::find(SYNC_RENDER_SLIDE.begin(), SYNC_RENDER_SLIDE.end(), parent->GetTag()) == SYNC_RENDER_SLIDE.end();
-        if (hasTargetParent) {
-            relativeOffsetOfScroll_ += frameNode->GetGeometryNode()->GetFrameOffset();
-            continue;
-        }
-        isParentHasScroll_ = true;
-        return;
-    }
-    isParentHasScroll_ = false;
-}
-
 void WebPattern::InitSlideUpdateListener()
 {
     std::shared_ptr<SlideUpdateListener> listener = std::make_shared<SlideUpdateListener>();
@@ -3399,7 +3374,6 @@ void WebPattern::InitSlideUpdateListener()
 
 void WebPattern::UpdateSlideOffset(bool isNeedReset)
 {
-    UpdateRelativeOffset();
     switch (syncAxis_) {
         case Axis::HORIZONTAL:
             CalculateHorizontalDrawRect(isNeedReset);
@@ -3414,14 +3388,15 @@ void WebPattern::UpdateSlideOffset(bool isNeedReset)
 
 void WebPattern::CalculateHorizontalDrawRect(bool isNeedReset)
 {
+    fitContentOffset_ = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetX());
-    if (relativeOffsetOfScroll_.GetX() >= 0) {
+    renderSurface_->SetWebOffset(fitContentOffset_.GetX());
+    if (fitContentOffset_.GetX() >= 0) {
         isNeedReDrawRect_ = false;
         return;
     }
 
-    int32_t stepGear = (-relativeOffsetOfScroll_.GetX()) / ADJUST_WEB_DRAW_LENGTH;
+    int32_t stepGear = (-fitContentOffset_.GetX()) / ADJUST_WEB_DRAW_LENGTH;
     int32_t width = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
     int32_t height = std::min(static_cast<int32_t>(drawSize_.Height()), FIT_CONTENT_LIMIT_LENGTH);
     int32_t x = ADJUST_WEB_DRAW_LENGTH * stepGear;
@@ -3435,14 +3410,15 @@ void WebPattern::CalculateHorizontalDrawRect(bool isNeedReset)
 
 void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
 {
+    fitContentOffset_ = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->SetWebOffset(relativeOffsetOfScroll_.GetY());
-    if (relativeOffsetOfScroll_.GetY() >= 0) {
+    renderSurface_->SetWebOffset(fitContentOffset_.GetY());
+    if (fitContentOffset_.GetY() >= 0) {
         isNeedReDrawRect_ = false;
         return;
     }
 
-    int32_t stepGear = (-relativeOffsetOfScroll_.GetY()) / ADJUST_WEB_DRAW_LENGTH;
+    int32_t stepGear = (-fitContentOffset_.GetY()) / ADJUST_WEB_DRAW_LENGTH;
     int32_t width = std::min(static_cast<int32_t>(drawSize_.Width()), FIT_CONTENT_LIMIT_LENGTH);
     int32_t height = ADJUST_WEB_DRAW_LENGTH * 2 + stepGear;
     int32_t x = 0;
