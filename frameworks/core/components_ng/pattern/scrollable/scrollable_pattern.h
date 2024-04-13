@@ -515,6 +515,8 @@ public:
         return nullptr;
     }
 
+    void CheckRestartSpring(bool sizeDiminished);
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const

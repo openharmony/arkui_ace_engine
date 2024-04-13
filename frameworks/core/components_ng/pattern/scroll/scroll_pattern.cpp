@@ -133,6 +133,9 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     CheckScrollToEdge(oldScrollableDistance, scrollableDistance_);
+    if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
+        CheckRestartSpring(true);
+    }
     auto axis = GetAxis();
     auto oldMainSize = GetMainAxisSize(viewPort_, axis);
     auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
