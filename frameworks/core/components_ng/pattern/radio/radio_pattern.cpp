@@ -825,6 +825,12 @@ void RadioPattern::HandleEnabled()
     auto enabled = eventHub->IsEnabled();
     if (enabled_ != enabled) {
         enabled_ = enabled;
+        if (!enabled_) {
+            if (!radioModifier_) {
+                radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+            }
+            radioModifier_->SetUIStatus(UIStatus::UNSELECTED);
+        }
         auto paintProperty = GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
