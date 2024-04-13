@@ -38,6 +38,7 @@ namespace OHOS::Ace::NG {
         }
 
         if (needBuild) {
+            RecycleItemsOutOfBoundary();
             ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             std::pair<std::string, RefPtr<UINode>> itemInfo;
             if (useNewInterface_) {
@@ -567,5 +568,18 @@ namespace OHOS::Ace::NG {
             }
             cachedItems_.erase(index);
         }
+    }
+
+    void LazyForEachBuilder::RecordOutOfBoundaryNodes(int32_t index)
+    {
+        outOfBoundaryNodes_.emplace_back(index);
+    }
+
+    void LazyForEachBuilder::RecycleItemsOutOfBoundary()
+    {
+        for (const auto& i: outOfBoundaryNodes_) {
+            RecycleChildByIndex(i);
+        }
+        outOfBoundaryNodes_.clear();
     }
 }

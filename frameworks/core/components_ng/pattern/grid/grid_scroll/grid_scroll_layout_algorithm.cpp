@@ -41,8 +41,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(gridLayoutProperty);
 
     // Pre-recycle
-    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_, gridLayoutInfo_.currentOffset_,
-                                               gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, layoutWrapper);
+    ScrollableUtils::RecycleItemsOutOfBoundary(gridLayoutInfo_.axis_,
+        gridLayoutInfo_.currentOffset_ - gridLayoutInfo_.prevOffset_, gridLayoutInfo_.startIndex_,
+        gridLayoutInfo_.endIndex_, layoutWrapper);
 
     // Step1: Decide size of Grid
     Axis axis = gridLayoutInfo_.axis_;
@@ -201,6 +202,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float prevLineHeight = 0.0f;
     int32_t startIndex = -1;
     int32_t endIndex = -1;
+    if (gridLayoutInfo_.hasMultiLineItem_) {
+        layoutWrapper->RemoveAllChildInRenderTree();
+    }
     LargeItemForwardLineHeight(gridLayoutInfo_.startMainLineIndex_, layoutWrapper);
     for (auto i = gridLayoutInfo_.startMainLineIndex_; i <= gridLayoutInfo_.endMainLineIndex_; i++) {
         const auto& line = gridLayoutInfo_.gridMatrix_.find(i);
@@ -250,7 +254,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
-            if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (gridLayoutInfo_.hasMultiLineItem_ || expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
                 wrapper->Layout();
             } else {
                 SyncGeometry(wrapper);
@@ -265,7 +269,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
-    layoutWrapper->SetActiveChildRange(startIndex, endIndex);
+    if (!gridLayoutInfo_.hasMultiLineItem_) {
+        layoutWrapper->SetActiveChildRange(startIndex, endIndex);
+    }
     gridLayoutInfo_.totalHeightOfItemsInView_ = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
 
     if (SystemProperties::GetGridCacheEnabled()) {
@@ -819,7 +825,9 @@ void GridScrollLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>&
     }
 
     if ((mainSpan > 1) && !hasNormalItem) {
-        cellAveLength_ = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_) / mainSpan, cellAveLength_);
+        cellAveLength_ =
+            std::max((GetMainAxisSize(itemSize, gridLayoutInfo_.axis_) - (mainGap_ * (mainSpan - 1))) / mainSpan,
+                cellAveLength_);
     }
 }
 
@@ -1331,6 +1339,9 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     CHECK_NULL_VOID(itemWrapper);
     AdjustRowColSpan(itemWrapper, layoutWrapper, firstItem);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
+    if (mainSpan > 1) {
+        gridLayoutInfo_.hasMultiLineItem_ = true;
+    }
     auto measureNumber = 0;
     currentMainLineIndex_ = (firstItem == 0 ? 0 : gridLayoutInfo_.startMainLineIndex_) - 1;
     gridLayoutInfo_.endIndex_ = firstItem - 1;
@@ -1530,7 +1541,10 @@ void GridScrollLayoutAlgorithm::CalculateLineHeightForLargeItem(int32_t lineInde
                 break;
             }
             LargeItemLineHeight(itemWrapper, hasNormalItem);
-            gridLayoutInfo_.lineHeightMap_[i] = cellAveLength_;
+            auto line = gridLayoutInfo_.lineHeightMap_.find(i);
+            if (line == gridLayoutInfo_.lineHeightMap_.end() || line->second < cellAveLength_) {
+                gridLayoutInfo_.lineHeightMap_[i] = cellAveLength_;
+            }
         }
     }
 }
@@ -1599,6 +1613,9 @@ int32_t GridScrollLayoutAlgorithm::MeasureNewChild(const SizeF& frameSize, int32
     auto crossCount = static_cast<int32_t>(crossCount_);
     AdjustRowColSpan(childLayoutWrapper, layoutWrapper, itemIndex);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
+    if (mainSpan > 1) {
+        gridLayoutInfo_.hasMultiLineItem_ = true;
+    }
     auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
     auto crossStart = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
     if (crossSpan > crossCount) {

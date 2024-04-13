@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 enum class CheckBoxStyle { CIRCULAR_STYLE = 0, SQUARE_STYLE };
-
+enum class OriginalCheckBoxStyle { CIRCULAR_STYLE = 0, SQUARE_STYLE, NONE };
 class CheckBoxModel {
 public:
     static CheckBoxModel* GetInstance();
@@ -33,6 +33,7 @@ public:
     virtual void SetSelect(bool isSelected);
     virtual void SetSelectedColor(const Color& color);
     virtual void SetUnSelectedColor(const Color& color) {}
+    virtual void SetBuilder(std::optional<std::function<void(void)>>& buildFunc) {};
     virtual void SetCheckMarkColor(const Color& color) {}
     virtual void SetCheckMarkSize(const Dimension& size) {}
     virtual void SetCheckMarkWidth(const Dimension& width) {}

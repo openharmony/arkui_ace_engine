@@ -190,6 +190,9 @@ void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) con
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
+    auto jsonOption = JsonUtil::Create(true);
+    jsonOption->Put("radius",  std::to_string(propForegroundEffect.value()).c_str());
+    json->Put("foregroundEffect", jsonOption);
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const

@@ -602,7 +602,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
 
     DialogProperties properties;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         properties.alignment = DialogAlignment::BOTTOM;
     } else {
         properties.alignment = DialogAlignment::CENTER;
@@ -622,6 +623,12 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             properties.backgroundBlurStyle = blurStyle;
         }
+    }
+
+    auto shadowValue = paramObj->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        properties.shadow = shadow;
     }
     properties.customStyle = false;
     properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));

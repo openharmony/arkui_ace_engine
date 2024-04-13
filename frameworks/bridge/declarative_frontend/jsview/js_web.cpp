@@ -1690,6 +1690,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
+    JSClass<JSWeb>::StaticMethod("enableSmoothDragResize", &JSWeb::EnableSmoothDragResize);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
@@ -1783,7 +1784,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("onOverrideUrlLoading", &JSWeb::OnOverrideUrlLoading);
     JSClass<JSWeb>::StaticMethod("textAutosizing", &JSWeb::TextAutosizing);
-    JSClass<JSWeb>::StaticMethod("enableNativeVideoPlayer", &JSWeb::EnableNativeVideoPlayer);
+    JSClass<JSWeb>::StaticMethod("enableNativeMediaPlayer", &JSWeb::EnableNativeVideoPlayer);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2945,6 +2946,11 @@ void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
+}
+
+void JSWeb::EnableSmoothDragResize(bool isSmoothDragResizeEnabled)
+{
+    WebModel::GetInstance()->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)

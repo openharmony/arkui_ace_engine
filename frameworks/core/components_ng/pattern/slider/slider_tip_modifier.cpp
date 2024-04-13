@@ -56,6 +56,7 @@ SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> 
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_SIZE_MIN_SCALE)),
       opacityScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(BUBBLE_OPACITY_MIN_SCALE)),
       content_(AceType::MakeRefPtr<PropertyString>("")), bubbleVertex_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      sliderGlobalOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       getBubbleVertexFunc_(std::move(getBubbleVertexFunc))
 {
     AttachProperty(tipFlag_);
@@ -64,6 +65,7 @@ SliderTipModifier::SliderTipModifier(std::function<std::pair<OffsetF, float>()> 
     AttachProperty(opacityScale_);
     AttachProperty(content_);
     AttachProperty(bubbleVertex_);
+    AttachProperty(sliderGlobalOffset_);
 }
 
 SliderTipModifier::~SliderTipModifier() {}
@@ -116,7 +118,7 @@ void SliderTipModifier::PaintHorizontalBubble(float vertexOffsetFromBlock, RSPat
     auto arrowHorizonOffset = static_cast<float>(ARROW_HORIZON_OFFSET.ConvertToPx());
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float circularRadius = (bubbleSize_.Height() - arrowSizeHeight) * HALF;
-    if (sliderGlobalOffset_.GetY() + vertex_.GetY() < bubbleSize_.Height()) {
+    if (sliderGlobalOffset_->Get().GetY() + vertex_.GetY() < bubbleSize_.Height()) {
         vertex_.AddY(vertexOffsetFromBlock / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
@@ -154,7 +156,7 @@ void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath&
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
     float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
     float circularRadius = bubbleSize_.Height() * HALF;
-    if (sliderGlobalOffset_.GetX() + vertex_.GetX() < bubbleSize_.Width()) {
+    if (sliderGlobalOffset_->Get().GetX() + vertex_.GetX() < bubbleSize_.Width()) {
         vertex_.AddX(vertexOffsetFromBlock / HALF);
         isMask_ = true;
         path.MoveTo(vertex_.GetX(), vertex_.GetY());
@@ -394,7 +396,7 @@ bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
     RectF rect;
     if (axis_ == Axis::HORIZONTAL) {
         auto maxWidth = std::max(circleSize.Height(), frameSize.Height());
-        if (sliderGlobalOffset_.GetY() + vertex.GetY() < bubbleSize_.Height()) {
+        if (sliderGlobalOffset_->Get().GetY() + vertex.GetY() < bubbleSize_.Height()) {
             rect.SetOffset(OffsetF(-bubbleSize_.Width(), bubbleSize_.Height() + distance));
         } else {
             rect.SetOffset(OffsetF(-bubbleSize_.Width(), -bubbleSize_.Height() - distance));
@@ -403,7 +405,7 @@ bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
             SizeF(contentSize.Width() + bubbleSize_.Width() / HALF, maxWidth + bubbleSize_.Height() + distance));
     } else {
         auto maxWidth = std::max(circleSize.Width(), frameSize.Width());
-        if (sliderGlobalOffset_.GetX() + vertex.GetX() < bubbleSize_.Width()) {
+        if (sliderGlobalOffset_->Get().GetX() + vertex.GetX() < bubbleSize_.Width()) {
             rect.SetOffset(OffsetF(bubbleSize_.Width() + distance, -bubbleSize_.Height()));
         } else {
             rect.SetOffset(OffsetF(-bubbleSize_.Width() - distance, -bubbleSize_.Height()));
@@ -411,7 +413,11 @@ bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
         rect.SetSize(
             SizeF(maxWidth + bubbleSize_.Width() + distance, contentSize.Height() + bubbleSize_.Height() / HALF));
     }
-    if (rect != GetBoundsRect()) {
+    auto origin = GetBoundsRect();
+    if (origin.IsValid() && rect.IsValid()) {
+        rect = rect.CombineRectT(origin);
+    }
+    if (rect != origin) {
         SetBoundsRect(rect);
         return true;
     }

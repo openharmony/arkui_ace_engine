@@ -305,11 +305,16 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
         UpdateDragStyle(DragCursorStyleCore::MOVE);
         return;
     }
+    bool isFound = false;
     for (const auto& it : summaryMap_) {
-        if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-            UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
-            return;
+        if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
+            isFound = true;
+            break;
         }
+    }
+    if (!isFound) {
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        return;
     }
     UpdateDragStyle(dragBehavior == DragBehavior::MOVE ? DragCursorStyleCore::MOVE : DragCursorStyleCore::COPY);
 }
@@ -641,6 +646,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     draggedFrameNode_ = nullptr;
     preMovePoint_ = Point(0, 0);
     hasNotifiedTransformation_ = false;
+    badgeNumber_ = -1;
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
@@ -655,7 +661,6 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
             container->GetWindowId());
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
         ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
-        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
         ClearVelocityInfo();
         return;
     }
@@ -677,16 +682,21 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
+    bool isFound = false;
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (!dragFrameNodeAllowDrop.empty()) {
         for (const auto& it : summaryMap_) {
-            if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-                TAG_LOGI(AceLogTag::ACE_DRAG,
-                    "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
-                    container->GetWindowId());
-                ResetDragDrop(container->GetWindowId(), point);
-                return;
+            if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
+                isFound = true;
+                break;
             }
+        }
+        if (!isFound) {
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
+                container->GetWindowId());
+            ResetDragDrop(container->GetWindowId(), point);
+            return;
         }
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, drag position is (%{public}f, %{public}f)."
@@ -706,7 +716,6 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
         auto unifiedData = RequestUDMFDataWithUDKey(udKey);
         DoDropAction(dragFrameNode, point, unifiedData, udKey);
-        return;
     }
 }
 
@@ -1518,7 +1527,8 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     auto maxDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager, gatherNodeCenter.GetX(),
         gatherNodeCenter.GetY());
     constexpr decltype(distance) MAX_DIS = 5.0;
-    if (distance < MAX_DIS && maxDistance < MAX_DIS) {
+    if ((distance < MAX_DIS || !IsNeedScaleDragPreview()) &&
+        (maxDistance < MAX_DIS || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_))) {
         auto containerId = Container::CurrentId();
         TransDragWindowToDragFwk(containerId);
         return;

@@ -3476,6 +3476,22 @@ void ResetScrollFriction(ArkUI_NodeHandle node)
     }
 }
 
+const ArkUI_AttributeItem* GetScrollScrollSnap(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 values[32];
+    auto size = GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollScrollSnap(node->uiNodeHandle, values);
+
+    //size index
+    g_numberValues[NUM_0].i32 = values[NUM_0];
+    g_numberValues[NUM_1].i32 = values[NUM_1];
+    g_numberValues[NUM_2].i32 = values[NUM_2];
+    for (auto i = 0; i < size - NUM_3; i++) {
+        g_numberValues[i].i32 = values[i];
+    }
+    g_attributeItem.size = size;
+    return &g_attributeItem;
+}
+
 int32_t SetScrollScrollSnap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_FOUR_PARAM);
@@ -8088,7 +8104,7 @@ int32_t SetCheckboxMark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
 
     GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setMark(
-        node->uiNodeHandle, strokeColor, size, strokeWidth);
+        node->uiNodeHandle, strokeColor, size, DEFAULT_UNIT, strokeWidth, DEFAULT_UNIT);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -9625,7 +9641,7 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
 {
     static Getter* getters[] = { GetScrollScrollBar, GetScrollScrollBarWidth, GetScrollScrollBarColor,
         GetScrollScrollable, GetScrollEdgeEffect, GetScrollEnableScrollInteraction, GetScrollFriction,
-        nullptr, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging };
+        GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

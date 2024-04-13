@@ -2852,6 +2852,43 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
         TaskExecutor::TaskType::PLATFORM);
 }
 
+
+void WebDelegate::DragResize(const double& width, const double& height,
+                             const double& pre_height, const double& pre_width)
+{
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), width, height, pre_height, pre_width]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_ && !delegate->window_) {
+                // Sur need int value, greater than this value in case show black line.
+                delegate->nweb_->DragResize(std::ceil(width), std::ceil(height),
+                                            std::ceil(pre_height), std::ceil(pre_width));
+                double offsetX = 0;
+                double offsetY = 0;
+                delegate->UpdateScreenOffSet(offsetX, offsetY);
+                delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
+{
+    isSmoothDragResizeEnabled_ = isSmoothDragResizeEnabled;
+}
+
+bool WebDelegate::GetIsSmoothDragResizeEnabled()
+{
+    return isSmoothDragResizeEnabled_;
+}
+
 void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
 {
     auto context = context_.Upgrade();

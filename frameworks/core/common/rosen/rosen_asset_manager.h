@@ -80,6 +80,11 @@ public:
 
     RefPtr<Asset> GetAsset(const std::string& assetName) override;
 
+    std::vector<RefPtr<Asset>> GetAssetFromI18n(const std::string& assetName) override
+    {
+        return {};
+    }
+
     std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
 
     void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) override

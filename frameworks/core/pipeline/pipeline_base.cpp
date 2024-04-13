@@ -686,8 +686,8 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
     }
 }
 
-void PipelineBase::OnVirtualKeyboardAreaChange(
-    Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, bool supportAvoidance)
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
@@ -701,7 +701,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
+    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance);
 }
 
 void PipelineBase::OnVirtualKeyboardAreaChange(

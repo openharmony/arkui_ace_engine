@@ -410,6 +410,8 @@ private:
 
     void ClearAlertCallback(PageInfo pageInfo);
 
+    void GetAssetFromI18n(const std::string& fileFullPath, std::unique_ptr<JsonValue>& data);
+
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
     int32_t pageId_ = -1;

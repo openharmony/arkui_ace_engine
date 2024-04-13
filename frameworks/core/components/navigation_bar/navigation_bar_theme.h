@@ -127,6 +127,7 @@ public:
             theme->marginRight_ = pattern->GetAttr<Dimension>("title_margin_right", 16.0_vp);
             theme->mainTitleFontSizeL_ = pattern->GetAttr<Dimension>("title_primary_size", 30.0_fp);
             theme->mainTitleFontSizeM_ = pattern->GetAttr<Dimension>("title_secondary_size", 26.0_fp);
+            theme->mainTitleFontSizeS_ = pattern->GetAttr<Dimension>("title_tertiary_size", 20.0_fp);
             theme->subTitleFontSizeS_ = pattern->GetAttr<Dimension>("title_subheader_size", 14.0_fp);
             theme->cornerRadius_ = pattern->GetAttr<Dimension>("icon_background_shape", 20.0_vp);
             theme->compPadding_ = pattern->GetAttr<Dimension>("icon_background_space_horizontal", 8.0_vp);
@@ -422,6 +423,10 @@ public:
     {
         return mainTitleFontSizeM_;
     }
+    const Dimension& GetMainTitleFontSizeS() const
+    {
+        return mainTitleFontSizeS_;
+    }
     const Dimension& GetSubTitleFontSizeS() const
     {
         return subTitleFontSizeS_;
@@ -585,6 +590,7 @@ private:
     Dimension marginRight_;
     Dimension mainTitleFontSizeL_;
     Dimension mainTitleFontSizeM_;
+    Dimension mainTitleFontSizeS_;
     Dimension subTitleFontSizeS_;
     Color mainTitleFontColor_;
     Color subTitleFontColor_;

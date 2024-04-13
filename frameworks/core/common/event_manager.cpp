@@ -45,6 +45,7 @@ const std::string SHORT_CUT_VALUE_Z = "Z";
 const std::string SHORT_CUT_VALUE_A = "A";
 const std::string SHORT_CUT_VALUE_C = "C";
 const std::string SHORT_CUT_VALUE_V = "V";
+const std::string SHORT_CUT_VALUE_TAB = "TAB";
 enum class CtrlKeysBit {
     CTRL = 1,
     SHIFT = 2,
@@ -667,7 +668,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         LOGI("the %{public}d axis test result does not exist!", event.id);
         return false;
     }
-    if (event.action == AxisAction::BEGIN) {
+    // rotate event is no need to add scope.
+    if (event.action == AxisAction::BEGIN && !event.isRotationEvent) {
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
@@ -682,7 +684,8 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
             break;
         }
     }
-    if (event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) {
+    if ((event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) &&
+        !event.isRotationEvent) {
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
                 refereeNG_->CleanGestureScope(event.id);
@@ -1195,6 +1198,9 @@ bool EventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t ke
     }
     if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT))) &&
         value == SHORT_CUT_VALUE_Z) {
+        return true;
+    }
+    if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::SHIFT))) && value == SHORT_CUT_VALUE_TAB) {
         return true;
     }
     return false;

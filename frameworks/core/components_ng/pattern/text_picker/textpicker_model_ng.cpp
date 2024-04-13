@@ -58,6 +58,9 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = textPickerDialog.backgroundBlurStyle.value();
     }
+    if (textPickerDialog.shadow.has_value()) {
+        properties.shadow = textPickerDialog.shadow.value();
+    }
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));

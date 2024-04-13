@@ -80,7 +80,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_RETURN(pickerRow, nullptr);
 
-        auto monthDaysNode = CreateAndMountMonthDaysNode(settingData, dateNode, pickerRow, lunarChangeEvent);
+        auto monthDaysNode = CreateAndMountMonthDaysNode(settingData, dateNode, pickerRow, std::move(lunarChangeEvent));
         CHECK_NULL_RETURN(monthDaysNode, nullptr);
         auto timeNode = CreateAndMountTimeNode(settingData, monthDaysNode, pickerRow);
         CHECK_NULL_RETURN(timeNode, nullptr);
@@ -554,6 +554,10 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     CHECK_NULL_RETURN(pickerTheme, nullptr);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     timePickerRowPattern->SetShowCount(showCount);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ZeroPrefixType hourType = ZeroPrefixType::SHOW;
+        timePickerRowPattern->SetPrefixHour(hourType);
+    }
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -961,7 +965,7 @@ std::function<void(bool)> DatePickerDialogView::CreateLunarChangeEvent(const Ref
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateAndMountMonthDaysNode(const DatePickerSettingData& settingData,
-    const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow, std::function<void(bool)> lunarChangeEvent)
+    const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow, std::function<void(bool)>&& lunarChangeEvent)
 {
     auto layoutProperty = dateNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);

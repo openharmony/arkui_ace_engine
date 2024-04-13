@@ -29,6 +29,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -310,7 +311,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
     checkBoxGroupModelNG.SetWidth(WIDTH);
     checkBoxGroupModelNG.SetHeight(HEIGHT);
     checkBoxGroupModelNG.SetPadding(PADDING, newArgs, flag);
-
+    
     /**
      * @tc.steps: step3. Get paint property and get CheckBoxGroup property
      * @tc.expected: Check the CheckBoxGroup property value
@@ -956,6 +957,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest001, TestSize.Level1)
     geometryNode->SetContentOffset(CONTENT_OFFSET);
     auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->UpdateCheckBoxGroupSelectedStyle(CheckBoxStyle::SQUARE_STYLE);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     /**
      *  @tc.case: case. When isTouch is true, CheckBoxGroupModifier will call DrawTouchBoard.
@@ -1880,5 +1882,106 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest027, TestSize.Level1)
     pattern->updateFlag_ = false;
     pattern->MarkIsSelected(isSelected);
     EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintPropertyTest028
+ * @tc.desc: Set CheckBoxGroup style value into CheckBoxGroupPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    /**
+     * @tc.steps: step2. Set parameters to CheckBoxGroup property
+     */
+    checkBoxGroupModelNG.SetCheckboxGroupStyle(CheckBoxStyle::SQUARE_STYLE);
+    /**
+     * @tc.steps: step3. Get paint property and get CheckBoxGroup property
+     * @tc.expected: Check the CheckBoxGroup property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle(), true);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintPropertyTest029
+ * @tc.desc: Verify ToJsonValue of shape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    /**
+     * @tc.steps: step2. Set parameters to CheckBoxGroup property
+     */
+    checkBoxGroupModelNG.SetCheckboxGroupStyle(CheckBoxStyle::SQUARE_STYLE);
+    /**
+     * @tc.steps: step3. Get paint property and get CheckBoxGroup property
+     * @tc.expected: Check the CheckBoxGroup property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    auto json = JsonUtil::Create(true);
+    checkBoxPaintProperty->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("shape"), "1");
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest030
+ * @tc.desc: Test OnAfterModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest030, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxModelNG checkboxModelNG;
+    checkboxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkboxModelNG.SetCheckboxStyle(CheckBoxStyle::CIRCULAR_STYLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    CheckBoxGroupModelNG checkboxGroupModelNG;
+    checkboxGroupModelNG.Create(GROUP_NAME);
+    checkboxGroupModelNG.SetCheckboxGroupStyle(CheckBoxStyle::SQUARE_STYLE);
+    auto groupFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(groupFrameNode, nullptr);
+    auto pattern = groupFrameNode->GetPattern<CheckBoxGroupPattern>();
+    EXPECT_NE(pattern, nullptr);
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap;
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode);
+    checkBoxGroupMap[GROUP_NAME].push_back(groupFrameNode);
+
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier = AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    EXPECT_NE(checkBoxGroupModifier, nullptr);
+    pattern->UpdateCheckBoxStyle();
+    /**
+     * @tc.steps: step2. Get paint property and get CheckBoxGroup and CheckBox property
+     * @tc.expected: Check the CheckBoxGroup and CheckBox property value
+     */
+    auto groupPaintProperty = groupFrameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    EXPECT_NE(groupPaintProperty, nullptr);
+    EXPECT_EQ(groupPaintProperty->GetCheckBoxGroupSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedStyleValue(), CheckBoxStyle::CIRCULAR_STYLE);
 }
 } // namespace OHOS::Ace::NG

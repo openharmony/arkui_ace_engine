@@ -258,7 +258,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem001, TestSize.Level1)
     ASSERT_TRUE(child);
     auto constraint = *child->GetGeometryNode()->GetParentLayoutConstraint();
     EXPECT_EQ(constraint.maxSize.Width(), 50.0f);
-    EXPECT_EQ(*constraint.selfIdealSize.Width(), 50.0f);
+    EXPECT_EQ(*constraint.parentIdealSize.Width(), 50.0f);
     EXPECT_EQ(constraint.percentReference.Width(), 50.0f);
 }
 
@@ -297,7 +297,7 @@ HWTEST_F(GridIrregularFillerTest, MeasureItem002, TestSize.Level1)
     ASSERT_TRUE(child);
     auto constraint = *child->GetGeometryNode()->GetParentLayoutConstraint();
     EXPECT_EQ(constraint.maxSize.Width(), 315.0f);
-    EXPECT_EQ(*constraint.selfIdealSize.Width(), 315.0f);
+    EXPECT_EQ(*constraint.parentIdealSize.Width(), 315.0f);
     EXPECT_EQ(constraint.percentReference.Width(), 315.0f);
 }
 

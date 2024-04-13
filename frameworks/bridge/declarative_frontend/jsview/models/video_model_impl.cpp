@@ -54,7 +54,8 @@ void VideoModelImpl::SetProgressRate(double progressRate)
     videoComponent->SetSpeed(static_cast<float>(progressRate));
 }
 
-void VideoModelImpl::SetPosterSourceInfo(const std::string& posterUrl)
+void VideoModelImpl::SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
+    const std::string &moduleName)
 {
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(videoComponent);

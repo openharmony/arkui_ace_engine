@@ -58,44 +58,45 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
         if (!event) {
             continue;
         }
-        if (!clickRecognizer_) {
-            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
-        }
-        bool isHitTestBlock = event->IsHitTestBlock();
-        bool clickJudge = event->ClickJudge(localPoint);
-        clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-        clickRecognizer_->SetNodeId(frameNode->GetId());
-        clickRecognizer_->AttachFrameNode(frameNode);
-        clickRecognizer_->SetTargetComponent(targetComponent);
-        clickRecognizer_->SetIsSystemGesture(true);
-        clickRecognizer_->SetSysGestureJudge([isHitTestBlock, clickJudge](const RefPtr<GestureInfo>& gestureInfo,
-                                                 const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-            if (isHitTestBlock || clickJudge) {
-                return GestureJudgeResult::CONTINUE;
+        if (event->GetEnable()) {
+            if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
+                event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+            } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
+                event->BarCollectLongPressTarget(
+                    coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+            } else if (event->GetScrollable()) {
+                const auto& scrollable = event->GetScrollable();
+                scrollable->SetGetEventTargetImpl(getEventTargetImpl);
+                scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+                scrollable->OnCollectTouchTarget(result, frameNode, targetComponent);
             }
-            return GestureJudgeResult::REJECT;
-        });
-        clickRecognizer_->SetOnClick([frameNode](const ClickInfo&) {
-            auto pattern = frameNode->GetPattern<ListPattern>();
-            CHECK_NULL_VOID(pattern);
-            auto item = pattern->GetSwiperItem().Upgrade();
-            CHECK_NULL_VOID(item);
-            item->SwiperReset(true);
-        });
-        result.emplace_front(clickRecognizer_);
-        if (!event->GetEnable()) {
-            continue;
         }
-        if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
-            event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
-        } else if (event->InBarRectRegion(localPoint, touchRestrict.sourceType)) {
-            event->BarCollectLongPressTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
-        } else if (event->GetScrollable()) {
-            const auto& scrollable = event->GetScrollable();
-            scrollable->SetGetEventTargetImpl(getEventTargetImpl);
-            scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            scrollable->OnCollectTouchTarget(result, frameNode, targetComponent);
+        bool clickJudge = event->ClickJudge(localPoint);
+        if (event->GetEnable() || clickJudge) {
+            if (!clickRecognizer_) {
+                clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+            }
+            bool isHitTestBlock = event->IsHitTestBlock();
+            clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+            clickRecognizer_->SetNodeId(frameNode->GetId());
+            clickRecognizer_->AttachFrameNode(frameNode);
+            clickRecognizer_->SetTargetComponent(targetComponent);
+            clickRecognizer_->SetIsSystemGesture(true);
+            clickRecognizer_->SetSysGestureJudge([isHitTestBlock, clickJudge](const RefPtr<GestureInfo>& gestureInfo,
+                                                     const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+                return isHitTestBlock || clickJudge ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
+            });
+            clickRecognizer_->SetOnClick([weak = WeakClaim(RawPtr(frameNode))](const ClickInfo&) {
+                auto frameNode = weak.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                auto pattern = frameNode->GetPattern<ListPattern>();
+                CHECK_NULL_VOID(pattern);
+                auto item = pattern->GetSwiperItem().Upgrade();
+                CHECK_NULL_VOID(item);
+                item->SwiperReset(true);
+            });
+            result.emplace_front(clickRecognizer_);
         }
         break;
     }

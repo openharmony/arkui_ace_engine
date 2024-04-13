@@ -227,12 +227,17 @@ private:
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    void UpdateBgBlurStyle(const RefPtr<RenderContext>& contentRenderContext, const DialogProperties& props);
     RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
+    void CreateTitleRowNode(const DialogProperties& dialogProperties, PaddingProperty& titlePadding);
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
     void ParseButtonFontColorAndBgColor(
         const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);
@@ -283,6 +288,7 @@ private:
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
+    RefPtr<RenderContext> contentRenderContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 

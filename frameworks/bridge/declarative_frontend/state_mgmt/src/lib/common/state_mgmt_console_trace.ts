@@ -44,6 +44,10 @@ class stateMgmtConsole {
   public static applicationError(...args: any): void {
     aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
   }
+
+  public static applicationWarn(...args: any): void {
+    aceConsole.warn(...args);
+  }
   public static featureCombinationError(msg: string): void {
     aceConsole.warn(msg);
   }

@@ -2498,6 +2498,11 @@ void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
     if (info.Length() != 0) {
         return;
     }
+    paintState_ = PaintState();
+    style_ = TextStyle();
+    anti_ = false;
+    isInitializeShadow_ = false;
+    isOffscreenInitializeShadow_ = false;
 
     BaseInfo baseInfo;
     baseInfo.canvasPattern = canvasPattern_;

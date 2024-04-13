@@ -328,6 +328,8 @@ public:
 
     void RebuildRenderContextTree() override;
 
+    bool IsContextTransparent() override;
+
     bool IsVisible() const
     {
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
@@ -911,6 +913,7 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
+    const static std::set<std::string> layoutTags_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -963,7 +966,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO, false, false, false, { .isShowBadge = true } };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

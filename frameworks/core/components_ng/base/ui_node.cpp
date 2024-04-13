@@ -1142,7 +1142,6 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
     }
 }
 
-
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
@@ -1205,4 +1204,15 @@ void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>
         DFSAllChild(child, res);
     }
 }
+
+bool UINode::IsContextTransparent()
+{
+    for (const auto& item : GetChildren()) {
+        if (!item->IsContextTransparent()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

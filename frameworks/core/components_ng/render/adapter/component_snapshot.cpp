@@ -46,9 +46,8 @@ public:
             return;
         }
         if (!pixelMap) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! The pixelmap returned by the system is null");
             callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                    "Internal error! The pixelmap returned by the system is null");
                 auto frameNode = node.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 Inspector::RemoveOffscreenNode(frameNode);
@@ -102,6 +101,13 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
         return;
     }
     auto rsNode = GetRsNode(node);
+    if (!rsNode) {
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "RsNode is null from FrameNode(id=%{public}s)",
+            componentId.c_str());
+        return;
+    }
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
 }

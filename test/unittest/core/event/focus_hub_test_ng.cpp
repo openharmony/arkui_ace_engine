@@ -32,7 +32,9 @@
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
@@ -2007,7 +2009,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0045, TestSize.Level1)
 
 /**
  * @tc.name: FocusHubTestNg0046
- * @tc.desc: Test the function HandleParentScroll.
+ * @tc.desc: Test the function TriggerFocusScroll.
  * @tc.type: FUNC
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
@@ -2030,7 +2032,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
     focusHub->onPaintFocusStateCallback_ = []() { return true; };
     focusHub->PaintAllFocusState();
-    focusHub->HandleParentScroll();
+    focusHub->TriggerFocusScroll();
     EXPECT_TRUE(focusHub->isFocusUnit_);
 }
 
@@ -3464,5 +3466,69 @@ HWTEST_F(FocusHubTestNg, SetEnabled001, TestSize.Level1)
 
     focusHub->SetEnabled(false);
     ASSERT_FALSE(focusHub->currentFocus_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0101
+ * @tc.desc: Test the function IsSyncRequestFocusable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0101, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    eventHub->SetEnabled(false);
+
+    /**
+     * @tc.steps2: call the function IsSyncRequestFocusable with FocusType::NODE
+     * @tc.expected: The return value of IsSyncRequestFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    EXPECT_FALSE(focusHub->IsSyncRequestFocusable());
+
+    /**
+     * @tc.steps3: call the function IsSyncRequestFocusable with FocusType::SCOPE
+     * @tc.expected: The return value of IsSyncRequestFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    EXPECT_FALSE(focusHub->IsSyncRequestFocusable());
+
+    /**
+     * @tc.steps4: call the function IsSyncRequestFocusable with FocusType::DISABLE
+     * @tc.expected: The return value of IsSyncRequestFocusable is false.
+     */
+    focusHub->SetFocusType(FocusType::DISABLE);
+    EXPECT_FALSE(focusHub->IsSyncRequestFocusable());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0102
+ * @tc.desc: Test the function ScrollByOffsetToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0102, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto textFieldNode = FrameNode::CreateFrameNode("frameNode", 103, AceType::MakeRefPtr<TextFieldPattern>());
+    textFieldNode->GetOrCreateFocusHub();
+    auto textFieldFocusHub = textFieldNode->GetFocusHub();
+    ASSERT_NE(textFieldNode, nullptr);
+    ASSERT_FALSE(focusHub->ScrollByOffsetToParent(textFieldNode));
+
+    auto listNode = FrameNode::CreateFrameNode("frameNode", 104, AceType::MakeRefPtr<ListPattern>());
+    listNode->GetOrCreateFocusHub();
+    auto listFocusHub = listNode->GetFocusHub();
+    ASSERT_NE(listFocusHub, nullptr);
+    ASSERT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
 } // namespace OHOS::Ace::NG

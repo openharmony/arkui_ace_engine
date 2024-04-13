@@ -625,6 +625,11 @@ public:
         hasTabsAncestor_ = hasTabsAncestor;
     }
 
+    void SetIndicatorInteractive(bool isInteractive)
+    {
+        isIndicatorInteractive_ = isInteractive;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -942,6 +947,7 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float translateAnimationEndPos_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     float touchBottomRate_ = 1.0f;
@@ -1027,6 +1033,7 @@ private:
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;
     bool hasTabsAncestor_ = false;
+    bool isIndicatorInteractive_ = true;
 
     std::optional<int32_t> cachedCount_;
 

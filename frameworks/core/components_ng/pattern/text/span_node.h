@@ -235,6 +235,7 @@ public:
     std::string GetSpanContent(const std::string& rawContent);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
+    std::string SymbolColorToString();
 
 private:
     std::optional<TextStyle> textStyle_;
@@ -417,6 +418,9 @@ public:
     }
 
     std::set<PropertyInfo> CalculateInheritPropertyInfo();
+
+protected:
+    void DumpInfo() override;
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;

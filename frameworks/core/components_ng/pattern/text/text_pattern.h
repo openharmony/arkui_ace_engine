@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -60,8 +61,8 @@ struct SpanNodeInfo {
     RefPtr<UINode> containerSpanNode;
 };
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern, public TextDragBase, public TextBase, public SpanWatcher {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, SpanWatcher);
+class TextPattern : public virtual Pattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
 
 public:
     TextPattern()
@@ -511,8 +512,7 @@ public:
     {
         return isSpanStringMode_;
     }
-    void UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems) override;
-
+    void SetStyledString(const RefPtr<SpanString>& value);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
@@ -627,10 +627,12 @@ protected:
     RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
 
     OffsetF parentGlobalOffset_;
+    std::optional<TextResponseType> textResponseType_;
 
     friend class TextContentModifier;
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -658,6 +660,7 @@ private:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
+    void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -700,7 +703,6 @@ private:
     SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
-    std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
     mutable std::list<RefPtr<UINode>> childNodes_;

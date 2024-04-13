@@ -199,6 +199,7 @@ public:
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
     void HandleTouchUpEvent();
+    void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
     RefPtr<FrameNode> GetItemFatherNode();
     RefPtr<FrameNode> GetFrameNode();
@@ -231,6 +232,7 @@ private:
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isSelectedItemNode_ = false;
+    bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
 

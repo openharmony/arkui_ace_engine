@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/text/span_node.h"
 
 #include <optional>
+#include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -189,6 +191,24 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
     spanItem_->backgroundStyle = GetTextBackgroundStyle();
+}
+
+void SpanNode::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("Content:").append(spanItem_->GetSpanContent()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontSize:").append(spanItem_->fontStyle->GetFontSize().value_or(Dimension()).ToString()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("FontColor:").append(spanItem_->fontStyle->GetTextColor().value_or(Color()).ColorToString()));
+    DumpLog::GetInstance().AddDesc(std::string("FontWeight:").append(
+        StringUtils::FontWeightToString(spanItem_->fontStyle->GetFontWeight().value_or(FontWeight::NORMAL))));
+    if (spanItem_->unicode != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
+        DumpLog::GetInstance().AddDesc(std::string("SymbolRenderingStrategy:").append(
+            std::to_string(spanItem_->fontStyle->GetSymbolRenderingStrategy().value_or(0))));
+        DumpLog::GetInstance().AddDesc(std::string("SymbolEffectStrategy:").append(
+            std::to_string(spanItem_->fontStyle->GetSymbolEffectStrategy().value_or(0))));
+    }
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
@@ -520,6 +540,7 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
     INHERIT_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
     INHERIT_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
     INHERIT_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
+    INHERIT_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
     INHERIT_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
     INHERIT_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
     INHERIT_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
@@ -578,6 +599,20 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     return sameSpan;
+}
+
+std::string SpanItem::SymbolColorToString()
+{
+    auto colors = fontStyle->GetSymbolColorList();
+    auto colorStr = std::string("[");
+    if (colors.has_value()) {
+        for (const auto& color : colors.value()) {
+            colorStr.append(color.ColorToString());
+            colorStr.append(",");
+        }
+    }
+    colorStr.append("]");
+    return colorStr;
 }
 
 std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const

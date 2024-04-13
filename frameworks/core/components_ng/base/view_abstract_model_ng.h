@@ -1086,7 +1086,12 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-
+    
+    void SetForegroundEffect(float radius) override
+    {
+        ViewAbstract::SetForegroundEffect(radius);
+    }
+    
     void DisableOnClick() override
     {
         ViewAbstract::DisableOnClick();
@@ -1155,6 +1160,11 @@ public:
     void SetLightIntensity(const float value) override
     {
         ViewAbstract::SetLightIntensity(value);
+    }
+
+    void SetLightColor(const Color& value) override
+    {
+        ViewAbstract::SetLightColor(value);
     }
 
     void SetLightIlluminated(const uint32_t value) override

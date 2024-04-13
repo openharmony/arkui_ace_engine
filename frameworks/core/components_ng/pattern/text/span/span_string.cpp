@@ -35,7 +35,6 @@ SpanString::SpanString(const std::string& text) : text_(text)
 SpanString::~SpanString()
 {
     spansMap_.clear();
-    watchers_.clear();
     spans_.clear();
 }
 
@@ -92,7 +91,6 @@ void SpanString::ApplyToSpans(
             it = spans_.insert(std::next(it), newSpan);
         }
     }
-    NotifySpanWatcher();
 }
 
 void SpanString::SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int32_t, int32_t> interval)
@@ -376,25 +374,6 @@ bool SpanString::operator==(const SpanString& other) const
         }
     }
     return true;
-}
-
-void SpanString::AddSpanWatcher(const WeakPtr<SpanWatcher>& watcher)
-{
-    watchers_.emplace_back(watcher);
-}
-
-void SpanString::NotifySpanWatcher()
-{
-    if (spans_.empty()) {
-        spans_.emplace_back(GetDefaultSpanItem(""));
-    }
-    for (const auto& item : watchers_) {
-        auto watcher = item.Upgrade();
-        if (!watcher) {
-            continue;
-        }
-        watcher->UpdateSpanItems(spans_);
-    }
 }
 
 const std::list<RefPtr<NG::SpanItem>>& SpanString::GetSpanItems() const

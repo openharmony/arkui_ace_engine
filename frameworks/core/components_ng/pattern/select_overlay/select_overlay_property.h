@@ -51,6 +51,15 @@ struct SelectHandleInfo {
     }
 
     static Dimension GetDefaultLineWidth();
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_BOOL(jsonValue, isShow);
+        JSON_STRING_PUT_BOOL(jsonValue, needLayout);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, paintRect);
+        return jsonValue->ToString();
+    }
 };
 
 using SelectOverlayDirtyFlag = uint32_t;
@@ -63,6 +72,8 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT;
+
+inline constexpr int32_t REQUEST_RECREATE = 1;
 
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
 enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, CAMERA_INPUT, APPEAR, DISAPPEAR };
@@ -115,6 +126,20 @@ struct SelectMenuInfo {
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
                  (showCut == info.showCut) && (showCameraInput == info.showCameraInput));
+    }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_BOOL(jsonValue, menuDisable);
+        JSON_STRING_PUT_BOOL(jsonValue, menuIsShow);
+        JSON_STRING_PUT_BOOL(jsonValue, singleHandleMenuIsShow);
+        JSON_STRING_PUT_BOOL(jsonValue, showCopy);
+        JSON_STRING_PUT_BOOL(jsonValue, showPaste);
+        JSON_STRING_PUT_BOOL(jsonValue, showCopyAll);
+        JSON_STRING_PUT_BOOL(jsonValue, showCut);
+        JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
+        return jsonValue->ToString();
     }
 };
 
@@ -196,6 +221,25 @@ struct SelectOverlayInfo {
 
     bool isHandleLineShow = true;
     std::string selectText;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_BOOL(jsonValue, isUsingMouse);
+        JSON_STRING_PUT_BOOL(jsonValue, isSingleHandle);
+        JSON_STRING_PUT_BOOL(jsonValue, handleReverse);
+        JSON_STRING_PUT_BOOL(jsonValue, isSelectRegionVisible);
+        JSON_STRING_PUT_BOOL(jsonValue, isNewAvoid);
+        JSON_STRING_PUT_BOOL(jsonValue, recreateOverlay);
+        JSON_STRING_PUT_BOOL(jsonValue, isUseOverlayNG);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, firstHandle);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, secondHandle);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, showArea);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, selectArea);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, rightClickOffset);
+        JSON_STRING_PUT_STRING(jsonValue, selectText);
+        return jsonValue->ToString();
+    }
 };
 
 } // namespace OHOS::Ace::NG

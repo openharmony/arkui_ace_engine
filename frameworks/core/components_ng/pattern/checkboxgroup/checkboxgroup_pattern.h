@@ -18,6 +18,9 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
+#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_accessibility_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
@@ -65,6 +68,13 @@ public:
             UpdateModifierParam(paintParameters);
             checkBoxGroupModifier_ = AceType::MakeRefPtr<CheckBoxGroupModifier>(paintParameters);
         }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+            if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
+                checkboxStyle = paintProperty->GetCheckBoxGroupSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+            }
+            checkBoxGroupModifier_->SetCheckboxGroupStyle(checkboxStyle);
+        }
         auto paintMethod = MakeRefPtr<CheckBoxGroupPaintMethod>(checkBoxGroupModifier_);
         paintMethod->SetEnabled(enabled);
         paintMethod->SetUiStatus(uiStatus_);
@@ -87,6 +97,9 @@ public:
         size_ = geometryNode->GetContentSize();
         if (!isUserSetResponseRegion_) {
             AddHotZoneRect();
+        }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            UpdateCheckBoxStyle();
         }
         return true;
     }
@@ -157,6 +170,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
     void OnAttachToMainTree() override;
+    void UpdateCheckBoxStyle();
 
 private:
     void OnAttachToFrameNode() override;
@@ -187,6 +201,10 @@ private:
     void UpdateSelectStatus(bool isSelected);
     std::string GetGroupNameWithNavId();
 
+    void SetCheckBoxStyle(const RefPtr<CheckBoxPaintProperty>& paintProperty, const RefPtr<FrameNode>& frameNode,
+        CheckBoxStyle checkBoxGroupStyle);
+    void GetCheckBoxGroupStyle(const RefPtr<FrameNode>& frameNode, CheckBoxStyle& checkboxGroupStyle);
+    void InnerFocusPaintCircle(RoundRect& paintRect);
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
     RefPtr<ClickEvent> clickListener_;

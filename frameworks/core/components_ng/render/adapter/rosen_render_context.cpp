@@ -37,6 +37,7 @@
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "rosen_render_context.h"
 
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -622,6 +623,23 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnForegroundEffectUpdate(float radius)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CalcDimension value;
+    value.SetValue(static_cast<double>(radius));
+    float radiusPx = context->NormalizeToPx(value);
+#ifndef USE_ROSEN_DRAWING
+    float foreRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float foreRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    rsNode_->SetForegroundEffectRadius(foreRadius);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -692,9 +710,10 @@ void RosenRenderContext::PaintBackground()
         GetHost()->GetGeometryNode()->GetFrameSize(), renderSize, GetBackgroundImagePosition());
     auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
     auto srcSize = bgLoadingCtx_->GetImageSize();
-    Rosen::Vector4f rect(slice.left.ConvertToPx(), slice.top.ConvertToPx(),
-        srcSize.Width() - (slice.left + slice.right).ConvertToPx(),
-        srcSize.Height() - (slice.top + slice.bottom).ConvertToPx());
+    Rosen::Vector4f rect(slice.left.ConvertToPxWithSize(srcSize.Width()),
+        slice.top.ConvertToPxWithSize(srcSize.Height()),
+        srcSize.Width() - (slice.left + slice.right).ConvertToPxWithSize(srcSize.Width()),
+        srcSize.Height() - (slice.top + slice.bottom).ConvertToPxWithSize(srcSize.Height()));
     rsNode_->SetBgImageWidth(renderSize.Width());
     rsNode_->SetBgImageHeight(renderSize.Height());
     rsNode_->SetBgImagePositionX(positionOffset.GetX());
@@ -729,6 +748,12 @@ void RosenRenderContext::OnBackgroundImageSizeUpdate(const BackgroundImageSize& 
 }
 
 void RosenRenderContext::OnBackgroundImagePositionUpdate(const BackgroundImagePosition& /*bgImgPosition*/)
+{
+    CHECK_NULL_VOID(rsNode_);
+    PaintBackground();
+}
+
+void RosenRenderContext::OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& /*ImageResizableSlice*/)
 {
     CHECK_NULL_VOID(rsNode_);
     PaintBackground();
@@ -2592,6 +2617,39 @@ float RosenRenderContext::RoundValueToPixelGrid(float value, bool isRound, bool 
     return value;
 }
 
+float RosenRenderContext::OnePixelValueRounding(float value)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.5f)) {
+        return (value - fractials + 1.0f);
+    } else {
+        return (value - fractials);
+    }
+}
+
+float RosenRenderContext::OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (forceCeil) {
+        return (value - fractials + 1.0f);
+    } else if (forceFloor) {
+        return (value - fractials);
+    } else if (isRound) {
+        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.5f)) {
+            return (value - fractials + 1.0f);
+        } else {
+            return (value - fractials);
+        }
+    }
+    return value;
+}
+
 void RosenRenderContext::RoundToPixelGrid()
 {
     auto frameNode = GetHost();
@@ -2682,6 +2740,125 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
         UpdateBorderWidthF(borderWidthPropertyF);
     }
 }
+
+void RosenRenderContext::OnePixelRounding()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
+    float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
+    float nodeWidth = geometryNode->GetFrameSize().Width();
+    float nodeHeight = geometryNode->GetFrameSize().Height();
+    float roundToPixelErrorX = 0.0f;
+    float roundToPixelErrorY = 0.0f;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+
+    float nodeLeftI = OnePixelValueRounding(relativeLeft);
+    float nodeTopI = OnePixelValueRounding(relativeTop);
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
+    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+
+    float nodeWidthI = OnePixelValueRounding(absoluteRight) - nodeLeftI;
+    float nodeWidthTemp = OnePixelValueRounding(nodeWidth);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = OnePixelValueRounding(absoluteBottom) - nodeTopI;
+    float nodeHeightTemp = OnePixelValueRounding(nodeHeight);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+
+    geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+}
+
+void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
+    float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
+    float nodeWidth = geometryNode->GetFrameSize().Width();
+    float nodeHeight = geometryNode->GetFrameSize().Height();
+    float roundToPixelErrorX = 0.0f;
+    float roundToPixelErrorY = 0.0f;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    bool ceilLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    bool floorLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    bool ceilTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    bool floorTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    bool ceilRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    bool floorRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    bool ceilBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    bool floorBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+
+    float nodeLeftI = OnePixelValueRounding(relativeLeft, isRound, ceilLeft, floorLeft);
+    float nodeTopI = OnePixelValueRounding(relativeTop, isRound, ceilTop, floorTop);
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
+    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+
+    float nodeWidthI = OnePixelValueRounding(absoluteRight, isRound, ceilRight, floorRight) - nodeLeftI;
+    float nodeWidthTemp = OnePixelValueRounding(nodeWidth, isRound, ceilRight, floorRight);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = OnePixelValueRounding(absoluteBottom, isRound, ceilBottom, floorBottom) - nodeTopI;
+    float nodeHeightTemp = OnePixelValueRounding(nodeHeight, isRound, ceilBottom, floorBottom);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+
+    geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+}
+
 
 void RosenRenderContext::CombineMarginAndPosition(Dimension& resultX, Dimension& resultY,
     const Dimension& parentPaddingLeft, const Dimension& parentPaddingTop, float widthPercentReference,
@@ -3937,19 +4114,22 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
         case PageTransitionType::EXIT_POP:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
-            pageTransitionRectF = RectF(rect.Width() * HALF, 0.0f, rect.Width() * HALF, REMOVE_CLIP_SIZE);
+            pageTransitionRectF = RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF,
+                REMOVE_CLIP_SIZE);
             translate.x = Dimension(rect.Width() * HALF);
             break;
         case PageTransitionType::ENTER_POP:
             initialBackgroundColor = MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
-            pageTransitionRectF = RectF(0.0f, 0.0f, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
+            pageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width() * PARENT_PAGE_OFFSET,
+                REMOVE_CLIP_SIZE);
             translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
             break;
         case PageTransitionType::EXIT_PUSH:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = MASK_COLOR;
-            pageTransitionRectF = RectF(0.0f, 0.0f, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
+            pageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width() * PARENT_PAGE_OFFSET,
+                REMOVE_CLIP_SIZE);
             translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
             break;
         default:
@@ -3997,7 +4177,7 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
-    resultEffect->SetPageTransitionRectF(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE));
+    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE));
     resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
     resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     return resultEffect;
@@ -4063,7 +4243,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         UpdateTransformScale(VectorF(1.0f, 1.0f));
         UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
-        ClipWithRRect(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE),
+        ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
             RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::CloseImplicitAnimation();
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
@@ -4072,7 +4252,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
-    ClipWithRRect(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE),
+    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
@@ -4093,6 +4273,15 @@ void RosenRenderContext::MaskAnimation(const Color& initialBackgroundColor, cons
     AnimationUtils::OpenImplicitAnimation(maskOption, maskOption.GetCurve(), nullptr);
     SetActualForegroundColor(backgroundColor);
     AnimationUtils::CloseImplicitAnimation();
+}
+
+float RosenRenderContext::GetStatusBarHeight()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto statusBarHeight = safeAreaInsets.top_.Length();
+    return static_cast<float>(statusBarHeight);
 }
 
 void RosenRenderContext::PaintOverlayText()
@@ -4182,6 +4371,13 @@ void RosenRenderContext::OnLightIntensityUpdate(const float lightIntensity)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnLightColorUpdate(const Color& lightColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetLightColor(lightColor.GetValue());
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnLightIlluminatedUpdate(const uint32_t lightIlluminated)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -4225,7 +4421,7 @@ void RosenRenderContext::ResetSharedTranslate()
 void RosenRenderContext::ResetPageTransitionEffect()
 {
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }
@@ -5329,10 +5525,18 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
-    if (isRound && flag == 0) {
-        RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (isRound && flag == 0) {
+            OnePixelRounding(); // call OnePixelRounding without param to improve performance
+        } else {
+            OnePixelRounding(isRound, flag);
+        }
     } else {
-        RoundToPixelGrid(isRound, flag);
+        if (isRound && flag == 0) {
+            RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance
+        } else {
+            RoundToPixelGrid(isRound, flag);
+        }
     }
     paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s", host->GetTag().c_str(), host->GetId(),

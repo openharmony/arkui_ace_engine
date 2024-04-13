@@ -71,4 +71,9 @@ constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;     // GetData failed, da
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ERROR = 103301;
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST = 103302;
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_NOT_FOUND = 103303;
+
+// RequestFocus error code
+constexpr int32_t ERROR_CODE_NON_FOCUSABLE = 150001;
+constexpr int32_t ERROR_CODE_NON_FOCUSABLE_ANCESTOR = 150002;
+constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
 } // namespace OHOS::Ace

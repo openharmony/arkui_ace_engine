@@ -176,6 +176,57 @@ class TextInputWordBreakModifier extends ModifierWithKey<WordBreak> {
   }
 }
 
+class TextInputMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMinFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMinFontSize(node);
+    } else {
+      getUINativeModule().textInput.setMinFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMaxFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMaxFontSize(node);
+    } else {
+      getUINativeModule().textInput.setMaxFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
+  constructor(value: TextHeightAdaptivePolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputHeightAdaptivePolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetHeightAdaptivePolicy(node);
+    } else {
+      getUINativeModule().textInput.setHeightAdaptivePolicy(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -834,6 +885,18 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   wordBreak(value: WordBreak): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
+    return this;
+  }
+  minFontSize(value: number | string | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMinFontSizeModifier.identity, TextInputMinFontSizeModifier, value);
+    return this;
+  }
+  maxFontSize(value: number | string | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMaxFontSizeModifier.identity, TextInputMaxFontSizeModifier, value);
+    return this;
+  }
+  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputHeightAdaptivePolicyModifier.identity, TextInputHeightAdaptivePolicyModifier, value);
     return this;
   }
 }

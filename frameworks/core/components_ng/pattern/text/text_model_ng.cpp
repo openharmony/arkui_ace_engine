@@ -65,7 +65,6 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
     CHECK_NULL_VOID(textPattern);
     auto spanString = AceType::DynamicCast<SpanString>(spanBase);
     if (spanString) {
-        spanString->AddSpanWatcher(WeakPtr(textPattern));
         auto spans = spanString->GetSpanItems();
         textPattern->SetSpanItemChildren(spans);
         textPattern->SetSpanStringMode(true);

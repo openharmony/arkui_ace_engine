@@ -585,20 +585,16 @@ ArkUINativeModuleValue TabsBridge::SetWidthAuto(ArkUIRuntimeCallInfo* runtimeCal
     CalcDimension width;
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width)) {
-        if (secondArg->IsString() && !secondArg->ToString(vm)->ToString().empty()) {
-            return panda::JSValueRef::Undefined(vm);
-        }
-        if (secondArg->IsString() && secondArg->ToString(vm)->ToString() == "auto" && !secondArg->IsNull() &&
-            !secondArg->IsUndefined()) {
-            GetArkUINodeModifiers()->getTabsModifier()->setTabWidthAuto(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
         GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
     } else {
         if (LessNotEqual(width.Value(), 0.0)) {
             width.SetValue(0.0);
         }
 
+        if (width.Unit() == DimensionUnit::AUTO) {
+            GetArkUINodeModifiers()->getTabsModifier()->setTabWidthAuto(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
         if (width.Unit() == DimensionUnit::CALC) {
             GetArkUINodeModifiers()->getCommonModifier()->setWidth(
                 nativeNode, 0, static_cast<int32_t>(width.Unit()), width.CalcValue().c_str());
@@ -632,18 +628,15 @@ ArkUINativeModuleValue TabsBridge::SetHeightAuto(ArkUIRuntimeCallInfo* runtimeCa
     CalcDimension height;
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, height)) {
-        if (secondArg->IsString() && !secondArg->ToString(vm)->ToString().empty()) {
-            return panda::JSValueRef::Undefined(vm);
-        }
-        if (secondArg->IsString() && secondArg->ToString(vm)->ToString() == "auto" && !secondArg->IsNull() &&
-            !secondArg->IsUndefined()) {
-            GetArkUINodeModifiers()->getTabsModifier()->setTabHeightAuto(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             height.SetValue(0.0);
+        }
+        
+        if (height.Unit() == DimensionUnit::AUTO) {
+            GetArkUINodeModifiers()->getTabsModifier()->setTabHeightAuto(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
         }
         if (height.Unit() == DimensionUnit::CALC) {
             GetArkUINodeModifiers()->getCommonModifier()->setHeight(

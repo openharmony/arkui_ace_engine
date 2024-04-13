@@ -15,10 +15,11 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
-#include "interfaces/native/native_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
+#include "interfaces/native/native_event.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/log/frame_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -54,6 +55,24 @@ namespace {
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
+std::string XComponentTypeToString(XComponentType type)
+{
+    switch (type) {
+        case XComponentType::UNKNOWN:
+            return "unknown";
+        case XComponentType::SURFACE:
+            return "surface";
+        case XComponentType::COMPONENT:
+            return "component";
+        case XComponentType::TEXTURE:
+            return "texture";
+        case XComponentType::NODE:
+            return "node";
+        default:
+            return "unknown";
+    }
+}
+
 OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
 {
     switch (touchType) {
@@ -134,14 +153,9 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 }
 } // namespace
 
-XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
-    const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
-    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
-{}
-
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
-    : XComponentPattern(id, type, xcomponentController, initWidth, initHeight)
+    : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
 {
     SetLibraryName(libraryname);
 }
@@ -473,12 +487,17 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return false;
 }
 
-void XComponentPattern::OnPaint()
+void XComponentPattern::DumpInfo()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateBackgroundColor(Color::BLACK);
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_));
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(XComponentTypeToString(type_)));
+    DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_));
+}
+
+void XComponentPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("surfaceRect: ").append(RectF { localPosition_, surfaceSize_ }.ToString()));
 }
 
 void XComponentPattern::NativeXComponentChange(float width, float height)
@@ -1016,10 +1035,15 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     auto renderContext = host->GetRenderContext();
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
-    auto paintRect = AdjustPaintRect(
-        localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
-    handlingSurfaceRenderContext_->SetBounds(
-        paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto paintRect = AdjustPaintRect(
+            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
+        handlingSurfaceRenderContext_->SetBounds(
+            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    } else {
+        handlingSurfaceRenderContext_->SetBounds(
+            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
+    }
 }
 
 OffsetF XComponentPattern::GetOffsetRelativeToWindow()
@@ -1250,10 +1274,15 @@ void XComponentPattern::UpdateSurfaceBounds(bool needForceRender, bool frameOffs
         XComponentSizeChange({ localPosition_, surfaceSize_ }, preSurfaceSize.IsPositive());
     }
     if (handlingSurfaceRenderContext_) {
-        auto paintRect = AdjustPaintRect(
-            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
-        handlingSurfaceRenderContext_->SetBounds(
-            paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto paintRect = AdjustPaintRect(
+                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
+            handlingSurfaceRenderContext_->SetBounds(
+                paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+        } else {
+            handlingSurfaceRenderContext_->SetBounds(
+                localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
+        }
 #ifdef ENABLE_ROSEN_BACKEND
         auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
         if (transactionProxy != nullptr) {
@@ -1428,8 +1457,8 @@ RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float
 
     float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
     float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
-    roundToPixelErrorX += nodeLeftI -relativeLeft;
-    roundToPixelErrorY += nodeTopI -relativeTop;
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
     rect.SetLeft(nodeLeftI);
     rect.SetTop(nodeTopI);
 
@@ -1463,12 +1492,6 @@ RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float
     if (nodeHeightI < nodeHeightTemp) {
         roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
         nodeHeightI = nodeHeightTemp;
-    }
-    if (roundToPixelErrorX >= 1.0f || roundToPixelErrorX <= -1.0f) {
-        LOGI("roundToPixelErrorX is %{public}f", roundToPixelErrorX);
-    }
-    if (roundToPixelErrorY >= 1.0f || roundToPixelErrorY <= -1.0f) {
-        LOGI("roundToPixelErrorY is %{public}f", roundToPixelErrorY);
     }
 
     rect.SetWidth(nodeWidthI);

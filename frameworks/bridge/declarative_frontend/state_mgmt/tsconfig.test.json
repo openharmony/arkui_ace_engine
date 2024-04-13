@@ -32,6 +32,7 @@
     "src/lib/sdk/subscribable_abstract.ts",
     "src/lib/sdk/persistent_storage.ts",
     "src/lib/sdk/environment.ts",
+    "src/lib/sdk/i_repeat.ts",
 
     // common, non-sdk
     "src/lib/common/observed_object.ts",
@@ -59,6 +60,7 @@
     "src/lib/partial_update/pu_synced_property_object_nested.ts",
     "src/lib/partial_update/pu_uinode_registry_proxy.ts",
     "src/lib/partial_update/pu_view.ts",
+    "src/lib/partial_update/pu_repeat.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
 
@@ -68,6 +70,9 @@
     "src/lib/v3/v3_computed.ts",
     "src/lib/v3/v3_variable_decorators.ts",
     
+    // partial_update specific
+    "src/lib/partial_update/pu_repeat.ts",
+
     // unit testing
     "src/utest/common/helpers_for_test.ts",
     "src/utest/common/local_storage_test.ts",
