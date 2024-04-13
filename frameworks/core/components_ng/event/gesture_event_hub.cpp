@@ -410,8 +410,7 @@ bool GestureEventHub::IsPixelMapNeedScale() const
     CHECK_NULL_RETURN(frameNode, false);
     auto width = pixelMap_->GetWidth();
     auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG ||
-        frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE || width == 0 || width < maxWidth) {
+    if (frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE || width == 0 || width < maxWidth) {
         return false;
     }
     return true;
@@ -866,9 +865,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * defaultPixelMapScale;
-    auto overlayManager = pipeline->GetOverlayManager();
     auto windowScale = dragDropManager->GetWindowScale();
+    float scale = windowScale * defaultPixelMapScale;
+    auto overlayManager = pipeline->GetOverlayManager();
     bool isSwitchToSubWindow = false;
     RefPtr<FrameNode> imageNode = nullptr;
     RefPtr<FrameNode> textNode = nullptr;
