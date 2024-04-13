@@ -294,6 +294,13 @@ HWTEST_F(ListAttrTestNg, AttrSpace003, TestSize.Level1)
      */
     CreateWithItem([](ListModelNG model) { model.SetSpace(Dimension(LIST_HEIGHT)); });
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
+
+    /**
+     * @tc.cases: Set invalid space: -1
+     * @tc.expected: Space was going to be zero
+     */
+    CreateWithItem([](ListModelNG model) { model.SetSpace(Dimension(-1)); });
+    EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
 }
 
 /**
