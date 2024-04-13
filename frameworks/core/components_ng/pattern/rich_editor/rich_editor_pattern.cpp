@@ -3643,7 +3643,11 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     SetCaretPosition(newPos);
     MoveCaretToContentRect();
-    StartTwinkling();
+    if (textSelector_.SelectNothing()) {
+        StartTwinkling();
+    } else {
+        StopTwinkling();
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
