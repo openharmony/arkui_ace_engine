@@ -432,6 +432,12 @@ public:
         return startIndex;
     }
 
+    int32_t GetRowEndIndex(const int32_t input)
+    {
+        std::pair<int32_t, float> rowInfo = GetRowEndIndexAndHeight(input);
+        return rowInfo.first;
+    }
+
     std::pair<int32_t, float> GetRowEndIndexAndHeight(const int32_t input)
     {
         int32_t endIndex = input;
