@@ -24,6 +24,9 @@ void ListTestNg::SetUpTestSuite()
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 
+    auto listTheme = AceType::MakeRefPtr<ListTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(ListTheme::TypeId())).WillRepeatedly(Return(listTheme));
+
     auto listItemTheme = AceType::MakeRefPtr<ListItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
     listItemTheme->itemDefaultColor_ = Color::WHITE;
