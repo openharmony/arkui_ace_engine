@@ -243,6 +243,14 @@ public:
         touchEventActuator_->AddTouchEvent(touchEvent);
     }
 
+    void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+        touchEventActuator_->AddTouchAfterEvent(touchEvent);
+    }
+
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (!touchEventActuator_) {
@@ -297,6 +305,7 @@ public:
     void ClearJSFrameNodeOnTouch();
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
