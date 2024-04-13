@@ -1353,6 +1353,7 @@ public:
     {
         if (pixelMap == nullptr) {
             TAG_LOGW(AceLogTag::ACE_DRAG, "pixelMap is null!");
+            g_pixelMap = nullptr;
             thumbnailGet.notify_all();
             return;
         }

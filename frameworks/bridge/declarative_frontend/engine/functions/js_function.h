@@ -93,9 +93,6 @@ public:
     JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
 
 protected:
-    virtual bool MaybeRelease() override;
-
-    int32_t containerId_;
     JSRef<JSFunc> jsFunction_;
 };
 
