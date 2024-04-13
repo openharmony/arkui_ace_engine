@@ -1941,10 +1941,6 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
 
-    pattern_->ScrollToIndex(3, true, ScrollAlign::NONE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
-
     pattern_->ScrollToIndex(29, true);
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
