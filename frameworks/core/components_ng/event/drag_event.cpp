@@ -1396,7 +1396,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {imageNode, offset, width, height};
+    gatherNodeChildInfo = {imageNode, offset, width, height, width / 2.0f, height / 2.0f};
     return imageNode;
 }
 
@@ -1603,7 +1603,7 @@ void DragEventActuator::HandleTouchMoveEvent()
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
-        manager->RemoveGatherNodeWithAnimation();
+        manager->RemoveGatherNode();
         isOnBeforeLiftingAnimation = false;
     }
 }

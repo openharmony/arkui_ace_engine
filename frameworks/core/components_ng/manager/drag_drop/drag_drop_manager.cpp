@@ -51,6 +51,8 @@ constexpr int32_t MAX_RETRY_TIMES = 3;
 constexpr int32_t MAX_RETRY_DURATION = 800;
 constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
 constexpr int64_t MOVE_TIME_LIMIT = 6L;
+constexpr int64_t DRAG_MOVE_TIME_THRESHOLD = 16 * 1000 * 1000;
+constexpr float MAX_DISTANCE_TO_PRE_POINTER = 20.0f;
 } // namespace
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -1407,6 +1409,24 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     return true;
 }
 
+bool DragDropManager::IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent)
+{
+    if (!IsNeedDisplayInSubwindow() || isDragFwkShow_) {
+        return false;
+    }
+    auto x = pointerEvent.GetPoint().GetX();
+    auto y = pointerEvent.GetPoint().GetY();
+    auto distanceToPrePointer = sqrt(pow(prePointerOffset_.GetX() - x, 2) + pow(prePointerOffset_.GetY() - y, 2));
+    int64_t nanoCurrentTimeStamp = pointerEvent.downTime.time_since_epoch().count();
+    if ((nanoCurrentTimeStamp < nanoPreDragMoveAnimationTime_ + DRAG_MOVE_TIME_THRESHOLD) &&
+        (distanceToPrePointer < MAX_DISTANCE_TO_PRE_POINTER)) {
+        return false;
+    }
+    nanoPreDragMoveAnimationTime_ = nanoCurrentTimeStamp;
+    prePointerOffset_ = { x, y };
+    return true;
+}
+
 bool DragDropManager::IsNeedScaleDragPreview()
 {
     return info_.scale > 0 && info_.scale < 1.0f;
@@ -1462,14 +1482,12 @@ Offset DragDropManager::CalcDragMoveOffset(
 
 void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
 {
-    if (!IsNeedDisplayInSubwindow()) {
+    if (!IsNeedDoDragMoveAnimate(pointerEvent)) {
         return;
     }
     isPullMoveReceivedForCurrentDrag_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
     auto containerId = Container::CurrentId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-    CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(info_.imageNode);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
@@ -1500,13 +1518,10 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
     CHECK_NULL_VOID(renderContext);
     AnimationUtils::Animate(
         option,
-        [renderContext, localPoint = newOffset, info = info_, overlayManager, gatherNodeCenter]() {
+        [renderContext, localPoint = newOffset, info = info_, overlayManager]() {
             renderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
-            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, -1.0f);
-            CHECK_NULL_VOID(info.textNode);
-            auto textRenderContext = info.textNode->GetRenderContext();
-            CHECK_NULL_VOID(textRenderContext);
-            textRenderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
+            UpdateGatherNodePosition(overlayManager, info.imageNode);
+            UpdateTextNodePosition(info.textNode, localPoint);
         },
         option.GetOnFinishEvent());
 }
@@ -1529,16 +1544,16 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     constexpr decltype(distance) MAX_DIS = 5.0;
     if ((distance < MAX_DIS || !IsNeedScaleDragPreview()) &&
         (maxDistance < MAX_DIS || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_))) {
-        auto containerId = Container::CurrentId();
         TransDragWindowToDragFwk(containerId);
         return;
     }
-    Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT,
-        static_cast<int32_t>(event.GetGlobalLocation().GetX()), static_cast<int32_t>(event.GetGlobalLocation().GetY()),
-        info_);
+    Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
+        static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
+    nanoPreDragMoveAnimationTime_ = GetSysTimestamp();
+    prePointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
     AnimationOption option;
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
-    constexpr int32_t animateDuration = 30;
+    constexpr int32_t animateDuration = 300;
     option.SetCurve(curve);
     option.SetDuration(animateDuration);
     option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId]() {
@@ -1555,10 +1570,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
             renderContext->UpdateTransformScale({ info.scale, info.scale });
             renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
             UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, info.scale);
-            CHECK_NULL_VOID(info.textNode);
-            auto textRenderContext = info.textNode->GetRenderContext();
-            CHECK_NULL_VOID(textRenderContext);
-            textRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
+            UpdateTextNodePosition(info.textNode, newOffset);
         },
         option.GetOnFinishEvent());
 }
@@ -1652,8 +1664,8 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdatePosition(OffsetT<Dimension>(
-            Dimension(gatherNodeCenter.GetX() - child.width / 2.0f),
-            Dimension(gatherNodeCenter.GetY() - child.height / 2.0f)));
+            Dimension(gatherNodeCenter.GetX() - child.halfWidth),
+            Dimension(gatherNodeCenter.GetY() - child.halfHeight)));
         if (scale > 0) {
             imageContext->UpdateTransformScale({ scale, scale });
         }
@@ -1675,6 +1687,37 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
     }
 }
 
+void DragDropManager::UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
+    const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto gatherNodeCenter = imageNode->GetPaintRectCenter();
+    CHECK_NULL_VOID(overlayManager);
+    Dimension x = Dimension(0.0f);
+    Dimension y = Dimension(0.0f);
+    OffsetT<Dimension> offset(x, y);
+    auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
+    for (const auto& child : gatherNodeChildrenInfo) {
+        auto imageNode = child.imageNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageContext);
+        x.SetValue(gatherNodeCenter.GetX() - child.halfWidth);
+        y.SetValue(gatherNodeCenter.GetY() - child.halfHeight);
+        offset.SetX(x);
+        offset.SetY(y);
+        imageContext->UpdatePosition(offset);
+    }
+}
+
+void DragDropManager::UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
+}
+
 double DragDropManager::CalcGatherNodeMaxDistanceWithPoint(const RefPtr<OverlayManager>& overlayManager,
     int32_t x, int32_t y)
 {
@@ -1687,8 +1730,8 @@ double DragDropManager::CalcGatherNodeMaxDistanceWithPoint(const RefPtr<OverlayM
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_RETURN(imageContext, 0.0f);
         auto renderPosition = imageContext->GetPropertyOfPosition();
-        double dis = sqrt(pow(renderPosition.GetX() + child.width / 2.0f - x, 2) +
-            pow(renderPosition.GetY() + child.height / 2.0f - y, 2));
+        double dis = sqrt(pow(renderPosition.GetX() + child.halfWidth - x, 2) +
+            pow(renderPosition.GetY() + child.halfHeight - y, 2));
         maxDistance = std::max(maxDistance, dis);
     }
     return maxDistance;

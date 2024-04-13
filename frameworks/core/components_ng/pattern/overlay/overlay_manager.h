@@ -68,8 +68,10 @@ struct PopupInfo {
 struct GatherNodeChildInfo {
     WeakPtr<FrameNode> imageNode;
     OffsetF offset;
-    float width = 0.0;
-    float height = 0.0;
+    float width = 0.0f;
+    float height = 0.0f;
+    float halfWidth = 0.0f;
+    float halfHeight = 0.0f;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -461,7 +463,7 @@ public:
     {
         return gatherNodeWeak_.Upgrade();
     }
-    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo()
+    const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo()
     {
         return gatherNodeChildrenInfo_;
     }

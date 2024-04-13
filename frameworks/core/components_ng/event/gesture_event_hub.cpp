@@ -847,17 +847,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
         GenerateMousePixelMap(info);
-        SetDragGatherPixelMaps(info);
         if (pixelMap_) {
             pixelMap = pixelMap_;
         }
     } else {
-        SetDragGatherPixelMaps(info);
         CHECK_NULL_VOID(pixelMap_);
         if (pixelMap == nullptr) {
             pixelMap = pixelMap_;
         }
     }
+    SetDragGatherPixelMaps(info);
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
     auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
