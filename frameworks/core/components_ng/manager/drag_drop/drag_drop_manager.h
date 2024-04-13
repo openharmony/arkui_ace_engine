@@ -406,6 +406,7 @@ private:
     bool isDistanceLimited(const Point& point);
     bool isTimeLimited(const PointerEvent& pointerEvent, const Point& point);
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
+    bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;

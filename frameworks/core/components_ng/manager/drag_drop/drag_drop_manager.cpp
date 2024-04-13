@@ -300,23 +300,38 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 
 void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior)
 {
-    const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
-    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        UpdateDragStyle(DragCursorStyleCore::MOVE);
-        return;
-    }
-    bool isFound = false;
-    for (const auto& it : summaryMap_) {
-        if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
-            isFound = true;
-            break;
-        }
-    }
-    if (!isFound) {
+    if (IsDropAllowed(dragFrameNode)) {
         UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
         return;
     }
-    UpdateDragStyle(dragBehavior == DragBehavior::MOVE ? DragCursorStyleCore::MOVE : DragCursorStyleCore::COPY);
+    
+    // drop allowed
+    // special handling for no drag data present situation, always show as move
+    if (summaryMap_.empty()) {
+        UpdateDragStyle(DragCursorStyleCore::MOVE);
+        return;
+    }
+
+    //other case, check drag behavior
+    switch (dragBehavior) {
+        case DragBehavior::UNKNOWN: {
+            // the application does not config the drag behavior, use copy as default
+            UpdateDragStyle(DragCursorStyleCore::COPY);
+            break;
+        }
+        case DragBehavior::MOVE: {
+            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            break;
+        }
+        case DragBehavior::COPY: {
+            UpdateDragStyle(DragCursorStyleCore::COPY);
+            break;
+        }
+        default: {
+            UpdateDragStyle(DragCursorStyleCore::COPY);
+            break;
+        }
+    }
 }
 
 void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle)
@@ -674,30 +689,12 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
-    bool isDisallowDropForcedly = dragFrameNode->GetDisallowDropForcedly();
-    if (isDisallowDropForcedly) {
+    if (!IsDropAllowed(dragFrameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
             container->GetWindowId());
         ResetDragDrop(container->GetWindowId(), point);
         return;
-    }
-    bool isFound = false;
-    const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
-    if (!dragFrameNodeAllowDrop.empty()) {
-        for (const auto& it : summaryMap_) {
-            if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
-                isFound = true;
-                break;
-            }
-        }
-        if (!isFound) {
-            TAG_LOGI(AceLogTag::ACE_DRAG,
-                "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
-                container->GetWindowId());
-            ResetDragDrop(container->GetWindowId(), point);
-            return;
-        }
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, drag position is (%{public}f, %{public}f)."
         "TargetNode is %{public}s, id is %{public}s",
@@ -717,6 +714,27 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         auto unifiedData = RequestUDMFDataWithUDKey(udKey);
         DoDropAction(dragFrameNode, point, unifiedData, udKey);
     }
+}
+
+bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
+{
+    // application passed in null to indicate refusing all drag data forcedly
+    bool isDisallowDropForcedly = dragFrameNode->GetDisallowDropForcedly();
+    if (isDisallowDropForcedly) {
+        return false;
+    }
+    const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
+    // if application does not set allow drop or set with empty, treat as all data types is allowed
+    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
+        return true;
+    }
+    for (const auto& it : summaryMap_) {
+        // if one matched found, allow drop
+        if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void DragDropManager::RequestDragSummaryInfoAndPrivilege()
