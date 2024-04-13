@@ -223,6 +223,8 @@ private:
     bool isGroupChanged_ = false;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isOnAnimationFlag_ = false;
+    bool preTypeIsBuilder_ = false;
+    RefPtr<FrameNode> builderChildNode_;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
     bool enabled_ = true;
