@@ -6154,7 +6154,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts202, TestSize.Level1)
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
-    richEditorPattern->HandleSelectFrontStyle(KeyCode::KEY_B);
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
 }
 
 /**
@@ -6186,7 +6186,7 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts203, TestSize.Level1)
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
-    richEditorPattern->HandleSelectFrontStyle(KeyCode::KEY_I);
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
 }
 
 /**
@@ -6218,6 +6218,6 @@ HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts204, TestSize.Level1)
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->textSelector_.Update(4, 20);
-    richEditorPattern->HandleSelectFrontStyle(KeyCode::KEY_U);
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
 }
 } // namespace OHOS::Ace::NG
