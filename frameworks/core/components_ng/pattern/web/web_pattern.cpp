@@ -2295,6 +2295,7 @@ void WebPattern::DragDropSelectionMenu()
     selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
     selectInfo.secondHandle.isShow = IsTouchHandleShow(endSelectionHandle_);
     selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+    QuickMenuIsNeedNewAvoid(selectInfo, dropParams_, startSelectionHandle_, endSelectionHandle_);
     selectInfo.menuInfo.menuIsShow = true;
     RegisterSelectOverlayCallback(selectInfo, dropParams_, menuCallback_);
     RegisterSelectOverlayEvent(selectInfo);
