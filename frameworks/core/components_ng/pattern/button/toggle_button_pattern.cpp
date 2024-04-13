@@ -104,6 +104,7 @@ void ToggleButtonPattern::OnModifyDone()
     InitHoverEvent();
     InitOnKeyEvent();
     SetAccessibilityAction();
+    FireBuilder();
 }
 
 void ToggleButtonPattern::SetAccessibilityAction()
@@ -123,6 +124,7 @@ void ToggleButtonPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->UpdateSelectStatus(false);
     });
+    FireBuilder();
 }
 
 void ToggleButtonPattern::UpdateSelectStatus(bool isSelected)
@@ -167,6 +169,9 @@ void ToggleButtonPattern::OnAfterModifyDone()
 
 void ToggleButtonPattern::HandleEnabled()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -213,6 +218,9 @@ void ToggleButtonPattern::InitClickEvent()
 
 void ToggleButtonPattern::OnClick()
 {
+    if (UseContentModifier()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();
@@ -337,5 +345,60 @@ void ToggleButtonPattern::OnColorConfigurationUpdate()
     checkedColor_ = toggleTheme->GetCheckedColor();
     unCheckedColor_ = toggleTheme->GetBackgroundColor();
     OnModifyDone();
+}
+
+void ToggleButtonPattern::SetButtonPress(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (!enabled) {
+        return;
+    }
+    auto paintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIsOn(isSelected);
+    OnModifyDone();
+}
+
+void ToggleButtonPattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+    const auto& renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
+    CHECK_NULL_VOID(buttonPaintProperty);
+    auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(ITEM_FILL_COLOR);
+    renderContext->UpdateBackgroundColor(bgColor);
+}
+
+RefPtr<FrameNode> ToggleButtonPattern::BuildContentModifierNode()
+{
+    if (!toggleMakeFunc_.has_value()) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(toggleMakeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    auto paintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    bool isSelected = false;
+    if (paintProperty->HasIsOn()) {
+        isSelected = paintProperty->GetIsOnValue();
+    } else {
+        isSelected = false;
+    }
+    return (toggleMakeFunc_.value())(ToggleConfiguration(enabled, isSelected));
 }
 } // namespace OHOS::Ace::NG
