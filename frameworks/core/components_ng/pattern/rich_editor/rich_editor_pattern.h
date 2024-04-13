@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <set>
 
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -190,7 +191,9 @@ public:
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void HandleOnDelete(bool backward) override;
     void DeleteBackward(int32_t length = 0) override;
-    std::wstring DeleteBackwardOperation(int32_t length = 0);
+    void DeleteBackward(int32_t length = 0, bool isExternalkeyboard = false);
+    std::wstring DeleteBackwardOperation(int32_t length = 0, bool isExternalkeyboard = false);
+    std::wstring GetBackwardDeleteText(int32_t length);
     void DeleteForward(int32_t length) override;
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
@@ -667,6 +670,9 @@ private:
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
+    bool DeleteImageBySoftKeyboard(const RichEditorDeleteValue& info);
+    void DeleteTextSpanInfo(const RefPtr<FrameNode>& host, std::set<int32_t, std::greater<int32_t>>& SpanNodes,
+        const RichEditorAbstractSpanResult& spanResult);
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
