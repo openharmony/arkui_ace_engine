@@ -1095,6 +1095,24 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IndexerModelNGTest008
+ * @tc.desc: Test newly added properties of indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerModelNGTest008, TestSize.Level1)
+{
+    Create([](IndexerModelNG model) {
+        model.SetAdaptiveWidth(true);
+    });
+
+    /**
+     * @tc.steps: step1. Get properties.
+     * @tc.expected: Properties are correct.
+     */
+    EXPECT_EQ(layoutProperty_->GetAdaptiveWidthValue(), true);
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: Test OnModifyDone
  * @tc.type: FUNC
@@ -1209,16 +1227,12 @@ HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
     std::vector<std::pair<std::string, bool>> arrayValueRst;
     arrayValueRst.push_back(std::pair("A", false));
     arrayValueRst.push_back(std::pair("B", true));
-    arrayValueRst.push_back(std::pair("E", false));
-    arrayValueRst.push_back(std::pair("F", true));
-    arrayValueRst.push_back(std::pair("I", false));
-    arrayValueRst.push_back(std::pair("J", true));
+    arrayValueRst.push_back(std::pair("G", false));
+    arrayValueRst.push_back(std::pair("H", true));
     arrayValueRst.push_back(std::pair("M", false));
     arrayValueRst.push_back(std::pair("N", true));
-    arrayValueRst.push_back(std::pair("Q", false));
-    arrayValueRst.push_back(std::pair("R", true));
-    arrayValueRst.push_back(std::pair("U", false));
-    arrayValueRst.push_back(std::pair("V", true));
+    arrayValueRst.push_back(std::pair("S", false));
+    arrayValueRst.push_back(std::pair("T", true));
     arrayValueRst.push_back(std::pair("Z", false));
 
     EXPECT_EQ(pattern_->autoCollapse_, true);
@@ -1228,7 +1242,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
         EXPECT_EQ(arrayValueRst[index].first, pattern_->arrayValue_[index].first);
         EXPECT_EQ(arrayValueRst[index].second, pattern_->arrayValue_[index].second);
     }
-    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
 }
 
 /**
@@ -1296,7 +1310,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone007, TestSize.Level1)
     Create([](IndexerModelNG model) {
         model.SetAutoCollapse(true);
         model.SetItemSize(Dimension(10, DimensionUnit::VP));
-    }, CREATE_ARRAY_2, 0);
+    }, CREATE_ARRAY_1, 0);
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> layoutWrapper =
@@ -1314,8 +1328,8 @@ HWTEST_F(IndexerTestNg, OnModifyDone007, TestSize.Level1)
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
     EXPECT_EQ(pattern_->autoCollapse_, true);
-    EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_2.size());
-    EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_2.size());
+    EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
+    EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
         EXPECT_EQ(value.second, false);
     }

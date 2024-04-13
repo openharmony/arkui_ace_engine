@@ -325,6 +325,7 @@ public:
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
     virtual void SetAccessibilityText(const std::string& text) = 0;
+    virtual void SetAccessibilityTextHint(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;

@@ -305,11 +305,16 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
         UpdateDragStyle(DragCursorStyleCore::MOVE);
         return;
     }
+    bool isFound = false;
     for (const auto& it : summaryMap_) {
-        if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-            UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
-            return;
+        if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
+            isFound = true;
+            break;
         }
+    }
+    if (!isFound) {
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        return;
     }
     UpdateDragStyle(dragBehavior == DragBehavior::MOVE ? DragCursorStyleCore::MOVE : DragCursorStyleCore::COPY);
 }
@@ -677,16 +682,21 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
+    bool isFound = false;
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (!dragFrameNodeAllowDrop.empty()) {
         for (const auto& it : summaryMap_) {
-            if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-                TAG_LOGI(AceLogTag::ACE_DRAG,
-                    "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
-                    container->GetWindowId());
-                ResetDragDrop(container->GetWindowId(), point);
-                return;
+            if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
+                isFound = true;
+                break;
             }
+        }
+        if (!isFound) {
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
+                container->GetWindowId());
+            ResetDragDrop(container->GetWindowId(), point);
+            return;
         }
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, drag position is (%{public}f, %{public}f)."

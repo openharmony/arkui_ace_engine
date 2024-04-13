@@ -539,6 +539,14 @@ void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
     accessibilityProperty->SetAccessibilityText(text);
 }
 
+void ViewAbstractModelNG::SetAccessibilityTextHint(const std::string& text)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityTextHint(text);
+}
+
 void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& description)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();

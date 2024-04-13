@@ -6157,6 +6157,11 @@ void JSViewAbstract::JsAccessibilityText(const std::string& text)
     ViewAbstractModel::GetInstance()->SetAccessibilityText(text);
 }
 
+void JSViewAbstract::JsAccessibilityTextHint(const std::string& text)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(text);
+}
+
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
     std::pair<bool, std::string> autoEventPair(false, "");
@@ -7202,6 +7207,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("privacySensitive", &JSViewAbstract::JsPrivacySensitive);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
     JSClass<JSViewAbstract>::StaticMethod("dragPreview", &JSViewAbstract::JsDragPreview);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityTextHint", &JSViewAbstract::JsAccessibilityTextHint);
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
@@ -7310,8 +7316,11 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
             allowDrop = allowDropArray->GetValueAt(i)->ToString();
             allowDropSet.insert(allowDrop);
         }
+        ViewAbstractModel::GetInstance()->SetDisallowDropForcedly(false);
     } else if (info[0]->IsNull()) {
         ViewAbstractModel::GetInstance()->SetDisallowDropForcedly(true);
+    } else {
+        ViewAbstractModel::GetInstance()->SetDisallowDropForcedly(false);
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
 }

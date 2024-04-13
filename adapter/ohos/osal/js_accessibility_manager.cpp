@@ -38,6 +38,7 @@
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "frameworks/core/components_ng/property/accessibility_property.h"
+#include "nlohmann/json.hpp"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -1114,6 +1115,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
         nodeInfo.SetRange(rangeInfo);
     }
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
+    nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
     nodeInfo.SetChecked(accessibilityProperty->IsChecked());
     nodeInfo.SetSelected(accessibilityProperty->IsSelected());
@@ -2560,6 +2562,10 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
     }
     DumpCommonPropertyNG(nodeInfo);
     DumpAccessibilityPropertyNG(nodeInfo);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty) {
+        DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
+    }
     DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
 }
 
@@ -3048,7 +3054,19 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    SearchParameter param {0, text, 0, uiExtensionOffset};
+    nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
+    if (textJson.is_null() || !textJson.contains("type")) {
+        return;
+    }
+    if (textJson["type"] == "textType") {
+        SearchParameter param {0, text, 0, uiExtensionOffset};
+        FindTextByTextHint(node, infos, ngPipeline, commonProperty, param);
+        return;
+    }
+    if (!textJson.contains("value")) {
+        return;
+    }
+    SearchParameter param {0, textJson["value"], 0, uiExtensionOffset};
     FindText(node, infos, ngPipeline, commonProperty, param);
 }
 
@@ -4326,6 +4344,46 @@ void JsAccessibilityManager::FindText(const RefPtr<NG::UINode>& node,
     if (!node->GetChildren().empty()) {
         for (const auto& child : node->GetChildren()) {
             FindText(child, infos, context, commonProperty, searchParam);
+        }
+    }
+}
+
+void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
+    std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::PipelineContext>& context,
+    const CommonProperty& commonProperty, const SearchParameter& searchParam)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    if (frameNode && !frameNode->IsInternal()) {
+        std::string text = searchParam.text;
+        nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
+        std::string value = "";
+        if (!textJson.is_null() && textJson.contains("value")) {
+            value = textJson["value"];
+        }
+        std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
+        nlohmann::json textTypeJson = nlohmann::json::parse(textType, nullptr, false);
+        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value) {
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
+            infos.emplace_back(nodeInfo);
+        }
+    }
+    if (IsUIExtensionOrEmbeddedComponent(frameNode)) {
+        auto infosByIPC = SearchElementInfosByTextNG(NG::UI_EXTENSION_ROOT_ID, searchParam.text,
+            frameNode, searchParam.uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
+        if (!infosByIPC.empty()) {
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
+            ConvertExtensionAccessibilityNodeId(infosByIPC, frameNode, searchParam.uiExtensionOffset, nodeInfo);
+            for (auto& info : infosByIPC) {
+                infos.emplace_back(info);
+            }
+        }
+    }
+    if (!node->GetChildren().empty()) {
+        for (const auto& child : node->GetChildren()) {
+            FindTextByTextHint(child, infos, context, commonProperty, searchParam);
         }
     }
 }

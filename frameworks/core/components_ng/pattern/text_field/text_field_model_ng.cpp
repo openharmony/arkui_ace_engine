@@ -823,16 +823,16 @@ void TextFieldModelNG::SetBackBorder()
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasBorderRadius()) {
-        auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-        paintProperty->UpdateBorderRadiusFlagByUser(renderContext->GetBorderRadius().value());
+        ACE_UPDATE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderRadiusFlagByUser, renderContext->GetBorderRadius().value());
     }
     if (renderContext->HasBorderColor()) {
-        auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-        paintProperty->UpdateBorderColorFlagByUser(renderContext->GetBorderColor().value());
+        ACE_UPDATE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderColorFlagByUser, renderContext->GetBorderColor().value());
     }
     if (renderContext->HasBorderWidth()) {
-        auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-        paintProperty->UpdateBorderWidthFlagByUser(renderContext->GetBorderWidth().value());
+        ACE_UPDATE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value());
     }
 }
 

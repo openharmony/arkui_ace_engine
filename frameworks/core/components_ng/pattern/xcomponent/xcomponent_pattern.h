@@ -130,7 +130,6 @@ public:
         }
     }
 
-    void OnPaint();
     void NativeXComponentOffset(double x, double y);
     void NativeXComponentChange(float width, float height);
     void NativeXComponentDestroy();
@@ -290,6 +289,8 @@ private:
     void NativeSurfaceShow();
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
+    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();

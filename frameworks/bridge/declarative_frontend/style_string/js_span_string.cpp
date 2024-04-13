@@ -157,12 +157,15 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
             break;
         case SpanType::Decoration: {
             obj = CreateJsDecorationSpan(spanObject);
+            break;
         }
         case SpanType::BaselineOffset: {
             obj = CreateJsBaselineOffsetSpan(spanObject);
+            break;
         }
         case SpanType::LetterSpacing: {
             obj = CreateJsLetterSpacingSpan(spanObject);
+            break;
         }
         case SpanType::Gesture:
             obj = CreateJsGestureSpan(spanObject);

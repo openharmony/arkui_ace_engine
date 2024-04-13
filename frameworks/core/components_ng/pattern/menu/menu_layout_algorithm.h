@@ -27,6 +27,23 @@
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 
 namespace OHOS::Ace::NG {
+
+struct MenuDumpInfo {
+    uint32_t menuPreviewMode;
+    uint32_t menuType;
+    bool enableArrow;
+    std::string targetNode;
+    OffsetF targetOffset;
+    SizeF targetSize;
+    float previewBeginScale;
+    float previewEndScale;
+    float top;
+    float bottom;
+    OffsetF globalLocation;
+    std::string originPlacement;
+    OffsetF finalPosition;
+    std::string finalPlacement;
+};
 class MenuLayoutProperty;
 class MenuPattern;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -213,6 +230,7 @@ private:
 
     // previewSacle_ must be greater than 0
     float previewScale_ = 1.0f;
+    MenuDumpInfo dumpInfo_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

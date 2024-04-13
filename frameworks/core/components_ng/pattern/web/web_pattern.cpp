@@ -169,6 +169,9 @@ const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE = 4;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
+int64_t last_height_ = 0L;
+int64_t last_width_ = 0L;
+bool g_dragWindowFlag = false;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
@@ -1784,6 +1787,7 @@ void WebPattern::OnModifyDone()
         if (accessibilityState_) {
             delegate_->SetAccessibilityState(true);
         }
+        delegate_->UpdateSmoothDragResizeEnabled(GetSmoothDragResizeEnabledValue(false));
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -2903,7 +2907,51 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
-void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    switch (type) {
+        case WindowSizeChangeReason::DRAG_START:
+        case WindowSizeChangeReason::DRAG:
+        case WindowSizeChangeReason::DRAG_END: {
+            g_dragWindowFlag = true;
+            WindowDrag(width, height);
+            break;
+        }
+        default:
+            g_dragWindowFlag = false;
+            last_height_ = 0;
+            last_width_ = 0;
+            break;
+    }
+}
+
+void WebPattern::WindowDrag(int32_t width, int32_t height)
+{
+    if (delegate_) {
+        bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
+        if (!isSmoothDragResizeEnabled) {
+            return;
+        }
+        if (last_height_ == 0 && last_width_ == 0) {
+            last_height_ = height;
+            last_width_ = width;
+        }
+        if (!GetPendingSizeStatus() && g_dragWindowFlag) {
+            int64_t pre_height = height - last_height_;
+            int64_t pre_width = width - last_width_;
+            delegate_->DragResize(width, height, pre_height, pre_width);
+            last_height_ = height;
+            last_width_ = width;
+        }
+    }
+}
+
+void WebPattern::OnSmoothDragResizeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateSmoothDragResizeEnabled(value);
+    }
+}
 
 void WebPattern::OnCompleteSwapWithNewSize()
 {
@@ -3547,19 +3595,61 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto offset = host->GetOffsetRelativeToWindow();
-    touchEventInfo = touchEventInfo_;
+    TouchEventInfo tempTouchInfo = touchEventInfo_;
     if ((touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) &&
         !touchEventQueue_.empty()) {
-        touchEventInfo = touchEventQueue_.front();
+        tempTouchInfo = touchEventQueue_.front();
         touchEventQueue_.pop();
     }
+    touchEventInfo.SetSourceDevice(tempTouchInfo.GetSourceDevice());
+    touchEventInfo.SetTarget(tempTouchInfo.GetTarget());
+    touchEventInfo.SetForce(tempTouchInfo.GetForce());
+    touchEventInfo.SetSourceTool(tempTouchInfo.GetSourceTool());
+    touchEventInfo.SetTargetDisplayId(tempTouchInfo.GetTargetDisplayId());
+    touchEventInfo.SetDeviceId(tempTouchInfo.GetDeviceId());
+
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
     changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
     changedInfo.SetTouchType(touchEvent.type);
 
+    SetTouchLocationInfo(touchEvent, changedInfo, tempTouchInfo, touchEventInfo);
+
     touchEventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
+}
+
+void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchLocationInfo& changedInfo,
+    const TouchEventInfo& tempTouchInfo, TouchEventInfo& touchEventInfo)
+{
+    float scaleX = 0.0f;
+    float scaleY = 0.0f;
+    const std::list<TouchLocationInfo>& touchList = tempTouchInfo.GetTouches();
+    for (const TouchLocationInfo& location : touchList) {
+        if (touchEvent.id == location.GetFingerId()) {
+            const OHOS::Ace::Offset& localLocation = location.GetLocalLocation();
+            scaleX = localLocation.GetX() - touchEvent.x;
+            scaleY = localLocation.GetY() - touchEvent.y;
+        }
+    }
+    for (const TouchLocationInfo& location : touchList) {
+        TouchLocationInfo info("onTouch", location.GetFingerId());
+        if (touchEvent.id == location.GetFingerId()) {
+            info.SetGlobalLocation(changedInfo.GetGlobalLocation());
+            info.SetLocalLocation(changedInfo.GetLocalLocation());
+            info.SetScreenLocation(changedInfo.GetScreenLocation());
+            info.SetTouchType(changedInfo.GetTouchType());
+        } else {
+            const OHOS::Ace::Offset& localLocation = location.GetLocalLocation();
+            const OHOS::Ace::Offset& globalLocation = location.GetGlobalLocation();
+            const OHOS::Ace::Offset& screenLocation = location.GetScreenLocation();
+            info.SetGlobalLocation(Offset(globalLocation.GetX() - scaleX, globalLocation.GetY() - scaleY));
+            info.SetLocalLocation(Offset(localLocation.GetX() - scaleX, localLocation.GetY() - scaleY));
+            info.SetScreenLocation(Offset(screenLocation.GetX() - scaleX, screenLocation.GetY() - scaleY));
+            info.SetTouchType(location.GetTouchType());
+        }
+        touchEventInfo.AddTouchLocationInfo(std::move(info));
+    }
 }
 
 void WebPattern::RegisterVisibleAreaChangeCallback()

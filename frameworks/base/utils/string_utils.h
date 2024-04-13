@@ -519,6 +519,22 @@ inline void StringSplitter(
     }
 }
 
+inline bool ParseStringToArray(const std::string& input, std::vector<float>& output)
+{
+    std::istringstream iss(StringUtils::ReplaceChar(input, ',', ' '));
+    std::string token;
+
+    while (iss >> token) {
+        double value;
+        if (!StringToDouble(token, value)) {
+            return false;
+        }
+        output.emplace_back(value);
+    }
+
+    return true;
+}
+
 inline void StringSplitter(const std::string& source, char delimiter, std::vector<std::string>& out)
 {
     using Func = std::string (*)(const std::string&);

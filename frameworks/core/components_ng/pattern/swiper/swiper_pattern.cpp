@@ -1594,18 +1594,22 @@ void SwiperPattern::StopTranslateAnimation()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         translateAnimationIsRunning_ = false;
-        AnimationOption option;
-        option.SetCurve(Curves::LINEAR);
-        option.SetDuration(0);
 
-        // update property value, because stop animation need different endPos.
-        host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, currentOffset_ - PX_EPSILON);
-        translateAnimation_ = AnimationUtils::StartAnimation(
-            option, [host, weak = WeakClaim(this)]() {
-                auto swiper = weak.Upgrade();
-                CHECK_NULL_VOID(swiper);
-                host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
-            });
+        if (NearZero(translateAnimationEndPos_ - currentOffset_)) {
+            AnimationUtils::StopAnimation(translateAnimation_);
+            targetIndex_.reset();
+        } else {
+            AnimationOption option;
+            option.SetCurve(Curves::LINEAR);
+            option.SetDuration(0);
+            translateAnimation_ = AnimationUtils::StartAnimation(
+                option, [host, weak = WeakClaim(this)]() {
+                    auto swiper = weak.Upgrade();
+                    CHECK_NULL_VOID(swiper);
+                    host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
+                });
+            }
+
         OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_, true);
     }
 }
@@ -2943,6 +2947,7 @@ void SwiperPattern::PlayTranslateAnimation(
     host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, startPos);
     translateAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
+    translateAnimationEndPos_ = endPos;
     translateAnimation_ = AnimationUtils::StartAnimation(
         option, [host, weak, startPos, endPos, nextIndex, velocity]() {
             host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);

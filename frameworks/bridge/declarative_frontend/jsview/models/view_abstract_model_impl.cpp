@@ -1623,6 +1623,9 @@ void ViewAbstractModelImpl::SetAccessibilityText(const std::string& text)
     inspector->SetAccessibilitytext(text);
 }
 
+void ViewAbstractModelImpl::SetAccessibilityTextHint(const std::string& text)
+{}
+
 void ViewAbstractModelImpl::SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) {}
 
 void ViewAbstractModelImpl::SetAccessibilityDescription(const std::string& description)

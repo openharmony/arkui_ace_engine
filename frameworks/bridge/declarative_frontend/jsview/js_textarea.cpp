@@ -46,6 +46,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("height", &JSTextField::JsHeight);
     JSClass<JSTextArea>::StaticMethod("width", &JSTextField::JsWidth);
     JSClass<JSTextArea>::StaticMethod("padding", &JSTextField::JsPadding);
+    JSClass<JSTextArea>::StaticMethod("margin", &JSTextField::JsMargin);
     JSClass<JSTextArea>::StaticMethod("border", &JSTextField::JsBorder);
     JSClass<JSTextArea>::StaticMethod("borderWidth", &JSTextField::JsBorderWidth);
     JSClass<JSTextArea>::StaticMethod("borderColor", &JSTextField::JsBorderColor);
