@@ -302,8 +302,9 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCancelMsg();
+        refereeState_ = RefereeState::READY;
     }
 }
 
