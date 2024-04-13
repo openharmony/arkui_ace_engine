@@ -788,6 +788,12 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
                 context->UpdateOffset(menuAnimationOffset);
             },
             option.GetOnFinishEvent());
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+#endif
     }
     // start animation immediately
     pipeline->RequestFrame();
@@ -2055,9 +2061,27 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(dialogLayoutProp);
     if (dialogLayoutProp && dialogLayoutProp->GetShowInSubWindowValue(false) &&
         dialogLayoutProp->GetIsModal().value_or(true)) {
+        RefPtr<OverlayManager> parentOverlayManager = nullptr;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        auto container = Container::Current();
+        auto currentId = Container::CurrentId();
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+            container = AceEngine::Get().GetContainer(currentId);
+            CHECK_NULL_VOID(container);
+        }
+        ContainerScope scope(currentId);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_VOID(context);
+        parentOverlayManager = context->GetOverlayManager();
+#else
         auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
         CHECK_NULL_VOID(parentPipelineContext);
-        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        parentOverlayManager = parentPipelineContext->GetOverlayManager();
+#endif
         CHECK_NULL_VOID(parentOverlayManager);
         RefPtr<FrameNode> maskNode =
             parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
