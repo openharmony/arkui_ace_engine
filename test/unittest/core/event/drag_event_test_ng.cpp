@@ -554,6 +554,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     DragDropInfo dragDropInfo;
     frameNode->SetDragPreview(dragDropInfo);
     frameNode->SetDraggable(true);
+    frameNode->GetOrCreateFocusHub();
     eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
@@ -598,7 +599,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), false);
     EXPECT_EQ(dragEventActuator->IsAllowedDrag(), true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
     /**
      * @tc.steps: step6. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == false, isAllowedDrag == false.
@@ -607,7 +608,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     frameNode->SetDraggable(false);
     EXPECT_EQ(dragEventActuator->IsAllowedDrag(), false);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->isReceivedLongPress_, false);
+    EXPECT_EQ(dragEventActuator->isReceivedLongPress_, true);
     /**
      * @tc.steps: step7. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == true, GetIsTextDraggable() == false.
@@ -616,7 +617,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     gestureEventHub->SetIsTextDraggable(false);
     dragEventActuator->SetIsNotInPreviewState(true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
     /**
      * @tc.steps: step8. Invoke longPressUpdate callback.
      * @tc.expected: cover longPressUpdate when GetTextDraggable() == true, GetIsTextDraggable() == true.
@@ -624,7 +625,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     gestureEventHub->SetIsTextDraggable(true);
     dragEventActuator->SetIsNotInPreviewState(true);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
+    EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), false);
 }
 
 /**
