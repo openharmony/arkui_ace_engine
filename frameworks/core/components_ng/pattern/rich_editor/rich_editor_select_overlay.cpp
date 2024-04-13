@@ -158,7 +158,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
-    if (!IsSingleHandle() && textSelector.StartEqualToDest()) {
+    if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
         pattern->StartTwinkling();
@@ -325,6 +325,13 @@ std::optional<SelectOverlayInfo> RichEditorSelectOverlay::GetSelectOverlayInfo()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
     return manager->GetSelectOverlayInfo();
+}
+
+bool RichEditorSelectOverlay::IsSingleHandleShow()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, false);
+    return manager->IsSingleHandle();
 }
 
 } // namespace OHOS::Ace::NG
