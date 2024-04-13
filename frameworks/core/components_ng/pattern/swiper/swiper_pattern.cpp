@@ -283,9 +283,9 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    InitCapture();
     InitIndicator();
     InitArrow();
+    InitCapture();
     SetLazyLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
