@@ -1912,9 +1912,11 @@ void OverlayManager::UpdateCustomDialog(
         dialogLayoutProp->UpdateAutoCancel(dialogProps.autoCancel);
         auto dialogContext = dialogNode->GetRenderContext();
         CHECK_NULL_VOID(dialogContext);
-        if (dialogProps.maskColor.has_value()) {
-            dialogContext->UpdateBackgroundColor(dialogProps.maskColor.value());
-        }
+        auto pipelineContext = dialogNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+        CHECK_NULL_VOID(dialogTheme);
+        dialogContext->UpdateBackgroundColor(dialogProps.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
         dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         callback(ERROR_CODE_NO_ERROR);
