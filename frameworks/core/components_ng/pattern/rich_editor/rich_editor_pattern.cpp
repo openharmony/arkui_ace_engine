@@ -34,6 +34,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/text/text_emoji_processor.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
@@ -3019,36 +3020,24 @@ void RichEditorPattern::FireOnDeleteComplete(const RichEditorDeleteValue& info)
     }
 }
 
-std::pair<bool, bool> RichEditorPattern::CaretPositionIsEmoji(int32_t& emojiLength)
+std::pair<bool, bool> RichEditorPattern::IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length)
 {
-    uint32_t start = 0;
-    uint32_t end = 0;
-    uint32_t characterLength = 0;
-    constexpr uint32_t EMOJI_CHARACTER_LENGTH = 2; //single emoji length
-    bool caretPositionBackwardIsEmoji = false;
-    bool caretPositionForwardIsEmoji = false;
+    bool isEmojiOnCaretBackward = false;
+    bool isEmojiOnCaretForward = false;
     std::stringstream ss;
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
         ss << (*iter)->content;
     }
     auto content = ss.str();
-    while (start < content.length()) {
-        auto unicode = TypedText::GetUTF8Next(content.c_str(), start, end);
-        if (TypedText::IsEmoji(unicode)) {
-            emojiLength = (end - start) / EMOJI_CHARACTER_LENGTH;
-            if (characterLength == static_cast<uint32_t>(caretPosition_)) {
-                caretPositionForwardIsEmoji = true;
-            }
-            characterLength += EMOJI_CHARACTER_LENGTH;
-            if (characterLength == static_cast<uint32_t>(caretPosition_)) {
-                caretPositionBackwardIsEmoji = true;
-            }
+    emojiLength = TextEmojiProcessor::Delete(caretPosition_, length, content, isBackward);
+    if (emojiLength > 0) {
+        if (isBackward) {
+            isEmojiOnCaretBackward = true;
         } else {
-            characterLength++;
+            isEmojiOnCaretForward = true;
         }
-        start = end;
     }
-    return std::make_pair(caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji);
+    return std::make_pair(isEmojiOnCaretBackward, isEmojiOnCaretForward);
 }
 
 void RichEditorPattern::HandleOnDelete(bool backward)
@@ -3066,6 +3055,30 @@ void RichEditorPattern::HandleOnDelete(bool backward)
         DeleteForward(1);
 #endif
     }
+}
+
+int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward, bool& isSpanSelected)
+{
+    int32_t emojiLength = 0;
+    auto [isEmojiOnCaretBackward, isEmojiOnCaretForward] = IsEmojiOnCaretPosition(emojiLength, isBackward, length);
+    if (textSelector_.IsValid()) {
+        if (!textSelector_.StartEqualToDest()) {
+            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+            if (isBackward) {
+                caretPosition_ = textSelector_.GetTextEnd();
+                isSpanSelected = true;
+            } else {
+                caretPosition_ = textSelector_.GetTextStart();
+            }
+        } else if ((isBackward && isEmojiOnCaretBackward) || (!isBackward && isEmojiOnCaretForward)) {
+            length = emojiLength;
+        }
+        CloseSelectOverlay();
+        ResetSelection();
+    } else if ((isBackward && isEmojiOnCaretBackward) || (!isBackward && isEmojiOnCaretForward)) {
+        length = emojiLength;
+    }
+    return length;
 }
 
 void RichEditorPattern::DeleteBackward(int32_t length)
@@ -3092,20 +3105,8 @@ void RichEditorPattern::DeleteBackward(int32_t length, bool isExternalkeyboard)
 
 std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isExternalkeyboard)
 {
-    int32_t emojiLength = 0;
-    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
     bool isSpanSelected = false;
-    if (textSelector_.IsValid()) {
-        if (!textSelector_.StartEqualToDest()) {
-            length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        }
-        caretPosition_ = textSelector_.GetTextEnd();
-        isSpanSelected = true;
-        CloseSelectOverlay();
-        ResetSelection();
-    } else if (caretPositionBackwardIsEmoji) {
-        length = emojiLength;
-    }
+    length = CalculateDeleteLength(length, true, isSpanSelected);
     std::wstring deleteText = GetBackwardDeleteText(length);
     RichEditorDeleteValue info;
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
@@ -3169,17 +3170,8 @@ void RichEditorPattern::DeleteForward(int32_t length)
 
 std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
 {
-    int32_t emojiLength = 0;
-    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
-    if (textSelector_.IsValid()) {
-        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        caretPosition_ = textSelector_.GetTextStart();
-        CloseSelectOverlay();
-        ResetSelection();
-    } else if (caretPositionForwardIsEmoji && length > 0) {
-        // if text to be deleted contains emoji, transfer length to length-contains-emoji
-        length = emojiLength;
-    }
+    bool isSpanSelected = false;
+    length = CalculateDeleteLength(length, false, isSpanSelected);
     std::wstringstream wss;
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
         wss << StringUtils::ToWstring((*iter)->content);
@@ -3258,8 +3250,9 @@ bool RichEditorPattern::CursorMoveLeft()
     ResetSelection();
     int32_t emojiLength = 0;
     int32_t caretPosition = caretPosition_;
-    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
-    if (caretPositionBackwardIsEmoji) {
+    constexpr int32_t DELETE_COUNT = 1;
+    auto [isEmojiOnCaretBackward, isEmojiOnCaretForward] = IsEmojiOnCaretPosition(emojiLength, true, DELETE_COUNT);
+    if (isEmojiOnCaretBackward) {
         caretPosition = std::clamp((caretPosition_ - emojiLength), 0, static_cast<int32_t>(GetTextContentLength()));
     } else {
         caretPosition = std::clamp((caretPosition_ - 1), 0, static_cast<int32_t>(GetTextContentLength()));
@@ -3282,8 +3275,9 @@ bool RichEditorPattern::CursorMoveRight()
     ResetSelection();
     int32_t emojiLength = 0;
     int32_t caretPosition = caretPosition_;
-    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
-    if (caretPositionForwardIsEmoji) {
+    constexpr int32_t DELETE_COUNT = 1;
+    auto [isEmojiOnCaretBackward, isEmojiOnCaretForward] = IsEmojiOnCaretPosition(emojiLength, false, DELETE_COUNT);
+    if (isEmojiOnCaretForward) {
         caretPosition = std::clamp((caretPosition_ + emojiLength), 0, static_cast<int32_t>(GetTextContentLength()));
     } else {
         caretPosition = std::clamp((caretPosition_ + 1), 0, static_cast<int32_t>(GetTextContentLength()));
@@ -3615,17 +3609,19 @@ int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
 {
     int32_t newPos = caretPosition_;
     int32_t emojiLength = 0;
-    auto [caretPositionBackwardIsEmoji, caretPositionForwardIsEmoji] = CaretPositionIsEmoji(emojiLength);
+    constexpr int32_t DELETE_COUNT = 1;
     if (direction == CaretMoveIntent::Left) {
-        if (caretPositionBackwardIsEmoji) {
+        auto [isEmojiOnCaretBackward, isEmojiOnCaretForward] = IsEmojiOnCaretPosition(emojiLength, true, DELETE_COUNT);
+        if (isEmojiOnCaretBackward) {
             newPos = caretPosition_ - emojiLength;
         } else {
             newPos = caretPosition_ - 1;
         }
         return newPos;
     }
+    auto [isEmojiOnCaretBackward, isEmojiOnCaretForward] = IsEmojiOnCaretPosition(emojiLength, false, DELETE_COUNT);
     if (direction == CaretMoveIntent::Right) {
-        if (caretPositionForwardIsEmoji) {
+        if (isEmojiOnCaretForward) {
             newPos = caretPosition_ + emojiLength;
         } else {
             newPos = caretPosition_ + 1;
