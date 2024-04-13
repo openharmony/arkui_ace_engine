@@ -230,7 +230,7 @@ public:
         actionSetSelectionImpl_ = actionSetSelection;
     }
 
-    bool ActActionSetSelection(int32_t start, int32_t end, SelectionDirection dir)
+    bool ActActionSetSelection(int32_t start, int32_t end, SelectionDirection dir = NG::DIR_DOWN)
     {
         if (actionSetSelectionImpl_) {
             actionSetSelectionImpl_(start, end, dir);
