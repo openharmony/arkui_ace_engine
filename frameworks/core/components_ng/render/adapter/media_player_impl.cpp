@@ -148,16 +148,20 @@ bool MediaPlayerImpl::SetSource(const std::string& src)
 void MediaPlayerImpl::SetRenderSurface(const RefPtr<RenderSurface>& renderSurface)
 {
     renderSurface_ = renderSurface;
+    CHECK_NULL_VOID(renderSurface);
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (renderSurface ->IsTexture()) {
         auto surfaceImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
+        CHECK_NULL_VOID(surfaceImpl);
         surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
     } else {
         auto surfaceImpl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface);
+        CHECK_NULL_VOID(surfaceImpl);
         surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
     }
 #else
     auto surfaceImpl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface);
+    CHECK_NULL_VOID(surfaceImpl);
     surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
 #endif
 }
