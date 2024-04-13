@@ -2445,7 +2445,7 @@ void ScrollablePattern::InitScrollBarMouseEvent()
 
 void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset)
 {
-    if (SystemProperties::GetDebugOffsetLogEnabled()) {
+    if (SystemProperties::GetDebugOffsetLogEnabled() && !NearZero(finalOffset)) {
         TAG_LOGD(tag, "Scrollable id:%{public}d, scrollSource:%{public}d, scrollOffset:%{public}f",
             id, scrollSource_, finalOffset);
     }
