@@ -48,6 +48,8 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static void SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
+        ZeroPrefixType& minuteType, ZeroPrefixType& secondType);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
