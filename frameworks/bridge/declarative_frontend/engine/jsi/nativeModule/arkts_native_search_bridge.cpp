@@ -55,10 +55,12 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     auto themeFontSize = theme->GetFontSize();
     CalcDimension size = themeFontSize;
     if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size) || size.Unit() == DimensionUnit::PERCENT) {
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, size) || size.Unit() == DimensionUnit::PERCENT
+        || LessNotEqual(size.Value(), 0.0)) {
         value.fontSizeNumber = themeFontSize.Value();
         value.fontSizeUnit = static_cast<int8_t>(themeFontSize.Unit());
     } else {
+        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, size);
         value.fontSizeNumber = size.Value();
         value.fontSizeUnit = static_cast<int8_t>(size.Unit());
     }
