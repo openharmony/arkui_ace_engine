@@ -1539,17 +1539,19 @@ float GridPattern::GetEndOffset()
 {
     float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
     float mainGap = GetMainGap();
-
-    float totalHeight = gridLayoutInfo_.GetTotalLineHeight(mainGap);
-    if (GetAlwaysEnabled() && GreatNotEqual(contentHeight, totalHeight)) {
-        return totalHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    float heightInView = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    if (GetAlwaysEnabled()) {
+        float totalHeight = gridLayoutInfo_.GetTotalLineHeight(mainGap);
+        if (GreatNotEqual(contentHeight, totalHeight)) {
+            return totalHeight - heightInView;
+        }
     }
 
     if (UseIrregularLayout()) {
-        return gridLayoutInfo_.currentOffset_ -
-               gridLayoutInfo_.GetDistanceToBottom(contentHeight, gridLayoutInfo_.totalHeightOfItemsInView_, mainGap);
+        float disToBot = gridLayoutInfo_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
+        return gridLayoutInfo_.currentOffset_ - disToBot;
     }
-    return contentHeight - gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    return contentHeight - heightInView;
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -1829,15 +1831,21 @@ void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapp
 // scroll to the item where the index is located
 bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
-    auto gridScrollLayoutAlgorithm =
-        DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
+    // use as reference
+    GridLayoutInfo* infoPtr {};
+    if (UseIrregularLayout()) {
+        infoPtr = &gridLayoutInfo_;
+    } else {
+        auto gridScrollLayoutAlgorithm =
+            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
+        infoPtr = &scrollGridLayoutInfo_;
+    }
 
     float targetPos = 0.0f;
     // Based on the index, align gets the position to scroll to
-
-    auto success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
-        gridLayoutInfo_, targetIndex_.value(), align, GetMainGap(), targetPos);
+    bool success =
+        infoPtr->GetGridItemAnimatePos(gridLayoutInfo_, targetIndex_.value(), align, GetMainGap(), targetPos);
     CHECK_NULL_RETURN(success, false);
 
     isSmoothScrolling_ = true;

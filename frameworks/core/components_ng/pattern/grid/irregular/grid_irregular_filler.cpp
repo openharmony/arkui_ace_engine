@@ -196,6 +196,7 @@ bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row
 void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(itemIdx);
+    CHECK_NULL_VOID(child);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
