@@ -2059,13 +2059,14 @@ Alignment JSViewAbstract::ParseAlignment(int32_t align)
 void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
 {
     int32_t visible = 0;
-    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsNull() || arg->IsUndefined()) {
         // undefined value use default value.
         visible = 0;
-    } else if (!info[0]->IsNumber()) {
+    } else if (!arg->IsNumber()) {
         return;
     } else {
-        visible = info[0]->ToNumber<int32_t>();
+        visible = arg->ToNumber<int32_t>();
     }
 
     if (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE)) {
@@ -4291,9 +4292,6 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
 
 bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        return false;
-    }
     if (jsValue->IsNumber()) {
         result = jsValue->ToNumber<int32_t>();
         return true;
@@ -4301,6 +4299,9 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
     if (jsValue->IsString()) {
         result = StringUtils::StringToInt(jsValue->ToString());
         return true;
+    }
+    if (!jsValue->IsObject()) {
+        return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -4539,13 +4540,13 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
 
 bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& result)
 {
-    if (!jsValue->IsString() && !jsValue->IsObject()) {
-        return false;
-    }
-
     if (jsValue->IsString()) {
         result = jsValue->ToString();
         return true;
+    }
+
+    if (!jsValue->IsObject()) {
+        return false;
     }
 
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
