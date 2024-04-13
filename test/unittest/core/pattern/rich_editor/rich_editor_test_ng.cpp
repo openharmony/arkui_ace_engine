@@ -5964,4 +5964,260 @@ HWTEST_F(RichEditorTestNg, SingleHandle003, TestSize.Level1)
     richEditorPattern->HandleTouchMove(touchOffset);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
 }
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts001 about cursor move
+ * @tc.desc: test the cursor move line start
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::Left);
+    richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::RightWord);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::ParagraghBegin);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::ParagraghEnd);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::Home);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::End);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::LineBegin);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->CursorMove(CaretMoveIntent::LineEnd);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts101 about Handle select
+ * @tc.desc: test the select move position
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts101, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::Left);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::Right);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::LeftWord);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::RightWord);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::LineBegin);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::LineEnd);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts101 about Handle select
+ * @tc.desc: test the select move position, up and down
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts102, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextStyle style;
+    style.SetTextColor(TEXT_COLOR_VALUE);
+    style.SetFontSize(FONT_SIZE_VALUE);
+    style.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
+    style.SetFontWeight(FONT_WEIGHT_VALUE);
+    style.SetFontFamilies(FONT_FAMILY_VALUE);
+    style.SetTextDecoration(TEXT_DECORATION_VALUE);
+    style.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    textOptions.style = style;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 20);
+    richEditorPattern->paragraphs_.minParagraphFontSize = style.GetFontSize().ConvertToPx();
+    richEditorPattern->HandleSelect(CaretMoveIntent::Up);
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleSelect(CaretMoveIntent::Down);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts201 about Handle delete comb
+ * @tc.desc: test the delete comb
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts201, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->HandleOnDeleteComb(true);
+    richEditorPattern->HandleOnDeleteComb(false);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts202 about Handle Select FontStyle
+ * @tc.desc: test the text font style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts202, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextStyle style;
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    textOptions.style = style;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->textSelector_.Update(4, 20);
+    richEditorPattern->HandleSelectFrontStyle(KeyCode::KEY_B);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts203 about Handle Select FontStyle
+ * @tc.desc: test the text font style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts203, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextStyle style;
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    textOptions.style = style;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->textSelector_.Update(4, 20);
+    richEditorPattern->HandleSelectFrontStyle(KeyCode::KEY_I);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts204 about Handle Select FontStyle
+ * @tc.desc: test the text font style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorKeyBoardShortCuts204, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. get richEditor controller
+     */
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    /**
+     * @tc.steps: step2. add text span
+     */
+    TextStyle style;
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    textOptions.style = style;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
+    richEditorPattern->SetCaretPosition(20);
+    richEditorPattern->textSelector_.Update(4, 20);
+    richEditorPattern->HandleSelectFrontStyle(KeyCode::KEY_U);
+}
 } // namespace OHOS::Ace::NG
