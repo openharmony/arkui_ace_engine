@@ -20,6 +20,7 @@
 #include <map>
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,6 +57,13 @@ public:
     }
 
     void CleanRecognizerState() override;
+
+    int32_t GetValidFingersCount()
+    {
+        return std::count_if(touchPoints_.begin(), touchPoints_.end(),
+            [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
     {

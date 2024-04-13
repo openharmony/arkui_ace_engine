@@ -164,7 +164,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
-    auto pointsCount = static_cast<int32_t>(touchPoints_.size());
+    auto pointsCount = GetValidFingersCount();
 
     if (pointsCount == fingers_) {
         refereeState_ = RefereeState::DETECTING;
