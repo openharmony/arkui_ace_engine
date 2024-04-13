@@ -115,22 +115,18 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     pattern->AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::OUT_BOUNDARY);
 }
 
-void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirst)
+void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirst)
 {
     auto pattern = GetPattern<RichEditorPattern>();
     auto textSelector = pattern->GetTextSelector();
-    bool isUseHandleTop = (isFirst != IsHandleReverse());
-    auto handleBaseLineOffset = Offset(localOffset.GetX(), localOffset.GetY() + (isUseHandleTop ? 0 : handleHeight));
-    auto currentHandleIndex = pattern->GetHandleIndex(handleBaseLineOffset);
+    auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
     } else {
         pattern->SetCaretPosition(currentHandleIndex);
         if (IsSingleHandle()) {
             float selectLineHeight = 0.0f;
-            auto textOffset = OffsetF(
-                static_cast<float>(handleBaseLineOffset.GetX()), static_cast<float>(handleBaseLineOffset.GetY()));
-            textOffset = textOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
+            auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
             auto lastClickOffset =
                 pattern->paragraphs_.ComputeCursorInfoByClick(currentHandleIndex, selectLineHeight, textOffset);
             pattern->SetLastClickOffset(lastClickOffset + pattern->richTextRect_.GetOffset());

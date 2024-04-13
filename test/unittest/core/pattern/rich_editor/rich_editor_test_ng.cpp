@@ -5923,8 +5923,8 @@ HWTEST_F(RichEditorTestNg, SingleHandle002, TestSize.Level1)
     /**
      * @tc.steps: step6. move single handle
      */
-    auto localOffset = OffsetF(0, 0);
-    richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(localOffset, 5.0f, false);
+    auto handleOffset = OffsetF(0, 5);
+    richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(handleOffset, false);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
