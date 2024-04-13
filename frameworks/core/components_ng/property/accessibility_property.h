@@ -352,6 +352,11 @@ public:
         accessibilityText_ = text;
     }
 
+    void SetAccessibilityTextHint(const std::string& text)
+    {
+        textTypeHint_ = text;
+    }
+
     void SetAccessibilityDescription(const std::string& accessibilityDescription)
     {
         accessibilityDescription_ = accessibilityDescription;
@@ -382,6 +387,11 @@ public:
     std::string GetAccessibilityDescription() const
     {
         return accessibilityDescription_.value_or("");
+    }
+
+    std::string GetTextType() const
+    {
+        return textTypeHint_.value_or("");
     }
 
     virtual float GetScrollOffSet()
@@ -489,6 +499,7 @@ protected:
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
+    std::optional<std::string> textTypeHint_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

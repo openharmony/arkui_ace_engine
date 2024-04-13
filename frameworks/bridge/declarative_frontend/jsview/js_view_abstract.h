@@ -352,6 +352,7 @@ public:
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
+    static void JsAccessibilityTextHint(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
