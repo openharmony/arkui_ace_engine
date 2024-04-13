@@ -49,6 +49,8 @@ public:
                     radioModifier_->UpdateIsOnAnimatableProperty(checked);
                 }
             }
+        } else if (!checked && isFirstCreated_) {
+            radioModifier_->InitOpacityScale(checked);
         }
     }
 
