@@ -3847,8 +3847,8 @@ const ArkUI_AttributeItem* GetScrollOffset(ArkUI_NodeHandle node)
     ArkUI_Float32 values[2];
     GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollOffset(node->uiNodeHandle, values);
     //size index
-    g_numberValues[0].i32 = values[0];
-    g_numberValues[1].i32 = values[1];
+    g_numberValues[0].f32 = values[0];
+    g_numberValues[1].f32 = values[1];
     g_attributeItem.size = ALLOW_SIZE_2;
     return &g_attributeItem;
 }
