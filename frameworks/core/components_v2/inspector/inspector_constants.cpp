@@ -584,4 +584,10 @@ const char DYNAMIC_COMPONENT_ETS_TAG[] = "DynamicComponent";
 // ContainerSpan
 const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
 const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
+
+//RenderNode
+const char RENDER_NODE_ETS_TAG[] = "RenderNode";
+
+//CustomFrameNode
+const char CUSTOM_FRAME_NODE_ETS_TAG[] = "CustomFrameNode";
 } // namespace OHOS::Ace::V2

@@ -192,13 +192,15 @@ void SetPivot(ArkUINodeHandle node, ArkUI_Float32 pivotX, ArkUI_Float32 pivotY)
     renderContext->RequestNextFrame();
 }
 
-void SetFrame(ArkUINodeHandle node, ArkUI_Float32 positionX, ArkUI_Float32 positionY,
-    ArkUI_Float32 width, ArkUI_Float32 height)
+void SetFrame(
+    ArkUINodeHandle node, ArkUI_Float32 positionX, ArkUI_Float32 positionY, ArkUI_Float32 width, ArkUI_Float32 height)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetFrame(positionX, positionY, width, height);
+    renderContext->SetFrame(Dimension(positionX, DimensionUnit::VP).ConvertToPx(),
+        Dimension(positionY, DimensionUnit::VP).ConvertToPx(), Dimension(width, DimensionUnit::VP).ConvertToPx(),
+        Dimension(height, DimensionUnit::VP).ConvertToPx());
     renderContext->RequestNextFrame();
 }
 

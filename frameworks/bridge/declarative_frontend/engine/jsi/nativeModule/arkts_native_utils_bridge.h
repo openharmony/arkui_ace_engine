@@ -74,6 +74,8 @@ public:
     static ArkUINativeModuleValue GetNativeHandleForWeak(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetNativeHandleForStrong(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Upgrade(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Dispose(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateStrongRef(EcmaVM* vm, const RefPtr<AceType>& ref);
 };
 } // namespace OHOS::Ace::NG
 
