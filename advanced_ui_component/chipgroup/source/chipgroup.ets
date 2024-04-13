@@ -18,13 +18,13 @@ import { Chip, ChipSize } from '@ohos.arkui.advanced.Chip'
 interface ChipGroupTheme {
   itemStyle: ChipItemStyle;
   chipGroupSpace: ChipGroupSpaceOptions;
-  leftPadding:number;
-  rightPadding:number;
+  leftPadding: number;
+  rightPadding: number;
 }
 
 const noop = (selectedIndexes: Array<number>) => {
 }
-const alpha: Array<[string, number]> = [['rgba(0, 0, 0, 1)', 0.5], ['rgba(0, 0, 0, 0)', 1]]
+const colorStops: Array<[string, number]> = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]]
 const defaultTheme: ChipGroupTheme = {
   itemStyle: {
     size: ChipSize.NORMAL,
@@ -34,8 +34,8 @@ const defaultTheme: ChipGroupTheme = {
     selectedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
   },
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 0 },
-  leftPadding:0,
-  rightPadding:8,
+  leftPadding: 0,
+  rightPadding: 16,
 }
 
 const chipGroupSuffixTheme: BuilderTheme = {
@@ -52,6 +52,7 @@ interface IconOptions {
   src: ResourceStr;
   size?: SizeOptions;
 }
+
 
 interface LabelOptions {
   text: string;
@@ -118,26 +119,25 @@ export struct IconGroupSuffix {
   }
 
   build() {
-    Stack() {
-      Row() {
-        ForEach(this.items, (suffixItem: IconItemOptions, index) => {
+    Row() {
+      ForEach(this.items, (suffixItem: IconItemOptions, index) => {
+        Button() {
           Image(suffixItem.icon.src)
-            .size(suffixItem.icon.size ?? { width: this.getIconSize(), height: this.getIconSize() })
-            .constraintSize({ maxWidth: this.getIconSize(), maxHeight: this.getIconSize() })
-            .backgroundColor(chipGroupSuffixTheme.backgroundColor)
             .fillColor($r('sys.color.ohos_id_color_primary'))
-            .onClick((event: ClickEvent) => {
-              suffixItem.action()
-            })
+            .constraintSize({ maxWidth: this.getIconSize(), maxHeight: this.getIconSize() })
+            .size({ width: this.getBackgroundSize(), height: this.getBackgroundSize() })
+        }
+        .constraintSize({ maxWidth: this.getBackgroundSize(), maxHeight: this.getBackgroundSize() })
+        .size({ width: this.getBackgroundSize(), height: this.getBackgroundSize() })
+        .backgroundColor(chipGroupSuffixTheme.backgroundColor)
+        .borderRadius(chipGroupSuffixTheme.borderRadius)
+        .margin({ left: chipGroupSuffixTheme.marginLeft })
+        .onClick((event: ClickEvent) => {
+          suffixItem.action()
         })
-      }
+        .borderRadius(chipGroupSuffixTheme.borderRadius)
+      })
     }
-    .margin({ left: chipGroupSuffixTheme.marginLeft })
-    .borderRadius(chipGroupSuffixTheme.borderRadius)
-    .backgroundColor(chipGroupSuffixTheme.backgroundColor)
-    .constraintSize({ maxWidth: this.getBackgroundSize(), maxHeight: this.getBackgroundSize() })
-    .size({ width: this.getBackgroundSize(), height: this.getBackgroundSize() })
-    .align(Alignment.Center)
   }
 }
 
@@ -148,19 +148,15 @@ export struct ChipGroup {
   @Prop items: ChipGroupItemOptions[] = []
   @Prop itemStyle: ChipItemStyle = defaultTheme.itemStyle
   @Prop selectedIndexes: Array<number> = [0]
-  @Prop multiple: boolean = true
-  @Prop chipGroupSpaceSize: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace
+  @Prop multiple: boolean = false
+  @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace
   @BuilderParam suffix?: Callback<void>
   private scroller: Scroller = new Scroller()
   public onChange: Callback<Array<number>> = noop
   @State isReachEnd: boolean = this.scroller.isAtEnd();
 
-  private init(): boolean {
-    this.chipSize = this.itemStyle.size
-    return true
-  }
-
   private getChipSize(): ChipSize | SizeOptions | undefined {
+    this.chipSize = this.itemStyle.size
     return this.itemStyle.size ?? defaultTheme.itemStyle.size
   }
 
@@ -172,12 +168,12 @@ export struct ChipGroup {
     return this.selectedIndexes ?? [0]
   }
 
-  private getMultiple(): boolean {
+  private isMultiple(): boolean {
     return this.multiple ?? true
   }
 
   private getChipGroupSpaceSize(): ChipGroupSpaceOptions {
-    return this.chipGroupSpaceSize ?? defaultTheme.chipGroupSpace
+    return this.chipGroupSpace ?? defaultTheme.chipGroupSpace
   }
 
   private getOnChange(): (selectedIndexes: Array<number>) => void {
@@ -185,7 +181,7 @@ export struct ChipGroup {
   }
 
   private isSelected(itemIndex: number): boolean {
-    if (!this.getMultiple()) {
+    if (!this.isMultiple()) {
       return itemIndex == this.getSelectedIndexes()[0]
     } else {
       return this.selectedIndexes.some((element, index, array) => {
@@ -199,7 +195,7 @@ export struct ChipGroup {
 
       Stack() {
         Scroll(this.scroller) {
-          Row({ space: this.getChipGroupSpaceSize().itemSpace }) {
+          Row({ space: this.getChipGroupSpaceSize().itemSpace ?? defaultTheme.chipGroupSpace.itemSpace }) {
             ForEach(this.items, (chipItem: ChipGroupItemOptions, index) => {
               Chip({
                 prefixIcon: {
@@ -213,7 +209,7 @@ export struct ChipGroup {
                 suffixIcon: {
                   src: chipItem.suffixIcon?.src ?? "",
                 },
-                allowClose: chipItem.allowClose,
+                allowClose: chipItem.allowClose ?? false,
                 enabled: true,
                 activated: this.isSelected(index),
                 backgroundColor: this.getItemStyle().backgroundColor ?? defaultTheme.itemStyle.backgroundColor,
@@ -223,15 +219,11 @@ export struct ChipGroup {
                 onClicked: () => {
                   if (this.isSelected(index)) {
                     this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1)
-                    if (this.getMultiple() == false) {
-                      this.selectedIndexes = [];
-                    }
                   } else {
-                    this.selectedIndexes.push(index)
-                    if (!this.getMultiple()) {
+                    if (!this.isMultiple()) {
                       this.selectedIndexes = [];
-                      this.selectedIndexes.push(index)
                     }
+                    this.selectedIndexes.push(index)
                   }
                   this.getOnChange()(this.selectedIndexes)
                 }
@@ -250,11 +242,12 @@ export struct ChipGroup {
           this.isReachEnd = this.scroller.isAtEnd()
         })
 
-        if (this.init()) {
+
+        if (this.suffix) {
           Stack()
             .width(chipGroupSuffixTheme.normalbackgroundSize)
             .height(this.chipSize === ChipSize.SMALL ? chipGroupSuffixTheme.smallBackgroundSize : chipGroupSuffixTheme.normalbackgroundSize)
-            .linearGradient({ angle: 90, colors: alpha })
+            .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }
@@ -272,7 +265,11 @@ export struct ChipGroup {
     }
     .align(Alignment.End)
     .width("100%")
-    .padding({ left: defaultTheme.leftPadding, right: this.suffix == null ? 0 : defaultTheme.rightPadding })
+    .padding({
+      left: defaultTheme.leftPadding,
+      right: this.suffix == null ? (this.getChipGroupSpaceSize()
+        .endSpace ?? defaultTheme.chipGroupSpace.endSpace) : defaultTheme.rightPadding
+    })
     .height(64)
   }
 }
