@@ -114,36 +114,6 @@ public:
         return endNodeIndex_ >= 0;
     }
 
-    int32_t GetStartNodeIndex()
-    {
-        return startNodeIndex_;
-    }
-
-    int32_t GetEndNodeIndex()
-    {
-        return endNodeIndex_;
-    }
-
-    int32_t GetChildNodeIndex()
-    {
-        return childNodeIndex_;
-    }
-
-    float GetStartNodeSize()
-    {
-        return startNodeSize_;
-    }
-
-    float GetEndNodeSize()
-    {
-        return endNodeSize_;
-    }
-
-    float GetCurOffset()
-    {
-        return curOffset_;
-    }
-
     ListItemSwipeIndex GetSwiperIndex()
     {
         return swiperIndex_;
