@@ -58,7 +58,7 @@ interface LabelOptions {
   text: string;
 }
 
-interface ChipGroupItemOptions {
+export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
   label: LabelOptions;
   suffixIcon?: IconOptions;
