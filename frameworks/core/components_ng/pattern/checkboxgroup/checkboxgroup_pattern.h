@@ -206,6 +206,9 @@ private:
         CheckBoxStyle checkBoxGroupStyle);
     void GetCheckBoxGroupStyle(const RefPtr<FrameNode>& frameNode, CheckBoxStyle& checkboxGroupStyle);
     void InnerFocusPaintCircle(RoundRect& paintRect);
+    void GetCheckBoxNameList(const RefPtr<FrameNode>& frameNode,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, const std::string& group,
+        bool select, std::vector<std::string>& vec);
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
     RefPtr<ClickEvent> clickListener_;
