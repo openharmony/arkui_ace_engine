@@ -90,6 +90,7 @@ void ScrollableUtilsTest::FillChildren(int32_t count, Axis axis, SizeF size)
 void ScrollableUtilsTest::ClearChildren()
 {
     lazyNode_->builder_->cachedItems_.clear();
+    lazyNode_->builder_->outOfBoundaryNodes_.clear();
 }
 
 /**
@@ -126,7 +127,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary002, TestSize.Level1)
      * @tc.expected: no child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::HORIZONTAL, 100, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 10);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 0);
 
     ClearChildren();
 }
@@ -145,7 +146,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary003, TestSize.Level1)
      * @tc.expected: 1 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::HORIZONTAL, 101, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 9);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 1);
 
     ClearChildren();
 }
@@ -164,7 +165,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary004, TestSize.Level1)
      * @tc.expected: 2 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::HORIZONTAL, 201, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 8);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 2);
 
     ClearChildren();
 }
@@ -183,7 +184,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary005, TestSize.Level1)
      * @tc.expected: 1 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::HORIZONTAL, -101, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 9);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 1);
 
     ClearChildren();
 }
@@ -202,7 +203,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary006, TestSize.Level1)
      * @tc.expected: 2 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::HORIZONTAL, -201, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 8);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 2);
 
     ClearChildren();
 }
@@ -221,7 +222,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary007, TestSize.Level1)
      * @tc.expected: no child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::VERTICAL, 100, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 10);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 0);
 
     ClearChildren();
 }
@@ -240,7 +241,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary008, TestSize.Level1)
      * @tc.expected: 1 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::VERTICAL, 101, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 9);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 1);
 
     ClearChildren();
 }
@@ -259,7 +260,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary009, TestSize.Level1)
      * @tc.expected: 2 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::VERTICAL, 201, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 8);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 2);
 
     ClearChildren();
 }
@@ -278,7 +279,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary010, TestSize.Level1)
      * @tc.expected: 1 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::VERTICAL, -101, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 9);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 1);
 
     ClearChildren();
 }
@@ -297,7 +298,7 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary011, TestSize.Level1)
      * @tc.expected: 2 child is out of parent.
      */
     ScrollableUtils::RecycleItemsOutOfBoundary(Axis::VERTICAL, -201, 0, 9, Referenced::RawPtr(scrollable_));
-    ASSERT_EQ(lazyNode_->builder_->cachedItems_.size(), 8);
+    ASSERT_EQ(lazyNode_->builder_->outOfBoundaryNodes_.size(), 2);
 
     ClearChildren();
 }
