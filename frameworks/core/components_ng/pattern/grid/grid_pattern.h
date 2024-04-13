@@ -232,7 +232,6 @@ private:
     float GetEndOffset();
     float GetMainGap() const;
     float GetAllDelta();
-    void CheckRestartSpring();
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;

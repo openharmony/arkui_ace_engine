@@ -1047,26 +1047,6 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     });
 }
 
-void ListPattern::CheckRestartSpring(bool sizeDiminished)
-{
-    auto edgeEffect = GetScrollEdgeEffect();
-    if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
-        return;
-    }
-    // Check if need update Spring when itemTotalSize diminishes.
-    if (IsScrollableSpringMotionRunning() && sizeDiminished) {
-        edgeEffect->ProcessSpringUpdate();
-    }
-    if (!ScrollableIdle() || !IsOutOfBoundary()) {
-        return;
-    }
-    if (AnimateRunning()) {
-        return;
-    }
-    FireOnScrollStart();
-    edgeEffect->ProcessScrollOver(0);
-}
-
 void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {

@@ -2505,4 +2505,25 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
     animator_->PlayMotion(fixedVelocityMotion_);
     FireOnScrollStart();
 }
+
+void ScrollablePattern::CheckRestartSpring(bool sizeDiminished)
+{
+    auto edgeEffect = GetScrollEdgeEffect();
+    if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
+        return;
+    }
+    // Check if need update Spring when itemTotalSize diminishes.
+    if (IsScrollableSpringMotionRunning() && sizeDiminished) {
+        edgeEffect->ProcessSpringUpdate();
+        return;
+    }
+    if (!ScrollableIdle() || !IsOutOfBoundary()) {
+        return;
+    }
+    if (AnimateRunning()) {
+        return;
+    }
+    FireOnScrollStart();
+    edgeEffect->ProcessScrollOver(0);
+}
 } // namespace OHOS::Ace::NG

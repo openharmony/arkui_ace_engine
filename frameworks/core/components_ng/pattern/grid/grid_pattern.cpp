@@ -292,23 +292,6 @@ SizeF GridPattern::GetContentSize() const
     return geometryNode->GetPaddingSize();
 }
 
-void GridPattern::CheckRestartSpring()
-{
-    if (!ScrollableIdle() || !IsOutOfBoundary()) {
-        return;
-    }
-    auto edgeEffect = GetScrollEdgeEffect();
-    if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
-        return;
-    }
-    if (AnimateRunning()) {
-        return;
-    }
-
-    FireOnScrollStart();
-    edgeEffect->ProcessScrollOver(0);
-}
-
 float GridPattern::GetMainGap() const
 {
     float mainGap = 0.0;
@@ -437,7 +420,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    CheckRestartSpring();
+    CheckRestartSpring(false);
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
