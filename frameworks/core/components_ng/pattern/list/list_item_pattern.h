@@ -151,6 +151,8 @@ public:
 
     RefPtr<FrameNode> GetListFrameNode() const;
 
+    RefPtr<FrameNode> GetParentFrameNode() const;
+
     Axis GetAxis() const;
 
     void ChangeAxis(Axis axis);
