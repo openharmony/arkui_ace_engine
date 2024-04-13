@@ -43,7 +43,7 @@
 extern "C" {
 #endif
 
-int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value frameNode, ArkUI_NodeHandle* handle);
+int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkUI_NodeHandle* handle);
 
 #ifdef __cplusplus
 };

@@ -16,9 +16,11 @@
 #include "node_model.h"
 
 #include <cstdint>
+#include <set>
 #include <unordered_map>
 
 #include "event_converter.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 #include "native_node.h"
 #include "native_type.h"
 #include "style_modifier.h"
@@ -26,10 +28,7 @@
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/property/property.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
-#include "interfaces/native/event/ui_input_event_impl.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -264,6 +263,11 @@ const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttribu
     return GetNodeAttribute(node, attribute);
 }
 
+int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId)
+{
+    return RegisterNodeEvent(nodePtr, eventType, targetId, nullptr);
+}
+
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData)
 {
     auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
@@ -276,7 +280,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
     if (impl->getBasicAPI()->isBuilderNode(nodePtr->uiNodeHandle)) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    auto* extraParam = new InnerEventExtraParam({targetId, nodePtr, userData});
+    auto* extraParam = new InnerEventExtraParam({ targetId, nodePtr, userData });
     if (nodePtr->extraData) {
         auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
         auto result = extraData->eventMap.try_emplace(eventType, extraParam);
@@ -315,6 +319,12 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
         delete extraData;
         nodePtr->extraData = nullptr;
     }
+}
+
+void (*g_compatibleEventReceiver)(ArkUI_CompatibleNodeEvent* event) = nullptr;
+void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event))
+{
+    g_compatibleEventReceiver = eventReceiver;
 }
 
 void (*g_eventReceiver)(ArkUI_NodeEvent* event) = nullptr;
@@ -383,6 +393,15 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         }
         g_eventReceiver(&event);
     }
+    if (g_compatibleEventReceiver) {
+        ArkUI_CompatibleNodeEvent event;
+        event.node = nodePtr;
+        event.eventId = innerEventExtraParam->second->targetId;
+        if (ConvertEvent(innerEvent, &event)) {
+            g_compatibleEventReceiver(&event);
+            ConvertEventResult(&event, innerEvent);
+        }
+    }
 }
 
 int32_t CheckEvent(ArkUI_NodeEvent* event)
@@ -430,4 +449,4 @@ void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
     impl->getBasicAPI()->markDirty(nodePtr->uiNodeHandle, flag);
 }
 
-} // namespace OHOS::Ace::NodeModelNodeModifier
+} // namespace OHOS::Ace::NodeModel

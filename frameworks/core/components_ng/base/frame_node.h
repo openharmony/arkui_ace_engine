@@ -644,6 +644,9 @@ public:
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
         uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
+
+    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false);
+
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.

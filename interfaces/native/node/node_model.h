@@ -17,6 +17,7 @@
 
 #include <cstdint>
 
+#include "native_compatible.h"
 #include "native_node.h"
 #include "native_type.h"
 
@@ -60,9 +61,11 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
+int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId);
 int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t targetId, void* userData);
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
+void RegisterOnEvent(void (*eventReceiver)(ArkUI_CompatibleNodeEvent* event));
 void UnregisterOnEvent();
 int32_t CheckEvent(ArkUI_NodeEvent* event);
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
