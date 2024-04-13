@@ -3299,7 +3299,7 @@ bool RichEditorPattern::CursorMoveUp()
         nextCaretOffset = CalcCursorOffsetByPosition(GetCaretPosition() + 1, nextCaretHeight, false, false);
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPosition) {
-            return false;
+            caretPosition = 0;
         }
         SetCaretPosition(caretPosition);
         MoveCaretToContentRect();
@@ -3336,7 +3336,7 @@ bool RichEditorPattern::CursorMoveDown()
         caretPositionEnd = paragraphs_.GetIndex(textOffset);
         caretPositionEnd = std::clamp(caretPositionEnd, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPositionEnd) {
-            return false;
+            caretPositionEnd = GetTextContentLength();
         }
         SetCaretPosition(caretPositionEnd);
         CursorMoveLineEndPos(caretOffsetUp, caretOffsetDown, nextCaretOffset);
@@ -6910,13 +6910,17 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction)
         case CaretMoveIntent::Right:
             return CaretPositionSelectEmoji(CaretMoveIntent::Right);
         case CaretMoveIntent::Up:
-            return HandleSelectUpPos();
+            return HandleSelectPosition(true);
         case CaretMoveIntent::Down:
-            return HandleSelectDownPos();
+            return HandleSelectPosition(false);
         case CaretMoveIntent::LeftWord:
             return GetLeftWordPosition(caretPosition_);
         case CaretMoveIntent::RightWord:
             return GetRightWordPosition(caretPosition_);
+        case CaretMoveIntent::ParagraghBegin:
+            return HandleSelectParagraghPos(true);
+        case CaretMoveIntent::ParagraghEnd:
+            return HandleSelectParagraghPos(false);
         case CaretMoveIntent::LineBegin:
             return CalcLineBeginPosition();
         case CaretMoveIntent::LineEnd:
@@ -6926,36 +6930,37 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction)
     }
 }
 
-int32_t RichEditorPattern::HandleSelectUpPos()
+int32_t RichEditorPattern::HandleSelectPosition(bool isForward)
 {
     float caretHeight = 0.0f;
+    float careOffsetY = 0.0f;
     int32_t newPos;
     OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
     auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
-    float caretOffsetY = caretOffset.GetY() - GetTextRect().GetY() - minDet;
-    newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(), caretOffsetY), true);
-    auto stringText = GetSelectedText(newPos, caretPosition_);
-    auto sizePos = stringText.find('\n');
-    if (sizePos != std::string::npos) {
-        sizePos += 1;
-        newPos += sizePos;
+    if (isForward) {
+        careOffsetY = caretOffset.GetY() - GetTextRect().GetY() - minDet;
+    } else {
+        careOffsetY = caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet / 2.0;
     }
+    newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(), careOffsetY), true);
     return newPos;
 }
 
-int32_t RichEditorPattern::HandleSelectDownPos()
+int32_t RichEditorPattern::HandleSelectParagraghPos(bool direction)
 {
-    float caretHeight = 0.0f;
-    int32_t newPos;
-    OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
-    auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
-    float caretOffsetY = caretOffset.GetY() - GetTextRect().GetY() + caretHeight + minDet;
-    newPos = paragraphs_.GetIndex(Offset(caretOffset.GetX() - GetTextRect().GetX(), caretOffsetY),
-        true);
-    auto stringText = GetSelectedText(caretPosition_, newPos);
-    auto sizePos = stringText.find('\n');
-    if (sizePos != std::string::npos) {
-        newPos = caretPosition_ + sizePos;
+    int32_t newPos = 0;
+    CloseSelectOverlay();
+    ResetSelection();
+    if (direction) {
+        newPos = GetParagraphBeginPosition(caretPosition_);
+        if (newPos == caretPosition_ && caretPosition_ > 0) {
+            newPos = GetParagraphBeginPosition(caretPosition_ - 1);
+        }
+    } else {
+        newPos = GetParagraphEndPosition(caretPosition_);
+        if (newPos == caretPosition_ && caretPosition_ < static_cast<int32_t>(GetTextContentLength())) {
+            newPos = GetParagraphEndPosition(caretPosition_ + 1);
+        }
     }
     return newPos;
 }
