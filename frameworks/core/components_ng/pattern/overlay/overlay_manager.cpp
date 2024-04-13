@@ -4337,7 +4337,7 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
 }
 
 RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-    const RefPtr<NG::FrameNode>& targetNode, std::string longestContent, int32_t menuSize)
+    const RefPtr<NG::FrameNode>& targetNode, const std::string& longestContent, int32_t menuSize)
 {
     CHECK_NULL_RETURN(uiExtNode, nullptr);
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -4379,7 +4379,7 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
 }
 
 SizeF OverlayManager::CaculateMenuSize(
-    const RefPtr<FrameNode>& menuNode, std::string longestContent, int32_t menuSize)
+    const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "caculate menu size enter");
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -4422,8 +4422,8 @@ SizeF OverlayManager::CaculateMenuSize(
     return SizeF(idealWidth, idealHeight);
 }
 
-bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
-    std::string longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode)
+bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
+    const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show ui extension menu enter");
     CHECK_NULL_RETURN(uiExtNode, false);
@@ -4442,8 +4442,32 @@ bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode,
     CHECK_NULL_RETURN(menuLayoutProperty, false);
     menuLayoutProperty->UpdateIsRectInTarget(true);
     menuLayoutProperty->UpdateTargetSize(aiRect.GetSize());
-    ShowMenu(targetNode->GetId(), aiRect.GetOffset(), menuWrapperNode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if (expandDisplay) {
+        SubwindowManager::GetInstance()->ShowMenuNG(menuWrapperNode, targetNode->GetId(), aiRect.GetOffset());
+    } else {
+        ShowMenu(targetNode->GetId(), aiRect.GetOffset(), menuWrapperNode);
+    }
     return true;
+}
+
+void OverlayManager::CloseUIExtensionMenu(const std::function<void(const std::string&)>& onClickMenu, int32_t targetId)
+{
+    bool isShown = SubwindowManager::GetInstance()->GetShown();
+    if (isShown) {
+        CleanMenuInSubWindow(targetId);
+    } else {
+        auto menuNode = GetMenuNode(targetId);
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        HideMenu(menuNode, targetId);
+    }
 }
 
 void OverlayManager::CreateOverlayNode()
