@@ -154,6 +154,35 @@ class LengthMetric {
   }
 }
 
+class LengthMetrics {
+  public unit: LengthUnit;
+  public value: number;
+  constructor(value: number, unit?: LengthUnit) {
+      if (unit in LengthUnit) {
+          this.unit = unit;
+          this.value = value;
+      } else {
+          this.unit = LengthUnit.VP;
+          this.value = 0;
+      }
+  }
+  static px(value: number) {
+      return new LengthMetrics(value, LengthUnit.PX);
+  }
+  static vp(value: number) {
+      return new LengthMetrics(value, LengthUnit.VP);
+  }
+  static fp(value: number) {
+      return new LengthMetrics(value, LengthUnit.FP);
+  }
+  static percent(value: number) {
+      return new LengthMetrics(value, LengthUnit.PERCENT);
+  }
+  static lpx(value: number) {
+      return new LengthMetrics(value, LengthUnit.LPX);
+  }
+}
+
 class ShapeMask {
   public rect: Rect | null = null;
   public roundRect: RoundRect | null = null;
