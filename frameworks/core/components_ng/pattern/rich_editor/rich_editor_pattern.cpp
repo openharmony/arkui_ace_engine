@@ -2233,6 +2233,13 @@ void RichEditorPattern::onDragDropAndLeave()
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        if (!eventHub->IsEnabled()) {
+            return;
+        }
         pattern->status_ = Status::ON_DROP;
         pattern->HandleOnDragDrop(event);
         pattern->status_ = Status::NONE;
@@ -6114,11 +6121,7 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
         return;
     }
 
-    if (isDragSponsor_) {
-        HandleOnDragDropTextOperation(str);
-    } else {
-        InsertValue(str, false);
-    }
+    HandleOnDragDropTextOperation(str, isDragSponsor_);
 
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
@@ -6163,7 +6166,7 @@ int32_t RichEditorPattern::HandleOnDragDeleteForward()
     return allDelLength;
 }
 
-void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertValue)
+void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect)
 {
     int32_t currentPosition = caretPosition_;
     int32_t strLength = static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
@@ -6174,13 +6177,18 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DRAG));
     if (currentPosition < dragRange_.first) {
         HandleOnDragInsertValue(insertValue);
-        dragRange_.first += strLength;
-        dragRange_.second += strLength;
-        HandleOnDragDeleteForward();
+        if (isDeleteSelect) {
+            dragRange_.first += strLength;
+            dragRange_.second += strLength;
+            HandleOnDragDeleteForward();
+        }
         caretPosition_ += strLength;
     } else if (currentPosition > dragRange_.second) {
         HandleOnDragInsertValue(insertValue);
-        int32_t delLength = HandleOnDragDeleteForward();
+        int32_t delLength = 0;
+        if (isDeleteSelect) {
+            delLength = HandleOnDragDeleteForward();
+        }
         caretPosition_ -= (delLength - strLength);
     }
     AfterChangeText(changeValue);

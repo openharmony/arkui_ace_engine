@@ -4147,10 +4147,10 @@ HWTEST_F(RichEditorTestNg, RichEditorDragTest004, TestSize.Level1)
     EXPECT_EQ(index, 0);
     pattern->dragRange_.first = 0;
     pattern->caretPosition_ = options.value.length();
-    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1);
+    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1, true);
     pattern->dragRange_.first = options.value.length();
     pattern->caretPosition_ = 0;
-    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1);
+    pattern->HandleOnDragDropTextOperation(INIT_VALUE_1, true);
     EXPECT_EQ(pattern->status_, Status::NONE);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -5703,7 +5703,7 @@ HWTEST_F(RichEditorTestNg, ChangeTextCallbackTest006, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 2;
     richEditorPattern->dragRange_.first = 0;
     richEditorPattern->dragRange_.second = 2;
-    richEditorPattern->HandleOnDragDropTextOperation("he");
+    richEditorPattern->HandleOnDragDropTextOperation("he", true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 1);
