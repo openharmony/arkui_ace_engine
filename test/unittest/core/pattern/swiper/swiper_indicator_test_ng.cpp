@@ -1120,7 +1120,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1
     });
     auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = indicatorNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     indicatorPattern->SetIndicatorInteractive(true);
     EXPECT_TRUE(eventHub->IsEnabled());
