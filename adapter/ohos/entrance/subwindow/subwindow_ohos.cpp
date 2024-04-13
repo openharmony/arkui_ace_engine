@@ -515,6 +515,7 @@ void SubwindowOhos::HidePreviewNG()
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
+    overlayManager->RemovePreviewBadgeNode();
     overlayManager->RemoveGatherNode();
     overlayManager->RemoveEventColumn();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1469,6 +1470,7 @@ void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAn
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
     if (!startDrag) {
+        manager->RemovePreviewBadgeNode();
         manager->RemoveGatherNodeWithAnimation();
     }
     if (showAnimation) {

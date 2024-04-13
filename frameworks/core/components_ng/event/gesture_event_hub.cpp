@@ -960,6 +960,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedDisplayInSubwindow()) {
             overlayManager->RemovePixelMap();
+            overlayManager->RemovePreviewBadgeNode();
             overlayManager->RemoveGatherNode();
             pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
