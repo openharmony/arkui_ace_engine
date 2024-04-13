@@ -14,9 +14,13 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -26,6 +30,27 @@ ArkUI_Bool IsModifiable(ArkUINodeHandle node)
     auto* frameNode = AceType::DynamicCast<UINode>(currentNode);
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->GetTag() == "CustomFrameNode";
+}
+
+ArkUINodeHandle CreateFrameNode()
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    node->SetExclusiveEventForChild(true);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
+void InvalidateInFrameNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(AceType::InstanceOf<CustomFrameNode>(frameNode));
+    auto pattern = frameNode->GetPattern<CustomFrameNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    pattern->Invalidate();
+    renderContext->RequestNextFrame();
 }
 
 RefPtr<FrameNode> GetParentNode(UINode* node)
@@ -316,11 +341,12 @@ ArkUINodeHandle GetLast(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
-    static const ArkUIFrameNodeModifier modifier = { IsModifiable, AppendChildInFrameNode, InsertChildAfterInFrameNode,
-        RemoveChildInFrameNode, ClearChildrenInFrameNode, GetChildrenCount, GetChild, GetFirst, GetNextSibling,
-        GetPreviousSibling, GetParent, GetIdByNodePtr, GetPositionToParent, GetPositionToWindow, GetMeasuredSize,
-        GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById,
-        GetFrameNodeByUniqueId, GetFrameNodeByKey, PropertyUpdate, GetLast };
+    static const ArkUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
+        AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
+        GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
+        GetPositionToParent, GetPositionToWindow, GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType,
+        IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey,
+        PropertyUpdate, GetLast };
     return &modifier;
 }
 } // namespace NodeModifier

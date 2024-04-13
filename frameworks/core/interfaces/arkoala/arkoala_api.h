@@ -3143,6 +3143,8 @@ struct ArkUIRenderNodeModifier {
 
 struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*isModifiable)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)();
+    void (*invalidate)(ArkUINodeHandle node);
     ArkUI_Bool (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);

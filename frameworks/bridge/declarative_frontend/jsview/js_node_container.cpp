@@ -76,11 +76,14 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     JSObject firstArg = JSRef<JSObject>::Cast(info[0]).Get();
     auto nodeContainerId = frameNode->GetId();
     // check if it's the same object, and if it is, return it;
-    auto insideId = firstArg->GetProperty(NODE_CONTAINER_ID);
-    if (insideId->IsNumber()) {
-        auto id = insideId->ToNumber<int32_t>();
-        if (id == nodeContainerId) {
-            return;
+    auto internalField = firstArg->GetProperty(NODE_CONTAINER_ID);
+    if (internalField->IsObject()) {
+        auto insideId = firstArg->GetProperty(INTERNAL_FIELD_VALUE);
+        if (insideId->IsNumber()) {
+            auto id = insideId->ToNumber<int32_t>();
+            if (id == nodeContainerId) {
+                return;
+            }
         }
     }
     // clear the _nodeContainerId in pre controller;
@@ -99,7 +102,6 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     auto execCtx = info.GetExecutionContext();
     SetNodeController(object, execCtx);
     // set the _nodeContainerId to nodeController
-    auto internalField = firstArg->GetProperty(NODE_CONTAINER_ID);
     if (internalField->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(internalField);
         obj->SetProperty(INTERNAL_FIELD_VALUE, nodeContainerId);

@@ -80,8 +80,15 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         parent->ReplaceChild(viewNode_, newNode);
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
-    viewNode_ = newNode;
+    viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
+    ProccessNode(isSupportExportTexture);
+    UpdateEnd(info);
+}
+
+void JSBaseNode::ProccessNode(bool isSupportExportTexture)
+{
     CHECK_NULL_VOID(viewNode_);
+    viewNode_->SetIsRootBuilderNode(true);
     if (isSupportExportTexture) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
@@ -90,9 +97,6 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
     viewNode_->Build(nullptr);
-    if (size_.IsValid()) {
-        viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
-    }
 }
 
 void JSBaseNode::Create(const JSCallbackInfo& info)
@@ -106,80 +110,6 @@ void JSBaseNode::Create(const JSCallbackInfo& info)
     BuildNode(info);
     EcmaVM* vm = info.GetVm();
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(viewNode_))));
-}
-
-void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
-{
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    std::string nodeTag = "RenderNode";
-    auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
-        nodeTag, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
-    viewNode_ = frameNode;
-    void* ptr = AceType::RawPtr(viewNode_);
-
-    EcmaVM* vm = info.GetVm();
-    auto object = info[0];
-    auto renderNode = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> jsDrawFunc = renderNode->GetProperty("draw");
-    if (jsDrawFunc->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(jsDrawFunc);
-        RefPtr<JsFunction> jsDraw = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(renderNode), jsFunc);
-        auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-        auto execCtx = info.GetExecutionContext();
-        auto drawCallback = JSViewAbstract::GetDrawCallback(jsDraw, execCtx);
-        pattern->SetDrawCallback(std::move(drawCallback));
-    }
-    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
-}
-
-void JSBaseNode::CreateFrameNode(const JSCallbackInfo& info)
-{
-    EcmaVM* vm = info.GetVm();
-    CHECK_NULL_VOID(vm);
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    node->SetExclusiveEventForChild(true);
-    auto pattern = node->GetPattern<NG::CustomFrameNodePattern>();
-    auto global = JSNApi::GetGlobalObject(vm);
-    auto funcName = panda::StringRef::NewFromUtf8(vm, "__AttachToMainTree__");
-    auto obj = global->Get(vm, funcName);
-    panda::Local<panda::FunctionRef> attachFunc = obj;
-    if (obj->IsFunction()) {
-        pattern->SetOnAttachFunc([vm, func = panda::CopyableGlobal(vm, attachFunc)](int32_t nodeId) {
-            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
-            func->Call(vm, func.ToLocal(), params, ArraySize(params));
-        });
-    }
-    funcName = panda::StringRef::NewFromUtf8(vm, "__DetachToMainTree__");
-    obj = global->Get(vm, funcName);
-    panda::Local<panda::FunctionRef> detachFunc = obj;
-    if (detachFunc->IsFunction()) {
-        pattern->SetOnDetachFunc([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
-            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
-            func->Call(vm, func.ToLocal(), params, ArraySize(params));
-        });
-    }
-    viewNode_ = node;
-    void* ptr = AceType::RawPtr(viewNode_);
-    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
-}
-
-void JSBaseNode::ConvertToFrameNode(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    EcmaVM* vm = info.GetVm();
-    CHECK_NULL_VOID(vm);
-    auto obj = info[0];
-    CHECK_NULL_VOID(!obj.IsEmpty());
-    auto* node = obj->GetLocalHandle()->ToNativePointer(vm)->Value();
-    auto* uiNode = reinterpret_cast<NG::UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    CHECK_NULL_VOID(AceType::InstanceOf<NG::UINode>(uiNode));
-    viewNode_ = AceType::Claim(uiNode);
-    void* ptr = AceType::RawPtr(viewNode_);
-    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
 }
 
 void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
@@ -331,10 +261,11 @@ void JSBaseNode::UpdateStart(const JSCallbackInfo& info)
 
 void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
 {
-    if (viewNode_ && size_.IsValid()) {
+    scopedViewStackProcessor_ = nullptr;
+    CHECK_NULL_VOID(viewNode_);
+    if (size_.IsValid()) {
         viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
     }
-    scopedViewStackProcessor_ = nullptr;
 }
 
 void JSBaseNode::JSBind(BindingTarget globalObj)
@@ -342,12 +273,9 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
 
     JSClass<JSBaseNode>::CustomMethod("create", &JSBaseNode::Create);
-    JSClass<JSBaseNode>::CustomMethod("createRenderNode", &JSBaseNode::CreateRenderNode);
-    JSClass<JSBaseNode>::CustomMethod("createFrameNode", &JSBaseNode::CreateFrameNode);
-    JSClass<JSBaseNode>::CustomMethod("convertToFrameNode", &JSBaseNode::ConvertToFrameNode);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
-    JSClass<JSBaseNode>::CustomMethod("dispose", &JSBaseNode::Dispose);
+    JSClass<JSBaseNode>::CustomMethod("disposeNode", &JSBaseNode::Dispose);
     JSClass<JSBaseNode>::CustomMethod("updateStart", &JSBaseNode::UpdateStart);
     JSClass<JSBaseNode>::CustomMethod("updateEnd", &JSBaseNode::UpdateEnd);
 

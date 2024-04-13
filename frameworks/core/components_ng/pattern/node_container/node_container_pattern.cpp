@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +30,10 @@ void NodeContainerPattern::RemakeNode()
         return;
     }
     host->RemoveChildAtIndex(0);
+    if (newNode && !(newNode->GetTag() == V2::CUSTOM_FRAME_NODE_ETS_TAG) && !newNode->GetIsRootBuilderNode()) {
+        TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "Cannot return with a ArkTsNode");
+        return;
+    }
     host->AddChild(newNode, 0);
     OnAddBaseNode();
     host->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
