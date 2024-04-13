@@ -491,7 +491,7 @@ public:
     bool HandleFocusByTabIndex(const KeyEvent& event);
     RefPtr<FocusHub> GetChildFocusNodeByType(FocusNodeType nodeType = FocusNodeType::DEFAULT);
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
-    void TriggerFocusScroll();
+    bool TriggerFocusScroll();
     int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
     bool RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest = false);
     RefPtr<FocusView> GetFirstChildFocusView();
@@ -979,7 +979,7 @@ private:
 
     bool IsNeedPaintFocusState();
 
-    void ScrollByOffset();
+    bool ScrollByOffset();
     bool ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) const;
 
     RefPtr<FocusHub> GetNearestNodeByProjectArea(const std::list<RefPtr<FocusHub>>& allNodes, FocusStep step);
