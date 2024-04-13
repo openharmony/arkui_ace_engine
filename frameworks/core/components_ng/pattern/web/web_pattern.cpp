@@ -2275,6 +2275,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
 
 void WebPattern::DragDropSelectionMenu()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web menu controller status. dropMenuState_：%{publc}d", dropMenuState_);
     if (dropMenuState_ || IsImageDrag()) {
         return;
     }
@@ -2285,6 +2286,7 @@ void WebPattern::DragDropSelectionMenu()
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsCurrentFocus()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event The current web page has lost focus, no need to draw menu handles");
         return;
     }
     SelectOverlayInfo selectInfo;
