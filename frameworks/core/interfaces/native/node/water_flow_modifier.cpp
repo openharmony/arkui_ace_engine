@@ -247,7 +247,7 @@ ArkUI_CharPtr GetRowsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    g_strValue = WaterFlowModelNG::GetColumnsTemplate(frameNode);
+    g_strValue = WaterFlowModelNG::GetRowsTemplate(frameNode);
     return g_strValue.c_str();
 }
 

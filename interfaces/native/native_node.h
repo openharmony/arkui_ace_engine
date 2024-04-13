@@ -4282,7 +4282,7 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
      * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: scroll offset of each frame. The offset is positive when the
      * component is scrolled up and negative when the component is scrolled down. \n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: current scroll state. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      */
     NODE_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
 } ArkUI_NodeEventType;
