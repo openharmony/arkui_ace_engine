@@ -437,6 +437,7 @@ struct PlaceholderSpanItem : public SpanItem {
 public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
+    PlaceholderRun run_;
     PlaceholderSpanItem() = default;
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
@@ -503,6 +504,7 @@ struct ImageSpanItem : public PlaceholderSpanItem {
 public:
     ImageSpanItem() = default;
     ~ImageSpanItem() override = default;
+    PlaceholderRun run_;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
         double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
@@ -537,6 +539,8 @@ public:
     {
         return imageSpanItem_;
     }
+
+    void DumpInfo() override;
 
 private:
     RefPtr<ImageSpanItem> imageSpanItem_ = MakeRefPtr<ImageSpanItem>();

@@ -195,19 +195,33 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 
 void SpanNode::DumpInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("Content:").append(spanItem_->GetSpanContent()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("FontSize:").append(spanItem_->fontStyle->GetFontSize().value_or(Dimension()).ToString()));
-    DumpLog::GetInstance().AddDesc(
-        std::string("FontColor:").append(spanItem_->fontStyle->GetTextColor().value_or(Color()).ColorToString()));
-    DumpLog::GetInstance().AddDesc(std::string("FontWeight:").append(
-        StringUtils::FontWeightToString(spanItem_->fontStyle->GetFontWeight().value_or(FontWeight::NORMAL))));
-    if (spanItem_->unicode != 0) {
-        DumpLog::GetInstance().AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
-        DumpLog::GetInstance().AddDesc(std::string("SymbolRenderingStrategy:").append(
-            std::to_string(spanItem_->fontStyle->GetSymbolRenderingStrategy().value_or(0))));
-        DumpLog::GetInstance().AddDesc(std::string("SymbolEffectStrategy:").append(
-            std::to_string(spanItem_->fontStyle->GetSymbolEffectStrategy().value_or(0))));
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("Content: ").append("\"").append(spanItem_->content).append("\""));
+    auto textStyle = spanItem_->GetTextStyle();
+    if (!textStyle) {
+        return;
+    }
+    dumpLog.AddDesc(std::string("FontSize: ").append(textStyle->GetFontSize().ToString()));
+    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle->GetLineHeight().ToString()));
+    dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle->GetBaselineOffset().ToString()));
+    dumpLog.AddDesc(std::string("WordSpacing: ").append(textStyle->GetWordSpacing().ToString()));
+    dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
+    dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle->GetLetterSpacing().ToString()));
+    dumpLog.AddDesc(std::string("TextColor: ").append(textStyle->GetTextColor().ColorToString()));
+    dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle->GetFontWeight())));
+    dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle->GetFontStyle())));
+    dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle->GetTextBaseline())));
+    dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle->GetTextOverflow())));
+    dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle->GetTextVerticalAlign())));
+    dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle->GetTextAlign())));
+    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle->GetWordBreak())));
+    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle->GetTextCase())));
+    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle->GetEllipsisMode())));
+    dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle->GetHalfLeading())));
+    if (GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        dumpLog.AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
+        dumpLog.AddDesc(std::string("RenderStrategy: ").append(std::to_string(textStyle->GetRenderStrategy())));
+        dumpLog.AddDesc(std::string("EffectStrategy: ").append(std::to_string(textStyle->GetEffectStrategy())));
     }
 }
 
@@ -628,6 +642,26 @@ std::optional<std::pair<int32_t, int32_t>> SpanItem::GetIntersectionInterval(std
     return std::make_optional<std::pair<int32_t, int32_t>>(std::make_pair(start, end));
 }
 
+void ImageSpanNode::DumpInfo()
+{
+    FrameNode::DumpInfo();
+    auto& dumpLog = DumpLog::GetInstance();
+    auto& run = imageSpanItem_->run_;
+    dumpLog.AddDesc("--------------- print run info ---------------");
+    dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run.width)));
+    dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run.height)));
+    dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run.alignment)));
+    dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run.baseline)));
+    dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run.baseline_offset)));
+    auto& textStyle = imageSpanItem_->textStyle;
+    dumpLog.AddDesc("--------------- print text style ---------------");
+    dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
+    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
+    dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
+    dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
+    dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
+}
+
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
     double width, double height, VerticalAlign verticalAlign)
 {
@@ -658,6 +692,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
+    run_ = run;
     builder->PopStyle();
     return index;
 }
@@ -688,6 +723,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     textStyle.SetTextDecoration(TextDecoration::NONE);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
+    run_ = run;
     builder->PopStyle();
     return index;
 }

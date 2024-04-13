@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H
 
 #include <cstdint>
+#include "base/utils/linear_map.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -194,6 +196,22 @@ enum class TextAlign {
     END = 2,
 };
 
+namespace StringUtils {
+inline std::string ToString(const TextAlign& textAlign)
+{
+    static const LinearEnumMapNode<TextAlign, std::string> table[] = {
+        { TextAlign::LEFT, "LEFT" },
+        { TextAlign::RIGHT, "RIGHT" },
+        { TextAlign::CENTER, "CENTER" },
+        { TextAlign::JUSTIFY, "JUSTIFY" },
+        { TextAlign::START, "START" },
+        { TextAlign::END, "END" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textAlign);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 enum class TextDataDetectType {
     PHONE_NUMBER = 0,
     URL,
@@ -216,6 +234,20 @@ enum class TextOverflow {
     ELLIPSIS,
     MARQUEE,
 };
+
+namespace StringUtils {
+inline std::string ToString(const TextOverflow& textOverflow)
+{
+    static const LinearEnumMapNode<TextOverflow, std::string> table[] = {
+        { TextOverflow::NONE, "NONE" },
+        { TextOverflow::CLIP, "CLIP" },
+        { TextOverflow::ELLIPSIS, "ELLIPSIS" },
+        { TextOverflow::MARQUEE, "MARQUEE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textOverflow);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class TextMarqueeState {
     START = 0,
@@ -526,6 +558,21 @@ enum class VerticalAlign {
     BASELINE,
     NONE,
 };
+
+namespace StringUtils {
+inline std::string ToString(const VerticalAlign& verticalAlign)
+{
+    static const LinearEnumMapNode<VerticalAlign, std::string> table[] = {
+        { VerticalAlign::TOP, "TOP" },
+        { VerticalAlign::CENTER, "CENTER" },
+        { VerticalAlign::BOTTOM, "BOTTOM" },
+        { VerticalAlign::BASELINE, "BASELINE" },
+        { VerticalAlign::NONE, "NONE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), verticalAlign);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class BarPosition {
     START,

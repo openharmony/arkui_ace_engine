@@ -803,6 +803,9 @@ public:
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
 
+protected:
+    void DumpInfo() override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -838,7 +841,6 @@ private:
     bool RemoveImmediately() const override;
 
     // dump self info.
-    void DumpInfo() override;
     void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
