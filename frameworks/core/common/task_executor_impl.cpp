@@ -49,6 +49,23 @@ inline std::string GenJsThreadName()
 TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainer(
     TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc) const
 {
+    #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    std::shared_ptr<TraceId> traceId(TraceId::CreateTraceId());
+    auto wrappedTask = [originTask = std::move(task), id, traceIdPtr = std::move(traceId),
+                           traceIdFunc = std::move(traceIdFunc)]() {
+        ContainerScope scope(id);
+        if (originTask && traceIdPtr) {
+            traceIdPtr->SetTraceId();
+            originTask();
+            traceIdPtr->ClearTraceId();
+        } else {
+            LOGW("WrapTaskWithContainer: originTask or traceIdPtr is null.");
+        }
+        if (traceIdFunc) {
+            traceIdFunc();
+        }
+    };
+    #else
     auto wrappedTask = [originTask = std::move(task), id, traceId = TraceId::CreateTraceId(),
                            traceIdFunc = std::move(traceIdFunc)]() {
         ContainerScope scope(id);
@@ -64,12 +81,30 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainer(
             traceIdFunc();
         }
     };
+    #endif
     return wrappedTask;
 }
 
 TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
     TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc) const
 {
+    #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    std::shared_ptr<TraceId> traceId(TraceId::CreateTraceId());
+    auto wrappedTask = [taskWrapper = taskWrapper_, originTask = std::move(task), id,
+                           traceIdPtr = std::move(traceId), traceIdFunc = std::move(traceIdFunc)]() {
+        ContainerScope scope(id);
+        if (originTask && traceIdPtr) {
+            traceIdPtr->SetTraceId();
+            taskWrapper->Call(originTask);
+            traceIdPtr->ClearTraceId();
+        } else {
+            LOGW("WrapTaskWithContainer: originTask or traceIdPtr is null.");
+        }
+        if (traceIdFunc) {
+            traceIdFunc();
+        }
+    };
+    #else
     auto wrappedTask = [taskWrapper = taskWrapper_, originTask = std::move(task), id,
                            traceId = TraceId::CreateTraceId(), traceIdFunc = std::move(traceIdFunc)]() {
         ContainerScope scope(id);
@@ -85,6 +120,7 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
             traceIdFunc();
         }
     };
+    #endif
     return wrappedTask;
 }
 
