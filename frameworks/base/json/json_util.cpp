@@ -175,6 +175,23 @@ bool JsonValue::Put(const char* key, const char* value)
     return true;
 }
 
+bool JsonValue::PutFixedAttr(const char* key, const char* value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, const char* value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
 const JsonObject* JsonValue::GetJsonObject() const
 {
     return object_;
@@ -192,6 +209,24 @@ bool JsonValue::Put(const char* key, const std::unique_ptr<JsonValue>& value)
 
     cJSON_AddItemToObject(object_, key, jsonObject);
     return true;
+}
+
+bool JsonValue::PutFixedAttr(const char* key, const std::unique_ptr<JsonValue>& value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, const std::unique_ptr<JsonValue>& value,
+    const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
 }
 
 // add item to array
@@ -223,6 +258,23 @@ bool JsonValue::Put(const char* key, size_t value)
     return true;
 }
 
+bool JsonValue::PutFixedAttr(const char* key, size_t value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, size_t value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
 bool JsonValue::Put(const char* key, int32_t value)
 {
     if (key == nullptr) {
@@ -237,9 +289,43 @@ bool JsonValue::Put(const char* key, int32_t value)
     return true;
 }
 
+bool JsonValue::PutFixedAttr(const char* key, int32_t value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, int32_t value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
 bool JsonValue::Put(const char* key, int64_t value)
 {
     return Put(key, static_cast<double>(value));
+}
+
+bool JsonValue::PutFixedAttr(const char* key, int64_t value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, int64_t value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
 }
 
 bool JsonValue::Put(const char* key, double value)
@@ -254,6 +340,23 @@ bool JsonValue::Put(const char* key, double value)
     }
     cJSON_AddItemToObject(object_, key, child);
     return true;
+}
+
+bool JsonValue::PutFixedAttr(const char* key, double value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, double value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
 }
 
 JsonObject* JsonValue::ReleaseJsonObject()
@@ -331,6 +434,23 @@ bool JsonValue::Put(const char* key, bool value)
     }
     cJSON_AddItemToObject(object_, key, child);
     return true;
+}
+
+bool JsonValue::PutFixedAttr(const char* key, bool value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, bool value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
 }
 
 bool JsonValue::Replace(const char* key, bool value)
