@@ -159,7 +159,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest002, TestSize.Lev
     EXPECT_FALSE(props.ActActionScrollBackward());
     EXPECT_FALSE(props.ActActionScrollForward());
     EXPECT_FALSE(props.ActActionSelect());
-    EXPECT_FALSE(props.ActActionSetSelection(0, 1));
+    EXPECT_FALSE(props.ActActionSetSelection(0, 1, NG::DIR_NULL));
     EXPECT_FALSE(props.ActActionSetText("abc"));
 
     /**
@@ -182,8 +182,8 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest002, TestSize.Lev
     EXPECT_TRUE(props.ActActionScrollForward());
     props.SetActionSelect([]() {});
     EXPECT_TRUE(props.ActActionSelect());
-    props.SetActionSetSelection([](int32_t start, int32_t end, int32_t dir) {});
-    EXPECT_TRUE(props.ActActionSetSelection(0, 1, 1));
+    props.SetActionSetSelection([](int32_t start, int32_t end, SelectionDirection dir) {});
+    EXPECT_TRUE(props.ActActionSetSelection(0, 1, NG::DIR_NULL));
     props.SetActionSetText([](std::string text) {});
     EXPECT_TRUE(props.ActActionSetText("abc"));
 }
@@ -399,8 +399,8 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest007, TestSize.Lev
      * @tc.expected: act every action return false
      */
     AccessibilityProperty props;
-    props.SetActionSetSelection([](int32_t start, int32_t end, int32_t dir) {});
-    EXPECT_TRUE(props.ActActionSetSelection(0, 1, 1));
+    props.SetActionSetSelection([](int32_t start, int32_t end, SelectionDirection dir) {});
+    EXPECT_TRUE(props.ActActionSetSelection(0, 1, NG::DIR_NULL));
     props.SetActionSetIndex([](int32_t start) {});
     EXPECT_TRUE(props.ActActionSetIndex(1));
     props.SetActionGetIndex([]() {return 2;});
