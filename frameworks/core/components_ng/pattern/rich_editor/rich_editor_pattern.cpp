@@ -4090,9 +4090,6 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (SelectOverlayIsOn()) {
         return;
     }
-    if (info.IsPreventDefault()) {
-        return;
-    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
