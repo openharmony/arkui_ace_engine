@@ -2286,7 +2286,7 @@ void WebPattern::DragDropSelectionMenu()
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsCurrentFocus()) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event The current web page has lost focus, no need to draw menu handles");
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event web page has lost focus, no need to draw menu handles");
         return;
     }
     SelectOverlayInfo selectInfo;
