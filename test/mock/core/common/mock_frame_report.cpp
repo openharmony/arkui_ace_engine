@@ -43,4 +43,11 @@ void FrameReport::BeginListFling()
 {
 }
 
+void FrameReport::EnableSelfRender()
+{
+}
+
+void FrameReport::DisableSelfRender()
+{
+}
 } // namespace OHOS::Ace
