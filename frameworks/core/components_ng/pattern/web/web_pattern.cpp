@@ -28,6 +28,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/date_util.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
@@ -35,6 +36,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -162,6 +164,7 @@ constexpr Dimension TOOLTIP_FONT_SIZE = 10.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_MARGIN = 10.0f;
+constexpr float TOOLTIP_DELAY_MS = 1000;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
@@ -2495,26 +2498,53 @@ std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(cons
 
 void WebPattern::OnTooltip(const std::string& tooltip)
 {
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    tooltipTimestamp_ = GetSysTimestamp();
+    auto tooltipTimestamp = tooltipTimestamp_;
 
-    if (tooltipTextId_ == -1) {
+    if (tooltipId_ != -1) {
+        overlayManager->RemoveIndexerPopupById(tooltipId_);
+    }
+
+    if (tooltip == "" || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
+        return;
+    }
+    ShowTooltip(tooltip, tooltipTimestamp);
+}
+
+void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
+{
+    if (tooltipTimestamp_ != tooltipTimestamp) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (tooltipId_ == -1) {
+        tooltipId_ = ElementRegister::GetInstance()->MakeUniqueId();
         tooltipTextId_ = ElementRegister::GetInstance()->MakeUniqueId();
     }
-    if (tooltip == "") {
-        overlayManager->RemoveIndexerPopupById(tooltipTextId_);
-        tooltipEnabled_ = false;
-        return;
-    }
-    if (tooltipEnabled_ || mouseHoveredX_ < 0 || mouseHoveredY_ < 0) {
-        return;
-    }
-    tooltipEnabled_ = true;
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, tooltipTextId_,
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(textNode);
+    auto tooltipNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tooltipId_,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    CHECK_NULL_VOID(tooltipNode);
+
+    textNode->MountToParent(tooltipNode, 0);
+
+    auto tooltipLayoutProperty = tooltipNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(tooltipLayoutProperty);
+    tooltipLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CalcLength(1.0, DimensionUnit::PERCENT))));
+    tooltipLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CalcLength(1.0, DimensionUnit::PERCENT))));
+    tooltipLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    tooltipLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
 
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
@@ -2533,16 +2563,35 @@ void WebPattern::OnTooltip(const std::string& tooltip)
     textRenderContext->UpdateBackgroundColor(Color::WHITE);
 
     MarginProperty textMargin;
-    CalculateToolTipMargin(textNode, textMargin);
+    CalculateTooltipMargin(textNode, textMargin);
     textLayoutProperty->UpdateMargin(textMargin);
     
     BorderColorProperty borderColor;
     borderColor.SetColor(Color::BLACK);
     textRenderContext->UpdateBorderColor(borderColor);
-    overlayManager->ShowIndexerPopup(tooltipTextId_, textNode);
+    overlayManager->ShowIndexerPopup(tooltipId_, tooltipNode);
 }
 
-void WebPattern::CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin)
+void WebPattern::ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
+{
+    auto tooltipTask = [weak = WeakClaim(this), tooltip, tooltipTimestamp]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleShowTooltip(tooltip, tooltipTimestamp);
+    };
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    taskExecutor->PostDelayedTask(tooltipTask, TaskExecutor::TaskType::UI, TOOLTIP_DELAY_MS);
+}
+
+void WebPattern::CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin)
 {
     auto textLayoutWrapper = textNode->CreateLayoutWrapper(true);
     CHECK_NULL_VOID(textLayoutWrapper);
@@ -2555,7 +2604,7 @@ void WebPattern::CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginPrope
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     auto marginX = offset.GetX() + mouseHoveredX_ + TOOLTIP_MARGIN;
     auto marginY = offset.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN;
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (GreatNotEqual(marginX + textWidth, pipeline->GetCurrentRootWidth())) {
         marginX = pipeline->GetCurrentRootWidth() - textWidth;
