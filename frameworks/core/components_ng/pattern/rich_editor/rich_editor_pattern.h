@@ -300,6 +300,7 @@ public:
     bool JudgeDraggable(GestureEvent& info);
     void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
     OffsetF CalculateEmptyValueCaretRect();
+    void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
 
     bool IsUsingMouse() const
     {

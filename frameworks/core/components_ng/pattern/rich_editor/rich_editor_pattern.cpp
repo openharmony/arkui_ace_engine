@@ -4007,15 +4007,27 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
                 break;
         }
     }
-    for (auto index : deleteNodes) {
-        host->RemoveChildAtIndex(index);
-    }
+    RemoveEmptySpan(deleteNodes);
     if (info.GetRichEditorDeleteDirection() == RichEditorDeleteDirection::BACKWARD) {
         SetCaretPosition(std::clamp(caretPosition_ - caretMoveLength, 0, static_cast<int32_t>(GetTextContentLength())));
     }
     UpdateSpanPosition();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     OnModifyDone();
+}
+
+void RichEditorPattern::RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (auto index : deleteSpanIndexs) {
+        host->RemoveChildAtIndex(index);
+        auto it = spans_.begin();
+        std::advance(it, index);
+        if (it != spans_.end()) {
+            spans_.erase(it);
+        }
+    }
 }
 
 void RichEditorPattern::DeleteTextSpanInfo(const RefPtr<FrameNode>& host,
