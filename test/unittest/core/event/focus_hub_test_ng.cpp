@@ -2069,7 +2069,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     EXPECT_TRUE(focusHub->CalculatePosition());
     focusHub1->focusType_ = FocusType::NODE;
-    EXPECT_FALSE(focusHub->PaintAllFocusState());
+    EXPECT_TRUE(focusHub->PaintAllFocusState());
     EXPECT_TRUE(focusHub->CalculatePosition());
 }
 

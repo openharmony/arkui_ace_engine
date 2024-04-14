@@ -1017,7 +1017,7 @@ void PipelineContext::SetupRootElement()
     }
     postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>();
+    focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
 
@@ -1075,7 +1075,7 @@ void PipelineContext::SetupSubRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>();
+    focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
     postEventManager_ = MakeRefPtr<PostEventManager>();
 }
 
@@ -1102,7 +1102,7 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
-        focusManager_ = MakeRefPtr<FocusManager>();
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
     }
     return focusManager_;
 }
