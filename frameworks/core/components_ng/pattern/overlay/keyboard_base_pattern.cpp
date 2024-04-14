@@ -63,6 +63,9 @@ void KeyboardPattern::OnModifyDone()
 
 void KeyboardPattern::OnAreaChangedInner()
 {
+    if (!supportAvoidance_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentGlobal = host->GetTransformRectRelativeToWindow();
