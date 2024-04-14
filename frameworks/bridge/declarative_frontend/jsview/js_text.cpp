@@ -309,7 +309,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
 }
@@ -317,7 +317,7 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
 }
@@ -414,7 +414,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
 }
@@ -472,7 +472,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
