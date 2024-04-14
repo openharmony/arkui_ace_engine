@@ -107,6 +107,16 @@ void EventTreeRecord::AddFrameNodeSnapshot(FrameNodeSnapshot&& node)
         return;
     }
     if (eventTreeList.back().hitTestTree.size() < MAX_FRAME_NODE_CNT) {
+        bool isInList = false;
+        for (auto iter : eventTreeList.back().hitTestTree) {
+            if (iter.nodeId == node.nodeId) {
+                isInList = true;
+                break;
+            }
+        }
+        if (isInList) {
+            return;
+        }
         eventTreeList.back().hitTestTree.emplace_back(node);
     }
 }
