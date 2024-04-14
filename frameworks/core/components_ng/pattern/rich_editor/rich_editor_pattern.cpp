@@ -3833,6 +3833,7 @@ void RichEditorPattern::CalcDeleteValueObj(int32_t currentPosition, int32_t leng
             int32_t eraseLength = 0;
             if ((*it)->unicode != 0) {
                 eraseLength = DeleteValueSetSymbolSpan(*it, spanResult);
+                info.SetLength(SYMBOL_SPAN_LENGTH);
             } else if (AceType::InstanceOf<ImageSpanItem>(*it)) {
                 eraseLength = DeleteValueSetImageSpan(*it, spanResult);
             } else {
@@ -3859,11 +3860,7 @@ int32_t RichEditorPattern::DeleteValueSetSymbolSpan(
     spanResult.SetSpanType(SpanResultType::SYMBOL);
     spanResult.SetSpanRangeEnd(spanItem->position);
     spanResult.SetSpanRangeStart(spanItem->position - SYMBOL_SPAN_LENGTH);
-    if (GetCaretPosition() < spanItem->position) {
-        spanResult.SetEraseLength(1);
-    } else {
-        spanResult.SetEraseLength(SYMBOL_SPAN_LENGTH);
-    }
+    spanResult.SetEraseLength(SYMBOL_SPAN_LENGTH);
     return SYMBOL_SPAN_LENGTH;
 }
 
