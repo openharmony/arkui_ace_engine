@@ -18,6 +18,7 @@
 
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -51,13 +52,13 @@ public:
         ResetRadioIndicator();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto radioTheme = pipeline->GetTheme<RadioTheme>();
-        PaintProperty::ToJsonValue(json);
-        json->Put("checked", GetRadioCheck().value_or(false) ? "true" : "false");
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("checked", GetRadioCheck().value_or(false) ? "true" : "false", filter);
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("checkedBackgroundColor",
             GetRadioCheckedBackgroundColor().value_or(radioTheme->GetActiveColor()).ColorToString().c_str());
@@ -67,10 +68,10 @@ public:
             "indicatorColor", GetRadioIndicatorColor().value_or(radioTheme->GetPointColor()).ColorToString().c_str());
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             static const char* INDICATRO_TYPE[] = { "TICK", "DOT", "CUSTOM" };
-            json->Put("indicatorType",
-                INDICATRO_TYPE[static_cast<int32_t>(GetRadioIndicator().value_or(0))]);
+            json->PutExtAttr("indicatorType",
+                INDICATRO_TYPE[static_cast<int32_t>(GetRadioIndicator().value_or(0))], filter);
         }
-        json->Put("radioStyle", jsonValue->ToString().c_str());
+        json->PutExtAttr("radioStyle", jsonValue->ToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioCheck, bool, PROPERTY_UPDATE_RENDER);

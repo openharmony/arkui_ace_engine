@@ -34,6 +34,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float DEVICE_WIDTH = 480.f;
 constexpr float DEVICE_HEIGHT = 800.f;
 constexpr int32_t STATE_DEFAULT = 0;
@@ -240,7 +241,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest002, TestSize.Level1)
      */
 
     auto jsonValue = JsonUtil::Create(true);
-    imageAnimatorPattern->ToJsonValue(jsonValue);
+    imageAnimatorPattern->ToJsonValue(jsonValue, filter);
     EXPECT_EQ(jsonValue->GetValue("state")->GetString().c_str(), STATUS_IDLE_STR);
     EXPECT_EQ(jsonValue->GetValue("duration")->GetString().c_str(), std::to_string(DURATION_DEFAULT));
     EXPECT_EQ(jsonValue->GetValue("iterations")->GetString().c_str(), std::to_string(ITERATION_DEFAULT));
@@ -298,7 +299,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest003, TestSize.Level1)
      */
 
     auto jsonValue = JsonUtil::Create(true);
-    imageAnimatorPattern->ToJsonValue(jsonValue);
+    imageAnimatorPattern->ToJsonValue(jsonValue, filter);
     std::string imagesStr = jsonValue->GetValue("images")->GetString();
     auto imageArray = JsonUtil::CreateArray(true);
     auto imageItem = JsonUtil::Create(true);

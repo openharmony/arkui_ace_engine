@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 
@@ -99,32 +100,40 @@ public:
         ignoreItemSpace_ = false;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("index", std::to_string(propIndex_.value_or(0)).c_str());
-        json->Put("vertical", propDirection_.value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "true" : "false");
-        json->Put("indicator", propShowIndicator_.value_or(true) ? "true" : "false");
-        json->Put("itemSpace", propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("cachedCount", propCachedCount_.value_or(1));
-        json->Put("displayMode", propDisplayMode_.value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::AUTO_LINEAR
-                                     ? "SwiperDisplayMode.AutoLinear"
-                                     : "SwiperDisplayMode.Stretch");
-        json->Put("displayCount", propDisplayCount_.value_or(1));
-        json->Put("minSize", propMinSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("prevMargin", propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("nextMargin", propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false");
-        json->Put("hoverShow", propHoverShow_.value_or(false) ? "true" : "false");
-        json->Put("showBackground", propIsShowBackground_.value_or(false) ? "true" : "false");
-        json->Put("isSidebarMiddle", propIsSidebarMiddle_.value_or(false) ? "true" : "false");
-        json->Put(
-            "arrowBackgroundSize", propBackgroundSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("arrowSize", propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("arrowBackgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
-        json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
-        json->Put("loop", propLoop_.value_or(true) ? "true" : "false");
-        json->Put("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false");
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("index", std::to_string(propIndex_.value_or(0)).c_str(), filter);
+        json->PutExtAttr("vertical",
+            propDirection_.value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "true" : "false", filter);
+        json->PutExtAttr("indicator", propShowIndicator_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("itemSpace",
+            propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("cachedCount", propCachedCount_.value_or(1), filter);
+        json->PutExtAttr("displayMode",
+            propDisplayMode_.value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::AUTO_LINEAR ?
+            "SwiperDisplayMode.AutoLinear" : "SwiperDisplayMode.Stretch", filter);
+        json->PutExtAttr("displayCount", propDisplayCount_.value_or(1), filter);
+        json->PutExtAttr("minSize",
+            propMinSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("prevMargin",
+            propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("nextMargin",
+            propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("hoverShow", propHoverShow_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("showBackground", propIsShowBackground_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("isSidebarMiddle", propIsSidebarMiddle_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("arrowBackgroundSize",
+            propBackgroundSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("arrowSize",
+            propArrowSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("arrowBackgroundColor",
+            propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
+        json->PutExtAttr("arrowColor",
+            propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
+        json->PutExtAttr("loop", propLoop_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false", filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

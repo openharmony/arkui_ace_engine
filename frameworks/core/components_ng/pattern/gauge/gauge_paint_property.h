@@ -19,6 +19,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/image/image_source_info.h"
@@ -89,18 +90,18 @@ public:
         ResetIndicatorSpace();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put("value", StringUtils::DoubleToString(propValue_.value_or(0)).c_str());
-        json->Put("max", StringUtils::DoubleToString(propMax_.value_or(100)).c_str());
-        json->Put("min", StringUtils::DoubleToString(propMin_.value_or(0)).c_str());
-        json->Put("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str());
-        json->Put("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str());
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("value", StringUtils::DoubleToString(propValue_.value_or(0)).c_str(), filter);
+        json->PutExtAttr("max", StringUtils::DoubleToString(propMax_.value_or(100)).c_str(), filter);
+        json->PutExtAttr("min", StringUtils::DoubleToString(propMin_.value_or(0)).c_str(), filter);
+        json->PutExtAttr("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str(), filter);
+        json->PutExtAttr("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str(), filter);
         if (propStrokeWidth_.has_value()) {
-            json->Put("strokeWidth", propStrokeWidth_.value().ToString().c_str());
+            json->PutExtAttr("strokeWidth", propStrokeWidth_.value().ToString().c_str(), filter);
         } else {
-            json->Put("strokeWidth", "");
+            json->PutExtAttr("strokeWidth", "", filter);
         }
 
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -114,28 +115,29 @@ public:
                     jsonColors->Put(index.c_str(), jsonObject);
                 }
             }
-            json->Put("colors", jsonColors->ToString().c_str());
+            json->PutExtAttr("colors", jsonColors->ToString().c_str(), filter);
         } else {
-            ToJsonColor(json);
-            ToJsonIndicator(json);
-            ToJsonTrackShadow(json);
+            ToJsonColor(json, filter);
+            ToJsonIndicator(json, filter);
+            ToJsonTrackShadow(json, filter);
         }
     }
 
-    void ToJsonColor(std::unique_ptr<JsonValue>& json) const
+    void ToJsonColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         if (!propGaugeType_.has_value()) {
             auto jsonColor = JsonUtil::CreateArray(true);
             for (size_t j = 0; j < GAUGE_DEFAULT_COLOR.size(); j++) {
                 jsonColor->Put(std::to_string(j).c_str(), GAUGE_DEFAULT_COLOR[j].ColorToString().c_str());
             }
-            json->Put("colors", jsonColor->ToString().c_str());
+            json->PutExtAttr("colors", jsonColor->ToString().c_str(), filter);
             return;
         }
 
         if (propGaugeType_.value() == GaugeType::TYPE_CIRCULAR_MONOCHROME) {
             if (propGradientColors_.has_value()) {
-                json->Put("colors", propGradientColors_.value().at(0).at(0).first.ColorToString().c_str());
+                json->PutExtAttr("colors",
+                    propGradientColors_.value().at(0).at(0).first.ColorToString().c_str(), filter);
             }
             return;
         }
@@ -151,7 +153,7 @@ public:
                     auto indexStr = std::to_string(j);
                     jsonColor->Put(indexStr.c_str(), jsonColorObject);
                 }
-                json->Put("colors", jsonColor->ToString().c_str());
+                json->PutExtAttr("colors", jsonColor->ToString().c_str(), filter);
             }
             return;
         }
@@ -175,13 +177,13 @@ public:
                 jsonGradientColors->Put(index.c_str(), jsonObject);
             }
         }
-        json->Put("colors", jsonGradientColors->ToString().c_str());
+        json->PutExtAttr("colors", jsonGradientColors->ToString().c_str(), filter);
     }
 
-    void ToJsonIndicator(std::unique_ptr<JsonValue>& json) const
+    void ToJsonIndicator(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         if (!propIsShowIndicator_.value_or(true)) {
-            json->Put("indicator", "null");
+            json->PutExtAttr("indicator", "null", filter);
             return;
         }
         auto indicatorJsonValue = JsonUtil::Create(true);
@@ -196,10 +198,10 @@ public:
         } else {
             indicatorJsonValue->Put("space", INDICATOR_DISTANCE_TO_TOP.ToString().c_str());
         }
-        json->Put("indicator", indicatorJsonValue);
+        json->PutExtAttr("indicator", indicatorJsonValue, filter);
     }
 
-    void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json) const
+    void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         GaugeShadowOptions trackShadow;
         if (propShadowOptions_.has_value()) {
@@ -214,7 +216,7 @@ public:
         }
 
         if (!trackShadow.isShadowVisible) {
-            json->Put("trackShadow", "null");
+            json->PutExtAttr("trackShadow", "null", filter);
             return;
         }
 
@@ -223,7 +225,7 @@ public:
         shadowOptionJson->Put("offsetX", std::to_string(trackShadow.offsetX).c_str());
         shadowOptionJson->Put("offsetY", std::to_string(trackShadow.offsetY).c_str());
 
-        json->Put("trackShadow", shadowOptionJson);
+        json->PutExtAttr("trackShadow", shadowOptionJson, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, float, PROPERTY_UPDATE_RENDER);

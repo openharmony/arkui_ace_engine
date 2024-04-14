@@ -56,6 +56,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const int32_t OFFSETX = 10;
 const int32_t OFFSETY = 20;
 constexpr int32_t SELECT_ERROR = -1;
@@ -1788,7 +1789,7 @@ HWTEST_F(SelectTestNg, ToJsonValue001, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
     ASSERT_NE(jsonValue, nullptr);
-    pattern->ToJsonValue(jsonValue);
+    pattern->ToJsonValue(jsonValue, filter);
     EXPECT_TRUE(pattern->options_.empty());
 }
 
@@ -1817,7 +1818,7 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
     pattern->options_.push_back(option);
     pattern->menuWrapper_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern->ToJsonValue(jsonValue);
+    pattern->ToJsonValue(jsonValue, filter);
     EXPECT_FALSE(pattern->options_.empty());
 }
 

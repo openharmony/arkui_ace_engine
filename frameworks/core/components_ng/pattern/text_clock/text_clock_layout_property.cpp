@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -76,22 +77,27 @@ std::string ConvertFeature(const FONT_FEATURES_MAP& fontFeaTures)
 }
 } // namespace
 
-void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
+    LayoutProperty::ToJsonValue(json, filter);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        json->Put("format", propFormat_.value_or(DEFAULT_FORMAT_API_ELEVEN).c_str());
+        json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT_API_ELEVEN).c_str(), filter);
     } else {
-        json->Put("format", propFormat_.value_or(DEFAULT_FORMAT_API_TEN).c_str());
+        json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT_API_TEN).c_str(), filter);
     }
-    json->Put("timeZoneOffset", std::to_string(propHoursWest_.value_or(GetSystemTimeZone())).c_str());
-    json->Put("fontSize", GetFontSize().value_or(Dimension()).ToString().c_str());
-    json->Put("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str());
-    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-    json->Put(
-        "fontStyle", V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
-    json->Put("fontFamily", ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str());
-    json->Put("textShadow", ConvertTextShadow(GetTextShadow().value_or(std::vector<Shadow>())).c_str());
-    json->Put("fontFeature", ConvertFeature(GetFontFeature().value_or(FONT_FEATURES_MAP())).c_str());
+    json->PutExtAttr("timeZoneOffset",
+        std::to_string(propHoursWest_.value_or(GetSystemTimeZone())).c_str(), filter);
+    json->PutExtAttr("fontSize", GetFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
+    json->PutExtAttr("fontWeight",
+        V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
+    json->PutExtAttr("fontStyle",
+        V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str(), filter);
+    json->PutExtAttr("fontFamily",
+        ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str(), filter);
+    json->PutExtAttr("textShadow",
+        ConvertTextShadow(GetTextShadow().value_or(std::vector<Shadow>())).c_str(), filter);
+    json->PutExtAttr("fontFeature",
+        ConvertFeature(GetFontFeature().value_or(FONT_FEATURES_MAP())).c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

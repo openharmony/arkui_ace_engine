@@ -69,6 +69,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float RK356_WIDTH = 720.0f;
 constexpr float RK356_HEIGHT = 1136.0f;
 constexpr float RK356_LOW_WIDTH = 50.0f;
@@ -1458,7 +1459,7 @@ HWTEST_F(TextTestNg, ToJsonValue001, TestSize.Level1)
      * @tc.steps: step2. run ToJsonValue().
      */
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1491,7 +1492,7 @@ HWTEST_F(TextTestNg, ToJsonValue002, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::IDEOGRAPHIC);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1524,7 +1525,7 @@ HWTEST_F(TextTestNg, ToJsonValue003, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::TOP);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1557,7 +1558,7 @@ HWTEST_F(TextTestNg, ToJsonValue004, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::BOTTOM);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1590,7 +1591,7 @@ HWTEST_F(TextTestNg, ToJsonValue005, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::MIDDLE);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1623,7 +1624,7 @@ HWTEST_F(TextTestNg, ToJsonValue006, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::HANGING);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1645,7 +1646,7 @@ HWTEST_F(TextTestNg, ToJsonValue007, TestSize.Level1)
      * @tc.steps: step2. expect default textDetectEnable_ false.
      */
     pattern->SetTextDetectEnable(true);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("enableDataDetector"), "true");
 }
 
@@ -3098,7 +3099,7 @@ HWTEST_F(TextTestNg, TextDecorationToJsonValue001, TestSize.Level1)
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -3131,7 +3132,7 @@ HWTEST_F(TextTestNg, TextDecorationToJsonValue002, TestSize.Level1)
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -3170,7 +3171,7 @@ HWTEST_F(TextTestNg, TextDecorationToJsonValue003, TestSize.Level1)
     std::vector<Shadow> shadows { textShadow1, textShadow2 };
     textLayoutProperty->UpdateTextShadow(shadows);
     auto json = JsonUtil::Create(true);
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("textShadow"));
     auto textShadowJson = json->GetValue("textShadow");
     EXPECT_TRUE(textShadowJson->IsArray());

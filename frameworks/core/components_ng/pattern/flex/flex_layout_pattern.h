@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
@@ -95,7 +96,7 @@ public:
         isWrap_ = isWrap;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         auto property = GetLayoutProperty<FlexLayoutProperty>();
         CHECK_NULL_VOID(property);
@@ -125,8 +126,8 @@ public:
             jsonConstructor->Put("alignContent",
                 V2::ConvertWrapAlignmentToStirng(property->GetAlignment().value_or(WrapAlignment::START)).c_str());
         }
-        json->Put("constructor", jsonConstructor);
-        json->Put("space", SpaceToString().c_str());
+        json->PutExtAttr("constructor", jsonConstructor, filter);
+        json->PutExtAttr("space", SpaceToString().c_str(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

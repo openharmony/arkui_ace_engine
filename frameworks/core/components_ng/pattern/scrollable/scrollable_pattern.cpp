@@ -22,6 +22,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
@@ -72,20 +73,21 @@ RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
     return property;
 }
 
-void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("friction", GetFriction());
+    json->PutExtAttr("friction", GetFriction(), filter);
     if (edgeEffect_ == EdgeEffect::SPRING) {
-        json->Put("edgeEffect", "EdgeEffect.Spring");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.Spring", filter);
     } else if (edgeEffect_ == EdgeEffect::FADE) {
-        json->Put("edgeEffect", "EdgeEffect.Fade");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.Fade", filter);
     } else {
-        json->Put("edgeEffect", "EdgeEffect.None");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.None", filter);
     }
-    json->Put("flingSpeedLimit", Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str());
+    json->PutExtAttr("flingSpeedLimit",
+        Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str(), filter);
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
+    json->PutExtAttr("edgeEffectOptions", JsonEdgeEffectOptions, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)

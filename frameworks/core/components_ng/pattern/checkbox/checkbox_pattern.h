@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
@@ -177,20 +178,20 @@ public:
         builder_ = buildFunc.value_or(nullptr);
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        Pattern::ToJsonValue(json);
+        Pattern::ToJsonValue(json, filter);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
         auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
-        json->Put("name", name.c_str());
-        json->Put("group", group.c_str());
-        json->Put("type", "ToggleType.Checkbox");
+        json->PutExtAttr("name", name.c_str(), filter);
+        json->PutExtAttr("group", group.c_str(), filter);
+        json->PutExtAttr("type", "ToggleType.Checkbox", filter);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
         auto select = paintProperty->GetCheckBoxSelectValue(false);
-        json->Put("select", select ? "true" : "false");
+        json->PutExtAttr("select", select ? "true" : "false", filter);
     }
 
     void SetOriginalCheckboxStyle(OriginalCheckBoxStyle style)

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 
 #include "base/utils/string_utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -31,68 +32,72 @@ V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)
 }
 } // namespace
 
-void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
-    json->Put("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str());
-    json->Put("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str());
-    json->Put("initialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str());
-    json->Put("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("initialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
                                    ? "Axis.Vertical"
-                                   : "Axis.Horizontal");
-    json->Put("editMode", propEditMode_.value_or(false));
-    json->Put("chainAnimation", propChainAnimation_.value_or(false));
+                                   : "Axis.Horizontal", filter);
+    json->PutExtAttr("editMode", propEditMode_.value_or(false), filter);
+    json->PutExtAttr("chainAnimation", propChainAnimation_.value_or(false), filter);
     if (propDivider_.has_value()) {
         auto divider = JsonUtil::Create(true);
         divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
         divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
         divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
         divider->Put("color", propDivider_.value().color.ColorToString().c_str());
-        json->Put("divider", divider);
+        json->PutExtAttr("divider", divider, filter);
     } else {
         auto divider = JsonUtil::Create(true);
-        json->Put("divider", divider);
+        json->PutExtAttr("divider", divider, filter);
     }
-    json->Put("lanes", std::to_string(propLanes_.value_or(0)).c_str());
-    json->Put("laneMinLength", propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("laneMaxLength", propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("laneGutter", propLaneGutter_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+    json->PutExtAttr("lanes", std::to_string(propLanes_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("laneMinLength",
+        propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("laneMaxLength",
+        propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("laneGutter",
+        propLaneGutter_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::START) {
-        json->Put("alignListItem", "ListItemAlign.Start");
+        json->PutExtAttr("alignListItem", "ListItemAlign.Start", filter);
     } else if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::CENTER) {
-        json->Put("alignListItem", "ListItemAlign.Center");
+        json->PutExtAttr("alignListItem", "ListItemAlign.Center", filter);
     } else {
-        json->Put("alignListItem", "ListItemAlign.End");
+        json->PutExtAttr("alignListItem", "ListItemAlign.End", filter);
     }
-    json->Put("cachedCount", std::to_string(propCachedCount_.value_or(0)).c_str());
+    json->PutExtAttr("cachedCount", std::to_string(propCachedCount_.value_or(0)).c_str(), filter);
     auto sticky = propStickyStyle_.value_or(V2::StickyStyle::NONE);
     if (sticky == V2::StickyStyle::HEADER) {
-        json->Put("sticky", "StickyStyle.Header");
+        json->PutExtAttr("sticky", "StickyStyle.Header", filter);
     } else if (sticky == V2::StickyStyle::FOOTER) {
-        json->Put("sticky", "StickyStyle.Footer");
+        json->PutExtAttr("sticky", "StickyStyle.Footer", filter);
     } else if (sticky == V2::StickyStyle::BOTH) {
-        json->Put("sticky", "StickyStyle.Header | StickyStyle.Footer");
+        json->PutExtAttr("sticky", "StickyStyle.Header | StickyStyle.Footer", filter);
     } else {
-        json->Put("sticky", "StickyStyle.None");
+        json->PutExtAttr("sticky", "StickyStyle.None", filter);
     }
-    json->Put("fadingEdge", propFadingEdge_.value_or(false));
-    ScrollSnapPropToJsonValue(json);
+    json->PutExtAttr("fadingEdge", propFadingEdge_.value_or(false), filter);
+    ScrollSnapPropToJsonValue(json, filter);
 }
 
-void ListLayoutProperty::ScrollSnapPropToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListLayoutProperty::ScrollSnapPropToJsonValue(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto scrollSnapAlign = propScrollSnapAlign_.value_or(V2::ScrollSnapAlign::NONE);
     if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
-        json->Put("scrollSnapAlign", "ScrollSnapAlign.START");
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.START", filter);
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
-        json->Put("scrollSnapAlign", "ScrollSnapAlign.CENTER");
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.CENTER", filter);
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
-        json->Put("scrollSnapAlign", "ScrollSnapAlign.END");
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.END", filter);
     } else {
-        json->Put("scrollSnapAlign", "ScrollSnapAlign.NONE");
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.NONE", filter);
     }
-    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
+    json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
 }
 
 void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

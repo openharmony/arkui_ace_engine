@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -784,9 +785,9 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("selectable", selectable_);
+    json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
 }
 
 void ListItemPattern::SetAccessibilityAction()

@@ -20,6 +20,7 @@
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class NavigatorEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavigatorEventHub, EventHub)
@@ -67,7 +68,7 @@ public:
     void NavigatePage();
 
     std::string GetNavigatorType() const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     std::string url_;

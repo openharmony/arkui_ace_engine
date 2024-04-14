@@ -29,6 +29,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 enum class ListItemSwipeIndex {
     SWIPER_END = -1,
@@ -88,7 +89,7 @@ public:
         return MakeRefPtr<ListItemEventHub>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void SetStartNode(const RefPtr<NG::UINode>& startNode);
 

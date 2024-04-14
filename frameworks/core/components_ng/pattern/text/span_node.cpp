@@ -26,6 +26,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
@@ -77,35 +78,38 @@ std::string SpanItem::GetFont() const
     return jsonValue->ToString();
 }
 
-void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("content", content.c_str());
+    json->PutFixedAttr("content", content.c_str(), filter, FIXED_ATTR_CONTENT);
     if (fontStyle) {
-        json->Put("font", GetFont().c_str());
-        json->Put("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str());
-        json->Put("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(), fontStyle->GetTextDecoration(),
-            fontStyle->GetTextDecorationStyle()).c_str());
-        json->Put("letterSpacing", fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
-        json->Put(
-            "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());
-        json->Put("fontColor", fontStyle->GetForegroundColor()
-                                   .value_or(fontStyle->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
-        json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
-        json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
-        json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
-        json->Put("renderingStrategy",
-            GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str());
-        json->Put("effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str());
+        json->PutExtAttr("font", GetFont().c_str(), filter);
+        json->PutExtAttr("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str(), filter);
+        json->PutExtAttr("decoration", GetDeclaration(fontStyle->GetTextDecorationColor(),
+            fontStyle->GetTextDecoration(), fontStyle->GetTextDecorationStyle()).c_str(), filter);
+        json->PutExtAttr("letterSpacing",
+            fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("textCase",
+            V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str(), filter);
+        json->PutExtAttr("fontColor", fontStyle->GetForegroundColor().value_or(fontStyle->GetTextColor()
+            .value_or(Color::BLACK)).ColorToString().c_str(), filter);
+        json->PutExtAttr("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str(), filter);
+        json->PutExtAttr("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str(), filter);
+        json->PutExtAttr("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str(), filter);
+        json->PutExtAttr("renderingStrategy",
+            GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str(), filter);
+        json->PutExtAttr("effectStrategy",
+            GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
 
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
         // Determines if there are multiple textShadows
         auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
-        json->Put("textShadow", jsonShadow);
+        json->PutExtAttr("textShadow", jsonShadow, filter);
     }
     if (textLineStyle) {
-        json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
+        json->PutExtAttr("lineHeight",
+            textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str(), filter);
     }
-    TextBackgroundStyle::ToJsonValue(json, backgroundStyle);
+    TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
 }
 
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
@@ -736,9 +740,9 @@ void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
     MarkTextDirty();
 }
 
-void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle());
+    TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle(), filter);
 }
 
 std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()

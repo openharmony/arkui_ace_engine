@@ -53,6 +53,7 @@ namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class InspectorFilter;
 class Modifier;
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
@@ -349,7 +350,7 @@ public:
 
     virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
@@ -359,7 +360,7 @@ public:
 
     virtual void DumpAdvanceInfo() {}
 
-    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option);
     const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const;

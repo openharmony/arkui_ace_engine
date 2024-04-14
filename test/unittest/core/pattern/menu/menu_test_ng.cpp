@@ -63,6 +63,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr int32_t SELECTED_INDEX = 10;
@@ -2485,7 +2486,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg015, TestSize.Level1)
     property.UpdateLabelFontWeight(FontWeight::LIGHTER);
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     auto labelFontJson = json->GetObject("labelFont");
     auto contentFontJson = json->GetObject("contentFont");
     EXPECT_EQ(json->GetString("startIcon"), IMAGE_SRC_URL);
@@ -2513,7 +2514,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg016, TestSize.Level1)
     property.UpdateSelectIconSrc("select.png");
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectIcon"), "false");
 }
 
@@ -2528,7 +2529,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg017, TestSize.Level1)
     property.UpdateSelectIcon(true);
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectIcon"), "true");
 }
 
@@ -2549,7 +2550,7 @@ HWTEST_F(MenuTestNg, MenuItemLayoutPropertyTestNg018, TestSize.Level1)
     ASSERT_NE(itemProperty, nullptr);
 
     auto json = JsonUtil::Create(true);
-    itemProperty->ToJsonValue(json);
+    itemProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectIcon"), "true");
 }
 
@@ -6806,7 +6807,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
     property.UpdateFontWeight(FontWeight::BOLD);
 
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     auto fontJsonObject = json->GetObject("font");
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
@@ -6835,7 +6836,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg010, TestSize.Level1)
     ASSERT_NE(property, nullptr);
 
     auto json = JsonUtil::Create(true);
-    property->ToJsonValue(json);
+    property->ToJsonValue(json, filter);
     auto itemArray = json->GetValue("bindMenu");
     ASSERT_EQ(itemArray->GetArraySize(), 2u);
     auto item1 = itemArray->GetArrayItem(0);
@@ -7515,7 +7516,7 @@ HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg007, TestSize.Level1)
      * @tc.expected: property jsonValue are as expected.
      */
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("enableArrow"), V2::ConvertBoolToString(true).c_str());
     EXPECT_EQ(json->GetString("arrowOffset"), Dimension(10.0f).ToString().c_str());
     EXPECT_EQ(json->GetString("arrowPosition"), OffsetF(10.0f, 10.0f).ToString().c_str());
@@ -7538,7 +7539,7 @@ HWTEST_F(MenuTestNg, MenuPaintPropertyTestNg008, TestSize.Level1)
      * @tc.expected: property jsonValue are as expected.
      */
     auto json = JsonUtil::Create(true);
-    property.ToJsonValue(json);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("enableArrow"), V2::ConvertBoolToString(false).c_str());
     EXPECT_EQ(json->GetString("arrowOffset"), Dimension(0.0, DimensionUnit::VP).ToString().c_str());
     EXPECT_EQ(json->GetString("arrowPosition"), OffsetF(0.0f, 0.0f).ToString().c_str());

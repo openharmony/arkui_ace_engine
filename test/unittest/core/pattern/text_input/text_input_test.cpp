@@ -85,6 +85,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr double FONT_SIZE = 16;
@@ -314,7 +315,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
      * @tc.expected: Check if all set properties are displayed in the corresponding JSON
      */
     auto json = JsonUtil::Create(true);
-    pattern_->ToJsonValue(json);
+    pattern_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("text"), DEFAULT_TEXT.c_str());
     EXPECT_EQ(json->GetString("type"), "InputType.Normal");
     EXPECT_EQ(json->GetString("caretColor"), "#FF000000");
@@ -328,7 +329,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("maxLines"), "3");
     EXPECT_EQ(json->GetString("barState"), "BarState.AUTO");
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("caretPosition"), "");
     EXPECT_TRUE(json->GetBool("showUnderline"));
     EXPECT_TRUE(json->GetBool("selectAll"));
@@ -4226,7 +4227,7 @@ HWTEST_F(TextFieldUXTest, TextInputToJsonValue001, TestSize.Level1)
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("decoration"));
     EXPECT_TRUE(json->Contains("letterSpacing"));
     EXPECT_TRUE(json->Contains("lineHeight"));

@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT GridLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(GridLayoutProperty, LayoutProperty);
 
@@ -61,7 +63,7 @@ public:
         ResetLayoutOptions();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool IsVertical() const
     {

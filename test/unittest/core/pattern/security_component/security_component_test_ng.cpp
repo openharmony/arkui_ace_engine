@@ -57,23 +57,24 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr float DEFAULT_ICON_SIZE = 16.0f;
-    constexpr float DEFAULT_FONT_SIZE = 16.0f;
-    constexpr float DEFAULT_ICON_MIN_SIZE = 12.0f;
-    constexpr float DEFAULT_FONT_MIN_SIZE = 12.0f;
-    constexpr float DEFAULT_PADDING = 10.0f;
-    constexpr float DEFAULT_BORDER_RADIUS = 1.0f;
-    constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
-    constexpr float DEFAULT_PADDING_WITHOUT_BG = 4.0f;
-    constexpr float DEFAULT_BUTTON_SIZE = 20.0f;
-    constexpr float MIN_SIZE = 1.0f;
-    constexpr float ENLARGE_SIZE = 50.0f;
-    const std::string DEFAULT_TEXT = "Add Security Component Buttom";
-    constexpr int INDEX_ZERO = 0;
-    constexpr int INDEX_ONE = 1;
-    constexpr int INDEX_TWO = 2;
-    constexpr int INDEX_SIZE = 3;
-    constexpr int ICON_RESOURCE_TABLE = 2;
+const InspectorFilter filter;
+constexpr float DEFAULT_ICON_SIZE = 16.0f;
+constexpr float DEFAULT_FONT_SIZE = 16.0f;
+constexpr float DEFAULT_ICON_MIN_SIZE = 12.0f;
+constexpr float DEFAULT_FONT_MIN_SIZE = 12.0f;
+constexpr float DEFAULT_PADDING = 10.0f;
+constexpr float DEFAULT_BORDER_RADIUS = 1.0f;
+constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
+constexpr float DEFAULT_PADDING_WITHOUT_BG = 4.0f;
+constexpr float DEFAULT_BUTTON_SIZE = 20.0f;
+constexpr float MIN_SIZE = 1.0f;
+constexpr float ENLARGE_SIZE = 50.0f;
+const std::string DEFAULT_TEXT = "Add Security Component Buttom";
+constexpr int INDEX_ZERO = 0;
+constexpr int INDEX_ONE = 1;
+constexpr int INDEX_TWO = 2;
+constexpr int INDEX_SIZE = 3;
+constexpr int ICON_RESOURCE_TABLE = 2;
 }
 
 namespace {
@@ -2574,7 +2575,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue001, T
         BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
     pattern.frameNode_ = frameNode;
     auto jsonNode = JsonUtil::Create(true);
-    pattern.ToJsonValue(jsonNode);
+    pattern.ToJsonValue(jsonNode, filter);
     ASSERT_EQ(jsonNode->GetString("type", ""), V2::LOCATION_BUTTON_ETS_TAG);
 }
 
@@ -2592,7 +2593,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue002, T
         0, 0, V2::LOCATION_BUTTON_ETS_TAG);
     pattern.frameNode_ = frameNode;
     auto jsonNode = JsonUtil::Create(true);
-    pattern.ToJsonValue(jsonNode);
+    pattern.ToJsonValue(jsonNode, filter);
     ASSERT_EQ(jsonNode->GetString("type", ""), V2::LOCATION_BUTTON_ETS_TAG);
 }
 
@@ -2610,7 +2611,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue003, T
         0, V2::LOCATION_BUTTON_ETS_TAG);
     pattern.frameNode_ = frameNode;
     auto jsonNode = JsonUtil::Create(true);
-    pattern.ToJsonValue(jsonNode);
+    pattern.ToJsonValue(jsonNode, filter);
     ASSERT_EQ(jsonNode->GetString("type", ""), V2::LOCATION_BUTTON_ETS_TAG);
 }
 
