@@ -210,6 +210,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
     void OnAttachToMainTree() override;
+    void StartCustomNodeAnimation(bool select);
 
 private:
     void OnAttachToFrameNode() override;
@@ -227,7 +228,6 @@ private:
     void HandleFocusEvent();
     void HandleBlurEvent();
     void CheckPageNode();
-    void StartCustomNodeAnimation(bool select);
     void LoadBuilder();
     void UpdateIndicator();
     void SetBuilderNodeHidden();

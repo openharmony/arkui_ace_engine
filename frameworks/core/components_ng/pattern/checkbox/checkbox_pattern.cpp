@@ -66,7 +66,6 @@ void CheckBoxPattern::UpdateIndicator()
                 SetBuilderNodeHidden();
             }
         } else {
-            paintProperty->UpdateCheckBoxSelect(false);
             SetBuilderNodeHidden();
         }
     }
@@ -757,6 +756,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
                 paintProperty->UpdateCheckBoxSelect(true);
                 auto checkBoxPattern = node->GetPattern<CheckBoxPattern>();
                 CHECK_NULL_VOID(checkBoxPattern);
+                checkBoxPattern->StartCustomNodeAnimation(true);
                 checkBoxPattern->UpdateUIStatus(true);
                 checkBoxPattern->SetLastSelect(true);
             }
