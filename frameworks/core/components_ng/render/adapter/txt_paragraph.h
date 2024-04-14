@@ -126,6 +126,12 @@ public:
     {
         return GetParagraphLength() == 0;
     }
+    void SetParagraphId(uint32_t id) override
+    {
+        if (paragraph_) {
+            paragraph_->SetParagraphId(id);
+        }
+    }
     
 private:
     void CreateBuilder();
