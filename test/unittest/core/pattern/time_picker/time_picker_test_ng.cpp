@@ -105,6 +105,7 @@ const std::string PM = "下午";
 const std::string COLON = ":";
 const std::string ZERO = "0";
 const PickerTime TIME_PICKED = PickerTime(14, 9, 10);
+const PickerTime TIME_PICKED_PREFIXZERO = PickerTime(3, 3, 3);
 const int32_t AM_PM_PICKED = 1;
 const int32_t HOUR_PICKED = 1;
 const int32_t HOUR24_PICKED = 14;
@@ -809,7 +810,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
 
     options[minuteColumnNode] = DEFAULT_VALUE.size();
     minuteColumnPattern->SetOptions(options);
-    EXPECT_EQ(accessibilityProperty->GetText(), "08:00:00");
+    EXPECT_EQ(accessibilityProperty->GetText(), "03");
 
     options.erase(minuteColumnNode);
     minuteColumnPattern->SetOptions(options);
@@ -941,6 +942,108 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
     amPmPickerColumnPattern->SetCurrentIndex(1);
     EXPECT_EQ(accessibilityProperty->GetText(),
         PM + std::to_string(CURRENT_VALUE2 + 1) + COLON + std::to_string(CURRENT_VALUE2));
+}
+
+/**
+ * @tc.name: TimePickerAccessibilityPropertyTestNg008
+ * @tc.desc: Test the Text property for leading zero of TimePickerRowPattern when time is MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg008, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    ZeroPrefixType showType = ZeroPrefixType::SHOW;
+    ZeroPrefixType hideType = ZeroPrefixType::HIDE;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED_PREFIXZERO);
+    TimePickerModelNG::GetInstance()->SetDateTimeOptions(hideType, showType, hideType);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    secondColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        std::to_string(CURRENT_VALUE1) + COLON +
+        ZERO + std::to_string(CURRENT_VALUE1) + COLON +
+        std::to_string(CURRENT_VALUE1));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerAccessibilityPropertyTestNg009
+ * @tc.desc: Test the Text property for leading zero of TimePickerRowPattern when time is not MilitaryTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg009, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    ZeroPrefixType showType = ZeroPrefixType::SHOW;
+    ZeroPrefixType hideType = ZeroPrefixType::HIDE;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(setApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, false);
+    TimePickerModelNG::GetInstance()->SetHour24(false);
+    TimePickerModelNG::GetInstance()->SetSelectedTime(TIME_PICKED_PREFIXZERO);
+    TimePickerModelNG::GetInstance()->SetDateTimeOptions(showType, hideType, showType);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    hourColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
+
+    auto amPmColumn = allChildNode["amPm"].Upgrade();
+    ASSERT_NE(amPmColumn, nullptr);
+    auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    amPmPickerColumnPattern->SetCurrentIndex(0);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        AM + ZERO + std::to_string(CURRENT_VALUE1 + 1) + COLON + std::to_string(CURRENT_VALUE1));
+
+    amPmPickerColumnPattern->SetCurrentIndex(1);
+    EXPECT_EQ(accessibilityProperty->GetText(),
+        PM + ZERO + std::to_string(CURRENT_VALUE1 + 1) + COLON + std::to_string(CURRENT_VALUE1));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
