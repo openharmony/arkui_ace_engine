@@ -656,7 +656,9 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
-    void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
+    void CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
+    void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
+    void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
@@ -709,9 +711,10 @@ private:
     bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
     int32_t tooltipTextId_ = -1;
-    bool tooltipEnabled_ = false;
+    int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;
+    int64_t tooltipTimestamp_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
