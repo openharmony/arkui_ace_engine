@@ -85,6 +85,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     eventObj->SetPropertyObject(
         "getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetHistoricalPoints));
+    eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
     eventObj->Wrap<TouchEventInfo>(&info);
     return eventObj;
 }

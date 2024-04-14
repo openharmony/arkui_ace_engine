@@ -1329,12 +1329,13 @@ void ParseUserGesture(
             gestureOption.onClick = nullptr;
         } else {
             auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
-            auto onClick = [
-                    execCtx = args.GetExecutionContext(), func = jsOnClickFunc, spanTypeInner = spanType
-                    ](const BaseEventInfo* info) {
+            auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc, spanTypeInner = spanType,
+                               node = AceType::WeakClaim(targetNode)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
                 ACE_SCORING_EVENT(spanTypeInner + ".onClick");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute(*clickInfo);
             };
             auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
@@ -1347,11 +1348,11 @@ void ParseUserGesture(
             gestureOption.onLongPress = nullptr;
         } else {
             auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onLongPressFunc));
-            auto onLongPress = [
-                    execCtx = args.GetExecutionContext(), func = jsLongPressFunc, spanTypeInner = spanType
-                    ](const BaseEventInfo* info) {
+            auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsLongPressFunc, spanTypeInner = spanType,
+                                   node =  AceType::WeakClaim(targetNode)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
                 ACE_SCORING_EVENT(spanTypeInner + ".onLongPress");
                 func->Execute(*longPressInfo);
             };
