@@ -49,6 +49,7 @@ public:
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
+    bool IsHandlesShow();
 
 private:
     void RemoveAreaChangeInner();

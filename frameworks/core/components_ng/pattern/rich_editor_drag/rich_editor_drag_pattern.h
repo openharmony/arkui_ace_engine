@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -31,11 +32,15 @@ class RichEditorDragPattern : public TextDragPattern {
     DECLARE_ACE_TYPE(RichEditorDragPattern, TextDragPattern);
 
 public:
-    explicit RichEditorDragPattern(const RefPtr<TextPattern>& hostPattern) : hostPattern_(hostPattern) {};
+    explicit RichEditorDragPattern(const RefPtr<TextPattern>& hostPattern,
+        const std::shared_ptr<RichEditorDragInfo> info) : info_(info), hostPattern_(hostPattern) {};
     ~RichEditorDragPattern() override = default;
 
     static RefPtr<FrameNode> CreateDragNode(
         const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren);
+
+    static RefPtr<FrameNode> CreateDragNode(
+        const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren, const RichEditorDragInfo& info);
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -51,7 +56,7 @@ public:
             contentModifier_->SetIsCustomFont(pattern->GetIsCustomFont());
         }
 
-        return MakeRefPtr<RichEditorDragPaintMethod>(WeakClaim(this), overlayModifier_, contentModifier_);
+        return MakeRefPtr<RichEditorDragPaintMethod>(WeakClaim(this), overlayModifier_, contentModifier_, *info_);
     }
 
     void Initialize(const TextDragData& data)
@@ -59,8 +64,11 @@ public:
         textDragData_ = data;
     }
 
+protected:
+    std::shared_ptr<RichEditorDragInfo> info_;
+
 private:
-    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
+    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode, const RichEditorDragInfo& info);
 
     WeakPtr<TextPattern> hostPattern_;
     RefPtr<RichEditorDragContentModifier> contentModifier_;

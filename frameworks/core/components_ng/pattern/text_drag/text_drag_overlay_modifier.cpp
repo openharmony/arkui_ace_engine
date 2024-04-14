@@ -25,11 +25,12 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t TEXT_ANIMATION_DURATION = 300;
 TextDragOverlayModifier::TextDragOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern)
 {
     backgroundOffset_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(TEXT_DRAG_OFFSET.ConvertToPx());
+    selectedBackgroundOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     AttachProperty(backgroundOffset_);
+    AttachProperty(selectedBackgroundOpacity_);
 }
 
 void TextDragOverlayModifier::onDraw(DrawingContext& context)
@@ -78,21 +79,13 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     }
 }
 
-void TextDragOverlayModifier::StartAnimate()
-{
-    isAnimating_ = true;
-    backgroundOffset_->Set(0);
-    AnimationOption option;
-    option.SetDuration(TEXT_ANIMATION_DURATION);
-    option.SetCurve(Curves::EASE_OUT);
-    option.SetDelay(0);
-    option.SetOnFinishEvent([this]() { isAnimating_ = false; });
-    AnimationUtils::Animate(
-        option, [this]() { SetBackgroundOffset(TEXT_DRAG_OFFSET.ConvertToPx()); }, option.GetOnFinishEvent());
-}
-
 void TextDragOverlayModifier::SetBackgroundOffset(float offset)
 {
     backgroundOffset_->Set(offset);
+}
+
+void TextDragOverlayModifier::SetSelectedBackgroundOpacity(float offset)
+{
+    selectedBackgroundOpacity_->Set(offset);
 }
 } // namespace OHOS::Ace::NG
