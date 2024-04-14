@@ -34,6 +34,10 @@ struct ArkUI_Node {
     void* extraCustomData = nullptr;
 };
 
+struct ArkUI_Context {
+    int32_t id;
+};
+
 constexpr int BASIC_COMPONENT_NUM = 18;
 
 #ifdef __cplusplus

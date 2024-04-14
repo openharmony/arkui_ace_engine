@@ -15,6 +15,8 @@
 
 #include "native_interface.h"
 #include "native_node.h"
+#include "native_animate.h"
+#include "node/animate_impl.h"
 #include "node/dialog_model.h"
 #include "node/gesture_impl.h"
 #include "node/native_compatible.h"
@@ -121,6 +123,10 @@ ArkUI_NativeGestureAPI_1 gestureImpl_1 = {
     OHOS::Ace::GestureModel::GetGestureType,
 };
 
+ArkUI_NativeAnimateAPI_1 animateImpl_1 = {
+    OHOS::Ace::AnimateModel::AnimateTo,
+};
+
 } // namespace
 
 #ifdef __cplusplus
@@ -207,6 +213,11 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
         case ARKUI_NATIVE_GESTURE:
             if (strcmp(structName, "ArkUI_NativeGestureAPI_1") == 0) {
                 return &gestureImpl_1;
+            }
+            break;
+        case ARKUI_NATIVE_ANIMATE:
+            if (strcmp(structName, "ArkUI_NativeAnimateAPI_1") == 0) {
+                return &animateImpl_1;
             }
             break;
         default:
