@@ -1518,6 +1518,6 @@ class ComponentContent {
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetric, LengthMetrics, LengthUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetric, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent
 };
