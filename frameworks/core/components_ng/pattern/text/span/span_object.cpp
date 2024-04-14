@@ -416,10 +416,14 @@ void GestureSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     if (gestureInfo_.onClick.has_value()) {
         spanItem->onClick = gestureInfo_.onClick.value();
+    } else {
+        spanItem->onClick = nullptr;
     }
 
     if (gestureInfo_.onLongPress.has_value()) {
         spanItem->onLongPress = gestureInfo_.onLongPress.value();
+    } else {
+        spanItem->onLongPress = nullptr;
     }
 }
 void GestureSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)

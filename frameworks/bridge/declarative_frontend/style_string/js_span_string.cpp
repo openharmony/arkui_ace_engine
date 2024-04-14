@@ -21,6 +21,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 namespace OHOS::Ace::Framework {
+const std::vector<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset, SpanType::Decoration,
+    SpanType::LetterSpacing, SpanType::TextShadow };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
@@ -320,9 +322,10 @@ RefPtr<SpanBase> JSSpanString::ParseJsTextShadowSpan(int32_t start, int32_t leng
     return nullptr;
 }
 
-bool JSSpanString::CheckSpanType(const int32_t& type)
+bool JSSpanString::CheckSpanType(const int32_t& spanType)
 {
-    if (type < 0 || type >= static_cast<int32_t>(SpanType::MAX)) {
+    auto type = std::find(types.begin(), types.end(), static_cast<SpanType>(spanType)) - types.begin();
+    if (type < 0 || type >= static_cast<int32_t>(types.size())) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
         return false;
     }
