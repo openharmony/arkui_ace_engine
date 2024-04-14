@@ -31,6 +31,7 @@ build_component_ng("svg_ng") {
     "parse/svg_g.cpp",
     "parse/svg_gradient.cpp",
     "parse/svg_graphic.cpp",
+    "parse/svg_image.cpp",
     "parse/svg_line.cpp",
     "parse/svg_mask.cpp",
     "parse/svg_node.cpp",

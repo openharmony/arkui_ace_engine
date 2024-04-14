@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_IMAGE_H
 
+#include "testing_data.h"
+
 namespace OHOS::Ace::Testing {
 class TestingImage {
 public:
@@ -41,6 +43,11 @@ public:
     }
 
     virtual bool BuildFromBitmap(const TestingBitmap& bitmap) const
+    {
+        return true;
+    }
+
+    bool MakeFromEncoded(const std::shared_ptr<TestingData>& data)
     {
         return true;
     }

@@ -270,7 +270,7 @@ void JSRenderImage::OnImageLoadSuccess()
     pixelMap_ = image_->GetPixelMap();
     auto svgImageObj = AceType::DynamicCast<NG::SvgImageObject>(imageObj_);
     if (svgImageObj) {
-        svgDom_ = svgImageObj->MakeSvgDom(svgImageObj->GetSvgImageData(), svgImageObj->GetSourceInfo().GetFillColor());
+        svgDom_ = svgImageObj->MakeSvgDom(svgImageObj->GetSvgImageData(), svgImageObj->GetSourceInfo());
     }
     imageFit_ = loadingCtx_->GetImageFit();
     imageSize_ = loadingCtx_->GetImageSize();

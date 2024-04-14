@@ -13,15 +13,41 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_graphic.h"
+#include "core/components_ng/svg/parse/svg_graphic.h"
 
 #include "include/core/SkScalar.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 
+#include "core/components/declaration/svg/svg_declaration.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
+void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
+{
+#ifndef USE_ROSEN_DRAWING
+    fillPaint_.reset();
+    strokePaint_.reset();
+#else
+    fillBrush_.Reset();
+    strokePen_.Reset();
+#endif
+    path_ = AsPath(layout); // asPath override by graphic tag
+    UpdateGradient(layout);
+    if (UpdateFillStyle(color)) {
+        OnGraphicFill();
+    }
+    if (UpdateStrokeStyle()) {
+        OnGraphicStroke();
+    }
+    if (!fillState_.GetHref().empty()) {
+        auto svgContext = svgContext_.Upgrade();
+        auto refSvgNode = svgContext->GetSvgNodeById(fillState_.GetHref());
+        CHECK_NULL_VOID(refSvgNode);
+        refSvgNode->Draw(canvas, layout, color);
+    }
+}
+
 void SvgGraphic::UpdateGradient(const Size& viewPort)
 {
     fillState_ = declaration_->GetFillState();
