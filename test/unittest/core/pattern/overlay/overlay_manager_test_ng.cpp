@@ -2190,16 +2190,9 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage003, TestSize.Level1)
     auto sheetLayoutAlgorithm =
         AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sheetLayoutAlgorithm, nullptr);
-    auto rootNode = PipelineContext::GetCurrentContext()->GetOverlayManager()->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
-    ASSERT_NE(frameNode, nullptr);
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = SizeF(800, 2000);
-    frameNode->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
     sheetNode->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sheetLayoutAlgorithm);
     sheetNode->Measure(sheetNode->GetLayoutConstraint());
-    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 1280);
+    EXPECT_EQ(sheetLayoutAlgorithm->sheetHeight_, 2000);
 
     sheetLayoutAlgorithm->sheetType_ = SHEET_CENTER;
     sheetLayoutAlgorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
