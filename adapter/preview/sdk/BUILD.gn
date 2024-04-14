@@ -23,6 +23,12 @@ if (is_ohos_standard_system) {
   system_resource_path =
       get_label_info("//base/global/system_resources/systemres:systemres_hap",
                      "target_out_dir") + "/resources"
+  system_resource_index_path =
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
+                     "target_gen_dir") + "/main_res/gen/resources.index"
+  system_resource_value_path =
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
+                     "target_out_dir") + "/resources/entry/resources.txt"
 } else {
   system_resource_hap_path =
       get_label_info("//base/global/system_resources/systemres:systemres_hap",
@@ -30,6 +36,12 @@ if (is_ohos_standard_system) {
   system_resource_path =
       get_label_info("//base/global/system_resources/systemres:systemres_hap",
                      "target_gen_dir") + "/resources"
+  system_resource_index_path =
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
+                     "target_gen_dir") + "/main_res/gen/resources.index"
+  system_resource_value_path =
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
+                     "target_gen_dir") + "/resources/entry/resources.txt"
 }
 
 action("get_system_resource") {
@@ -41,6 +53,16 @@ action("get_system_resource") {
   ]
   inputs = [ system_resource_hap_path ]
   outputs = [ system_resource_path ]
+}
+
+action("extra_system_resource") {
+  script = "./dump/dump.py"
+  deps = [ "//base/global/system_resources/systemres:main_res" ]
+  args = [
+    rebase_path(system_resource_index_path),
+    rebase_path(system_resource_value_path),
+  ]
+  outputs = [ system_resource_value_path ]
 }
 
 # Triggered only when the SDK is compiled
@@ -150,7 +172,10 @@ if (is_ohos_standard_system) {
   }
 
   ohos_copy("copy_system_resource_standard") {
-    deps = [ ":get_system_resource" ]
+    deps = [
+      ":extra_system_resource",
+      ":get_system_resource",
+    ]
 
     sources = [ system_resource_path ]
 
@@ -166,7 +191,10 @@ if (is_ohos_standard_system) {
       module_source_dir = target_out_dir + "/tv_resources/"
       module_install_name = ""
     } else {
-      deps = [ ":get_system_resource" ]
+      deps = [
+        ":extra_system_resource",
+        ":get_system_resource",
+      ]
 
       sources = [ system_resource_path ]
       outputs = [ target_out_dir + "/tv_resources/{{source_file_part}}" ]
@@ -182,7 +210,10 @@ if (is_ohos_standard_system) {
       module_source_dir = target_out_dir + "/wearable_resources/"
       module_install_name = ""
     } else {
-      deps = [ ":get_system_resource" ]
+      deps = [
+        ":extra_system_resource",
+        ":get_system_resource",
+      ]
 
       sources = [ system_resource_path ]
       outputs = [ target_out_dir + "/wearable_resources/{{source_file_part}}" ]
