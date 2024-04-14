@@ -699,13 +699,11 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
             if (rect.IsInRegion(textOffset)) {
                 CHECK_NULL_RETURN(!item->onClick, true);
                 clickedSpanPosition_ = -1;
-                break;
+                return false;
             }
         }
-        if (clickedSpanPosition_ == -1) {
-            break;
-        }
     }
+    clickedSpanPosition_ = -1;
     return false;
 }
 
