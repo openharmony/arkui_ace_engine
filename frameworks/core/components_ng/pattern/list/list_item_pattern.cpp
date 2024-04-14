@@ -74,6 +74,14 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_RETURN(listItemEventHub, nullptr);
+    if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
+        !listItemEventHub->GetEndOnDelete()) {
+        return MakeRefPtr<BoxLayoutAlgorithm>();
+    }
     auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, childNodeIndex_);
     layoutAlgorithm->SetAxis(axis_);
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
