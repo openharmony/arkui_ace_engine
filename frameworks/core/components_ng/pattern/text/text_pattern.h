@@ -282,7 +282,6 @@ public:
     virtual void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
     void CreateHandles() override;
-
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
     // end of TextDragBase implementations

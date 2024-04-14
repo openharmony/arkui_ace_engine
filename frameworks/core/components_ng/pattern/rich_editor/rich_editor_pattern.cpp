@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -4718,7 +4719,13 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
-            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren);
+            RichEditorDragInfo info;
+            info.handleColor = pattern->GetCaretColor();
+            info.selectedBackgroundColor = pattern->GetSelectedBackgroundColor();
+            pattern->CalculateHandleOffsetAndShowOverlay();
+            info.firstHandle = pattern->textSelector_.firstHandle;
+            info.secondHandle = pattern->textSelector_.secondHandle;
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
@@ -4750,6 +4757,13 @@ void RichEditorPattern::CreateHandles()
     RectF secondHandle = RectF(secondHandleOffset, secondHandlePaintSize);
     textSelector_.secondHandle = secondHandle;
     ShowSelectOverlay(firstHandle, secondHandle, IsSelectAll(), TextResponseType::LONG_PRESS);
+}
+
+void RichEditorPattern::ShowHandles()
+{
+    if (!selectOverlay_->IsHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
+        selectOverlay_->ProcessOverlay({.animation = false});
+    }
 }
 
 void RichEditorPattern::OnAreaChangedInner()
@@ -4786,6 +4800,11 @@ void RichEditorPattern::CloseSelectOverlay()
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "CloseSelectOverlay");
     TextPattern::CloseSelectOverlay(true);
     selectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
+}
+
+void RichEditorPattern::CloseHandleAndSelect()
+{
+    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
 }
 
 void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -4832,6 +4851,11 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 bool RichEditorPattern::IsSingleHandle()
 {
     return GetTextContentLength() == 0 || !IsSelected();
+}
+
+bool RichEditorPattern::IsHandlesShow()
+{
+    return selectOverlay_->IsHandlesShow();
 }
 
 void RichEditorPattern::ResetSelection()
