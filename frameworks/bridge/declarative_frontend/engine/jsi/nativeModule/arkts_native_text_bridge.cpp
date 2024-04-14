@@ -337,7 +337,7 @@ ArkUINativeModuleValue TextBridge::SetMaxLines(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber() && secondArg->ToNumber(vm)->Value() >= NUM_0) {
+    if (secondArg->IsNumber()) {
         uint32_t maxLine = secondArg->Uint32Value(vm);
         GetArkUINodeModifiers()->getTextModifier()->setTextMaxLines(nativeNode, maxLine);
     } else {
