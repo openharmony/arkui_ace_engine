@@ -546,12 +546,6 @@ void TitleBarPattern::UpdateScaleByDragOverDragOffset(float overDragOffset)
     if (navBarNode->GetPrevTitleIsCustomValue(true)) {
         return;
     }
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        return;
-    }
-
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     auto titleNode = titleBarNode->GetTitle();
