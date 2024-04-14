@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 
 class AttachmentImage {};
 
-enum class SpanType { Font = 0, Decoration, BaselineOffset, LetterSpacing, TextShadow = 4, Gesture = 7, MAX = 8 };
+enum class SpanType { Font = 0, Decoration, BaselineOffset, LetterSpacing, TextShadow = 4, Gesture = 100 };
 
 enum class SpanOperation {
     ADD = 0,
@@ -179,6 +179,7 @@ private:
 
 class TextShadowSpan : public SpanBase {
     DECLARE_ACE_TYPE(TextShadowSpan, SpanBase);
+
 public:
     TextShadowSpan() = default;
     explicit TextShadowSpan(std::vector<Shadow> font);

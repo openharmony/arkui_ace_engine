@@ -393,8 +393,6 @@ RefPtr<SpanBase> MutableSpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<BaselineOffsetSpan>();
         case SpanType::LetterSpacing:
             return MakeRefPtr<LetterSpacingSpan>();
-        case SpanType::MAX:
-            return nullptr;
     }
 }
 } // namespace OHOS::Ace
