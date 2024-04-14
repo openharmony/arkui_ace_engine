@@ -194,6 +194,17 @@ void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 
 void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        checkboxPattern->SetToggleBuilderFunc(std::move(makeFunc));
+        return;
+    }
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        buttonPattern->SetToggleBuilderFunc(std::move(makeFunc));
+        return;
+    }
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
@@ -201,6 +212,17 @@ void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&
 
 void ToggleModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        checkboxPattern->SetCheckBoxSelect(std::move(value));
+        return;
+    }
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        buttonPattern->SetButtonPress(std::move(value));
+        return;
+    }
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwitchIsOn(value);

@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
@@ -161,6 +162,11 @@ public:
         makeFunc_ = std::move(makeFunc);
     }
 
+    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+    {
+        toggleMakeFunc_ = std::move(toggleMakeFunc);
+    }
+
     bool UseContentModifier()
     {
         return contentModifierNode_ != nullptr;
@@ -260,6 +266,7 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
 
     std::optional<CheckBoxMakeCallback> makeFunc_;
+    std::optional<SwitchMakeCallback> toggleMakeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
