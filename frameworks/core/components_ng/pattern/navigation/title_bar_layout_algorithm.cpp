@@ -76,9 +76,11 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
                 backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
             }
             backButtonWrapper->Measure(constraint);
+            backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
             return;
         }
         auto buttonLayoutProperty = backButtonNode->GetLayoutProperty();
+        buttonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         PaddingProperty padding;
         padding.SetEdges(CalcLength(BUTTON_PADDING));
         buttonLayoutProperty->UpdatePadding(padding);
