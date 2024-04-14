@@ -903,7 +903,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
 }
 // @ts-ignore
 globalThis.Span.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+  attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr: KNode) => {
     return new ArkSpanComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.SpanModifier(nativePtr, classType);
