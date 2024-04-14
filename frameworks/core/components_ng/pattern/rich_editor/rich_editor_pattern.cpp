@@ -2567,12 +2567,8 @@ void RichEditorPattern::UpdateCaretInfoToController()
     auto selectionResult = GetSpansInfo(0, GetTextContentLength(), GetSpansMethod::ONSELECT);
     auto resultObjects = selectionResult.GetSelection().resultObjects;
     std::string text = "";
-    if (!resultObjects.empty()) {
-        for (const auto& resultObj : resultObjects) {
-            if (resultObj.type == SelectSpanType::TYPESPAN) {
-                text += resultObj.valueString;
-            }
-        }
+    for (const auto& resultObj : resultObjects) {
+        text += resultObj.type == SelectSpanType::TYPESPAN ? resultObj.valueString : " ";
     }
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
