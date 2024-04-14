@@ -230,8 +230,9 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }
-    if (refereeState_ == RefereeState::SUCCEED) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCancelMsg();
+        refereeState_ = RefereeState::READY;
     } else {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
