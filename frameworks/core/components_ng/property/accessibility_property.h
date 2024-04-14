@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
@@ -117,9 +118,9 @@ public:
         return -1;
     }
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("scrollable", IsScrollable());
+        json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);
     }
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}

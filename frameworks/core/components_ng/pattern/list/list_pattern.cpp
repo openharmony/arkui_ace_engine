@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
@@ -2119,13 +2120,13 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
     return 0;
 }
 
-void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json);
-    json->Put("multiSelectable", multiSelectable_);
-    json->Put("startIndex", startIndex_);
+    ScrollablePattern::ToJsonValue(json, filter);
+    json->PutExtAttr("multiSelectable", multiSelectable_, filter);
+    json->PutExtAttr("startIndex", startIndex_, filter);
     if (!itemPosition_.empty()) {
-        json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
+        json->PutExtAttr("itemStartPos", itemPosition_.begin()->second.startPos, filter);
     }
 }
 

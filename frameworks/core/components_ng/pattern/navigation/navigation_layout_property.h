@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
@@ -70,28 +71,29 @@ public:
         ResetPixelMap();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         std::string navBarWidthRange = GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH).ToString() + ", " +
                                        GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH).ToString();
-        json->Put("navBarWidth", GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ToString().c_str());
-        json->Put("navBarWidthRange", navBarWidthRange.c_str());
-        json->Put("minContentWidth", GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH).ToString().c_str());
-        json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) == NavBarPosition::START
+        json->PutExtAttr("navBarWidth", GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ToString().c_str(), filter);
+        json->PutExtAttr("navBarWidthRange", navBarWidthRange.c_str(), filter);
+        json->PutExtAttr("minContentWidth",
+            GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH).ToString().c_str(), filter);
+        json->PutExtAttr("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) == NavBarPosition::START
                                         ? "NavBarPosition.Start"
-                                        : "NavBarPosition.End");
+                                        : "NavBarPosition.End", filter);
         static const std::array<std::string, 3> NAVIGATION_MODE_TO_STRING = {
             "NavigationMode.STACK",
             "NavigationMode.SPLIT",
             "NavigationMode.AUTO",
         };
-        json->Put("mode",
+        json->PutExtAttr("mode",
             NAVIGATION_MODE_TO_STRING.at(static_cast<int32_t>(GetUsrNavigationMode().value_or(NavigationMode::AUTO)))
-                .c_str());
-        json->Put("hideNavBar", GetHideNavBarValue(false));
+                .c_str(), filter);
+        json->PutExtAttr("hideNavBar", GetHideNavBarValue(false), filter);
         if (HasImageSource()) {
-            json->Put("backButtonIcon", GetImageSourceValue().GetSrc().c_str());
+            json->PutExtAttr("backButtonIcon", GetImageSourceValue().GetSrc().c_str(), filter);
         }
     }
 

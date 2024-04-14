@@ -45,9 +45,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -5321,40 +5321,44 @@ bool TextFieldPattern::IsUnspecifiedOrTextType() const
     return inputType == TextInputType::UNSPECIFIED || inputType == TextInputType::TEXT;
 }
 
-void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("placeholder", GetPlaceHolder().c_str());
-    json->Put("text", contentController_->GetTextValue().c_str());
-    json->Put("fontSize", GetFontSize().c_str());
-    json->Put("fontColor", GetTextColor().c_str());
-    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
-    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str());
-    json->Put("fontFamily", GetFontFamily().c_str());
-    json->Put("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str());
-    json->Put("caretColor", GetCaretColor().c_str());
-    json->Put("type", TextInputTypeToString().c_str());
-    json->Put("contentType", TextContentTypeToString().c_str());
-    json->Put("placeholderColor", GetPlaceholderColor().c_str());
-    json->Put("placeholderFont", GetPlaceholderFont().c_str());
-    json->Put("enterKeyType", TextInputActionToString().c_str());
+    json->PutExtAttr("placeholder", GetPlaceHolder().c_str(), filter);
+    json->PutExtAttr("text", contentController_->GetTextValue().c_str(), filter);
+    json->PutExtAttr("fontSize", GetFontSize().c_str(), filter);
+    json->PutExtAttr("fontColor", GetTextColor().c_str(), filter);
+    json->PutExtAttr("fontStyle",
+        GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic", filter);
+    json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str(), filter);
+    json->PutExtAttr("fontFamily", GetFontFamily().c_str(), filter);
+    json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str(), filter);
+    json->PutExtAttr("caretColor", GetCaretColor().c_str(), filter);
+    json->PutExtAttr("type", TextInputTypeToString().c_str(), filter);
+    json->PutExtAttr("contentType", TextContentTypeToString().c_str(), filter);
+    json->PutExtAttr("placeholderColor", GetPlaceholderColor().c_str(), filter);
+    json->PutExtAttr("placeholderFont", GetPlaceholderFont().c_str(), filter);
+    json->PutExtAttr("enterKeyType", TextInputActionToString().c_str(), filter);
     auto maxLength = GetMaxLength();
-    json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
-    json->Put("inputFilter", GetInputFilter().c_str());
-    json->Put("copyOption", GetCopyOptionString().c_str());
-    json->Put("style", GetInputStyleString().c_str());
+    json->PutExtAttr("maxLength",
+        GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
+    json->PutExtAttr("inputFilter", GetInputFilter().c_str(), filter);
+    json->PutExtAttr("copyOption", GetCopyOptionString().c_str(), filter);
+    json->PutExtAttr("style", GetInputStyleString().c_str(), filter);
+
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("onIconSrc", GetShowResultImageSrc().c_str());
     jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
-    json->Put("passwordIcon", jsonValue->ToString().c_str());
-    json->Put("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined");
+    json->PutExtAttr("passwordIcon", jsonValue->ToString().c_str(), filter);
+    json->PutExtAttr("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined", filter);
     auto maxLines = GetMaxLines();
-    json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
-    json->Put("barState", GetBarStateString().c_str());
-    json->Put("caretPosition", std::to_string(GetCaretIndex()).c_str());
-    json->Put("normalUnderlineColor", GetNormalUnderlineColorStr().c_str());
-    json->Put("typingUnderlineColor", GetTypingUnderlineColorStr().c_str());
-    json->Put("errorUnderlineColor", GetErrorUnderlineColorStr().c_str());
-    json->Put("disableUnderlineColor", GetDisableUnderlineColorStr().c_str());
+    json->PutExtAttr("maxLines",
+        GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str(), filter);
+    json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
+    json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
+    json->PutExtAttr("normalUnderlineColor", GetNormalUnderlineColorStr().c_str(), filter);
+    json->PutExtAttr("typingUnderlineColor", GetTypingUnderlineColorStr().c_str(), filter);
+    json->PutExtAttr("errorUnderlineColor", GetErrorUnderlineColorStr().c_str(), filter);
+    json->PutExtAttr("disableUnderlineColor", GetDisableUnderlineColorStr().c_str(), filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -5367,7 +5371,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonShowCounterOptions->Put("thresholdPercentage", counterType);
     jsonShowCounterOptions->Put("highlightBorder", showBorder);
     jsonShowCounter->Put("options", jsonShowCounterOptions);
-    json->Put("showCounter", jsonShowCounter);
+    json->PutExtAttr("showCounter", jsonShowCounter, filter);
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)

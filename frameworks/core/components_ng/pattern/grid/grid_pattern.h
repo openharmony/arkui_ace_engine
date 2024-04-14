@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct GridItemIndexInfo {
     int32_t mainIndex = -1;
     int32_t crossIndex = -1;
@@ -145,7 +147,7 @@ public:
         gridLayoutInfo_.ResetPositionFlags();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 

@@ -67,6 +67,8 @@ const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.0, 0.67, 1.0);
 } // namespace
+class InspectorFilter;
+
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
@@ -251,12 +253,12 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
     }
 }
 
-void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    FrameNode::ToJsonValue(json);
+    FrameNode::ToJsonValue(json, filter);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    navBarNode->ToJsonValue(json);
+    navBarNode->ToJsonValue(json, filter);
 }
 
 RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)

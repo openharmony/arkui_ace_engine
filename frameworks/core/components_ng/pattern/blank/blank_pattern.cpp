@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -61,9 +62,9 @@ std::string BlankPattern::GetColorString() const
     return paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString();
 }
 
-void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("color", GetColorString().c_str());
+    json->PutExtAttr("color", GetColorString().c_str(), filter);
 }
 
 void BlankPattern::DumpInfo()

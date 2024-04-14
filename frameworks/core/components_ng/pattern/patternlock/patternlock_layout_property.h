@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_LAYOUT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/pipeline/pipeline_base.h"
@@ -42,15 +43,15 @@ public:
         ResetSideLength();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
         CHECK_NULL_VOID(patternLockTheme);
-        json->Put("sideLength",
-            GetSideLength().value_or(patternLockTheme->GetSideLength()).ToString().c_str());
+        json->PutExtAttr("sideLength",
+            GetSideLength().value_or(patternLockTheme->GetSideLength()).ToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideLength, Dimension, PROPERTY_UPDATE_MEASURE);

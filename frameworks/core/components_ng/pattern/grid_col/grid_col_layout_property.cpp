@@ -17,24 +17,25 @@
 
 #include <string>
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {
 
 using OHOS::Ace::V2::GridContainerUtils;
 
-void GridColLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GridColLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
+    LayoutProperty::ToJsonValue(json, filter);
     auto sizeType = GetSizeTypeValue(V2::GridSizeType::UNDEFINED);
 
     auto span = GetSpan(sizeType);
     auto offset = GetOffset(sizeType);
     auto order = GetOrder(sizeType);
-    json->Put("span", std::to_string(span).c_str());
-    json->Put("offset", std::to_string(offset).c_str());
-    json->Put("gridColOffset", std::to_string(offset).c_str());
-    json->Put("order", std::to_string(order).c_str());
+    json->PutExtAttr("span", std::to_string(span).c_str(), filter);
+    json->PutExtAttr("offset", std::to_string(offset).c_str(), filter);
+    json->PutExtAttr("gridColOffset", std::to_string(offset).c_str(), filter);
+    json->PutExtAttr("order", std::to_string(order).c_str(), filter);
 }
 
 int32_t GridColLayoutProperty::GetPropValue(const V2::GridContainerSize& prop, V2::GridSizeType sizeType)

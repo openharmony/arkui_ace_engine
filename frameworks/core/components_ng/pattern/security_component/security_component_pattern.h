@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 constexpr int32_t DEFAULT_SECURITY_COMPONENT_CLICK_DISTANCE = 15;
 constexpr uint64_t MAX_REGISTER_WAITING_TIME = 3000; // 3000ms
 constexpr int32_t MAX_RETRY_TIMES = 3;
@@ -97,8 +99,8 @@ protected:
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-    void ToJsonValueRect(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool IsParentMenu(RefPtr<FrameNode>& secCompNode);
 private:
     void HandleClickEventFromTouch(const TouchEventInfo& info);

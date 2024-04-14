@@ -50,6 +50,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float VALUE = 50.0f;
 constexpr float STEP = 1.0f;
 constexpr float MIN = 0.0f;
@@ -1849,7 +1850,7 @@ HWTEST_F(SliderTestNg, SliderPaintPropertyTest001, TestSize.Level1)
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     sliderPaintProperty->UpdateTrackBorderRadius(SLIDER_MODEL_NG_TRACK_BORDER_RADIUS);
     sliderPaintProperty->UpdateSelectedBorderRadius(SLIDER_MODEL_NG_SELECTED_BORDER_RADIUS);
-    sliderPaintProperty->ToJsonValue(json);
+    sliderPaintProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
     sliderPaintProperty->UpdateBlockBorderColor(TEST_COLOR);
     EXPECT_EQ(sliderPaintProperty->GetBlockBorderColorValue(Color::TRANSPARENT), TEST_COLOR);
@@ -1900,11 +1901,11 @@ HWTEST_F(SliderTestNg, SliderLayoutPropertyTest001, TestSize.Level1)
      * @tc.steps: step3. call ToJsonValue when SliderMode = OUTSET/INSET
      */
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    sliderLayoutProperty->ToJsonValue(json);
+    sliderLayoutProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     sliderLayoutProperty->ResetBlockSize();
-    sliderLayoutProperty->ToJsonValue(json);
+    sliderLayoutProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
 }
 

@@ -17,7 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class ListScrollerTestNg : public ListTestNg {
 public:
@@ -1672,7 +1674,7 @@ HWTEST_F(ListScrollerTestNg, Pattern012, TestSize.Level1)
     // test ToJsonValue/FromJson
     CreateWithItem([](ListModelNG model) {});
     auto json = JsonUtil::Create(true);
-    pattern_->ToJsonValue(json);
+    pattern_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetBool("multiSelectable"), false);
     EXPECT_EQ(json->GetInt("startIndex"), 0);
     EXPECT_EQ(json->GetDouble("itemStartPos"), 0.0);

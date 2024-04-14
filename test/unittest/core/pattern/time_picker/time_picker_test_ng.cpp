@@ -93,6 +93,7 @@ TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr double TOSS_DELTA = 20.0;
 const int CURRENT_VALUE1 = 3;
 const int CURRENT_VALUE2 = 10;
@@ -632,7 +633,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerLayoutPropertyToJsonValue001, TestSi
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto disappearFont = JsonUtil::Create(true);
-    pickerProperty->ToJsonValue(disappearFont);
+    pickerProperty->ToJsonValue(disappearFont, filter);
     EXPECT_NE(disappearFont, nullptr);
 }
 

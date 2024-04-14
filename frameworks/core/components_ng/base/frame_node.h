@@ -59,6 +59,7 @@ class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class PipelineContext;
 class Pattern;
 class StateModifyTask;
@@ -347,7 +348,7 @@ public:
 
     void ChangeSensitiveStyle(bool isSensitive);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -852,10 +853,10 @@ private:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
-    void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     bool GetTouchable() const;
     bool OnLayoutFinish(bool& needSyncRsNode);

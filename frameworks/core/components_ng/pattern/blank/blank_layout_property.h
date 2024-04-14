@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 
@@ -51,11 +52,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinSize, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Height, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("min", GetMinSizeValue(Dimension()).ToString().c_str());
-        json->Put("height", GetHeightValue(Dimension()).ToString().c_str());
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("min", GetMinSizeValue(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("height", GetHeightValue(Dimension()).ToString().c_str(), filter);
     }
 
 private:

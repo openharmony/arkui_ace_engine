@@ -21,6 +21,7 @@
 #include "base/i18n/localization.h"
 #include "base/i18n/time_format.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -385,9 +386,9 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("selected", selectedTime_.ToString(false, false).c_str());
+        json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
     }
 
     void CreateAmPmNode();

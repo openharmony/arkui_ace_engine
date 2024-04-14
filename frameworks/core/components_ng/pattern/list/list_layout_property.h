@@ -28,6 +28,8 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT ListLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ListLayoutProperty, LayoutProperty);
 
@@ -82,11 +84,11 @@ public:
         ResetFadingEdge();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    void ScrollSnapPropToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ScrollSnapPropToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);

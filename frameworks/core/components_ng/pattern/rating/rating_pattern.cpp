@@ -24,6 +24,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/property/property.h"
@@ -864,29 +865,29 @@ void RatingPattern::OnModifyDone()
 }
 
 // XTS inspector code
-void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void RatingPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (isForegroundImageInfoFromTheme_) {
-        json->Put("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->PutExtAttr("foregroundImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);
     } else {
         auto foregroundImageSourceInfo =
             ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
-        json->Put("foregroundImageSourceInfo", foregroundImageSourceInfo.ToString().c_str());
+        json->PutExtAttr("foregroundImageSourceInfo", foregroundImageSourceInfo.ToString().c_str(), filter);
     }
     if (isSecondaryImageInfoFromTheme_) {
-        json->Put("secondaryImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->PutExtAttr("secondaryImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);
     } else {
         auto secondaryImageSourceInfo =
             ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
-        json->Put("secondaryImageSourceInfo", secondaryImageSourceInfo.ToString().c_str());
+        json->PutExtAttr("secondaryImageSourceInfo", secondaryImageSourceInfo.ToString().c_str(), filter);
     }
     if (isBackgroundImageInfoFromTheme_) {
-        json->Put("backgroundImageSourceInfo", ImageSourceInfo("").ToString().c_str());
+        json->PutExtAttr("backgroundImageSourceInfo", ImageSourceInfo("").ToString().c_str(), filter);
     } else {
         auto backgroundImageSourceInfo =
             ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
-        json->Put("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str());
+        json->PutExtAttr("backgroundImageSourceInfo", backgroundImageSourceInfo.ToString().c_str(), filter);
     }
 }
 

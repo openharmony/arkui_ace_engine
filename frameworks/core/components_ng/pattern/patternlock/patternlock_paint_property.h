@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PAINT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/pipeline/pipeline_base.h"
@@ -55,26 +56,26 @@ public:
         ResetAutoReset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
+        PaintProperty::ToJsonValue(json, filter);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
         CHECK_NULL_VOID(patternLockTheme);
-        json->Put("circleRadius",
-            GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ToString().c_str());
-        json->Put("regularColor",
-            GetRegularColor().value_or(patternLockTheme->GetRegularColor()).ColorToString().c_str());
-        json->Put("selectedColor",
-            GetSelectedColor().value_or(patternLockTheme->GetSelectedColor()).ColorToString().c_str());
-        json->Put("activeColor",
-            GetActiveColor().value_or(patternLockTheme->GetActiveColor()).ColorToString().c_str());
-        json->Put("pathColor",
-            GetPathColor().value_or(patternLockTheme->GetPathColor()).ColorToString().c_str());
-        json->Put("pathStrokeWidth",
-            GetPathStrokeWidth().value_or(patternLockTheme->GetPathStrokeWidth()).ToString().c_str());
-        json->Put("autoReset", GetAutoReset().value_or(true) ? "true" : "false");
+        json->PutExtAttr("circleRadius",
+            GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ToString().c_str(), filter);
+        json->PutExtAttr("regularColor",
+            GetRegularColor().value_or(patternLockTheme->GetRegularColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("selectedColor",
+            GetSelectedColor().value_or(patternLockTheme->GetSelectedColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("activeColor",
+            GetActiveColor().value_or(patternLockTheme->GetActiveColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("pathColor",
+            GetPathColor().value_or(patternLockTheme->GetPathColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("pathStrokeWidth",
+            GetPathStrokeWidth().value_or(patternLockTheme->GetPathStrokeWidth()).ToString().c_str(), filter);
+        json->PutExtAttr("autoReset", GetAutoReset().value_or(true) ? "true" : "false", filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CircleRadius, Dimension, PROPERTY_UPDATE_RENDER);

@@ -36,6 +36,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float COLUMN_HEIGHT = 200.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -705,7 +706,7 @@ HWTEST_F(BlankTestNg, ToJsonValue001, TestSize.Level1)
     EXPECT_EQ(colorString.c_str(), COLOR_WHITE);
 
     auto jsonValue = JsonUtil::Create(true);
-    frameNode->GetPattern<BlankPattern>()->ToJsonValue(jsonValue);
+    frameNode->GetPattern<BlankPattern>()->ToJsonValue(jsonValue, filter);
     EXPECT_EQ(jsonValue->GetValue("color")->GetString().c_str(), COLOR_WHITE);
 }
 } // namespace OHOS::Ace::NG

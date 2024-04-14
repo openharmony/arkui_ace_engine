@@ -26,6 +26,8 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct TextMarqueeOptions {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStart, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStep, double);
@@ -62,7 +64,7 @@ public:
         ResetAdaptFontSizeStep();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 

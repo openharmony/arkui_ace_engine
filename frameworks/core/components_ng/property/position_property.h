@@ -17,15 +17,17 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_POSITION_PROPERTIES_H
 
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 struct PositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, Alignment);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("align", propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str());
+        json->PutExtAttr("align",
+            propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str(), filter);
     }
 };
 } // namespace OHOS::Ace::NG

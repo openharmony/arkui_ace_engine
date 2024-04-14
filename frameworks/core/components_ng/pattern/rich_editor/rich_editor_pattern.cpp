@@ -41,6 +41,7 @@
 #include "core/common/ime/text_input_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -3884,7 +3885,8 @@ int32_t RichEditorPattern::DeleteValueSetImageSpan(
         BorderRadiusProperty brp;
         auto jsonObject = JsonUtil::Create(true);
         auto jsonBorder = JsonUtil::Create(true);
-        imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
+        InspectorFilter filter;
+        imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder, filter);
         spanResult.SetBorderRadius(jsonObject->GetValue("borderRadius")->IsObject()
                                        ? jsonObject->GetValue("borderRadius")->ToString()
                                        : jsonObject->GetString("borderRadius"));
@@ -5957,12 +5959,12 @@ bool RichEditorPattern::NeedShowAIDetect()
     return TextPattern::NeedShowAIDetect() && !HasFocus();
 }
 
-void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("enableDataDetector", textDetectEnable_ ? "true" : "false");
+    json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
-    json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+    json->PutExtAttr("dataDetectorConfig", jsonValue->ToString().c_str(), filter);
 }
 
 void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)

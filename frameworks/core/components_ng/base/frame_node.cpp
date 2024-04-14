@@ -40,6 +40,7 @@
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/target_component.h"
@@ -700,7 +701,7 @@ bool FrameNode::CheckAutoSave()
     return false;
 }
 
-void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
+void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     bool enabled = true;
     bool focusable = false;
@@ -719,26 +720,26 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
         focusOnTouch = focusHub->IsFocusOnTouch().value_or(false);
         tabIndex = focusHub->GetTabIndex();
     }
-    json->Put("enabled", enabled);
-    json->Put("focusable", focusable);
-    json->Put("focused", focused);
-    json->Put("defaultFocus", defaultFocus);
-    json->Put("groupDefaultFocus", groupDefaultFocus);
-    json->Put("focusOnTouch", focusOnTouch);
-    json->Put("tabIndex", tabIndex);
+    json->PutExtAttr("enabled", enabled, filter);
+    json->PutFixedAttr("focusable", focusable, filter, FIXED_ATTR_FOCUSABLE);
+    json->PutFixedAttr("focused", focused, filter, FIXED_ATTR_FOCUSED);
+    json->PutExtAttr("defaultFocus", defaultFocus, filter);
+    json->PutExtAttr("groupDefaultFocus", groupDefaultFocus, filter);
+    json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
+    json->PutExtAttr("tabIndex", tabIndex, filter);
 }
 
-void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const
+void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     std::string hoverEffect = "HoverEffect.Auto";
     auto inputEventHub = GetOrCreateInputEventHub();
     if (inputEventHub) {
         hoverEffect = inputEventHub->GetHoverEffectStr();
     }
-    json->Put("hoverEffect", hoverEffect.c_str());
+    json->PutExtAttr("hoverEffect", hoverEffect.c_str(), filter);
 }
 
-void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
+void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     bool touchable = true;
     bool monopolizeEvents = false;
@@ -753,23 +754,23 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
         mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
         monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
-    json->Put("touchable", touchable);
-    json->Put("hitTestBehavior", hitTestMode.c_str());
-    json->Put("monopolizeEvents", monopolizeEvents);
+    json->PutExtAttr("touchable", touchable, filter);
+    json->PutExtAttr("hitTestBehavior", hitTestMode.c_str(), filter);
+    json->PutExtAttr("monopolizeEvents", monopolizeEvents, filter);
     auto jsArr = JsonUtil::CreateArray(true);
     for (int32_t i = 0; i < static_cast<int32_t>(responseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
         jsArr->Put(iStr.c_str(), responseRegion[i].ToJsonString().c_str());
     }
-    json->Put("responseRegion", jsArr);
+    json->PutExtAttr("responseRegion", jsArr, filter);
     for (int32_t i = 0; i < static_cast<int32_t>(mouseResponseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
         jsArr->Put(iStr.c_str(), mouseResponseRegion[i].ToJsonString().c_str());
     }
-    json->Put("mouseResponseRegion", jsArr);
+    json->PutExtAttr("mouseResponseRegion", jsArr, filter);
 }
 
-void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
+void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     bool hasIdealWidth = false;
     bool hasIdealHeight = false;
@@ -784,7 +785,7 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
         auto idealWidthVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Width()).ConvertToVp());
         auto widthStr =
             (idealWidthVpStr.substr(0, idealWidthVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP);
-        json->Put("width", widthStr.c_str());
+        json->PutExtAttr("width", widthStr.c_str(), filter);
         if (jsonSize) {
             jsonSize->Put("width", widthStr.c_str());
         }
@@ -794,17 +795,17 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const
         auto idealHeightVpStr = std::to_string(Dimension(geometryNode_->GetFrameSize().Height()).ConvertToVp());
         auto heightStr =
             (idealHeightVpStr.substr(0, idealHeightVpStr.find(".") + SUBSTR_LENGTH) + DIMENSION_UNIT_VP);
-        json->Put("height", heightStr.c_str());
+        json->PutExtAttr("height", heightStr.c_str(), filter);
         if (jsonSize) {
             jsonSize->Put("height", heightStr.c_str());
         }
     }
 }
 
-void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (renderContext_) {
-        renderContext_->ToJsonValue(json);
+        renderContext_->ToJsonValue(json, filter);
     }
     // scrollable in AccessibilityProperty
     ACE_PROPERTY_TO_JSON_VALUE(accessibilityProperty_, AccessibilityProperty);
@@ -812,19 +813,19 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
     ACE_PROPERTY_TO_JSON_VALUE(pattern_, Pattern);
     if (eventHub_) {
-        eventHub_->ToJsonValue(json);
+        eventHub_->ToJsonValue(json, filter);
     }
-    FocusToJsonValue(json);
-    MouseToJsonValue(json);
-    TouchToJsonValue(json);
+    FocusToJsonValue(json, filter);
+    MouseToJsonValue(json, filter);
+    TouchToJsonValue(json, filter);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
 #if defined(PREVIEW)
-        GeometryNodeToJsonValue(json);
+        GeometryNodeToJsonValue(json, filter);
 #endif
     } else {
-        GeometryNodeToJsonValue(json);
+        GeometryNodeToJsonValue(json, filter);
     }
-    json->Put("id", propInspectorId_.value_or("").c_str());
+    json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
 }
 
 void FrameNode::FromJson(const std::unique_ptr<JsonValue>& json)

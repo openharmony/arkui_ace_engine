@@ -16,6 +16,7 @@
 #include "grid_container_layout_property.h"
 
 #include "base/log/log.h"
+#include "core/components_ng/base/inspector_filter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,9 +46,9 @@ void GridContainerLayoutProperty::BuildWidth(float width)
     }
 }
 
-void GridContainerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GridContainerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LinearLayoutProperty::ToJsonValue(json);
+    LinearLayoutProperty::ToJsonValue(json, filter);
     if (!HasContainerInfo()) {
         return;
     }
@@ -61,7 +62,7 @@ void GridContainerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) 
     constructor->Put("gutter", info.GetGutterWidth().ToString().c_str());
     constructor->Put("margin", info.GetMarginLeft().ToString().c_str());
 
-    json->Put("constructor", constructor);
+    json->PutExtAttr("constructor", constructor, filter);
 }
 
 } // namespace OHOS::Ace::NG

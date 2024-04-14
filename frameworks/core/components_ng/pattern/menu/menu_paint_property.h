@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -88,13 +89,16 @@ public:
         return index < 0 ? "Placement.None" : placementTable[index].value;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put("enableArrow", V2::ConvertBoolToString(GetEnableArrow().value_or(false)).c_str());
-        json->Put("arrowOffset", GetArrowOffset().value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("arrowPosition", GetArrowPosition().value_or(OffsetF(0.0f, 0.0f)).ToString().c_str());
-        json->Put("arrowPlacement", ConvertPlacementToString(GetArrowPlacement().value_or(Placement::NONE)).c_str());
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("enableArrow", V2::ConvertBoolToString(GetEnableArrow().value_or(false)).c_str(), filter);
+        json->PutExtAttr("arrowOffset",
+            GetArrowOffset().value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("arrowPosition",
+            GetArrowPosition().value_or(OffsetF(0.0f, 0.0f)).ToString().c_str(), filter);
+        json->PutExtAttr("arrowPlacement",
+            ConvertPlacementToString(GetArrowPlacement().value_or(Placement::NONE)).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_RENDER);

@@ -43,6 +43,7 @@ using CheckboxBuilderFunc = std::optional<std::function<void()>>;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string NAME = "checkbox";
 const std::string GROUP_NAME = "checkboxGroup";
 const std::string GROUP_NAME_CHANGE = "checkboxGroupChange";
@@ -171,7 +172,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest002, TestSize.Level1)
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     auto json = JsonUtil::Create(true);
-    checkBoxPaintProperty->ToJsonValue(json);
+    checkBoxPaintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("isOn"), "true");
 }
 

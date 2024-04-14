@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -357,19 +358,19 @@ void ImageAnimatorPattern::UpdateEventCallback()
     }
 }
 
-void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    Pattern::ToJsonValue(json);
+    Pattern::ToJsonValue(json, filter);
     static const char* STATUS_MODE[] = { "AnimationStatus.Initial", "AnimationStatus.Running", "AnimationStatus.Paused",
         "AnimationStatus.Stopped" };
-    json->Put("state", STATUS_MODE[static_cast<int32_t>(status_)]);
-    json->Put("duration", std::to_string(animator_->GetDuration()).c_str());
-    json->Put("reverse", isReverse_ ? "true" : "false");
-    json->Put("fixedSize", fixedSize_ ? "true" : "false");
+    json->PutExtAttr("state", STATUS_MODE[static_cast<int32_t>(status_)], filter);
+    json->PutExtAttr("duration", std::to_string(animator_->GetDuration()).c_str(), filter);
+    json->PutExtAttr("reverse", isReverse_ ? "true" : "false", filter);
+    json->PutExtAttr("fixedSize", fixedSize_ ? "true" : "false", filter);
     static const char* FILL_MODE[] = { "FillMode.None", "FillMode.Forwards", "FillMode.Backwards", "FillMode.Both" };
-    json->Put("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())]);
-    json->Put("iterations", std::to_string(animator_->GetIteration()).c_str());
-    json->Put("images", ImagesToString().c_str());
+    json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())], filter);
+    json->PutExtAttr("iterations", std::to_string(animator_->GetIteration()).c_str(), filter);
+    json->PutExtAttr("images", ImagesToString().c_str(), filter);
 }
 
 std::string ImageAnimatorPattern::ImagesToString() const

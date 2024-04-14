@@ -25,6 +25,8 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT TextClockLayoutProperty final : public TextLayoutProperty {
     DECLARE_ACE_TYPE(TextClockLayoutProperty, TextLayoutProperty);
 
@@ -64,7 +66,7 @@ public:
         ResetFontFeature();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Format, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoursWest, float, PROPERTY_UPDATE_MEASURE);

@@ -18,6 +18,7 @@
 #include <vector>
 #include "base/json/json_util.h"
 #include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -26,28 +27,29 @@ namespace {
 constexpr float DEFAULT_SIZE = 12.0f;
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 }
-void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
-    json->Put("selected", std::to_string(propSelected_.value_or(0)).c_str());
-    json->Put("color", propColor_.value_or(Color::WHITE).ColorToString().c_str());
-    json->Put("selectedColor", propSelectedColor_.value_or(Color::WHITE).ColorToString().c_str());
-    json->Put("popupColor", propPopupColor_.value_or(Color::WHITE).ColorToString().c_str());
-    json->Put("usingPopup", propUsingPopup_.value_or(false) ? "true" : "false");
-    json->Put("itemSize", propItemSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("alignStyle",
-        propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ? "IndexerAlign.Left" : "IndexerAlign.Right");
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("selected", std::to_string(propSelected_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("color", propColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
+    json->PutExtAttr("selectedColor", propSelectedColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
+    json->PutExtAttr("popupColor", propPopupColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
+    json->PutExtAttr("usingPopup", propUsingPopup_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("itemSize",
+        propItemSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("alignStyle", propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ?
+        "IndexerAlign.Left" : "IndexerAlign.Right", filter);
     auto PopupPositionJsonObject = JsonUtil::Create(true);
     PopupPositionJsonObject->Put("popupPositionX", propPopupPositionX_.value_or(Dimension()).ToString().c_str());
     PopupPositionJsonObject->Put("popupPositionY", propPopupPositionY_.value_or(Dimension()).ToString().c_str());
-    json->Put("popupPosition", PopupPositionJsonObject);
+    json->PutExtAttr("popupPosition", PopupPositionJsonObject, filter);
     auto jsonArrayValue = JsonUtil::CreateArray(true);
     auto arrayValue = propArrayValue_.value_or(std::vector<std::string>());
     for (uint32_t i = 0; i < arrayValue.size(); i++) {
         auto index = std::to_string(i);
         jsonArrayValue->Put(index.c_str(), arrayValue[i].c_str());
     }
-    json->Put("arrayValue", jsonArrayValue);
+    json->PutExtAttr("arrayValue", jsonArrayValue, filter);
     auto defaultFont = TextStyle();
     defaultFont.SetFontStyle(FontStyle::NORMAL);
     defaultFont.SetFontSize(Dimension(DEFAULT_SIZE, DimensionUnit::FP));
@@ -56,24 +58,24 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     fontFamily.emplace_back(DEFAULT_FAMILY);
     defaultFont.SetFontFamilies(fontFamily);
     auto fontJsonObject = ToJsonObjectValue(propFont_.value_or(defaultFont));
-    json->Put("font", fontJsonObject);
+    json->PutExtAttr("font", fontJsonObject, filter);
     auto selectFontJsonObject = ToJsonObjectValue(propSelectedFont_.value_or(defaultFont));
-    json->Put("selectFont", selectFontJsonObject);
+    json->PutExtAttr("selectFont", selectFontJsonObject, filter);
     auto popupFontJsonObject = ToJsonObjectValue(propPopupFont_.value_or(defaultFont));
-    json->Put("popupFont", popupFontJsonObject);
+    json->PutExtAttr("popupFont", popupFontJsonObject, filter);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto defaultFontSize = indexerTheme->GetPopupTextStyle().GetFontSize();
     auto defaultFontWeight = indexerTheme->GetPopupTextStyle().GetFontWeight();
-    json->Put("popupItemFontSize", propFontSize_.value_or(defaultFontSize).ToString().c_str());
-    json->Put("popupItemFontWeight",
-        V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(defaultFontWeight)).c_str());
-    json->Put("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false");
-    json->Put("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
-        Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str());
-    json->Put("adaptiveWidth", propAdaptiveWidth_.value_or(false) ? "true" : "false");
+    json->PutExtAttr("popupItemFontSize", propFontSize_.value_or(defaultFontSize).ToString().c_str(), filter);
+    json->PutExtAttr("popupItemFontWeight",
+        V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(defaultFontWeight)).c_str(), filter);
+    json->PutExtAttr("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
+        Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("adaptiveWidth", propAdaptiveWidth_.value_or(false) ? "true" : "false", filter);
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

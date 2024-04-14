@@ -81,6 +81,7 @@ struct TestProperty {
 };
 
 namespace {
+const InspectorFilter filter;
 constexpr double MAX_VALUE_OF_PROGRESS = 120.0;
 constexpr double PROGRESS_MODEL_NG_CACHEDVALUE = 10.0;
 constexpr double PROGRESS_MODEL_NG_MAX = 20.0;
@@ -561,7 +562,7 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(progressPaintProperty, nullptr);
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    progressPaintProperty->ToJsonValue(json);
+    progressPaintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 
     /**
@@ -733,7 +734,7 @@ HWTEST_F(ProgressTestNg, RingProgressCreator001, TestSize.Level1)
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    progressPaintProperty->ToJsonValue(json);
+    progressPaintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
     auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     ASSERT_NE(progressLayoutAlgorithm, nullptr);
@@ -1625,15 +1626,15 @@ HWTEST_F(ProgressTestNg, ProgressPattern004, TestSize.Level1)
     ASSERT_NE(progressPaintProperty, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    pattern->ToJsonValue(json);
-    progressPaintProperty->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
+    progressPaintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 
     testProperty.progressStatus = std::make_optional(ProgressStatus::LOADING);
     frameNode = CreateProgressParagraph(testProperty);
     pattern = frameNode->GetPattern<ProgressPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
 
@@ -2574,7 +2575,7 @@ HWTEST_F(ProgressTestNg, ProgressPattern005, TestSize.Level1)
     std::vector<std::string> fontFamilyVector = paintProperty->GetFontFamilyValue(defaultFamily);
     fontFamilyVector.push_back("test");
     paintProperty->UpdateFontFamily(fontFamilyVector);
-    paintProperty->ToJsonValue(json);
+    paintProperty->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 
     paintProperty->UpdateProgressType(PROGRESS_TYPE_LINEAR);

@@ -69,6 +69,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float WATERFLOW_WIDTH = 480.f;
 constexpr float WATERFLOW_HEIGHT = 800.f;
 constexpr int32_t TOTAL_LINE_NUMBER = 10;
@@ -252,7 +253,7 @@ HWTEST_F(WaterFlowTestNg, Property001, TestSize.Level1)
     EXPECT_EQ(maxSize->Height().value_or(CalcLength(Infinity<double>(), DimensionUnit::VP)).ToString(), "500.00px");
 
     auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
 
@@ -393,12 +394,12 @@ HWTEST_F(WaterFlowTestNg, Property010, TestSize.Level1)
      * @tc.expected: function ToJsonValue is called.
      */
     auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 
     layoutProperty_->Reset();
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
 
