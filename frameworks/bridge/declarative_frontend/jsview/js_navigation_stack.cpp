@@ -244,14 +244,21 @@ std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
     return pathIndex;
 }
 
-void JSNavigationStack::InitNavPathIndex()
+void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNames)
 {
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
 
+    JSRef<JSArray> nameArray = JSRef<JSArray>::New();
+    JSRef<JSVal> params[1];
+    for (size_t i = 0; i < pathNames.size(); i++) {
+        JSRef<JSVal> info = JSRef<JSVal>::Make(ToJSValue(pathNames[i]));
+        nameArray->SetValueAt(i, info);
+    }
+    params[0] = nameArray;
     auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("initNavPathIndex"));
-    func->Call(dataSourceObj_);
+    func->Call(dataSourceObj_, 1, params);
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
