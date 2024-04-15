@@ -220,7 +220,9 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         if (preDestination) {
             auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
             preContext_ = pattern->GetNavDestinationContext();
-            preContext_->SetPreIndex(preStackSize_ - 1);
+            if (preContext_) {
+                preContext_->SetPreIndex(preStackSize_ - 1);
+            }
         }
     }
     UpdateNavPathList();
