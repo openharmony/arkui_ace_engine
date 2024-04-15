@@ -3862,6 +3862,32 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   }
 }
 
+function attributeModifierFuncWithoutStateStyles(modifier, componentBuilder, modifierBuilder) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      modifier.applyNormalAttribute(component);
+      component.applyModifierPatch();
+    }
+  } else {
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+  }
+}
+
 class UIGestureEvent {
   setNodePtr(nodePtr) {
     this._nodePtr = nodePtr;
@@ -7575,7 +7601,7 @@ class ArkSpanComponent {
 // @ts-ignore
 if (globalThis.Span !== undefined) {
   globalThis.Span.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
       return new ArkSpanComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SpanModifier(nativePtr, classType);
@@ -11109,6 +11135,9 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
@@ -12013,6 +12042,9 @@ class ArkToggleComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, this);
@@ -12752,6 +12784,9 @@ class ArkRadioComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, this);
@@ -13022,6 +13057,10 @@ class ArkTimePickerComponent extends ArkComponent {
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
+  dateTimeOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity, TimepickerDateTimeOptionsModifier, value);
+    return this;
+  }
 }
 class TimepickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -13163,6 +13202,21 @@ class TimepickerUseMilitaryTimeModifier extends ModifierWithKey {
   }
 }
 TimepickerUseMilitaryTimeModifier.identity = Symbol('timepickerUseMilitaryTime');
+
+class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
+    }
+  }
+}
+TimepickerDateTimeOptionsModifier.identity = Symbol('timepickerDateTimeOptions');
 
 // @ts-ignore
 if (globalThis.TimePicker !== undefined) {
@@ -13518,6 +13572,9 @@ class ArkSliderComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, this);
@@ -13869,6 +13926,9 @@ class ArkRatingComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
@@ -13967,6 +14027,9 @@ class ArkCheckboxComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, this);

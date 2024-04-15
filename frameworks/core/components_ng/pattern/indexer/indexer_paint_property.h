@@ -19,6 +19,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -68,43 +69,47 @@ public:
         ResetPopupTitleBackground();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put(
-            "selectedBackgroundColor", propSelectedBackgroundColor_.value_or(Color::WHITE).ColorToString().c_str());
-        json->Put("popupBackground", propPopupBackground_.value_or(Color::WHITE).ColorToString().c_str());
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("selectedBackgroundColor",
+            propSelectedBackgroundColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
+        json->PutExtAttr("popupBackground",
+            propPopupBackground_.value_or(Color::WHITE).ColorToString().c_str(), filter);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
-        json->Put("popupSelectedColor",
-            propPopupSelectedColor_.value_or(indexerTheme->GetPopupSelectedTextColor()).ColorToString().c_str());
-        json->Put("popupUnselectedColor",
-            propPopupUnselectedColor_.value_or(indexerTheme->GetPopupUnselectedTextColor()).ColorToString().c_str());
-        json->Put("popupItemBackground",
-            propPopupItemBackground_.value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str());
+        json->PutExtAttr("popupSelectedColor", propPopupSelectedColor_.
+            value_or(indexerTheme->GetPopupSelectedTextColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("popupUnselectedColor", propPopupUnselectedColor_.
+            value_or(indexerTheme->GetPopupUnselectedTextColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("popupItemBackground", propPopupItemBackground_.
+            value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str(), filter);
         if (propPopupBorderRadius_.has_value()) {
-            json->Put("popupBorderRadius", propPopupBorderRadius_.value().ToString().c_str());
+            json->PutExtAttr("popupBorderRadius", propPopupBorderRadius_.value().ToString().c_str(), filter);
         } else {
-            json->Put("popupBorderRadius", Dimension(NG::BUBBLE_RADIUS, DimensionUnit::VP).ToString().c_str());
+            json->PutExtAttr("popupBorderRadius",
+                Dimension(NG::BUBBLE_RADIUS, DimensionUnit::VP).ToString().c_str(), filter);
         }
         if (propPopupItemBorderRadius_.has_value()) {
-            json->Put("popupItemBorderRadius", propPopupItemBorderRadius_.value().ToString().c_str());
+            json->PutExtAttr("popupItemBorderRadius",
+                propPopupItemBorderRadius_.value().ToString().c_str(), filter);
         } else {
-            json->Put("popupItemBorderRadius", Dimension(NG::BUBBLE_ITEM_RADIUS, DimensionUnit::VP).ToString().c_str());
+            json->PutExtAttr("popupItemBorderRadius",
+                Dimension(NG::BUBBLE_ITEM_RADIUS, DimensionUnit::VP).ToString().c_str(), filter);
         }
         if (propItemBorderRadius_.has_value()) {
-            json->Put("itemBorderRadius", propItemBorderRadius_.value().ToString().c_str());
+            json->PutExtAttr("itemBorderRadius", propItemBorderRadius_.value().ToString().c_str(), filter);
         } else {
-            json->Put("itemBorderRadius",
-                Dimension(NG::INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str());
+            json->PutExtAttr("itemBorderRadius",
+                Dimension(NG::INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str(), filter);
         }
         if (propIndexerBorderRadius_.has_value()) {
-            json->Put("indexerBorderRadius", propIndexerBorderRadius_.value().ToString().c_str());
+            json->PutExtAttr("indexerBorderRadius", propIndexerBorderRadius_.value().ToString().c_str(), filter);
         } else {
-            json->Put(
-                "indexerBorderRadius", Dimension(NG::INDEXER_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str());
+            json->PutExtAttr("indexerBorderRadius",
+                Dimension(NG::INDEXER_DEFAULT_RADIUS, DimensionUnit::VP).ToString().c_str(), filter);
         }
         BlurStyleOption blurStyleOption;
         if (propPopupBackgroundBlurStyle_.has_value()) {
@@ -113,10 +118,11 @@ public:
             blurStyleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
         }
         auto jsonValue = JsonUtil::Create(true);
-        blurStyleOption.ToJsonValue(jsonValue);
-        json->Put("popupBackgroundBlurStyle", jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"));
-        json->Put("popupTitleBackground",
-            propPopupTitleBackground_.value_or(indexerTheme->GetPopupTitleBackground()).ColorToString().c_str());
+        blurStyleOption.ToJsonValue(jsonValue, filter);
+        json->PutExtAttr("popupBackgroundBlurStyle",
+            jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"), filter);
+        json->PutExtAttr("popupTitleBackground", propPopupTitleBackground_.
+            value_or(indexerTheme->GetPopupTitleBackground()).ColorToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupSelectedColor, Color, PROPERTY_UPDATE_RENDER);

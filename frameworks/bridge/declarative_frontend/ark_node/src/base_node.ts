@@ -24,20 +24,16 @@ declare interface RenderOptions {
   surfaceId?: string
 }
 
-declare class DrawContext {}
+declare class DrawContext { }
 declare type NodePtr = Object | null;
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): NodePtr;
-  createRenderNode(node: BaseNode | RenderNode): NodePtr;
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
-  dispose(): void;
+  disposeNode(): void;
   updateStart(): void;
   updateEnd(): void;
-  createFrameNode(frameNode: FrameNode): NodePtr;
-  draw(drawContext: DrawContext): void;
-  convertToFrameNode(nodePtr: NodePtr): NodePtr;
 }
 
 class BaseNode extends __JSBaseNode__ {
@@ -45,7 +41,7 @@ class BaseNode extends __JSBaseNode__ {
   protected nodePtr_: NodePtr;
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(options);
-    let instanceId: number = -1;
+
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
@@ -54,12 +50,10 @@ class BaseNode extends __JSBaseNode__ {
           'Node constructor error, param uiContext is invalid'
         );
       }
-      instanceId = uiContext.instanceId_;
     }
-    this.instanceId_ = instanceId;
+    this.instanceId_ = uiContext.instanceId_;
   }
-  public getInstanceId()
-  {
+  public getInstanceId() {
     return this.instanceId_;
   }
 }

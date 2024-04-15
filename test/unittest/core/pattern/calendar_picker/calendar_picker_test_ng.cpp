@@ -75,6 +75,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr Dimension TEST_SETTING_RADIUS = Dimension(10.0, DimensionUnit::VP);
 constexpr int32_t YEAR_INDEX = 0;
 constexpr int32_t MONTH_INDEX = 2;
@@ -3184,7 +3185,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest001, TestSize.Lev
     auto clone = layoutProperty->Clone();
 
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     layoutProperty->Reset();
     clone.Reset();
 
@@ -3211,11 +3212,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest002, TestSize.Lev
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
 
     layoutProperty->propDialogAlignType_ = CalendarEdgeAlign::EDGE_ALIGN_START;
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     layoutProperty->propDialogAlignType_ = CalendarEdgeAlign::EDGE_ALIGN_CENTER;
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     layoutProperty->propDialogAlignType_ = CalendarEdgeAlign::EDGE_ALIGN_END;
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
 }
 
 /**

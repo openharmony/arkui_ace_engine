@@ -493,9 +493,10 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         // AxisEvent is single one.
         SendCancelMsg();
+        refereeState_ = RefereeState::READY;
     }
 }
 

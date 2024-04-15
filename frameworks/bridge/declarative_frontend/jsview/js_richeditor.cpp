@@ -1184,10 +1184,10 @@ void JSRichEditorController::ParseJsTextStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size) &&
-        !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
+        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
@@ -1306,6 +1306,10 @@ void JSRichEditorController::ParseTextDecoration(
             updateSpanStyle.hasResourceDecorationColor = color->IsObject();
         }
     }
+    if (!updateSpanStyle.updateTextDecorationColor.has_value()) {
+        updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
+        style.SetTextDecorationColor(style.GetTextColor());
+    }
 }
 
 void ParseUserGesture(
@@ -1325,12 +1329,13 @@ void ParseUserGesture(
             gestureOption.onClick = nullptr;
         } else {
             auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
-            auto onClick = [
-                    execCtx = args.GetExecutionContext(), func = jsOnClickFunc, spanTypeInner = spanType
-                    ](const BaseEventInfo* info) {
+            auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto onClick = [execCtx = args.GetExecutionContext(), func = jsOnClickFunc, spanTypeInner = spanType,
+                               node = AceType::WeakClaim(targetNode)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
                 ACE_SCORING_EVENT(spanTypeInner + ".onClick");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute(*clickInfo);
             };
             auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
@@ -1343,11 +1348,11 @@ void ParseUserGesture(
             gestureOption.onLongPress = nullptr;
         } else {
             auto jsLongPressFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(onLongPressFunc));
-            auto onLongPress = [
-                    execCtx = args.GetExecutionContext(), func = jsLongPressFunc, spanTypeInner = spanType
-                    ](const BaseEventInfo* info) {
+            auto* targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto onLongPress = [execCtx = args.GetExecutionContext(), func = jsLongPressFunc, spanTypeInner = spanType,
+                                   node =  AceType::WeakClaim(targetNode)](BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                auto* longPressInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
                 ACE_SCORING_EVENT(spanTypeInner + ".onLongPress");
                 func->Execute(*longPressInfo);
             };

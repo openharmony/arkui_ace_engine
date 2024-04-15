@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <set>
 
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -45,6 +46,7 @@
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -58,6 +60,8 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
@@ -190,7 +194,9 @@ public:
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void HandleOnDelete(bool backward) override;
     void DeleteBackward(int32_t length = 0) override;
-    std::wstring DeleteBackwardOperation(int32_t length = 0);
+    void DeleteBackward(int32_t length = 0, bool isExternalkeyboard = false);
+    std::wstring DeleteBackwardOperation(int32_t length = 0, bool isExternalkeyboard = false);
+    std::wstring GetBackwardDeleteText(int32_t length);
     void DeleteForward(int32_t length) override;
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
@@ -289,6 +295,7 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void ShowHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
@@ -335,8 +342,10 @@ public:
 
     RectF GetCaretRect() const override;
     void CloseSelectOverlay() override;
+    void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     bool IsSingleHandle();
+    bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
@@ -552,6 +561,11 @@ public:
 
     float GetCrossOverHeight() const;
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<RichEditorAccessibilityProperty>();
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -620,7 +634,7 @@ private:
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
@@ -667,6 +681,9 @@ private:
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
+    bool DeleteImageBySoftKeyboard(const RichEditorDeleteValue& info);
+    void DeleteTextSpanInfo(const RefPtr<FrameNode>& host, std::set<int32_t, std::greater<int32_t>>& SpanNodes,
+        const RichEditorAbstractSpanResult& spanResult);
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
@@ -747,7 +764,7 @@ private:
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
     void DeleteForward(int32_t currentPosition, int32_t length);
     int32_t HandleOnDragDeleteForward();
-    void HandleOnDragDropTextOperation(const std::string& insertValue);
+    void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
     void HandleOnDragInsertValueOperation(const std::string& insertValue);

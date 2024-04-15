@@ -54,6 +54,17 @@ public:
     {
         CloseSelectOverlay();
     }
+
+    virtual void ShowHandles()
+    {
+        CreateHandles();
+    }
+
+    virtual bool IsHandlesShow()
+    {
+        return true;
+    }
+
     virtual void CreateHandles() {};
     virtual bool CloseKeyboard(bool forceClose) = 0;
     virtual OffsetF GetDragUpperLeftCoordinates() = 0;

@@ -112,6 +112,19 @@ public:
         return clickEvents_.empty();
     }
 
+    void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
+    {
+        clickAfterEvents_ = std::move(clickEvent);
+    }
+
+    void ClearClickAfterEvent()
+    {
+        // When the event param is undefined, it will clear the callback.
+        if (clickAfterEvents_) {
+            clickAfterEvents_.Reset();
+        }
+    }
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
@@ -158,6 +171,7 @@ public:
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<ClickEvent>> clickEvents_;
+    RefPtr<ClickEvent> clickAfterEvents_;
     RefPtr<ClickEvent> userCallback_;
     RefPtr<ClickEvent> jsFrameNodeCallback_;
     RefPtr<ClickRecognizer> clickRecognizer_;

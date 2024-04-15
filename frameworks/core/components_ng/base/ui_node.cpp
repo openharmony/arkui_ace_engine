@@ -1142,6 +1142,16 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
     }
 }
 
+void UINode::SetIsRootBuilderNode(bool isRootBuilderNode)
+{
+    isRootBuilderNode_ = isRootBuilderNode;
+}
+
+bool UINode::GetIsRootBuilderNode() const
+{
+    return isRootBuilderNode_;
+}
+
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,

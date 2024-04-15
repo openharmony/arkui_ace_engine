@@ -1153,6 +1153,14 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
 
+void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
+{
+    CheckClickActuator();
+    clickEventActuator_->AddClickAfterEvent(clickEvent);
+
+    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
 // replace last showMenu callback
 void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
 {

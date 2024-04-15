@@ -1805,26 +1805,27 @@ RefPtr<FocusView> FocusHub::GetFirstChildFocusView()
     return nullptr;
 }
 
-void FocusHub::TriggerFocusScroll()
+bool FocusHub::TriggerFocusScroll()
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto* context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
     if (!context->GetIsFocusActive() || (focusType_ == FocusType::DISABLE && !isFocusUnit_)) {
-        return;
+        return false;
     }
-    ScrollByOffset();
+    return ScrollByOffset();
 }
 
-void FocusHub::ScrollByOffset()
+bool FocusHub::ScrollByOffset()
 {
     auto parent = GetParentFocusHub();
     RefPtr<FrameNode> parentFrame;
     RefPtr<Pattern> parentPattern;
+    bool ret = false;
     while (parent) {
         if (parent->isFocusUnit_) {
-            return;
+            return false;
         }
         parentFrame = parent->GetFrameNode();
         if (!parentFrame) {
@@ -1832,10 +1833,11 @@ void FocusHub::ScrollByOffset()
             continue;
         }
         if (ScrollByOffsetToParent(parentFrame)) {
-            return;
+            ret = true;
         }
         parent = parent->GetParentFocusHub();
     }
+    return ret;
 }
 
 bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) const

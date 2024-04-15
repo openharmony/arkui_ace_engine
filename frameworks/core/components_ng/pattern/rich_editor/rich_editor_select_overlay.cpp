@@ -334,4 +334,10 @@ bool RichEditorSelectOverlay::IsSingleHandleShow()
     return manager->IsSingleHandle();
 }
 
+bool RichEditorSelectOverlay::IsHandlesShow()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, false);
+    return manager->IsHandlesShow();
+}
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include "base/geometry/offset.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -74,29 +75,30 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Width, CalcDimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Height, CalcDimension, PROPERTY_UPDATE_MEASURE);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("alignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("alignment", DialogAlignmentUtils::ConvertDialogAlignmentToString(
                                          propDialogAlignment_.value_or(DialogAlignment::BOTTOM))
-                                         .c_str());
+                                         .c_str(), filter);
 
         auto offsetValue = JsonUtil::Create(true);
         offsetValue->Put("dX", propDialogOffset_.value_or(DimensionOffset()).GetX().Value());
         offsetValue->Put("dY", propDialogOffset_.value_or(DimensionOffset()).GetY().Value());
-        json->Put("offset", offsetValue);
+        json->PutExtAttr("offset", offsetValue, filter);
 
-        json->Put("gridCount", std::to_string(propGridCount_.value_or(-1)).c_str());
-        json->Put("customStyle", propUseCustomStyle_.value_or(false) ? "true" : "false");
-        json->Put("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false");
-        json->Put("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false");
-        json->Put("isModal", propIsModal_.value_or(false) ? "true" : "false");
-        json->Put("isScenceBoardDialog", propIsScenceBoardDialog_.value_or(false) ? "true" : "false");
-        json->Put("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
+        json->PutExtAttr("gridCount", std::to_string(propGridCount_.value_or(-1)).c_str(), filter);
+        json->PutExtAttr("customStyle", propUseCustomStyle_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("isModal", propIsModal_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("isScenceBoardDialog",
+            propIsScenceBoardDialog_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
                                          propDialogButtonDirection_.value_or(DialogButtonDirection::AUTO))
-                                         .c_str());
-        json->Put("width", propWidth_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("height", propHeight_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+                                         .c_str(), filter);
+        json->PutExtAttr("width", propWidth_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("height", propHeight_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     }
 
 private:

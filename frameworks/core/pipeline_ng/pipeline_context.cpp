@@ -862,8 +862,9 @@ void PipelineContext::FlushFocusScroll()
     }
     auto lastFocusStateNode = focusManager_->GetLastFocusStateNode();
     CHECK_NULL_VOID(lastFocusStateNode);
-    lastFocusStateNode->TriggerFocusScroll();
-    focusManager_->SetNeedTriggerScroll(false);
+    if (!lastFocusStateNode->TriggerFocusScroll()) {
+        focusManager_->SetNeedTriggerScroll(false);
+    }
 }
 
 void PipelineContext::FlushPipelineImmediately()

@@ -41,7 +41,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+        return std::nullopt;
     }
     InitializeParam();
     // Case 1: Width and height are set in the front end.
@@ -82,7 +82,11 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
 
 void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG && !pattern->UseContentModifier()) {
         // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->GetGeometryNode()->SetFrameSize(SizeF());

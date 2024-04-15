@@ -37,6 +37,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const size_t ARRAY_SIZE = 1;
 } // namespace
 
@@ -203,7 +204,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest003, TestSize.Lev
     props.SetText("test");
     EXPECT_EQ(props.GetText(), "test");
     auto json = std::make_unique<JsonValue>();
-    props.ToJsonValue(json);
+    props.ToJsonValue(json, filter);
     EXPECT_FALSE(json->GetBool("scrollable", false));
     EXPECT_FALSE(props.IsCheckable());
     EXPECT_FALSE(props.IsChecked());

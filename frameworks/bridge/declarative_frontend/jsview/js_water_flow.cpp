@@ -396,9 +396,15 @@ void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
 
 void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    auto edgeEffect = JSScrollable::ParseEdgeEffect(info, WaterFlowModel::GetInstance()->GetEdgeEffect());
-    auto alwaysEnabled =
-        JSScrollable::ParseAlwaysEnable(info, WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect());
+    auto edgeEffect = WaterFlowModel::GetInstance()->GetEdgeEffect();
+    if (info.Length() > 0) {
+        edgeEffect = JSScrollable::ParseEdgeEffect(info[0], edgeEffect);
+    }
+    auto alwaysEnabled = WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect();
+    if (info.Length() > 1) {
+        alwaysEnabled =
+            JSScrollable::ParseAlwaysEnable(info[1], alwaysEnabled);
+    }
     WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 

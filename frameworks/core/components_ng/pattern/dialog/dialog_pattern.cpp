@@ -35,6 +35,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -1012,14 +1013,14 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
-void DialogPattern::HandleFocusEvent()
+void DialogPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOff());
     contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(Shadow::CreateShadow(defaultShadowOff)));
 }
 
-void DialogPattern::HandleBlurEvent()
+void DialogPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOn());
@@ -1027,14 +1028,14 @@ void DialogPattern::HandleBlurEvent()
 }
 
 // XTS inspector
-void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
-        json->Put("title", title_.c_str());
-        json->Put("subtitle", subtitle_.c_str());
-        json->Put("message", message_.c_str());
+        json->PutExtAttr("title", title_.c_str(), filter);
+        json->PutExtAttr("subtitle", subtitle_.c_str(), filter);
+        json->PutExtAttr("message", message_.c_str(), filter);
     }
 }
 

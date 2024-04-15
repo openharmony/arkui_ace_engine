@@ -24,6 +24,7 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT BadgeLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(BadgeLayoutProperty, LayoutProperty);
@@ -84,7 +85,7 @@ public:
         badgeCircleRadius_ = badgeCircleRadius;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     std::string GetBadgePositionString(BadgePosition position) const
     {

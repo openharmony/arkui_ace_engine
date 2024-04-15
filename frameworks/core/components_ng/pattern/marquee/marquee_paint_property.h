@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -51,15 +52,15 @@ public:
         ResetLoop();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put(
-            "step", std::to_string(propScrollAmount_.value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx())).c_str());
-        json->Put("loop", std::to_string(propLoop_.value_or(-1)).c_str());
-        json->Put("start", propPlayerStatus_.value_or(true) ? "true" : "false");
-        json->Put(
-            "fromStart", propDirection_.value_or(MarqueeDirection::RIGHT) == MarqueeDirection::LEFT ? "true" : "false");
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("step", std::to_string(propScrollAmount_.value_or(
+            DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx())).c_str(), filter);
+        json->PutExtAttr("loop", std::to_string(propLoop_.value_or(-1)).c_str(), filter);
+        json->PutExtAttr("start", propPlayerStatus_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("fromStart",
+            propDirection_.value_or(MarqueeDirection::RIGHT) == MarqueeDirection::LEFT ? "true" : "false", filter);
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlayerStatus, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollAmount, double, PROPERTY_UPDATE_MEASURE);

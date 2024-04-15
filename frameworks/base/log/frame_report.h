@@ -40,6 +40,8 @@ using EndListFlingFunc = void (*)();
 using FlushBeginFunc = void (*)();
 using FlushEndFunc = void (*)();
 using SetFrameParamFunc = void (*)(int, int, int, int);
+using EnableSelfRenderFunc = void (*)();
+using DisableSelfRenderFunc = void (*)();
 
 class ACE_EXPORT FrameReport final {
 public:
@@ -63,6 +65,8 @@ public:
     void FlushBegin();
     void FlushEnd();
     void SetFrameParam(int requestId, int load, int schedFrameNum, int value);
+    void EnableSelfRender();
+    void DisableSelfRender();
 
 private:
     FrameReport();
@@ -93,6 +97,8 @@ private:
     ACE_EXPORT FlushBeginFunc flushBeginFunc_ = nullptr;
     ACE_EXPORT FlushEndFunc flushEndFunc_ = nullptr;
     ACE_EXPORT SetFrameParamFunc setFrameParamFunc_ = nullptr;
+    ACE_EXPORT EnableSelfRenderFunc enableSelfRenderFunc_ = nullptr;
+    ACE_EXPORT DisableSelfRenderFunc disableSelfRenderFunc_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_FRAME_REPORT_H

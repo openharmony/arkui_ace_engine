@@ -34,6 +34,8 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // ProgressPattern is the base class for progress render node to perform paint progress.
 class ProgressPattern : public Pattern {
     DECLARE_ACE_TYPE(ProgressPattern, Pattern);
@@ -74,7 +76,7 @@ public:
         return MakeRefPtr<ProgressAccessibilityProperty>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -103,8 +105,8 @@ private:
     void HandleEnabled();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
-    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
 
     double strokeWidth_ = 2;

@@ -4751,9 +4751,17 @@ RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEv
 
 void WebDelegate::OnTooltip(const std::string& tooltip)
 {
-    auto webPattern = webPattern_.Upgrade();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->OnTooltip(tooltip);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), tooltip]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->OnTooltip(tooltip);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void WebDelegate::OnRequestFocus()

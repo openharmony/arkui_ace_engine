@@ -42,6 +42,7 @@
 #include "core/event/mouse_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
@@ -77,7 +78,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
 
     // scrollable
@@ -514,6 +515,8 @@ public:
     {
         return nullptr;
     }
+
+    void CheckRestartSpring(bool sizeDiminished);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

@@ -41,6 +41,7 @@ class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
@@ -297,7 +298,7 @@ private:
     void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     RectF CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode);
 

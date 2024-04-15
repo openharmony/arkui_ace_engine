@@ -60,6 +60,7 @@ public:
     void MarkSelectOverlayDirty(PropertyChangeFlag changeFlag);
     bool IsMenuShow();
     bool IsSingleHandle();
+    bool IsHandlesShow();
     bool IsHandleReverse();
     void ResetSelectionRect();
     void RestartHiddenHandleTask(bool isDelay);

@@ -30,6 +30,8 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+class InspectorFilter;
+
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 using OnPreDragFunc = std::function<void(const PreDragStatus)>;
@@ -390,7 +392,7 @@ public:
     }
 
     // get XTS inspector value
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 

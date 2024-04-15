@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
@@ -26,8 +25,6 @@ namespace OHOS::Ace::NG {
 void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     layoutWrapper->RemoveAllChildInRenderTree();
-
-    Initialize(layoutWrapper);
 
     std::list<RefPtr<LayoutWrapper>> childList;
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -121,19 +118,5 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
         content->SetOffset(translate);
     }
-}
-
-void ListItemLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
-{
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
-    auto listItemPattern = hostNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_VOID(listItemPattern);
-    startNodeIndex_ = listItemPattern->GetStartNodeIndex();
-    endNodeIndex_ = listItemPattern->GetEndNodeIndex();
-    childNodeIndex_ = listItemPattern->GetChildNodeIndex();
-    startNodeSize_ = listItemPattern->GetStartNodeSize();
-    endNodeSize_ = listItemPattern->GetEndNodeSize();
-    curOffset_ = listItemPattern->GetCurOffset();
 }
 } // namespace OHOS::Ace::NG

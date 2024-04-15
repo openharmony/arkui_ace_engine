@@ -594,5 +594,11 @@ ACE_EXPORT extern const char DYNAMIC_COMPONENT_ETS_TAG[];
 // ContainerSpan
 ACE_EXPORT extern const char CONTAINER_SPAN_COMPONENT_TAG[];
 ACE_EXPORT extern const char CONTAINER_SPAN_ETS_TAG[];
+
+//RenderNode
+ACE_EXPORT extern const char RENDER_NODE_ETS_TAG[];
+
+//CustomFrameNode
+ACE_EXPORT extern const char CUSTOM_FRAME_NODE_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

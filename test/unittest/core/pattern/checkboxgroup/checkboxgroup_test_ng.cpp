@@ -52,6 +52,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string NAME = "checkbox";
 const std::string GROUP_NAME = "checkboxGroup";
 const std::string GROUP_NAME_CHANGE = "checkboxGroupChange";
@@ -372,7 +373,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelect(), SELECTED);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedColor(), SELECTED_COLOR);
     auto json = JsonUtil::Create(true);
-    checkBoxPaintProperty->ToJsonValue(json);
+    checkBoxPaintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectAll"), "true");
 }
 
@@ -1939,7 +1940,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     auto json = JsonUtil::Create(true);
-    checkBoxPaintProperty->ToJsonValue(json);
+    checkBoxPaintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("shape"), "1");
 }
 

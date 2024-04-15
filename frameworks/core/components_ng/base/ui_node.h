@@ -46,10 +46,11 @@ struct ExtraInfo {
 
 enum class NodeStatus : char {
     NORMAL_NODE = 0,               // Indicates it is a normal node;
-    BUILDER_NODE_OFF_MAINTREE = 1, // Indicates it is a BuilderNode and is detach from the maintreee;
-    BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the maintreee;
+    BUILDER_NODE_OFF_MAINTREE = 1, // Indicates it is a BuilderNode and is detach from the mainTree;
+    BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the mainTree;
 };
 
+class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
 
@@ -340,7 +341,7 @@ public:
         return useOffscreenProcess_;
     }
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -536,8 +537,11 @@ public:
     std::string GetCurrentCustomNodeInfo();
     static int64_t GenerateAccessibilityId();
 
+    // used by BuilderNode
     NodeStatus GetNodeStatus() const;
     void UpdateNodeStatus(NodeStatus nodeStatus);
+    void SetIsRootBuilderNode(bool isRootBuilderNode);
+    bool GetIsRootBuilderNode() const;
 
     const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
     {
@@ -664,6 +668,7 @@ private:
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
+    bool isRootBuilderNode_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;

@@ -26,6 +26,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT IndexerLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(IndexerLayoutProperty, LayoutProperty);
 
@@ -84,7 +86,7 @@ public:
         ResetAdaptiveWidth();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrayValue, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, int32_t, PROPERTY_UPDATE_NORMAL);

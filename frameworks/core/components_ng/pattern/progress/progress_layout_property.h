@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/pipeline/pipeline_base.h"
@@ -48,18 +49,19 @@ public:
         ResetStrokeWidth();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
 
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto progressTheme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
 
-        json->Put(
-            "type", (ProgressTypeUtils::ConvertProgressTypeToString(propType_.value_or(ProgressType::LINEAR))).c_str());
-        json->Put("strokeWidth", propStrokeWidth_.value_or(progressTheme->GetTrackThickness()).ToString().c_str());
+        json->PutExtAttr("type",
+            (ProgressTypeUtils::ConvertProgressTypeToString(propType_.value_or(ProgressType::LINEAR))).c_str(), filter);
+        json->PutExtAttr("strokeWidth",
+            propStrokeWidth_.value_or(progressTheme->GetTrackThickness()).ToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Type, ProgressType, PROPERTY_UPDATE_MEASURE);

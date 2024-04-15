@@ -19,6 +19,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
@@ -72,9 +73,9 @@ public:
         ResetShadowOption();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
+        PaintProperty::ToJsonValue(json, filter);
         auto jsonDashArray = JsonUtil::CreateArray(true);
         for (size_t i = 0; i < propValues_.value().size(); ++i) {
             auto index = std::to_string(i);
@@ -88,19 +89,20 @@ public:
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DataPanelTheme>();
-        json->Put("max", std::to_string(propMax_.value_or(100)).c_str());
-        json->Put("closeEffect", closeEffect ? "true" : "false");
-        json->Put("type", propDataPanelType_ == 1 ? "DataPanelType.Line" : "DataPanelType.Circle");
-        json->Put("values", jsonDashArray);
-        json->Put(
-            "trackBackgroundColor", GetTrackBackground().value_or(theme->GetBackgroundColor()).ColorToString().c_str());
-        json->Put("strokeWidth", GetStrokeWidth().value_or(theme->GetThickness()).ToString().c_str());
+        json->PutExtAttr("max", std::to_string(propMax_.value_or(100)).c_str(), filter);
+        json->PutExtAttr("closeEffect", closeEffect ? "true" : "false", filter);
+        json->PutExtAttr("type", propDataPanelType_ == 1 ? "DataPanelType.Line" : "DataPanelType.Circle", filter);
+        json->PutExtAttr("values", jsonDashArray, filter);
+        json->PutExtAttr("trackBackgroundColor",
+            GetTrackBackground().value_or(theme->GetBackgroundColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("strokeWidth",
+            GetStrokeWidth().value_or(theme->GetThickness()).ToString().c_str(), filter);
 
-        ToJsonValueColors(json);
-        ToJsonTrackShadow(json);
+        ToJsonValueColors(json, filter);
+        ToJsonTrackShadow(json, filter);
     }
 
-    void ToJsonValueColors(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValueColors(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         std::vector<Gradient> valueColors;
         if (propValueColors_.has_value()) {
@@ -130,10 +132,10 @@ public:
             }
             valueColorsJosnArray->Put(std::to_string(i).c_str(), gradientItemJsonArray);
         }
-        json->Put("valueColors", valueColorsJosnArray);
+        json->PutExtAttr("valueColors", valueColorsJosnArray, filter);
     }
 
-    void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json) const
+    void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -152,7 +154,7 @@ public:
         }
 
         if (!trackShadow.isShadowVisible) {
-            json->Put("trackShadow", "null");
+            json->PutExtAttr("trackShadow", "null", filter);
             return;
         }
 
@@ -187,7 +189,7 @@ public:
             colorsJosnArray->Put(std::to_string(i).c_str(), gradientItemJsonArray);
         }
         shadowOptionJson->Put("colors", colorsJosnArray);
-        json->Put("trackShadow", shadowOptionJson);
+        json->PutExtAttr("trackShadow", shadowOptionJson, filter);
     }
 
     void CreateGradient(const std::pair<Color, Color>& itemParam, Gradient& gradient) const

@@ -150,7 +150,7 @@ struct ArkUIHistoryTouchEvent {
 };
 
 struct ArkUITouchEvent {
-    ArkUI_Int32  action;
+    ArkUI_Int32 action;
     /** Time stamp of the current event. */
     ArkUI_Int64 timeStamp;
     ArkUITouchPoint actionTouchPoint;
@@ -1676,6 +1676,9 @@ struct ArkUITimepickerModifier {
     ArkUI_Int32 (*getTimepickerUseMilitaryTime)(ArkUINodeHandle node);
     void (*setTimepickerUseMilitaryTime)(ArkUINodeHandle node, ArkUI_Bool isUseMilitaryTime);
     void (*resetTimepickerUseMilitaryTime)(ArkUINodeHandle node);
+    void (*setTimepickerDateTimeOptions)(ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType,
+        ArkUI_Int32 secondType);
+    void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -3143,6 +3146,8 @@ struct ArkUIRenderNodeModifier {
 
 struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*isModifiable)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)();
+    void (*invalidate)(ArkUINodeHandle node);
     ArkUI_Bool (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);

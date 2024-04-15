@@ -24,6 +24,7 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class TextFieldPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(TextFieldPaintProperty, PaintProperty)
@@ -72,7 +73,7 @@ public:
         ResetMarginByUser();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 

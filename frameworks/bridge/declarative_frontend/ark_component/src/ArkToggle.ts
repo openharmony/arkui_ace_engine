@@ -57,6 +57,9 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     return this;
   }
   setContentModifier(modifier: ContentModifier<ToggleConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, this);

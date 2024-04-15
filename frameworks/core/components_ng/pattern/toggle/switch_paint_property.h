@@ -18,6 +18,7 @@
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -31,10 +32,11 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UnselectedColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str());
-        json->Put("switchPointColor", propSwitchPointColor.value_or(Color()).ColorToString().c_str());
+        json->PutExtAttr("selectedColor", propSelectedColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("switchPointColor",
+            propSwitchPointColor.value_or(Color()).ColorToString().c_str(), filter);
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
@@ -42,16 +44,16 @@ struct SwitchPaintParagraph {
         auto defaultHeight = (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2);
         auto defaultPointRadius = defaultHeight / 2 - 2.0_vp; // Get the default radius of the point.
         if (propPointRadius.has_value()) {
-            json->Put("pointRadius", propPointRadius.value().ToString().c_str());
+            json->PutExtAttr("pointRadius", propPointRadius.value().ToString().c_str(), filter);
         } else {
-            json->Put("pointRadius", defaultPointRadius.ToString().c_str());
+            json->PutExtAttr("pointRadius", defaultPointRadius.ToString().c_str(), filter);
         }
-        json->Put("unselectedColor", propUnselectedColor.value_or(Color()).ColorToString().c_str());
+        json->PutExtAttr("unselectedColor", propUnselectedColor.value_or(Color()).ColorToString().c_str(), filter);
         auto defaultTrackBorderRadius = defaultHeight / 2; // Get the default border radius of the track.
         if (propTrackBorderRadius.has_value()) {
-            json->Put("trackBorderRadius", propTrackBorderRadius.value().ToString().c_str());
+            json->PutExtAttr("trackBorderRadius", propTrackBorderRadius.value().ToString().c_str(), filter);
         } else {
-            json->Put("trackBorderRadius", defaultTrackBorderRadius.ToString().c_str());
+            json->PutExtAttr("trackBorderRadius", defaultTrackBorderRadius.ToString().c_str(), filter);
         }
     }
 };
@@ -85,10 +87,10 @@ public:
         ResetSwitchAnimationStyle();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("type", "ToggleType.Switch");
-        json->Put("isOn", propIsOn_.value_or(false) ? "true" : "false");
+        json->PutExtAttr("type", "ToggleType.Switch", filter);
+        json->PutExtAttr("isOn", propIsOn_.value_or(false) ? "true" : "false", filter);
         ACE_PROPERTY_TO_JSON_VALUE(propSwitchPaintParagraph_, SwitchPaintParagraph);
     }
 

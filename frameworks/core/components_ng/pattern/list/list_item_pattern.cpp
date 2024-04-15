@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -74,6 +75,14 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_RETURN(listItemEventHub, nullptr);
+    if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
+        !listItemEventHub->GetEndOnDelete()) {
+        return MakeRefPtr<BoxLayoutAlgorithm>();
+    }
     auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, childNodeIndex_);
     layoutAlgorithm->SetAxis(axis_);
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
@@ -181,6 +190,19 @@ RefPtr<FrameNode> ListItemPattern::GetListFrameNode() const
     auto parent = host->GetParent();
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
     while (parent && (!frameNode || (parent->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG))) {
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    return frameNode;
+}
+
+RefPtr<FrameNode> ListItemPattern::GetParentFrameNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent && !frameNode) {
         parent = parent->GetParent();
         frameNode = AceType::DynamicCast<FrameNode>(parent);
     }
@@ -763,9 +785,9 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("selectable", selectable_);
+    json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
 }
 
 void ListItemPattern::SetAccessibilityAction()
@@ -976,8 +998,16 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
     CHECK_NULL_RETURN(host, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
-    auto offset = geometryNode->GetMarginFrameOffset();
-    auto size = geometryNode->GetMarginFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    if (indexInListItemGroup_ != -1) {
+        auto parentFrameNode = GetParentFrameNode();
+        CHECK_NULL_RETURN(parentFrameNode, true);
+        auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+        CHECK_NULL_RETURN(parentGeometryNode, true);
+        auto parentOffset = parentGeometryNode->GetFrameOffset();
+        offset = offset + parentOffset;
+    }
+    auto size = geometryNode->GetFrameSize();
     auto xOffset = localPoint.GetX() - offset.GetX();
     auto yOffset = localPoint.GetY() - offset.GetY();
     if (GetAxis() == Axis::VERTICAL) {

@@ -14,24 +14,25 @@
  */
 
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 
 namespace OHOS::Ace::NG {
-void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    PaintProperty::ToJsonValue(json);
+    PaintProperty::ToJsonValue(json, filter);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
 
-    json->Put("placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str());
+    json->PutExtAttr("placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str(), filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("width", propCursorWidth_.value_or(textFieldTheme->GetCursorWidth()).ToString().c_str());
-    json->Put("caretStyle", jsonValue->ToString().c_str());
-    json->Put("selectedBackgroundColor",
-        propSelectedBackgroundColor_.value_or(textFieldTheme->GetSelectedColor()).ColorToString().c_str());
+    json->PutExtAttr("caretStyle", jsonValue->ToString().c_str(), filter);
+    json->PutExtAttr("selectedBackgroundColor",
+        propSelectedBackgroundColor_.value_or(textFieldTheme->GetSelectedColor()).ColorToString().c_str(), filter);
 }
 
 void TextFieldPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)

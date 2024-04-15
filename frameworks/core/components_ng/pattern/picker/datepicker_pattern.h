@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
 }
@@ -563,7 +564,7 @@ public:
     }
 
     void ShowTitle(int32_t titleId);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;

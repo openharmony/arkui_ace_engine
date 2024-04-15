@@ -87,6 +87,7 @@ DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr double PATTERN_OFFSET = 1000;
 constexpr double UP_FONT_SIZE = 5.0;
 constexpr double TEST_FONT_SIZE = 10.0;
@@ -812,7 +813,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyToJsonValue001, TestSize.L
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto disappearFont = JsonUtil::Create(true);
-    pickerProperty->ToJsonValue(disappearFont);
+    pickerProperty->ToJsonValue(disappearFont, filter);
     EXPECT_NE(disappearFont, nullptr);
 }
 
@@ -2129,12 +2130,12 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest010, TestSize.Level1)
      * @tc.step: step2. call pattern's ToJsonValue method.
      * @tc.expected: jsonValue2->GetValue("constructor") is not nullptr.
      */
-    pickerPattern->ToJsonValue(jsonValue);
+    pickerPattern->ToJsonValue(jsonValue, filter);
     /**
      * cover branch LunarValue == true
      */
     rowLayoutProperty->UpdateLunar(true);
-    pickerPattern->ToJsonValue(jsonValue2);
+    pickerPattern->ToJsonValue(jsonValue2, filter);
     ASSERT_NE(jsonValue2->GetValue("constructor"), nullptr);
 }
 

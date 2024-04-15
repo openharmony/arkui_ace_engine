@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/property/property.h"
@@ -67,12 +68,12 @@ public:
         }
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("titleMode", GetTitleModeString().c_str());
-        json->Put("hideBackButton", GetHideBackButtonValue(false));
-        json->Put("hideTitleBar", GetHideTitleBarValue(false));
-        json->Put("hideToolBar", GetHideToolBarValue(false));
+        json->PutExtAttr("titleMode", GetTitleModeString().c_str(), filter);
+        json->PutExtAttr("hideBackButton", GetHideBackButtonValue(false), filter);
+        json->PutExtAttr("hideTitleBar", GetHideTitleBarValue(false), filter);
+        json->PutExtAttr("hideToolBar", GetHideToolBarValue(false), filter);
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);

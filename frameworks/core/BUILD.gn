@@ -138,6 +138,7 @@ template("ace_core_source_set") {
       "components/declaration/svg/svg_fe_offset_declaration.cpp",
       "components/declaration/svg/svg_filter_declaration.cpp",
       "components/declaration/svg/svg_gradient_declaration.cpp",
+      "components/declaration/svg/svg_image_declaration.cpp",
       "components/declaration/svg/svg_line_declaration.cpp",
       "components/declaration/svg/svg_mask_declaration.cpp",
       "components/declaration/svg/svg_path_declaration.cpp",

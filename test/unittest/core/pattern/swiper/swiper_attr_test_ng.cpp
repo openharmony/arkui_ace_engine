@@ -17,7 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class SwiperAttrTestNg : public SwiperTestNg {
 public:
@@ -1149,7 +1151,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
      * @tc.expected: Check the swiper property value
      */
     auto json = JsonUtil::Create(true);
-    paintProperty_->ToJsonValue(json);
+    paintProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("autoPlay"), "false");
 
     /**

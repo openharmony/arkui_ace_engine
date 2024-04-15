@@ -20,6 +20,9 @@
 
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/render_node/render_node_modifier.h"
+#include "core/components_ng/pattern/render_node/render_node_paint_method.h"
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -84,7 +87,40 @@ public:
         detachFunc_(host->GetId());
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        auto renderNodePaintProperty = MakeRefPtr<RenderNodePaintProperty>();
+        renderNodePaintProperty->UpdateRenderNodeFlag(0);
+        return renderNodePaintProperty;
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+
+        if (!renderNodeModifier_) {
+            renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+        }
+        auto paintMethod = AceType::MakeRefPtr<RenderNodePaintMethod>(renderNodeModifier_);
+        return paintMethod;
+    }
+
+    void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
+    {
+        drawCallback_ = drawCallback;
+        renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+    }
+
+    void Invalidate()
+    {
+        CHECK_NULL_VOID(renderNodeModifier_);
+        renderNodeModifier_->Modify();
+    }
+
 private:
+    std::function<void(DrawingContext& context)> drawCallback_;
+    RefPtr<RenderNodeModifier> renderNodeModifier_;
     std::function<void(int32_t)> attachFunc_;
     std::function<void(int32_t)> detachFunc_;
 };

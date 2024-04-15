@@ -61,6 +61,7 @@ using namespace OHOS::Ace;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float COLUMN_HEIGHT = 200.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -709,15 +710,15 @@ HWTEST_F(SearchTestNg, Pattern003, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     pattern->UpdateChangeEvent("search");
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
 
     searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INPUT);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INPUT);
     searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INVISIBLE);
     pattern->UpdateChangeEvent("");
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
 }
 

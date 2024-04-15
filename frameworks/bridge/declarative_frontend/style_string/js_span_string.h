@@ -57,7 +57,7 @@ public:
     static RefPtr<SpanBase> ParseJsBaselineOffsetSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
     static RefPtr<SpanBase> ParseJsGestureSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
     static RefPtr<SpanBase> ParseJsTextShadowSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static bool CheckSpanType(const int32_t& type);
+    static bool CheckSpanType(const int32_t& spanType);
     bool CheckParameters(const int32_t& start, const int32_t& length);
     void GetSpans(const JSCallbackInfo& info);
     const RefPtr<SpanString>& GetController();

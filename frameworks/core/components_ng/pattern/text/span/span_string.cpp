@@ -17,6 +17,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 
 namespace OHOS::Ace {
 SpanString::SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans) : SpanString(text)
@@ -398,10 +399,20 @@ RefPtr<SpanBase> SpanString::GetSpan(int32_t start, int32_t length, SpanType spa
 
 bool SpanString::operator==(const SpanString& other) const
 {
-    if (text_ != other.text_ || spansMap_.size() != other.spansMap_.size()) {
+    if (text_ != other.text_) {
         return false;
     }
+    auto size = spansMap_.size() - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1);
+    auto sizeOther =
+        other.spansMap_.size() - (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1);
+    if (size != sizeOther) {
+        return false;
+    }
+
     for (const auto& map : spansMap_) {
+        if (map.first == SpanType::Gesture) {
+            continue;
+        }
         auto spansOtherMap = other.spansMap_.find(map.first);
         if (spansOtherMap == other.spansMap_.end()) {
             return false;

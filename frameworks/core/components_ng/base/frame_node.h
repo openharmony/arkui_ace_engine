@@ -59,6 +59,7 @@ class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class PipelineContext;
 class Pattern;
 class StateModifyTask;
@@ -347,7 +348,7 @@ public:
 
     void ChangeSensitiveStyle(bool isSensitive);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -644,6 +645,9 @@ public:
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
         uint32_t index, bool addToRenderTree = true, bool isCache = false) override;
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
+
+    FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false);
+
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -803,6 +807,9 @@ public:
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
 
+protected:
+    void DumpInfo() override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -838,7 +845,6 @@ private:
     bool RemoveImmediately() const override;
 
     // dump self info.
-    void DumpInfo() override;
     void DumpDragInfo();
     void DumpOverlayInfo();
     void DumpCommonInfo();
@@ -847,10 +853,10 @@ private:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
-    void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     bool GetTouchable() const;
     bool OnLayoutFinish(bool& needSyncRsNode);
