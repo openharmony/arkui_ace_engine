@@ -76,13 +76,16 @@ private:
 
     void AdjustOverScroll(float mainSize);
 
-    RefPtr<LayoutWrapper> MeasureChild(int32_t idx);
+    RefPtr<LayoutWrapper> MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx);
+
+    void CheckReset();
 
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutInfoSW> info_;
 
     Axis axis_ {};
     std::vector<float> itemCrossSize_;
+    float mainSize_ = 0.0f;
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
 

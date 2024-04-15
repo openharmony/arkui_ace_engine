@@ -163,7 +163,6 @@ public:
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
-    float lastMainSize_ = 0.0f;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
 

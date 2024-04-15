@@ -28,49 +28,58 @@ namespace OHOS::Ace::NG {
  */
 class WaterFlowLayoutInfoSW : public WaterFlowLayoutInfoBase {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoSW, WaterFlowLayoutInfoBase);
+
 public:
-
     float offset() const override;
-    int32_t firstIdx() const override {return startIndex_;}
+    int32_t firstIdx() const override
+    {
+        return startIndex_;
+    }
 
-    void UpdateOffset(float delta) override {}
+    void UpdateOffset(float delta) override
+    {
+        delta_ = delta;
+    }
 
-    int32_t GetCrossIndex(int32_t itemIndex) const override {}
+    int32_t GetCrossIndex(int32_t itemIndex) const override
+    {
+        if (idxToLane_.count(itemIndex)) {
+            return static_cast<int32_t>(idxToLane_.at(itemIndex));
+        }
+        return -1;
+    }
 
+    OverScrollOffset GetOverScrolledDelta(float delta) const override;
 
-    OverScrollOffset GetOverScrolledDelta(float delta) const override {}
+    float CalcOverScroll(float mainSize, float delta) const override;
 
-    float CalcOverScroll(float mainSize, float delta) const override {}
+    bool ReachStart(float prevPos, bool firstLayout) const override;
 
-    bool ReachStart(float prevPos, bool firstLayout) const override {}
+    bool ReachEnd(float prevPos) const override;
 
-    bool ReachEnd(float prevPos) const override {}
+    bool OutOfBounds() const override;
 
-    bool OutOfBounds() const override {}
+    float GetContentHeight() const override;
 
-    /**
-     * @return total height of all recorded items.
-     */
-    float GetContentHeight() const override {}
+    float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
 
-    /**
-     * @brief Get target item's position in order to perform scrollTo animation.
-     *
-     * @param idx item's index.
-     * @param crossIdx item's cross-axis lane index.
-     * @return position
-     */
-    float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override {}
+    float GetDelta(float prevPos) const override
+    {
+        return delta_;
+    }
 
-    /**
-     * @return change in position, comparing to [prevPos]
-     */
-    float GetDelta(float prevPos) const override {return delta_;}
+    int32_t GetMainCount() const override;
+    int32_t GetCrossCount() const override
+    {
+        return lanes_.size();
+    }
 
-    int32_t GetMainCount() const override {}
-    int32_t GetCrossCount() const override {}
-
-    void Reset() override {}
+    void Reset() override
+    {
+        lanes_.clear();
+        idxToLane_.clear();
+        delta_ = 0.0f;
+    }
 
     void SyncRange();
 
@@ -98,8 +107,13 @@ public:
     std::unordered_map<size_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
+    float mainGap_ = 0.0f; // update this at the end of a layout
 
     struct ItemInfo;
+
+private:
+    inline float EndPos() const;
+    inline float StartPos() const;
 };
 
 struct WaterFlowLayoutInfoSW::ItemInfo {

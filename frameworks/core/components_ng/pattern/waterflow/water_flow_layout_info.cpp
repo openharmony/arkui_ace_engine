@@ -576,10 +576,10 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
 {
     float res = 0;
     if (itemStart_) {
-        res = offset() + delta;
+        res = currentOffset_ + delta;
     }
     if (offsetEnd_) {
-        res = mainSize - (GetMaxMainHeight() + offset() - delta);
+        res = mainSize - (GetMaxMainHeight() + currentOffset_ - delta);
     }
     return res;
 }

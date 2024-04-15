@@ -106,11 +106,11 @@ public:
     // for compatibility
     virtual void UpdateStartIndex() {};
 
-    Axis axis_ = Axis::VERTICAL;
-
     bool itemStart_ = false;
     bool itemEnd_ = false;   // last item is partially in viewport
     bool offsetEnd_ = false; // last item's bottom is in viewport
+
+    Axis axis_ = Axis::VERTICAL;
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
     ScrollAlign align_ = ScrollAlign::START;
@@ -120,6 +120,8 @@ public:
     int32_t endIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t childrenCount_ = 0;
+
+    float lastMainSize_ = 0.0f;
 
     // store offset for distributed migration
     float storedOffset_ = 0.0f;
