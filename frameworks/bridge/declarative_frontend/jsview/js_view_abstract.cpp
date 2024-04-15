@@ -153,6 +153,7 @@ constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr uint32_t ON_WILL_DISMISS_FIELD_COUNT = 2;
+constexpr int32_t SECOND_INDEX = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
@@ -6422,11 +6423,10 @@ void JSViewAbstract::ParseSheetIsShow(
 
 void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
 {
-    // parse isShow
+    // parse isShow and builder
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
     ParseSheetIsShow(info, isShow, callback);
-    // parse builder
     if (!info[1]->IsObject()) {
         return;
     }
@@ -6457,19 +6457,21 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     std::function<void()> shouldDismissFunc;
     std::function<void(const float)> onHeightDidChangeCallback;
     std::function<void(const float)> onDetentsDidChangeCallback;
+    std::function<void(const float)> onWidthDidChangeCallback;
+    std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
-    if (info.Length() == 3) {
-        if (info[2]->IsObject()) {
-            ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc, onWillShowCallback,
-                onWillDismissCallback, onHeightDidChangeCallback, onDetentsDidChangeCallback);
-            ParseSheetStyle(info[2], sheetStyle);
-            ParseSheetTitle(info[2], sheetStyle, titleBuilderFunction);
-        }
+    if (info.Length() == PARAMETER_LENGTH_THIRD && info[SECOND_INDEX]->IsObject()) {
+        ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc, onWillShowCallback,
+            onWillDismissCallback, onHeightDidChangeCallback, onDetentsDidChangeCallback,
+            onWidthDidChangeCallback, onTypeDidChangeCallback);
+        ParseSheetStyle(info[2], sheetStyle);
+        ParseSheetTitle(info[2], sheetStyle, titleBuilderFunction);
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onShowCallback), std::move(onDismissCallback),
         std::move(shouldDismissFunc), std::move(onWillShowCallback), std::move(onWillDismissCallback),
-        std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback));
+        std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
+        std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback));
 }
 
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
@@ -6704,15 +6706,15 @@ void JSViewAbstract::ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& s
     }
 }
 
-void JSViewAbstract::ParseSheetHeightCallback(const JSRef<JSObject>& paramObj,
-    std::function<void(const float)>& heightDidChange, const char* prop)
+void JSViewAbstract::ParseCallback(const JSRef<JSObject>& paramObj,
+    std::function<void(const float)>& callbackDidChange, const char* prop)
 {
     auto callBack = paramObj->GetProperty(prop);
     if (callBack->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callBack));
-        heightDidChange = [func = std::move(jsFunc)](int32_t height) {
-            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(height));
+        callbackDidChange = [func = std::move(jsFunc)](int32_t value) {
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(value));
             func->ExecuteJS(1, &param);
         };
     }
@@ -6721,7 +6723,8 @@ void JSViewAbstract::ParseSheetHeightCallback(const JSRef<JSObject>& paramObj,
 void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
     std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
     std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
-    std::function<void(const float)>& onDetentsDidChange)
+    std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
+    std::function<void(const float)>& onTypeDidChange)
 {
     auto showCallback = paramObj->GetProperty("onAppear");
     auto dismissCallback = paramObj->GetProperty("onDisappear");
@@ -6761,8 +6764,10 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
         onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
     }
-    ParseSheetHeightCallback(paramObj, onHeightDidChange, "onHeightDidChange");
-    ParseSheetHeightCallback(paramObj, onDetentsDidChange, "onDetentsDidChange");
+    ParseCallback(paramObj, onHeightDidChange, "onHeightDidChange");
+    ParseCallback(paramObj, onDetentsDidChange, "onDetentsDidChange");
+    ParseCallback(paramObj, onWidthDidChange, "onWidthDidChange");
+    ParseCallback(paramObj, onTypeDidChange, "onTypeDidChange");
 }
 
 void JSViewAbstract::ParseSheetTitle(

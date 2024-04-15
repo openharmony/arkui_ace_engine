@@ -175,6 +175,33 @@ public:
 
     void FireOnDetentsDidChange(float height);
 
+    void UpdateOnWidthDidChange(std::function<void(const float)>&& onWidthDidChange)
+    {
+        onWidthDidChange_ = std::move(onWidthDidChange);
+    }
+
+    void onWidthDidChange(float currentWidth) const
+    {
+        if (onWidthDidChange_) {
+            onWidthDidChange_(currentWidth);
+        }
+    }
+
+    void FireOnWidthDidChange(RefPtr<FrameNode> sheetNode);
+
+    void UpdateOnTypeDidChange(std::function<void(const float)>&& onTypeDidChange)
+    {
+        onTypeDidChange_ = std::move(onTypeDidChange);
+    }
+
+    void onTypeDidChange(float currentType) const
+    {
+        if (onTypeDidChange_) {
+            onTypeDidChange_(currentType);
+        }
+    }
+
+    void FireOnTypeDidChange();
 
     void CallShouldDismiss()
     {
@@ -470,6 +497,8 @@ private:
     std::function<void()> shouldDismiss_;
     std::function<void(const float)> onHeightDidChange_;
     std::function<void(const float)> onDetentsDidChange_;
+    std::function<void(const float)> onWidthDidChange_;
+    std::function<void(const float)> onTypeDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
@@ -479,6 +508,8 @@ private:
     float sheetHeight_ = 0.0f; // sheet frameSize Height
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
+    float preWidth_ = 0.0f;
+    int32_t preType_ = -1;
     float statusBarHeight_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
