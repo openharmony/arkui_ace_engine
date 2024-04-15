@@ -1649,6 +1649,7 @@ void RichEditorPattern::MoveCaretAndStartFocus(const Offset& textOffset)
             if (overlayMod_) {
                 RequestKeyboard(false, true, true);
             }
+            magnifierController_->UpdateShowMagnifier();
             HandleOnEditChanged(true);
         }
     }
@@ -1868,6 +1869,7 @@ void RichEditorPattern::HandleBlurEvent()
             dataDetectorAdapter_->StartAITask();
         }
     }
+    magnifierController_->UpdateShowMagnifier();
     StopTwinkling();
     auto reason = GetBlurReason();
     // The pattern handles blurevent, Need to close the softkeyboard first.
@@ -2737,6 +2739,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     } else {
         SpanNodeFission(spanNode, insertValueTemp, info);
     }
+    magnifierController_->UpdateShowMagnifier();
     AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValueTemp).length()), false, isIME);
 }
 
