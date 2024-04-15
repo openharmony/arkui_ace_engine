@@ -909,6 +909,8 @@ private:
             !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
+    bool NeedStartNewAnimation(const OffsetF& offset) const;
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;
