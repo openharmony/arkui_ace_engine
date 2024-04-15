@@ -82,15 +82,18 @@ struct AxisEvent final : public UIInputEvent {
     float localX = 0.0;
     float localY = 0.0;
 
+    int32_t targetDisplayId = 0;
+
     AxisEvent() {}
 
     AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
-        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent,
+        int32_t targetDisplayId)
         : id(id), x(x), y(y), screenX(screenX), screenY(screenY), verticalAxis(verticalAxis),
           horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
           isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
-          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent))
+          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), targetDisplayId(targetDisplayId)
     {
         time = timestamp;
     }
@@ -99,11 +102,11 @@ struct AxisEvent final : public UIInputEvent {
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
-                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent };
+                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, targetDisplayId };
         }
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis,
             pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
-            pointerEvent };
+            pointerEvent, targetDisplayId };
     }
 
     Offset GetOffset() const
