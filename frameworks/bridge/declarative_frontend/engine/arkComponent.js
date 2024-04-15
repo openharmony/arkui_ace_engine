@@ -7554,7 +7554,14 @@ class ArkSpanComponent {
     return this;
   }
   font(value) {
-    modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
+      value === null || value === void 0 ? void 0 : value.size);
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
+      value === null || value === void 0 ? void 0 : value.weight);
+    modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier,
+      value === null || value === void 0 ? void 0 : value.family);
+    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier,
+      value === null || value === void 0 ? void 0 : value.style);
     return this;
   }
   lineHeight(value) {
