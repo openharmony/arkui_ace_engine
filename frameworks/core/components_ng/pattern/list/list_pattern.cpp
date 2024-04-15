@@ -1862,9 +1862,7 @@ void ListPattern::SetChainAnimation()
         chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID(list);
-            if (list->IsScrollableAnimationNotRunning()) {
-                list->MarkDirtyNodeSelf();
-            }
+            list->MarkDirtyNodeSelf();
         });
     }
 }
