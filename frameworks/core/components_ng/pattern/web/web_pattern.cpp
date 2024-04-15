@@ -2275,6 +2275,11 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
 
 void WebPattern::DragDropSelectionMenu()
 {
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    if (overlayType == INVALID_OVERLAY) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web menu controller status. dropMenuState_：%{publc}d", dropMenuState_);
     if (dropMenuState_ || IsImageDrag()) {
         return;
