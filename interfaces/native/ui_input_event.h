@@ -115,6 +115,33 @@ enum {
 };
 
 /**
+ * @brief Enumerates the hit test modes.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Both the node and its child node respond to the hit test of a touch event, but its sibling node is blocked from
+     *  the hit test.
+     */
+    HTM_DEFAULT = 0,
+
+    /** The node responds to the hit test of a touch event, but its child node and sibling node are blocked from the hit
+     *  test.
+     */
+    HTM_BLOCK,
+
+    /** Both the node and its child node respond to the hit test of a touch event, and its sibling node is also
+     *  considered during the hit test.
+     */
+    HTM_TRANSPARENT,
+
+    /** The node does not respond to the hit test of a touch event, but its child node and sibling node are considered
+     *  during the hit test.
+     */
+    HTM_NONE,
+} HitTestMode;
+
+/**
  * @brief Obtains the type of this UI input event.
  *
  * @param event Indicates the pointer to the current UI input event.
@@ -591,6 +618,16 @@ double OH_ArkUI_AxisEvent_GetHorizontalAxisValue(const ArkUI_UIInputEvent* event
  * @since 12
  */
 double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Sets how the component behaves during hit testing.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param mode Indicates how the component behaves during hit testing. The parameter type is {@link HitTestMode}.
+ * @return Returns the status code of the execution.
+ * @since 12
+ */
+int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* event, HitTestMode mode);
 
 #ifdef __cplusplus
 };

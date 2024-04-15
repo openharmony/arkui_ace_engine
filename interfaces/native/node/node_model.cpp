@@ -366,7 +366,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->textInputEvent.subKind);
             break;
         case TOUCH_EVENT:
-            subKind = ON_TOUCH;
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchEvent.subKind);
             break;
         default:
             break; /* Empty */
@@ -383,7 +383,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     if (ConvertEvent(innerEvent, &event)) {
         event.targetId = innerEvent->nodeId;
         ArkUI_UIInputEvent uiEvent;
-        if (eventType == NODE_TOUCH_EVENT) {
+        if (eventType == NODE_TOUCH_EVENT || eventType == NODE_ON_TOUCH_INTERCEPT) {
             uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
             uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
             uiEvent.inputEvent = &(innerEvent->touchEvent);
@@ -408,6 +408,20 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 {
     // TODO.
     return 0;
+}
+
+
+int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
+{
+    if (!nodePtr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!InRegion(static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_DEFAULT),
+        static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    nodePtr->lengthMetricUnit = unit;
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)

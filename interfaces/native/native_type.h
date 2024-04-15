@@ -1447,6 +1447,22 @@ typedef enum {
 } ArkUI_FinishCallbackType;
 
 /**
+ * @brief Enumerates the component units.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Default, which is fp for fonts and vp for non-fonts. */
+    ARKUI_LENGTH_METRIC_UNIT_DEFAULT = -1,
+    /** px. */
+    ARKUI_LENGTH_METRIC_UNIT_PX = 0,
+    /** vp. */
+    ARKUI_LENGTH_METRIC_UNIT_VP,
+    /** fp. */
+    ARKUI_LENGTH_METRIC_UNIT_FP
+} ArkUI_LengthMetricUnit;
+
+/**
 * @brief Creates a size constraint.
 *
 * @since 12

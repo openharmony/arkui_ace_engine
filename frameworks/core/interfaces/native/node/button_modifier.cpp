@@ -503,11 +503,11 @@ ArkUI_CharPtr GetButtonLabel(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-ArkUI_Float32 GetButtonFontSize(ArkUINodeHandle node)
+ArkUI_Float32 GetButtonFontSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return ButtonModelNG::GetFontSize(frameNode).Value();
+    return ButtonModelNG::GetFontSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_Int32 GetButtonFontWeight(ArkUINodeHandle node)

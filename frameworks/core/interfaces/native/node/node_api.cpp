@@ -251,6 +251,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     NodeModifier::SetOnFocus,
+    NodeModifier::SetOnTouchIntercept,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -333,6 +334,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
+    NodeModifier::SetOnReachEnd,
 };
 
 /* clang-format on */

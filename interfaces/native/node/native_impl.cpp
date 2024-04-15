@@ -81,6 +81,13 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::GetLayoutPosition,
     OHOS::Ace::NodeModel::MeasureNode,
     OHOS::Ace::NodeModel::LayoutNode,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    OHOS::Ace::NodeModel::SetLengthMetricUnit,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
