@@ -856,7 +856,10 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
         JSRef<JSObject> fontObject = object->GetProperty("font");
         Font font;
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
+        if (!pipelineContext) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
+            return;
+        }
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
         TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
         ParseJsFont(fontObject, font);
@@ -1377,22 +1380,10 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
     }
     if (options.image.has_value()) {
         std::string assetSrc = options.image.value();
-        SrcType srcType = ImageSourceInfo::ResolveURIType(assetSrc);
-        if (assetSrc[0] == '/') {
-            assetSrc = assetSrc.substr(1); // get the asset src without '/'.
-        } else if (assetSrc[0] == '.' && assetSrc.size() > 2 && assetSrc[1] == '/') {
-            assetSrc = assetSrc.substr(2); // get the asset src without './'.
-        }
-        if (srcType == SrcType::ASSET) {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto assetManager = pipelineContext->GetAssetManager();
-            CHECK_NULL_VOID(assetManager);
-            auto assetData = assetManager->GetAsset(assetSrc);
-            if (!assetData) {
-                args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
-                return;
-            }
+        if (!CheckImageSource(assetSrc)) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "CheckImageSource failed");
+            args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+            return;
         }
     }
     if (args.Length() > 1 && args[1]->IsObject()) {
@@ -1419,6 +1410,34 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         spanIndex = controller->AddImageSpan(options);
     }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
+}
+
+bool JSRichEditorController::CheckImageSource(std::string assetSrc)
+{
+    SrcType srcType = ImageSourceInfo::ResolveURIType(assetSrc);
+    if (assetSrc[0] == '/') {
+        assetSrc = assetSrc.substr(1); // get the asset src without '/'.
+    } else if (assetSrc[0] == '.' && assetSrc.size() > 2 && assetSrc[1] == '/') {
+        assetSrc = assetSrc.substr(2); // get the asset src without './'.
+    }
+    if (srcType == SrcType::ASSET) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        if (!pipelineContext) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
+            return false;
+        }
+        auto assetManager = pipelineContext->GetAssetManager();
+        if (!assetManager) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "assetManager is null");
+            return false;
+        }
+        auto assetData = assetManager->GetAsset(assetSrc);
+        if (!assetData) {
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "assetData is null");
+            return false;
+        }
+    }
+    return true;
 }
 
 ImageSpanOptions JSRichEditorController::CreateJsImageOptions(const JSCallbackInfo& args)
@@ -1508,7 +1527,10 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
+            if (!pipelineContext) {
+                TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
+                return;
+            }
             auto theme = pipelineContext->GetTheme<TextTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
@@ -1564,7 +1586,10 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
+            if (!pipelineContext) {
+                TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
+                return;
+            }
             auto theme = pipelineContext->GetTheme<TextTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
@@ -1941,7 +1966,10 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
 
     auto [start, end] = ParseRange(jsObject);
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
+        return;
+    }
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
@@ -2072,7 +2100,10 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
+        return;
+    }
     auto theme = pipelineContext->GetTheme<TextTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
