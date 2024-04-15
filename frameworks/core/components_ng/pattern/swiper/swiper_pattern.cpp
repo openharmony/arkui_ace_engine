@@ -2357,10 +2357,6 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     if (removeEventCallback) {
         removeEventCallback();
     }
-#ifdef OHOS_PLATFORM
-    // Increase the cpu frequency when sliding.
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
 
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
@@ -2481,10 +2477,6 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
             return;
         }
     }
-
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
 
     // nested and reached end, need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
@@ -2686,6 +2678,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto finishCallback = [weak = WeakClaim(this), offset]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
         }
@@ -2709,6 +2704,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         if (!swiperPattern) {
             return;
         }
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
         }

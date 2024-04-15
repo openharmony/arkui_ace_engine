@@ -106,6 +106,20 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     panGestureOption_->SetOnPanDistanceId(onChangeDistance_);
 }
 
+inline void ReportSlideOn()
+{
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
+}
+
+inline void ReportSlideOff()
+{
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
+}
+
 void PanRecognizer::OnAccepted()
 {
     int64_t acceptTime = GetSysTimestamp();
@@ -122,6 +136,7 @@ void PanRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
+    ReportSlideOn();
     SendCallbackMsg(onActionStart_);
     SendCallbackMsg(onActionUpdate_);
 }
@@ -293,6 +308,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         if (currentFingers_  == fingers_) {
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
+            ReportSlideOff();
             averageDistance_.Reset();
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
@@ -338,6 +354,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (refereeState_ == RefereeState::SUCCEED) {
         // AxisEvent is single one.
         SendCallbackMsg(onActionEnd_);
+        ReportSlideOff();
         int64_t overTime = GetSysTimestamp();
         int64_t inputTime = overTime;
         if (firstInputTime_.has_value()) {
@@ -865,5 +882,4 @@ bool PanRecognizer::AboutToAddCurrentFingers(int32_t touchId)
     currentFingers_++;
     return true;
 }
-
 } // namespace OHOS::Ace::NG
