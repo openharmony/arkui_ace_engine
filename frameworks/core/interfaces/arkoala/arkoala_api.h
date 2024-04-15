@@ -31,7 +31,7 @@ extern "C" {
 // increased as well.
 #define ARKUI_NODE_API_VERSION 90
 
-#define ARKUI_BASIC_API_VERSION 7
+#define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 7
@@ -850,6 +850,29 @@ struct ArkUICustomNodeEvent {
     ArkUI_Int64 extraParam;
     ArkUI_Int64 canvas;
     ArkUI_Int32 data[8];
+};
+
+struct ArkUIExpectedFrameRateRange {
+    ArkUI_Uint32 min;
+    ArkUI_Uint32 max;
+    ArkUI_Uint32 expected;
+};
+
+struct ArkUIAnimateOption {
+    ArkUI_Uint32 duration;
+    ArkUI_Float32 tempo;
+    ArkUI_Int32 curve;
+    ArkUI_Int32 delay;
+    ArkUI_Int32 iterations;
+    ArkUI_Int32 playMode;
+    ArkUIExpectedFrameRateRange* expectedFrameRateRange;
+    void* onFinishCallback;
+    void* user;
+    ArkUI_Int32 finishCallbackType;
+};
+
+struct ArkUIContext {
+    ArkUI_Int32 id;
 };
 
 struct ArkUICommonModifier {
@@ -3180,6 +3203,7 @@ struct ArkUIAnimation {
     void (*openImplicitAnimation)(
         ArkUIVMContext vmContext, ArkUI_Int32 curve, ArkUI_Float32* options, ArkUI_Int32 callbackId);
     void (*closeImplicitAnimation)();
+    void (*animateTo)(ArkUIContext* context, ArkUIAnimateOption option, void* event, void* userData);
 };
 
 struct ArkUINavigation {
