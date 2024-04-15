@@ -320,6 +320,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                     static_cast<long long>(inputTime), static_cast<long long>(overTime));
             }
             firstInputTime_.reset();
+            refereeState_ = RefereeState::READY;
         }
     }
 
