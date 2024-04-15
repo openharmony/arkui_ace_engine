@@ -546,6 +546,11 @@ bool SelectContentOverlayManager::IsSingleHandle()
     return IsOpen() && shareOverlayInfo_ && shareOverlayInfo_->isSingleHandle;
 }
 
+bool SelectContentOverlayManager::IsHandlesShow()
+{
+    return IsOpen() && shareOverlayInfo_ && !shareOverlayInfo_->isSingleHandle;
+}
+
 bool SelectContentOverlayManager::IsHandleReverse()
 {
     return IsOpen() && shareOverlayInfo_ && shareOverlayInfo_->handleReverse;

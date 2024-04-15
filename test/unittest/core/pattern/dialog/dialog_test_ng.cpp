@@ -39,6 +39,8 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
+
 const std::string SHEET_TITLE = "sheet item";
 const std::string SHEET_TITLE_2 = "sheet item 2";
 const std::string SHEET_TITLE_3 = "sheet item 3";
@@ -412,7 +414,7 @@ HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
      * @tc.expected: json->GetKey() equal to "".
      */
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetKey(), "");
 }
 

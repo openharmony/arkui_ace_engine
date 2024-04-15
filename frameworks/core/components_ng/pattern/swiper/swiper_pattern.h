@@ -27,6 +27,7 @@
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -106,12 +107,12 @@ public:
         return MakeRefPtr<SwiperEventHub>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        Pattern::ToJsonValue(json);
-        json->Put("currentIndex", currentIndex_);
-        json->Put("currentOffset", currentOffset_);
-        json->Put("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1));
+        Pattern::ToJsonValue(json, filter);
+        json->PutExtAttr("currentIndex", currentIndex_, filter);
+        json->PutExtAttr("currentOffset", currentOffset_, filter);
+        json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
 
         if (indicatorIsBoolean_) {
             return;
@@ -119,9 +120,9 @@ public:
 
         auto indicatorType = GetIndicatorType();
         if (indicatorType == SwiperIndicatorType::DOT) {
-            json->Put("indicator", GetDotIndicatorStyle().c_str());
+            json->PutExtAttr("indicator", GetDotIndicatorStyle().c_str(), filter);
         } else {
-            json->Put("indicator", GetDigitIndicatorStyle().c_str());
+            json->PutExtAttr("indicator", GetDigitIndicatorStyle().c_str(), filter);
         }
     }
 
@@ -907,6 +908,8 @@ private:
         return (onSwiperCustomContentTransition_ || onContentDidScroll_) &&
             !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
     }
+
+    bool NeedStartNewAnimation(const OffsetF& offset) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

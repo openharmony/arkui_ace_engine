@@ -102,6 +102,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
+    config.colorFilter_.Reset();
     auto colorFilterMatrix = renderProps->GetColorFilter();
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_.colorFilterMatrix_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());

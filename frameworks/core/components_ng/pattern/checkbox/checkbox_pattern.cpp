@@ -66,7 +66,6 @@ void CheckBoxPattern::UpdateIndicator()
                 SetBuilderNodeHidden();
             }
         } else {
-            paintProperty->UpdateCheckBoxSelect(false);
             SetBuilderNodeHidden();
         }
     }
@@ -757,6 +756,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
                 paintProperty->UpdateCheckBoxSelect(true);
                 auto checkBoxPattern = node->GetPattern<CheckBoxPattern>();
                 CHECK_NULL_VOID(checkBoxPattern);
+                checkBoxPattern->StartCustomNodeAnimation(true);
                 checkBoxPattern->UpdateUIStatus(true);
                 checkBoxPattern->SetLastSelect(true);
             }
@@ -910,7 +910,7 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
 
 void CheckBoxPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
+    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
         return;
     }
     auto host = GetHost();
@@ -924,7 +924,7 @@ void CheckBoxPattern::FireBuilder()
 
 RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value()) {
+    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
         return nullptr;
     }
     auto host = GetHost();
@@ -940,6 +940,9 @@ RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
         isSelected = paintProperty->GetCheckBoxSelectValue();
     } else {
         isSelected = false;
+    }
+    if (host->GetHostTag() == V2::CHECKBOX_ETS_TAG && toggleMakeFunc_.has_value()) {
+        return (toggleMakeFunc_.value())(ToggleConfiguration(enabled, isSelected));
     }
     CheckBoxConfiguration checkBoxConfiguration(name, isSelected, enabled);
     return (makeFunc_.value())(checkBoxConfiguration);

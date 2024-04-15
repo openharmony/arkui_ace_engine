@@ -236,7 +236,9 @@ void TextFieldModelNG::SetType(TextInputType value)
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
+    if (layoutProperty) {
+        layoutProperty->UpdateTextInputType(value);
+    }
 }
 
 void TextFieldModelNG::SetPlaceholderColor(const Color& value)

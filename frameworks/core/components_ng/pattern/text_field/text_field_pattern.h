@@ -73,7 +73,9 @@
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
+class InspectorFilter;
 class OnTextChangedListener;
+
 struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
@@ -525,7 +527,7 @@ public:
     {
         return selectController_->GetSelectedRects();
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
     void InitValueText(std::string content);

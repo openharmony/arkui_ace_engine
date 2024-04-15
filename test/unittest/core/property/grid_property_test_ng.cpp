@@ -31,6 +31,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
+
 constexpr int32_t SPANONE = 10;
 constexpr int32_t SPANTWO = -10;
 constexpr int32_t OFFSETONE = 5;
@@ -241,7 +243,7 @@ HWTEST_F(GridPropertyTestNg, ToJsonValue_Test01, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     auto json = JsonUtil::Create(true);
-    gridProperty->ToJsonValue(json);
+    gridProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("gridSpan"), "");
     EXPECT_EQ(json->GetString("gridOffset"), "");
 

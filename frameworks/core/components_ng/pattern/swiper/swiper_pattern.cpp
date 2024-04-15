@@ -2357,10 +2357,6 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     if (removeEventCallback) {
         removeEventCallback();
     }
-#ifdef OHOS_PLATFORM
-    // Increase the cpu frequency when sliding.
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
 
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
@@ -2481,10 +2477,6 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
             return;
         }
     }
-
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
 
     // nested and reached end, need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
@@ -2627,6 +2619,27 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     return nextIndex;
 }
 
+bool SwiperPattern::NeedStartNewAnimation(const OffsetF& offset) const
+{
+    if (itemPositionInAnimation_.empty()) {
+        return true;
+    }
+
+    for (const auto& animationItem : itemPositionInAnimation_) {
+        auto iter = itemPosition_.find(animationItem.first);
+        if (iter == itemPosition_.end()) {
+            return true;
+        }
+        if ((animationItem.second.node && animationItem.second.finalOffset != offset) ||
+            !NearEqual(animationItem.second.startPos, iter->second.startPos) ||
+            !NearEqual(animationItem.second.endPos, iter->second.endPos)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void SwiperPattern::PlayPropertyTranslateAnimation(
     float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
 {
@@ -2647,26 +2660,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         offset.AddY(translate);
     }
     if (usePropertyAnimation_) {
-        auto startNewAnimationFlag = false;
-        if (itemPositionInAnimation_.empty()) {
-            startNewAnimationFlag = true;
-        }
-        if (!startNewAnimationFlag) {
-            for (const auto& animationItem : itemPositionInAnimation_) {
-                auto iter = itemPosition_.find(animationItem.first);
-                if (iter == itemPosition_.end()) {
-                    startNewAnimationFlag = true;
-                    break;
-                }
-                if (animationItem.second.finalOffset != offset ||
-                    !NearEqual(animationItem.second.startPos, iter->second.startPos) ||
-                    !NearEqual(animationItem.second.endPos, iter->second.endPos)) {
-                    startNewAnimationFlag = true;
-                    break;
-                }
-            }
-        }
-        if (!startNewAnimationFlag) {
+        if (!NeedStartNewAnimation(offset)) {
             stopIndicatorAnimation_ = false;
             return;
         }
@@ -2686,6 +2680,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto finishCallback = [weak = WeakClaim(this), offset]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
         }
@@ -2709,6 +2706,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         if (!swiperPattern) {
             return;
         }
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
         }

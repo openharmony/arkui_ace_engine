@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -41,13 +42,13 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
     }
 }
 
-void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
-    json->Put("rowStart", std::to_string(propRowStart_.value_or(0)).c_str());
-    json->Put("rowEnd", std::to_string(propRowEnd_.value_or(0)).c_str());
-    json->Put("columnStart", std::to_string(propColumnStart_.value_or(0)).c_str());
-    json->Put("columnEnd", std::to_string(propColumnEnd_.value_or(0)).c_str());
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("rowStart", std::to_string(propRowStart_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("rowEnd", std::to_string(propRowEnd_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("columnStart", std::to_string(propColumnStart_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("columnEnd", std::to_string(propColumnEnd_.value_or(0)).c_str(), filter);
 }
 
 int32_t GridItemLayoutProperty::GetCustomCrossIndex(Axis axis) const

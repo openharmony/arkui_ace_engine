@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
@@ -1202,11 +1203,11 @@ void GridPattern::ScrollBy(float offset)
     // AccessibilityEventType::SCROLL_END
 }
 
-void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json);
-    json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
-    json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
+    ScrollablePattern::ToJsonValue(json, filter);
+    json->PutExtAttr("multiSelectable", multiSelectable_ ? "true" : "false", filter);
+    json->PutExtAttr("supportAnimation", supportAnimation_ ? "true" : "false", filter);
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)

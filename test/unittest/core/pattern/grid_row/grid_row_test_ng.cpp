@@ -37,6 +37,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float DEFAULT_SPAN_WIDTH = 100.0f;
 constexpr uint8_t DEFAULT_COLUMNS = 8;
 constexpr float DEFAULT_GRID_ROW_WIDTH = (DEFAULT_SPAN_WIDTH * DEFAULT_COLUMNS);
@@ -1376,7 +1377,7 @@ HWTEST_F(GridRowTestNg, GridRowDefault001, TestSize.Level1)
     auto clone = layoutProperty->Clone();
     clone.Reset();
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1442,7 +1443,7 @@ HWTEST_F(GridRowTestNg, GridColDefault001, TestSize.Level1)
     auto clone = layoutProperty->Clone();
     clone.Reset();
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
 }
 
 /**

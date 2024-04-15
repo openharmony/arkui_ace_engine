@@ -211,8 +211,8 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
-                           const BaseEventInfo* info) {
-            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+                           BaseEventInfo* info) {
+            auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onClick");
             PipelineContext::SetCallBackNode(node);

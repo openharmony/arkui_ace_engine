@@ -36,6 +36,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -1061,17 +1062,17 @@ void ImagePattern::HandleCopy()
     }
 }
 
-void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     static const char* COPY_OPTIONS[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
         "CopyOptions.Distributed" };
-    json->Put("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)]);
+    json->PutExtAttr("copyOption", COPY_OPTIONS[static_cast<int32_t>(copyOption_)], filter);
 
-    json->Put("syncLoad", syncLoad_ ? "true" : "false");
+    json->PutExtAttr("syncLoad", syncLoad_ ? "true" : "false", filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    json->Put("draggable", host->IsDraggable() ? "true" : "false");
-    json->Put("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false");
+    json->PutExtAttr("draggable", host->IsDraggable() ? "true" : "false", filter);
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()

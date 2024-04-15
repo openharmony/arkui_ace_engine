@@ -138,6 +138,15 @@ public:
         return declaration_;
     }
 
+    void SetImagePath(const std::string& path)
+    {
+        imagePath_ = path;
+    }
+
+    std::string GetImagePath() const
+    {
+        return imagePath_;
+    }
 protected:
     // override as need by derived class
     // called by function AppendChild
@@ -195,6 +204,7 @@ protected:
     std::string hrefClipPath_;
     std::string hrefMaskId_;
     std::string hrefFilterId_;
+    std::string imagePath_;
     uint8_t opacity_ = 0xFF;
     float smoothEdge_ = 0.0f;
     std::optional<ImageColorFilter> colorFilter_;

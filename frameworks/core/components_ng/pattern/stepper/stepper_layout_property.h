@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STEPPER_STEPPER_LAYOUT_PROPERTY_H
 
 #include <string>
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -42,10 +43,10 @@ public:
         ResetIndex();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("index", std::to_string(GetIndex().value_or(0)).c_str());
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("index", std::to_string(GetIndex().value_or(0)).c_str(), filter);
     }
 
     void UpdateIndexWithoutMeasure(int32_t index)

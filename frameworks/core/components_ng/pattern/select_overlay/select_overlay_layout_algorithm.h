@@ -67,6 +67,7 @@ private:
     OffsetF AdjustSelectMenuOffset(
         LayoutWrapper* layoutWrapper, const RectF& menuRect, double spaceBetweenText, double spaceBetweenHandle);
     void AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect);
+    void AdjustMenuInRootRect(OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize);
     OffsetF CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper);
     void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     bool IsTextAreaSelectAll();

@@ -84,6 +84,33 @@ typedef struct ArkUI_Node* ArkUI_NodeHandle;
 typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
 
 /**
+ * @brief 提供ArkUI native UI的上下文实例对象定义。
+ *
+ * @since 12
+ */
+
+struct ArkUI_Context;
+
+/**
+ * @brief 定义ArkUI native UI的上下文实例对象指针定义。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_Context* ArkUI_ContextHandle;
+
+/**
+ * @brief Defines the event callback type.
+ *
+ * @since 12
+ */
+typedef struct {
+    /** Custom type. */
+    void* userData;
+    /** Event callback. */
+    void (*callback)(void* userData);
+} ArkUI_ContextCallback;
+
+/**
  * @brief Defines the water flow section configuration.
  *
  * @since 12
@@ -1405,6 +1432,19 @@ typedef struct {
     /** Left margin, in vp. */
     float left;
 } ArkUI_Margin;
+
+/**
+ * @brief Enumerates the animation onFinish callback types.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** The callback is invoked when the entire animation is removed once it has finished. */
+    ARKUI_FINISH_CALLBACK_REMOVED = 0,
+    /** The callback is invoked when the animation logically enters the falling state, though it may still be in its
+      * long tail state. */
+    ARKUI_FINISH_CALLBACK_LOGICALLY,
+} ArkUI_FinishCallbackType;
 
 /**
 * @brief Creates a size constraint.

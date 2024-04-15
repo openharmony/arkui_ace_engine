@@ -29,6 +29,7 @@
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
@@ -1006,12 +1007,18 @@ const ArkUIGraphicsAPI* GetGraphicsAPI()
     return &api;
 }
 
+void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void* event, void* user)
+{
+    ViewAnimate::AnimateTo(context, option, reinterpret_cast<void (*)(void*)>(event), user);
+}
+
 const ArkUIAnimation* GetAnimationAPI()
 {
     static const ArkUIAnimation modifier = {
         nullptr,
         nullptr,
         nullptr,
+        AnimateTo,
     };
     return &modifier;
 }

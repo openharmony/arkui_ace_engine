@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 enum class DialogContentNode {
     TITLE = 0,
     SUBTITLE,
@@ -109,7 +111,7 @@ public:
 
     void BuildChild(const DialogProperties& dialogProperties);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     const std::string& GetTitle()
     {

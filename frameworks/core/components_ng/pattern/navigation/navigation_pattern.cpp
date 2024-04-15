@@ -46,14 +46,14 @@ namespace {
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 
 void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDestinationState state,
-    const RefPtr<NavDestinationContext>& context, std::optional<NavDestinationInfo>& info)
+    const RefPtr<NavDestinationContext>& context, bool isFrom, std::optional<NavDestinationInfo>& info)
 {
     if (!context) {
         info.reset();
         return;
     }
 
-    int32_t index = context->GetIndex();
+    int32_t index = isFrom ? context->GetPreIndex() : context->GetIndex();
     std::string navDestinationId = std::to_string(context->GetNavDestinationId());
     std::string name;
     napi_value param = nullptr;
@@ -220,6 +220,9 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         if (preDestination) {
             auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
             preContext_ = pattern->GetNavDestinationContext();
+            if (preContext_) {
+                preContext_->SetPreIndex(preStackSize_ - 1);
+            }
         }
     }
     UpdateNavPathList();
@@ -1484,8 +1487,7 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
             pattern->MarkNeedSyncWithJsStack();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            auto navigationManager = context->GetNavigationManager();
-            navigationManager->AddNavigationUpdateCallback([weakPattern]() {
+            context->AddBuildFinishCallBack([weakPattern]() {
                 auto pattern = weakPattern.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->SyncWithJsStackIfNeeded();
@@ -1680,8 +1682,8 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     std::string navigationId = host->GetInspectorIdValue("");
     std::optional<NavDestinationInfo> fromInfo;
     std::optional<NavDestinationInfo> toInfo;
-    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_HIDDEN, from, fromInfo);
-    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, toInfo);
+    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_HIDDEN, from, true, fromInfo);
+    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, false, toInfo);
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(
         std::move(fromInfo), std::move(toInfo), operation);
 }
@@ -1692,19 +1694,11 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto navigationManager = pipeline->GetNavigationManager();
+    navigationManager->FireNavigationUpdateCallback();
     if (!isAnimated) {
-        pipeline->AddBuildFinishCallBack([weakNavigation = WeakClaim(this),
-            weakPreDestination = WeakPtr<NavDestinationGroupNode>(preDestination),
-            weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
-            isPopPage, isNeedVisible]() {
-            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(weakNavigation.Upgrade());
-            CHECK_NULL_VOID(navigationPattern);
-            auto preDestination = weakPreDestination.Upgrade();
-            auto topDestination = weakTopDestination.Upgrade();
-            navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage);
-            navigationPattern->TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
-        });
-        
+        FireShowAndHideLifecycle(preDestination, topDestination, isPopPage);
+        TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;
     }
     pipeline->AddAfterLayoutTask([weakNavigation = WeakClaim(this),

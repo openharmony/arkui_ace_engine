@@ -112,6 +112,19 @@ public:
         touchEvents_.remove(touchEvent);
     }
 
+    void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent)
+    {
+        touchAfterEvents_ = std::move(touchEvent);
+    }
+
+    void ClearTouchAfterEvent()
+    {
+        // When the event param is undefined, it will clear the callback.
+        if (touchAfterEvents_) {
+            touchAfterEvents_.Reset();
+        }
+    }
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override
     {
@@ -144,6 +157,7 @@ private:
     bool ShouldResponse() override;
 
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
+    RefPtr<TouchEventImpl> touchAfterEvents_;
     RefPtr<TouchEventImpl> userCallback_;
     RefPtr<TouchEventImpl> onTouchEventCallback_;
     RefPtr<TouchEventImpl> commonTouchEventCallback_;

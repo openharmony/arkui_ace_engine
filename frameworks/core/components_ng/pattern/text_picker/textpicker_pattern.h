@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 using EventCallback = std::function<void(bool)>;
 using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
 
@@ -187,7 +188,7 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void SetCascadeOptions(const std::vector<NG::TextCascadePickerOptions>& options,
         const std::vector<NG::TextCascadePickerOptions>& cascadeOptions)

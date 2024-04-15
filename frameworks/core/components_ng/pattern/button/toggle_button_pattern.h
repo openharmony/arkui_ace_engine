@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/button/toggle_button_accessibility_property.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 namespace OHOS::Ace::NG {
 class ToggleButtonPattern : public ButtonPattern {
@@ -37,6 +38,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -53,11 +59,17 @@ public:
     {
         return MakeRefPtr<ToggleButtonAccessibilityProperty>();
     }
+
+    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
+    {
+        toggleMakeFunc_ = std::move(toggleMakeFunc);
+    }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnClick();
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
+    void SetButtonPress(bool value);
 
 private:
     void OnAttachToFrameNode() override;
@@ -71,6 +83,11 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
+    void FireBuilder();
+
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<SwitchMakeCallback> toggleMakeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;

@@ -35,6 +35,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct ListItemGroupPara {
     int32_t lanes = -1;
     int32_t itemEndIndex = -1;
@@ -75,7 +77,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 

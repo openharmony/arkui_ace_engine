@@ -300,14 +300,15 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 
 void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior)
 {
-    if (IsDropAllowed(dragFrameNode)) {
+    if (!IsDropAllowed(dragFrameNode)) {
         UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
         return;
     }
     
     // drop allowed
+    const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     // special handling for no drag data present situation, always show as move
-    if (summaryMap_.empty()) {
+    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
         UpdateDragStyle(DragCursorStyleCore::MOVE);
         return;
     }

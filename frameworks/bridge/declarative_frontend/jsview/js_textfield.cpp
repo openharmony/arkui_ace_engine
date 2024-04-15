@@ -106,8 +106,9 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
     std::optional<std::string> value;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
-    if (info[0]->IsObject()) {
-        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto jsValue = info[0];
+    if (jsValue->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
         std::string placeholder;
         if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
             placeholderSrc = placeholder;
@@ -155,8 +156,9 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
     std::optional<std::string> value;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal = JSRef<JSVal>::Make();
-    if (info[0]->IsObject()) {
-        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto jsValue = info[0];
+    if (jsValue->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
         std::string placeholder;
         if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
             placeholderSrc = placeholder;
@@ -201,14 +203,15 @@ void JSTextField::SetType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsUndefined()) {
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined()) {
         TextFieldModel::GetInstance()->SetType(TextInputType::UNSPECIFIED);
         return;
     }
-    if (!info[0]->IsNumber()) {
+    if (!jsValue->IsNumber()) {
         return;
     }
-    TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
+    TextInputType textInputType = static_cast<TextInputType>(jsValue->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetType(textInputType);
 }
 
@@ -217,14 +220,15 @@ void JSTextField::SetContentType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsUndefined()) {
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined()) {
         TextFieldModel::GetInstance()->SetContentType(NG::TextContentType::UNSPECIFIED);
         return;
     }
-    if (!info[0]->IsNumber()) {
+    if (!jsValue->IsNumber()) {
         return;
     }
-    NG::TextContentType textContentType = static_cast<NG::TextContentType>(info[0]->ToNumber<int32_t>());
+    NG::TextContentType textContentType = static_cast<NG::TextContentType>(jsValue->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetContentType(textContentType);
 }
 
@@ -300,14 +304,15 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsUndefined()) {
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined()) {
         TextFieldModel::GetInstance()->SetEnterKeyType(TextInputAction::UNSPECIFIED);
         return;
     }
-    if (!info[0]->IsNumber()) {
+    if (!jsValue->IsNumber()) {
         return;
     }
-    TextInputAction textInputAction = CastToTextInputAction(info[0]->ToNumber<int32_t>());
+    TextInputAction textInputAction = CastToTextInputAction(jsValue->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 
@@ -347,11 +352,15 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
 
 void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (!jsValue->IsObject()) {
         return;
     }
     CaretStyle caretStyle;
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = JSRef<JSObject>::Cast(jsValue);
     auto caretWidth = paramObject->GetProperty("width");
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -416,15 +425,16 @@ void JSTextField::SetMaxLength(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    auto jsValue = info[0];
     int32_t maxLength = 0;
-    if (info[0]->IsUndefined()) {
+    if (jsValue->IsUndefined()) {
         TextFieldModel::GetInstance()->ResetMaxLength();
         return;
-    } else if (!info[0]->IsNumber()) {
+    } else if (!jsValue->IsNumber()) {
         TextFieldModel::GetInstance()->ResetMaxLength();
         return;
     }
-    maxLength = info[0]->ToNumber<int32_t>();
+    maxLength = jsValue->ToNumber<int32_t>();
     if (GreatOrEqual(maxLength, 0)) {
         TextFieldModel::GetInstance()->SetMaxLength(maxLength);
     } else {
@@ -470,11 +480,12 @@ void JSTextField::SetWordBreak(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber()) {
         TextFieldModel::GetInstance()->SetWordBreak(WordBreak::BREAK_WORD);
         return;
     }
-    auto index = info[0]->ToNumber<int32_t>();
+    auto index = jsValue->ToNumber<int32_t>();
     if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
         TextFieldModel::GetInstance()->SetWordBreak(WordBreak::BREAK_WORD);
         return;
@@ -487,14 +498,15 @@ void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    auto jsValue = info[0];
     ForegroundColorStrategy strategy;
-    if (ParseJsColorStrategy(info[0], strategy)) {
+    if (ParseJsColorStrategy(jsValue, strategy)) {
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         TextFieldModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
         return;
     }
     Color foregroundColor;
-    if (!ParseJsColor(info[0], foregroundColor)) {
+    if (!ParseJsColor(jsValue, foregroundColor)) {
         return;
     }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
@@ -525,12 +537,13 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    auto jsValue = info[0];
     std::string inputFilter;
-    if (info[0]->IsUndefined()) {
+    if (jsValue->IsUndefined()) {
         TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
         return;
     }
-    if (!ParseJsString(info[0], inputFilter)) {
+    if (!ParseJsString(jsValue, inputFilter)) {
         return;
     }
     if (!CheckRegexValid(inputFilter)) {
@@ -553,12 +566,13 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
 
 void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
         TextFieldModel::GetInstance()->SetShowPasswordIcon(true);
         return;
     }
 
-    bool isShowPasswordIcon = info[0]->ToBoolean();
+    bool isShowPasswordIcon = jsValue->ToBoolean();
     TextFieldModel::GetInstance()->SetShowPasswordIcon(isShowPasswordIcon);
 }
 
@@ -594,10 +608,11 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsString() && info[0]->ToString().empty()) {
+    auto jsValue = info[0];
+    if (jsValue->IsString() && jsValue->ToString().empty()) {
         return;
     }
-    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+    if (jsValue->IsString() && jsValue->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         TextFieldModel::GetInstance()->SetWidthAuto(true);
         return;
@@ -605,7 +620,7 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
 
     TextFieldModel::GetInstance()->SetWidthAuto(false);
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -633,15 +648,16 @@ void JSTextField::JsMargin(const JSCallbackInfo& info)
 
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined() || (jsValue->IsString() && CheckIsIllegalString(jsValue->ToString()))) {
         return;
     };
     CalcDimension length;
-    ParseJsDimensionVp(info[0], length);
+    ParseJsDimensionVp(jsValue, length);
     if (length.IsNegative()) {
         return;
     }
-    bool tmp = !info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject();
+    bool tmp = !jsValue->IsString() && !jsValue->IsNumber() && !jsValue->IsObject();
 
     NG::PaddingProperty newPadding = GetNewPadding(info);
     Edge oldPadding = Edge(GetOldPadding(info));
@@ -651,14 +667,15 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
 Edge JSTextField::GetOldPadding(const JSCallbackInfo& info)
 {
     Edge padding;
-    if (info[0]->IsNumber() || info[0]->IsString()) {
+    auto jsValue = info[0];
+    if (jsValue->IsNumber() || jsValue->IsString()) {
         CalcDimension edgeValue;
-        if (ParseJsDimensionVp(info[0], edgeValue)) {
+        if (ParseJsDimensionVp(jsValue, edgeValue)) {
             padding = Edge(edgeValue);
         }
     }
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
         CalcDimension left = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension top = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension right = CalcDimension(0.0, DimensionUnit::VP);
@@ -675,12 +692,13 @@ Edge JSTextField::GetOldPadding(const JSCallbackInfo& info)
 NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
 {
     NG::PaddingProperty padding;
-    if (info[0]->IsObject()) {
+    auto jsValue = info[0];
+    if (jsValue->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
         std::optional<CalcDimension> top;
         std::optional<CalcDimension> bottom;
-        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsValue);
 
         CalcDimension leftDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
@@ -705,7 +723,7 @@ NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
     }
 
     CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
+    if (!ParseJsDimensionVp(jsValue, length)) {
         // use default value.
         length.Reset();
     }
@@ -766,7 +784,8 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderWidth(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsObject() && !jsValue->IsString() && !jsValue->IsNumber()) {
         return;
     }
     JSViewAbstract::JsBorderWidth(info);
@@ -775,7 +794,8 @@ void JSTextField::JsBorderWidth(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderColor(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsObject() && !jsValue->IsString() && !jsValue->IsNumber()) {
         return;
     }
     JSViewAbstract::JsBorderColor(info);
@@ -784,7 +804,8 @@ void JSTextField::JsBorderColor(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject() && !info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsObject() && !jsValue->IsNumber()) {
         return;
     }
     JSViewAbstract::JsBorderStyle(info);
@@ -793,7 +814,8 @@ void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
 
 void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsObject() && !jsValue->IsString() && !jsValue->IsNumber()) {
         return;
     }
     JSViewAbstract::JsBorderRadius(info);
@@ -802,16 +824,18 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber()) {
         return;
     }
-    TextFieldModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
+    TextFieldModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(jsValue->ToNumber<int32_t>()));
 }
 
 void JSTextField::SetOnEditChanged(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnEditChanged(std::move(callback));
 }
 
@@ -828,8 +852,9 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
+    auto jsValue = info[0];
     auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
-        JSRef<JSFunc>::Cast(info[0]));
+        JSRef<JSFunc>::Cast(jsValue));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](int32_t key,
                        NG::TextFieldCommonEvent& event) {
@@ -852,14 +877,15 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 
 void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
 #ifdef NG_BUILD
     CreateJsTextFieldCommonEvent(info);
 #else
     if (Container::IsCurrentUseNewPipeline()) {
         CreateJsTextFieldCommonEvent(info);
     } else {
-        JsEventCallback<void(int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+        JsEventCallback<void(int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
         TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
     }
 #endif
@@ -867,36 +893,41 @@ void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 
 void JSTextField::SetOnChange(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
 }
 
 void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
 }
 
 void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(float, float)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnContentScroll(std::move(callback));
 }
 
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 
 void JSTextField::SetOnCut(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
@@ -912,9 +943,10 @@ JSRef<JSVal> JSTextField::CreateJSTextCommonEvent(NG::TextCommonEvent& event)
 
 void JSTextField::SetOnPaste(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 2>>(
-        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+        JSRef<JSFunc>::Cast(jsValue), CreateJSTextCommonEvent);
 
     auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](
         const std::string& val, NG::TextCommonEvent& info) {
@@ -941,13 +973,14 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    if (info[0]->IsUndefined()) {
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined()) {
         TextFieldModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
     auto copyOptions = CopyOptions::None;
-    if (info[0]->IsNumber()) {
-        auto emunNumber = info[0]->ToNumber<int>();
+    if (jsValue->IsNumber()) {
+        auto emunNumber = jsValue->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     TextFieldModel::GetInstance()->SetCopyOption(copyOptions);
@@ -955,20 +988,22 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
 
 void JSTextField::JsMenuOptionsExtension(const JSCallbackInfo& info)
 {
-    if (info[0]->IsArray()) {
+    auto jsValue = info[0];
+    if (jsValue->IsArray()) {
         std::vector<NG::MenuOptionsParam> menuOptionsItems;
-        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(jsValue), menuOptionsItems);
         TextFieldModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
     }
 }
 
 void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
         TextFieldModel::GetInstance()->SetShowUnderline(false);
         return;
     }
-    TextFieldModel::GetInstance()->SetShowUnderline(info[0]->ToBoolean());
+    TextFieldModel::GetInstance()->SetShowUnderline(jsValue->ToBoolean());
 }
 
 void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
@@ -976,11 +1011,12 @@ void JSTextField::SetUnderlineColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    auto jsValue = info[0];
     Color underlineColor;
-    if (ParseJsColor(info[0], underlineColor)) {
+    if (ParseJsColor(jsValue, underlineColor)) {
         TextFieldModel::GetInstance()->SetNormalUnderlineColor(underlineColor);
-    } else if (info[0]->IsObject()) {
-        auto param = JSRef<JSObject>::Cast(info[0]);
+    } else if (jsValue->IsObject()) {
+        auto param = JSRef<JSObject>::Cast(jsValue);
         UserUnderlineColor userColor = UserUnderlineColor();
         auto typingColorProp = param->GetProperty("typing");
         Color typing;
@@ -1013,10 +1049,11 @@ void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    if (!info[0]->IsObject()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsObject()) {
         return;
     }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> showVal = jsObj->GetProperty("onIconSrc");
     JSRef<JSVal> hideVal = jsObj->GetProperty("offIconSrc");
     PasswordIcon passwordIcon;
@@ -1096,35 +1133,39 @@ void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
 
 void JSTextField::SetShowUnit(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsFunction()) {
         return;
     }
 
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
     auto unitFunc = [builderFunc]() { builderFunc->Execute(); };
     TextFieldModel::GetInstance()->SetShowUnit(std::move(unitFunc));
 }
 
 void JSTextField::SetShowError(const JSCallbackInfo& info)
 {
+    auto jsValue = info[0];
     if (Container::IsCurrentUseNewPipeline()) {
-        if (!info[0]->IsUndefined() && !info[0]->IsString()) {
+        if (!jsValue->IsUndefined() && !jsValue->IsString()) {
             TextFieldModel::GetInstance()->SetShowError("", false);
             return;
         }
         TextFieldModel::GetInstance()->SetShowError(
-            info[0]->IsString() ? info[0]->ToString() : "", info[0]->IsUndefined() ? false : true);
+            jsValue->IsString() ? jsValue->ToString() : "", jsValue->IsUndefined() ? false : true);
     }
 }
 
 void JSTextField::SetShowCounter(const JSCallbackInfo& info)
 {
-    if ((!info[0]->IsBoolean() && !info[1]->IsObject())) {
+    auto jsValue = info[0];
+    auto secondJSValue = info[1];
+    if ((!jsValue->IsBoolean() && !secondJSValue->IsObject())) {
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
-    if (info[1]->IsObject()) {
-        auto paramObject = JSRef<JSObject>::Cast(info[1]);
+    if (secondJSValue->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(secondJSValue);
         auto param = paramObject->GetProperty("highlightBorder");
         auto isBorderShow = param->ToBoolean();
         if (!param->IsBoolean() || param->IsUndefined() || param->IsNull()) {
@@ -1136,7 +1177,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         auto inputNumber = parameter->ToNumber<int32_t>();
         TextFieldModel::GetInstance()->SetCounterType(inputNumber);
         if (parameter->IsNull() || parameter->IsUndefined()) {
-            TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
+            TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
             TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
             return;
         }
@@ -1147,35 +1188,41 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             TextFieldModel::GetInstance()->SetShowCounter(false);
             return;
         }
-        TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
+        TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
         return;
     }
-    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
+    TextFieldModel::GetInstance()->SetShowCounter(jsValue->ToBoolean());
     TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
     TextFieldModel::GetInstance()->SetShowCounterBorder(true);
 }
 
 void JSTextField::SetBarState(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsNumber()) {
+    if (info.Length() < 1) {
         TextFieldModel::GetInstance()->SetBarState(DisplayMode::AUTO);
         return;
     }
-    DisplayMode displayMode = static_cast<DisplayMode>(info[0]->ToNumber<int32_t>());
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber()) {
+        TextFieldModel::GetInstance()->SetBarState(DisplayMode::AUTO);
+        return;
+    }
+    DisplayMode displayMode = static_cast<DisplayMode>(jsValue->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetBarState(displayMode);
 }
 
 void JSTextField::SetMaxLines(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsNumber()) {
+    if (info.Length() < 1) {
         TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
         return;
     }
-    if (info[0]->ToNumber<int32_t>() <= 0) {
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber() || jsValue->ToNumber<int32_t>() <= 0) {
         TextFieldModel::GetInstance()->SetMaxViewLines(MAX_LINES);
         return;
     }
-    TextFieldModel::GetInstance()->SetMaxViewLines(info[0]->ToNumber<uint32_t>());
+    TextFieldModel::GetInstance()->SetMaxViewLines(jsValue->ToNumber<uint32_t>());
 }
 
 void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
@@ -1183,11 +1230,12 @@ void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined() || !jsValue->IsBoolean()) {
         TextFieldModel::GetInstance()->RequestKeyboardOnFocus(true);
         return;
     }
-    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(info[0]->ToBoolean());
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(jsValue->ToBoolean());
 }
 
 void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
@@ -1195,11 +1243,12 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined() || !jsValue->IsBoolean()) {
         TextFieldModel::GetInstance()->SetSelectionMenuHidden(false);
         return;
     }
-    TextFieldModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+    TextFieldModel::GetInstance()->SetSelectionMenuHidden(jsValue->ToBoolean());
 }
 
 bool JSTextField::ParseJsCustomKeyboardBuilder(
@@ -1227,11 +1276,15 @@ bool JSTextField::ParseJsCustomKeyboardBuilder(
 
 void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && (info[0]->IsUndefined() || info[0]->IsNull())) {
-        TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr);
+    if (info.Length() < 1) {
         return;
     }
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    if (jsValue->IsUndefined() || jsValue->IsNull()) {
+        TextFieldModel::GetInstance()->SetCustomKeyboard(nullptr);
         return;
     }
     bool supportAvoidance = false;
@@ -1250,20 +1303,22 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
 
 void JSTextField::SetPasswordRules(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsString()) {
         return;
     }
-    auto passwordRules = info[0]->ToString();
+    auto passwordRules = jsValue->ToString();
     TextFieldModel::GetInstance()->SetPasswordRules(passwordRules);
 }
 
 void JSTextField::SetEnableAutoFill(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
         TextFieldModel::GetInstance()->SetEnableAutoFill(true);
         return;
     }
-    TextFieldModel::GetInstance()->SetEnableAutoFill(info[0]->ToBoolean());
+    TextFieldModel::GetInstance()->SetEnableAutoFill(jsValue->ToBoolean());
 }
 
 static CleanNodeStyle ConvertStrToCleanNodeStyle(const std::string& value)
@@ -1456,11 +1511,12 @@ void JSTextField::SetFontFeature(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsString()) {
+    auto jsValue = info[0];
+    if (!jsValue->IsString()) {
         return;
     }
 
-    std::string fontFeatureSettings = info[0]->ToString();
+    std::string fontFeatureSettings = jsValue->ToString();
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 

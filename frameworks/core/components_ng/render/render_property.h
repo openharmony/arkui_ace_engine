@@ -24,6 +24,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/overlay_property.h"
@@ -73,13 +74,15 @@ struct BackgroundProperty {
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
     std::optional<EffectOption> propEffectOption;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct CustomBackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundPixelMap, RefPtr<PixelMap>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundAlign, Alignment);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct ForegroundProperty {
@@ -103,7 +106,7 @@ struct ForegroundProperty {
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundEffect, float);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct BorderImageProperty {
@@ -115,7 +118,7 @@ struct BorderImageProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageRepeat, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageGradient, Gradient);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         static const char* REPEAT_MODE[] = {
             "RepeatMode.Space",
@@ -135,7 +138,7 @@ struct BorderImageProperty {
             propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
         jsonBorderImage->Put("fill", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
             ->GetNeedFillCenter() ? "true" : "false");
-        json->Put("borderImage", jsonBorderImage->ToString().c_str());
+        json->PutExtAttr("borderImage", jsonBorderImage->ToString().c_str(), filter);
     }
 };
 
@@ -145,7 +148,7 @@ struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderStyle, BorderStyleProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderWidth, BorderWidthProperty);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct PointLightProperty {
@@ -156,7 +159,7 @@ struct PointLightProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IlluminatedBorderWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Bloom, float);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct OuterBorderProperty {
@@ -165,7 +168,7 @@ struct OuterBorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OuterBorderStyle, BorderStyleProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OuterBorderWidth, BorderWidthProperty);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct TransformProperty {
@@ -173,7 +176,8 @@ struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector5F);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct GraphicsProperty {
@@ -194,7 +198,8 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackBlendApplyType, BlendApplyType);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct RenderPositionProperty {
@@ -203,28 +208,32 @@ struct RenderPositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PositionEdges, EdgesParam);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OffsetEdges, EdgesParam);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Anchor, OffsetT<Dimension>);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct ClipProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipShape, RefPtr<BasicShape>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipEdge, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ClipMask, RefPtr<BasicShape>);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct GradientProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RadialGradient, NG::Gradient);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 struct OverlayProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayText, OverlayOptions);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        propOverlayText.value_or(OverlayOptions()).ToJsonValue(json);
+        propOverlayText.value_or(OverlayOptions()).ToJsonValue(json, filter);
     }
 };
 

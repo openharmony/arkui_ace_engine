@@ -650,6 +650,12 @@ public:
     }
     void SetFontScale(float fontScale);
 
+    float GetFontWeightScale() const
+    {
+        return fontWeightScale_;
+    }
+    void SetFontWeightScale(float fontWeightScale);
+
     uint32_t GetWindowId() const
     {
         return windowId_;
@@ -1189,6 +1195,7 @@ protected:
 
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
+    float fontWeightScale_ = 1.0f;
     float designWidthScale_ = 1.0f;
     float viewScale_ = 1.0f;
     double density_ = 1.0;

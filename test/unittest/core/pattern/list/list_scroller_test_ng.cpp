@@ -17,7 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class ListScrollerTestNg : public ListTestNg {
 public:
@@ -473,6 +475,47 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndex014
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndex014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create list.
+     * @tc.cases: the height of listItemGroup is more than one screen
+     */
+    Create([](ListModelNG model) {
+        model.SetContentStartOffset(50.f);
+        model.SetContentEndOffset(50.f);
+        model.SetInitialIndex(1);
+        CreateGroupWithSetting(4, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, 8);
+    });
+    EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
+    EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
+
+    /**
+     * @tc.steps: step2. scroll to the 1st index.
+     * @tc.cases: jumpIndex < StartIndex
+     * @tc.expected: pattern_->GetTotalOffset() == 120.
+     */
+    ScrollToIndex(0, false, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 120);
+    auto itemHeight = GetChildFrameNode(frameNode_, 0)->GetGeometryNode()->GetMarginFrameSize().Height();
+    EXPECT_GT(itemHeight, pattern_->contentMainSize_);
+
+    /**
+     * @tc.steps: step2. scroll to the 2nd index.
+     * @tc.cases: jumpIndex < StartIndex
+     * @tc.expected: pattern_->GetTotalOffset() == 120.
+     */
+    ScrollToIndex(1, false, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 820);
+    itemHeight = GetChildFrameNode(frameNode_, 1)->GetGeometryNode()->GetMarginFrameSize().Height();
+    EXPECT_GT(itemHeight, pattern_->contentMainSize_);
+}
+
+/**
  * @tc.name: ScrollToItemInGroup001
  * @tc.desc: Test ScrollToItemInGroup with ListItemGroup and indexInGroup
  * @tc.type: FUNC
@@ -749,12 +792,12 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup009, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup010, TestSize.Level1)
 {
-     /**
+    /**
      * @tc.steps: step1. create list
      */
     Create([](ListModelNG model) { CreateGroup(8); });
 
-     /**
+    /**
      * @tc.steps: step2. index is -2.
      * @tc.expected: not scroll.
      */
@@ -784,7 +827,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup010, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -200);
     EXPECT_EQ(pattern_->itemPosition_[1].endPos, 600);
 
-     /**
+    /**
      * @tc.steps: step5. group within the screen.
      * @tc.expected: not scroll.
      */
@@ -806,9 +849,10 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup011, TestSize.Level1)
     /**
      * @tc.steps: step1. create list
      */
-    Create([](ListModelNG model) { CreateGroupWithItem(8); });
+    const int32_t number = 8;
+    Create([](ListModelNG model) { CreateGroupWithItem(number); });
 
-     /**
+    /**
      * @tc.steps: step2. index is item.
      * @tc.expected: not scroll.
      */
@@ -824,13 +868,28 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup011, TestSize.Level1)
     EXPECT_EQ(pattern_->startIndex_, 0);
     EXPECT_EQ(pattern_->endIndex_, 2);
 
-     /**
-     * @tc.steps: step3. indexInGroup is greater than group size.
+    /**
+     * @tc.steps: step3. indexInGroup is greater than item size in group.
      * @tc.expected: not scroll.
      */
     ScrollToItemInGroup(2, 4, true, ScrollAlign::START);
     EXPECT_EQ(pattern_->startIndex_, 0);
     EXPECT_EQ(pattern_->endIndex_, 2);
+
+    /**
+     * @tc.steps: step4. index is greater than the size in list.
+     * @tc.expected: not scroll.
+     */
+    ScrollToIndex(number, true, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->startIndex_, 0);
+    EXPECT_EQ(pattern_->endIndex_, 2);
+
+    /**
+     * @tc.steps: step5. index is -1.
+     * @tc.expected: not scroll.
+     */
+    ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, true, ScrollAlign::START);
+    EXPECT_EQ(pattern_->startIndex_, 0);
 }
 
 /**
@@ -840,7 +899,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup011, TestSize.Level1)
  */
 HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup012, TestSize.Level1)
 {
-     /**
+    /**
      * @tc.steps: step1. create list
      */
     Create([](ListModelNG model) {
@@ -886,6 +945,69 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup012, TestSize.Level1)
     EXPECT_EQ(pattern_->endIndex_, 2);
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, -150);
     EXPECT_EQ(pattern_->itemPosition_[2].endPos, 910);
+}
+
+/**
+ * @tc.name: ScrollToItemInGroup013
+ * @tc.desc: Test ScrollToItemInGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create list.
+     */
+    Create([](ListModelNG model) {
+        model.SetContentStartOffset(50.f);
+        model.SetContentEndOffset(50.f);
+        CreateGroup(5);
+    });
+    EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
+    EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
+
+    /**
+     * @tc.steps: step2. scroll to the last index.
+     * @tc.expected: pattern_->itemPosition_[4].endPos == 750.
+     */
+    ScrollToItemInGroup(4, 3, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->endIndex_, 4);
+    EXPECT_EQ(pattern_->itemPosition_[3].startPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[4].endPos, 750);
+
+    ScrollToItemInGroup(4, 3, false, ScrollAlign::CENTER);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->endIndex_, 4);
+    EXPECT_EQ(pattern_->itemPosition_[3].startPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[4].endPos, 750);
+
+    pattern_->ScrollTo(0);
+    FlushLayoutTask(frameNode_);
+    ScrollToItemInGroup(4, 3, false, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->startIndex_, 3);
+    EXPECT_EQ(pattern_->endIndex_, 4);
+    EXPECT_EQ(pattern_->itemPosition_[3].startPos, -50);
+    EXPECT_EQ(pattern_->itemPosition_[4].endPos, 750);
+
+    /**
+     * @tc.steps: step3. scroll to the 1st index.
+     * @tc.cases: jumpIndex < StartIndex
+     * @tc.expected: pattern_->GetTotalOffset() == -50.
+     */
+    ScrollToIndex(0, false, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -50);
+    auto itemHeight = GetChildFrameNode(frameNode_, 0)->GetGeometryNode()->GetMarginFrameSize().Height();
+    EXPECT_LT(itemHeight, pattern_->contentMainSize_);
+
+    /**
+     * @tc.steps: step4. scroll to the 3rd index.
+     * @tc.cases: jumpIndex > EndIndex
+     * @tc.expected: pattern_->GetTotalOffset() == 850.
+     */
+    ScrollToIndex(3, false, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 850);
+    itemHeight = GetChildFrameNode(frameNode_, 3)->GetGeometryNode()->GetMarginFrameSize().Height();
+    EXPECT_LT(itemHeight, pattern_->contentMainSize_);
 }
 
 /**
@@ -985,6 +1107,7 @@ HWTEST_F(ListScrollerTestNg, PositionController002, TestSize.Level1)
      */
     EXPECT_EQ(controller->GetScrollDirection(), Axis::HORIZONTAL);
     EXPECT_EQ(controller->GetCurrentOffset(), Offset::Zero());
+    EXPECT_EQ(pattern_->GetCurrentOffset(), Offset::Zero());
 
     /**
      * @tc.steps: step2. Test ScrollBy
@@ -1197,6 +1320,7 @@ HWTEST_F(ListScrollerTestNg, PositionController006, TestSize.Level1)
     EXPECT_EQ(pattern_->startIndex_, 1);
     EXPECT_EQ(pattern_->endIndex_, 3);
     controller->JumpToItemInGroup(2, 1, false, ScrollAlign::AUTO);
+    pattern_->DumpAdvanceInfo();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->startIndex_, 1);
     EXPECT_EQ(pattern_->endIndex_, 3);
@@ -1672,7 +1796,7 @@ HWTEST_F(ListScrollerTestNg, Pattern012, TestSize.Level1)
     // test ToJsonValue/FromJson
     CreateWithItem([](ListModelNG model) {});
     auto json = JsonUtil::Create(true);
-    pattern_->ToJsonValue(json);
+    pattern_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetBool("multiSelectable"), false);
     EXPECT_EQ(json->GetInt("startIndex"), 0);
     EXPECT_EQ(json->GetDouble("itemStartPos"), 0.0);
@@ -1744,6 +1868,15 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 1200);
     EXPECT_TRUE(ScrollToIndex(1, true, ScrollAlign::AUTO, 800));
+
+    /**
+     * @tc.cases: JumpIndex == StartIndex == EndIndex
+     * @tc.expected: top Align
+     */
+    pattern_->ScrollTo(800);
+    FlushLayoutTask(frameNode_);
+    ScrollToIndex(1, false, ScrollAlign::AUTO);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 800);
 }
 
 /**
@@ -2179,9 +2312,7 @@ HWTEST_F(ListScrollerTestNg, PostListItemPressStyleTask_scroll001, TestSize.Leve
     /**
      * @tc.steps: step1. Init List.
      */
-    CreateWithItem([](ListModelNG model) {
-        model.SetDivider(ITEM_DIVIDER);
-    });
+    CreateWithItem([](ListModelNG model) { model.SetDivider(ITEM_DIVIDER); });
     int cur = 0;
     for (auto& child : pattern_->itemPosition_) {
         child.second.id += cur;

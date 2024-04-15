@@ -23,6 +23,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -805,16 +806,16 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
     }
 }
 
-void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (!range_.empty()) {
-        json->Put("range", GetRangeStr().c_str());
+        json->PutExtAttr("range", GetRangeStr().c_str(), filter);
     } else {
         if (!cascadeOriginptions_.empty()) {
             if (!isCascade_) {
-                json->Put("range", GetOptionsMultiStr().c_str());
+                json->PutExtAttr("range", GetOptionsMultiStr().c_str(), filter);
             } else {
-                json->Put("range", GetOptionsCascadeStr(cascadeOriginptions_).c_str());
+                json->PutExtAttr("range", GetOptionsCascadeStr(cascadeOriginptions_).c_str(), filter);
             }
         }
     }

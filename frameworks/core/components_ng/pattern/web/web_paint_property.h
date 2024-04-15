@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_PAINT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -38,10 +39,10 @@ public:
         PaintProperty::Reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put("content", webPaintData_.value_or("null").c_str());
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutFixedAttr("content", webPaintData_.value_or("null").c_str(), filter, FIXED_ATTR_CONTENT);
     }
 
     void SetWebPaintData(const std::string& webData)

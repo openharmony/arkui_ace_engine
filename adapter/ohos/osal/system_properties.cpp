@@ -504,7 +504,15 @@ ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
     // Default value of font weight scale is 1.0.
     std::string prop =
         "persist.sys.font_wght_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return std::stof(system::GetParameter(prop, "1.0"));
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+}
+
+ACE_WEAK_SYM float SystemProperties::GetFontScale()
+{
+    // Default value of font size scale is 1.0.
+    std::string prop =
+        "persist.sys.font_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)

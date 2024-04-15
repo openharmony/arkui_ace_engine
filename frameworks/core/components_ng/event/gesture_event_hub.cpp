@@ -982,6 +982,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedDisplayInSubwindow()) {
             overlayManager->RemovePixelMap();
+            overlayManager->RemovePreviewBadgeNode();
             overlayManager->RemoveGatherNode();
             pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
@@ -1149,6 +1150,14 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
+
+    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
+{
+    CheckClickActuator();
+    clickEventActuator_->AddClickAfterEvent(clickEvent);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }

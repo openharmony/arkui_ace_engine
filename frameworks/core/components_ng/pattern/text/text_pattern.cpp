@@ -37,12 +37,14 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
@@ -716,13 +718,11 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
             if (rect.IsInRegion(textOffset)) {
                 CHECK_NULL_RETURN(!item->onClick, true);
                 clickedSpanPosition_ = -1;
-                break;
+                return false;
             }
         }
-        if (clickedSpanPosition_ == -1) {
-            break;
-        }
     }
+    clickedSpanPosition_ = -1;
     return false;
 }
 
@@ -1512,7 +1512,10 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
-            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren);
+            RichEditorDragInfo info;
+            info.firstHandle = pattern->textSelector_.firstHandle;
+            info.secondHandle = pattern->textSelector_.secondHandle;
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
@@ -1743,7 +1746,8 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
             BorderRadiusProperty brp;
             auto jsonObject = JsonUtil::Create(true);
             auto jsonBorder = JsonUtil::Create(true);
-            imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
+            InspectorFilter emptyFilter;
+            imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder, emptyFilter);
             resultObject.imageStyle.borderRadius = jsonObject->GetValue("borderRadius")->IsObject()
                                                        ? jsonObject->GetValue("borderRadius")->ToString()
                                                        : jsonObject->GetString("borderRadius");
@@ -1887,15 +1891,15 @@ void TextPattern::OnModifyDone()
     }
 }
 
-void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("enableDataDetector", textDetectEnable_ ? "true" : "false");
+    json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
-    json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+    json->PutExtAttr("dataDetectorConfig", jsonValue->ToString().c_str(), filter);
     const auto& selector = GetTextSelector();
     auto result = "[" + std::to_string(selector.GetTextStart()) + "," + std::to_string(selector.GetTextEnd()) + "]";
-    json->Put("selection", result.c_str());
+    json->PutExtAttr("selection", result.c_str(), filter);
 }
 
 void TextPattern::OnAfterModifyDone()
@@ -2008,10 +2012,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void TextPattern::ProcessOverlayAfterLayout()
 {
-    if (processOverlayDelayTask_) {
-        processOverlayDelayTask_();
-        processOverlayDelayTask_ = nullptr;
-    } else if (selectOverlay_->SelectOverlayIsOn()) {
+    if (selectOverlay_->SelectOverlayIsOn()) {
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
     }
@@ -2261,16 +2262,18 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
-    if (selectOverlay_->SelectOverlayIsOn()) {
-        if (selectOverlay_->IsShowMouseMenu()) {
-            CloseSelectOverlay();
-        } else {
-            processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+    CHECK_NULL_VOID(selectOverlay_->SelectOverlayIsOn());
+    if (selectOverlay_->IsShowMouseMenu()) {
+        CloseSelectOverlay();
+    } else {
+        auto context = PipelineContext::GetCurrentContextSafely();
+        if (context) {
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->CalculateHandleOffsetAndShowOverlay();
                 pattern->ShowSelectOverlay({ .menuIsShow = false });
-            };
+            });
         }
     }
 }

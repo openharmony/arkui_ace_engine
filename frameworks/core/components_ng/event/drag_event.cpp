@@ -151,7 +151,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         return;
     }
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        IsBelongToMultiItemNode(frameNode)) {
+        IsBelongToMultiItemNode(frameNode) || touchRestrict.inputEventType == InputEventType::AXIS) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, drag forbidden set is %{public}d,"
             "frameNode draggable is %{public}d, custom set is %{public}d", gestureHub->IsDragForbidden(),
             frameNode->IsDraggable(), frameNode->IsCustomerSet());
@@ -954,8 +954,8 @@ void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool sh
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemovePreviewBadgeNode();
     if (!startDrag) {
+        manager->RemovePreviewBadgeNode();
         manager->RemoveGatherNodeWithAnimation();
     }
     if (showAnimation) {
@@ -1125,6 +1125,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
         TAG_LOGD(AceLogTag::ACE_DRAG, "Position is between selected position, stop set text animation.");
         return;
     }
+    auto isHandlesShow = pattern->IsHandlesShow();
     pattern->CloseHandleAndSelect();
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
@@ -1135,12 +1136,16 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     columnNode->AddChild(dragNode);
     // mount to rootNode
     manager->MountPixelMapToRootNode(columnNode);
-    auto modifier = dragNode->GetPattern<TextDragPattern>()->GetOverlayModifier();
+    auto textDragPattern = dragNode->GetPattern<TextDragPattern>();
+    CHECK_NULL_VOID(textDragPattern);
+    auto modifier = textDragPattern->GetOverlayModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->UpdateHandlesShowFlag(isHandlesShow);
     auto renderContext = dragNode->GetRenderContext();
     if (renderContext) {
         textPixelMap_ = renderContext->GetThumbnailPixelMap();
     }
-    modifier->StartAnimate();
+    modifier->StartFloatingAnimate();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
 
@@ -1158,8 +1163,14 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextDragBase>();
     CHECK_NULL_VOID(pattern);
+    auto node = pattern->MoveDragNode();
+    CHECK_NULL_VOID(node);
+    auto textDragPattern = node->GetPattern<TextDragPattern>();
+    CHECK_NULL_VOID(textDragPattern);
+    auto modifier = textDragPattern->GetOverlayModifier();
+    CHECK_NULL_VOID(modifier);
     auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
-                                weakEvent = gestureEventHub_] {
+            weakEvent = gestureEventHub_, weakModifier = WeakPtr<TextDragOverlayModifier>(modifier)] {
         ContainerScope scope(id);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -1169,7 +1180,11 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         if (!startDrag) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->CreateHandles();
+            auto modifier = weakModifier.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            if (modifier->IsHandlesShow()) {
+                pattern->ShowHandles();
+            }
         }
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
@@ -1200,6 +1215,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    modifier->StartFloatingCancelAnimate();
     AnimationUtils::Animate(
         option,
         [context, startDrag, globalX, globalY, frameWidth, frameHeight, scale]() {

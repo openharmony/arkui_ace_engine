@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline/pipeline_base.h"
@@ -25,20 +26,22 @@
 namespace OHOS::Ace::NG {
 constexpr float PROGRSS_MAX_VALUE = 100.f;
 
-void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    PaintProperty::ToJsonValue(json);
+    PaintProperty::ToJsonValue(json, filter);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
 
-    json->Put("constructor", ProgressOptions().c_str());
-    json->Put("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
-    json->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
-    json->Put("scaleCount", std::to_string(GetScaleCount().value_or(progressTheme->GetScaleNumber())).c_str());
-    json->Put("scaleWidth", (GetScaleWidth().value_or(progressTheme->GetScaleWidth()).ToString()).c_str());
+    json->PutExtAttr("constructor", ProgressOptions().c_str(), filter);
+    json->PutExtAttr("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str(), filter);
+    json->PutExtAttr("value", std::to_string(GetValue().value_or(0.f)).c_str(), filter);
+    json->PutExtAttr("scaleCount",
+        std::to_string(GetScaleCount().value_or(progressTheme->GetScaleNumber())).c_str(), filter);
+    json->PutExtAttr("scaleWidth",
+        (GetScaleWidth().value_or(progressTheme->GetScaleWidth()).ToString()).c_str(), filter);
     Color defaultBackgroundColor = progressTheme->GetTrackBgColor();
     Color defaultColor = progressTheme->GetTrackSelectedColor();
     ProgressType progressType = GetProgressType().value_or(ProgressType::LINEAR);
@@ -48,12 +51,13 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else if (progressType == ProgressType::RING) {
         defaultBackgroundColor = progressTheme->GetRingProgressBgColor();
     }
-    json->Put("color", (GetColor().value_or(defaultColor)).ColorToString().c_str());
-    json->Put("backgroundColor", (GetBackgroundColor().value_or(defaultBackgroundColor)).ColorToString().c_str());
-    json->Put(
-        "capsuleBorderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
-    ToJsonValueForCapsule(json);
-    json->Put("progressGradientColor", ToJsonGradientColor().c_str());
+    json->PutExtAttr("color", (GetColor().value_or(defaultColor)).ColorToString().c_str(), filter);
+    json->PutExtAttr("backgroundColor",
+        (GetBackgroundColor().value_or(defaultBackgroundColor)).ColorToString().c_str(), filter);
+    json->PutExtAttr("capsuleBorderColor",
+        (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str(), filter);
+    ToJsonValueForCapsule(json, filter);
+    json->PutExtAttr("progressGradientColor", ToJsonGradientColor().c_str(), filter);
 }
 
 std::string ProgressPaintProperty::ProgressOptions() const
@@ -66,7 +70,7 @@ std::string ProgressPaintProperty::ProgressOptions() const
     return jsonValue->ToString();
 }
 
-void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json) const
+void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -98,7 +102,7 @@ void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& js
     }
     font->Put("family", fontFamily.c_str());
     capsuleStyle->Put("font", font);
-    json->Put("capsuleStyle", capsuleStyle);
+    json->PutExtAttr("capsuleStyle", capsuleStyle, filter);
 }
 
 std::string ProgressPaintProperty::ToJsonGradientColor() const

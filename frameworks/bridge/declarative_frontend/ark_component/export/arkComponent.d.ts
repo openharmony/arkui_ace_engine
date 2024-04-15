@@ -306,7 +306,7 @@ declare class ArkGridColComponent extends ArkComponent implements GridColAttribu
     gridColOffset(value: number | GridColColumnOption): GridColAttribute;
     order(value: number | GridColColumnOption): GridColAttribute;
 }
-declare class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
+declare class ImageColorFilterModifier extends ModifierWithKey<ColorFilter | DrawingColorFilter> {
     constructor(value: ColorFilter);
     static identity: Symbol;
     applyPeer(node: KNode, reset: boolean): void;

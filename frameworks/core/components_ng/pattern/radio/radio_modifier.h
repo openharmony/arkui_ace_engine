@@ -49,6 +49,9 @@ enum class TouchHoverAnimationType {
 class RadioModifier : public ContentModifier {
     DECLARE_ACE_TYPE(RadioModifier, ContentModifier);
 
+private:
+    void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
+
 public:
     RadioModifier();
     ~RadioModifier() override = default;
@@ -79,10 +82,12 @@ public:
     {
         pointColor_->Set(LinearColor(pointColor));
     }
+
     void SetactiveColor(const Color& activeColor)
     {
         activeColor_->Set(LinearColor(activeColor));
     }
+
     void SetinactiveColor(const Color& inactiveColor)
     {
         inactiveColor_->Set(LinearColor(inactiveColor));
@@ -188,6 +193,13 @@ public:
         showHoverEffect_ = showHoverEffect;
     }
 
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
+    }
+
 private:
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
@@ -206,6 +218,7 @@ private:
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
+    RefPtr<PropertyBool> isFocused_;
 
     RefPtr<AnimatablePropertyColor> pointColor_;
     RefPtr<AnimatablePropertyColor> activeColor_;

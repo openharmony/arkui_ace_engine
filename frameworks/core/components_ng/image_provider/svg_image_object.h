@@ -37,7 +37,7 @@ public:
     {
         return Claim(this);
     }
-    RefPtr<SvgDomBase> MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor);
+    RefPtr<SvgDomBase> MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src);
     const RefPtr<ImageData>& GetSvgImageData() const;
 
 private:

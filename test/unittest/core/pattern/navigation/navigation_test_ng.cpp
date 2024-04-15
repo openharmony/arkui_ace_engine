@@ -80,6 +80,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr Dimension DEFAULT_NAVBAR_WIDTH = 240.0_vp;
 constexpr int32_t TEST_DATA = 10;
 constexpr int32_t STANDARD_INDEX = -1;
@@ -360,7 +361,7 @@ HWTEST_F(NavigationTestNg, NavigationTestNg002, TestSize.Level1)
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
     ASSERT_NE(AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode()), nullptr);
-    navigationGroupNode.ToJsonValue(json);
+    navigationGroupNode.ToJsonValue(json, filter);
 }
 
 /**

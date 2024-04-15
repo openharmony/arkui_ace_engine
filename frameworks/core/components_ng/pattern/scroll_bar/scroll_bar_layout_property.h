@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 
@@ -46,9 +47,9 @@ public:
         ResetDisplayMode();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         std::unordered_map<Axis, std::string> directionMap = {
             { Axis::VERTICAL, "ScrollBarDirection.Vertical" },
             { Axis::HORIZONTAL, "ScrollBarDirection.Horizontal" }
@@ -58,8 +59,8 @@ public:
             { DisplayMode::AUTO, "BarState.Auto" },
             { DisplayMode::ON, "BarState.On" }
             };
-        json->Put("direction", directionMap[GetAxisValue(Axis::VERTICAL)].c_str());
-        json->Put("state", stateMap[GetDisplayModeValue(DisplayMode::AUTO)].c_str());
+        json->PutExtAttr("direction", directionMap[GetAxisValue(Axis::VERTICAL)].c_str(), filter);
+        json->PutExtAttr("state", stateMap[GetDisplayModeValue(DisplayMode::AUTO)].c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);

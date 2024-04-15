@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "base/log/ace_scoring_log.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -64,7 +65,9 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
         int32_t res = 1;
 #ifdef SECURITY_COMPONENT_ENABLE
         res = ReportSecurityComponentClickEvent(event);
-        if (res != 0) {
+        if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
+            res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
+        } else if (res != 0) {
             LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
             res = 1;
         }
@@ -133,6 +136,10 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     gestureInfo.SetDisplayY(item.GetDisplayY());
     gestureInfo.SetPointerEvent(info.GetPointerEvent());
     int res = ReportSecurityComponentClickEvent(gestureInfo);
+    if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
+        LOGI("wait for dialog, drop current click");
+        return;
+    }
     if (res != 0) {
         LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
         res = 1;
@@ -224,39 +231,41 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
     SetNodeHitTestMode(text, HitTestMode::HTMTRANSPARENT);
 }
 
-void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto node = GetHost();
     CHECK_NULL_VOID(node);
 
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    json->Put("text", layoutProperty->GetSecurityComponentDescription().value_or(0));
-    json->Put("icon", layoutProperty->GetIconStyle().value_or(0));
-    json->Put("buttonType", layoutProperty->GetBackgroundType().value_or(0));
-    json->Put("layoutDirection", static_cast<int64_t>(
-        layoutProperty->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::VERTICAL)));
-    json->Put("type", node->GetTag().c_str());
+    json->PutExtAttr("text", layoutProperty->GetSecurityComponentDescription().value_or(0), filter);
+    json->PutExtAttr("icon", layoutProperty->GetIconStyle().value_or(0), filter);
+    json->PutExtAttr("buttonType", layoutProperty->GetBackgroundType().value_or(0), filter);
+    json->PutExtAttr("layoutDirection", static_cast<int64_t>(
+        layoutProperty->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::VERTICAL)), filter);
+    json->PutExtAttr("type", node->GetTag().c_str(), filter);
 
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
         auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(iconProp);
-        json->Put("iconSize",
-            iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ToString().c_str());
-        json->Put("iconColor",
-            iconProp->GetImageSourceInfo().value().GetFillColor().value_or(Color::WHITE).ColorToString().c_str());
+        json->PutExtAttr("iconSize",
+            iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ToString().c_str(), filter);
+        json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo().value().GetFillColor().
+            value_or(Color::WHITE).ColorToString().c_str(), filter);
     }
     RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
     if (textNode != nullptr) {
         auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProp);
-        json->Put("fontSize", textProp->GetFontSize().value_or(Dimension(0.0)).ToString().c_str());
-        json->Put("fontWeight",
-            V2::ConvertWrapFontWeightToStirng(textProp->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-        json->Put("fontFamily", "HarmonyOS Sans");
-        json->Put("fontStyle", static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)));
-        json->Put("fontColor", textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str());
+        json->PutExtAttr("fontSize", textProp->GetFontSize().value_or(Dimension(0.0)).ToString().c_str(), filter);
+        json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(
+            textProp->GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
+        json->PutExtAttr("fontFamily", "HarmonyOS Sans", filter);
+        json->PutExtAttr("fontStyle",
+            static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)), filter);
+        json->PutExtAttr("fontColor",
+            textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
     }
     auto paddingJson = JsonUtil::Create(true);
     paddingJson->Put("top", layoutProperty->GetBackgroundTopPadding().value_or(Dimension(0.0)).ToString().c_str());
@@ -264,12 +273,13 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) con
         layoutProperty->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ToString().c_str());
     paddingJson->Put("left", layoutProperty->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ToString().c_str());
     paddingJson->Put("right", layoutProperty->GetBackgroundRightPadding().value_or(Dimension(0.0)).ToString().c_str());
-    json->Put("padding", paddingJson);
-    json->Put("textIconSpace", layoutProperty->GetTextIconSpace().value_or(Dimension(0.0)).ToString().c_str());
-    ToJsonValueRect(json);
+    json->PutExtAttr("padding", paddingJson, filter);
+    json->PutExtAttr("textIconSpace",
+        layoutProperty->GetTextIconSpace().value_or(Dimension(0.0)).ToString().c_str(), filter);
+    ToJsonValueRect(json, filter);
 }
 
-void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json) const
+void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto node = GetHost();
     CHECK_NULL_VOID(node);
@@ -278,23 +288,25 @@ void SecurityComponentPattern::ToJsonValueRect(std::unique_ptr<JsonValue>& json)
     if (buttonNode != nullptr) {
         const auto& renderContext = buttonNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        json->Put("backgroundColor", renderContext->GetBackgroundColor().value().ColorToString().c_str());
-        json->Put("borderColor",
-            renderContext->GetBorderColor()->leftColor.value_or(Color::BLACK).ColorToString().c_str());
-        json->Put("borderStyle",
-            static_cast<int>(renderContext->GetBorderStyle()->styleLeft.value_or(BorderStyle::NONE)));
+        json->PutExtAttr("backgroundColor",
+            renderContext->GetBackgroundColor().value().ColorToString().c_str(), filter);
+        json->PutExtAttr("borderColor",
+            renderContext->GetBorderColor()->leftColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
+        json->PutExtAttr("borderStyle",
+            static_cast<int>(renderContext->GetBorderStyle()->styleLeft.value_or(BorderStyle::NONE)), filter);
         auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(bgProp);
         const auto& borderWidth = bgProp->GetBorderWidthProperty();
         if (borderWidth != nullptr) {
-            json->Put("borderWidth", borderWidth->leftDimen.value_or(Dimension(0.0)).ToString().c_str());
+            json->PutExtAttr("borderWidth",
+                borderWidth->leftDimen.value_or(Dimension(0.0)).ToString().c_str(), filter);
         }
         auto borderRadius = bgProp->GetBorderRadius();
         if (borderRadius.has_value()) {
-            json->Put("borderRadius",
-                borderRadius->radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
+            json->PutExtAttr("borderRadius", borderRadius->radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).
+                ToString().c_str(), filter);
         } else {
-            json->Put("borderRadius", "0.00vp");
+            json->PutExtAttr("borderRadius", "0.00vp", filter);
         }
     }
 }

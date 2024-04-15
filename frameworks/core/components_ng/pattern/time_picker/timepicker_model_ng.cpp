@@ -234,6 +234,11 @@ void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    if ((timePickerRowPattern->GetPrefixHour() != hourType) ||
+        (timePickerRowPattern->GetPrefixMinute() != minuteType) ||
+        (timePickerRowPattern->GetPrefixSecond() != secondType)) {
+        timePickerRowPattern->SetDateTimeOptionUpdate(true);
+    }
     timePickerRowPattern->SetPrefixHour(hourType);
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, static_cast<int32_t>(hourType));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute, static_cast<int32_t>(minuteType));

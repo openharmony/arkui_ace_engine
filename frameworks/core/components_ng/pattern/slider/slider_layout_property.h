@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SLIDER_SLIDER_LAYOUT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/pipeline/pipeline_base.h"
@@ -42,19 +43,19 @@ public:
         ResetSliderLayoutStyle();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
-        LayoutProperty::ToJsonValue(json);
-        json->Put("trackThickness",
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("trackThickness",
             GetThickness()
                 .value_or(GetSliderModeValue(SliderModel::SliderMode::OUTSET) == SliderModel::SliderMode::OUTSET
                               ? theme->GetOutsetTrackThickness()
                               : theme->GetInsetTrackThickness())
-                .ToString().c_str());
+                .ToString().c_str(), filter);
         static const std::array<std::string, 4> SLIDER_MODE_TO_STRING = {
             "SliderStyle.OutSet",
             "SliderStyle.InSet",
@@ -62,9 +63,9 @@ public:
             "SliderStyle.Capsule",
         };
         // should be in constructor
-        json->Put("style",
+        json->PutExtAttr("style",
             SLIDER_MODE_TO_STRING.at(static_cast<int32_t>(GetSliderMode().value_or(SliderModel::SliderMode::OUTSET)))
-                .c_str());
+                .c_str(), filter);
         auto jsonValue = JsonUtil::Create(true);
         if (jsonValue) {
             if (GetBlockSize().has_value()) {
@@ -77,7 +78,7 @@ public:
                 jsonValue->Put("width", themeBlockSize.ToString().c_str());
                 jsonValue->Put("height", themeBlockSize.ToString().c_str());
             }
-            json->Put("blockSize", jsonValue);
+            json->PutExtAttr("blockSize", jsonValue, filter);
         }
     }
 

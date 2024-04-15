@@ -252,11 +252,13 @@ void ImageModelNG::SetSyncMode(bool syncMode)
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float> &matrix)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
+    ACE_RESET_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter);
 }
 
 void ImageModelNG::SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter);
+    ACE_RESET_PAINT_PROPERTY(ImageRenderProperty, ColorFilter);
 }
 
 void ImageModelNG::SetDraggable(bool draggable)
@@ -320,6 +322,11 @@ void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
     auto srcInfo = CreateSourceInfo(src, pixMapPtr, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
+void ImageModelNG::SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
 }
 
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)

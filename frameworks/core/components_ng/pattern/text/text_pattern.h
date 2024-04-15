@@ -28,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_adapter.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
@@ -282,7 +283,6 @@ public:
     virtual void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
     void CreateHandles() override;
-
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
     // end of TextDragBase implementations
@@ -663,7 +663,7 @@ private:
     void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     // to check if drag is in progress
     void SetCurrentDragTool(SourceTool tool)
     {
@@ -707,7 +707,6 @@ private:
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
     mutable std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
-    std::function<void()> processOverlayDelayTask_;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);

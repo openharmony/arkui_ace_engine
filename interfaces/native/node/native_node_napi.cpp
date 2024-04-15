@@ -100,4 +100,34 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
     return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
 }
 
+int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_ContextHandle* context)
+{
+    bool hasProperty = false;
+    auto result = napi_has_named_property(env, value, "instanceId_", &hasProperty);
+    if (result != napi_ok || !hasProperty) {
+        LOGE("fail to get Context value");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+
+    napi_value contextPtr = nullptr;
+    result = napi_get_named_property(env, value, "instanceId_", &contextPtr);
+    if (result != napi_ok) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+
+    napi_valuetype valuetype;
+    if (napi_typeof(env, contextPtr, &valuetype) != napi_ok) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (valuetype != napi_number) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t instanceId = -1;
+    result = napi_get_value_int32(env, contextPtr, &instanceId);
+    if (result != napi_ok) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    *context = new ArkUI_Context({ .id = instanceId });
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
 }

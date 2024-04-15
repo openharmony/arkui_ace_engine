@@ -55,7 +55,7 @@ public:
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
-    void SetOnClick(std::function<void(const BaseEventInfo*)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo*)>&& click) override;
     void ClearOnClick() override {};
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;

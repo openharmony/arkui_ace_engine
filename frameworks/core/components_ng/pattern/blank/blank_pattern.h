@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/blank/blank_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class BlankPattern : public Pattern {
     DECLARE_ACE_TYPE(BlankPattern, Pattern);
@@ -31,7 +32,7 @@ public:
     BlankPattern() = default;
     ~BlankPattern() override = default;
     std::string GetColorString() const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void DumpInfo() override;
     void BeforeCreateLayoutWrapper() override;
 

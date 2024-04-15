@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
@@ -54,7 +55,7 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     return node;
 }
 
-void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
 #if defined(PREVIEW)
     auto frameSize = frame_.rect_.GetSize();

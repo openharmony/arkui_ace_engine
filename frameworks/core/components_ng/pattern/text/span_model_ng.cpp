@@ -141,7 +141,7 @@ void SpanModelNG::SetLineHeight(const Dimension& value)
     ACE_UPDATE_SPAN_PROPERTY(LineHeight, value, PropertyInfo::LINEHEIGHT);
 }
 
-void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
+void SpanModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc), PropertyInfo::NONE);

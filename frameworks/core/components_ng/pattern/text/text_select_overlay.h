@@ -54,7 +54,7 @@ public:
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
 
 protected:
-    virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, float handleHeight, bool isFirstHandle);
+    virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
 
 private:
     void RemoveAreaChangeInner();

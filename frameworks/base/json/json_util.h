@@ -20,6 +20,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "interfaces/inner_api/ace/serializeable_object.h"
 
 struct cJSON;
@@ -77,6 +78,24 @@ public:
     bool Put(const char* key, bool value) override;
     virtual bool Put(const char* key, const std::unique_ptr<JsonValue>& value);
     bool Put(const std::unique_ptr<JsonValue>& value);
+
+    bool PutFixedAttr(const char* key, const char* value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
+    bool PutFixedAttr(const char* key, size_t value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
+    bool PutFixedAttr(const char* key, int32_t value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
+    bool PutFixedAttr(const char* key, int64_t value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
+    bool PutFixedAttr(const char* key, double value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
+    bool PutFixedAttr(const char* key, bool value, const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
+    virtual bool PutFixedAttr(const char* key, const std::unique_ptr<JsonValue>& value,
+        const NG::InspectorFilter& filter, NG::FixedAttrBit attr);
+
+    bool PutExtAttr(const char* key, const char* value, const NG::InspectorFilter& filter);
+    bool PutExtAttr(const char* key, size_t value, const NG::InspectorFilter& filter);
+    bool PutExtAttr(const char* key, int32_t value, const NG::InspectorFilter& filter);
+    bool PutExtAttr(const char* key, int64_t value, const NG::InspectorFilter& filter);
+    bool PutExtAttr(const char* key, double value, const NG::InspectorFilter& filter);
+    bool PutExtAttr(const char* key, bool value, const NG::InspectorFilter& filter);
+    virtual bool PutExtAttr(const char* key, const std::unique_ptr<JsonValue>& value,
+        const NG::InspectorFilter& filter);
 
     JsonObject* ReleaseJsonObject();
     bool PutRef(const char* key, std::unique_ptr<JsonValue>&& value);

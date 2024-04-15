@@ -151,6 +151,11 @@ public:
     static float GetFontWeightScale();
 
     /*
+     * Get size scale of device.
+     */
+    static float GetFontScale();
+
+    /*
      * Get density of default display.
      */
     static double GetResolution()

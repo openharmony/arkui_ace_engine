@@ -44,6 +44,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const bool RATING_INDICATOR = true;
 const int32_t DEFAULT_STAR_NUM = 5;
 const int32_t RATING_STAR_NUM = 10;
@@ -370,7 +371,7 @@ HWTEST_F(RatingTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
     EXPECT_FALSE(ratingPattern->isSecondaryImageInfoFromTheme_);
     EXPECT_FALSE(ratingPattern->isSecondaryImageInfoFromTheme_);
     auto json = JsonUtil::Create(true);
-    ratingPattern->ToJsonValue(json);
+    ratingPattern->ToJsonValue(json, filter);
 
     EXPECT_EQ(json->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
     EXPECT_EQ(json->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
@@ -384,7 +385,7 @@ HWTEST_F(RatingTestNg, RatingPatternToJsonValueTest008, TestSize.Level1)
     ratingPattern->isSecondaryImageInfoFromTheme_ = true;
     ratingPattern->isBackgroundImageInfoFromTheme_ = true;
     auto json2 = JsonUtil::Create(true);
-    ratingPattern->ToJsonValue(json2);
+    ratingPattern->ToJsonValue(json2, filter);
 
     EXPECT_EQ(json2->GetValue(RATING_FOREGROUND_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);
     EXPECT_EQ(json2->GetValue(RATING_SECONDARY_IMAGE_KEY)->GetString(), IMAGE_SOURCE_INFO_STRING);

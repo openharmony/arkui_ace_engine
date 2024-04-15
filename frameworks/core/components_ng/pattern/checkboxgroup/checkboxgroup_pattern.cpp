@@ -443,6 +443,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
                 if (select) {
                     paintProperty->UpdateCheckBoxSelect(select);
                     auto pattern = node->GetPattern<CheckBoxPattern>();
+                    pattern->StartCustomNodeAnimation(select);
                     pattern->UpdateUIStatus(select);
                     pattern->SetLastSelect(select);
                     eventHub->UpdateChangeEvent(select);
@@ -451,6 +452,7 @@ void CheckBoxGroupPattern::UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNo
             if (paintProperty->HasCheckBoxSelect() && paintProperty->GetCheckBoxSelectValue() != select) {
                 paintProperty->UpdateCheckBoxSelect(select);
                 auto pattern = node->GetPattern<CheckBoxPattern>();
+                pattern->StartCustomNodeAnimation(select);
                 pattern->UpdateUIStatus(select);
                 pattern->SetLastSelect(select);
                 eventHub->UpdateChangeEvent(select);
