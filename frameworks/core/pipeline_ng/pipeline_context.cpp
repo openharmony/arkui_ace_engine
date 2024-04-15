@@ -907,7 +907,6 @@ void PipelineContext::FlushBuild()
     }
     FlushOnceVsyncTask();
     isRebuildFinished_ = false;
-    navigationMgr_->FireNavigationUpdateCallback();
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();

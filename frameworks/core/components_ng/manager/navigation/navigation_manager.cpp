@@ -58,5 +58,6 @@ void NavigationManager::FireNavigationUpdateCallback()
     for (const auto& func : updateCallbacks_) {
         func();
     }
+    updateCallbacks_.clear();
 }
 } // namespace OHOS::Ace::NG
