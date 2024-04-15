@@ -1925,3 +1925,6 @@ declare class ArkEffectComponentComponent extends ArkComponent implements Effect
 }
 declare class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
 }
+
+declare class CheckboxWidthModifier extends ModifierWithKey<Length>{}
+declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor>{}
