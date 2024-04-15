@@ -218,6 +218,16 @@ public:
         return contentEndOffset_;
     }
 
+    void SetPrevContentStartOffset(float prevContentStartOffset)
+    {
+        prevContentStartOffset_ = prevContentStartOffset;
+    }
+
+    void SetPrevContentEndOffset(float prevContentEndOffset)
+    {
+        prevContentEndOffset_ = prevContentEndOffset;
+    }
+
     float GetStartPosition() const
     {
         if (itemPosition_.empty()) {
@@ -392,6 +402,7 @@ private:
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
+    void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -410,6 +421,8 @@ private:
     float endMainPos_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float prevContentStartOffset_ = 0.0f;
+    float prevContentEndOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;

@@ -108,6 +108,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentStartOffset_ = 0;
         contentEndOffset_ = 0;
     }
+    UpdateSnapAlignContentOffset(listLayoutProperty);
 
     if (totalItemCount_ > 0) {
         OnSurfaceChanged(layoutWrapper);
@@ -626,6 +627,26 @@ void ListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layoutWra
         if (GetEndIndex() == totalItemCount_ - 1) {
             itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
             contentEndOffset_ = std::max((contentMainSize_ - itemHeight) / 2.0f, 0.0f);
+        }
+    }
+}
+
+void ListLayoutAlgorithm::UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty)
+{
+    auto scrollSnapAlign = listLayoutProperty->GetScrollSnapAlign().value_or(V2::ScrollSnapAlign::NONE);
+    if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
+        if ((GetEndIndex() == totalItemCount_ - 1) &&
+           LessOrEqual(GetEndPosition() - currentDelta_, contentMainSize_ - prevContentEndOffset_)) {
+            currentDelta_ = currentDelta_ + contentEndOffset_ - prevContentEndOffset_;
+        } else {
+            currentDelta_ = currentDelta_ - contentStartOffset_ + prevContentStartOffset_;
+        }
+    }
+    if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
+        if ((GetStartIndex() == 0) && NonNegative(GetStartPosition() - currentDelta_ - prevContentStartOffset_)) {
+            currentDelta_ = currentDelta_ - contentStartOffset_ + prevContentStartOffset_;
+        } else {
+            currentDelta_ = currentDelta_ + contentEndOffset_ - prevContentEndOffset_;
         }
     }
 }
