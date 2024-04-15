@@ -916,6 +916,12 @@ void OverlayManager::PopToast(int32_t toastId)
             }
         },
         option.GetOnFinishEvent());
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+#endif
     // start animation immediately
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
