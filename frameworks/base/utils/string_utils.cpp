@@ -27,6 +27,7 @@ const size_t MAX_STRING_SIZE = 256;
 const char DEFAULT_STRING[] = "error";
 const std::wstring DEFAULT_WSTRING = L"error";
 const std::u16string DEFAULT_USTRING = u"error";
+const std::u32string DEFAULT_U32STRING = U"error";
 
 const std::string FormatString(const char* fmt, ...)
 {

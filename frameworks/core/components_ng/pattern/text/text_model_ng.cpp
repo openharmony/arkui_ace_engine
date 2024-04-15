@@ -65,7 +65,6 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
     CHECK_NULL_VOID(textPattern);
     auto spanString = AceType::DynamicCast<SpanString>(spanBase);
     if (spanString) {
-        spanString->AddSpanWatcher(WeakPtr(textPattern));
         auto spans = spanString->GetSpanItems();
         textPattern->SetSpanItemChildren(spans);
         textPattern->SetSpanStringMode(true);
@@ -311,7 +310,7 @@ void TextModelNG::SetTextDetectConfig(const std::string& value,
     textPattern->SetOnResult(std::move(onResult));
 }
 
-void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
+void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

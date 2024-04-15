@@ -16,11 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 
 namespace OHOS::Ace::NG {
+class SliderConfiguration : public CommonConfiguration {
+public:
+    SliderConfiguration(double value, double min, double max, double step, bool enabled)
+        : CommonConfiguration(enabled), value_(value), min_(min), max_(max), step_(step)
+    {}
+    double value_;
+    double min_;
+    double max_;
+    double step_;
+};
+using SliderMakeCallback =
+    std::function<RefPtr<FrameNode>(const SliderConfiguration& sliderConfiguration)>;
 class ACE_EXPORT SliderModelNG : public SliderModel {
 public:
     void Create(float value, float step, float min, float max) override;
@@ -120,6 +133,8 @@ public:
     static std::string GetBlockImageValue(FrameNode* frameNode);
     static RefPtr<BasicShape> GetBlockShape(FrameNode* frameNode);
     static Gradient CreateSolidGradient(Color value);
+    static void SetBuilderFunc(FrameNode* frameNode, SliderMakeCallback&& jsMake);
+    static void SetChangeValue(FrameNode* frameNode, double value, int32_t mode);
 
 private:
     void SetSliderValue(float value);

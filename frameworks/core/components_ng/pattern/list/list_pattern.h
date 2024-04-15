@@ -16,14 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
+#include <tuple>
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
+#include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -32,6 +35,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct ListItemGroupPara {
     int32_t lanes = -1;
     int32_t itemEndIndex = -1;
@@ -45,6 +50,8 @@ class ListPattern : public ScrollablePattern {
 public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
     ~ListPattern() override = default;
+
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode);
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -70,7 +77,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -126,6 +133,10 @@ public:
                 }
             });
     }
+
+    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+
+    std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
 
@@ -251,11 +262,13 @@ public:
         }
     }
 
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
+    void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
+    bool ListChildrenSizeExist()
+    {
+        return static_cast<bool>(childrenSize_);
+    }
 private:
-    struct PositionInfo {
-        float mainPos;
-        float mainSize;
-    };
 
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -289,10 +302,10 @@ private:
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
-    void CheckRestartSpring(bool sizeDiminished);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
+    void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
@@ -322,6 +335,11 @@ private:
     bool UpdateEndListItemIndex();
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
+
+    void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
+    bool isFadingEdge_ = false;
+    bool isTopEdgeFading_ = false;
+    bool isLowerEdgeFading_ = false;
 
     int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = -1;
@@ -354,7 +372,9 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
-    std::map<int32_t, PositionInfo> posMap_;
+    RefPtr<ListPositionMap> posMap_;
+    RefPtr<ListChildrenMainSize> childrenSize_;
+    float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;
     std::set<int32_t> pressedItem_;

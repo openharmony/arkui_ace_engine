@@ -15,13 +15,14 @@
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 
+#include "core/components_ng/pattern/text/span/span_object.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 namespace OHOS::Ace::Framework {
-
-const std::vector<SpanType> types = { SpanType::Font };
+const std::vector<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset, SpanType::Decoration,
+    SpanType::LetterSpacing, SpanType::TextShadow };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
@@ -140,27 +141,44 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
     JSRef<JSArray> spanObjectArray = JSRef<JSArray>::New();
     uint32_t idx = 0;
     for (const RefPtr<SpanBase>& spanObject : spans) {
-        spanObjectArray->SetValueAt(idx++, CreateJSSpanBaseObject(spanObject));
+        spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(spanObject));
     }
     info.SetReturnValue(JSRef<JSVal>::Cast(spanObjectArray));
 }
 
-JSRef<JSObject> JSSpanString::CreateJSSpanBaseObject(const RefPtr<SpanBase>& spanObject)
+JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spanObject)
 {
     JSRef<JSObject> resultObj = JSRef<JSObject>::New();
     resultObj->SetProperty<int32_t>("start", spanObject->GetStartIndex());
     resultObj->SetProperty<int32_t>("length", spanObject->GetLength());
     resultObj->SetProperty<int32_t>("styledKey", static_cast<int32_t>(spanObject->GetSpanType()));
+    JSRef<JSObject> obj;
     switch (spanObject->GetSpanType()) {
-        case SpanType::Font: {
-            JSRef<JSObject> obj = CreateJsFontSpan(spanObject);
-            resultObj->SetPropertyObject("styledValue", obj);
-            return resultObj;
+        case SpanType::Font:
+            obj = CreateJsFontSpan(spanObject);
+            break;
+        case SpanType::Decoration: {
+            obj = CreateJsDecorationSpan(spanObject);
+            break;
         }
+        case SpanType::BaselineOffset: {
+            obj = CreateJsBaselineOffsetSpan(spanObject);
+            break;
+        }
+        case SpanType::LetterSpacing: {
+            obj = CreateJsLetterSpacingSpan(spanObject);
+            break;
+        }
+        case SpanType::Gesture:
+            obj = CreateJsGestureSpan(spanObject);
+            break;
+        case SpanType::TextShadow:
+            obj = CreateJsTextShadowSpan(spanObject);
+            break;
         default:
             break;
     }
-
+    resultObj->SetPropertyObject("styledValue", obj);
     return resultObj;
 }
 
@@ -174,11 +192,71 @@ JSRef<JSObject> JSSpanString::CreateJsFontSpan(const RefPtr<SpanBase>& spanObjec
     return obj;
 }
 
+JSRef<JSObject> JSSpanString::CreateJsDecorationSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<DecorationSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSDecorationSpan>::NewInstance();
+    auto decorationSpan = Referenced::Claim(obj->Unwrap<JSDecorationSpan>());
+    decorationSpan->SetDecorationSpan(span);
+    return obj;
+}
+
+JSRef<JSObject> JSSpanString::CreateJsBaselineOffsetSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<BaselineOffsetSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSBaselineOffsetSpan>::NewInstance();
+    auto baselineOffsetSpan = Referenced::Claim(obj->Unwrap<JSBaselineOffsetSpan>());
+    baselineOffsetSpan->SetBaselineOffsetSpan(span);
+    return obj;
+}
+
+JSRef<JSObject> JSSpanString::CreateJsLetterSpacingSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<LetterSpacingSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSLetterSpacingSpan>::NewInstance();
+    auto letterSpacingSpan = Referenced::Claim(obj->Unwrap<JSLetterSpacingSpan>());
+    letterSpacingSpan->SetLetterSpacingSpan(span);
+    return obj;
+}
+
+JSRef<JSObject> JSSpanString::CreateJsGestureSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<GestureSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSGestureSpan>::NewInstance();
+    auto gestureSpan = Referenced::Claim(obj->Unwrap<JSGestureSpan>());
+    gestureSpan->SetGestureSpan(span);
+    return obj;
+}
+
+JSRef<JSObject> JSSpanString::CreateJsTextShadowSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<TextShadowSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSTextShadowSpan>::NewInstance();
+    auto textShadowSpan = Referenced::Claim(obj->Unwrap<JSTextShadowSpan>());
+    textShadowSpan->SetTextShadowSpan(span);
+    return obj;
+}
+
 RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, SpanType type, JSRef<JSObject> obj)
 {
     switch (type) {
         case SpanType::Font:
             return ParseJsFontSpan(start, length, obj);
+        case SpanType::Decoration:
+            return ParseJsDecorationSpan(start, length, obj);
+        case SpanType::LetterSpacing:
+            return ParseJsLetterSpacingSpan(start, length, obj);
+        case SpanType::BaselineOffset:
+            return ParseJsBaselineOffsetSpan(start, length, obj);
+        case SpanType::Gesture:
+            return ParseJsGestureSpan(start, length, obj);
+        case SpanType::TextShadow:
+            return ParseJsTextShadowSpan(start, length, obj);
         default:
             break;
     }
@@ -194,8 +272,59 @@ RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, JS
     return nullptr;
 }
 
-bool JSSpanString::CheckSpanType(const int32_t& type)
+RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
 {
+    auto* decorationSpan = obj->Unwrap<JSDecorationSpan>();
+    if (decorationSpan && decorationSpan->GetDecorationSpan()) {
+        return AceType::MakeRefPtr<DecorationSpan>(decorationSpan->GetDecorationSpan()->GetTextDecorationType(),
+            decorationSpan->GetDecorationSpan()->GetColor(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsBaselineOffsetSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
+{
+    auto* baselineOffsetSpan = obj->Unwrap<JSBaselineOffsetSpan>();
+    if (baselineOffsetSpan && baselineOffsetSpan->GetBaselineOffsetSpan()) {
+        return AceType::MakeRefPtr<BaselineOffsetSpan>(
+            baselineOffsetSpan->GetBaselineOffsetSpan()->GetBaselineOffset(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsLetterSpacingSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
+{
+    auto* letterSpacingSpan = obj->Unwrap<JSLetterSpacingSpan>();
+    if (letterSpacingSpan && letterSpacingSpan->GetLetterSpacingSpan()) {
+        return AceType::MakeRefPtr<LetterSpacingSpan>(
+            letterSpacingSpan->GetLetterSpacingSpan()->GetLetterSpacing(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsGestureSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
+{
+    auto* gestureSpan = obj->Unwrap<JSGestureSpan>();
+    if (gestureSpan && gestureSpan->GetGestureSpan()) {
+        return AceType::MakeRefPtr<GestureSpan>(
+            gestureSpan->GetGestureSpan()->GetGestureStyle(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsTextShadowSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
+{
+    auto* textShadowSpan = obj->Unwrap<JSTextShadowSpan>();
+    if (textShadowSpan && textShadowSpan->GetTextShadowSpan()) {
+        return AceType::MakeRefPtr<TextShadowSpan>(
+            textShadowSpan->GetTextShadowSpan()->GetTextShadow(), start, start + length);
+    }
+    return nullptr;
+}
+
+bool JSSpanString::CheckSpanType(const int32_t& spanType)
+{
+    auto type = std::find(types.begin(), types.end(), static_cast<SpanType>(spanType)) - types.begin();
     if (type < 0 || type >= static_cast<int32_t>(types.size())) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
         return false;

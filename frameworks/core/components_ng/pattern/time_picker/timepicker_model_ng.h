@@ -29,6 +29,8 @@ public:
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(TimeChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
+    void SetDateTimeOptions(ZeroPrefixType& hourType,
+        ZeroPrefixType& minuteType, ZeroPrefixType& secondType) override;
     void SetWheelModeEnabled(bool wheelModeEnabled) override;
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
@@ -46,6 +48,8 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static void SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
+        ZeroPrefixType& minuteType, ZeroPrefixType& secondType);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);

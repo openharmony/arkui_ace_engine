@@ -243,6 +243,14 @@ public:
         touchEventActuator_->AddTouchEvent(touchEvent);
     }
 
+    void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+        touchEventActuator_->AddTouchAfterEvent(touchEvent);
+    }
+
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (!touchEventActuator_) {
@@ -297,6 +305,7 @@ public:
     void ClearJSFrameNodeOnTouch();
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
@@ -314,11 +323,21 @@ public:
         return clickEventActuator_->IsClickEventsEmpty();
     }
 
+    GestureEventFunc GetClickEvent()
+    {
+        return clickEventActuator_->GetClickEvent();
+    }
+
     void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const
     {
         return longPressEventActuator_ != nullptr;
+    }
+
+    void SetRedirectClick(bool redirectClick)
+    {
+        redirectClick_ = redirectClick;
     }
 
     bool ActLongClick();
@@ -678,6 +697,7 @@ private:
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;
+    bool redirectClick_  = false;
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;

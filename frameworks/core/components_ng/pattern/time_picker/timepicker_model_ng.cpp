@@ -228,6 +228,27 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
 }
 
+void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
+    ZeroPrefixType& minuteType, ZeroPrefixType& secondType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    if ((timePickerRowPattern->GetPrefixHour() != hourType) ||
+        (timePickerRowPattern->GetPrefixMinute() != minuteType) ||
+        (timePickerRowPattern->GetPrefixSecond() != secondType)) {
+        timePickerRowPattern->SetDateTimeOptionUpdate(true);
+    }
+    timePickerRowPattern->SetPrefixHour(hourType);
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, static_cast<int32_t>(hourType));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute, static_cast<int32_t>(minuteType));
+    if (timePickerRowPattern->GetHasSecond()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond, static_cast<int32_t>(secondType));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond, static_cast<int32_t>(ZeroPrefixType::OFF));
+    }
+}
+
 void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled);
@@ -379,6 +400,9 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = pickerDialog.backgroundBlurStyle.value();
     }
+    if (pickerDialog.shadow.has_value()) {
+        properties.shadow = pickerDialog.shadow.value();
+    }
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -528,6 +552,24 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
+}
+
+void TimePickerModelNG::SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
+    ZeroPrefixType& minuteType, ZeroPrefixType& secondType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetPrefixHour(hourType);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixHour, static_cast<int32_t>(hourType), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixMinute,
+        static_cast<int32_t>(minuteType), frameNode);
+    if (timePickerRowPattern->GetHasSecond()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond,
+            static_cast<int32_t>(secondType), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, PrefixSecond,
+            static_cast<int32_t>(ZeroPrefixType::OFF), frameNode);
+    }
 }
 
 PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)

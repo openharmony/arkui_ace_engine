@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ public:
         RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
     void DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
+    void DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const;
 
     void SetBorderWidth(float borderWidth)
     {
@@ -226,6 +227,13 @@ public:
         hoverEffectType_ = hoverEffectType;
     }
 
+    void SetCheckboxGroupStyle(CheckBoxStyle checkBoxGroupStyle)
+    {
+        checkBoxGroupStyle_ = checkBoxGroupStyle;
+        CHECK_NULL_VOID(checkBoxGroupShape_);
+        checkBoxGroupShape_->Set(static_cast<int32_t>(checkBoxGroupStyle));
+    }
+
 private:
     RefPtr<AnimatablePropertyColor> activeColor_;
     RefPtr<AnimatablePropertyColor> pointColor_;
@@ -240,6 +248,8 @@ private:
     RefPtr<PropertyInt> status_;
     RefPtr<PropertyOffsetF> offset_;
     RefPtr<PropertySizeF> size_;
+    RefPtr<PropertyInt> checkBoxGroupShape_;
+    CheckBoxStyle checkBoxGroupStyle_ = CheckBoxStyle::CIRCULAR_STYLE;
     float borderWidth_;
     float borderRadius_;
     Color shadowColor_;

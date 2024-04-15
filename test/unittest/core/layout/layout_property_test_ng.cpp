@@ -39,6 +39,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::optional<float> ZERO { 0.0 };
 const std::optional<int32_t> SPAN_ONE { -1 };
 const std::optional<int32_t> OFFSET_ONE { -1 };
@@ -142,7 +143,7 @@ HWTEST_F(LayoutPropertyTestNg, ToJsonValue001, TestSize.Level1)
      * @tc.steps3: call ToJsonValue with json.
      * @tc.expected: Return expected results..
      */
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("padding"), "0.00vp");
     EXPECT_EQ(json->GetString("margin"), "0.00vp");
     EXPECT_EQ(json->GetString("visibility"), "Visibility.Visible");
@@ -193,7 +194,7 @@ HWTEST_F(LayoutPropertyTestNg, ToJsonValue002, TestSize.Level1)
      * @tc.steps3: call ToJsonValue with json.
      * @tc.expected: Return expected results.
      */
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("padding"), STRING_TEST);
     EXPECT_EQ(json->GetString("margin"), STRING_TEST);
     EXPECT_EQ(json->GetString("direction"), "Direction.Rtl");

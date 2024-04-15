@@ -49,7 +49,7 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
 {
     auto *stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::IMAGE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
@@ -64,9 +64,49 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
+    GetImagePattern()->SetIsAnimation(false);
     auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(isUriPureNumber);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
+}
+
+void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::IMAGE_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetChildren().empty()) {
+        auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        frameNode->AddChild(imageNode);
+    }
+    stack->Push(frameNode);
+
+    // set draggable for framenode
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto draggable = pipeline->GetDraggable<ImageTheme>();
+    if (draggable && !frameNode->IsDraggable()) {
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
+    auto pattern = GetImagePattern();
+    pattern->StopAnimation();
+    pattern->SetIsAnimation(true);
+    std::vector<ImageProperties> images = imageList;
+    pattern->SetImages(std::move(images));
+    pattern->SetDuration(duration);
+    pattern->SetIteration(iteration);
+    pattern->StartAnimation();
 }
 
 RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
@@ -212,6 +252,13 @@ void ImageModelNG::SetSyncMode(bool syncMode)
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float> &matrix)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
+    ACE_RESET_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter);
+}
+
+void ImageModelNG::SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter);
+    ACE_RESET_PAINT_PROPERTY(ImageRenderProperty, ColorFilter);
 }
 
 void ImageModelNG::SetDraggable(bool draggable)
@@ -275,6 +322,11 @@ void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
     auto srcInfo = CreateSourceInfo(src, pixMapPtr, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
+void ImageModelNG::SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
 }
 
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
@@ -495,6 +547,18 @@ ImageRenderMode ImageModelNG::GetImageRenderMode(FrameNode* frameNode)
     CHECK_NULL_RETURN(paintProperty, ImageRenderMode::ORIGINAL);
     CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), ImageRenderMode::ORIGINAL);
     return paintProperty->GetImagePaintStyle()->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
+}
+
+bool ImageModelNG::GetIsAnimation()
+{
+    return GetImagePattern()->GetIsAnimation();
+}
+
+RefPtr<ImagePattern> ImageModelNG::GetImagePattern()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return AceType::DynamicCast<ImagePattern>(frameNode->GetPattern());
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

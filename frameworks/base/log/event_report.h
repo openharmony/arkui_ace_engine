@@ -139,17 +139,11 @@ enum class FormExcepType {
 
 #ifdef VSYNC_TIMEOUT_CHECK
 enum class VsyncExcepType {
-    VSYNC_TIMEOUT
+    UI_VSYNC_TIMEOUT
 };
 #endif
 
 enum class RawEventType { WARNING, FREEZE, RECOVER };
-
-enum class PerformanceExecpType {
-    PAGE_NODE_OVERFLOW = 0,
-    PAGE_DEPTH_OVERFLOW,
-    FUNCTION_TIMEOUT
-};
 
 struct EventInfo {
     std::string eventType;
@@ -177,7 +171,7 @@ public:
     static void SendAccessibilityException(AccessibilityExcepType type);
     static void SendFormException(FormExcepType type);
 #ifdef VSYNC_TIMEOUT_CHECK
-    static void SendVsyncException(VsyncExcepType type);
+    static void SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp);
 #endif
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
@@ -195,8 +189,9 @@ public:
     static void ReportJankFrameFiltered(JankInfo& info);
     static void ReportDoubleClickTitle(int32_t stateChange);
     static void ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange);
-    static void PerformanceEventReport(PerformanceExecpType type, const std::string& pageUrl,
-        const std::string& msg ="");
+    static void ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold);
+    static void ReportPageDepthOverflow(const std::string& pageUrl, int32_t depth, int32_t threshold);
+    static void ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

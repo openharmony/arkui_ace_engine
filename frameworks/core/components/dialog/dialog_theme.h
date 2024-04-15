@@ -68,26 +68,38 @@ public:
             if (!dialogPattern) {
                 return;
             }
-            theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
             theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
             theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
             theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
             theme->subtitleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("subtitle_text_color", Color::BLACK));
+
             theme->subtitleTextStyle_.SetFontSize(
                 dialogPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp));
             theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
             theme->contentTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("content_text_font_size", 16.0_fp));
             theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
-            theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("dialog_container_radius", 32.0_vp));
+                theme->backgroundColor_ = dialogPattern->GetAttr<Color>("bg_color_version_twelve", Color(0xffffff));
+            } else {
+                theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("radius", 24.0_vp));
+                theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
+            }
+            theme->text_align_content_= dialogPattern->GetAttr<int>("text_align_content", 1);
+            theme->text_align_title_= dialogPattern->GetAttr<int>("text_align_title", 1);
+            theme->device_columns_dialog_= dialogPattern->GetAttr<int>("device_columns_dialog", 0);
             theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
             theme->dividerBetweenButtonWidth_ =
                 dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH, 2.0_px);
             theme->dividerColor_ = dialogPattern->GetAttr<Color>("divider_color", Color(0x33000000));
+            theme->backgroundBorderColor_ = dialogPattern->GetAttr<Color>("border_color", Color(0xff007dff));
+            theme->backgroundBorderWidth_ =  dialogPattern->GetAttr<Dimension>("border_width", 16.0_vp);
 
             auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
             theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
             theme->defaultPaddingBottomFixed_ =
                 dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
+            theme->dialogRatioHeight_ = dialogPattern->GetAttr<double>("dialog_ratio_height", 0.8f);
             theme->defaultDialogMarginBottom_ =
                 dialogPattern->GetAttr<Dimension>("default_dialog_margin_bottom", 16.0_vp);
             theme->buttonHighlightBgColor_ =
@@ -214,8 +226,20 @@ public:
                 dialogPattern->GetAttr<Dimension>("dialog_divider_padding_horizon", 4.0_vp),
                 dialogPattern->GetAttr<Dimension>("dialog_divider_padding_vertical", 6.0_vp));
             theme->marginBottom_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_bottom", 16.0_vp);
-            theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_start", 12.0_vp);
-            theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_end", 12.0_vp);
+            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_container_margin_left", 16.0_vp);
+                theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_container_margin_right", 16.0_vp);
+            } else {
+                theme->marginLeft_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_start", 12.0_vp);
+                theme->marginRight_ = dialogPattern->GetAttr<Dimension>("dialog_dimension_end", 12.0_vp);
+            }
+            theme->containerMaxWidth_ = dialogPattern->GetAttr<Dimension>("dialog_container_max_width", 400.0_vp);
+            theme->defaultShadowOn_ =
+                static_cast<uint32_t>(dialogPattern->GetAttr<double>("dialog_background_shadow_on",
+                static_cast<double>(ShadowStyle::None)));
+            theme->defaultShadowOff_ =
+                static_cast<uint32_t>(dialogPattern->GetAttr<double>("dialog_background_shadow_off",
+                static_cast<double>(ShadowStyle::None)));
         }
     };
 
@@ -274,6 +298,16 @@ public:
     const Edge& GetDefaultPadding() const
     {
         return defaultPadding_;
+    }
+
+    const Color& GetBackgroudBorderColor() const
+    {
+        return backgroundBorderColor_;
+    }
+
+    const Dimension& GetBackgroudBorderWidth()
+    {
+        return backgroundBorderWidth_;
     }
 
     const Edge& GetAdjustPadding() const
@@ -416,6 +450,11 @@ public:
         return frameEnd_;
     }
 
+    double GetDialogRatioHeight() const
+    {
+        return dialogRatioHeight_;
+    }
+
     double GetScaleStart() const
     {
         return scaleStart_;
@@ -474,6 +513,21 @@ public:
     int32_t GetAnimationDurationOut() const
     {
         return animationDurationOut_;
+    }
+
+    int32_t GetTextAlignContent() const
+    {
+        return text_align_content_;
+    }
+
+    int32_t GetTextAlignTitle() const
+    {
+        return text_align_title_;
+    }
+
+    int32_t GetDeviceColumns() const
+    {
+        return device_columns_dialog_;
     }
 
     const Color& GetDividerColor()
@@ -535,6 +589,7 @@ public:
     {
         return defaultDialogMarginBottom_;
     }
+
     const std::string& GetMultipleDialogDisplay()
     {
         return multipleDialogDisplay_;
@@ -549,12 +604,28 @@ public:
     {
         return buttonWithContentPadding_;
     }
+
+    const Dimension& GetContainerMaxWidth() const
+    {
+        return containerMaxWidth_;
+    }
+    
+    uint32_t GetDefaultShadowOn() const
+    {
+        return defaultShadowOn_;
+    }
+
+    uint32_t GetDefaultShadowOff() const
+    {
+        return defaultShadowOff_;
+    }
 protected:
     DialogTheme() = default;
 
 private:
     Radius radius_;
     Color backgroundColor_;
+    Color backgroundBorderColor_;
     TextStyle titleTextStyle_;
     TextStyle subtitleTextStyle_;
     TextStyle contentTextStyle_;
@@ -575,6 +646,7 @@ private:
     Dimension buttonSpacingVertical_;
     Dimension dividerLength_;
     Dimension dividerBetweenButtonWidth_;
+    Dimension backgroundBorderWidth_;
     Color buttonBackgroundColor_;
     Color buttonClickedColor_;
     Color buttonHighlightBgColor_;
@@ -585,6 +657,7 @@ private:
     Dimension translateValue_;
     double frameStart_ = 0.0;
     double frameEnd_ = 1.0;
+    double dialogRatioHeight_ = 1.0;
     double scaleStart_ = 0.0;
     double scaleEnd_ = 1.0;
     double opacityStart_ = 0.0;
@@ -592,6 +665,9 @@ private:
     int32_t animationDurationIn_ = 250;
     int32_t opacityAnimationDurIn_ = 150;
     int32_t animationDurationOut_ = 250;
+    int32_t text_align_content_ = 0;
+    int32_t text_align_title_ = 0;
+    int32_t device_columns_dialog_ = 0;
     Color maskColorStart_;
     Color maskColorEnd_;
     Color dividerColor_;
@@ -621,6 +697,9 @@ private:
     std::string multipleDialogDisplay_;
     bool expandDisplay_ = false;
     Dimension buttonWithContentPadding_;
+    Dimension containerMaxWidth_;
+    uint32_t defaultShadowOn_ = 6;
+    uint32_t defaultShadowOff_ = 6;
 };
 
 } // namespace OHOS::Ace

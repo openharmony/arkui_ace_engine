@@ -175,6 +175,7 @@ public:
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
+    void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
@@ -210,6 +211,7 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
+    float GetStatusBarHeight();
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -363,6 +365,7 @@ private:
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
+    void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) override;
 
     void OnForegroundColorUpdate(const Color& value) override;
     void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) override;
@@ -421,6 +424,7 @@ private:
 
     void OnLightPositionUpdate(const TranslateOptions& position) override;
     void OnLightIntensityUpdate(const float lightIntensity) override;
+    void OnLightColorUpdate(const Color& lightColor) override;
     void OnLightIlluminatedUpdate(const uint32_t lightIlluminated) override;
     void OnIlluminatedBorderWidthUpdate(const Dimension& illuminatedBorderWidth) override;
     void OnBloomUpdate(const float bloomIntensity) override;
@@ -538,8 +542,12 @@ private:
 
     float RoundValueToPixelGrid(float value);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    float OnePixelValueRounding(float value);
+    float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid();
     void RoundToPixelGrid(bool isRound, uint8_t flag);
+    void OnePixelRounding();
+    void OnePixelRounding(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;

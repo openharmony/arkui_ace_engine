@@ -39,6 +39,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr double INPUT_COUNT = 60000.0;
 constexpr bool IS_COUNT_DOWN = false;
 const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SS";
@@ -175,7 +176,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level1)
 
     textTimerLayoutProperty->UpdateFontFamily(FONT_FAMILY_VALUE);
     auto json = JsonUtil::Create(true);
-    textTimerLayoutProperty->ToJsonValue(json);
+    textTimerLayoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(textTimerLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
 
@@ -743,7 +744,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest010, TestSize.Level1)
      */
     textTimerLayoutProperty->UpdateTextShadow(TEXT_SHADOWS);
     auto json = JsonUtil::Create(true);
-    textTimerLayoutProperty->ToJsonValue(json);
+    textTimerLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("textShadow"));
     EXPECT_EQ(textTimerLayoutProperty->GetTextShadow(), TEXT_SHADOWS);
 }

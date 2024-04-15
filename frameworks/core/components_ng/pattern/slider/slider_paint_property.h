@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/components_ng/render/paint_property.h"
 
@@ -74,13 +75,13 @@ public:
         return jsonArray->ToString();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
-        PaintProperty::ToJsonValue(json);
+        PaintProperty::ToJsonValue(json, filter);
         auto jsonConstructor = JsonUtil::Create(true);
         jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());
         jsonConstructor->Put("min", std::to_string(GetMin().value_or(0.0f)).c_str());
@@ -89,42 +90,46 @@ public:
         jsonConstructor->Put("reverse", GetReverse().value_or(false) ? "true" : "false");
         jsonConstructor->Put("direction",
             (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
-        json->Put("constructor", jsonConstructor);
-        json->Put("blockColor", GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str());
-        json->Put("trackColor", ToJsonTrackBackgroundColor().c_str());
-        json->Put("selectedColor", GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str());
-        json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
-        json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
-        json->Put("blockBorderColor", GetBlockBorderColorValue(Color::TRANSPARENT).ColorToString().c_str());
-        json->Put("blockBorderWidth", GetBlockBorderWidthValue(Dimension()).ToString().c_str());
-        json->Put("stepColor", GetStepColorValue(theme->GetMarkerColor()).ColorToString().c_str());
+        json->PutExtAttr("constructor", jsonConstructor, filter);
+        json->PutExtAttr("blockColor",
+            GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("trackColor", ToJsonTrackBackgroundColor().c_str(), filter);
+        json->PutExtAttr("selectedColor",
+            GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("showSteps", GetShowSteps().value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("showTips", GetShowTips().value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("blockBorderColor",
+            GetBlockBorderColorValue(Color::TRANSPARENT).ColorToString().c_str(), filter);
+        json->PutExtAttr("blockBorderWidth", GetBlockBorderWidthValue(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("stepColor", GetStepColorValue(theme->GetMarkerColor()).ColorToString().c_str(), filter);
         if (GetTrackBorderRadius().has_value()) {
-            json->Put("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str());
+            json->PutExtAttr("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str(), filter);
         }
         if (GetSelectedBorderRadius().has_value()) {
-            json->Put("selectedBorderRadius", GetSelectedBorderRadius().value().ToString().c_str());
+            json->PutExtAttr("selectedBorderRadius", GetSelectedBorderRadius().value().ToString().c_str(), filter);
         }
         static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
             "BlockStyleType.DEFAULT",
             "BlockStyleType.IMAGE",
             "BlockStyleType.SHAPE",
         };
-        json->Put("blockType",
+        json->PutExtAttr("blockType",
             SLIDER_BLOCK_TYPE_TO_STRING.at(static_cast<int>(GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT)))
-                .c_str());
-        json->Put("stepSize", GetStepSizeValue(theme->GetMarkerSize()).ToString().c_str());
+                .c_str(), filter);
+        json->PutExtAttr("stepSize", GetStepSizeValue(theme->GetMarkerSize()).ToString().c_str(), filter);
         if (GetCustomContent().has_value()) {
-            json->Put("content", GetCustomContent().value().c_str());
+            json->PutFixedAttr("content", GetCustomContent().value().c_str(), filter, FIXED_ATTR_CONTENT);
         }
         static const std::array<std::string, 2> SLIDER_INTERACTION_MODE_TO_STRING = {
             "SliderInteraction.SLIDE_AND_CLICK",
             "SliderInteraction.SLIDE_ONLY",
         };
-        json->Put("sliderInteractionMode",
+        json->PutExtAttr("sliderInteractionMode",
             SLIDER_INTERACTION_MODE_TO_STRING
                 .at(static_cast<int>(GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK)))
-                .c_str());
-        json->Put("minResponsiveDistance", std::to_string(GetMinResponsiveDistance().value_or(0.0f)).c_str());
+                .c_str(), filter);
+        json->PutExtAttr("minResponsiveDistance",
+            std::to_string(GetMinResponsiveDistance().value_or(0.0f)).c_str(), filter);
     }
 
     SizeF GetBlockSizeValue(const SizeF& defaultValue)

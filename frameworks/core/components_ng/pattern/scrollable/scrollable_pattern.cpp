@@ -22,6 +22,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
@@ -72,20 +73,21 @@ RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
     return property;
 }
 
-void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("friction", GetFriction());
+    json->PutExtAttr("friction", GetFriction(), filter);
     if (edgeEffect_ == EdgeEffect::SPRING) {
-        json->Put("edgeEffect", "EdgeEffect.Spring");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.Spring", filter);
     } else if (edgeEffect_ == EdgeEffect::FADE) {
-        json->Put("edgeEffect", "EdgeEffect.Fade");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.Fade", filter);
     } else {
-        json->Put("edgeEffect", "EdgeEffect.None");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.None", filter);
     }
-    json->Put("flingSpeedLimit", Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str());
+    json->PutExtAttr("flingSpeedLimit",
+        Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str(), filter);
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
+    json->PutExtAttr("edgeEffectOptions", JsonEdgeEffectOptions, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -551,9 +553,9 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         auto fadeEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
         CHECK_NULL_VOID(fadeEdgeEffect);
         fadeEdgeEffect->SetHandleOverScrollCallback([weakScroll = AceType::WeakClaim(this)]() -> void {
-            auto list = weakScroll.Upgrade();
-            CHECK_NULL_VOID(list);
-            auto host = list->GetHost();
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         });
@@ -1011,7 +1013,9 @@ void ScrollablePattern::AnimateTo(
     if (NearEqual(position, GetTotalOffset())) {
         return;
     }
+#ifdef OHOS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     finalPosition_ = position;
     if (smooth) {
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
@@ -1087,7 +1091,9 @@ void ScrollablePattern::PlayCurveAnimation(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
+#ifdef OHOS_PLATFORM
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
@@ -1701,6 +1707,9 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
     }
     if (GetEdgeEffect() == EdgeEffect::NONE) {
         result = parent->HandleScroll(remainOffset, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
+        if (NearZero(result.remain)) {
+            offset -= overOffset;
+        }
     }
     SetCanOverScroll(!NearZero(overOffset) || (NearZero(offset) && result.reachEdge));
     return { 0, GetCanOverScroll() };
@@ -1844,7 +1853,11 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 
 bool ScrollablePattern::HandleScrollVelocity(float velocity)
 {
-    if (!OutBoundaryCallback()) {
+    // if edgeEffect is None and scrollable try to over scroll when it is at the boundary,
+    // scrollable does not start fling animation.
+    auto needFlingAtEdge = !(GetEdgeEffect() == EdgeEffect::NONE &&
+                             ((IsAtTop() && Positive(velocity)) || (IsAtBottom() && Negative(velocity))));
+    if (!OutBoundaryCallback() && needFlingAtEdge) {
         // trigger scroll animation if edge not reached
         if (scrollableEvent_ && scrollableEvent_->GetScrollable()) {
             scrollableEvent_->GetScrollable()->StartScrollAnimation(0.0f, velocity);
@@ -2428,7 +2441,7 @@ void ScrollablePattern::InitScrollBarMouseEvent()
         if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
             pattern->isMousePressed_ = true;
             pattern->InitScrollBarClickEvent();
-        } else if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        } else {
             pattern->isMousePressed_ = false;
         }
     };
@@ -2438,7 +2451,7 @@ void ScrollablePattern::InitScrollBarMouseEvent()
 
 void ScrollablePattern::PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset)
 {
-    if (SystemProperties::GetDebugOffsetLogEnabled()) {
+    if (SystemProperties::GetDebugOffsetLogEnabled() && !NearZero(finalOffset)) {
         TAG_LOGD(tag, "Scrollable id:%{public}d, scrollSource:%{public}d, scrollOffset:%{public}f",
             id, scrollSource_, finalOffset);
     }
@@ -2504,5 +2517,26 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
 
     animator_->PlayMotion(fixedVelocityMotion_);
     FireOnScrollStart();
+}
+
+void ScrollablePattern::CheckRestartSpring(bool sizeDiminished)
+{
+    auto edgeEffect = GetScrollEdgeEffect();
+    if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
+        return;
+    }
+    // Check if need update Spring when itemTotalSize diminishes.
+    if (IsScrollableSpringMotionRunning() && sizeDiminished) {
+        edgeEffect->ProcessSpringUpdate();
+        return;
+    }
+    if (!ScrollableIdle() || !IsOutOfBoundary()) {
+        return;
+    }
+    if (AnimateRunning()) {
+        return;
+    }
+    FireOnScrollStart();
+    edgeEffect->ProcessScrollOver(0);
 }
 } // namespace OHOS::Ace::NG

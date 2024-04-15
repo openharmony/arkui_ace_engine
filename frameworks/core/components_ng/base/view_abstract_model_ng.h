@@ -176,6 +176,11 @@ public:
         ViewAbstract::SetLightUpEffect(radio);
     }
 
+    void SetDisallowDropForcedly(bool isDisallowDropForcedly) override
+    {
+        ViewAbstract::SetDisallowDropForcedly(isDisallowDropForcedly);
+    }
+
     void SetPadding(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -1068,6 +1073,7 @@ public:
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityTextHint(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
@@ -1081,7 +1087,12 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-
+    
+    void SetForegroundEffect(float radius) override
+    {
+        ViewAbstract::SetForegroundEffect(radius);
+    }
+    
     void DisableOnClick() override
     {
         ViewAbstract::DisableOnClick();
@@ -1150,6 +1161,11 @@ public:
     void SetLightIntensity(const float value) override
     {
         ViewAbstract::SetLightIntensity(value);
+    }
+
+    void SetLightColor(const Color& value) override
+    {
+        ViewAbstract::SetLightColor(value);
     }
 
     void SetLightIlluminated(const uint32_t value) override

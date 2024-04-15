@@ -64,6 +64,8 @@ void RadioModelNG::SetChecked(bool isChecked)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "radio node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
@@ -190,5 +192,19 @@ void RadioModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<Dim
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetResponseRegion(true);
+}
+
+void RadioModelNG::SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRadioChecked(value);
 }
 } // namespace OHOS::Ace::NG

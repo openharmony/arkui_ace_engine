@@ -26,6 +26,7 @@
 #include "frameworks/core/components/common/layout/grid_container_info.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT GridContainerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(GridContainerLayoutProperty, LinearLayoutProperty);
@@ -59,7 +60,7 @@ public:
         LinearLayoutProperty::Reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void UpdateChild(RefPtr<GridProperty>& child, const GridContainerInfo& info);
     void RegistGridChild(const RefPtr<FrameNode>& child);

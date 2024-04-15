@@ -1036,4 +1036,11 @@ void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
 
     webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
+
+void WebModelNG::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
+}
 } // namespace OHOS::Ace::NG

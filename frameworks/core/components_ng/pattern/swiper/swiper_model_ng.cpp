@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -126,6 +127,15 @@ void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsIndicatorCustomSize(isCustomSize);
+}
+
+void SwiperModelNG::SetIndicatorInteractive(bool interactive)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorInteractive(interactive);
 }
 
 void SwiperModelNG::SetAutoPlay(bool autoPlay)
@@ -259,6 +269,14 @@ void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin)
 void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
+}
+
+void SwiperModelNG::SetIndicatorInteractive(FrameNode* frameNode, bool interactive)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorInteractive(interactive);
 }
 
 void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent)

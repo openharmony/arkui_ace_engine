@@ -112,6 +112,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::Declare("Swiper");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSwiper>::StaticMethod("create", &JSSwiper::Create, opt);
+    JSClass<JSSwiper>::StaticMethod("indicatorInteractive", &JSSwiper::SetIndicatorInteractive, opt);
     JSClass<JSSwiper>::StaticMethod("autoPlay", &JSSwiper::SetAutoPlay, opt);
     JSClass<JSSwiper>::StaticMethod("duration", &JSSwiper::SetDuration, opt);
     JSClass<JSSwiper>::StaticMethod("index", &JSSwiper::SetIndex, opt);
@@ -150,6 +151,19 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
     JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSSwiper::SetIndicatorInteractive(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsBoolean()) {
+        SwiperModel::GetInstance()->SetIndicatorInteractive(info[0]->ToBoolean());
+    } else {
+        SwiperModel::GetInstance()->SetIndicatorInteractive(true);
+    }
 }
 
 void JSSwiper::SetAutoPlay(bool autoPlay)

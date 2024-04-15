@@ -18,11 +18,16 @@
 
 #include <cstdint>
 #include <type_traits>
+
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
 class RenderNodeBridge {
 public:
+    static ArkUINativeModuleValue CreateRenderNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void FireDrawCallback(EcmaVM* vm, Framework::JsiWeak<Framework::JsiObject> obj, NG::DrawingContext& context,
+        Local<panda::StringRef> funcName);
+    static void SetOnDraw(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AppendChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue InsertChildAfter(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveChild(ArkUIRuntimeCallInfo* runtimeCallInfo);

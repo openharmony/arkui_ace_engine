@@ -251,6 +251,7 @@ public:
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
+    void SetAccessibilityTextHint(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
@@ -280,6 +281,7 @@ public:
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};
+    void SetLightColor(const Color& value) override {};
     void SetLightIlluminated(const uint32_t value) override {};
     void SetIlluminatedBorderWidth(const Dimension& value) override {};
     void SetBloom(const float value) override {};

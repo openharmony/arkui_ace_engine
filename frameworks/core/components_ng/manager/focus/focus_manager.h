@@ -26,6 +26,8 @@ namespace OHOS::Ace::NG {
 
 using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
 
+using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
+
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
@@ -52,11 +54,48 @@ public:
         return focusViewStack_;
     }
 
+    void SetRequestFocusCallback(const RequestFocusCallback& callback)
+    {
+        requestCallback_ = std::move(callback);
+    }
+
+    void TriggerRequestFocusCallback(NG::RequestFocusResult result)
+    {
+        if (requestCallback_) {
+            requestCallback_(result);
+            requestCallback_ = nullptr;
+        }
+    }
+
+    void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
+    {
+        lastFocusStateNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+        isNeedTriggerScroll_ = true;
+    }
+    RefPtr<FocusHub> GetLastFocusStateNode() const
+    {
+        return lastFocusStateNode_.Upgrade();
+    }
+
+    void SetNeedTriggerScroll(bool isNeedTriggerScroll)
+    {
+        isNeedTriggerScroll_ = isNeedTriggerScroll;
+    }
+    bool GetNeedTriggerScroll() const
+    {
+        return isNeedTriggerScroll_;
+    }
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
 
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
+
+    RequestFocusCallback requestCallback_;
+
+    WeakPtr<FocusHub> lastFocusStateNode_;
+    bool isNeedTriggerScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

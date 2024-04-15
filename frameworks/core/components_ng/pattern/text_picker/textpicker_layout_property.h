@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -68,24 +69,25 @@ public:
         ResetDivider();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
 
-        json->Put("defaultPickerItemHeight", GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str());
-        json->Put("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str());
-        json->Put("selected", std::to_string(GetSelectedValue(0)).c_str());
-        json->Put("value", GetValueValue("").c_str());
+        json->PutExtAttr("defaultPickerItemHeight",
+            GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str(), filter);
+        json->PutExtAttr("gradientHeight", GetGradientHeightValue(Dimension(0)).ToString().c_str(), filter);
+        json->PutExtAttr("selected", std::to_string(GetSelectedValue(0)).c_str(), filter);
+        json->PutExtAttr("value", GetValueValue("").c_str(), filter);
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
             divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
             divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
             divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
             divider->Put("color", propDivider_.value().color.ColorToString().c_str());
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         } else {
             auto divider = JsonUtil::Create(true);
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         }
 
         auto jsonArraySelected = JsonUtil::CreateArray(true);
@@ -94,7 +96,7 @@ public:
             auto index = std::to_string(i);
             jsonArraySelected->Put(index.c_str(), std::to_string(arraySelected[i]).c_str());
         }
-        json->Put("selecteds", jsonArraySelected);
+        json->PutExtAttr("selecteds", jsonArraySelected, filter);
 
         auto jsonArraySelectedIndex = JsonUtil::CreateArray(true);
         auto arraySelectedIndex = CloneSelecteds().value_or(std::vector<uint32_t>());
@@ -102,7 +104,7 @@ public:
             auto index = std::to_string(i);
             jsonArraySelectedIndex->Put(index.c_str(), std::to_string(arraySelectedIndex[i]).c_str());
         }
-        json->Put("selectedIndex", jsonArraySelectedIndex);
+        json->PutExtAttr("selectedIndex", jsonArraySelectedIndex, filter);
 
         auto jsonArrayValue = JsonUtil::CreateArray(true);
         auto arrayValue = CloneValues().value_or(std::vector<std::string>());
@@ -110,7 +112,7 @@ public:
             auto index = std::to_string(i);
             jsonArrayValue->Put(index.c_str(), arrayValue[i].c_str());
         }
-        json->Put("values", jsonArrayValue);
+        json->PutExtAttr("values", jsonArrayValue, filter);
 
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
@@ -119,7 +121,7 @@ public:
         auto disappearTextStyle = JsonUtil::Create(true);
         disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
-        json->Put("disappearTextStyle", disappearTextStyle);
+        json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
         auto normalFont = JsonUtil::Create(true);
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
@@ -127,7 +129,7 @@ public:
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
-        json->Put("textStyle", normalTextStyle);
+        json->PutExtAttr("textStyle", normalTextStyle, filter);
 
         auto selectedFont = JsonUtil::Create(true);
         selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
@@ -136,9 +138,9 @@ public:
         auto selectedTextStyle = JsonUtil::Create(true);
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
-        json->Put("selectedTextStyle", selectedTextStyle);
+        json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
         auto canLoop = GetCanLoopValue();
-        json->Put("canLoop", canLoop ? "true" : "false");
+        json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);

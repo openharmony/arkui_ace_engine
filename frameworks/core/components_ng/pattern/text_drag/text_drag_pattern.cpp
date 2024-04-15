@@ -143,6 +143,8 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     SelectPositionInfo info(leftHandleX + hostGlobalOffset.GetX() - globalX,
         leftHandleY + hostGlobalOffset.GetY() - globalY, rightHandleX + hostGlobalOffset.GetX() - globalX,
         rightHandleY + hostGlobalOffset.GetY() - globalY);
+    info.globalX_ = globalX;
+    info.globalY_ = globalY;
     TextDragData data(dragTextRect, width + bothOffset, height + bothOffset, lineHeight, info, oneLineSelected);
     return data;
 }
@@ -185,6 +187,15 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateBackgroundPath(float offset)
     std::vector<TextPoint> points;
     GenerateBackgroundPoints(points, offset);
     CalculateLineAndArc(points, path);
+    return path;
+}
+
+std::shared_ptr<RSPath> TextDragPattern::GenerateSelBackgroundPath(float offset)
+{
+    std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
+    std::vector<TextPoint> points;
+    GenerateBackgroundPoints(points, offset);
+    CalculateLine(points, path);
     return path;
 }
 
@@ -261,6 +272,17 @@ void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::s
             path->LineTo(crossPoint.x, crossPoint.y - radius * directionY);
             path->ArcTo(radius, radius, 0.0f, direction, crossPoint.x + radius * directionX, secondPoint.y);
         }
+    }
+}
+
+void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path)
+{
+    auto radius = TEXT_DRAG_RADIUS.ConvertToPx();
+    path->MoveTo(points[0].x + radius, points[0].y);
+    size_t step = 2;
+    for (size_t i = 0; i + step < points.size(); i++) {
+        auto crossPoint = points[i + 1];
+        path->LineTo(crossPoint.x, crossPoint.y);
     }
 }
 } // namespace OHOS::Ace::NG

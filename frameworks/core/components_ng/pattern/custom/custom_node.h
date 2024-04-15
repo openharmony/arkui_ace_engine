@@ -21,10 +21,13 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // CustomNode is the frame node of @Component struct.
 class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
     DECLARE_ACE_TYPE(CustomNode, UINode, CustomNodeBase);
@@ -64,9 +67,9 @@ public:
     }
     void FlushReload();
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("viewKey", viewKey_.c_str());
+        json->PutExtAttr("viewKey", viewKey_.c_str(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override {}
@@ -103,12 +106,12 @@ public:
 
     void DoSetActiveChildRange(int32_t start, int32_t end) override;
 
-    RefPtr<UINode> GetNavigationNode()
+    const WeakPtr<UINode>& GetNavigationNode() const
     {
-        return navigationNode_.Upgrade();
+        return navigationNode_;
     }
 
-    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
+    void SetNavigationNode(const WeakPtr<UINode>& navigationNode)
     {
         navigationNode_ = navigationNode;
     }
@@ -120,7 +123,7 @@ private:
     bool needMarkParent_ = true;
     bool prevJsActive_ = true;
     std::list<ExtraInfo> extraInfos_;
-    WeakPtr<UINode> navigationNode_ = nullptr;
+    WeakPtr<UINode> navigationNode_;
 };
 } // namespace OHOS::Ace::NG
 

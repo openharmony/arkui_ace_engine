@@ -231,6 +231,7 @@ struct PromptDialogAttr {
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
     std::optional<NG::BorderWidthProperty> borderWidth;
     std::optional<NG::BorderColorProperty> borderColor;
     std::optional<NG::BorderStyleProperty> borderStyle;

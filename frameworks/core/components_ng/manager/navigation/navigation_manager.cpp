@@ -13,24 +13,25 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 #include <string>
 
 #include "base/log/dump_log.h"
 #include "base/thread/task_executor.h"
 #include "core/common/thread_checker.h"
-#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
+
 
 namespace OHOS::Ace::NG {
-void NavigationDumpManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
+void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
 {
     CHECK_RUN_ON(UI);
     dumpMap_.emplace(DumpMapKey(nodeId, depth), callback);
 }
 
-void NavigationDumpManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth)
+void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth)
 {
     CHECK_RUN_ON(UI);
     auto it = dumpMap_.find(DumpMapKey(nodeId, depth));
@@ -39,7 +40,7 @@ void NavigationDumpManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t
     }
 }
 
-void NavigationDumpManager::OnDumpInfo()
+void NavigationManager::OnDumpInfo()
 {
     constexpr int NAVIGATION_DUMP_DEPTH = 2;
     CHECK_RUN_ON(UI);
@@ -55,15 +56,21 @@ void NavigationDumpManager::OnDumpInfo()
     }
 }
 
-std::shared_ptr<NavigationInfo> NavigationDumpManager::GetNavigationInfo(const RefPtr<AceType>& node)
+void NavigationManager::FireNavigationUpdateCallback()
 {
-    CHECK_NULL_RETURN(node, nullptr);
+    for (const auto& func : updateCallbacks_) {
+        func();
+    }
+    updateCallbacks_.clear();
+}
+
+std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPtr<AceType>& node)
+{
     RefPtr<UINode> current = nullptr;
-    do {
-        auto customNode = AceType::DynamicCast<CustomNode>(node);
-        CHECK_NULL_BREAK(customNode);
-        current = customNode->GetNavigationNode();
-    } while (false);
+    auto customNode = AceType::DynamicCast<CustomNode>(node);
+    if (customNode) {
+        current = customNode->GetNavigationNode().Upgrade();
+    }
 
     if (!current) {
         current = AceType::DynamicCast<UINode>(node);
@@ -73,15 +80,19 @@ std::shared_ptr<NavigationInfo> NavigationDumpManager::GetNavigationInfo(const R
             }
             current = current->GetParent();
         }
-        CHECK_NULL_RETURN(current, nullptr);
+    }
+
+    if (!current) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find parent navigation node failed");
+        return nullptr;
     }
     
-    auto nav = AceType::DynamicCast<FrameNode>(current);
-    CHECK_NULL_RETURN(nav, nullptr);
-    auto pattern = nav->GetPattern<NavigationPattern>();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(current);
+    CHECK_NULL_RETURN(navigation, nullptr);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto stack = pattern->GetNavigationStack();
     CHECK_NULL_RETURN(stack, nullptr);
-    return std::make_shared<NavigationInfo>(nav->GetInspectorId().value_or(""), stack);
+    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
 }
 } // namespace OHOS::Ace::NG

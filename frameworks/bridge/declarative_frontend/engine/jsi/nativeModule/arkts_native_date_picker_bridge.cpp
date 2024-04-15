@@ -68,7 +68,7 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     }
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color)) {
-        Color::ParseColorString("#ff007dff", color);
+        Color::ParseColorString("#ff0a59f7", color);
     }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());

@@ -19,12 +19,12 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
-#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
@@ -410,6 +410,9 @@ private:
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
     void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
+
+    void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

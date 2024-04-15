@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -72,7 +73,11 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
 
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
-    clip_ = MakeRefPtr<PropertyBool>(false);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip_ = MakeRefPtr<PropertyBool>(true);
+    } else {
+        clip_ = MakeRefPtr<PropertyBool>(false);
+    }
     AttachProperty(clip_);
     fontFamilyString_ = MakeRefPtr<PropertyString>("");
     AttachProperty(fontFamilyString_);
@@ -272,6 +277,7 @@ void TextContentModifier::DrawImageNodeList(const float drawingContextWidth,
 
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    ACE_SCOPED_TRACE("Text::onDraw");
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     if (!ifPaintObscuration || ifHaveSpanItemChildren_) {

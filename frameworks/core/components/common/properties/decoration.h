@@ -38,6 +38,7 @@
 #include "core/components/common/properties/outline_style.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/theme_utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -131,7 +132,7 @@ struct BlurStyleOption {
         return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
                NearEqual(scale, other.scale);
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
         static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
             "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
@@ -146,7 +147,8 @@ struct BlurStyleOption {
         jsonBlurStyleOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int>(adaptiveColor)]);
         jsonBlurStyleOption->Put("scale", scale);
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
-        json->Put("backgroundBlurStyle", jsonBlurStyle);
+
+        json->PutExtAttr("backgroundBlurStyle", jsonBlurStyle, filter);
     }
 };
 
@@ -167,7 +169,7 @@ struct EffectOption {
         return radius == other.radius && NearEqual(saturation, other.saturation) &&
                NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
     {
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
         auto jsonEffect = JsonUtil::Create(true);
@@ -185,7 +187,8 @@ struct EffectOption {
         }
         jsonBrightnessOption->Put("blurOption", grayscale);
         jsonEffect->Put("options", jsonBrightnessOption);
-        json->Put("backgroundEffect", jsonEffect);
+
+        json->PutExtAttr("backgroundEffect", jsonEffect, filter);
     }
 };
 

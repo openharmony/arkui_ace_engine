@@ -134,6 +134,11 @@ public:
         syncGeometryNodeTasks_.emplace_back(task);
     }
 
+    void SetIsLayouting(bool layouting)
+    {
+        isLayouting_ = layouting;
+    }
+
     void FlushSyncGeometryNodeTasks();
 
 private:

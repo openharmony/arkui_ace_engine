@@ -2607,4 +2607,116 @@ HWTEST_F(GestureEventHubTestNg, TestSetDragGatherPixelMap001, TestSize.Level1)
     auto size = dragData.shadowInfos.size();
     EXPECT_EQ(size, 0);
 }
+
+/**
+ * @tc.name: GestureEventHubModifierTest001
+ * @tc.desc: Test modifier AttachGesture & RemoveGesture & ClearModifierGesture
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. call AttachGesture
+     *            case: recreateGesture_ is true & modifierGestures_.size() != gestureHierarchy_.size()
+     * @tc.expected: recreateGesture_ = false
+     *               modifierGestures_ has one element & gestureHierarchy_ has one element
+     */
+    auto longPressGesture = AceType::MakeRefPtr<LongPressGesture>(FINGERS, false, 1);
+    gestureEventHub->AttachGesture(longPressGesture);
+    EXPECT_FALSE(gestureEventHub->recreateGesture_);
+    auto sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
+    auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
+    EXPECT_EQ(sizeModifierGestures, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 1);
+
+    /**
+     * @tc.steps: step3. call RemoveGesture
+     *            case: recreateGesture_ is true & modifierGestures_.size() != gestureHierarchy_.size()
+     * @tc.expected: recreateGesture_ = false
+     *               modifierGestures_ has zero element & gestureHierarchy_ has zero element
+     */
+    gestureEventHub->RemoveGesture(longPressGesture);
+    EXPECT_FALSE(gestureEventHub->recreateGesture_);
+    sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
+    sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
+    EXPECT_EQ(sizeModifierGestures, 0);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
+
+    /**
+     * @tc.steps: step4. call AttachGesture & ClearModifierGesture
+     *            case: recreateGesture_ is true & gestures_.size() != gestureHierarchy_.size()
+     * @tc.expected: recreateGesture_ = false
+     *               modifierGestures_ has cleared & gestureHierarchy_ has cleared
+     */
+    gestureEventHub->AttachGesture(longPressGesture);
+    EXPECT_FALSE(gestureEventHub->recreateGesture_);
+    sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
+    sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
+    EXPECT_EQ(sizeModifierGestures, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 1);
+
+    gestureEventHub->ClearModifierGesture();
+    EXPECT_FALSE(gestureEventHub->recreateGesture_);
+    sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
+    sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
+    EXPECT_EQ(sizeModifierGestures, 0);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
+}
+
+/**
+ * @tc.name: GestureEventHubModifierTest002
+ * @tc.desc: Test modifier RemoveGesturesByTag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step4. call RemoveGesturesByTag
+     * @tc.expected: recreateGesture_ = false
+     *               modifierGestures_ one element & gestureHierarchy_ has one element & group has one child
+     */
+    std::vector<RefPtr<Gesture>> gestures;
+    auto longPressGestureOne = AceType::MakeRefPtr<LongPressGesture>(FINGERS, false, 1);
+    longPressGestureOne->SetTag(CHECK_TAG_1);
+    gestures.emplace_back(longPressGestureOne);
+    auto longPressGestureTwo = AceType::MakeRefPtr<LongPressGesture>(FINGERS, false, 1);
+    gestures.emplace_back(longPressGestureTwo);
+    auto group = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
+    gestureEventHub->AttachGesture(group);
+    EXPECT_FALSE(gestureEventHub->recreateGesture_);
+    auto sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
+    auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
+    EXPECT_EQ(sizeModifierGestures, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 1);
+
+    gestureEventHub->RemoveGesturesByTag(CHECK_TAG_1);
+    EXPECT_FALSE(gestureEventHub->recreateGesture_);
+    sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
+    sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
+    EXPECT_EQ(sizeModifierGestures, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(group->gestures_.size(), 1);
+}
 } // namespace OHOS::Ace::NG

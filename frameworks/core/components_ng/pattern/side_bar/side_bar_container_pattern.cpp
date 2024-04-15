@@ -934,6 +934,7 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
 
     auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
+    dividerFrameNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->SetMouseResponseRegion(mouseRegion);

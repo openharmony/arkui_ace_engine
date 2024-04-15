@@ -422,7 +422,7 @@ void JSGrid::SetCachedCount(const JSCallbackInfo& info)
     auto jsValue = info[0];
 
     if (!jsValue->IsUndefined() && jsValue->IsNumber()) {
-        ParseJsInt32(jsValue, cachedCount);
+        cachedCount = jsValue->ToNumber<int32_t>();
         if (cachedCount < 0) {
             cachedCount = 1;
         }
@@ -482,8 +482,14 @@ void JSGrid::SetDragAnimation(bool value)
 
 void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    auto edgeEffect = JSScrollable::ParseEdgeEffect(info, EdgeEffect::NONE);
-    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(info, false);
+    auto edgeEffect = EdgeEffect::NONE;
+    if (info.Length() > 0) {
+        edgeEffect = JSScrollable::ParseEdgeEffect(info[0], EdgeEffect::NONE);
+    }
+    auto alwaysEnabled = false;
+    if (info.Length() > 1) {
+        alwaysEnabled = JSScrollable::ParseAlwaysEnable(info[1], false);
+    }
     GridModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 

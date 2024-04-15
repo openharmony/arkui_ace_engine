@@ -136,6 +136,21 @@ void MouseStyleOhos::SetMouseIcon(
     }
 }
 
+void MouseStyleOhos::SetCustomCursor(
+    int32_t windowId, int32_t focusX, int32_t focusY, std::shared_ptr<Media::PixelMap> pixelMap) const
+{
+    auto inputManager = MMI::InputManager::GetInstance();
+    CHECK_NULL_VOID(inputManager);
+    CHECK_NULL_VOID(pixelMap);
+
+    int32_t status = inputManager->SetCustomCursor(windowId, static_cast<void*>(pixelMap.get()), focusX, focusY);
+    if (status != 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "set custom cursor failed %{public}u", status);
+        return;
+    }
+    inputManager->SetPointerVisible(true);
+}
+
 void MouseStyleOhos::SetPointerVisible(MouseFormat pointerStyle) const
 {
     auto inputManager = MMI::InputManager::GetInstance();

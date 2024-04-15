@@ -348,7 +348,9 @@ RefPtr<SvgDom> ParseTestNg::ParseRect(const std::string& svgLabel)
 {
     auto svgStream = SkMemoryStream::MakeCopy(RECT_SVG_LABEL.c_str(), RECT_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_NE(svg, nullptr);
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
@@ -369,7 +371,9 @@ RefPtr<SvgDom> ParseTestNg::parsePolygon(const std::string& svgLable)
 {
     auto svgStream = SkMemoryStream::MakeCopy(svgLable.c_str(), svgLable.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     EXPECT_NE(svgDom, nullptr);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_NE(svg, nullptr);
@@ -391,7 +395,9 @@ RefPtr<SvgDom> ParseTestNg::ParsePath(const std::string& svgLabel)
 {
     auto svgStream = SkMemoryStream::MakeCopy(svgLabel.c_str(), svgLabel.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
     auto svgPath = AceType::DynamicCast<SvgPath>(svg->children_.at(0));
@@ -405,7 +411,9 @@ RefPtr<SvgDom> ParseTestNg::ParseFeGaussianblur(const std::string& svgLabel)
 {
     auto svgStream = SkMemoryStream::MakeCopy(svgLabel.c_str(), svgLabel.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
@@ -423,7 +431,9 @@ RefPtr<SvgDom> ParseTestNg::ParseEllipse(const std::string& svgLabel)
 {
     auto svgStream = SkMemoryStream::MakeCopy(svgLabel.c_str(), svgLabel.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgEllipse = AceType::DynamicCast<SvgEllipse>(svg->children_.at(0));
@@ -454,7 +464,9 @@ HWTEST_F(ParseTestNg, ParseCircleTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(CIRCLE_SVG_LABEL.c_str(), CIRCLE_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgLine = AceType::DynamicCast<SvgCircle>(svg->children_.at(0));
@@ -501,7 +513,9 @@ HWTEST_F(ParseTestNg, ParseClipPathTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(CLIP_SVG_LABEL.c_str(), CLIP_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgDefs = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
@@ -526,7 +540,9 @@ HWTEST_F(ParseTestNg, ParseSvgTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(SVG_LABEL.c_str(), SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     EXPECT_FLOAT_EQ(svgDom->svgSize_.Width(), WIDTH);
     EXPECT_FLOAT_EQ(svgDom->svgSize_.Height(), HEIGHT);
     EXPECT_FLOAT_EQ(svgDom->viewBox_.Left(), VIEWBOX_X);
@@ -544,7 +560,9 @@ HWTEST_F(ParseTestNg, ParseUseTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::GREEN);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::GREEN);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
     auto svgUse = AceType::DynamicCast<SvgUse>(svg->children_.at(INDEX_ONE));
@@ -585,7 +603,9 @@ HWTEST_F(ParseTestNg, ParseStyleTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(STYLE_SVG_LABEL.c_str(), STYLE_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
     auto svgStyle = AceType::DynamicCast<SvgStyle>(svg->children_.at(0));
@@ -609,7 +629,9 @@ HWTEST_F(ParseTestNg, ParseStopTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(STOP_SVG_LABEL.c_str(), STOP_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
     auto defers = AceType::DynamicCast<SvgDefs>(svg->children_.at(INDEX_ZEARO));
@@ -720,7 +742,9 @@ HWTEST_F(ParseTestNg, ParsePatternTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(PATTERN_SVG_LABEL.c_str(), PATTERN_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgDefs = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
@@ -849,7 +873,9 @@ HWTEST_F(ParseTestNg, ParseMaskTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(MASK_SVG_LABEL.c_str(), MASK_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgG = AceType::DynamicCast<SvgG>(svg->children_.at(INDEX_ONE));
@@ -878,7 +904,9 @@ HWTEST_F(ParseTestNg, ParseLineTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(LINE_SVG_LABEL.c_str(), LINE_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgLine = AceType::DynamicCast<SvgLine>(svg->children_.at(0));
@@ -905,7 +933,9 @@ HWTEST_F(ParseTestNg, ParseLinearGradientTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_LINEAR.c_str(), GRADIENT_SVG_LINEAR.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
     auto defers = AceType::DynamicCast<SvgDefs>(svg->children_.at(INDEX_ZEARO));
@@ -941,7 +971,9 @@ HWTEST_F(ParseTestNg, ParseRadialGradientTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_RADIAL.c_str(), GRADIENT_SVG_RADIAL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_EQ(svg->children_.size(), CHILD_NUMBER);
     auto defers = AceType::DynamicCast<SvgDefs>(svg->children_.at(INDEX_ZEARO));
@@ -984,7 +1016,9 @@ HWTEST_F(ParseTestNg, ParseGTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(G_SVG_LABEL.c_str(), G_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto g = AceType::DynamicCast<SvgG>(svg->children_.at(0));
@@ -1009,7 +1043,9 @@ HWTEST_F(ParseTestNg, ParseFilterTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(FILTER_SVG_LABEL.c_str(), FILTER_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
@@ -1069,7 +1105,9 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(COMPOSITE_SVG_LABEL.c_str(), COMPOSITE_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
@@ -1143,7 +1181,9 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(COLOR_MATRIX_SVG_LABEL.c_str(), COLOR_MATRIX_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
@@ -1171,7 +1211,9 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest002, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(FE_COLOR_MATRIX.c_str(), FE_COLOR_MATRIX.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     // filter is first child in svg
@@ -1215,7 +1257,9 @@ HWTEST_F(ParseTestNg, ParseFeGaussianBlurTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(FE_GAUSSIAN_BLUR.c_str(), FE_GAUSSIAN_BLUR.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     // filter is first child in svg
@@ -1259,7 +1303,11 @@ HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(FE_FLOOD_AND_COMPOSITE.c_str(), FE_FLOOD_AND_COMPOSITE.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    CHECK_NULL_VOID(svgDom);
+    EXPECT_NE(svgDom, nullptr);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     // filter is first child in svg
@@ -1299,7 +1347,9 @@ HWTEST_F(ParseTestNg, ParseFeBlendTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(FE_BLEND.c_str(), FE_BLEND.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     // filter is first child in svg
@@ -1391,7 +1441,9 @@ HWTEST_F(ParseTestNg, ParseAnimateTest001, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(SVG_ANIMATE_TRANSFORM.c_str(), SVG_ANIMATE_TRANSFORM.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     EXPECT_TRUE(svgDom);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_TRUE(svg);
@@ -1602,7 +1654,9 @@ HWTEST_F(ParseTestNg, ParseNodeTest002, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(CLIP_SVG_LABEL.c_str(), CLIP_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
 
     // 0 = Expected value
@@ -1647,7 +1701,9 @@ HWTEST_F(ParseTestNg, ParseNodeTest003, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(CLIP_SVG_LABEL.c_str(), CLIP_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
 
@@ -1729,7 +1785,9 @@ HWTEST_F(ParseTestNg, ParseNodeTest004, TestSize.Level1)
     auto svgStream = SkMemoryStream::MakeCopy(CLIP_SVG_LABEL.c_str(), CLIP_SVG_LABEL.length());
     EXPECT_NE(svgStream, nullptr);
 
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     rect = svgDom->root_->GetRootViewBox();
 
     // 120 =  xml ViewBox width-value
@@ -1911,7 +1969,9 @@ HWTEST_F(ParseTestNg, ParseEllipseTest005, TestSize.Level1)
      * @tc.steps: step1. call CreateSvgDom
      * @tc.expected: Execute function return value size not is 0
      */
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
 
@@ -1938,7 +1998,9 @@ HWTEST_F(ParseTestNg, ParseEllipseTest006, TestSize.Level1)
      * @tc.steps: step1. call CreateSvgDom
      * @tc.expected: Execute function return value size not is 0
      */
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
 
@@ -1963,7 +2025,9 @@ HWTEST_F(ParseTestNg, ParsePolygonTest003, TestSize.Level1)
      * @tc.expected: Execute svgDom root node is 2
      */
     auto svgStream = SkMemoryStream::MakeCopy(POLYGON_SVG_LABEL1.c_str(), POLYGON_SVG_LABEL1.length());
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
 
@@ -1991,7 +2055,9 @@ HWTEST_F(ParseTestNg, ParsePolygonTest004, TestSize.Level1)
      * @tc.expected: Execute svgDom root node is 2
      */
     auto svgStream = SkMemoryStream::MakeCopy(POLYGON_SVG_LABEL1.c_str(), POLYGON_SVG_LABEL1.length());
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
 
@@ -2043,7 +2109,9 @@ HWTEST_F(ParseTestNg, ParseStyleTest002, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseRectTest004, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(RECT_SVG_LABEL3.c_str(), RECT_SVG_LABEL3.length());
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
 
@@ -2065,7 +2133,9 @@ HWTEST_F(ParseTestNg, ParseRectTest004, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseUseTest002, TestSize.Level1)
 {
     auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::GREEN);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::GREEN);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
 

@@ -347,6 +347,19 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetForegroundEffect(float radius)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateForegroundEffect(radius);
+    }
+}
+
 void ViewAbstract::SetBackgroundEffect(const EffectOption &effectOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2636,6 +2649,14 @@ void ViewAbstract::SetLightIntensity(const float value)
     ACE_UPDATE_RENDER_CONTEXT(LightIntensity, value);
 }
 
+void ViewAbstract::SetLightColor(const Color& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightColor, value);
+}
+
 void ViewAbstract::SetLightIlluminated(const uint32_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3983,6 +4004,13 @@ void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReport
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetEventStrictReportingEnabled(dragEventStrictReportingEnabled);
+}
+
+void ViewAbstract::SetDisallowDropForcedly(bool isDisallowDropForcedly)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDisallowDropForcedly(isDisallowDropForcedly);
 }
 
 void ViewAbstract::SetBackgroundImageResizableSlice(const ImageResizableSlice& slice)

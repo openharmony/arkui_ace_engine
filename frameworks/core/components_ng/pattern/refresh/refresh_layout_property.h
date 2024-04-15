@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "frameworks/core/components_ng/layout/layout_property.h"
 #include "frameworks/core/components_ng/property/property.h"
 
@@ -68,15 +69,17 @@ public:
         ResetRefreshOffset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
 
-        json->Put("offset", propIndicatorOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("refreshOffset", propRefreshOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("pullToRefresh", propPullToRefresh_.value_or(true));
-        json->Put("friction", propFriction_.value_or(1));
-        json->Put("promptText", propLoadingText_.value_or(std::string()).c_str());
+        json->PutExtAttr("offset",
+            propIndicatorOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("refreshOffset",
+            propRefreshOffset_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("pullToRefresh", propPullToRefresh_.value_or(true), filter);
+        json->PutExtAttr("friction", propFriction_.value_or(1), filter);
+        json->PutExtAttr("promptText", propLoadingText_.value_or(std::string()).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);

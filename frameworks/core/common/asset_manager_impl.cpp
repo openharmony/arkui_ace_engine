@@ -66,6 +66,28 @@ RefPtr<Asset> AssetManagerImpl::GetAsset(const std::string& assetName)
     return nullptr;
 }
 
+std::vector<RefPtr<Asset>> AssetManagerImpl::GetAssetFromI18n(const std::string& assetName)
+{
+    std::vector<RefPtr<Asset>> i18nAssetVector;
+    if (assetName.empty()) {
+        LOGW("GetAsset from i18n failed. assetName is null.");
+        return i18nAssetVector;
+    }
+
+    for (const auto& assetProvider : assetProviders_) {
+        auto asProvider = AceType::DynamicCast<AssetProviderImpl>(assetProvider);
+        if (!asProvider) {
+            continue;
+        }
+
+        auto assetVector = asProvider->GetAsMappingFromI18n(assetName);
+        for (auto& assetMapping : assetVector) {
+            i18nAssetVector.push_back(AceType::MakeRefPtr<AssetImpl>(std::move(assetMapping)));
+        }
+    }
+    return i18nAssetVector;
+}
+
 std::string AssetManagerImpl::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     for (const auto& assetProvider : assetProviders_) {

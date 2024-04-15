@@ -356,11 +356,11 @@ std::unordered_map<std::string, int32_t> ParseFontFeatureSettings(const std::str
 
 std::string UnParseFontFeatureSetting(const std::unordered_map<std::string, int32_t>& fontFeatureSettings)
 {
-    std::stringstream str_temp;
+    std::stringstream strTemp;
     for (const auto& kv:fontFeatureSettings) {
-        str_temp << kv.first << " " << kv.second << ",";
+        strTemp << kv.first << " " << kv.second << ",";
     }
-    std::string fontFeatures = str_temp.str();
+    std::string fontFeatures = strTemp.str();
     if (!fontFeatures.empty()) {
         fontFeatures.pop_back();
     }

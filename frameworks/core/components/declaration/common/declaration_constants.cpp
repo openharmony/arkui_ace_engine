@@ -198,6 +198,8 @@ const std::shared_ptr<SvgCircleAttribute> DeclarationConstants::DEFAULT_SVG_CIRC
     std::make_shared<SvgCircleAttribute>();
 const std::shared_ptr<SvgEllipseAttribute> DeclarationConstants::DEFAULT_SVG_ELLIPSE_ATTR =
     std::make_shared<SvgEllipseAttribute>();
+const std::shared_ptr<SvgImageAttribute> DeclarationConstants::DEFAULT_SVG_IMAGE_ATTR =
+    std::make_shared<SvgImageAttribute>();
 const std::shared_ptr<SvgLineAttribute> DeclarationConstants::DEFAULT_SVG_LINE_ATTR =
     std::make_shared<SvgLineAttribute>();
 const std::shared_ptr<SvgMaskAttribute> DeclarationConstants::DEFAULT_SVG_MASK_ATTR =

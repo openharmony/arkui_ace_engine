@@ -221,6 +221,11 @@ public:
         return nullptr;
     }
 
+    TextSelector GetTextSelector() const
+    {
+        return textSelector_;
+    }
+    
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;

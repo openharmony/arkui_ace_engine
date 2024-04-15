@@ -314,6 +314,11 @@ void IndexerModelNG::SetPopupTitleBackground(const std::optional<Color>& color)
     }
 }
 
+void IndexerModelNG::SetAdaptiveWidth(bool state)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state);
+}
+
 void IndexerModelNG::SetPopupBorderRadius(FrameNode* frameNode, const Dimension& radius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupBorderRadius, radius, frameNode);

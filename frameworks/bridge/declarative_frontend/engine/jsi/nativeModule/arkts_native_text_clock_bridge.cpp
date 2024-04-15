@@ -91,8 +91,8 @@ ArkUINativeModuleValue TextClockBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.Value() < 0 ||
-        fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, fontSize, DimensionUnit::FP, false)
+        || fontSize.Value() < 0 || fontSize.Unit() == DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getTextClockModifier()->resetFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextClockModifier()->setFontSize(

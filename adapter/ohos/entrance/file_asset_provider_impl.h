@@ -36,6 +36,10 @@ public:
 
     bool Initialize(const std::string& packagePath, const std::vector<std::string>& assetBasePaths);
     std::unique_ptr<AssetMapping> GetAsMapping(const std::string& assetName) const override;
+    std::vector<std::unique_ptr<AssetMapping>> GetAsMappingFromI18n(const std::string& assetName) const override
+    {
+        return {};
+    }
     bool IsValid() const override;
     std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;

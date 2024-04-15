@@ -175,6 +175,7 @@ public:
             intelligentTrackingPreventionResultId) override;
     void SetTextAutosizing(bool isTextAutosizing) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
+    void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

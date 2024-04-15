@@ -40,7 +40,7 @@ public:
 
     int32_t width_ = 0;
     int32_t height_ = 0;
-    JSRef<JSArray> colorArray_;
+    JSRef<JSUint8ClampedArray> colorArray_;
 
     void setX(int32_t x)
     {

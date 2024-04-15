@@ -73,6 +73,11 @@ public:
         offsetChange_ = std::move(dragOffset);
     }
 
+    void ResetOnOffsetChange()
+    {
+        offsetChange_ = nullptr;
+    }
+
     void FireOnOffsetChange(const float value) const
     {
         if (offsetChange_) {

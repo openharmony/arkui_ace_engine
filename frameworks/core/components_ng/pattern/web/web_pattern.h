@@ -380,6 +380,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -404,6 +405,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
     void UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type);
+    void UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info);
     std::shared_ptr<OHOS::Media::PixelMap> CreatePixelMapFromString(const std::string& filePath);
     void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
@@ -544,6 +546,8 @@ private:
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
+    void WindowDrag(int32_t width, int32_t height);
+    void OnSmoothDragResizeEnabledUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -554,6 +558,7 @@ private:
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
     void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
+    void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -573,7 +578,6 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
-    void UpdateRelativeOffset();
     void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(bool isNeedReset);
     void CalculateVerticalDrawRect(bool isNeedReset);
@@ -625,7 +629,8 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
-
+    void SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchLocationInfo& changedInfo,
+        const TouchEventInfo& tempTouchInfo, TouchEventInfo& touchEventInfo);
     struct TouchInfo {
         float x = -1.0f;
         float y = -1.0f;
@@ -651,7 +656,9 @@ private:
     bool FilterScrollEventHandleOffset(const float offset);
     bool FilterScrollEventHandlevVlocity(const float velocity);
     void UpdateFlingReachEdgeState(const float value, bool status);
-    void CalculateToolTipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
+    void CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin);
+    void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
+    void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
 
     std::optional<std::string> webSrc_;
@@ -704,9 +711,10 @@ private:
     bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
     int32_t tooltipTextId_ = -1;
-    bool tooltipEnabled_ = false;
+    int32_t tooltipId_ = -1;
     int32_t mouseHoveredX_ = -1;
     int32_t mouseHoveredY_ = -1;
+    int64_t tooltipTimestamp_ = -1;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
     bool isWaiting_ = false;
@@ -715,8 +723,7 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
-    bool isParentHasScroll_ = false;
-    OffsetF relativeOffsetOfScroll_;
+    OffsetF fitContentOffset_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
@@ -742,6 +749,7 @@ private:
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
     ReachEdge isFlingReachEdge_ = { false, false };
+    std::queue<TouchEventInfo> touchEventQueue_;
 };
 } // namespace OHOS::Ace::NG
 

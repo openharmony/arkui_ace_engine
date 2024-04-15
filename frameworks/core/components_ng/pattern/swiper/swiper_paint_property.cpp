@@ -17,23 +17,26 @@
 #include <unordered_map>
 
 #include "base/utils/string_utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 
 namespace OHOS::Ace::NG {
 const int32_t SwiperAnimationStyle::DEFAULT_INTERVAL = 3000;
 const int32_t SwiperAnimationStyle::DEFAULT_DURATION = 400;
 
-void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    PaintProperty::ToJsonValue(json);
+    PaintProperty::ToJsonValue(json, filter);
 
-    json->Put("autoPlay", GetAutoPlay().value_or(false) ? "true" : "false");
-    json->Put(
-        "interval", std::to_string(GetAutoPlayInterval().value_or(SwiperAnimationStyle::DEFAULT_INTERVAL)).c_str());
-    json->Put("duration", std::to_string(GetDuration().value_or(SwiperAnimationStyle::DEFAULT_DURATION)).c_str());
+    json->PutExtAttr("autoPlay", GetAutoPlay().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("interval",
+        std::to_string(GetAutoPlayInterval().value_or(SwiperAnimationStyle::DEFAULT_INTERVAL)).c_str(), filter);
+    json->PutExtAttr("duration",
+        std::to_string(GetDuration().value_or(SwiperAnimationStyle::DEFAULT_DURATION)).c_str(), filter);
     static const char* EDGE_EFFECT[] = { "EdgeEffect.Spring", "EdgeEffect.Fade", "EdgeEffect.None" };
-    json->Put("effectMode", EDGE_EFFECT[static_cast<int32_t>(GetEdgeEffect().value_or(EdgeEffect::SPRING))]);
-    json->Put("curve",
-        GetCurve().has_value() ? Curves::ToString(GetCurve().value()).c_str() : Curves::DEFAULT_CURVE_NAME.c_str());
+    json->PutExtAttr("effectMode",
+        EDGE_EFFECT[static_cast<int32_t>(GetEdgeEffect().value_or(EdgeEffect::SPRING))], filter);
+    json->PutExtAttr("curve", GetCurve().has_value() ?
+        Curves::ToString(GetCurve().value()).c_str() : Curves::DEFAULT_CURVE_NAME.c_str(), filter);
 }
 
 void SwiperPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)

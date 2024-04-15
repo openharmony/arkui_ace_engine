@@ -340,6 +340,8 @@ public:
 
     void JSGetUIContext(const JSCallbackInfo& info);
 
+    void JSGetUniqueId(const JSCallbackInfo& info);
+
     // Release the UINode hold on the JS object and trigger the delete phase.
     void JSResetRecycleCustomNode(const JSCallbackInfo& info)
     {

@@ -95,6 +95,9 @@ private:
     Dimension GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
+    double GetTextMaxHeight();
+    double GetTextMaxWidth();
+    int32_t GetTextLineHeight(const RefPtr<FrameNode>& textNode);
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;

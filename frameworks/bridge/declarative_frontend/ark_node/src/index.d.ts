@@ -125,3 +125,20 @@ declare class ModifierWithKey<T extends number | string | boolean | object> {
   applyPeer(node: NodePtr, reset: boolean): void;
   checkObjectDiff(): boolean;
 }
+
+declare class NativeStrongRef {
+  getNativeHandle(): NodePtr;
+  dispose(): void;
+}
+
+declare class NativeWeakRef {
+  invalid(): boolean;
+  upgrade(): NativeStrongRef;
+  getNativeHandle(): NodePtr;
+  dispose?(): void;
+}
+
+declare class NativeUtils {
+  createNativeStrongRef(nodePtr: NodePtr): NativeStrongRef;
+  createNativeWeakRef(nodePtr: NodePtr): NativeWeakRef;
+}

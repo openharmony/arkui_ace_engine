@@ -194,8 +194,9 @@ void JSScroll::OnScrollFrameBeginCallback(const JSCallbackInfo& args)
 
 void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+    auto callbackInfo = args[0];
+    if (callbackInfo->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(callbackInfo)](
                             const Dimension& xOffset, const Dimension& yOffset) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(xOffset, yOffset);
@@ -203,7 +204,6 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
         };
         ScrollModel::GetInstance()->SetOnScroll(std::move(onScroll));
     }
-    args.SetReturnValue(args.This());
 }
 
 void JSScroll::OnWillScrollCallback(const JSCallbackInfo& args)
@@ -393,8 +393,14 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
-    auto edgeEffect = JSScrollable::ParseEdgeEffect(args, EdgeEffect::NONE);
-    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(args, true);
+    auto edgeEffect = EdgeEffect::NONE;
+    if (args.Length() > 0) {
+        edgeEffect = JSScrollable::ParseEdgeEffect(args[0], EdgeEffect::NONE);
+    }
+    auto alwaysEnabled = true;
+    if (args.Length() > 1) {
+        alwaysEnabled = JSScrollable::ParseAlwaysEnable(args[1], true);
+    }
     ScrollModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 

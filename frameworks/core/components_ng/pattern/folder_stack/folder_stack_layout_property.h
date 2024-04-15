@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FOLDER_STACK_LAYOUT_PROPERTY_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 
@@ -45,14 +46,14 @@ public:
         ResetUpperItems();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         auto align = Alignment::CENTER;
         if (GetPositionProperty()) {
             align = GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
         }
-        json->Put("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str());
+        json->PutExtAttr("alignContent", align.GetAlignmentStr(TextDirection::LTR).c_str(), filter);
         auto itemId = GetUpperItemsValue();
         std::string str;
         str.assign("[");
@@ -61,9 +62,9 @@ public:
             str.append(", ");
         }
         str = (itemId.size() > 1) ? str.substr(0, str.size() - 1).append("]") : str.append("]");
-        json->Put("upperItems", str.c_str());
-        json->Put("enableAnimation", propEnableAnimation_.value_or(true) ? "true" : "false");
-        json->Put("autoHalfFold", propAutoHalfFold_.value_or(true) ? "true" : "false");
+        json->PutExtAttr("upperItems", str.c_str(), filter);
+        json->PutExtAttr("enableAnimation", propEnableAnimation_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("autoHalfFold", propAutoHalfFold_.value_or(true) ? "true" : "false", filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);

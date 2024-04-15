@@ -736,16 +736,16 @@ shared_ptr<JsValue> JsLogPrint(
     std::string content = GetLogContent(runtime, argv, argc);
     switch (level) {
         case JsLogLevel::DEBUG:
-            LOGD("%{public}s", content.c_str());
+            TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
         case JsLogLevel::INFO:
-            LOGI("%{public}s", content.c_str());
+            TAG_LOGI(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
         case JsLogLevel::WARNING:
-            LOGW("%{public}s", content.c_str());
+            TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
         case JsLogLevel::ERROR:
-            LOGE("%{public}s", content.c_str());
+            TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "%{public}s", content.c_str());
             break;
     }
 

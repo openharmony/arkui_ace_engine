@@ -625,4 +625,11 @@ void WebModelImpl::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     webComponent->SetNativeVideoPlayerConfig(enable, shouldOverlay);
 }
 
+void WebModelImpl::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
+}
+
 } // namespace OHOS::Ace::Framework

@@ -19,7 +19,9 @@
 #include <optional>
 
 #include "base/i18n/localization.h"
+#include "base/i18n/time_format.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -96,6 +98,8 @@ public:
     void UpdateAllChildNode();
 
     void HandleHourColumnBuilding();
+
+    void HandleMinAndSecColumnBuilding();
 
     void FlushColumn();
 
@@ -187,6 +191,21 @@ public:
         auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
         CHECK_NULL_RETURN(timePickerLayoutProperty, hour24_);
         return timePickerLayoutProperty->GetIsUseMilitaryTimeValue(hour24_);
+    }
+
+    void SetDateTimeOptionUpdate(bool value)
+    {
+        isDateTimeOptionUpdate_ = value;
+    }
+
+    void SetPrefixHour(ZeroPrefixType& value)
+    {
+        prefixHour_ = value;
+    }
+
+    ZeroPrefixType GetPrefixHour() const
+    {
+        return prefixHour_;
     }
 
     void ClearOptionsHour()
@@ -281,6 +300,32 @@ public:
         hasSecond_ = value;
     }
 
+    void SetPrefixMinute(ZeroPrefixType value)
+    {
+        prefixMinute_ = value;
+    }
+
+    ZeroPrefixType GetPrefixMinute() const
+    {
+        auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+        CHECK_NULL_RETURN(timePickerLayoutProperty, prefixMinute_);
+        return static_cast<ZeroPrefixType>(
+            timePickerLayoutProperty->GetPrefixMinuteValue(0));
+    }
+
+    void SetPrefixSecond(ZeroPrefixType value)
+    {
+        prefixSecond_ = value;
+    }
+
+    ZeroPrefixType GetPrefixSecond() const
+    {
+        auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+        CHECK_NULL_RETURN(timePickerLayoutProperty, prefixSecond_);
+        return static_cast<ZeroPrefixType>(
+            timePickerLayoutProperty->GetPrefixSecondValue(0));
+    }
+
     bool GetWheelModeEnabled() const
     {
         auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
@@ -346,9 +391,9 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("selected", selectedTime_.ToString(false, false).c_str());
+        json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
     }
 
     void CreateAmPmNode();
@@ -398,6 +443,9 @@ private:
     Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
+    ZeroPrefixType prefixMinute_ = ZeroPrefixType::AUTO;
+    ZeroPrefixType prefixSecond_ = ZeroPrefixType::AUTO;
     PickerTime selectedTime_ = PickerTime::Current();
     PickerDate dialogTitleDate_ = PickerDate::Current();
     std::optional<int32_t> amPmId_;
@@ -422,6 +470,7 @@ private:
     bool isPicker_ = false;
     bool isFiredTimeChange_ = false;
     bool isForceUpdate_ = false;
+    bool isDateTimeOptionUpdate_ = false;
     std::optional<std::string> firedTimeStr_;
 };
 } // namespace OHOS::Ace::NG

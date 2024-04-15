@@ -28,6 +28,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
+const NG::InspectorFilter filter;
 const std::string ZERO_STRING = "0.0px";
 const std::string SRC_IMAGES = "images/mmm.jpg";
 const std::string BACKGROUND_IMAGES = "images/mmm.jpg, ImageRepeat.NoRepeat";
@@ -89,7 +90,7 @@ HWTEST_F(RenderPropertyTestNg, RenderPositionPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call ToJsonValue.The propPosition propOffset propMarkAnchor is null.
      */
-    renderPositionProperty.ToJsonValue(json);
+    renderPositionProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -113,7 +114,7 @@ HWTEST_F(RenderPropertyTestNg, RenderPositionPropertyTest001, TestSize.Level1)
     renderPosition.propPosition = POSITION;
     renderPosition.propOffset = OFFSET_TEST;
     renderPosition.propAnchor = ANCHOR;
-    renderPosition.ToJsonValue(jsonTest);
+    renderPosition.ToJsonValue(jsonTest, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -143,7 +144,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level1)
      * @tc.steps: step2. call ToJsonValue.The propBackShadow is null, propFrontColorBlend = WHITE;
      */
     MakeGraphicsProperty(graphicsProperty);
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -176,7 +177,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
      */
     shadow.style_ = ShadowStyle::OuterDefaultXS;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString(SHADOW_TEST), "ShadowStyle.OuterDefaultXS");
     json->Delete(SHADOW_TEST);
 
@@ -186,7 +187,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
      */
     shadow.style_ = ShadowStyle::OuterDefaultSM;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString(SHADOW_TEST), "ShadowStyle.OuterDefaultSM");
     json->Delete(SHADOW_TEST);
     /**
@@ -195,7 +196,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
      */
     shadow.style_ = ShadowStyle::OuterDefaultMD;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString(SHADOW_TEST), "ShadowStyle.OuterDefaultMD");
     json->Delete(SHADOW_TEST);
 
@@ -205,7 +206,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
      */
     shadow.style_ = ShadowStyle::OuterDefaultLG;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString(SHADOW_TEST), "ShadowStyle.OuterDefaultLG");
     json->Delete(SHADOW_TEST);
 
@@ -215,7 +216,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
      */
     shadow.style_ = ShadowStyle::OuterFloatingSM;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString(SHADOW_TEST), "ShadowStyle.OuterFloatingSM");
     json->Delete(SHADOW_TEST);
 
@@ -225,7 +226,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest002, TestSize.Level1)
      */
     shadow.style_ = ShadowStyle::OuterFloatingMD;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString(SHADOW_TEST), "ShadowStyle.OuterFloatingMD");
     json->Delete(SHADOW_TEST);
 }
@@ -250,7 +251,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
      */
     shadow.colorStrategy_ = ShadowColorStrategy::AVERAGE;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.AVERAGE");
     json->Delete(SHADOW_TEST);
 
@@ -260,7 +261,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest003, TestSize.Level1)
      */
     shadow.colorStrategy_ = ShadowColorStrategy::PRIMARY;
     graphicsProperty.propBackShadow = shadow;
-    graphicsProperty.ToJsonValue(json);
+    graphicsProperty.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "ColoringStrategy.PRIMARY");
 }
 
@@ -282,7 +283,7 @@ HWTEST_F(RenderPropertyTestNg, BackgroundPropertyTest001, TestSize.Level1)
      * @tc.steps: step2. push propBackgroundImageSize is null.
      * @tc.steps: step2. push propBackgroundImagePosition is null.
      */
-    backgroundProperty.ToJsonValue(json);
+    backgroundProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -315,7 +316,7 @@ HWTEST_F(RenderPropertyTestNg, BackgroundPropertyTest002, TestSize.Level1)
     backgroundProperty.propBackgroundImage = imageSourceInfo;
     backgroundProperty.propBackgroundImageSize = BACKGROUND_SIZE;
     backgroundProperty.propBackgroundImagePosition = BACKGROUND_POSITION;
-    backgroundProperty.ToJsonValue(json);
+    backgroundProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -342,7 +343,7 @@ HWTEST_F(RenderPropertyTestNg, ClipPropertytyTest001, TestSize.Level1)
      * @tc.steps: step2. call ToJsonValue.push propClipShape is null.
      * @tc.steps: step2. push propClipMask is null.
      */
-    clipProperty.ToJsonValue(json);
+    clipProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -358,7 +359,7 @@ HWTEST_F(RenderPropertyTestNg, ClipPropertytyTest001, TestSize.Level1)
      */
     clipProperty.propClipShape = AceType::MakeRefPtr<BasicShape>();
     clipProperty.propClipMask = AceType::MakeRefPtr<BasicShape>();
-    clipProperty.ToJsonValue(json);
+    clipProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -384,7 +385,7 @@ HWTEST_F(RenderPropertyTestNg, GradientPropertyTest001, TestSize.Level1)
      * @tc.steps: step2. call ToJsonValue.push propClipShape is null.
      * @tc.steps: step2. push propClipMask is null.
      */
-    gradientProperty.ToJsonValue(json);
+    gradientProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -406,7 +407,7 @@ HWTEST_F(RenderPropertyTestNg, GradientPropertyTest001, TestSize.Level1)
     gradientProperty.propLinearGradient = gradient;
     gradientProperty.propSweepGradient = gradient;
     gradientProperty.propRadialGradient = gradient;
-    gradientProperty.ToJsonValue(json);
+    gradientProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -432,7 +433,7 @@ HWTEST_F(RenderPropertyTestNg, TransformPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call ToJsonValue.push transformProperty is null.
      */
-    transformProperty.ToJsonValue(json);
+    transformProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -452,7 +453,7 @@ HWTEST_F(RenderPropertyTestNg, TransformPropertyTest001, TestSize.Level1)
     transformProperty.propTransformRotate = VECTOR_5F_TEST;
     transformProperty.propTransformScale = VECTOR_TEST;
     transformProperty.propTransformTranslate = PTTION_TEST;
-    transformProperty.ToJsonValue(json);
+    transformProperty.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.

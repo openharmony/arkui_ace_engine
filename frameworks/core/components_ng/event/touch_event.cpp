@@ -60,10 +60,6 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:TouchEvent",
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
         }
-        if (SystemProperties::GetTraceInputEventEnabled()) {
-            ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:TouchEvent",
-                static_cast<long long>(inputTime), static_cast<long long>(overTime));
-        }
         firstInputTime_.reset();
     }
 
@@ -173,6 +169,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         // actuator->userCallback_ may be overwritten in its invoke so we copy it first
         auto userCallback = userCallback_;
         (*userCallback)(event);
+    }
+    if (touchAfterEvents_) {
+        auto touchAfterEvents = touchAfterEvents_;
+        (*touchAfterEvents)(event);
     }
     if (onTouchEventCallback_) {
         // actuator->onTouchEventCallback_ may be overwritten in its invoke so we copy it first

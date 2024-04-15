@@ -261,9 +261,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
     auto iconWidth = selectTheme->GetIconSideLength();
     auto iconContentPadding = selectTheme->GetIconContentPadding();
     auto margin = MarginProperty();
-    if (pattern->HasSelectIcon() && pattern->HasStartIcon()) {
-        margin.left = CalcLength(iconWidth * 2.0 + iconContentPadding * 2.0);
-    } else if (pattern->HasSelectIcon() || pattern->HasStartIcon()) {
+    if (pattern->HasSelectIcon()) {
         margin.left = CalcLength(iconWidth + iconContentPadding);
     } else {
         // no need to update zero margin.

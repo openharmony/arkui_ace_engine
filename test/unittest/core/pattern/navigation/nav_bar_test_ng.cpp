@@ -40,6 +40,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string BAR_ITEM_ETS_TAG = "BarItem";
 const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
 const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
@@ -260,7 +261,7 @@ HWTEST_F(NavBarTestNg, ToJsonValue001, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto json = JsonUtil::Create(true);
-    barNode->ToJsonValue(json);
+    barNode->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetValue("title")->GetString(), EMPTY_STRING);
     EXPECT_EQ(json->GetValue("subtitle")->GetString(), EMPTY_STRING);
     EXPECT_EQ(json->GetValue("menus")->GetString(), EMPTY_STRING);

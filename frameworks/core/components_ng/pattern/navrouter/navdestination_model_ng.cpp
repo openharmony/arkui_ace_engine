@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -55,6 +56,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
     }
     navDestinationNode->UpdatePrevTitleIsCustom(false);
 
+    auto theme = NavigationGetTheme();
     // create or update main title
     auto mainTitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
     if (hasMainTitle) {
@@ -68,7 +70,6 @@ bool NavDestinationModelNG::ParseCommonTitle(
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            auto theme = NavigationGetTheme();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : 2);
             textLayoutProperty->UpdateContent(title);
             textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
@@ -78,6 +79,11 @@ bool NavDestinationModelNG::ParseCommonTitle(
             textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
+                textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
+                textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+            }
             titleBarNode->SetTitle(mainTitle);
             titleBarNode->AddChild(mainTitle);
         }
@@ -106,13 +112,17 @@ bool NavDestinationModelNG::ParseCommonTitle(
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
         //max title font size shoule be 14.0 vp
-        textLayoutProperty->UpdateAdaptMaxFontSize(NavigationGetTheme()->GetSubTitleFontSize());
+        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
         //min title font size should be 10.0 vp
         textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-        textLayoutProperty->UpdateTextColor(SUBTITLE_COLOR);
+        textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
+            textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
+        }
         titleBarNode->SetSubtitle(subTitle);
         titleBarNode->AddChild(subTitle);
     }
@@ -491,5 +501,34 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     titleBarNode->SetMenu(customMenu);
     titleBarNode->UpdatePrevMenuIsCustom(true);
     titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+}
+
+void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    if (!isVaild) {
+        navDestinationPattern->SetIsUserDefinedBgColor(false);
+        return;
+    }
+    ViewAbstract::SetBackgroundColor(color);
+    navDestinationPattern->SetIsUserDefinedBgColor(true);
+}
+
+void NavDestinationModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    if (!isVaild) {
+        navDestinationPattern->SetIsUserDefinedBgColor(false);
+        return;
+    }
+    ViewAbstract::SetBackgroundColor(frameNode, color);
+    navDestinationPattern->SetIsUserDefinedBgColor(true);
 }
 } // namespace OHOS::Ace::NG

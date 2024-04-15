@@ -18,10 +18,6 @@
 
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 
-#ifdef USE_GRAPHIC_TEXT_GINE
-#include "rosen_text/text_style.h"
-#endif
-
 namespace OHOS::Ace::NG {
 using setColorFunc = std::function<void (const std::string&)>;
 
@@ -47,6 +43,7 @@ public:
     void SetTransform(const TransformParam& param) override;
     TransformParam GetTransform() const override;
     void UpdateSize(int32_t width, int32_t height);
+    void Reset();
     int32_t GetWidth()
     {
         return width_;
@@ -64,30 +61,14 @@ public:
         return bitmapSize_;
     }
 private:
-    void InitBitmap(int32_t width, int32_t height);
+    void InitBitmap();
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     void PaintText(const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke,
         bool hasShadow = false);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
-#else
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
-#endif
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
-#else
     void UpdateTextStyleForeground(bool isStroke, OHOS::Rosen::TextStyle& txtStyle, bool hasShadow);
-#endif
-#ifndef USE_ROSEN_DRAWING
-    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint) override;
-    void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
-    SkCanvas* GetRawPtrOfSkCanvas() override
-    {
-        return skCanvas_.get();
-    }
-#else
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
         const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
@@ -95,13 +76,8 @@ private:
     {
         return rsCanvas_.get();
     }
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-    SkBitmap bitmap_;
-#else
     RSBitmap bitmap_;
-#endif
 
     int32_t width_;
     int32_t height_;

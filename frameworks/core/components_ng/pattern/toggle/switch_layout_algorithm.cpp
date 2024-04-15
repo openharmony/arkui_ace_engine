@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
@@ -30,6 +31,11 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return std::nullopt;
+    }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     float frameHeight = 0.0f;
@@ -67,6 +73,14 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
 
 void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
+        return;
+    }
     // switch does not have child nodes. If a child is added to a toggle, then hide the child.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetFrameSize(SizeF());

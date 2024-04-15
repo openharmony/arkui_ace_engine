@@ -39,6 +39,8 @@ class AccessibilityEventInfo;
 
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
+class InspectorFilter;
+
 struct DirtySwapConfig {
     bool frameSizeChange = false;
     bool frameOffsetChange = false;
@@ -268,6 +270,8 @@ public:
         return false;
     }
 
+    virtual void BeforeSyncGeometryProperties() {}
+
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*changeConfig*/)
@@ -407,7 +411,7 @@ public:
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     // get XTS inspector value
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     // call by recycle framework.
     virtual void OnRecycle() {}

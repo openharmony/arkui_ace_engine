@@ -138,6 +138,7 @@ template("ace_core_source_set") {
       "components/declaration/svg/svg_fe_offset_declaration.cpp",
       "components/declaration/svg/svg_filter_declaration.cpp",
       "components/declaration/svg/svg_gradient_declaration.cpp",
+      "components/declaration/svg/svg_image_declaration.cpp",
       "components/declaration/svg/svg_line_declaration.cpp",
       "components/declaration/svg/svg_mask_declaration.cpp",
       "components/declaration/svg/svg_path_declaration.cpp",
@@ -226,6 +227,9 @@ template("ace_core_source_set") {
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
       "common/recorder/node_data_cache.cpp",
+
+      # text
+      "text/text_emoji_processor.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {
@@ -796,6 +800,9 @@ template("ace_core_ng_source_set") {
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
       "common/recorder/node_data_cache.cpp",
+
+      # text
+      "text/text_emoji_processor.cpp",
     ]
     include_dirs = []
     if (is_arkui_x) {

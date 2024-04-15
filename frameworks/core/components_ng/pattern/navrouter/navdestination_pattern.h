@@ -185,6 +185,32 @@ public:
     {
         navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
     }
+    
+    void OnDetachFromMainTree() override
+    {
+        auto weak = AceType::WeakClaim(this);
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
+    }
+
+    void SetNavigationId(const std::string& id)
+    {
+        inspectorId_ = id;
+    }
+
+    std::string GetNavigationId() const
+    {
+        return inspectorId_;
+    }
+
+    void SetIsUserDefinedBgColor(bool isUserDefinedBgColor)
+    {
+        isUserDefinedBgColor_ = isUserDefinedBgColor;
+    }
+
+    bool IsUserDefinedBgColor() const
+    {
+        return isUserDefinedBgColor_;
+    }
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -193,10 +219,12 @@ private:
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
+    std::string inspectorId_;
     RefPtr<NavDestinationContext> navDestinationContext_;
     RefPtr<UINode> customNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;
+    bool isUserDefinedBgColor_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
 };

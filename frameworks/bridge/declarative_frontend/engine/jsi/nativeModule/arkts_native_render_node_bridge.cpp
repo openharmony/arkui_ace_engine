@@ -17,15 +17,96 @@
 
 #include <cstdint>
 
+#include "canvas_napi/js_canvas.h"
+#include "jsnapi_expo.h"
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/shape.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/render_node/render_node_properties.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t DEFAULT_COLOR = 0xFF000000;
+}
+
+ArkUINativeModuleValue RenderNodeBridge::CreateRenderNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
+        V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    RenderNodeBridge::SetOnDraw(frameNode, runtimeCallInfo);
+    return NativeUtilsBridge::CreateStrongRef(vm, frameNode);
+}
+
+void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, Framework::JsiWeak<Framework::JsiObject> object,
+    NG::DrawingContext& context, Local<panda::StringRef> funcName)
+{
+    auto funcObj = object.Lock()->GetLocalHandle()->Get(vm, funcName);
+    panda::Local<panda::FunctionRef> func = funcObj;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    Framework::ScopeRAII scope(env);
+
+    const char* keysOfSize[] = { "height", "width" };
+    Local<JSValueRef> valuesOfSize[] = {
+        panda::NumberRef::New(vm, static_cast<double>(PipelineBase::Px2VpWithCurrentDensity(context.height))),
+        panda::NumberRef::New(vm, static_cast<double>(PipelineBase::Px2VpWithCurrentDensity(context.width)))
+    };
+    auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfSize);
+    auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+    OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+    napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+    if (unwrapCanvas) {
+        unwrapCanvas->SaveCanvas();
+        unwrapCanvas->ClipCanvas(context.width, context.height);
+    }
+
+    auto jsCanvasVal = NapiValueToLocalValue(jsCanvas);
+    Local<JSValueRef> values[] = { sizeObj, jsCanvasVal };
+    const char* keys[] = { "size", "canvas" };
+    auto contextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    contextObj->SetNativePointerFieldCount(vm, 1);
+    JSValueWrapper valueWrapper = contextObj;
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_wrap(
+        env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+    panda::Local<panda::JSValueRef> params[1] = { contextObj };
+    func->Call(vm, object.Lock()->GetLocalHandle(), params, 1);
+    if (unwrapCanvas) {
+        unwrapCanvas->RestoreCanvas();
+        unwrapCanvas->ResetCanvas();
+    }
+}
+
+void RenderNodeBridge::SetOnDraw(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_VOID(firstArg->IsObject());
+    auto obj = Local<panda::ObjectRef>(firstArg);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "draw");
+    auto funcObj = obj->Get(vm, funcName);
+    CHECK_NULL_VOID(funcObj->IsFunction());
+    auto object = Framework::JsiRef(Framework::JsiObject(obj));
+    auto drawCallback = [vm, object = Framework::JsiWeak<Framework::JsiObject>(object)](NG::DrawingContext& context) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto funcName = panda::StringRef::NewFromUtf8(vm, "draw");
+        RenderNodeBridge::FireDrawCallback(vm, object, context, funcName);
+    };
+    auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
+    pattern->SetDrawCallback(std::move(drawCallback));
 }
 
 ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -204,7 +285,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetScale(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> scaleX = runtimeCallInfo->GetCallArgRef(1);
     float scaleXValue = 0;
     if (scaleX->IsNumber()) {
@@ -243,7 +324,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetPivot(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> pivotX = runtimeCallInfo->GetCallArgRef(1);
     float pivotXValue = 0;
     if (pivotX->IsNumber()) {
@@ -266,7 +347,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetFrame(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> positionX = runtimeCallInfo->GetCallArgRef(1);
     float positionXValue = 0;
     if (positionX->IsNumber()) {
@@ -341,7 +422,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetTranslate(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> translateX = runtimeCallInfo->GetCallArgRef(1);
     float translateXValue = 0;
     if (translateX->IsNumber()) {

@@ -85,6 +85,7 @@ public:
     virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
+    virtual void SetForegroundEffect(float radius) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -292,7 +293,7 @@ public:
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
-
+    virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {};
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
@@ -324,6 +325,7 @@ public:
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
     virtual void SetAccessibilityText(const std::string& text) = 0;
+    virtual void SetAccessibilityTextHint(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
@@ -350,6 +352,7 @@ public:
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
     virtual void SetLightIntensity(const float value) = 0;
+    virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;

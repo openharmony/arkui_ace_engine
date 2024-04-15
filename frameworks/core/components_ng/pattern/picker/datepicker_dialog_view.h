@@ -87,7 +87,7 @@ private:
     static std::function<void(bool)> CreateLunarChangeEvent(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateAndMountMonthDaysNode(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow,
-        std::function<void(bool)> lunarChangeEvent);
+        std::function<void(bool)>&& lunarChangeEvent);
     static RefPtr<FrameNode> CreateAndMountTimeNode(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& pickerRow);
     static std::function<void()> CreateAndSetDialogSwitchEvent(

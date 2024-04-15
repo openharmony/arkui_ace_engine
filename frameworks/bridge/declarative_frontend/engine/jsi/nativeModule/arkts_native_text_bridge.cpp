@@ -194,7 +194,7 @@ ArkUINativeModuleValue TextBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getTextModifier()->resetFontSize(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextModifier()->setFontSize(
@@ -220,7 +220,7 @@ ArkUINativeModuleValue TextBridge::SetLineHeight(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension lineHeight(0.0, DEFAULT_SPAN_FONT_UNIT);
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, lineHeight)) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, lineHeight)) {
         lineHeight.Reset();
     }
     if (lineHeight.IsNegative()) {
@@ -337,7 +337,7 @@ ArkUINativeModuleValue TextBridge::SetMaxLines(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsNumber() && secondArg->ToNumber(vm)->Value() >= NUM_0) {
+    if (secondArg->IsNumber()) {
         uint32_t maxLine = secondArg->Uint32Value(vm);
         GetArkUINodeModifiers()->getTextModifier()->setTextMaxLines(nativeNode, maxLine);
     } else {
@@ -365,7 +365,7 @@ ArkUINativeModuleValue TextBridge::SetMinFontSize(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     CalcDimension fontSize;
-    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+    if (ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getTextModifier()->setTextMinFontSize(
             nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
     } else {
@@ -417,7 +417,7 @@ ArkUINativeModuleValue TextBridge::SetMaxFontSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+    if (ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false)) {
         GetArkUINodeModifiers()->getTextModifier()->setTextMaxFontSize(
             nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
     } else {
@@ -595,7 +595,7 @@ ArkUINativeModuleValue TextBridge::SetTextIndent(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension indent;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, indent) || indent.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, indent) || indent.IsNegative()) {
         indent.Reset();
     }
     
@@ -680,7 +680,7 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ArkUIFontStruct fontInfo;
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg,  fontSize) || sizeArg->IsNull()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) || sizeArg->IsNull()) {
         fontSize.SetValue(DEFAULT_SPAN_FONT_SIZE);
         fontSize.SetUnit(DEFAULT_SPAN_FONT_UNIT);
     }

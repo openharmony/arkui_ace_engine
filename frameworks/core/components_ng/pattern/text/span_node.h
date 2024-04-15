@@ -138,6 +138,7 @@ public:                                                                         
 
 namespace OHOS::Ace::NG {
 using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
+class InspectorFilter;
 class Paragraph;
 
 struct SpanItem : public AceType {
@@ -188,7 +189,7 @@ public:
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     std::string GetFont() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
@@ -235,6 +236,7 @@ public:
     std::string GetSpanContent(const std::string& rawContent);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
+    std::string SymbolColorToString();
 
 private:
     std::optional<TextStyle> textStyle_;
@@ -388,9 +390,9 @@ public:
         spanItem_->children.clear();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        spanItem_->ToJsonValue(json);
+        spanItem_->ToJsonValue(json, filter);
     }
 
     void RequestTextFlushDirty();
@@ -418,6 +420,9 @@ public:
 
     std::set<PropertyInfo> CalculateInheritPropertyInfo();
 
+protected:
+    void DumpInfo() override;
+
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     std::set<PropertyInfo> propertyInfo_;
@@ -433,9 +438,10 @@ struct PlaceholderSpanItem : public SpanItem {
 public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
+    PlaceholderRun run_;
     PlaceholderSpanItem() = default;
     ~PlaceholderSpanItem() override = default;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
         double height, VerticalAlign verticalAlign) override;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
@@ -499,9 +505,10 @@ struct ImageSpanItem : public PlaceholderSpanItem {
 public:
     ImageSpanItem() = default;
     ~ImageSpanItem() override = default;
+    PlaceholderRun run_;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
         double height, VerticalAlign verticalAlign) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
@@ -534,6 +541,8 @@ public:
         return imageSpanItem_;
     }
 
+    void DumpInfo() override;
+
 private:
     RefPtr<ImageSpanItem> imageSpanItem_ = MakeRefPtr<ImageSpanItem>();
 
@@ -559,7 +568,7 @@ public:
     explicit ContainerSpanNode(int32_t nodeId) : UINode(V2::CONTAINER_SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
     ~ContainerSpanNode() override = default;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool IsAtomicNode() const override
     {

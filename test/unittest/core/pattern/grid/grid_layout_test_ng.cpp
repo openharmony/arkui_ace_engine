@@ -844,7 +844,7 @@ HWTEST_F(GridLayoutTestNg, GridPattern_GetItemRect001, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr");
         model.SetLayoutOptions(option);
-        CreateFixedItem(10);
+        CreateItem(10, -2, ITEM_HEIGHT);
     });
     pattern_->UpdateStartIndex(3, ScrollAlign::START);
     FlushLayoutTask(frameNode_);

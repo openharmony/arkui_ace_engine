@@ -35,6 +35,10 @@ void AddOrChangeTranslateZModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSTranslateZModifier>& modifier,
     std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value);
 
+void AddOrChangePerspectiveModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSPerspModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value);
+
 void AddOrChangeTranslateModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSTranslateModifier>& modifier,
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value);
@@ -48,12 +52,14 @@ void AddOrChangePivotModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value);
 
 struct TransformMatrixModifier {
+    std::shared_ptr<Rosen::RSPerspModifier> perspectiveXY;
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZ;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXY;
     std::shared_ptr<Rosen::RSSkewModifier> skewXY;
     std::shared_ptr<Rosen::RSPivotModifier> pivotXY;
     std::shared_ptr<Rosen::RSQuaternionModifier> quaternion;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> perspectiveXYValue;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> translateXYValue;
     std::shared_ptr<Rosen::RSAnimatableProperty<float>> translateZValue;
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>> scaleXYValue;

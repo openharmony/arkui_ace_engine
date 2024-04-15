@@ -68,6 +68,11 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return std::nullopt;
+    }
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(sliderLayoutProperty, std::nullopt);
     auto theme = GetTheme();
@@ -159,7 +164,13 @@ void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dim
 void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    layoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->UseContentModifier()) {
+        layoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(blockSize_.Width(), blockSize_.Height()));
+    }
     if (layoutWrapper->GetTotalChildCount() != 0) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(0);
         child->Measure(layoutConstraint);
@@ -169,16 +180,20 @@ void SliderLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    if (pattern->UseContentModifier()) {
+        BoxLayoutAlgorithm::Layout(layoutWrapper);
+        return;
+    }
     PerformLayout(layoutWrapper);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
     }
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();

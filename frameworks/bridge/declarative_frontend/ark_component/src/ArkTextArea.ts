@@ -98,12 +98,12 @@ class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
   constructor(value: WordBreak) {
     super(value);
   }
-  static identity: Symbol = Symbol('textInputWordBreak');
+  static identity: Symbol = Symbol('textAreaWordBreak');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.resetWordBreak(node);
+      getUINativeModule().textArea.resetWordBreak(node);
     } else {
-      getUINativeModule().text.setWordBreak(node, this.value!);
+      getUINativeModule().textArea.setWordBreak(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -138,6 +138,57 @@ class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
       getUINativeModule().textArea.resetMaxLines(node);
     } else {
       getUINativeModule().textArea.setMaxLines(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaMinFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMinFontSize(node);
+    } else {
+      getUINativeModule().textArea.setMinFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaMaxFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMaxFontSize(node);
+    } else {
+      getUINativeModule().textArea.setMaxFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
+  constructor(value: TextHeightAdaptivePolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaHeightAdaptivePolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetHeightAdaptivePolicy(node);
+    } else {
+      getUINativeModule().textArea.setHeightAdaptivePolicy(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -536,6 +587,18 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   wordBreak(value: WordBreak): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
+  minFontSize(value: number | string | Resource): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMinFontSizeModifier.identity, TextAreaMinFontSizeModifier, value);
+    return this;
+  }
+  maxFontSize(value: number | string | Resource): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxFontSizeModifier.identity, TextAreaMaxFontSizeModifier, value);
+    return this;
+  }
+  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHeightAdaptivePolicyModifier.identity, TextAreaHeightAdaptivePolicyModifier, value);
     return this;
   }
 }

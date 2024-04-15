@@ -31,6 +31,7 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
+
 class CheckBoxModifier : public ContentModifier {
     DECLARE_ACE_TYPE(CheckBoxModifier, ContentModifier);
 
@@ -78,6 +79,8 @@ public:
                 isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
             animatableShadowColor_->Set(
                 isSelect_->Get() ? LinearColor(shadowColor_) : LinearColor(shadowColor_.BlendOpacity(0)));
+            opacityScale_->Set(isSelect_->Get() ? 1.0f : 0.0f);
+            borderOpacityScale_->Set(isSelect_->Get() ? 0.0f : 1.0f);
         });
     }
 
@@ -181,6 +184,7 @@ public:
     {
         touchHoverType_ = touchHoverType;
     }
+
     void SetCheckboxStyle(CheckBoxStyle checkBoxStyle)
     {
         checkBoxStyle_ = checkBoxStyle;
@@ -191,6 +195,11 @@ public:
     void SetHoverEffectType(HoverEffectType hoverEffectType)
     {
         hoverEffectType_ = hoverEffectType;
+    }
+
+    void SetHasBuilder(bool hasBuilder)
+    {
+        hasBuilder_ = hasBuilder;
     }
 
 private:
@@ -219,6 +228,7 @@ private:
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
+    bool hasBuilder_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
@@ -238,6 +248,8 @@ private:
     RefPtr<PropertyBool> isFocused_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
+    RefPtr<AnimatablePropertyFloat> opacityScale_;
+    RefPtr<AnimatablePropertyFloat> borderOpacityScale_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxModifier);
 };

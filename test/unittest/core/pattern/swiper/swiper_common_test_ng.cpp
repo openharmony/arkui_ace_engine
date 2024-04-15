@@ -14,7 +14,6 @@
  */
 
 #include "swiper_test_ng.h"
-#include "core/components/swiper/swiper_component.h"
 
 namespace OHOS::Ace::NG {
 
@@ -24,6 +23,7 @@ class SwiperCommonTestNg : public SwiperTestNg {
 public:
     AssertionResult IsEqualNextFocusNode(FocusStep step,
         const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
+    void OnKeyEvent(KeyCode keyCode, KeyAction keyAction);
 };
 
 AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
@@ -39,6 +39,13 @@ AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
         return AssertionFailure() << "Next focusNode is not as expected";
     }
     return AssertionSuccess();
+}
+
+void SwiperCommonTestNg::OnKeyEvent(KeyCode keyCode, KeyAction keyAction)
+{
+    auto focusHub = frameNode_->GetFocusHub();
+    focusHub->ProcessOnKeyEventInternal(KeyEvent(keyCode, keyAction));
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -89,8 +96,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent003, TestSize.Level1)
      * @tc.expected: When touch up, will trigger UpdateAnimationProperty and stop animation
      */
     CreateWithItem([](SwiperModelNG model) {});
-    controller_->ShowNext();
-    FlushLayoutTask(frameNode_);
+    ShowNext();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
     pattern_->springAnimationIsRunning_ = true;
     pattern_->childScrolling_ = true;
@@ -143,7 +149,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent004, TestSize.Level1)
 
 /**
  * @tc.name: HandleTouchEvent005
- * @tc.desc: When touch down on indicatorNode, the animation will not stop
+ * @tc.desc: When touch down on indicatorNode_, the animation will not stop
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
@@ -152,7 +158,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
     pattern_->springAnimationIsRunning_ = true;
 
     /**
-     * @tc.steps: step1. Touch down on indicatorNode
+     * @tc.steps: step1. Touch down on indicatorNode_
      * @tc.expected: Animation still running
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
@@ -170,7 +176,7 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent005, TestSize.Level1)
 
 /**
  * @tc.name: HandleTouchEvent006
- * @tc.desc: When touch down on indicatorNode area, but no indicatorNode, the animation will stop
+ * @tc.desc: When touch down on indicatorNode_ area, but no indicatorNode_, the animation will stop
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
@@ -181,76 +187,12 @@ HWTEST_F(SwiperCommonTestNg, HandleTouchEvent006, TestSize.Level1)
     pattern_->translateAnimationIsRunning_ = true;
 
     /**
-     * @tc.steps: step1. Touch down on indicatorNode area
+     * @tc.steps: step1. Touch down on indicatorNode_ area
      * @tc.expected: Animation stoped
      */
     pattern_->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT)));
     EXPECT_TRUE(pattern_->isTouchDown_);
     EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
-}
-
-/**
- * @tc.name: Event001
- * @tc.desc: Test OnChange event
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, Event001, TestSize.Level1)
-{
-    int32_t currentIndex = 0;
-    auto onChange = [&currentIndex](const BaseEventInfo* info) {
-        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        currentIndex = swiperInfo->GetIndex();
-    };
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetOnChange(std::move(onChange));
-    });
-
-    /**
-     * @tc.steps: step1. Show next page
-     * @tc.expected: currentIndex change to 1
-     */
-    controller_->ShowNext();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(currentIndex, 1);
-
-    /**
-     * @tc.steps: step2. Show previous page
-     * @tc.expected: currentIndex change to 0
-     */
-    controller_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(currentIndex, 0);
-}
-
-/**
- * @tc.name: Event002
- * @tc.desc: Test OnAnimationStart OnAnimationEnd event
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, Event002, TestSize.Level1)
-{
-    bool isAnimationStart = false;
-    auto onAnimationStart =
-        [&isAnimationStart](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
-            isAnimationStart = true;
-        };
-    bool isAnimationEnd = false;
-    auto onAnimationEnd = [&isAnimationEnd](int32_t index, const AnimationCallbackInfo& info) {
-        isAnimationEnd = true;
-    };
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetOnAnimationStart(std::move(onAnimationStart));
-        model.SetOnAnimationEnd(std::move(onAnimationEnd));
-    });
-
-    /**
-     * @tc.steps: step1. Show next page
-     * @tc.expected: Animation event will be called
-     */
-    controller_->ShowNext();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(isAnimationStart);
-    EXPECT_TRUE(isAnimationEnd);
 }
 
 /**
@@ -314,8 +256,7 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty003, TestSize.Level1)
      * @tc.steps: step2. Show next page, Current is second(middle) page
      * @tc.expected: ACTION_SCROLL_FORWARD ACTION_SCROLL_BACKWARD
      */
-    controller_->ShowNext();
-    FlushLayoutTask(frameNode_);
+    ShowNext();
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions = 0;
     exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
@@ -341,8 +282,7 @@ HWTEST_F(SwiperCommonTestNg, AccessibilityProperty004, TestSize.Level1)
      * @tc.steps: step2. Show last page, Current is last page
      * @tc.expected: ACTION_SCROLL_BACKWARD
      */
-    controller_->SwipeToWithoutAnimation(3);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(3);
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions = 0;
     exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
@@ -463,39 +403,36 @@ HWTEST_F(SwiperCommonTestNg, FocusStep001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
 
     /**
-     * @tc.cases: GetNextFocusNode from indicatorNode
+     * @tc.cases: GetNextFocusNode from indicatorNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, rightArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode, rightArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode_, rightArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode_, nullptr));
 
     /**
-     * @tc.cases: GetNextFocusNode from leftArrowNode
+     * @tc.cases: GetNextFocusNode from leftArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode_, nullptr));
 
     /**
-     * @tc.cases: GetNextFocusNode from rightArrowNode
+     * @tc.cases: GetNextFocusNode from rightArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode_, nullptr));
 }
 
 /**
@@ -511,39 +448,36 @@ HWTEST_F(SwiperCommonTestNg, FocusStep002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
 
     /**
-     * @tc.cases: GetNextFocusNode from indicatorNode
+     * @tc.cases: GetNextFocusNode from indicatorNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode, rightArrowNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, indicatorNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, indicatorNode_, rightArrowNode_));
 
     /**
-     * @tc.cases: GetNextFocusNode from leftArrowNode
+     * @tc.cases: GetNextFocusNode from leftArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, leftArrowNode_, indicatorNode_));
 
     /**
-     * @tc.cases: GetNextFocusNode from rightArrowNode
+     * @tc.cases: GetNextFocusNode from rightArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, rightArrowNode_, nullptr));
 }
 
 /**
@@ -559,51 +493,46 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
 
     /**
      * @tc.cases: LoopIndex is first item(index:0)
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, rightArrowNode)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_)); // NextFocus
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is middle item(index:1)
      */
-    controller_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(1);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, rightArrowNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, rightArrowNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is last item(index:3)
      */
-    controller_->SwipeToWithoutAnimation(3);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(3);
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, indicatorNode));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, indicatorNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, indicatorNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, indicatorNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 }
 
 /**
@@ -620,39 +549,35 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 4);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 5);
 
     /**
      * @tc.cases: LoopIndex is last item(index:0)
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, rightArrowNode)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_)); // NextFocus
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is middle item(index:1)
      */
-    controller_->SwipeToWithoutAnimation(1);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, rightArrowNode));
+    ChangeIndex(1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 
     /**
      * @tc.cases: LoopIndex is last item(index:3)
      */
-    controller_->SwipeToWithoutAnimation(3);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, nullptr));
+    ChangeIndex(3);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, nullptr));
 
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 }
 
 /**
@@ -663,13 +588,12 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
 HWTEST_F(SwiperCommonTestNg, FocusStep005, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
 
     /**
-     * @tc.cases: GetNextFocusNode from indicatorNode
+     * @tc.cases: GetNextFocusNode from indicatorNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode, nullptr)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, indicatorNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, indicatorNode_, nullptr)); // NextFocus
 }
 
 /**
@@ -685,28 +609,26 @@ HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 4);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 5);
     
     /**
-     * @tc.cases: GetNextFocusNode from leftArrowNode
+     * @tc.cases: GetNextFocusNode from leftArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode, nullptr)); // PreviousFocus
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode, rightArrowNode)); // NextFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, leftArrowNode_, nullptr)); // PreviousFocus
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, leftArrowNode_, rightArrowNode_)); // NextFocus
     
     /**
-     * @tc.cases: GetNextFocusNode from rightArrowNode
+     * @tc.cases: GetNextFocusNode from rightArrowNode_
      */
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode, leftArrowNode));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, rightArrowNode_, leftArrowNode_));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, rightArrowNode_, nullptr));
 }
 
 /**
- * @tc.name: SwiperPattern001
- * @tc.desc: Swiper Paint Property.
+ * @tc.name: DumpAdvanceInfo001
+ * @tc.desc: DumpAdvanceInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperCommonTestNg, SwiperPattern001, TestSize.Level1)
+HWTEST_F(SwiperCommonTestNg, DumpAdvanceInfo001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
 
@@ -764,11 +686,11 @@ HWTEST_F(SwiperCommonTestNg, SwiperPattern001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPattern002
- * @tc.desc: Swiper Paint Property.
+ * @tc.name: DumpAdvanceInfo002
+ * @tc.desc: DumpAdvanceInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperCommonTestNg, SwiperPattern002, TestSize.Level1)
+HWTEST_F(SwiperCommonTestNg, DumpAdvanceInfo002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
 
@@ -790,82 +712,11 @@ HWTEST_F(SwiperCommonTestNg, SwiperPattern002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperFlushFocus001
- * @tc.desc: Swiper FlushFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, SwiperFlushFocus001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step2. Create curShowFrameNode, addChild to frameNode.
-     */
-    auto curShowFrame = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
-    child->GetOrCreateFocusHub();
-    child2->GetOrCreateFocusHub();
-    curShowFrame->AddChild(child);
-    frameNode_->AddChild(child2);
-
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-
-    /**
-     * @tc.steps: step3. test FlushFocus with IsShowIndicator() is false.
-     * @tc.expected: curShowFrame->GetFirstFocusHubChild()->lastWeakFocusNode_ is not null.
-     */
-    layoutProperty_->UpdateShowIndicator(false);
-    pattern_->isLastIndicatorFocused_ = true;
-    EXPECT_FALSE(pattern_->IsShowIndicator());
-    pattern_->FlushFocus(curShowFrame);
-    EXPECT_FALSE(curShowFrame->GetFirstFocusHubChild()->currentFocus_);
-    pattern_->isLastIndicatorFocused_ = false;
-    pattern_->FlushFocus(curShowFrame);
-    EXPECT_EQ(pattern_->lastWeakShowNode_, AceType::WeakClaim(AceType::RawPtr(curShowFrame)));
-
-    /**
-     * @tc.steps: step4. test FlushFocus with IsShowIndicator() is true and hasLeftButton and hasRightButton.
-     * @tc.expected: curShowFrame->GetFirstFocusHubChild()->currentFocus_ is false.
-     */
-    layoutProperty_->UpdateShowIndicator(true);
-    pattern_->GetLeftButtonId();
-    pattern_->GetRightButtonId();
-    EXPECT_TRUE(layoutProperty_->GetShowIndicatorValue(true));
-    EXPECT_TRUE(pattern_->IsShowIndicator());
-    focusHub->currentFocus_ = true;
-    pattern_->FlushFocus(curShowFrame);
-    EXPECT_FALSE(curShowFrame->GetFirstFocusHubChild()->currentFocus_);
-    pattern_->isLastIndicatorFocused_ = false;
-    pattern_->FlushFocus(curShowFrame);
-}
-
-/**
- * @tc.name: SwiperPatternOnVisibleChange003
- * @tc.desc: OnVisibleChange
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, SwiperPatternOnVisibleChange003, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->isWindowShow_ = false;
-
-    /**
-     * @tc.cases: call OnVisibleChange.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->isInit_ = true;
-    pattern_->OnVisibleChange(true);
-    EXPECT_TRUE(pattern_->isInit_);
-}
-
-/**
- * @tc.name: SwiperDistributedTest001
+ * @tc.name: Distributed001
  * @tc.desc: Test the distributed capability of Swiper
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperCommonTestNg, SwiperDistributedTest001, TestSize.Level1)
+HWTEST_F(SwiperCommonTestNg, Distributed001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create frameNode and get pattern_.
@@ -878,7 +729,7 @@ HWTEST_F(SwiperCommonTestNg, SwiperDistributedTest001, TestSize.Level1)
      */
     layoutProperty_->UpdateIndex(1);
     std::string ret = pattern_->ProvideRestoreInfo();
-    EXPECT_TRUE(ret == R"({"Index":1})");
+    EXPECT_EQ(ret, R"({"Index":1})");
 
     /**
      * @tc.steps: step3. Function OnRestoreInfo is called.
@@ -896,62 +747,149 @@ HWTEST_F(SwiperCommonTestNg, SwiperDistributedTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPatternGetLoopIndex001
- * @tc.desc: GetLoopIndex
+ * @tc.name: OnKeyEvent001
+ * @tc.desc: InitOnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperCommonTestNg, SwiperPatternGetLoopIndex001, TestSize.Level1)
+HWTEST_F(SwiperCommonTestNg, OnKeyEvent001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
+    CreateWithItem([](SwiperModelNG model) {});
 
     /**
-     * @tc.steps: step3. call GetLoopIndex.
-     * @tc.expected: Related function runs ok.
+     * @tc.steps: step1. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: Trigger ShowPrevious
      */
-    int32_t originalIndex = -1;
-    pattern_->GetLoopIndex(originalIndex);
+    OnKeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+
+    /**
+     * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: Trigger ShowNext
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
 }
 
 /**
- * @tc.name: SwiperFlushFocus002
- * @tc.desc: Swiper FlushFocus.
+ * @tc.name: OnKeyEvent002
+ * @tc.desc: InitOnKeyEvent in VERTICAL layout
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperCommonTestNg, SwiperFlushFocus002, TestSize.Level1)
+HWTEST_F(SwiperCommonTestNg, OnKeyEvent002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    eventHub_->AttachHost(frameNode_);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_);
-    focusHub->currentFocus_ = true;
-    focusHub->currentFocus_ = true;
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+    });
 
     /**
-     * @tc.steps: step2. Create curShowFrameNode, addChild to frameNode.
+     * @tc.steps: step1. Call OnKeyEvent KEY_DPAD_UP
+     * @tc.expected: Trigger ShowPrevious
      */
-    auto curShowFrame = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
-    auto child1 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
-    child->GetOrCreateFocusHub();
-    child1->GetOrCreateFocusHub();
-    curShowFrame->AddChild(child);
-    frameNode_->AddChild(child1);
-    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
-    eventHub1->AttachHost(child);
-    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
-    auto eventHub2 = AceType::MakeRefPtr<EventHub>();
-    eventHub2->AttachHost(child1);
-    auto focusHub2 = AceType::MakeRefPtr<FocusHub>(eventHub2);
+    OnKeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
 
     /**
-     * @tc.steps: step3. test FlushFocus with IsShowIndicator() is true.
-     * @tc.expected: the related function runs ok.
+     * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_DOWN
+     * @tc.expected: Trigger ShowNext
      */
-    layoutProperty_->UpdateShowIndicator(true);
-    pattern_->isLastIndicatorFocused_ = true;
-    pattern_->FlushFocus(curShowFrame);
+    OnKeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+}
+
+/**
+ * @tc.name: OnKeyEvent003
+ * @tc.desc: InitOnKeyEvent with DisplayCount>1, swipe only when focus first/last item in page
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, OnKeyEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. DisplayCount>1, focus item(index:0)
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(2);
+    });
+    GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
+
+    /**
+     * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: ShowPrevious and Focus pre item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 3)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: Focus next item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step4. Call OnKeyEvent KEY_DPAD_RIGHT
+     * @tc.expected: ShowNext and Focus next item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step5. Call OnKeyEvent KEY_DPAD_LEFT
+     * @tc.expected: Focus pre item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: OnKeyEvent004
+ * @tc.desc: InitOnKeyEvent with DisplayCount>1, swipe only when focus first/last item in page in VERTICAL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, OnKeyEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. DisplayCount>1, focus item(index:0)
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetDisplayCount(2);
+    });
+    GetChildFocusHub(frameNode_, 0)->RequestFocusImmediately();
+
+    /**
+     * @tc.steps: step2. Call OnKeyEvent KEY_DPAD_UP
+     * @tc.expected: ShowPrevious and Focus pre item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 3)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step3. Call OnKeyEvent KEY_DPAD_DOWN
+     * @tc.expected: Focus next item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step4. Call OnKeyEvent KEY_DPAD_DOWN
+     * @tc.expected: ShowNext and Focus next item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step5. Call OnKeyEvent KEY_DPAD_UP
+     * @tc.expected: Focus pre item
+     */
+    OnKeyEvent(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    EXPECT_TRUE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 }
 } // namespace OHOS::Ace::NG

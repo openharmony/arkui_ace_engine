@@ -369,7 +369,7 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "render current custom node: %{public}s",
                 customNode->GetCustomTag().c_str());
             // record parent navigationNode before customNode is rendered in case of navDestinationNode
-            auto navigationNode = GetHostNavigationNode();
+            auto navigationNode = GetNavigationNode();
             customNode->SetNavigationNode(navigationNode);
             // render, and find deep further
             customNode->Render();

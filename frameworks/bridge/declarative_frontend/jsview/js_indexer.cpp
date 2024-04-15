@@ -517,6 +517,16 @@ void JSIndexer::SetPopupTitleBackground(const JSCallbackInfo& args)
     IndexerModel::GetInstance()->SetPopupTitleBackground(PaseColor(args));
 }
 
+void JSIndexer::SetWidth(const JSCallbackInfo& args)
+{
+    JSViewAbstract::JsWidth(args);
+    if (args[0]->IsString() && args[0]->ToString() == "auto") {
+        IndexerModel::GetInstance()->SetAdaptiveWidth(true);
+    } else {
+        IndexerModel::GetInstance()->SetAdaptiveWidth(false);
+    }
+}
+
 void JSIndexer::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -548,6 +558,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("itemBorderRadius", &JSIndexer::SetItemBorderRadius);
     JSClass<JSIndexer>::StaticMethod("popupBackgroundBlurStyle", &JSIndexer::SetPopupBackgroundBlurStyle);
     JSClass<JSIndexer>::StaticMethod("popupTitleBackground", &JSIndexer::SetPopupTitleBackground, opt);
+    JSClass<JSIndexer>::StaticMethod("width", &JSIndexer::SetWidth);
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);

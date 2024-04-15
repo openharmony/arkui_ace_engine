@@ -31,6 +31,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT NavigationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
@@ -136,7 +137,7 @@ public:
 
     bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 

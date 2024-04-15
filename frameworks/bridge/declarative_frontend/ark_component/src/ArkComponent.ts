@@ -1175,6 +1175,34 @@ class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignme
   }
 }
 
+class BackgroundImageResizableModifier extends ModifierWithKey<ResizableOptions> {
+  constructor(value: ResizableOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImageResizable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageResizable(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      let sliceRight: Length | undefined;
+      if (!isUndefined(this.value.slice)) {
+        let tempSlice = this.value.slice as EdgeWidths;
+        sliceTop = tempSlice.top;
+        sliceBottom = tempSlice.bottom;
+        sliceLeft = tempSlice.left;
+        sliceRight = tempSlice.right;
+      }
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class LinearGradientBlurModifier extends ModifierWithKey<ArkLinearGradientBlur> {
   constructor(value: ArkLinearGradientBlur) {
     super(value);
@@ -2889,6 +2917,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  backgroundImageResizable(value: ResizableOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageResizableModifier.identity, BackgroundImageResizableModifier, value);
+    return this;
+  }
+
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
@@ -3791,6 +3824,9 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
@@ -3813,6 +3849,35 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
     }
   } else {
     applyUIAttributes(modifier, nativeNode, component);
+    component.applyModifierPatch();
+  }
+}
+
+function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<T>,
+  componentBuilder: (nativePtr: KNode) => ArkComponent,
+  modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
+{
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      modifier.applyNormalAttribute(component);
+      component.applyModifierPatch();
+    }
+  } else {
+    modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
   }
 }

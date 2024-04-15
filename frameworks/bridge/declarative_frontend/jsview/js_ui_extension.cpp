@@ -356,15 +356,38 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
     bool transferringCaller = false;
+    RefPtr<NG::FrameNode> placeholderNode = nullptr;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> transferringCallerValue = obj->GetProperty("isTransferringCaller");
         if (transferringCallerValue->IsBoolean()) {
             transferringCaller = transferringCallerValue->ToBoolean();
         }
+        do {
+            JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
+            if (!componentContent->IsObject()) {
+                break;
+            }
+            auto componentContentObj = JSRef<JSObject>::Cast(componentContent);
+            JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+            if (!builderNode->IsObject()) {
+                break;
+            }
+            auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+            JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+            if (nodePtr.IsEmpty()) {
+                break;
+            }
+            const auto* vm = nodePtr->GetEcmaVM();
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            if (!frameNode) {
+                break;
+            }
+            placeholderNode = AceType::Claim(frameNode);
+        } while (false);
     }
-
-    UIExtensionModel::GetInstance()->Create(want, transferringCaller);
+    UIExtensionModel::GetInstance()->Create(want, placeholderNode, transferringCaller);
 }
 
 void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)

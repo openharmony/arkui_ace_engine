@@ -362,6 +362,12 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
     localPoint = localPoint + paintRect.GetOffset();
     auto responseRegion = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
-    return host->InResponseRegionList(localPoint, responseRegion);
+    auto result = host->InResponseRegionList(localPoint, responseRegion);
+    if (!result) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE,
+            "%{public}s IsInAttachedNode result is negative, node tag = %{public}s, id = %{public}s",
+            AceType::TypeName(this), host->GetTag().c_str(), std::to_string(host->GetId()).c_str());
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

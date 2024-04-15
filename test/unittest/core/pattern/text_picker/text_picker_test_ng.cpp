@@ -62,6 +62,7 @@ namespace OHOS::Ace {
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
 std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogInstance_ = nullptr;
 
+
 TextPickerModel* TextPickerModel::GetInstance()
 {
     if (!textPickerInstance_) {
@@ -85,6 +86,7 @@ TextPickerDialogModel* TextPickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr int32_t COLUMN_INDEX_0 = 0;
 constexpr int32_t COLUMN_INDEX_2 = 2;
 constexpr int32_t HALF_INDEX_NUM = 5;
@@ -1519,7 +1521,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    textPickerPattern->ToJsonValue(json);
+    textPickerPattern->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
 }
 
@@ -1540,7 +1542,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    textPickerPattern->ToJsonValue(json);
+    textPickerPattern->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
 }
 
@@ -1577,14 +1579,14 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue003, TestSize.Level1)
      * @tc.cases: case. cover isCascade_ == false
      */
     textPickerPattern->SetIsCascade(false);
-    textPickerPattern->ToJsonValue(json);
+    textPickerPattern->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
 
     /**
      * @tc.cases: case. cover isCascade_ == true
      */
     textPickerPattern->SetIsCascade(true);
-    textPickerPattern->ToJsonValue(json);
+    textPickerPattern->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
 }
 
@@ -2844,7 +2846,7 @@ HWTEST_F(TextPickerTestNg, TextPickerLayoutPropertyToJsonValue001, TestSize.Leve
      * @tc.expected: the result of ToJsonValue is correct.
      */
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    pickerProperty->ToJsonValue(json);
+    pickerProperty->ToJsonValue(json, filter);
     ASSERT_NE(json, nullptr);
 }
 

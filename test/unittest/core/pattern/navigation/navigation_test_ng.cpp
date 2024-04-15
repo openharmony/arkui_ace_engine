@@ -80,6 +80,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr Dimension DEFAULT_NAVBAR_WIDTH = 240.0_vp;
 constexpr int32_t TEST_DATA = 10;
 constexpr int32_t STANDARD_INDEX = -1;
@@ -360,7 +361,7 @@ HWTEST_F(NavigationTestNg, NavigationTestNg002, TestSize.Level1)
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
     ASSERT_NE(AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode()), nullptr);
-    navigationGroupNode.ToJsonValue(json);
+    navigationGroupNode.ToJsonValue(json, filter);
 }
 
 /**
@@ -3176,6 +3177,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     pattern->OnModifyDone();
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     auto destinationProperty = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestination->GetLayoutProperty());
     EXPECT_TRUE(destinationProperty != nullptr);
     destinationProperty->UpdateHideTitleBar(true);
@@ -3199,6 +3201,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     auto layoutPropertyB = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationB->GetLayoutProperty());
     EXPECT_NE(layoutPropertyB, nullptr);
     layoutPropertyB->UpdateHideTitleBar(true);
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
     EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
 
@@ -3213,20 +3216,12 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     auto layoutPropertyC = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationC->GetLayoutProperty());
     EXPECT_NE(layoutPropertyC, nullptr);
     layoutPropertyC->UpdateHideTitleBar(true);
-
     navigationStack->Add("C", navDestinationC);
     pattern->OnModifyDone();
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(navigationNode, geometryNode, navigationNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    navigationNode->hideNodes_.emplace_back(navDestination);
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     EXPECT_EQ(layoutPropertyC->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
@@ -3415,7 +3410,7 @@ HWTEST_F(NavigationTestNg, NavigationNewStackTest001, TestSize.Level1)
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     stateChangedCallback();
     ASSERT_TRUE(navigationPattern->NeedSyncWithJsStackMarked());
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     ASSERT_EQ(mockStack->Size(), 1);
 
@@ -3428,7 +3423,7 @@ HWTEST_F(NavigationTestNg, NavigationNewStackTest001, TestSize.Level1)
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     stateChangedCallback();
     ASSERT_TRUE(navigationPattern->NeedSyncWithJsStackMarked());
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     ASSERT_EQ(mockStack->Size(), 1);
 
@@ -3439,7 +3434,7 @@ HWTEST_F(NavigationTestNg, NavigationNewStackTest001, TestSize.Level1)
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     stateChangedCallback();
     ASSERT_TRUE(navigationPattern->NeedSyncWithJsStackMarked());
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     ASSERT_EQ(mockStack->Size(), 2);
 }
@@ -3563,7 +3558,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest001, TestSize.Level1)
     auto frameNode = NavigationTestNg::CreateDestination("A");
     mockStack->Add("A", frameNode);
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 }
 
 /**
@@ -3600,7 +3595,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest002, TestSize.Level1)
     auto frameNode = NavigationTestNg::CreateDestination("A");
     mockStack->Add("A", frameNode);
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 
     /**
      * @tc.steps: step2.set navigation before and after interception during destination transition
@@ -3641,7 +3636,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest002, TestSize.Level1)
      */
     mockStack->Remove();
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 }
 
 /**
@@ -3707,7 +3702,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest003, TestSize.Level1)
      * @tc.expected: step3. trigger navigation before and after callback.
      */
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 }
 
 /**
@@ -3770,7 +3765,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest004, TestSize.Level1)
     auto frameNode = NavigationTestNg::CreateDestination("A");
     mockStack->Add("A", frameNode);
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
     EXPECT_EQ(times, 0);
 }
 

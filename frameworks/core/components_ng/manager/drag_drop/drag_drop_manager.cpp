@@ -222,9 +222,12 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop() ||
-                V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag() ||
-                V2::EMBEDDED_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) {
+            if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop())) {
+                return parentFrameNode;
+            }
+            if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag() ||
+                V2::EMBEDDED_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) &&
+                (!IsUIExtensionShowPlaceholder(parentFrameNode))) {
                 return parentFrameNode;
             }
         }
@@ -300,18 +303,39 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 
 void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior)
 {
+    if (!IsDropAllowed(dragFrameNode)) {
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        return;
+    }
+    
+    // drop allowed
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
+    // special handling for no drag data present situation, always show as move
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
         UpdateDragStyle(DragCursorStyleCore::MOVE);
         return;
     }
-    for (const auto& it : summaryMap_) {
-        if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-            UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
-            return;
+
+    //other case, check drag behavior
+    switch (dragBehavior) {
+        case DragBehavior::UNKNOWN: {
+            // the application does not config the drag behavior, use copy as default
+            UpdateDragStyle(DragCursorStyleCore::COPY);
+            break;
+        }
+        case DragBehavior::MOVE: {
+            UpdateDragStyle(DragCursorStyleCore::MOVE);
+            break;
+        }
+        case DragBehavior::COPY: {
+            UpdateDragStyle(DragCursorStyleCore::COPY);
+            break;
+        }
+        default: {
+            UpdateDragStyle(DragCursorStyleCore::COPY);
+            break;
         }
     }
-    UpdateDragStyle(dragBehavior == DragBehavior::MOVE ? DragCursorStyleCore::MOVE : DragCursorStyleCore::COPY);
 }
 
 void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle)
@@ -603,8 +627,9 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         return;
     }
 
-    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
-        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
+        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
@@ -641,6 +666,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     draggedFrameNode_ = nullptr;
     preMovePoint_ = Point(0, 0);
     hasNotifiedTransformation_ = false;
+    badgeNumber_ = -1;
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
@@ -655,7 +681,6 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
             container->GetWindowId());
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
         ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
-        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
         ClearVelocityInfo();
         return;
     }
@@ -666,18 +691,23 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d.",
             container->GetWindowId());
-        DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, container->GetWindowId(),
-            DragBehavior::UNKNOWN };
-        ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
-        dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+        ResetDragDrop(container->GetWindowId(), point);
+        return;
+    }
+    if (!IsDropAllowed(dragFrameNode)) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d.",
+            container->GetWindowId());
+        ResetDragDrop(container->GetWindowId(), point);
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Current windowId is %{public}d, drag position is (%{public}f, %{public}f)."
         "TargetNode is %{public}s, id is %{public}s",
         container->GetWindowId(), static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
         dragFrameNode->GetTag().c_str(), dragFrameNode->GetInspectorId()->c_str());
-    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
-        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
+        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
@@ -689,8 +719,28 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
         auto unifiedData = RequestUDMFDataWithUDKey(udKey);
         DoDropAction(dragFrameNode, point, unifiedData, udKey);
-        return;
     }
+}
+
+bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
+{
+    // application passed in null to indicate refusing all drag data forcedly
+    bool isDisallowDropForcedly = dragFrameNode->GetDisallowDropForcedly();
+    if (isDisallowDropForcedly) {
+        return false;
+    }
+    const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
+    // if application does not set allow drop or set with empty, treat as all data types is allowed
+    if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
+        return true;
+    }
+    for (const auto& it : summaryMap_) {
+        // if one matched found, allow drop
+        if (dragFrameNodeAllowDrop.find(it.first) != dragFrameNodeAllowDrop.end()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void DragDropManager::RequestDragSummaryInfoAndPrivilege()
@@ -1501,7 +1551,8 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     auto maxDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager, gatherNodeCenter.GetX(),
         gatherNodeCenter.GetY());
     constexpr decltype(distance) MAX_DIS = 5.0;
-    if (distance < MAX_DIS && maxDistance < MAX_DIS) {
+    if ((distance < MAX_DIS || !IsNeedScaleDragPreview()) &&
+        (maxDistance < MAX_DIS || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_))) {
         auto containerId = Container::CurrentId();
         TransDragWindowToDragFwk(containerId);
         return;
@@ -1697,6 +1748,13 @@ void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
     return;
 }
 
+void DragDropManager::ResetDragDrop(int32_t windowId, const Point& point)
+{
+    DragDropRet dragDropRet { DragRet::DRAG_FAIL, isMouseDragged_, windowId, DragBehavior::UNKNOWN };
+    ResetDragDropStatus(point, dragDropRet, windowId);
+    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+}
+
 void DragDropManager::FireOnDragLeave(
     const RefPtr<FrameNode>& preTargetFrameNode, const Point& point, const std::string& extraInfo)
 {
@@ -1715,5 +1773,18 @@ void DragDropManager::FireOnDragLeave(
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
         }
     }
+}
+
+bool DragDropManager::IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_RETURN(node, true);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto manager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(manager, true);
+    return manager->IsShowPlaceholder(node->GetId());
+#endif
+    return true;
 }
 } // namespace OHOS::Ace::NG

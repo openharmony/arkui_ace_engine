@@ -66,6 +66,13 @@ constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
 constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
+constexpr char EVENT_KEY_PAGE_NODE_COUNT[] = "PAGE_NODE_COUNT";
+constexpr char EVENT_KEY_PAGE_NODE_THRESHOLD[] = "PAGE_NODE_THRESHOLD";
+constexpr char EVENT_KEY_PAGE_DEPTH[] = "PAGE_DEPTH";
+constexpr char EVENT_KEY_PAGE_DEPTH_THRESHOLD[] = "PAGE_DEPTH_THRESHOLD";
+constexpr char EVENT_KEY_FUNCTION_NAME[] = "FUNCTION_NAME";
+constexpr char EVENT_KEY_FUNCTION_EXECUTE_TIME[] = "FUNCTION_EXECUTE_TIME";
+constexpr char EVENT_KEY_FUNCTION_TIME_THRESHOLD[] = "FUNCTION_TIME_THRESHOLD";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
@@ -79,9 +86,14 @@ constexpr char MAXMENUITEM[] = "MAXMENUITEM";
 constexpr char CHANGEDEFAULTSETTING[] = "CHANGEDEFAULTSETTING";
 constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
 #ifdef VSYNC_TIMEOUT_CHECK
-constexpr char EXECPTION_VSYNC[] = "VSYNC_EXCEPTION";
+constexpr char UI_VSYNC_TIMEOUT[] = "UI_VSYNC_TIMEOUT";
+constexpr char EVENT_KEY_WINDOW_ID[] = "WINDOW_ID";
+constexpr char EVENT_KEY_INSTANCE_ID[] = "INSTANCE_ID";
+constexpr char EVENT_KEY_VSYNC_TIMESTAMP[] = "VSYNC_TIMESTAMP";
 #endif
-constexpr char WARNNING_PERFERMANCE[] = "PERFERMANCE_WARNNING";
+constexpr char PAGE_NODE_OVERFLOW[] = "PAGE_NODE_OVERFLOW";
+constexpr char PAGE_DEPTH_OVERFLOW[] = "PAGE_DEPTH_OVERFLOW";
+constexpr char UI_LIFECIRCLE_FUNCTION_TIMEOUT[] = "UI_LIFECIRCLE_FUNCTION_TIMEOUT";
 
 void StrTrim(std::string& str)
 {
@@ -227,14 +239,17 @@ void EventReport::SendFormException(FormExcepType type)
 }
 
 #ifdef VSYNC_TIMEOUT_CHECK
-void EventReport::SendVsyncException(VsyncExcepType type)
+void EventReport::SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp)
 {
-    EventInfo eventInfo = {
-        .eventType = EXECPTION_VSYNC,
-        .errorType = static_cast<int32_t>(type),
-    };
-
-    SendEventInner(eventInfo);
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UI_VSYNC_TIMEOUT,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_WINDOW_ID, windowId,
+        EVENT_KEY_INSTANCE_ID, instanceId,
+        EVENT_KEY_VSYNC_TIMESTAMP, timeStamp);
 }
 #endif
 
@@ -478,15 +493,39 @@ void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stat
         CHANGEDEFAULTSETTING, stateChange);
 }
 
-void EventReport::PerformanceEventReport(PerformanceExecpType type, const std::string& pageUrl, const std::string& msg)
+void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold)
 {
     auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
     StrTrim(packageName);
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, WARNNING_PERFERMANCE,
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, PAGE_NODE_OVERFLOW,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_ERROR_TYPE, static_cast<int32_t>(type),
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_PAGE_URL, pageUrl,
-        EVENT_KEY_MESSAGE, msg);
+        EVENT_KEY_PAGE_NODE_COUNT, nodeCount,
+        EVENT_KEY_PAGE_NODE_THRESHOLD, threshold);
+}
+
+void EventReport::ReportPageDepthOverflow(const std::string& pageUrl, int32_t depth, int32_t threshold)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, PAGE_DEPTH_OVERFLOW,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_PAGE_DEPTH, depth,
+        EVENT_KEY_PAGE_DEPTH_THRESHOLD, threshold);
+}
+
+void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, UI_LIFECIRCLE_FUNCTION_TIMEOUT,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_PACKAGE_NAME, packageName,
+        EVENT_KEY_FUNCTION_NAME, functionName,
+        EVENT_KEY_FUNCTION_EXECUTE_TIME, time,
+        EVENT_KEY_FUNCTION_TIME_THRESHOLD, threshold);
 }
 } // namespace OHOS::Ace

@@ -33,6 +33,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+constexpr int32_t DEFAULT_CHECKBOX_ANIMATION_DURATION = 100;
 }
 
 void CheckBoxPattern::OnAttachToFrameNode()
@@ -42,9 +43,38 @@ void CheckBoxPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
+void CheckBoxPattern::SetBuilderNodeHidden()
+{
+    CHECK_NULL_VOID(builderNode_);
+    auto layoutProperty = builderNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::GONE);
+}
+
+void CheckBoxPattern::UpdateIndicator()
+{
+    if (builder_.has_value()) {
+        LoadBuilder();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        bool isSelected = false;
+        if (paintProperty->HasCheckBoxSelect()) {
+            isSelected = paintProperty->GetCheckBoxSelectValue();
+            if (!isSelected) {
+                SetBuilderNodeHidden();
+            }
+        } else {
+            SetBuilderNodeHidden();
+        }
+    }
+}
+
 void CheckBoxPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    UpdateIndicator();
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -441,9 +471,87 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
     FireBuilder();
 }
 
+void CheckBoxPattern::StartEnterAnimation()
+{
+    AnimationOption option;
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+    option.SetDuration(DEFAULT_CHECKBOX_ANIMATION_DURATION);
+    CHECK_NULL_VOID(builderNode_);
+    const auto& renderContext = builderNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateOpacity(0);
+    const auto& layoutProperty = builderNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    const auto& eventHub = builderNode_->GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabled(true);
+    }
+    AnimationUtils::Animate(
+        option,
+        [&]() {
+            renderContext->UpdateOpacity(1);
+        },
+        nullptr);
+}
+
+void CheckBoxPattern::StartExitAnimation()
+{
+    AnimationOption option;
+    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
+    option.SetDuration(DEFAULT_CHECKBOX_ANIMATION_DURATION);
+    CHECK_NULL_VOID(builderNode_);
+    const auto& renderContext = builderNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationUtils::Animate(
+        option,
+        [&]() {
+            renderContext->UpdateOpacity(0);
+        },
+        nullptr);
+    const auto& eventHub = builderNode_->GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabled(false);
+    }
+}
+
+void CheckBoxPattern::LoadBuilder()
+{
+    RefPtr<UINode> customNode;
+    if (builder_.has_value()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
+        if (!childNode) {
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            builder_.value()();
+            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+            CHECK_NULL_VOID(customNode);
+            childNode = AceType::DynamicCast<FrameNode>(customNode);
+            CHECK_NULL_VOID(childNode);
+            builderNode_ = childNode;
+        }
+        childNode->MountToParent(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    }
+}
+
+void CheckBoxPattern::StartCustomNodeAnimation(bool select)
+{
+    if (!isFirstCreated_ && builder_.has_value()) {
+        if (select) {
+            StartEnterAnimation();
+        } else {
+            StartExitAnimation();
+        }
+    }
+}
+
 void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBoxFrameNode,
     std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool select)
 {
+    StartCustomNodeAnimation(select);
+
     checkBoxFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto group = GetGroupNameWithNavId();
     std::vector<std::string> vec;
@@ -648,6 +756,7 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
                 paintProperty->UpdateCheckBoxSelect(true);
                 auto checkBoxPattern = node->GetPattern<CheckBoxPattern>();
                 CHECK_NULL_VOID(checkBoxPattern);
+                checkBoxPattern->StartCustomNodeAnimation(true);
                 checkBoxPattern->UpdateUIStatus(true);
                 checkBoxPattern->SetLastSelect(true);
             }
@@ -801,7 +910,7 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
 
 void CheckBoxPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
+    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
         return;
     }
     auto host = GetHost();
@@ -815,7 +924,7 @@ void CheckBoxPattern::FireBuilder()
 
 RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value()) {
+    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
         return nullptr;
     }
     auto host = GetHost();
@@ -831,6 +940,9 @@ RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
         isSelected = paintProperty->GetCheckBoxSelectValue();
     } else {
         isSelected = false;
+    }
+    if (host->GetHostTag() == V2::CHECKBOX_ETS_TAG && toggleMakeFunc_.has_value()) {
+        return (toggleMakeFunc_.value())(ToggleConfiguration(enabled, isSelected));
     }
     CheckBoxConfiguration checkBoxConfiguration(name, isSelected, enabled);
     return (makeFunc_.value())(checkBoxConfiguration);

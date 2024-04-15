@@ -37,6 +37,7 @@ public:
     void SetOnRefreshing(RefreshingEvent&& refreshing) override;
     void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
     void SetOnOffsetChange(OffsetChangeEvent&& dragOffset) override;
+    void ResetOnOffsetChange() override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     void SetLoadingText(const std::string& loadingText) override;
     void SetRefreshOffset(const Dimension& offset) override;
@@ -61,6 +62,7 @@ public:
     static void SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder);
     static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
     static void SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset);
+    static void ResetOnOffsetChange(FrameNode* frameNode);
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
     static void SetRefreshOffset(FrameNode* frameNode, const Dimension& offset);
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);

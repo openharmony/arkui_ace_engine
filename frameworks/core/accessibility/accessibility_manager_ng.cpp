@@ -197,36 +197,35 @@ void AccessibilityManagerNG::ResetHoverState()
 void AccessibilityManagerNG::HoverTestDebug(const RefPtr<FrameNode>& root, const PointF& point,
     std::string& summary, std::string& detail) const
 {
-    auto summaryJson = JsonUtil::Create(true);
-    auto detailJson = JsonUtil::Create(true);
+    auto summaryJson = JsonUtil::Create();
+    auto detailJson = JsonUtil::Create();
     std::stringstream summaryNodesSearched;
     auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
     AccessibilityHoverTestPath path = AccessibilityProperty::HoverTest(point, root, debugInfo);
-    auto summaryPath = JsonUtil::CreateArray(false);
-    auto summarySelected = JsonUtil::CreateArray(false);
+    auto summaryPath = JsonUtil::CreateArray();
+    auto summarySelected = JsonUtil::CreateArray();
 
-    auto detaiSelectionInfo = JsonUtil::CreateArray(false);
+    auto detaiSelectionInfo = JsonUtil::CreateArray();
     size_t numNodesSelected = 0;
     for (size_t i = 0; i < path.size(); ++i) {
         summaryPath->Put(std::to_string(i).c_str(), path[i]->GetAccessibilityId());
-        auto detailNodeSelection = JsonUtil::Create(false);
+        auto detailNodeSelection = JsonUtil::Create();
         if (AccessibilityProperty::IsAccessibilityFocusableDebug(path[i], detailNodeSelection)) {
             summarySelected->Put(std::to_string(numNodesSelected).c_str(), path[i]->GetAccessibilityId());
             ++numNodesSelected;
         }
-        detaiSelectionInfo->Put(std::to_string(i).c_str(), detailNodeSelection);
+        detaiSelectionInfo->PutRef(std::move(detailNodeSelection));
     }
-    summaryJson->Put("path", summaryPath);
-    summaryJson->Put("nodesSelected", summarySelected);
+    summaryJson->PutRef("path", std::move(summaryPath));
+    summaryJson->PutRef("nodesSelected", std::move(summarySelected));
 
-    auto detailSearchInfo = JsonUtil::CreateArray(false);
+    auto detailSearchInfo = JsonUtil::CreateArray();
     for (size_t i = 0; i < debugInfo->trace.size(); ++i) {
         auto detailNodeSearch = std::move(debugInfo->trace[i]);
         detailSearchInfo->Put(std::to_string(i).c_str(), detailNodeSearch);
     }
-    detailJson->Put("detailSearch", detailSearchInfo);
-    detailJson->Put("detailSelection", detaiSelectionInfo);
-    std::stringstream detailFiltered;
+    detailJson->PutRef("detailSearch", std::move(detailSearchInfo));
+    detailJson->PutRef("detailSelection", std::move(detaiSelectionInfo));
     summary = summaryJson->ToString();
     detail = detailJson->ToString();
 }

@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_layout_info.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
@@ -102,7 +103,7 @@ public:
 
     OffsetF GetContainerPosition();
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
 private:
     bool SetSpan(GridSizeType type, int32_t span);

@@ -326,7 +326,6 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (!moved_ || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
         startIncreaseTime_ = currentTime;
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().BeginListFling();
         }
@@ -433,7 +432,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }
@@ -449,6 +447,13 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         StartScrollAnimation(mainPosition, correctVelocity);
     }
     SetDelayedTask();
+}
+
+inline void ReportSlideOn()
+{
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
 }
 
 void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
@@ -484,7 +489,6 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }
@@ -510,6 +514,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     frictionOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_DEBUG_SCOPED_TRACE(
         "Scrollable start friction animation, start:%f, end:%f, vel:%f", mainPosition, finalPosition_, initVelocity_);
+    ReportSlideOn();
     frictionOffsetProperty_->AnimateWithVelocity(option, finalPosition_, initVelocity_,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -800,7 +805,7 @@ void Scrollable::StartSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
     });
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    ReportSlideOn();
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
 }
@@ -854,8 +859,7 @@ void Scrollable::UpdateSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
     });
-    
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    ReportSlideOn();
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
 }

@@ -59,8 +59,10 @@ private:
     void AddGestureEventInfoOne(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddGestureEventInfoTwo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddGestureEventInfoThree(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddFingerListInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
+    void AddTargetObject(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     napi_env env_ = nullptr;
     napi_ref callback_ = nullptr;
 };

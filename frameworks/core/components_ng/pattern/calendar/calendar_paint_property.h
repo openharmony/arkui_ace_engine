@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -53,44 +54,51 @@ struct CurrentDayStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BoundaryRowOffset, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BoundaryColOffset, Dimension);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("dayColor", propDayColor.value_or(Color()).ColorToString().c_str());
-        json->Put("lunarColor", propLunarColor.value_or(Color()).ColorToString().c_str());
-        json->Put("markLunarColor", propMarkLunarColor.value_or(Color()).ColorToString().c_str());
-        json->Put("dayFontSize", propDayFontSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put(
-            "lunarDayFontSize", propLunarDayFontSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("dayHeight", propDayHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("dayWidth", propDayWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("gregorianCalendarHeight",
-            propGregorianCalendarHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("dayYAxisOffset", propDayYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("lunarDayYAxisOffset",
-            propLunarDayYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("underscoreXAxisOffset",
-            propUnderscoreXAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("underscoreYAxisOffset",
-            propUnderscoreYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("scheduleMarkerXAxisOffset",
-            propScheduleMarkerXAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("scheduleMarkerYAxisOffset",
-            propScheduleMarkerYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("colSpace", propColSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put(
-            "dailyFiveRowSpace", propDailyFiveRowSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put(
-            "dailySixRowSpace", propDailySixRowSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("lunarHeight", propLunarHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("underscoreWidth", propUnderscoreWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put(
-            "underscoreLength", propUnderscoreLength.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("scheduleMarkerRadius",
-            propScheduleMarkerRadius.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put(
-            "boundaryRowOffset", propBoundaryRowOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put(
-            "boundaryColOffset", propBoundaryColOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->PutExtAttr("dayColor", propDayColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("lunarColor", propLunarColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("markLunarColor", propMarkLunarColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("dayFontSize",
+            propDayFontSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("lunarDayFontSize",
+            propLunarDayFontSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("dayHeight",
+            propDayHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("dayWidth",
+            propDayWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("gregorianCalendarHeight",
+            propGregorianCalendarHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("dayYAxisOffset",
+            propDayYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("lunarDayYAxisOffset",
+            propLunarDayYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("underscoreXAxisOffset",
+            propUnderscoreXAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("underscoreYAxisOffset",
+            propUnderscoreYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("scheduleMarkerXAxisOffset",
+            propScheduleMarkerXAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("scheduleMarkerYAxisOffset",
+            propScheduleMarkerYAxisOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("colSpace",
+            propColSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("dailyFiveRowSpace",
+            propDailyFiveRowSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("dailySixRowSpace",
+            propDailySixRowSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("lunarHeight",
+            propLunarHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("underscoreWidth",
+            propUnderscoreWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("underscoreLength",
+            propUnderscoreLength.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("scheduleMarkerRadius",
+            propScheduleMarkerRadius.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("boundaryRowOffset",
+            propBoundaryRowOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("boundaryColOffset",
+            propBoundaryColOffset.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     }
 };
 
@@ -100,14 +108,16 @@ struct NonCurrentDayStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NonCurrentMonthWorkDayMarkColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NonCurrentMonthOffDayMarkColor, Color);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("nonCurrentMonthDayColor", propNonCurrentMonthDayColor.value_or(Color()).ColorToString().c_str());
-        json->Put("nonCurrentMonthLunarColor", propNonCurrentMonthLunarColor.value_or(Color()).ColorToString().c_str());
-        json->Put("nonCurrentMonthWorkDayMarkColor",
-            propNonCurrentMonthWorkDayMarkColor.value_or(Color()).ColorToString().c_str());
-        json->Put("nonCurrentMonthOffDayMarkColor",
-            propNonCurrentMonthOffDayMarkColor.value_or(Color()).ColorToString().c_str());
+        json->PutExtAttr("nonCurrentMonthDayColor",
+            propNonCurrentMonthDayColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("nonCurrentMonthLunarColor",
+            propNonCurrentMonthLunarColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("nonCurrentMonthWorkDayMarkColor",
+            propNonCurrentMonthWorkDayMarkColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("nonCurrentMonthOffDayMarkColor",
+            propNonCurrentMonthOffDayMarkColor.value_or(Color()).ColorToString().c_str(), filter);
     }
 };
 
@@ -117,14 +127,15 @@ struct TodayStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FocusedAreaBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FocusedAreaRadius, Dimension);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("focusedDayColor", propFocusedDayColor.value_or(Color()).ColorToString().c_str());
-        json->Put("focusedLunarColor", propFocusedLunarColor.value_or(Color()).ColorToString().c_str());
-        json->Put(
-            "focusedAreaBackgroundColor", propFocusedAreaBackgroundColor.value_or(Color()).ColorToString().c_str());
-        json->Put(
-            "focusedAreaRadius", propFocusedAreaRadius.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->PutExtAttr("focusedDayColor", propFocusedDayColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("focusedLunarColor",
+            propFocusedLunarColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("focusedAreaBackgroundColor",
+            propFocusedAreaBackgroundColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("focusedAreaRadius",
+            propFocusedAreaRadius.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     }
 };
 
@@ -137,16 +148,20 @@ struct WeekStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WeekWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WeekAndDayRowSpace, Dimension);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("weekColor", propWeekColor.value_or(Color()).ColorToString().c_str());
-        json->Put("weekendDayColor", propWeekendDayColor.value_or(Color()).ColorToString().c_str());
-        json->Put("weekendLunarColor", propWeekendLunarColor.value_or(Color()).ColorToString().c_str());
-        json->Put("weekFontSize", propWeekFontSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("weekHeight", propWeekHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("weekWidth", propWeekWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put(
-            "weekAndDayRowSpace", propWeekAndDayRowSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->PutExtAttr("weekColor", propWeekColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("weekendDayColor", propWeekendDayColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("weekendLunarColor",
+            propWeekendLunarColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("weekFontSize",
+            propWeekFontSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("weekHeight",
+            propWeekHeight.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("weekWidth",
+            propWeekWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("weekAndDayRowSpace",
+            propWeekAndDayRowSpace.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     }
 };
 
@@ -159,17 +174,21 @@ struct WorkStateStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WorkStateHorizontalMovingDistance, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WorkStateVerticalMovingDistance, Dimension);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("workDayMarkColor", propWorkDayMarkColor.value_or(Color()).ColorToString().c_str());
-        json->Put("offDayMarkColor", propOffDayMarkColor.value_or(Color()).ColorToString().c_str());
-        json->Put("workDayMarkSize", propWorkDayMarkSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("offDayMarkSize", propOffDayMarkSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("workStateWidth", propWorkStateWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("workStateHorizontalMovingDistance",
-            propWorkStateHorizontalMovingDistance.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-        json->Put("workStateVerticalMovingDistance",
-            propWorkStateVerticalMovingDistance.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->PutExtAttr("workDayMarkColor",
+            propWorkDayMarkColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("offDayMarkColor", propOffDayMarkColor.value_or(Color()).ColorToString().c_str(), filter);
+        json->PutExtAttr("workDayMarkSize",
+            propWorkDayMarkSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("offDayMarkSize",
+            propOffDayMarkSize.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("workStateWidth",
+            propWorkStateWidth.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("workStateHorizontalMovingDistance", propWorkStateHorizontalMovingDistance.value_or(
+            Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+        json->PutExtAttr("workStateVerticalMovingDistance", propWorkStateVerticalMovingDistance.value_or(
+            Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
     }
 };
 
@@ -223,15 +242,15 @@ public:
         ResetDayRadius();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("showLunar", propShowLunar_.value_or(false) ? "true" : "false");
-        json->Put("showHoliday", propShowHoliday_.value_or(false) ? "true" : "false");
+        json->PutExtAttr("showLunar", propShowLunar_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("showHoliday", propShowHoliday_.value_or(false) ? "true" : "false", filter);
         static const char* WEEK[] = { "Week.Mon", "Week.Tue", "Week.Wed", "Week.Tur", "Week.Fri", "Week.Sat",
             "Week.Sun" };
-        json->Put("startOfWeek", WEEK[static_cast<int32_t>(GetStartOfWeek().value_or(Week::Mon))]);
+        json->PutExtAttr("startOfWeek", WEEK[static_cast<int32_t>(GetStartOfWeek().value_or(Week::Mon))], filter);
         const std::string DEFAULT_OFFDAYS = "5,6";
-        json->Put("offDays", propOffDays_.value_or(DEFAULT_OFFDAYS).c_str());
+        json->PutExtAttr("offDays", propOffDays_.value_or(DEFAULT_OFFDAYS).c_str(), filter);
         ACE_PROPERTY_TO_JSON_VALUE(propCurrentDayStyle_, CurrentDayStyle);
         ACE_PROPERTY_TO_JSON_VALUE(propNonCurrentDayStyle_, NonCurrentDayStyle);
         ACE_PROPERTY_TO_JSON_VALUE(propTodayStyle_, TodayStyle);

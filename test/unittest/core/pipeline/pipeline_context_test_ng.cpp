@@ -675,6 +675,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg012, TestSize.Level1)
     context_->onShow_ = false;
     context_->WindowFocus(false);
     EXPECT_FALSE(context_->onFocus_);
+    context_->RemoveWindowFocusChangedCallback(0);
     EXPECT_EQ(context_->onWindowFocusChangedCallbacks_.size(), DEFAULT_SIZE1);
 }
 
@@ -864,6 +865,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
+    context_->SetIsDragging(false);
+    EXPECT_FALSE(context_->IsDragging());
+    context_->ResetDragging();
 }
 
 /**
@@ -1465,6 +1469,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      */
     context_->designWidthScale_ = DEFAULT_DOUBLE1;
     context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
+    context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1, 0, 0);
     EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_DOUBLE1);
     EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), 0);
 
@@ -1482,6 +1487,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
         context_->OnVirtualKeyboardHeightChange(params[turn][1]);
+        context_->OnVirtualKeyboardHeightChange(params[turn][1], 0, 0);
         EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][2]);
     }
     /**
@@ -1505,6 +1511,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
         context_->rootNode_->geometryNode_->frame_.rect_.y_ = params[turn][3];
         context_->safeAreaManager_->UpdateKeyboardOffset(params[turn][3]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4]);
+        context_->OnVirtualKeyboardHeightChange(params[turn][4], 0, 0);
         EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][5]);
     }
 }
@@ -1845,6 +1852,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg039, TestSize.Level1)
     SystemProperties::dumpFrameCount_ = 1;
     context_->dumpFrameInfos_.push_back({});
     auto rt = context_->GetCurrentFrameInfo(DEFAULT_UINT64_1, DEFAULT_UINT64_2);
+    context_->DumpPipelineInfo();
     EXPECT_NE(rt, nullptr);
 }
 
@@ -2439,6 +2447,17 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg050, TestSize.Level1)
 
     context_->UpdateCutoutSafeArea(safeAreaInsets);
     EXPECT_NE(context_->safeAreaManager_->cutoutSafeArea_, safeAreaInsets);
+
+    context_->UpdateNavSafeArea(safeAreaInsets);
+
+    EXPECT_EQ(context_->safeAreaManager_->navSafeArea_, safeAreaInsets);
+
+    context_->SetIsLayoutFullScreen(true);
+    context_->SetIsLayoutFullScreen(false);
+    context_->SetIsNeedAvoidWindow(true);
+    context_->SetIsNeedAvoidWindow(false);
+    EXPECT_EQ(context_->GetSafeAreaWithoutProcess(), safeAreaInsets);
+    EXPECT_FALSE(context_->IsEnableKeyBoardAvoidMode());
 }
 
 /**
@@ -2513,6 +2532,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
         TEST_TAG, childId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
     childNode->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     node->AddChild(childNode);
+    context_->GetNavigationController(std::to_string(nodeId));
+    context_->AddOrReplaceNavigationNode(std::to_string(childId), AceType::WeakClaim(AceType::RawPtr(childNode)));
+    context_->DeleteNavigationNode(std::to_string(childId));
+    context_->AddNavigationNode(nodeId, AceType::WeakClaim(AceType::RawPtr(node)));
+    context_->RemoveNavigationNode(nodeId, nodeId);
+    context_->FirePageChanged(nodeId, false);
     EXPECT_EQ(context_->FindNavigationNodeToHandleBack(node), nullptr);
 }
 
@@ -2915,11 +2940,26 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
 {
+    /**
+     * @tc.steps1: GetResampleCoord illegal value verification
+     * @tc.expected: All result is 0.0f.
+     */
     std::vector<TouchEvent> emptyHistory;
     std::vector<TouchEvent> emptyCurrent;
     uint64_t nanoTimeStamp = 1234567890;
     bool isScreen = true;
     std::pair<float, float> result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
+    EXPECT_FLOAT_EQ(0.0f, result.first);
+    EXPECT_FLOAT_EQ(0.0f, result.second);
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    emptyHistory.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
+    result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
+    EXPECT_FLOAT_EQ(0.0f, result.first);
+    EXPECT_FLOAT_EQ(0.0f, result.second);
+    emptyHistory.clear();
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    emptyCurrent.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampTwo));
+    result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
     EXPECT_FLOAT_EQ(0.0f, result.first);
     EXPECT_FLOAT_EQ(0.0f, result.second);
 }
@@ -2934,7 +2974,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
     auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
     auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
-    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(2000));
     std::vector<TouchEvent> history;
     history.push_back(TouchEvent {}.SetX(100.0f).SetY(200.0f).SetTime(timeStampAce));
     history.push_back(TouchEvent {}.SetX(150.0f).SetY(250.0f).SetTime(timeStampTwo));
@@ -2942,24 +2982,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
     current.push_back(TouchEvent {}.SetX(200.0f).SetY(300.0f).SetTime(timeStampThree));
     current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
 
-    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
+    auto resampledCoord = context_->GetResampleCoord(history, current, 30000000, true);
 
-    ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
-    ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
-}
+    ASSERT_FLOAT_EQ(200.0f, std::get<0>(resampledCoord));
+    ASSERT_FLOAT_EQ(300.0f, std::get<1>(resampledCoord));
 
-/**
- * @tc.name: PipelineContextTestNg067
- * @tc.desc: Test history and current.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg067, TestSize.Level1)
-{
-    std::vector<TouchEvent> history;
-    std::vector<TouchEvent> current;
-
-    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
-
+    SystemProperties::debugEnabled_ = true;
+    resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
     ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
     ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
 }
@@ -3167,6 +3196,158 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg075, TestSize.Level1)
     context_->FlushOnceVsyncTask();
     EXPECT_FALSE(context_->HasOnceVsyncListener());
     EXPECT_TRUE(flag);
+}
+
+/**
++ * @tc.name: PipelineContextTestNg076
++ * @tc.desc: Test the function GetMainPipelineContext and NeedSoftKeyboard.
++ * @tc.type: FUNC
++ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg076, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps2: Get current pipeline
+     * @tc.expected: pipeline is not null.
+     */
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    EXPECT_NE(pipeline, nullptr);
+    EXPECT_FALSE(pipeline->NeedSoftKeyboard());
+    auto frameNode = FrameNode::GetOrCreateFrameNode("test", 10, nullptr);
+    pipeline->SetFocusNode(frameNode);
+    EXPECT_FALSE(pipeline->NeedSoftKeyboard());
+
+    /**
+     * @tc.steps3: Get current pipeline through the Container
+     * @tc.expected: pipeline is null.
+     */
+    pipeline->foldStatusChangedCallbackMap_.emplace(1, [](FoldStatus folderStatus) {});
+    pipeline->foldStatusChangedCallbackMap_.emplace(2, nullptr);
+    pipeline->foldDisplayModeChangedCallbackMap_.emplace(1, [](FoldDisplayMode foldDisplayMode) {});
+    pipeline->foldDisplayModeChangedCallbackMap_.emplace(2, nullptr);
+    pipeline->OnFoldStatusChange(FoldStatus::EXPAND);
+    pipeline->OnFoldDisplayModeChange(FoldDisplayMode::FULL);
+    EXPECT_NE(PipelineContext::GetContextByContainerId(0), nullptr);
+    pipeline->AddDirtyPropertyNode(frameNode);
+    EXPECT_TRUE(pipeline->hasIdleTasks_);
+    DelayedTask delayedTask;
+    pipeline->delayedTasks_.push_back(delayedTask);
+    DelayedTask delayedTask1;
+    delayedTask1.timeStamp = GetSysTimestamp();
+    delayedTask1.time = 1;
+    pipeline->delayedTasks_.push_back(delayedTask1);
+    pipeline->ProcessDelayTasks();
+    EXPECT_EQ(pipeline->delayedTasks_.size(), 1);
+}
+
+/**
++ * @tc.name: PipelineContextTestNg077
++ * @tc.desc: Test the function HandleFocusNode.
++ * @tc.type: FUNC
++ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg077, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get current pipeline
+     * @tc.expected: pipeline is not null.
+     */
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    EXPECT_NE(pipeline, nullptr);
+    EXPECT_EQ(pipeline->HandleFocusNode(), nullptr);
+
+    /**
+     * @tc.steps2: Changing node information affects the return results.
+     * @tc.expected:return frameNode is not null.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("test", 5, nullptr);
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode("test", 6, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode("test", 7, nullptr);
+    frameNode->GetOrCreateFocusHub();
+    frameNode1->GetOrCreateFocusHub()->currentFocus_ = false;
+    frameNode2->GetOrCreateFocusHub()->currentFocus_ = true;
+    frameNode1->GetOrCreateFocusHub()->SetFocusType(FocusType::NODE);
+    frameNode2->GetOrCreateFocusHub()->SetFocusType(FocusType::NODE);
+    frameNode->AddChild(frameNode1);
+    frameNode->AddChild(frameNode2);
+    pipeline->SetScreenNode(frameNode);
+    EXPECT_NE(pipeline->HandleFocusNode(), nullptr);
+    frameNode1->GetOrCreateFocusHub()->currentFocus_ = true;
+    EXPECT_NE(pipeline->HandleFocusNode(), nullptr);
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode("test", 8, nullptr);
+    auto frameNode4 = FrameNode::GetOrCreateFrameNode("test", 9, nullptr);
+    frameNode2->AddChild(frameNode3);
+    frameNode2->AddChild(frameNode4);
+    frameNode2->GetOrCreateFocusHub()->focusable_ = true;
+    frameNode3->GetOrCreateFocusHub()->currentFocus_ = false;
+    frameNode4->GetOrCreateFocusHub()->currentFocus_ = true;
+    frameNode4->GetOrCreateFocusHub()->focusable_ = false;
+    frameNode3->GetOrCreateFocusHub()->SetFocusType(FocusType::NODE);
+    frameNode4->GetOrCreateFocusHub()->SetFocusType(FocusType::NODE);
+    EXPECT_NE(pipeline->HandleFocusNode(), nullptr);
+}
+
+/**
++ * @tc.name: PipelineContextTestNg078
++ * @tc.desc: Test the function HandleFocusNode.
++ * @tc.type: FUNC
++ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Get current pipeline
+     * @tc.expected: pipeline is not null.
+     */
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto frameNode = FrameNode::GetOrCreateFrameNode("test", 5, nullptr);
+    pipeline->StartFullToMultWindowAnimation(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::RECOVER);
+    pipeline->StartFullToMultWindowAnimation(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::FULL_TO_FLOATING);
+    pipeline->CheckVirtualKeyboardHeight();
+    pipeline->AvoidanceLogic(0.0);
+    EXPECT_EQ(pipeline->finishFunctions_.size(), 0);
+    auto listenerWrapper = [](const std::vector<std::string>& params) {};
+    pipeline->RegisterDumpInfoListener(listenerWrapper);
+    EXPECT_EQ(pipeline->dumpListeners_.size(), 1);
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    EXPECT_FALSE(pipeline->DumpPageViewData(nullptr, viewDataWrap));
+    EXPECT_FALSE(pipeline->DumpPageViewData(frameNode, viewDataWrap));
+    EXPECT_FALSE(pipeline->CheckNeedAutoSave());
+    pipeline->NotifyFillRequestSuccess(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET, viewDataWrap);
+    pipeline->NotifyFillRequestFailed(frameNode, 101);
+
+    /**
+     * @tc.steps2: Partial addition of function execution.
+     * @tc.expected:Change the state of the pipeline.
+     */
+    auto formCallback = [](bool visible) {};
+    pipeline->ContainerModalUnFocus();
+    pipeline->UpdateTitleInTargetPos(false, 0);
+    pipeline->SetCloseButtonStatus(false);
+    pipeline->SetContainerModalTitleVisible(false, true);
+    pipeline->SetContainerModalTitleHeight(0);
+    pipeline->GetContainerModalTitleHeight();
+    pipeline->windowModal_ = WindowModal::CONTAINER_MODAL;
+    pipeline->ContainerModalUnFocus();
+    pipeline->UpdateTitleInTargetPos(false, 0);
+    pipeline->SetCloseButtonStatus(true);
+    pipeline->SetContainerModalTitleVisible(true, false);
+    pipeline->SetContainerModalTitleHeight(0);
+    pipeline->GetContainerModalTitleHeight();
+    pipeline->SetAppBgColor(Color::BLACK);
+    pipeline->AddIsFocusActiveUpdateEvent(frameNode, formCallback);
+    pipeline->RemoveIsFocusActiveUpdateEvent(frameNode);
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode("test", 6, nullptr);
+    pipeline->activeNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
+    pipeline->GetCurrentExtraInfo();
+    pipeline->AddFormVisibleChangeNode(frameNode, formCallback);
+    EXPECT_EQ(pipeline->onFormVisibleChangeNodeIds_.size(), 1);
+    pipeline->HandleFormVisibleChangeEvent(false);
+    pipeline->RemoveFormVisibleChangeNode(frameNode->GetId());
+    EXPECT_EQ(pipeline->onFormVisibleChangeNodeIds_.size(), 0);
 }
 } // namespace NG
 } // namespace OHOS::Ace

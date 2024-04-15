@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_TOGGLE_BUTTON_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
@@ -46,11 +47,11 @@ public:
         ResetBackgroundColor();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("type", "ToggleType.Button");
-        json->Put("isOn", propIsOn_.value_or(false) ? "true" : "false");
-        json->Put("selectedColor", propSelectedColor_.value_or(Color()).ColorToString().c_str());
+        json->PutExtAttr("type", "ToggleType.Button", filter);
+        json->PutExtAttr("isOn", propIsOn_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("selectedColor", propSelectedColor_.value_or(Color()).ColorToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_RENDER);

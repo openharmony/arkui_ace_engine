@@ -151,6 +151,11 @@ public:
     static float GetFontWeightScale();
 
     /*
+     * Get size scale of device.
+     */
+    static float GetFontScale();
+
+    /*
      * Get density of default display.
      */
     static double GetResolution()
@@ -352,6 +357,8 @@ public:
 
     static int GetArkProperties();
 
+    static std::string GetMemConfigProperty();
+
     static std::string GetArkBundleName();
 
     static size_t GetGcThreadNum();
@@ -469,6 +476,8 @@ public:
     {
         return acePerformanceMonitorEnable_;
     }
+
+    static std::string GetAtomicServiceBundleName();
 
 private:
     static bool traceEnabled_;

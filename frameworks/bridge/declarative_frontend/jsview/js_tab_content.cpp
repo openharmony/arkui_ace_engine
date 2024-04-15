@@ -88,19 +88,20 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (info.Length() <= 0) {
         return;
     }
+    auto tabBarInfo = info[0];
 
     std::string infoStr;
-    if (ParseJsString(info[0], infoStr)) {
+    if (ParseJsString(tabBarInfo, infoStr)) {
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, nullptr, true);
         return;
     }
 
-    if (!info[0]->IsObject()) {
+    if (!tabBarInfo->IsObject()) {
         return;
     }
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = JSRef<JSObject>::Cast(tabBarInfo);
     JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
     if (builderFuncParam->IsFunction()) {
         auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));

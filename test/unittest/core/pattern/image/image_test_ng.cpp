@@ -102,6 +102,13 @@ const std::string BUNDLE_NAME;
 const std::string MODULE_NAME;
 const std::string WEB_IMAGE =
     "https://img2.baidu.com/it/u=3999091694,1705560228&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800";
+constexpr int32_t DURATION_DEFAULT = 1000;
+constexpr int32_t ITERATION_DEFAULT = 1;
+constexpr int32_t STATE_START = 1;
+constexpr Dimension IMAGE_WIDTH = 170.0_vp;
+constexpr Dimension IMAGE_HEIGHT = 120.0_vp;
+constexpr Dimension IMAGE_TOP = 0.0_vp;
+constexpr Dimension IMAGE_LEFT = 0.0_vp;
 } // namespace
 
 class ImageTestNg : public testing::Test {
@@ -114,6 +121,8 @@ public:
         const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap = nullptr);
     static RefPtr<FrameNode> CreateSyncImageNode();
     static RefPtr<FrameNode> CreateSyncWebImageNode();
+    static RefPtr<PixelMap> CreatePixelMap(const std::string& src);
+    static RefPtr<FrameNode> CreatePixelMapAnimator(int32_t number = 1);
 };
 
 void ImageTestNg::SetUpTestSuite()
@@ -127,6 +136,30 @@ void ImageTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+RefPtr<PixelMap> ImageTestNg::CreatePixelMap(const std::string& src)
+{
+    RefPtr<PixelMap> pixelMap = nullptr;
+    return pixelMap;
+}
+
+RefPtr<FrameNode> ImageTestNg::CreatePixelMapAnimator(int32_t number)
+{
+    ImageModelNG imageModelNG;
+    std::vector<ImageProperties> images;
+    for (int32_t index = 0; index < number; index++) {
+        ImageProperties imageProperties;
+        imageProperties.pixelMap = ImageTestNg::CreatePixelMap(IMAGE_SRC_URL);
+        imageProperties.width = IMAGE_WIDTH;
+        imageProperties.height = IMAGE_HEIGHT;
+        imageProperties.top = IMAGE_TOP;
+        imageProperties.left = IMAGE_LEFT;
+        images.push_back(imageProperties);
+    }
+    imageModelNG.CreateAnimation(std::move(images), DURATION_DEFAULT, ITERATION_DEFAULT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return frameNode;
 }
 
 RefPtr<FrameNode> ImageTestNg::CreateImageNode(const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
@@ -794,7 +827,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_EQ(config->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
     EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
     EXPECT_EQ(config->flipHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
-    EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+    EXPECT_EQ(*config->colorFilter_.colorFilterMatrix_, COLOR_FILTER_DEFAULT);
     EXPECT_EQ(config->obscuredReasons_, std::vector<ObscuredReasons>());
 
     /**
@@ -1015,6 +1048,52 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     EXPECT_EQ(imagePattern->loadingCtx_->GetSourceInfo().GetSrc(), IMAGE_SRC_URL);
     ASSERT_NE(imagePattern->altLoadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
+}
+
+
+/**
+ * @tc.name: ImageColorFilterTest001
+ * @tc.desc: Test image ColorFilter is set correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * 数组
+    */
+    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
+    image.SetColorFilterMatrix(COLOR_FILTER_DEFAULT);
+
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
+    frameNode->MarkModifyDone();
+   /**
+    * 图形
+    */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+
+    auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
+    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
+    image.SetDrawingColorFilter(drawingColorFilter);
+
+    ASSERT_NE(imageRenderProperty, nullptr);
+    EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
+    frameNode->MarkModifyDone();
 }
 
 /**
@@ -2305,5 +2384,57 @@ HWTEST_F(ImageTestNg, ImageSetImageAnalyzerConfig0001, TestSize.Level1)
     frameNode->MarkModifyDone();
     pattern->EnableAnalyzer(true);
     EXPECT_TRUE(pattern->loadingCtx_);
+}
+
+/**
+ * @tc.name: ImagePixelMapListTest0001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImagePixelMapListTest0001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. images size is 0.
+     * @tc.expected: do nothing
+     */
+    auto frameNode = ImageTestNg::CreatePixelMapAnimator(0);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. SetShowingIndex() greater than images size-1.
+     * @tc.expected: nowImageIndex_ not change
+     */
+    frameNode = CreatePixelMapAnimator(1);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    imagePattern->SetShowingIndex(1);
+    EXPECT_EQ(imagePattern->nowImageIndex_, 0);
+
+    /**
+     * @tc.steps: step3. CreateAnimation() set PixelMap List.
+     * @tc.expected: images_ size is 2, other paramater is default value.
+     */
+    frameNode = CreatePixelMapAnimator(2);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(imagePattern->images_.size() == 2);
+    EXPECT_EQ(imagePattern->GetIsAnimation(), true);
+    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->durationTotal_, DURATION_DEFAULT);
+    EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
+    EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
 }
 } // namespace OHOS::Ace::NG

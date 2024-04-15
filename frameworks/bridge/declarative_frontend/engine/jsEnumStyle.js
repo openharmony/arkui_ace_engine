@@ -1402,6 +1402,11 @@ var FunctionKey;
   FunctionKey[FunctionKey["F10"] = 10] = "F10";
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
+  FunctionKey[FunctionKey["TAB"] = 13] = "TAB";
+  FunctionKey[FunctionKey["DPAD_UP"] = 14] = "DPAD_UP";
+  FunctionKey[FunctionKey["DPAD_DOWN"] = 15] = "DPAD_DOWN";
+  FunctionKey[FunctionKey["DPAD_LEFT"] = 16] = "DPAD_LEFT";
+  FunctionKey[FunctionKey["DPAD_RIGHT"] = 17] = "DPAD_RIGHT";
 })(FunctionKey || (FunctionKey = {}));
 
 var ContentType;
@@ -1429,6 +1434,9 @@ var ContentType;
   ContentType[ContentType['DATE'] = 20] = 'DATE';
   ContentType[ContentType['MONTH'] = 21] = 'MONTH';
   ContentType[ContentType['YEAR'] = 22] = 'YEAR';
+  ContentType[ContentType['NICKNAME'] = 23] = 'NICKNAME';
+  ContentType[ContentType['DETAIL_INFO_WITHOUT_STREET'] = 24] = 'DETAIL_INFO_WITHOUT_STREET';
+  ContentType[ContentType['FORMAT_ADDRESS'] = 25] = 'FORMAT_ADDRESS';
 })(ContentType || (ContentType = {}));
 
 var GestureJudgeResult;
@@ -2307,6 +2315,70 @@ class WaterFlowSections {
   }
 }
 
+class ChildrenMainSizeParamError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
+class ChildrenMainSize {
+
+  constructor(childDefaultSize) {
+    if (this.isInvalid(childDefaultSize)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = childDefaultSize;
+    this.changeFlag = true;
+    this.changeArray = [];
+  }
+
+  set childDefaultSize(value) {
+    if (this.isInvalid(value)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = value;
+  }
+
+  get childDefaultSize() {
+    return this.defaultMainSize;
+  }
+
+  // splice(start: number, deleteCount?: number, childrenSize?: Array<number>);
+  splice(start, deleteCount, childrenSize) {
+    let paramCount = arguments.length;
+    if (this.isInvalid(start)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    let startValue = Math.trunc(start);
+    let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
+    if (paramCount === 1) {
+      this.changeArray.push({ start: startValue });
+    } else if (paramCount === 2) {
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
+    } else if (paramCount === 3) {
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+    }
+    this.changeFlag = !this.changeFlag;
+  }
+
+  update(index, childSize) {
+    if (this.isInvalid(index)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.changeArray.push({ start: Math.trunc(index), deleteCount: 1, childrenSize: [childSize] });
+    this.changeFlag = !this.changeFlag;
+  }
+
+  isInvalid(input) {
+    return !(Number.isFinite(input) && input >= 0);
+  }
+
+  clearChanges() {
+    this.changeArray = [];
+  }
+}
+
 var ImageSpanAlignment;
 (function (ImageSpanAlignment) {
   ImageSpanAlignment[ImageSpanAlignment["NONE"] = 0] = "NONE";
@@ -2767,7 +2839,7 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
   StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
   StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
-  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 5] = "PARAGRAPH_STYLE";
+  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
-  StyledStringKey[StyledStringKey["GESTURE"] = 7] = "GESTURE";
+  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
 })(StyledStringKey || (StyledStringKey = {}));

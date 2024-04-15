@@ -34,6 +34,7 @@ public:
     RefPtr<SwiperController> Create() override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
+    void SetIndicatorInteractive(bool interactive) override;
     void SetAutoPlay(bool autoPlay) override;
     void SetAutoPlayInterval(uint32_t interval) override;
     void SetDuration(uint32_t duration) override;
@@ -76,6 +77,7 @@ public:
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin);
     static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin);
     static void SetIndex(FrameNode* frameNode, uint32_t index);

@@ -127,10 +127,11 @@ bool MagnifierPainter::GetMagnifierRect(
     if (textBasePattern->IsSelected() && firstHandleOffsetY != secondHandleOffsetY &&
         localOffsetY < firstHandleOffsetY + textDragBasePattern->GetLineHeight() &&
         localOffsetY < secondHandleOffsetY + textDragBasePattern->GetLineHeight()) {
-        if (firstHandleOffsetY < secondHandleOffsetY) {
-            cursorOffsetY = firstHandleOffsetY;
-        } else if (secondHandleOffsetY < firstHandleOffsetY) {
-            cursorOffsetY = secondHandleOffsetY;
+        cursorOffsetY = std::min(firstHandleOffsetY, secondHandleOffsetY);
+        if (!textBasePattern->GetTextSelector().MoveSelectionLeft()) {
+            auto OffsetY =
+                std::max(firstHandleOffsetY, secondHandleOffsetY) - std::min(firstHandleOffsetY, secondHandleOffsetY);
+            magnifierRect_.cursorOffset.SetY(magnifierRect_.cursorOffset.GetY() - OffsetY);
         }
     }
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;

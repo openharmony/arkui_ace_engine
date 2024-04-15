@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "bridge/declarative_frontend/style_string/js_span_object.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -48,6 +49,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
@@ -117,6 +119,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
@@ -430,10 +433,16 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSpanString::JSBind(globalObj);
     JSMutableSpanString::JSBind(globalObj);
     JSFontSpan::JSBind(globalObj);
+    JSDecorationSpan::JSBind(globalObj);
+    JSBaselineOffsetSpan::JSBind(globalObj);
+    JSLetterSpacingSpan::JSBind(globalObj);
+    JSGestureSpan::JSBind(globalObj);
+    JSTextShadowSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
     JSForEach::JSBind(globalObj);
+    JSRepeat::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
@@ -570,6 +579,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
+    JSColorMetrics::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
     JSNavPathStack::JSBind(globalObj);
     JSTextField::JSBind(globalObj);

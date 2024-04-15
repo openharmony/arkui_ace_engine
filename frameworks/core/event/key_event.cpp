@@ -77,11 +77,13 @@ std::string KeyEvent::ConvertInputCodeToString() const
         { KeyCode::KEY_APOSTROPHE, "\'\"" }, { KeyCode::KEY_SLASH, "/?" }, { KeyCode::KEY_AT, "@" },
         { KeyCode::KEY_PLUS, "+=" }, { KeyCode::KEY_NUMPAD_DIVIDE, "/" }, { KeyCode::KEY_NUMPAD_MULTIPLY, "*" },
         { KeyCode::KEY_NUMPAD_SUBTRACT, "-" }, { KeyCode::KEY_NUMPAD_ADD, "+" }, { KeyCode::KEY_NUMPAD_DOT, "." },
-        { KeyCode::KEY_NUMPAD_COMMA, "," }, { KeyCode::KEY_NUMPAD_EQUALS, "=" }, { KeyCode::KEY_TAB, "\t" },
+        { KeyCode::KEY_NUMPAD_COMMA, "," }, { KeyCode::KEY_NUMPAD_EQUALS, "=" }, { KeyCode::KEY_TAB, "TAB" },
         { KeyCode::KEY_SPACE, " " }, { KeyCode::KEY_ESCAPE, "ESC" }, { KeyCode::KEY_F1, "F1" },
         { KeyCode::KEY_F2, "F2" }, { KeyCode::KEY_F3, "F3" }, { KeyCode::KEY_F4, "F4" }, { KeyCode::KEY_F5, "F5" },
         { KeyCode::KEY_F6, "F6" }, { KeyCode::KEY_F7, "F7" }, { KeyCode::KEY_F8, "F8" }, { KeyCode::KEY_F9, "F9" },
-        { KeyCode::KEY_F10, "F10" }, { KeyCode::KEY_F11, "F11" }, { KeyCode::KEY_F12, "F12" } };
+        { KeyCode::KEY_F10, "F10" }, { KeyCode::KEY_F11, "F11" }, { KeyCode::KEY_F12, "F12" },
+        { KeyCode::KEY_DPAD_UP, "DPAD_UP" }, { KeyCode::KEY_DPAD_DOWN, "DPAD_DOWN" },
+        { KeyCode::KEY_DPAD_LEFT, "DPAD_LEFT" }, { KeyCode::KEY_DPAD_RIGHT, "DPAD_RIGHT" } };
     if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
         return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
     }

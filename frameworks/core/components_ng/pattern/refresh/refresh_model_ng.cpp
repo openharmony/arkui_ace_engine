@@ -63,6 +63,7 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(
         V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    CHECK_NULL_RETURN(frameNode, frameNode);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_RETURN(pattern, frameNode);
@@ -148,6 +149,15 @@ void RefreshModelNG::SetOnOffsetChange(OffsetChangeEvent&& dragOffset)
     eventHub->SetOnOffsetChange(std::move(dragOffset));
 }
 
+void RefreshModelNG::ResetOnOffsetChange()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ResetOnOffsetChange();
+}
+
 void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -187,6 +197,14 @@ void RefreshModelNG::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&&
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnOffsetChange(std::move(dragOffset));
+}
+
+void RefreshModelNG::ResetOnOffsetChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ResetOnOffsetChange();
 }
 
 void RefreshModelNG::SetRefreshing(FrameNode* frameNode, bool isRefreshing)

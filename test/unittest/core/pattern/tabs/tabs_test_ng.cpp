@@ -16,6 +16,10 @@
 #include "tabs_test_ng.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const InspectorFilter filter;
+}
+
 void TabsTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
@@ -253,7 +257,7 @@ HWTEST_F(TabsTestNg, TabsModelSetFadingEdge001, TestSize.Level1)
     EXPECT_TRUE(tabBarPaintProperty_->GetFadingEdgeValue());
 
     auto json = JsonUtil::Create(true);
-    frameNode_->ToJsonValue(json);
+    frameNode_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("fadingEdge"), "true");
 }
 
@@ -320,7 +324,7 @@ HWTEST_F(TabsTestNg, TabsModelToJsonValue001, TestSize.Level2)
 {
     CreateWithItem([](TabsModelNG model) {});
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    frameNode_->ToJsonValue(json);
+    frameNode_->ToJsonValue(json, filter);
     auto dividerJson = json->GetValue("divider");
     EXPECT_TRUE(dividerJson->IsNull());
 }
@@ -593,7 +597,7 @@ HWTEST_F(TabsTestNg, TabContentModelToJsonValue001, TestSize.Level1)
     labelStyle.fontFamily = { "unknown", "unknow2" };
     tabContentPattern->SetLabelStyle(labelStyle);
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    tabContentFrameNode->ToJsonValue(json);
+    tabContentFrameNode->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
 
@@ -5194,13 +5198,13 @@ HWTEST_F(TabsTestNg, TabsNodeToJsonValue001, TestSize.Level2)
     options.margin = 0.0_vp;
     options.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
-    frameNode_->ToJsonValue(json);
+    frameNode_->ToJsonValue(json, filter);
     options.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
-    frameNode_->ToJsonValue(json);
+    frameNode_->ToJsonValue(json, filter);
     options.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
     tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
-    frameNode_->ToJsonValue(json);
+    frameNode_->ToJsonValue(json, filter);
 
     /**
      * @tc.steps: steps3. ToJsonValue.

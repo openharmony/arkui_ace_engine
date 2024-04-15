@@ -18,10 +18,13 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class TextFieldPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(TextFieldPaintProperty, PaintProperty)
@@ -49,9 +52,28 @@ public:
         ResetSelectedBackgroundColor();
         ResetInputStyle();
         ResetBackgroundColor();
+        ResetPressBgColor();
+        ResetHoverBgColor();
+        ResetTextColorFlagByUser();
+        ResetBorderRadiusFlagByUser();
+        ResetBorderColorFlagByUser();
+        ResetBorderWidthFlagByUser();
+        ResetPaddingByUser();
+        ResetMarginByUser();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ResetUserProperties()
+    {
+        ResetBackgroundColor();
+        ResetTextColorFlagByUser();
+        ResetBorderRadiusFlagByUser();
+        ResetBorderColorFlagByUser();
+        ResetBorderWidthFlagByUser();
+        ResetPaddingByUser();
+        ResetMarginByUser();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -64,7 +86,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverBgColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstHandleInfo, HandleInfoNG, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondHandleInfo, HandleInfoNG, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_RENDER);
+    // 用于记录开发者设置的值
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadiusFlagByUser, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderColorFlagByUser, BorderColorProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderWidthFlagByUser, BorderWidthProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PaddingByUser, PaddingProperty, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MarginByUser, MarginProperty, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintProperty);

@@ -44,6 +44,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string CREATE_VALUE = "Hello World";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
@@ -159,7 +160,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue001, TestSize.Level1)
     auto json = std::make_unique<JsonValue>();
     spanNode->spanItem_->content = "";
     spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->ToJsonValue(json);
+    spanNode->spanItem_->ToJsonValue(json, filter);
     bool ret = json->Contains(FONT_SIZE);
     EXPECT_EQ(ret, false);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
@@ -178,7 +179,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue002, TestSize.Level1)
     auto json = std::make_unique<JsonValue>();
     spanNode->spanItem_->content = "";
     spanNode->spanItem_->fontStyle = std::make_unique<FontStyle>();
-    spanNode->spanItem_->ToJsonValue(json);
+    spanNode->spanItem_->ToJsonValue(json, filter);
     bool ret = json->Contains(FONT_SIZE);
     EXPECT_EQ(ret, false);
     ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
@@ -650,7 +651,7 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue001, TestSize.Level1)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
     auto json = JsonUtil::Create(true);
-    spanNode->ToJsonValue(json);
+    spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -680,7 +681,7 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue002, TestSize.Level1)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
     auto json = JsonUtil::Create(true);
-    spanNode->ToJsonValue(json);
+    spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("fontSize"));
@@ -711,7 +712,7 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
     auto json = JsonUtil::Create(true);
-    spanNode->ToJsonValue(json);
+    spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));

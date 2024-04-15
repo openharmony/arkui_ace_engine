@@ -70,7 +70,11 @@ bool TextSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!renderContext->GetClipEdge().value_or(false)) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (!renderContext->GetClipEdge().value_or(clip)) {
         return true;
     }
     auto contentRect = textPattern->GetTextContentRect();
@@ -112,7 +116,14 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
-    if (renderContext->GetClipEdge().value_or(false)) {
+    bool isUseHandleTop = (isFirst != IsHandleReverse());
+    handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
+    
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (renderContext->GetClipEdge().value_or(clip)) {
         handleOffset.SetX(
             std::clamp(handleOffset.GetX(), contentOffset.GetX(), contentOffset.GetX() + contentRect.Width()));
         handleOffset.SetY(
@@ -121,20 +132,23 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto textPaintOffset = contentOffset - OffsetF(0.0f, std::min(textPattern->GetBaselineOffset(), 0.0f));
     handleOffset -= textPaintOffset;
     // the handle position is calculated based on the middle of the handle height.
-    if (isFirst) {
-        auto deltaY = handleOffset.GetY() + (IsHandleReverse() ? handleRect.Height() : 0);
-        auto start = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), deltaY));
-        textPattern->HandleSelectionChange(start, textPattern->GetTextSelector().destinationOffset);
-    } else {
-        auto deltaY =
-            handleOffset.GetY() + (IsHandleReverse() || NearEqual(handleOffset.GetY(), 0) ? 0 : handleRect.Height());
-        auto end = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), deltaY));
-        textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, end);
-    }
+    UpdateSelectorOnHandleMove(handleOffset, isFirst);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
+}
+
+void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle)
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto currentHandleIndex = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
+    if (isFirstHandle) {
+        textPattern->HandleSelectionChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
+    } else {
+        textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, currentHandleIndex);
+    }
 }
 
 void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)

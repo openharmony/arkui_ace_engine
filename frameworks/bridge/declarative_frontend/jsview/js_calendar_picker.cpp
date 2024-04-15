@@ -602,7 +602,8 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
 
     DialogProperties properties;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         properties.alignment = DialogAlignment::BOTTOM;
     } else {
         properties.alignment = DialogAlignment::CENTER;
@@ -623,11 +624,19 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             properties.backgroundBlurStyle = blurStyle;
         }
     }
+
+    auto shadowValue = paramObj->GetProperty("shadow");
+    Shadow shadow;
+    if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
+        properties.shadow = shadow;
+    }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
-    NG::BorderRadiusProperty dialogRadius;
-    dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
-    properties.borderRadius = dialogRadius;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+        NG::BorderRadiusProperty dialogRadius;
+        dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
+        properties.borderRadius = dialogRadius;
+    }
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

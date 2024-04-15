@@ -401,10 +401,11 @@ public:
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-        const RefPtr<NG::FrameNode>& targetNode,  std::string longestContent, int32_t menuSize);
-    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode,  std::string longestContent, int32_t menuSize);
-    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, std::string longestContent,
-        int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
+        const RefPtr<NG::FrameNode>& targetNode, const std::string& longestContent, int32_t menuSize);
+    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
+    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
+        const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
+    void CloseUIExtensionMenu(const std::function<void(const std::string&)>& onClickMenu, int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -431,10 +432,7 @@ public:
 
     void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
-    void SetCustomKeyboardOption(bool supportAvoidance)
-    {
-        keyboardAvoidance_ = supportAvoidance;
-    }
+    void SetCustomKeyboardOption(bool supportAvoidance);
 
     void SupportCustomKeyboardAvoidance(RefPtr<RenderContext> context, AnimationOption option,
         RefPtr<FrameNode> customKeyboard);
@@ -482,6 +480,8 @@ public:
         return overlayNode_;
     }
     bool CheckPageNeedAvoidKeyboard() const;
+    void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
+    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
 
 private:
     void PopToast(int32_t targetId);
@@ -563,6 +563,8 @@ private:
     void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
         const WeakPtr<OverlayManager> weak, int32_t instanceId);
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
+    void RemoveMenuNotInSubWindow(
+        const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak);
 
     bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
     void HandleModalShow(std::function<void(const std::string&)>&& callback,
