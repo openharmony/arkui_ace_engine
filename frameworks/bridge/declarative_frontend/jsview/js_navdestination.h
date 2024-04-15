@@ -35,6 +35,7 @@ public:
     static void SetMode(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void SetMenus(const JSCallbackInfo& info);
+    static void SetBackgroundColor(const JSCallbackInfo& info);
 
 private:
     JSWeak<JSFunc> jsShownFunc_;

@@ -37,11 +37,13 @@ public:
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     void SetNavDestinationMode(NavDestinationMode mode) override;
     bool ParseCommonTitle(
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
+    void SetBackgroundColor(const Color& color, bool isVaild = true) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

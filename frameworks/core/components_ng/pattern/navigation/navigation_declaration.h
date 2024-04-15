@@ -59,7 +59,6 @@ constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
 constexpr Dimension SUBTITLE_HEIGHT = 26.0_vp;
 constexpr Dimension MIN_ADAPT_SUBTITLE_FONT_SIZE = 10.0_vp;
-constexpr Color SUBTITLE_COLOR = Color(0x99000000); // ohos_id_alpha_content_secondary
 // back button
 constexpr Dimension BACK_BUTTON_SIZE = 48.0_vp;
 constexpr Dimension BACK_BUTTON_ICON_SIZE = 24.0_vp;
