@@ -1106,6 +1106,7 @@ public:
     bool IsInlineMode();
     bool IsShowError();
     void ResetContextAttr();
+    void RestoreDefaultMouseState();
 
     bool IsTransparent()
     {
