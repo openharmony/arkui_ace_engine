@@ -428,6 +428,8 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
         if (!isHover) {
             OHOS::NWeb::NWebCursorInfo cursorInfo;
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "Set cursor to pointer when mouse pointer is leave.");
             pattern->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, cursorInfo);
         }
         pattern->WebOnMouseEvent(info);
@@ -1943,6 +1945,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "SelectOverlay touch down add id:%{public}d.", touchPoint.id);
+            touchOverlayInfo_.push_back(touchPoint);
         }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
@@ -2131,6 +2136,14 @@ void WebPattern::CloseSelectOverlay()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (selectOverlayProxy_) {
+        if (IsSelectOverlayDragging()) {
+            for (auto& touchOverlayInfo : touchOverlayInfo_) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
+                delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
+            }
+        }
+        touchOverlayInfo_.clear();
         selectOverlayProxy_->Close();
         pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
         selectOverlayProxy_ = nullptr;
