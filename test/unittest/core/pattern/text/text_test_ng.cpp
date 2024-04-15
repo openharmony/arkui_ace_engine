@@ -6045,6 +6045,8 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern.
      */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(10); // 10 means min platformVersion.
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -6090,6 +6092,7 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
     EXPECT_EQ(responseRegion.GetHeight().Value(), frameSize.Height());
     EXPECT_EQ(responseRegion.GetWidth().Value(), 240.0);
     EXPECT_EQ(responseRegion.GetHeight().Value(), 60.0);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
