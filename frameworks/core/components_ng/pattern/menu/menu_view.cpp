@@ -610,6 +610,9 @@ RefPtr<FrameNode> MenuView::Create(
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
+            auto focusHub = optionNode->GetOrCreateFocusHub();
+            CHECK_NULL_RETURN(focusHub, nullptr);
+            focusHub->SetIsDefaultFocus(true);
         }
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);

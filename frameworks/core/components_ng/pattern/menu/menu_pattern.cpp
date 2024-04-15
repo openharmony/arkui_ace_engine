@@ -386,6 +386,9 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
             auto props = childNode->GetPaintProperty<OptionPaintProperty>();
             CHECK_NULL_VOID(props);
             props->UpdateNeedDivider(false);
+            auto focusHub = childNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetIsDefaultFocus(true);
         }
         auto optionPattern = childNode->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(optionPattern);
