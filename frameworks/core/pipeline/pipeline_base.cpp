@@ -703,11 +703,13 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
+#ifdef OHOS_STANDARD_SYSTEM
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown()) {
             // subwindow is shown, main window no need to handle the keyboard event
             return;
         }
+#endif
     }
     double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
