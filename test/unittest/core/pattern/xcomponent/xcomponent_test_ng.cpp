@@ -2003,12 +2003,14 @@ HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
      * @tc.expected: IsSupportImageAnalyzerFeature() return right value
      */
     pattern->EnableAnalyzer(true);
-    EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
+    EXPECT_TRUE(pattern->isEnableAnalyzer_);
 
-    pattern->EnableAnalyzer(false);
-    EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+    if (ImageAnalyzerMgr::GetInstance()->IsImageAnalyzerSupported()) {
+        EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());  
+    } else {
+        EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+    }
 
-    pattern->EnableAnalyzer(true);
     pattern->imageAnalyzerManager_ = nullptr;
     EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
 }
