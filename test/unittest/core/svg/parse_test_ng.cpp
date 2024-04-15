@@ -1306,8 +1306,8 @@ HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
     ImageSourceInfo src;
     src.SetFillColor(Color::BLACK);
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
-    EXPECT_NE(svgDom, nullptr);
     CHECK_NULL_VOID(svgDom);
+    EXPECT_NE(svgDom, nullptr);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     // filter is first child in svg
