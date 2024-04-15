@@ -20,16 +20,24 @@
 
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_utils.h"
+#include "core/components_ng/property/templates_parser.h"
+
 namespace OHOS::Ace::NG {
 void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
 {
     wrapper_ = wrapper;
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
+    axis_ = axis_ = props->GetAxis();
 
-    float mainSize = Init();
+    auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
+    Init(idealSize);
+
+    float mainSize = idealSize.MainSize(axis_);
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_, mainSize);
     } else if (info_->targetIndex_) {
@@ -45,23 +53,64 @@ void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSWLayout::Layout(LayoutWrapper* wrapper)
 {
+    wrapper->RemoveAllChildInRenderTree();
     if (info_->lanes_.empty()) {
         return;
     }
 
     float crossPos = 0.0f;
-    for (auto& lane : info_->lanes_) {
+    for (size_t i = 0; i < info_->lanes_.size(); ++i) {
+        auto& lane = info_->lanes_[i];
         float mainPos = lane.startPos;
         for (auto& item : lane.items_) {
             auto child = wrapper->GetOrCreateChildByIndex(item.idx);
+            if (!child) {
+                continue;
+            }
             auto childNode = child->GetGeometryNode();
             childNode->SetMarginFrameOffset(
                 info_->axis_ == Axis::VERTICAL ? OffsetF { crossPos, mainPos } : OffsetF { mainPos, crossPos });
+            if (child->CheckNeedForceMeasureAndLayout()) {
+                child->Layout();
+            } else {
+                child->GetHostNode()->ForceSyncGeometryNode();
+            }
             mainPos += childNode->GetMarginFrameSize().MainSize(info_->axis_) + mainGap_;
         }
-        crossPos += width;
+        crossPos += itemCrossSize_[i] + crossGap_;
     }
-    wrapper->SetActiveChildRange(info_->startIndex_, info_->endIndex_);
+}
+
+void WaterFlowSWLayout::Init(const SizeF& frameSize)
+{
+    auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
+    auto scale = props->GetLayoutConstraint()->scaleProperty;
+    auto rowsGap = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+    auto columnsGap = ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    mainGap_ = { axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap };
+    crossGap_ = { axis_ == Axis::VERTICAL ? columnsGap : rowsGap };
+
+    auto crossSize = frameSize.CrossSize(axis_);
+    std::pair<std::vector<double>, bool> cross;
+    auto rowsTemplate = props->GetRowsTemplate().value_or("1fr");
+    auto columnsTemplate = props->GetColumnsTemplate().value_or("1fr");
+    if (axis_ == Axis::VERTICAL) {
+        cross = ParseTemplateArgs(
+            WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, info_->childrenCount_);
+    } else {
+        cross = ParseTemplateArgs(
+            WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, info_->childrenCount_);
+    }
+    if (cross.second) {
+        crossGap_ = 0.0f;
+    }
+
+    for (const auto& len : cross.first) {
+        itemCrossSize_.push_back(static_cast<float>(len));
+    }
+    if (itemCrossSize_.empty()) {
+        itemCrossSize_.push_back(crossSize);
+    }
 }
 
 void WaterFlowSWLayout::ApplyOffset(float mainSize, float offset)

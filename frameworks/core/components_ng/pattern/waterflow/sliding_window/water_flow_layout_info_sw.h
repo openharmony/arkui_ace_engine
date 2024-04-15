@@ -27,7 +27,51 @@ namespace OHOS::Ace::NG {
  * @brief Layout Data structure for Sliding Window version of WaterFlowLayout
  */
 class WaterFlowLayoutInfoSW : public WaterFlowLayoutInfoBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutInfoSW, WaterFlowLayoutInfoBase);
 public:
+
+    float offset() const override;
+    int32_t firstIdx() const override {return startIndex_;}
+
+    void UpdateOffset(float delta) override {}
+
+    int32_t GetCrossIndex(int32_t itemIndex) const override {}
+
+
+    OverScrollOffset GetOverScrolledDelta(float delta) const override {}
+
+    float CalcOverScroll(float mainSize, float delta) const override {}
+
+    bool ReachStart(float prevPos, bool firstLayout) const override {}
+
+    bool ReachEnd(float prevPos) const override {}
+
+    bool OutOfBounds() const override {}
+
+    /**
+     * @return total height of all recorded items.
+     */
+    float GetContentHeight() const override {}
+
+    /**
+     * @brief Get target item's position in order to perform scrollTo animation.
+     *
+     * @param idx item's index.
+     * @param crossIdx item's cross-axis lane index.
+     * @return position
+     */
+    float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override {}
+
+    /**
+     * @return change in position, comparing to [prevPos]
+     */
+    float GetDelta(float prevPos) const override {return delta_;}
+
+    int32_t GetMainCount() const override {}
+    int32_t GetCrossCount() const override {}
+
+    void Reset() override {}
+
     void SyncRange();
 
     /**
@@ -37,7 +81,7 @@ public:
      * @param mainGap 
      * @return positive result when item's top edge is below viewport.
      */
-    float DistanceToTop(size_t item, float mainGap) const;
+    float DistanceToTop(int32_t item, float mainGap) const;
 
     /**
      * @brief Calculates distance from the item's bottom edge to the bottom of the viewport.
@@ -47,9 +91,7 @@ public:
      * @param mainGap 
      * @return positive result when it's bottom edge is above viewport.
      */
-    float DistanceToBottom(size_t item, float mainSize, float mainGap) const;
-
-    void ResetLanes();
+    float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
 
     struct Lane;
     std::vector<Lane> lanes_;

@@ -25,17 +25,12 @@ class WaterFlowSegmentedLayout : public WaterFlowLayoutBase {
     DECLARE_ACE_TYPE(WaterFlowSegmentedLayout, WaterFlowLayoutBase);
 
 public:
-    explicit WaterFlowSegmentedLayout(WaterFlowLayoutInfo layoutInfo) : info_(std::move(layoutInfo)) {}
+    explicit WaterFlowSegmentedLayout(const RefPtr<WaterFlowLayoutInfo>& layoutInfo) : info_(layoutInfo) {}
     ~WaterFlowSegmentedLayout() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
-
-    WaterFlowLayoutInfo GetLayoutInfo() override
-    {
-        return std::move(info_);
-    }
 
     void SetCanOverScroll(bool value) override
     {
@@ -65,13 +60,6 @@ private:
      */
     void RegularInit(const SizeF& frameSize);
     void InitFooter(float crossSize);
-
-    /**
-     * @brief Measure self before measuring children.
-     *
-     * @return [idealSize given by parent, whether measure is successful (need to adapt to children size if not)].
-     */
-    std::pair<SizeF, bool> PreMeasureSelf();
 
     /**
      * @brief Measure self after measuring children. Only when pre-measure failed.
@@ -157,7 +145,7 @@ private:
     // offset to apply after a ResetAndJump
     float postJumpOffset_ = 0.0f;
 
-    WaterFlowLayoutInfo info_;
+    RefPtr<WaterFlowLayoutInfo> info_;
 
     // true if WaterFlow can be overScrolled
     bool overScroll_ = false;

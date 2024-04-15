@@ -20,7 +20,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -40,6 +41,11 @@ public:
     };
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
+
+    void SetLayoutMode(WaterFlowLayoutMode mode)
+    {
+        layoutMode_ = mode;
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
@@ -75,22 +81,22 @@ public:
 
     int32_t GetBeginIndex() const
     {
-        return layoutInfo_.startIndex_;
+        return layoutInfo_->startIndex_;
     }
 
     int32_t GetEndIndex() const
     {
-        return layoutInfo_.endIndex_;
+        return layoutInfo_->endIndex_;
     }
 
     int32_t GetChildrenCount() const
     {
-        return layoutInfo_.childrenCount_;
+        return layoutInfo_->childrenCount_;
     }
 
     float GetTotalOffset() const override
     {
-        return -layoutInfo_.currentOffset_;
+        return -layoutInfo_->offset();
     }
 
     int32_t GetRows() const;
@@ -107,17 +113,17 @@ public:
 
     double GetStoredOffset() const
     {
-        return layoutInfo_.storedOffset_;
+        return layoutInfo_->storedOffset_;
     }
 
     void SetRestoreOffset(double restoreOffset)
     {
-        layoutInfo_.restoreOffset_ = restoreOffset;
+        layoutInfo_->restoreOffset_ = restoreOffset;
     }
 
     void SetScrollAlign(ScrollAlign align)
     {
-        layoutInfo_.align_ = align;
+        layoutInfo_->align_ = align;
     }
 
     std::string ProvideRestoreInfo() override;
@@ -156,11 +162,13 @@ private:
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
     std::optional<int32_t> targetIndex_;
-    WaterFlowLayoutInfo layoutInfo_;
+    RefPtr<WaterFlowLayoutInfoBase> layoutInfo_;
     RefPtr<WaterFlowSections> sections_;
 
+    WaterFlowLayoutMode layoutMode_ = WaterFlowLayoutMode::TOP_DOWN;
     float prevOffset_ = 0.0f;
     SizeF lastSize_;
+    std::pair<int32_t, int32_t> itemRange_ = { -1, -1 };
     WeakPtr<UINode> footer_;
 
     // clip padding of WaterFlow

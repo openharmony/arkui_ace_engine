@@ -20,7 +20,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,11 +27,17 @@ class ACE_EXPORT WaterFlowSWLayout : public WaterFlowLayoutBase {
     DECLARE_ACE_TYPE(WaterFlowSWLayout, WaterFlowLayoutBase);
 
 public:
+    explicit WaterFlowSWLayout(const RefPtr<WaterFlowLayoutInfoSW>& info) : info_(info) {}
     void Measure(LayoutWrapper* wrapper) override;
     void Layout(LayoutWrapper* wrapper) override;
 
+    void SetCanOverScroll(bool value) override
+    {
+        overScroll_ = value;
+    }
+
 private:
-    float Init();
+    void Init(const SizeF& frameSize);
 
     void ApplyOffset(float mainSize, float offset);
 
@@ -73,9 +78,11 @@ private:
 
     RefPtr<LayoutWrapper> MeasureChild(int32_t idx);
 
-    LayoutWrapper* wrapper_;
-    WaterFlowLayoutInfoSW* info_;
+    LayoutWrapper* wrapper_ {};
+    RefPtr<WaterFlowLayoutInfoSW> info_;
 
+    Axis axis_ {};
+    std::vector<float> itemCrossSize_;
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
 

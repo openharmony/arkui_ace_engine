@@ -42,19 +42,19 @@ std::string WaterFlowLayoutUtils::PreParseArgs(const std::string& args)
     return rowsArgs;
 }
 
-FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(const WaterFlowLayoutInfo& info, int32_t index, float mainGap)
+FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(const RefPtr<WaterFlowLayoutInfo>& info, int32_t index, float mainGap)
 {
-    auto crossIndex = info.GetCrossIndex(index);
+    auto crossIndex = info->GetCrossIndex(index);
     // already in layoutInfo
     if (crossIndex != -1) {
-        return { crossIndex, info.GetStartMainPos(crossIndex, index) };
+        return { crossIndex, info->GetStartMainPos(crossIndex, index) };
     }
-    int32_t segment = info.GetSegment(index);
-    auto itemIndex = info.GetCrossIndexForNextItem(segment);
+    int32_t segment = info->GetSegment(index);
+    auto itemIndex = info->GetCrossIndexForNextItem(segment);
     if (itemIndex.lastItemIndex < 0) {
-        return { itemIndex.crossIndex, info.segmentStartPos_[segment] };
+        return { itemIndex.crossIndex, info->segmentStartPos_[segment] };
     }
-    auto mainHeight = info.GetMainHeight(itemIndex.crossIndex, itemIndex.lastItemIndex);
+    auto mainHeight = info->GetMainHeight(itemIndex.crossIndex, itemIndex.lastItemIndex);
     return { itemIndex.crossIndex, mainHeight + mainGap };
 }
 
@@ -117,5 +117,18 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
         CalcLength(itemConstraint.minSize.Height(), DimensionUnit::PX)));
 
     return itemConstraint;
+}
+
+std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapper, Axis axis)
+{
+    const auto& props = wrapper->GetLayoutProperty();
+    auto size = CreateIdealSize(props->GetLayoutConstraint().value(), axis, props->GetMeasureType(), true);
+    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(size, axis));
+    if (!matchChildren) {
+        wrapper->GetGeometryNode()->SetFrameSize(size);
+    }
+    MinusPaddingToSize(props->CreatePaddingAndBorder(), size);
+    wrapper->GetGeometryNode()->SetContentSize(size);
+    return { size, matchChildren };
 }
 } // namespace OHOS::Ace::NG

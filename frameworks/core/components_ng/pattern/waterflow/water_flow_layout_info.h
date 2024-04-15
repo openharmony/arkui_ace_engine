@@ -37,13 +37,27 @@ struct FlowItemPosition {
     float startMainPos = 0;
 };
 
-class WaterFlowLayoutInfo: public WaterFlowLayoutInfoBase {
+class WaterFlowLayoutInfo : public WaterFlowLayoutInfoBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutInfo, WaterFlowLayoutInfoBase);
+
 public:
-    int32_t GetCrossIndex(int32_t itemIndex) const;
-    void UpdateStartIndex();
+    WaterFlowLayoutInfo() = default;
+    ~WaterFlowLayoutInfo() override = default;
+
+    float offset() const override
+    {
+        return currentOffset_;
+    }
+    int32_t firstIdx() const override
+    {
+        return firstIndex_;
+    }
+    int32_t GetCrossIndex(int32_t itemIndex) const override;
+
+    void UpdateStartIndex() override;
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
-    float GetContentHeight() const;
+    float GetContentHeight() const override;
     bool IsAllCrossReachEnd(float mainSize) const;
 
     /**
@@ -56,15 +70,28 @@ public:
 
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex) const;
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
-    void Reset();
+    void Reset() override;
     void Reset(int32_t resetFrom);
-    int32_t GetCrossCount() const;
-    int32_t GetMainCount() const;
+    int32_t GetCrossCount() const override;
+    int32_t GetMainCount() const override;
     void ClearCacheAfterIndex(int32_t currentIndex);
 
-    bool ReachStart(float prevOffset, bool firstLayout) const;
-    bool ReachEnd(float prevOffset) const;
-    float JumpToTargetAlign(const std::pair<float, float>& item) const;
+    bool ReachStart(float prevOffset, bool firstLayout) const override;
+    bool ReachEnd(float prevOffset) const override;
+    bool OutOfBounds() const override;
+
+    OverScrollOffset GetOverScrolledDelta(float delta) const override;
+    float CalcOverScroll(float mainSize, float delta) const override;
+
+    void UpdateOffset(float delta) override;
+
+    float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
+
+    float GetDelta(float prevPos) const override
+    {
+        return prevPos - currentOffset_;
+    }
+
     void JumpTo(const std::pair<float, float>& item);
 
     /**
@@ -81,7 +108,7 @@ public:
      * @param sections vector of Sections info.
      * @param start index of the first modified section, all sections prior to [start] remain the same.
      */
-    void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start);
+    void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) override;
 
     /**
      * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
@@ -134,32 +161,14 @@ public:
      */
     void Sync(float mainSize, bool overScroll);
 
-    Axis axis_ = Axis::VERTICAL;
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
-    // store offset for distributed migration
-    float storedOffset_ = 0.0f;
-    float restoreOffset_ = 0.0f;
-
-    bool itemStart_ = false;
-    bool itemEnd_ = false;   // last item is partially in viewport
-    bool offsetEnd_ = false; // last item's bottom is in viewport
-
-    int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
-
-    ScrollAlign align_ = ScrollAlign::START;
-
-    int32_t startIndex_ = 0;
-    int32_t endIndex_ = -1;
-    int32_t footerIndex_ = -1;
-    int32_t childrenCount_ = 0;
 
     // first index for onScrollIndex
     int32_t firstIndex_ = 0;
-    std::optional<int32_t> targetIndex_;
 
     // Map structure: [crossIndex, [index, {mainOffset, itemMainSize}]],
     using ItemMap = std::map<int32_t, std::map<int32_t, std::pair<float, float>>>;

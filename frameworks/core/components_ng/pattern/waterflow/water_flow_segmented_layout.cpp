@@ -32,15 +32,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-bool IsDataValid(const WaterFlowLayoutInfo& info)
+bool IsDataValid(const RefPtr<WaterFlowLayoutInfo>& info)
 {
-    if (info.segmentTails_.empty()) {
+    if (info->segmentTails_.empty()) {
         return false;
     }
-    if (info.childrenCount_ - 1 != info.segmentTails_.back()) {
+    if (info->childrenCount_ - 1 != info->segmentTails_.back()) {
         TAG_LOGW(AceLogTag::ACE_WATERFLOW,
             "Children count = %{public}d and doesn't match the number provided in Sections, which is %{public}d.",
-            info.childrenCount_, info.segmentTails_.back() + 1);
+            info->childrenCount_, info->segmentTails_.back() + 1);
         return false;
     }
     return true;
@@ -51,8 +51,8 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 {
     wrapper_ = wrapper;
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
-    info_.axis_ = axis_ = props->GetAxis();
-    auto [idealSize, matchChildren] = PreMeasureSelf();
+    info_->axis_ = axis_ = props->GetAxis();
+    auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
 
     Init(idealSize);
     if (!IsDataValid(info_)) {
@@ -64,12 +64,12 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
 
-    if (info_.jumpIndex_ != EMPTY_JUMP_INDEX) {
-        MeasureOnJump(info_.jumpIndex_);
-        info_.jumpIndex_ = EMPTY_JUMP_INDEX;
-    } else if (info_.targetIndex_) {
-        MeasureToTarget(*info_.targetIndex_);
-        info_.targetIndex_.reset();
+    if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+        MeasureOnJump(info_->jumpIndex_);
+        info_->jumpIndex_ = EMPTY_JUMP_INDEX;
+    } else if (info_->targetIndex_) {
+        MeasureToTarget(*info_->targetIndex_);
+        info_->targetIndex_.reset();
     } else {
         MeasureOnOffset();
     }
@@ -77,7 +77,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     if (matchChildren) {
         PostMeasureSelf(idealSize);
     }
-    info_.lastMainSize_ = mainSize_;
+    info_->lastMainSize_ = mainSize_;
 
     wrapper_->SetCacheCount(props->GetCachedCountValue(1));
 }
@@ -104,7 +104,7 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     auto isRtl = layoutDirection == TextDirection::RTL && axis_ == Axis::VERTICAL;
     // prepare crossPos
     for (size_t i = 0; i < segmentCnt; ++i) {
-        float pos = ((axis_ == Axis::VERTICAL) ? info_.margins_[i].left : info_.margins_[i].top).value_or(0.0f);
+        float pos = ((axis_ == Axis::VERTICAL) ? info_->margins_[i].left : info_->margins_[i].top).value_or(0.0f);
         for (const auto& len : itemsCrossSize_[i]) {
             crossPos[i].push_back(!isRtl ? pos : crossSize - pos - len);
             pos += len + crossGaps_[i];
@@ -112,13 +112,13 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     }
 
     bool isReverse = props->IsReverse();
-    for (int32_t i = info_.startIndex_; i <= info_.endIndex_; ++i) {
-        LayoutItem(i, crossPos[info_.GetSegment(i)][info_.itemInfos_[i].crossIdx], initialOffset, isReverse);
+    for (int32_t i = info_->startIndex_; i <= info_->endIndex_; ++i) {
+        LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
-    wrapper_->SetActiveChildRange(info_.startIndex_, info_.endIndex_);
+    wrapper_->SetActiveChildRange(info_->startIndex_, info_->endIndex_);
 
     // for compatibility
-    info_.firstIndex_ = info_.startIndex_;
+    info_->firstIndex_ = info_->startIndex_;
 }
 
 namespace {
@@ -128,21 +128,21 @@ namespace {
  * @param info WaterFlowLayoutInfo
  * @return current StartItem's offset relative to the viewport.
  */
-float PrepareJump(WaterFlowLayoutInfo& info)
+float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
 {
-    if (info.endIndex_ == -1) {
+    if (info->endIndex_ == -1) {
         // implies that LayoutInfo has already been reset, no need to jump
         return 0.0f;
     }
-    info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
-    info.align_ = ScrollAlign::START;
-    float itemOffset = (info.itemInfos_.size() <= static_cast<size_t>(info.startIndex_))
-                           ? info.storedOffset_
-                           : info.currentOffset_ + info.itemInfos_[info.startIndex_].mainOffset;
+    info->jumpIndex_ = std::min(info->startIndex_, info->childrenCount_ - 1);
+    info->align_ = ScrollAlign::START;
+    float itemOffset = (info->itemInfos_.size() <= static_cast<size_t>(info->startIndex_))
+                           ? info->storedOffset_
+                           : info->currentOffset_ + info->itemInfos_[info->startIndex_].mainOffset;
 
-    info.startIndex_ = 0;
-    info.endIndex_ = -1;
-    info.currentOffset_ = 0.0f;
+    info->startIndex_ = 0;
+    info->endIndex_ = -1;
+    info->currentOffset_ = 0.0f;
 
     return itemOffset;
 }
@@ -150,36 +150,36 @@ float PrepareJump(WaterFlowLayoutInfo& info)
 
 void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
-    info_.childrenCount_ = wrapper_->GetTotalChildCount();
-    if (info_.childrenCount_ == 0) {
+    info_->childrenCount_ = wrapper_->GetTotalChildCount();
+    if (info_->childrenCount_ == 0) {
         return;
     }
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
-        if (info_.margins_.empty()) {
+        if (info_->margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
             postJumpOffset_ = PrepareJump(info_);
-            info_.InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
+            info_->InitMargins(sections, constraint->scaleProperty, constraint->percentReference.Width());
         }
         SegmentInit(sections, frameSize);
-        if (info_.segmentTails_.empty()) {
-            info_.InitSegments(sections, 0);
+        if (info_->segmentTails_.empty()) {
+            info_->InitSegments(sections, 0);
         }
     } else {
         RegularInit(frameSize);
-        if (info_.footerIndex_ >= 0) {
+        if (info_->footerIndex_ >= 0) {
             InitFooter(frameSize.CrossSize(axis_));
         }
     }
 
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
-        if (updateIdx <= info_.endIndex_) {
+        if (updateIdx <= info_->endIndex_) {
             postJumpOffset_ = PrepareJump(info_);
         }
-        info_.ClearCacheAfterIndex(updateIdx - 1);
+        info_->ClearCacheAfterIndex(updateIdx - 1);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
     }
@@ -207,7 +207,7 @@ void WaterFlowSegmentedLayout::SegmentInit(
             std::swap(crossGaps_[i], mainGaps_[i]);
         }
 
-        const auto& margin = info_.margins_[i];
+        const auto& margin = info_->margins_[i];
         float crossSize = frameSize.CrossSize(axis_) - (axis_ == Axis::VERTICAL ? margin.Width() : margin.Height());
         int32_t crossCnt = options[i].crossCount.value_or(1);
         itemsCrossSize_[i].resize(crossCnt);
@@ -237,10 +237,10 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
     std::pair<std::vector<double>, bool> cross;
     if (axis_ == Axis::VERTICAL) {
         cross = ParseTemplateArgs(
-            WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGaps_[0], info_.childrenCount_);
+            WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGaps_[0], info_->childrenCount_);
     } else {
         cross = ParseTemplateArgs(
-            WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGaps_[0], info_.childrenCount_);
+            WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGaps_[0], info_->childrenCount_);
     }
     crossLens = cross.first;
     if (crossLens.empty()) {
@@ -252,18 +252,18 @@ void WaterFlowSegmentedLayout::RegularInit(const SizeF& frameSize)
 
     itemsCrossSize_ = { {} };
 
-    if (crossLens.size() < info_.items_[0].size()) {
-        auto it = info_.items_[0].find(crossLens.size());
-        info_.items_[0].erase(it, info_.items_[0].end());
+    if (crossLens.size() < info_->items_[0].size()) {
+        auto it = info_->items_[0].find(crossLens.size());
+        info_->items_[0].erase(it, info_->items_[0].end());
     }
     int32_t index = 0;
     for (const auto& len : crossLens) {
         itemsCrossSize_[0].push_back(len);
-        info_.items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
+        info_->items_[0].try_emplace(index, std::map<int32_t, std::pair<float, float>>());
         ++index;
     }
-    info_.margins_.resize(1);
-    info_.segmentTails_ = { (info_.footerIndex_ >= 0) ? info_.childrenCount_ - 2 : info_.childrenCount_ - 1 };
+    info_->margins_.resize(1);
+    info_->segmentTails_ = { (info_->footerIndex_ >= 0) ? info_->childrenCount_ - 2 : info_->childrenCount_ - 1 };
 }
 
 void WaterFlowSegmentedLayout::InitFooter(float crossSize)
@@ -271,24 +271,24 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
     mainGaps_.emplace_back(0.0f);
     itemsCrossSize_.emplace_back(std::vector<float> { crossSize });
 
-    if (info_.items_.size() == 1) {
-        info_.items_.emplace_back();
-        info_.items_.back().try_emplace(0);
+    if (info_->items_.size() == 1) {
+        info_->items_.emplace_back();
+        info_->items_.back().try_emplace(0);
     }
-    info_.margins_.emplace_back();
-    info_.segmentTails_.emplace_back(info_.childrenCount_ - 1);
+    info_->margins_.emplace_back();
+    info_->segmentTails_.emplace_back(info_->childrenCount_ - 1);
 
-    if (info_.footerIndex_ != info_.childrenCount_ - 1) {
-        info_.footerIndex_ = std::min(info_.footerIndex_, info_.childrenCount_ - 1);
-        info_.ClearCacheAfterIndex(info_.footerIndex_ - 1);
+    if (info_->footerIndex_ != info_->childrenCount_ - 1) {
+        info_->footerIndex_ = std::min(info_->footerIndex_, info_->childrenCount_ - 1);
+        info_->ClearCacheAfterIndex(info_->footerIndex_ - 1);
         // re-insert at the end
-        auto footer = wrapper_->GetOrCreateChildByIndex(info_.footerIndex_);
+        auto footer = wrapper_->GetOrCreateChildByIndex(info_->footerIndex_);
         auto waterFlow = wrapper_->GetHostNode();
-        waterFlow->RemoveChildAtIndex(info_.footerIndex_);
+        waterFlow->RemoveChildAtIndex(info_->footerIndex_);
         footer->GetHostNode()->MountToParent(waterFlow);
         footer->SetActive(false);
-        info_.segmentCache_.erase(info_.footerIndex_);
-        info_.footerIndex_ = info_.childrenCount_ - 1;
+        info_->segmentCache_.erase(info_->footerIndex_);
+        info_->footerIndex_ = info_->childrenCount_ - 1;
     }
 }
 
@@ -310,62 +310,62 @@ float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, i
 
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
-    bool forward = LessOrEqual(info_.currentOffset_ - info_.prevOffset_, 0.0f) || info_.endIndex_ == -1;
+    bool forward = LessOrEqual(info_->currentOffset_ - info_->prevOffset_, 0.0f) || info_->endIndex_ == -1;
     if (forward) {
-        Fill(info_.endIndex_ + 1);
+        Fill(info_->endIndex_ + 1);
     }
 
-    int32_t oldStart = info_.startIndex_;
-    info_.Sync(mainSize_, overScroll_);
+    int32_t oldStart = info_->startIndex_;
+    info_->Sync(mainSize_, overScroll_);
 
     if (!forward) {
         // measure appearing items when scrolling upwards
         auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-        for (int32_t i = info_.startIndex_; i < oldStart; ++i) {
-            MeasureItem(props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, info_.GetSegment(i), i));
+        for (int32_t i = info_->startIndex_; i < oldStart; ++i) {
+            MeasureItem(props, i, info_->itemInfos_[i].crossIdx, GetUserDefHeight(sections_, info_->GetSegment(i), i));
         }
     }
 }
 
 void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 {
-    if (jumpIdx >= info_.childrenCount_) {
+    if (jumpIdx >= info_->childrenCount_) {
         return;
     }
     if (jumpIdx == LAST_ITEM) {
-        jumpIdx = info_.childrenCount_ - 1;
+        jumpIdx = info_->childrenCount_ - 1;
     }
-    if (static_cast<size_t>(jumpIdx) >= info_.itemInfos_.size()) {
+    if (static_cast<size_t>(jumpIdx) >= info_->itemInfos_.size()) {
         // prepare items
         MeasureToTarget(jumpIdx);
     }
     // solve offset
-    const auto& item = info_.itemInfos_[jumpIdx];
-    if (info_.align_ == ScrollAlign::AUTO) {
-        info_.align_ = TransformAutoScroll(item);
+    const auto& item = info_->itemInfos_[jumpIdx];
+    if (info_->align_ == ScrollAlign::AUTO) {
+        info_->align_ = TransformAutoScroll(item);
     }
-    info_.currentOffset_ = SolveJumpOffset(item) + postJumpOffset_;
+    info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_;
 
     Fill(jumpIdx);
-    info_.Sync(mainSize_, false);
+    info_->Sync(mainSize_, false);
 
     // only if range [startIndex, jumpIdx) isn't measured (used user-defined size)
     if (!sections_) {
         return;
     }
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-    for (int32_t i = info_.startIndex_; i < jumpIdx; ++i) {
-        auto seg = info_.GetSegment(i);
+    for (int32_t i = info_->startIndex_; i < jumpIdx; ++i) {
+        auto seg = info_->GetSegment(i);
         if (sections_->GetSectionInfo()[seg].onGetItemMainSizeByIndex) {
-            MeasureItem(props, i, info_.itemInfos_[i].crossIdx, GetUserDefHeight(sections_, seg, i));
+            MeasureItem(props, i, info_->itemInfos_[i].crossIdx, GetUserDefHeight(sections_, seg, i));
         }
     }
 }
 
 ScrollAlign WaterFlowSegmentedLayout::TransformAutoScroll(const WaterFlowLayoutInfo::ItemInfo& item) const
 {
-    bool isAbove = LessNotEqual(info_.currentOffset_ + item.mainOffset, 0.0f);
-    bool isBelow = GreatNotEqual(info_.currentOffset_ + item.mainOffset + item.mainSize, mainSize_);
+    bool isAbove = LessNotEqual(info_->currentOffset_ + item.mainOffset, 0.0f);
+    bool isBelow = GreatNotEqual(info_->currentOffset_ + item.mainOffset + item.mainSize, mainSize_);
     if (isAbove && isBelow) {
         // possible when the item is larger than viewport
         return ScrollAlign::NONE;
@@ -381,8 +381,8 @@ ScrollAlign WaterFlowSegmentedLayout::TransformAutoScroll(const WaterFlowLayoutI
 
 float WaterFlowSegmentedLayout::SolveJumpOffset(const WaterFlowLayoutInfo::ItemInfo& item) const
 {
-    float offset = info_.currentOffset_;
-    switch (info_.align_) {
+    float offset = info_->currentOffset_;
+    switch (info_->align_) {
         case ScrollAlign::START:
             offset = -item.mainOffset;
             break;
@@ -404,9 +404,9 @@ float WaterFlowSegmentedLayout::SolveJumpOffset(const WaterFlowLayoutInfo::ItemI
 void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-    targetIdx = std::min(targetIdx, info_.childrenCount_ - 1);
-    for (int32_t i = static_cast<int32_t>(info_.itemInfos_.size()); i <= targetIdx; ++i) {
-        int32_t seg = info_.GetSegment(i);
+    targetIdx = std::min(targetIdx, info_->childrenCount_ - 1);
+    for (int32_t i = static_cast<int32_t>(info_->itemInfos_.size()); i <= targetIdx; ++i) {
+        int32_t seg = info_->GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = GetUserDefHeight(sections_, seg, i);
         if (itemHeight < 0.0f) {
@@ -415,25 +415,25 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx)
                 itemHeight = GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_);
             }
         }
-        info_.RecordItem(i, position, itemHeight);
+        info_->RecordItem(i, position, itemHeight);
     }
 }
 
 void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
-    for (int32_t i = startIdx; i < info_.childrenCount_; ++i) {
-        auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[info_.GetSegment(i)]);
-        if (GreatOrEqual(position.startMainPos + info_.currentOffset_, mainSize_)) {
+    for (int32_t i = startIdx; i < info_->childrenCount_; ++i) {
+        auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[info_->GetSegment(i)]);
+        if (GreatOrEqual(position.startMainPos + info_->currentOffset_, mainSize_)) {
             break;
         }
-        float itemHeight = GetUserDefHeight(sections_, info_.GetSegment(i), i);
+        float itemHeight = GetUserDefHeight(sections_, info_->GetSegment(i), i);
         auto item = MeasureItem(props, i, position.crossIndex, itemHeight);
         if (!item) {
             continue;
         }
-        if (info_.itemInfos_.size() <= static_cast<size_t>(i)) {
-            info_.RecordItem(i, position, GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_));
+        if (info_->itemInfos_.size() <= static_cast<size_t>(i)) {
+            info_->RecordItem(i, position, GetMainAxisSize(item->GetGeometryNode()->GetMarginFrameSize(), axis_));
         }
     }
 }
@@ -457,26 +457,13 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
                                                                   : CalcSize(CalcLength(userDefMainSize), crossSize));
     }
     item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemsCrossSize_[info_.GetSegment(idx)][crossIdx], mainSize_, axis_ }, props, item));
+        { itemsCrossSize_[info_->GetSegment(idx)][crossIdx], mainSize_, axis_ }, props, item));
     return item;
-}
-
-std::pair<SizeF, bool> WaterFlowSegmentedLayout::PreMeasureSelf()
-{
-    auto props = wrapper_->GetLayoutProperty();
-    auto size = CreateIdealSize(props->GetLayoutConstraint().value(), axis_, props->GetMeasureType(), true);
-    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(size, axis_));
-    if (!matchChildren) {
-        wrapper_->GetGeometryNode()->SetFrameSize(size);
-    }
-    MinusPaddingToSize(props->CreatePaddingAndBorder(), size);
-    wrapper_->GetGeometryNode()->SetContentSize(size);
-    return { size, matchChildren };
 }
 
 void WaterFlowSegmentedLayout::PostMeasureSelf(SizeF size)
 {
-    mainSize_ = info_.maxHeight_;
+    mainSize_ = info_->maxHeight_;
     size.SetMainSize(mainSize_, axis_);
     auto props = wrapper_->GetLayoutProperty();
     AddPaddingToSize(props->CreatePaddingAndBorder(), size);
@@ -485,8 +472,8 @@ void WaterFlowSegmentedLayout::PostMeasureSelf(SizeF size)
 
 void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const OffsetF& padding, bool isReverse)
 {
-    const auto& item = info_.itemInfos_[idx];
-    auto mainOffset = item.mainOffset + info_.currentOffset_;
+    const auto& item = info_->itemInfos_[idx];
+    auto mainOffset = item.mainOffset + info_->currentOffset_;
     if (isReverse) {
         mainOffset = mainSize_ - item.mainSize - mainOffset;
     }
@@ -502,8 +489,8 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     }
 
     // recode restore info
-    if (idx == info_.startIndex_) {
-        info_.storedOffset_ = mainOffset;
+    if (idx == info_->startIndex_) {
+        info_->storedOffset_ = mainOffset;
     }
 }
 } // namespace OHOS::Ace::NG

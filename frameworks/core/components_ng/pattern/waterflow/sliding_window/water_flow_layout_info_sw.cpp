@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/waterflow/sliding_window/water_flow_layout_info_sw.h"
 
 #include <algorithm>
+#include <cstdint>
 
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::SyncRange()
@@ -28,15 +29,15 @@ void WaterFlowLayoutInfoSW::SyncRange()
     }
 }
 
-float WaterFlowLayoutInfoSW::DistanceToTop(size_t item, float mainGap) const
+float WaterFlowLayoutInfoSW::DistanceToTop(int32_t itemIdx, float mainGap) const
 {
-    if (!idxToLane_.count(item)) {
+    if (!idxToLane_.count(itemIdx)) {
         return 0.0f;
     }
-    const auto& lane = lanes_[idxToLane_[item]];
+    const auto& lane = lanes_[idxToLane_.at(itemIdx)];
     float dist = lane.startPos;
     for (const auto& item : lane.items_) {
-        if (item.idx == item) {
+        if (item.idx == itemIdx) {
             break;
         }
         dist += item.mainSize + mainGap;
@@ -44,19 +45,23 @@ float WaterFlowLayoutInfoSW::DistanceToTop(size_t item, float mainGap) const
     return dist;
 }
 
-float WaterFlowLayoutInfoSW::DistanceToBottom(size_t item, float mainSize, float mainGap) const
+float WaterFlowLayoutInfoSW::DistanceToBottom(int32_t itemIdx, float mainSize, float mainGap) const
 {
-    if (!idxToLane_.count(item)) {
+    if (!idxToLane_.count(itemIdx)) {
         return 0.0f;
     }
-    const auto& lane = lanes_[idxToLane_[item]];
+    const auto& lane = lanes_[idxToLane_.at(itemIdx)];
     float dist = mainSize - lane.endPos;
     for (const auto& item : lane.items_) {
-        if (item.idx == item) {
+        if (item.idx == itemIdx) {
             break;
         }
         dist += item.mainSize + mainGap;
     }
     return dist;
+}
+float WaterFlowLayoutInfoSW::offset() const
+{
+    return lanes_[0].startPos;
 }
 } // namespace OHOS::Ace::NG

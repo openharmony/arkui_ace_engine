@@ -157,6 +157,38 @@ float WaterFlowLayoutInfo::GetStartMainPos(int32_t crossIndex, int32_t itemIndex
     return result;
 }
 
+OverScrollOffset WaterFlowLayoutInfo::GetOverScrolledDelta(float delta) const
+{
+    OverScrollOffset offset = { 0, 0 };
+    if (startIndex_ == 0) {
+        auto startPos = currentOffset_;
+        auto newStartPos = startPos + delta;
+        if (startPos > 0 && newStartPos > 0) {
+            offset.start = delta;
+        }
+        if (startPos > 0 && newStartPos <= 0) {
+            offset.start = -startPos;
+        }
+        if (startPos <= 0 && newStartPos > 0) {
+            offset.start = newStartPos;
+        }
+    }
+    if (itemEnd_) {
+        auto endPos = currentOffset_ + maxHeight_;
+        auto newEndPos = endPos + delta;
+        if (endPos < lastMainSize_ && newEndPos < lastMainSize_) {
+            offset.end = delta;
+        }
+        if (endPos < lastMainSize_ && newEndPos >= lastMainSize_) {
+            offset.end = lastMainSize_ - endPos;
+        }
+        if (endPos >= lastMainSize_ && newEndPos < lastMainSize_) {
+            offset.end = newEndPos - lastMainSize_;
+        }
+    }
+    return offset;
+}
+
 bool WaterFlowLayoutInfo::IsAllCrossReachEnd(float mainSize) const
 {
     bool result = true;
@@ -498,39 +530,57 @@ void WaterFlowLayoutInfo::PrintWaterFlowItems() const
     }
 }
 
-float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item) const
+void WaterFlowLayoutInfo::UpdateOffset(float delta)
 {
-    float targetPosition = 0.0f;
+    prevOffset_ = currentOffset_;
+    currentOffset_ += delta;
+}
+
+float WaterFlowLayoutInfo::CalcTargetPosition(int32_t idx, int32_t crossIdx) const
+{
+    auto item = items_[GetSegment(idx)].at(crossIdx).at(idx);
+    float res = 0.0f;
     ScrollAlign align = align_;
     switch (align) {
         case ScrollAlign::START:
-            targetPosition = -item.first;
+            res = item.first;
             break;
         case ScrollAlign::END:
-            targetPosition = lastMainSize_ - (item.first + item.second);
+            res = -(lastMainSize_ - (item.first + item.second));
             break;
         case ScrollAlign::AUTO:
             if (currentOffset_ + item.first < 0) {
-                targetPosition = -item.first;
+                res = item.first;
             } else if (currentOffset_ + item.first + item.second > lastMainSize_) {
-                targetPosition = lastMainSize_ - (item.first + item.second);
+                res = -(lastMainSize_ - (item.first + item.second));
             } else {
-                targetPosition = currentOffset_;
+                res = -currentOffset_;
             }
             break;
         case ScrollAlign::CENTER:
-            targetPosition = -item.first + (lastMainSize_ - item.second) * HALF;
+            res = -(-item.first + (lastMainSize_ - item.second) / 2);
             break;
         default:
             break;
     }
-    return targetPosition;
+    return res;
+}
+bool WaterFlowLayoutInfo::OutOfBounds() const
+{
+    bool outOfStart = itemStart_ && Positive(currentOffset_);
+    bool outOfEnd = offsetEnd_ && LessNotEqual(currentOffset_ + maxHeight_, lastMainSize_);
+    return outOfStart || outOfEnd;
 }
 
-void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
+float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
 {
-    currentOffset_ = JumpToTargetAlign(item);
-    align_ = ScrollAlign::START;
-    jumpIndex_ = EMPTY_JUMP_INDEX;
+    float res = 0;
+    if (itemStart_) {
+        res = offset() + delta;
+    }
+    if (offsetEnd_) {
+        res = mainSize - (GetMaxMainHeight() + offset() - delta);
+    }
+    return res;
 }
 } // namespace OHOS::Ace::NG
