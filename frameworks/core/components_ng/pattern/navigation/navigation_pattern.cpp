@@ -46,14 +46,14 @@ namespace {
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 
 void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDestinationState state,
-    const RefPtr<NavDestinationContext>& context, std::optional<NavDestinationInfo>& info)
+    const RefPtr<NavDestinationContext>& context, bool isFrom, std::optional<NavDestinationInfo>& info)
 {
     if (!context) {
         info.reset();
         return;
     }
 
-    int32_t index = context->GetIndex();
+    int32_t index = isFrom ? context->GetPreIndex() : context->GetIndex();
     std::string navDestinationId = std::to_string(context->GetNavDestinationId());
     std::string name;
     napi_value param = nullptr;
@@ -220,6 +220,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         if (preDestination) {
             auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
             preContext_ = pattern->GetNavDestinationContext();
+            preContext_->SetPreIndex(preStackSize_ - 1);
         }
     }
     UpdateNavPathList();
@@ -1680,8 +1681,8 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     std::string navigationId = host->GetInspectorIdValue("");
     std::optional<NavDestinationInfo> fromInfo;
     std::optional<NavDestinationInfo> toInfo;
-    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_HIDDEN, from, fromInfo);
-    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, toInfo);
+    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_HIDDEN, from, true, fromInfo);
+    BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, false, toInfo);
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(
         std::move(fromInfo), std::move(toInfo), operation);
 }
