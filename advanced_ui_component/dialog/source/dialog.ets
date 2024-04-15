@@ -763,7 +763,7 @@ struct CustomDialogContentComponent {
           Divider()
             .width($r('sys.float.alert_divider_width'))
             .height($r('sys.float.alert_divider_height'))
-            .color($r('sys.color.alert_divider_color'))
+            .color(this.getDividerColor())
             .vertical(true)
             .margin({
               left: $r('sys.float.alert_button_horizontal_space'),
@@ -809,6 +809,24 @@ struct CustomDialogContentComponent {
       this.titleHeight = getNumberByResource('alert_title_secondary_height');
     }
     this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.getButtonsHeight()}vp)`;
+  }
+
+  /**
+   * get divider color
+   *
+   * @returns divider color
+   */
+  private getDividerColor(): ResourceColor {
+    if (!this.buttons || this.buttons.length === 0 || !getNumberByResource('dialog_divider_show')) {
+      return Color.Transparent;
+    }
+
+    if (this.buttons[0].buttonStyle !== ButtonStyleMode.TEXTUAL ||
+      this.buttons[HORIZON_BUTTON_MAX_COUNT - 1].buttonStyle !== ButtonStyleMode.TEXTUAL) {
+      return Color.Transparent;
+    } else {
+      return $r('sys.color.alert_divider_color');
+    }
   }
 
   /**
