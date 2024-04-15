@@ -741,6 +741,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::CreateNativeWeakRef));
     nativeUtils->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNativeStrongRef"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::CreateNativeStrongRef));
+    nativeUtils->Set(vm, panda::StringRef::NewFromUtf8(vm, "parseResourceColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::ParseResourceColor));
+    nativeUtils->Set(vm, panda::StringRef::NewFromUtf8(vm, "blendColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::BlendColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nativeUtils"), nativeUtils);
 
     auto counter = panda::ObjectRef::New(vm);
