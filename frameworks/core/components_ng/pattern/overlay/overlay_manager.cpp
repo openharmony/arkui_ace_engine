@@ -660,14 +660,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
         overlayManager->ResetContextMenuDragHideFinished();
         return;
     }
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        root = overlayManager->FindWindowScene(menu);
-    }
-    CHECK_NULL_VOID(root);
-    overlayManager->BlurOverlayNode(menu);
-    root->RemoveChild(menu);
-    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
 }
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
@@ -1545,6 +1538,11 @@ void OverlayManager::DeleteMenu(int32_t targetId)
         auto id = Container::CurrentId();
         SubwindowManager::GetInstance()->ClearMenu();
         SubwindowManager::GetInstance()->ClearMenuNG(id, targetId);
+
+        if (node->GetParent()) {
+            RemoveEventColumn();
+            RemoveMenuNotInSubWindow(WeakClaim(RawPtr(node)), rootNodeWeak_, WeakClaim(this));
+        }
     }
     menuMap_.erase(it);
 }
@@ -4887,5 +4885,24 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
             }
         },
         option.GetOnFinishEvent());
+}
+
+void OverlayManager::RemoveMenuNotInSubWindow(
+    const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak)
+{
+    auto menu = menuWK.Upgrade();
+    CHECK_NULL_VOID(menu);
+    auto rootNode = rootWeak.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto overlayManager = overlayWeak.Upgrade();
+    CHECK_NULL_VOID(overlayManager);
+
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        rootNode = overlayManager->FindWindowScene(menu);
+    }
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(menu);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 } // namespace OHOS::Ace::NG
