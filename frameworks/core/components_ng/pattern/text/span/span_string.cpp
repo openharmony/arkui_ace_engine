@@ -158,13 +158,9 @@ void SpanString::MergeIntervals(std::list<RefPtr<SpanBase>>& spans)
 
 void SpanString::AddSpan(const RefPtr<SpanBase>& span)
 {
-    if (!span) {
+    if (!span || !CheckRange(span->GetStartIndex(), span->GetLength())) {
         return;
     }
-    if (!CheckRange(span->GetStartIndex(), span->GetLength())) {
-        return;
-    }
-    auto spans = spansMap_[span->GetSpanType()];
     auto start = span->GetStartIndex();
     auto end = span->GetEndIndex();
     if (spansMap_.find(span->GetSpanType()) == spansMap_.end()) {
@@ -172,12 +168,61 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
     }
+    RemoveSpan(start, span->GetLength(), span->GetSpanType());
+    auto spans = spansMap_[span->GetSpanType()];
     ApplyToSpans(span, { start, end }, SpanOperation::ADD);
     SplitInterval(spans, { start, end });
     spans.emplace_back(span);
     SortSpans(spans);
     MergeIntervals(spans);
     spansMap_[span->GetSpanType()] = spans;
+}
+
+void SpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
+{
+    if (!CheckRange(start, length)) {
+        return;
+    }
+    auto it = spansMap_.find(key);
+    if (it == spansMap_.end()) {
+        return;
+    }
+    auto spans = spansMap_[key];
+    auto end = start + length;
+
+    auto defaultSpan = GetDefaultSpan(key);
+    CHECK_NULL_VOID(defaultSpan);
+    defaultSpan->UpdateStartIndex(start);
+    defaultSpan->UpdateEndIndex(end);
+    ApplyToSpans(defaultSpan, { start, end }, SpanOperation::REMOVE);
+    SplitInterval(spans, { start, end });
+    SortSpans(spans);
+    MergeIntervals(spans);
+    if (spans.empty()) {
+        spansMap_.erase(key);
+    } else {
+        spansMap_[key] = spans;
+    }
+}
+
+RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
+{
+    switch (type) {
+        case SpanType::Font:
+            return MakeRefPtr<FontSpan>();
+        case SpanType::TextShadow:
+            return MakeRefPtr<TextShadowSpan>();
+        case SpanType::Gesture:
+            return MakeRefPtr<GestureSpan>();
+        case SpanType::Decoration:
+            return MakeRefPtr<DecorationSpan>();
+        case SpanType::BaselineOffset:
+            return MakeRefPtr<BaselineOffsetSpan>();
+        case SpanType::LetterSpacing:
+            return MakeRefPtr<LetterSpacingSpan>();
+        default:
+            return nullptr;
+    }
 }
 
 bool SpanString::CheckRange(int32_t start, int32_t length, bool allowLengthZero) const

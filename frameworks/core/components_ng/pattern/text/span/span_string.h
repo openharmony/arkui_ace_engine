@@ -55,6 +55,7 @@ public:
     bool operator==(const SpanString& other) const;
     const std::list<RefPtr<NG::SpanItem>>& GetSpanItems() const;
     void AddSpan(const RefPtr<SpanBase>& span);
+    void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
 
 protected:
@@ -68,6 +69,7 @@ protected:
     void SortSpans(std::list<RefPtr<SpanBase>>& spans);
     bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
     static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
+    static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;

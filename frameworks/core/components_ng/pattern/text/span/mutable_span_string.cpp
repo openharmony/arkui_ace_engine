@@ -39,40 +39,16 @@ std::wstring MutableSpanString::GetWideStringSubstr(const std::wstring& content,
     return content.substr(start);
 }
 
-void MutableSpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
-{
-    if (!CheckRange(start, length)) {
-        return;
-    }
-    auto it = spansMap_.find(key);
-    if (it == spansMap_.end()) {
-        return;
-    }
-    auto spans = spansMap_[key];
-    auto end = start + length;
-
-    auto defaultSpan = MutableSpanString::GetDefaultSpan(key);
-    CHECK_NULL_VOID(defaultSpan);
-    defaultSpan->UpdateStartIndex(start);
-    defaultSpan->UpdateEndIndex(end);
-    ApplyToSpans(defaultSpan, { start, end }, SpanOperation::REMOVE);
-    SplitInterval(spans, { start, end });
-    SortSpans(spans);
-    MergeIntervals(spans);
-    if (spans.empty()) {
-        spansMap_.erase(key);
-    } else {
-        spansMap_[key] = spans;
-    }
-}
-
 void MutableSpanString::RemoveSpans(int32_t start, int32_t length)
 {
     if (!CheckRange(start, length)) {
         return;
     }
-    for (const auto& item : spansMap_) {
-        RemoveSpan(start, length, item.first);
+    for (auto it = spansMap_.begin(); it != spansMap_.end();) {
+        auto spanKey = (*it).first;
+        auto nextIt = std::next(it);
+        RemoveSpan(start, length, spanKey);
+        it = nextIt;
     }
 }
 
@@ -287,15 +263,24 @@ bool MutableSpanString::InsertUseFrontStyle(int32_t start)
 
 void MutableSpanString::InsertString(int32_t start, const std::string& other)
 {
-    if (other.length() == 0 || start > GetLength()) {
+    auto len = GetLength();
+    if (other.length() == 0 || start > len) {
         return;
     }
-    bool useFrontStyle = InsertUseFrontStyle(start);
-    auto text = GetWideString();
     auto wOther = StringUtils::ToWstring(other);
+    auto text = GetWideString();
     text = GetWideStringSubstr(text, 0, start) + wOther + GetWideStringSubstr(text, start);
     SetString(StringUtils::ToString(text));
     auto otherLength = wOther.length();
+    if (len == 0) {
+        spans_.clear();
+        auto spanItem = MakeRefPtr<NG::SpanItem>();
+        spanItem->content = other;
+        spanItem->interval = { 0, otherLength};
+        spans_.emplace_back(spanItem);
+        return;
+    }
+    bool useFrontStyle = InsertUseFrontStyle(start);
     for (auto& span : spans_) {
         auto spanItemStart = span->interval.first;
         auto spanItemEnd = span->interval.second;
@@ -376,23 +361,5 @@ void MutableSpanString::InsertSpanString(int32_t start, const RefPtr<SpanString>
 void MutableSpanString::AppendSpanString(const RefPtr<SpanString>& spanString)
 {
     ReplaceSpanString(GetLength(), 0, spanString);
-}
-
-RefPtr<SpanBase> MutableSpanString::GetDefaultSpan(SpanType type)
-{
-    switch (type) {
-        case SpanType::Font:
-            return MakeRefPtr<FontSpan>();
-        case SpanType::TextShadow:
-            return MakeRefPtr<TextShadowSpan>();
-        case SpanType::Gesture:
-            return MakeRefPtr<GestureSpan>();
-        case SpanType::Decoration:
-            return MakeRefPtr<DecorationSpan>();
-        case SpanType::BaselineOffset:
-            return MakeRefPtr<BaselineOffsetSpan>();
-        case SpanType::LetterSpacing:
-            return MakeRefPtr<LetterSpacingSpan>();
-    }
 }
 } // namespace OHOS::Ace
