@@ -61,10 +61,7 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     frameNode_->SetOverlayNode(overlayNode);
     overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode_)));
     overlayNode->SetActive(true);
-
-    if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        UpdateAnalyzerOverlayLayout();
-    }
+    UpdateAnalyzerOverlayLayout();
 
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -175,9 +172,9 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
     overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-
-    auto renderContext = overlayNode->GetRenderContext();
-    if (renderContext) {
+    if (holder_ == ImageAnalyzerHolder::IMAGE) {
+        auto renderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
     }
 }
