@@ -343,7 +343,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     if (!innerEvent) {
         return;
     }
-    if (!g_eventReceiver) {
+    if (!g_eventReceiver && !g_compatibleEventReceiver) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event receiver is not register");
         return;
     }
@@ -380,7 +380,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     event.node = nodePtr;
     event.eventId = innerEventExtraParam->second->targetId;
     event.userData = innerEventExtraParam->second->userData;
-    if (ConvertEvent(innerEvent, &event)) {
+    if (g_eventReceiver && ConvertEvent(innerEvent, &event)) {
         event.targetId = innerEvent->nodeId;
         ArkUI_UIInputEvent uiEvent;
         if (eventType == NODE_TOUCH_EVENT) {
