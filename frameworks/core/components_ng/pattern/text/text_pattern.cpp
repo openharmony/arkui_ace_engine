@@ -68,6 +68,15 @@ const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 
 void TextPattern::OnAttachToFrameNode()
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
+            host->GetRenderContext()->UpdateClipEdge(true);
+        }
+    }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -347,7 +356,11 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetClipEdge().value_or(false)) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (renderContext->GetClipEdge().value_or(clip)) {
         if (localOffset.GetX() < textContentGlobalOffset.GetX()) {
             localOffset.SetX(textContentGlobalOffset.GetX());
         } else if (GreatOrEqual(localOffset.GetX(), textContentGlobalOffset.GetX() + contentRect_.Width())) {
@@ -667,7 +680,11 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
     CHECK_NULL_RETURN(host, false);
     PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
         static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
-    if (!renderContext->GetClipEdge().value_or(false) && overlayMod_) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (!renderContext->GetClipEdge().value_or(clip) && overlayMod_) {
         textContentRect = overlayMod_->GetBoundsRect();
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
@@ -2593,7 +2610,11 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(gestureHub, paintMethod);
     std::vector<DimensionRect> hotZoneRegions;
     DimensionRect hotZoneRegion;
-    if (!context->GetClipEdge().value_or(false)) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (!context->GetClipEdge().value_or(clip)) {
         CHECK_NULL_RETURN(paragraph_, paintMethod);
         RectF boundsRect = overlayMod_->GetBoundsRect();
         auto boundsWidth = contentRect_.GetX() + std::ceil(static_cast<float>(paragraph_->GetLongestLine()));
