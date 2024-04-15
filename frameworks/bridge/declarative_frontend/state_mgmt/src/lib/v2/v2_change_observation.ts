@@ -23,7 +23,7 @@
 
 class ObserveV2 {
   // meta data about decorated variable inside prototype
-  public static readonly V3_DECO_META = Symbol('__v3_deco_meta__');
+  public static readonly V2_DECO_META = Symbol('__v2_deco_meta__');
 
   public static readonly SYMBOL_REFS = Symbol('__use_refs__');
   public static readonly ID_REFS = Symbol('__id_refs__');
@@ -82,8 +82,8 @@ class ObserveV2 {
   }
 
   // return true given value is @observed object
-  public static IsObservedObjectV3(value: any): boolean {
-    return (value && typeof (value) === 'object' && value[ObserveV2.V3_DECO_META]);
+  public static IsObservedObjectV2(value: any): boolean {
+    return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
   }
 
   // At the start of observeComponentCreation or
@@ -724,7 +724,7 @@ class ObserveV2 {
    */
   public static addVariableDecoMeta(proto: Object, varName: string, deco: string): void {
     // add decorator meta data
-    const meta = proto[ObserveV2.V3_DECO_META] ??= {};
+    const meta = proto[ObserveV2.V2_DECO_META] ??= {};
     meta[varName] = {};
     meta[varName].deco = deco;
 
@@ -742,7 +742,7 @@ class ObserveV2 {
 
   public static addParamVariableDecoMeta(proto: Object, varName: string, deco?: string, deco2?: string): void {
     // add decorator meta data
-    const meta = proto[ObserveV2.V3_DECO_META] ??= {};
+    const meta = proto[ObserveV2.V2_DECO_META] ??= {};
     meta[varName] ??= {};
     if (deco) { 
       meta[varName].deco = deco;
@@ -764,7 +764,7 @@ class ObserveV2 {
 
 
   public static usesV3Variables(proto: Object): boolean {
-    return (proto && typeof proto === 'object' && proto[ObserveV2.V3_DECO_META]);
+    return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
   }
 } // class ObserveV2
 
@@ -796,8 +796,8 @@ const trackInternal = (
     enumerable: true
   });
   // this marks the proto as having at least one @track property inside 
-  // used by IsObservedObjectV3
-  target[ObserveV2.V3_DECO_META] ??= {};
+  // used by IsObservedObjectV2
+  target[ObserveV2.V2_DECO_META] ??= {};
 }; // trackInternal
 
 

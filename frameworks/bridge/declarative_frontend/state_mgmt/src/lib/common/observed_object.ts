@@ -203,7 +203,7 @@ class SubscribableHandler {
         return this.owningProperties_.size;
         break;
       case ObserveV2.SYMBOL_REFS:
-      case ObserveV2.V3_DECO_META:
+      case ObserveV2.V2_DECO_META:
         // return result unmonitored
         return Reflect.get(target, property, receiver);
         break;

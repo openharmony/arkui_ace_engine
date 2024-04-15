@@ -41,7 +41,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         // Always use ID_REFS in ViewPU
         this[ObserveV2.ID_REFS] = {};
-      }
+    }
 
     public debugInfo__(): string {
         return `@ComponentV2 '${this.constructor.name}'[${this.id__()}]`;
@@ -116,7 +116,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
 
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-           ObserveV2.getObserve().startBind(this, elmtId);
+            ObserveV2.getObserve().startBind(this, elmtId);
 
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
@@ -348,4 +348,22 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return ''; // TODO DFX, read out META
     }
 
+    /**
+   * on first render create a new Instance of Repeat
+   * on re-render connect to existing instance
+   * @param arr
+   * @returns
+   */
+    public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
+        // factory is for future extensions, currently always return the same
+        const elmtId = this.getCurrentlyRenderedElmtId();
+        let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatV2<I>
+        if (!repeat) {
+            repeat = new __RepeatV2<I>(arr);
+            this.elmtId2Repeat_.set(elmtId, repeat);
+        } else {
+            repeat.updateArr(arr)
+        }
+        return repeat;
+    }
 }

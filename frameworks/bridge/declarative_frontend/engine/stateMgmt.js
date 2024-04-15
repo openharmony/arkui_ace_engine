@@ -2256,7 +2256,7 @@ class SubscribableHandler {
                 return this.owningProperties_.size;
                 break;
             case ObserveV2.SYMBOL_REFS:
-            case ObserveV2.V3_DECO_META:
+            case ObserveV2.V2_DECO_META:
                 // return result unmonitored
                 return Reflect.get(target, property, receiver);
                 break;
@@ -3786,25 +3786,6 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this.extraInfo_ = undefined;
-        /**
-         * on first render create a new Instance of Repeat
-         * on re-render connect to existing instance
-         * @param arr
-         * @returns
-         */
-        this.__mkRepeatAPI = (arr) => {
-            // factory is for future extensions, currently always return the same
-            const elmtId = this.getCurrentlyRenderedElmtId();
-            let repeat = this.elmtId2Repeat_.get(elmtId);
-            if (!repeat) {
-                repeat = new __Repeat(this, arr);
-                this.elmtId2Repeat_.set(elmtId, repeat);
-            }
-            else {
-                repeat.updateArr(arr);
-            }
-            return repeat;
-        };
         // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU/V2 object by given elmtId
@@ -4571,7 +4552,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       FIXME this expects the Map, Set patch to go in
      */
     checkIsSupportedValue(value) {
-        let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV3(value)) ||
+        let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value)) ||
             typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' ||
             value === undefined || value === null);
         if (!res) {
@@ -4592,7 +4573,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         FIXME this expects the Map, Set patch to go in
      */
     checkIsObject(value) {
-        let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV3(value)) ||
+        let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value)) ||
             value === undefined || value === null);
         if (!res) {
             errorReport.varValueCheckFailed({
@@ -5843,6 +5824,25 @@ class ViewPU extends PUV2ViewBase {
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
+        /**
+         * on first render create a new Instance of Repeat
+         * on re-render connect to existing instance
+         * @param arr
+         * @returns
+         */
+        this.__mkRepeatAPI = (arr) => {
+            // factory is for future extensions, currently always return the same
+            const elmtId = this.getCurrentlyRenderedElmtId();
+            let repeat = this.elmtId2Repeat_.get(elmtId);
+            if (!repeat) {
+                repeat = new __RepeatPU(this, arr);
+                this.elmtId2Repeat_.set(elmtId, repeat);
+            }
+            else {
+                repeat.updateArr(arr);
+            }
+            return repeat;
+        };
         // if set use the elmtId also as the ViewPU object's subscribable id.
         // these matching is requirement for updateChildViewById(elmtId) being able to
         // find the child ViewPU object by given elmtId
@@ -6972,8 +6972,8 @@ class ObserveV2 {
         return this.obsInstance_;
     }
     // return true given value is @observed object
-    static IsObservedObjectV3(value) {
-        return (value && typeof (value) === 'object' && value[ObserveV2.V3_DECO_META]);
+    static IsObservedObjectV2(value) {
+        return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
     }
     // At the start of observeComponentCreation or
     // MonitorV2 observeObjectAccess
@@ -7412,7 +7412,7 @@ class ObserveV2 {
         var _a;
         var _b;
         // add decorator meta data
-        const meta = (_a = proto[_b = ObserveV2.V3_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_b] = {});
+        const meta = (_a = proto[_b = ObserveV2.V2_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_b] = {});
         meta[varName] = {};
         meta[varName].deco = deco;
         // FIXME 
@@ -7428,7 +7428,7 @@ class ObserveV2 {
         var _a, _b;
         var _c;
         // add decorator meta data
-        const meta = (_a = proto[_c = ObserveV2.V3_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_c] = {});
+        const meta = (_a = proto[_c = ObserveV2.V2_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_c] = {});
         (_b = meta[varName]) !== null && _b !== void 0 ? _b : (meta[varName] = {});
         if (deco) {
             meta[varName].deco = deco;
@@ -7446,11 +7446,11 @@ class ObserveV2 {
         });
     }
     static usesV3Variables(proto) {
-        return (proto && typeof proto === 'object' && proto[ObserveV2.V3_DECO_META]);
+        return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
     }
 } // class ObserveV2
 // meta data about decorated variable inside prototype
-ObserveV2.V3_DECO_META = Symbol('__v3_deco_meta__');
+ObserveV2.V2_DECO_META = Symbol('__v2_deco_meta__');
 ObserveV2.SYMBOL_REFS = Symbol('__use_refs__');
 ObserveV2.ID_REFS = Symbol('__id_refs__');
 ObserveV2.MONITOR_REFS = Symbol('___monitor_refs_');
@@ -7652,8 +7652,8 @@ const trackInternal = (target, propertyKey) => {
         enumerable: true
     });
     // this marks the proto as having at least one @track property inside 
-    // used by IsObservedObjectV3
-    (_a = target[_b = ObserveV2.V3_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
+    // used by IsObservedObjectV2
+    (_a = target[_b = ObserveV2.V2_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
 }; // trackInternal
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -7687,7 +7687,7 @@ class VariableUtilV3 {
        */
     static initParam(target, attrName, newValue) {
         var _a;
-        const meta = (_a = target[ObserveV2.V3_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
+        const meta = (_a = target[ObserveV2.V2_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
         if (!meta || meta.deco !== '@param') {
             const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
             stateMgmtConsole.error(error);
@@ -7709,7 +7709,7 @@ class VariableUtilV3 {
     static updateParam(target, attrName, newValue) {
         var _a;
         // prevent update for @param @once
-        const meta = (_a = target[ObserveV2.V3_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
+        const meta = (_a = target[ObserveV2.V2_DECO_META]) === null || _a === void 0 ? void 0 : _a[attrName];
         if (!meta || meta.deco !== '@param') {
             const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
             stateMgmtConsole.error(error);
@@ -7744,7 +7744,7 @@ class ProvideConsumeUtilV3 {
         var _a;
         var _b;
         // add decorator meta data to prototype
-        const meta = (_a = proto[_b = ObserveV2.V3_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_b] = {});
+        const meta = (_a = proto[_b = ObserveV2.V2_DECO_META]) !== null && _a !== void 0 ? _a : (proto[_b] = {});
         // note: aliasName is the actual alias not the prefixed version
         meta[varName] = { 'deco': deco, 'aliasName': aliasName };
         // prefix to avoid name collisions with variable of same name as the alias!
@@ -7760,7 +7760,7 @@ class ProvideConsumeUtilV3 {
         });
     }
     static setupConsumeVarsV3(view) {
-        const meta = view && view[ObserveV2.V3_DECO_META];
+        const meta = view && view[ObserveV2.V2_DECO_META];
         if (!meta) {
             return;
         }
@@ -7788,7 +7788,7 @@ class ProvideConsumeUtilV3 {
         var _a;
         let checkView = view === null || view === void 0 ? void 0 : view.getParent();
         while (checkView) {
-            const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV2.V3_DECO_META];
+            const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV2.V2_DECO_META];
             if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
                 const aliasMeta = meta[searchingPrefixedAliasName];
                 const providedVarName = aliasMeta && (aliasMeta.deco === '@provide' ? aliasMeta.varName : undefined);
@@ -8170,6 +8170,25 @@ class ViewV2 extends PUV2ViewBase {
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
+        /**
+       * on first render create a new Instance of Repeat
+       * on re-render connect to existing instance
+       * @param arr
+       * @returns
+       */
+        this.__mkRepeatAPI = (arr) => {
+            // factory is for future extensions, currently always return the same
+            const elmtId = this.getCurrentlyRenderedElmtId();
+            let repeat = this.elmtId2Repeat_.get(elmtId);
+            if (!repeat) {
+                repeat = new __RepeatV2(arr);
+                this.elmtId2Repeat_.set(elmtId, repeat);
+            }
+            else {
+                repeat.updateArr(arr);
+            }
+            return repeat;
+        };
         
     }
     finalizeConstruction() {
@@ -8466,7 +8485,7 @@ function ObservedV2(BaseClass) {
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
     }
-    if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V3_DECO_META)) {
+    if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
         // not an error, suspicious of developer oversight
         stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is this intended? Check our application.`);
     }
@@ -8706,7 +8725,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 // implementation for existing state observation system
-class __RepeatItem {
+class __RepeatItemPU {
     constructor(owningView, initialItem, initialIndex) {
         this._observedItem = new ObservedPropertyPU(initialItem, owningView, "Repeat item");
         if (initialIndex !== undefined) {
@@ -8735,7 +8754,7 @@ class __RepeatItem {
 }
 // framework internal, deep observation 
 // implementation for deep observation 
-let __RepeatItemDeep = class __RepeatItemDeep {
+let __RepeatItemV2 = class __RepeatItemV2 {
     constructor(initialItem, initialIndex) {
         this.item = initialItem;
         this.index = initialIndex;
@@ -8751,13 +8770,13 @@ let __RepeatItemDeep = class __RepeatItemDeep {
 };
 __decorate([
     Trace
-], __RepeatItemDeep.prototype, "item", void 0);
+], __RepeatItemV2.prototype, "item", void 0);
 __decorate([
     Trace
-], __RepeatItemDeep.prototype, "index", void 0);
-__RepeatItemDeep = __decorate([
+], __RepeatItemV2.prototype, "index", void 0);
+__RepeatItemV2 = __decorate([
     ObservedV2
-], __RepeatItemDeep);
+], __RepeatItemV2);
 // helper
 class __RepeatDefaultKeyGen {
     // Return the same IDs for the same items
@@ -8790,12 +8809,10 @@ __RepeatDefaultKeyGen.weakMap_ = new WeakMap();
 __RepeatDefaultKeyGen.lastKey_ = 0;
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-class __Repeat {
-    constructor(owningView, arr) {
+class __RepeatV2 {
+    constructor(arr) {
         this.isVirtualScroll = false;
         this.key2Item_ = new Map();
-        //console.log(`Repeat.constructor`);
-        this.owningView_ = owningView;
         this.arr_ = arr !== null && arr !== void 0 ? arr : [];
         this.keyGenFunction_ = __RepeatDefaultKeyGen.func;
     }
@@ -8804,17 +8821,14 @@ class __Repeat {
         return this;
     }
     each(itemGenFunc) {
-        //console.log(`Repeat.each`)
         this.itemGenFunc_ = itemGenFunc;
         return this;
     }
     key(idGenFunc) {
-        //console.log(`Repeat.key`)
         this.keyGenFunction_ = idGenFunc !== null && idGenFunc !== void 0 ? idGenFunc : __RepeatDefaultKeyGen.func;
         return this;
     }
     virtualScroll() {
-        //console.log(`Repeat.virtualScroll`)
         this.isVirtualScroll = true;
         return this;
     }
@@ -8830,16 +8844,10 @@ class __Repeat {
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
         }
-        //console.log(`value2ids: ${JSON.stringify(Array.from(id2Item), null, 4)} .`)
         return key2Item;
     }
     mkRepeatItem(item, index) {
-        if (ObserveV2.IsObservedObjectV3(item)) {
-            return new __RepeatItemDeep(item, index);
-        }
-        else {
-            return new __RepeatItem(this.owningView_, item, index);
-        }
+        return new __RepeatItemV2(item, index);
     }
     render(isInitialRender) {
         if (!this.itemGenFunc_) {
@@ -8855,7 +8863,6 @@ class __Repeat {
         }
     }
     initialRenderNoneVirtual() {
-        //console.log(`Repeat.initialRenderNoneVirtual`)
         this.key2Item_ = this.genKeys();
         RepeatNative.startRender();
         let index = 0;
@@ -8871,7 +8878,6 @@ class __Repeat {
         
     }
     rerenderNoneVirtual() {
-        //console.log(`Repeat.rerenderNoneVirtual`)
         const oldKey2Item = this.key2Item_;
         this.key2Item_ = this.genKeys();
         // identify array items that have been deleted 
@@ -8945,6 +8951,17 @@ class __Repeat {
         // execute the ItemGen function
         this.itemGenFunc_(repeatItem);
         RepeatNative.createNewChildFinish(key);
+    }
+}
+// __Repeat implements ForEach with child re-use for both existing state observation
+// and deep observation , for non-virtual and virtual code paths (TODO)
+class __RepeatPU extends __RepeatV2 {
+    constructor(owningView, arr) {
+        super(arr);
+        this.owningView_ = owningView;
+    }
+    mkRepeatItem(item, index) {
+        return new __RepeatItemPU(this.owningView_, item, index);
     }
 }
 /*

@@ -44,7 +44,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected currentlyRenderedElmtIdStack_: Array<number> = new Array<number>();
 
   // Map elmtId -> Repeat instance in this ViewPU
-  private elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
+  protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
 
   private id_: number;
 
@@ -165,6 +165,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // that the View and thereby all properties
   // are about to be deleted
   abstract aboutToBeDeleted(): void;
+
   aboutToReuse(_: Object): void { }
   aboutToRecycle(): void { }
 
@@ -546,17 +547,5 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
    * @param arr
    * @returns
    */
-  public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
-    // factory is for future extensions, currently always return the same
-    const elmtId = this.getCurrentlyRenderedElmtId();
-    let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>
-    if (!repeat) {
-        repeat = new __Repeat<I>(this, arr);
-        this.elmtId2Repeat_.set(elmtId, repeat);
-    } else {
-        repeat.updateArr(arr)
-    }
-
-    return repeat;
-  }
+  abstract __mkRepeatAPI<I>(arr: Array<I>): RepeatAPI<I>;
 } // class PUV2ViewBase

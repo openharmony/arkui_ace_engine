@@ -313,7 +313,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    */
 
   protected checkIsSupportedValue(value: T): boolean {
-    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV3(value)) ||
+    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value)) ||
     typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean' ||
     value === undefined || value === null);
     if (!res) {
@@ -335,7 +335,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       FIXME this expects the Map, Set patch to go in
    */
   protected checkIsObject(value: T): boolean {
-    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV3(value)) ||
+    let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value)) ||
     value === undefined || value === null);
     if (!res) {
       errorReport.varValueCheckFailed({

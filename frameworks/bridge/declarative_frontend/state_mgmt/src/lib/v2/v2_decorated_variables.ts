@@ -31,7 +31,7 @@ class VariableUtilV3 {
        * @param newValue - update to new value
        */
     public static initParam<Z>(target: object, attrName: string, newValue: Z): void {
-      const meta = target[ObserveV2.V3_DECO_META]?.[attrName];
+      const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
       if (!meta || meta.deco !== '@param') {
         const error = `Use initParam(${attrName}) only to init @param. Internal error!`;
         stateMgmtConsole.error(error);
@@ -53,7 +53,7 @@ class VariableUtilV3 {
        */
     public static updateParam<Z>(target: object, attrName: string, newValue: Z): void {
       // prevent update for @param @once
-      const meta = target[ObserveV2.V3_DECO_META]?.[attrName];
+      const meta = target[ObserveV2.V2_DECO_META]?.[attrName];
       if (!meta || meta.deco !== '@param') {
         const error = `Use updateParm(${attrName}) only to update @param. Internal error!`;
         stateMgmtConsole.error(error);
@@ -90,7 +90,7 @@ class VariableUtilV3 {
      */
     public static addProvideConsumeVariableDecoMeta(proto: Object, varName: string, aliasName: string, deco: '@provide' | '@consume'): void {
       // add decorator meta data to prototype
-      const meta = proto[ObserveV2.V3_DECO_META] ??= {};
+      const meta = proto[ObserveV2.V2_DECO_META] ??= {};
       // note: aliasName is the actual alias not the prefixed version
       meta[varName] = { 'deco': deco, 'aliasName': aliasName };
   
@@ -110,7 +110,7 @@ class VariableUtilV3 {
     }
   
     public static setupConsumeVarsV3(view: ViewV2): boolean {
-      const meta = view && view[ObserveV2.V3_DECO_META];
+      const meta = view && view[ObserveV2.V2_DECO_META];
       if (!meta) {
         return;
       }
@@ -138,7 +138,7 @@ class VariableUtilV3 {
     private static findProvide(view: ViewV2, searchingPrefixedAliasName: string): [ViewV2, string] | undefined {
       let checkView : IView | undefined = view?.getParent();
       while (checkView) {
-        const meta = checkView.constructor?.prototype[ObserveV2.V3_DECO_META];
+        const meta = checkView.constructor?.prototype[ObserveV2.V2_DECO_META];
         if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
           const aliasMeta = meta[searchingPrefixedAliasName];
           const providedVarName: string | undefined = aliasMeta && (aliasMeta.deco === '@provide' ? aliasMeta.varName : undefined);

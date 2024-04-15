@@ -32,14 +32,14 @@ interface __IRepeatItemInternal<T> {
 interface __RepeatItemFactoryReturn<T> extends RepeatItem<T>, __IRepeatItemInternal<T> { }
 
 // implementation for existing state observation system
-class __RepeatItem<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
+class __RepeatItemPU<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 
     // ObservedPropertyPU is the framework class that implements @State, @Provide 
     // and App/LocalStorage properties
     private _observedItem: ObservedPropertyPU<T>;
     private _observedIndex?: ObservedPropertyPU<number>;
 
-    constructor(owningView: PUV2ViewBase, initialItem: T, initialIndex?: number) {
+    constructor(owningView: ViewPU, initialItem: T, initialIndex?: number) {
         this._observedItem = new ObservedPropertyPU<T>(initialItem, owningView, "Repeat item");
         if (initialIndex !== undefined) {
             this._observedIndex = new ObservedPropertyPU<number>(initialIndex, owningView, "Repeat index");
@@ -72,7 +72,7 @@ class __RepeatItem<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 // implementation for deep observation 
 
 @ObservedV2
-class __RepeatItemDeep<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
+class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
 
     constructor(initialItem: T, initialIndex?: number) {
         this.item = initialItem;
@@ -138,17 +138,14 @@ class __RepeatDefaultKeyGen {
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-class __Repeat<T> implements RepeatAPI<T> {
-    private owningView_ : PUV2ViewBase;
+class __RepeatV2<T> implements RepeatAPI<T> {
     private arr_: Array<T>;
     private itemGenFunc_?: RepeatItemGenFunc<T>;
     private keyGenFunction_?: RepeatKeyGenFunc<T>;
     private isVirtualScroll: boolean = false;
     private key2Item_: Map<string, __RepeatItemInfo<T>> = new Map<string, __RepeatItemInfo<T>>();
 
-    constructor(owningView: PUV2ViewBase, arr: Array<T>) {
-        //console.log(`Repeat.constructor`);
-        this.owningView_ = owningView;
+    constructor(arr: Array<T>) {
         this.arr_ = arr ?? [];
         this.keyGenFunction_ = __RepeatDefaultKeyGen.func;
     }
@@ -159,19 +156,16 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {
-        //console.log(`Repeat.each`)
         this.itemGenFunc_ = itemGenFunc;
         return this;
     }
 
     public key(idGenFunc: RepeatKeyGenFunc<T>): RepeatAPI<T> {
-        //console.log(`Repeat.key`)
         this.keyGenFunction_ = idGenFunc ?? __RepeatDefaultKeyGen.func;
         return this;
     }
 
     public virtualScroll(): RepeatAPI<T> {
-        //console.log(`Repeat.virtualScroll`)
         this.isVirtualScroll = true;
         return this;
     }
@@ -189,16 +183,11 @@ class __Repeat<T> implements RepeatAPI<T> {
             return this.genKeys();
             
         }
-        //console.log(`value2ids: ${JSON.stringify(Array.from(id2Item), null, 4)} .`)
         return key2Item;
     }
 
-    private mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
-        if (ObserveV2.IsObservedObjectV3(item)) {
-            return new __RepeatItemDeep(item as T, index);
-        } else {
-            return new __RepeatItem(this.owningView_, item, index);
-        }
+    protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
+        return new __RepeatItemV2(item as T, index);
     }
 
     public render(isInitialRender: boolean): void {
@@ -215,7 +204,6 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     private initialRenderNoneVirtual(): void {
-        //console.log(`Repeat.initialRenderNoneVirtual`)
         this.key2Item_ = this.genKeys();
 
         RepeatNative.startRender();
@@ -234,7 +222,6 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     private rerenderNoneVirtual(): void {
-        //console.log(`Repeat.rerenderNoneVirtual`)
         const oldKey2Item: Map<string, __RepeatItemInfo<T>> = this.key2Item_;
         this.key2Item_ = this.genKeys();
 
@@ -323,4 +310,19 @@ class __Repeat<T> implements RepeatAPI<T> {
         RepeatNative.createNewChildFinish(key);
     }
 
+}
+
+// __Repeat implements ForEach with child re-use for both existing state observation
+// and deep observation , for non-virtual and virtual code paths (TODO)
+class __RepeatPU<T> extends __RepeatV2<T> implements RepeatAPI<T> {
+    private owningView_ : ViewPU;
+
+    constructor(owningView: ViewPU, arr: Array<T>) {
+        super(arr);
+        this.owningView_ = owningView;
+    }
+
+    protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
+        return new __RepeatItemPU(this.owningView_, item, index);
+    }
 }

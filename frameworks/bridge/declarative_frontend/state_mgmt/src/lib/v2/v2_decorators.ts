@@ -47,7 +47,7 @@ function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
   }
 
 
-  if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V3_DECO_META)) {
+  if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
     // not an error, suspicious of developer oversight
     stateMgmtConsole.warn(`'@observed class ${BaseClass?.name}': no @track property inside. Is this intended? Check our application.`);
   }

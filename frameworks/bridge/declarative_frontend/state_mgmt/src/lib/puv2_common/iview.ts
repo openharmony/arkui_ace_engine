@@ -43,6 +43,7 @@ interface IView {
     // FIXME replace updateStateVarsOfChildByElmtId by new solution
     updateStateVarsOfChildByElmtId(elmtId, params: Object): void;
 
+    aboutToBeDeleted(): void;
     isDeleting() : boolean;
     setDeleting(): void;
     setDeleteStatusRecursively() : void;
