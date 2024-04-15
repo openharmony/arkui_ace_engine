@@ -19677,6 +19677,10 @@ class ArkSwiperComponent extends ArkComponent {
   nestedScroll(value) {
     throw new Error('Method not implemented.');
   }
+  indicatorInteractive(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
+    return this;
+  }
 }
 class SwiperNextMarginModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -20104,6 +20108,19 @@ class SwiperEnabledModifier extends ModifierWithKey {
   }
 }
 SwiperEnabledModifier.identity = Symbol('swiperenabled');
+class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetIndicatorInteractive(node);
+    } else {
+      getUINativeModule().swiper.setIndicatorInteractive(node, this.value);
+    }
+  }
+}
+SwiperIndicatorInteractiveModifier.identity = Symbol('indicatorInteractive');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {

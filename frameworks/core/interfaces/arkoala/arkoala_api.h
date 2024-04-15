@@ -1642,6 +1642,8 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*getSwiperShowIndicator)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperShowDisplayArrow)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperEffectMode)(ArkUINodeHandle node);
+    void (*setIndicatorInteractive)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*resetIndicatorInteractive)(ArkUINodeHandle node);
     ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
