@@ -66,7 +66,7 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (isContainerModal) {
                 auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                                   static_cast<float>(CONTENT_PADDING.ConvertToPx());
-                auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+                auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
                                   static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
                 wrapperOffset = OffsetF(newOffsetX, newOffsetY);
             }
@@ -114,7 +114,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
         if (isContainerModal) {
             auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                               static_cast<float>(CONTENT_PADDING.ConvertToPx());
-            auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+            auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
                               static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
             position -= OffsetF(newOffsetX, newOffsetY);
         }

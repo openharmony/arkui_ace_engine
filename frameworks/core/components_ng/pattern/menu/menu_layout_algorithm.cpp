@@ -518,7 +518,7 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
         wrapperOffset = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
-            static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+            static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx()));
         position -= wrapperOffset;
     }
 }
@@ -1555,7 +1555,9 @@ void MenuLayoutAlgorithm::LimitContainerModalMenuRect(double& rectWidth, double&
     auto containerOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                           static_cast<float>(CONTENT_PADDING.ConvertToPx());
-    auto containerOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto containerOffsetY = static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()) +
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
     rectWidth -= containerOffsetX;
@@ -1830,7 +1832,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     if (isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                           static_cast<float>(CONTENT_PADDING.ConvertToPx());
-        auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+        auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
         targetOffset_ -= OffsetF(newOffsetX, newOffsetY);
     } else {

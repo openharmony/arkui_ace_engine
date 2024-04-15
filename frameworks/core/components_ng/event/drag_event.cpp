@@ -675,7 +675,7 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     if (pipelineContext->HasFloatTitle()) {
         offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
-        offsetY -= static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx());
+        offsetY -= static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx());
     }
     return OffsetF(offsetX, offsetY);
 }

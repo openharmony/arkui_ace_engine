@@ -529,6 +529,9 @@ void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
     auto menuWidth = MENU_CONTAINER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
     auto menuHeight = MENU_CONTAINER_HEIGHT.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
     auto buttonWidth = TITLE_ICON_SIZE.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto titleHeight = pipeline->GetCustomTitleHeight().ConvertToPx();
     if (offsetX < MENU_SAFETY_X.ConvertToPx()) {
         LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen left");
         offsetX = offsetX + menuWidth - buttonWidth;
@@ -539,7 +542,7 @@ void ContainerModalViewEnhance::CalculateMenuOffset(OffsetF currentOffset)
     }
     if (offsetY > screenHeight - menuHeight - MENU_SAFETY_Y.ConvertToPx()) {
         LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
-        offsetY = offsetY - menuHeight - CONTAINER_TITLE_HEIGHT.ConvertToPx();
+        offsetY = offsetY - menuHeight - titleHeight;
     }
     menuOffset_ = { offsetX, offsetY };
 }
