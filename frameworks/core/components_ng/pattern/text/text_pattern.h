@@ -562,6 +562,7 @@ protected:
     void InitFocusEvent();
     void InitHoverEvent();
     void RecoverCopyOption();
+    void InitCopyOption();
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
@@ -697,7 +698,7 @@ private:
     bool leftFadeout_ = false;
     bool rightFadeout_ = false;
     float gradientPercent_ = 0.0;
-    bool isMarqueeRunning = false;
+    bool isMarqueeRunning_ = false;
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeholderIndex_;

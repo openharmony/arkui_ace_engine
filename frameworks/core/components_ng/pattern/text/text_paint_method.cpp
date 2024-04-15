@@ -15,18 +15,19 @@
 
 #include "core/components_ng/pattern/text/text_paint_method.h"
 
+#include "core/components/common/properties/marquee_option.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-    
+
 namespace {
 constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 4.0_vp;
 } // namespace
 
 TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,
     RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
-    : pattern_(pattern), baselineOffset_(baselineOffset),
-      textContentModifier_(std::move(textContentModifier)), textOverlayModifier_(std::move(textOverlayModifier))
+    : pattern_(pattern), baselineOffset_(baselineOffset), textContentModifier_(std::move(textContentModifier)),
+      textOverlayModifier_(std::move(textOverlayModifier))
 {}
 
 RefPtr<Modifier> TextPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
@@ -59,21 +60,23 @@ void TextPaintMethod::DoStartTextRace()
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto start = layoutProperty->GetTextMarqueeStart().value_or(true);
-    auto step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
-    if (GreatNotEqual(step, paragraph->GetTextWidth())) {
-        step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
+    MarqueeOption option;
+    option.start = layoutProperty->GetTextMarqueeStart().value_or(true);
+    option.step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
+    if (GreatNotEqual(option.step, paragraph->GetTextWidth())) {
+        option.step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
     }
-    auto loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
-    auto direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
-    auto delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
+    option.loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
+    option.direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT);
+    option.delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    auto fadeout = layoutProperty->GetTextMarqueeFadeout().value_or(theme->GetIsTextFadeout());
-    auto startPolicy = layoutProperty->GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT);
-    textContentModifier_->StartTextRace(start, step, loop, direction, delay, fadeout, startPolicy);
+    option.fadeout = layoutProperty->GetTextMarqueeFadeout().value_or(theme->GetIsTextFadeout());
+    option.startPolicy = layoutProperty->GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT);
+
+    textContentModifier_->StartTextRace(option);
 }
 
 void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)

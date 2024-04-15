@@ -55,6 +55,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr double DIMENSION_FADEOUT_ANGLE = 90.0;
 constexpr double DIMENSION_VALUE = 16.0;
 constexpr const char COPY_ACTION[] = "copy";
 constexpr const char SELECT_ACTION[] = "select";
@@ -1861,10 +1862,25 @@ void TextPattern::OnModifyDone()
         if (!renderContext->GetClipEdge().has_value()) {
             renderContext->UpdateClipEdge(true);
         }
-        if(textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
+        if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
             MarqueeStartPolicy::ON_FOCUS) {
             InitFocusEvent();
             InitHoverEvent();
+        }
+    }
+
+    if (GetAllChildren().empty()) {
+        std::string textCache = textForDisplay_;
+        textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        if (textCache != textForDisplay_) {
+            host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
+            dataDetectorAdapter_->aiDetectInitialized_ = false;
+            CloseSelectOverlay();
+            ResetSelection();
+        }
+        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+            dataDetectorAdapter_->textForAI_ = textForDisplay_;
+            dataDetectorAdapter_->StartAITask();
         }
     }
 
@@ -1881,7 +1897,7 @@ void TextPattern::RecoverCopyOption()
     CHECK_NULL_VOID(renderContext);
 
     copyOption_ =
-        isMarqueeRunning ? CopyOptions::None : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+        isMarqueeRunning_ ? CopyOptions::None : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
 
     if (GetAllChildren().empty()) {
         auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
@@ -1892,20 +1908,15 @@ void TextPattern::RecoverCopyOption()
             ResetSelection();
             copyOption_ = CopyOptions::None;
         }
-
-        std::string textCache = textForDisplay_;
-        textForDisplay_ = textLayoutProperty->GetContent().value_or("");
-        if (textCache != textForDisplay_) {
-            host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
-            dataDetectorAdapter_->aiDetectInitialized_ = false;
-            CloseSelectOverlay();
-            ResetSelection();
-        }
-        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-            dataDetectorAdapter_->textForAI_ = textForDisplay_;
-            dataDetectorAdapter_->StartAITask();
-        }
     }
+
+    InitCopyOption();
+}
+
+void TextPattern::InitCopyOption()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -2211,7 +2222,7 @@ void TextPattern::SetFadeout(const bool& left, const bool& right, const float& g
 
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    gradient.GetLinearGradient()->angle = CalcDimension(90, DimensionUnit::PX);
+    gradient.GetLinearGradient()->angle = CalcDimension(DIMENSION_FADEOUT_ANGLE, DimensionUnit::PX);
     gradient.AddColor(CreateTextGradientColor(0, Color::TRANSPARENT));
     gradient.AddColor(CreateTextGradientColor(leftFadeout_ ? gradientPercent : 0, Color::WHITE));
     gradient.AddColor(CreateTextGradientColor(rightFadeout_ ? (1 - gradientPercent) : 1, Color::WHITE));
@@ -2220,9 +2231,8 @@ void TextPattern::SetFadeout(const bool& left, const bool& right, const float& g
     frameRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
     overlayRenderContext->UpdateLinearGradient(gradient);
     overlayRenderContext->UpdateBackBlendMode(BlendMode::DST_IN);
-    overlayRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+    overlayRenderContext->UpdateBackBlendApplyType(BlendApplyType::FAST);
 
-    //此处遗留问题，即使标脏后概率(20%)出现未刷新渐隐混合绘制效果
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -2773,7 +2783,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 void TextPattern::CreateModifier()
 {
     if (!contentMod_) {
-        contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_);
+        contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_, WeakClaim(this));
     }
     if (!overlayMod_) {
         overlayMod_ = MakeRefPtr<TextOverlayModifier>();
@@ -2917,9 +2927,9 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     if (TextMarqueeState::START == state) {
         CloseSelectOverlay();
         ResetSelection();
-        isMarqueeRunning = true;
+        isMarqueeRunning_ = true;
     } else if (TextMarqueeState::FINISH == state) {
-        isMarqueeRunning = false;
+        isMarqueeRunning_ = false;
     }
 
     RecoverCopyOption();
