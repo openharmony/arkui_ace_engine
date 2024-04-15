@@ -222,9 +222,12 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
-            if (eventHub->HasOnDrop() || eventHub->HasOnItemDrop() || eventHub->HasCustomerOnDrop() ||
-                V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag() ||
-                V2::EMBEDDED_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) {
+            if ((eventHub->HasOnDrop()) || (eventHub->HasOnItemDrop()) || (eventHub->HasCustomerOnDrop())) {
+                return parentFrameNode;
+            }
+            if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == parentFrameNode->GetTag() ||
+                V2::EMBEDDED_COMPONENT_ETS_TAG == parentFrameNode->GetTag()) &&
+                (!IsUIExtensionShowPlaceholder(parentFrameNode))) {
                 return parentFrameNode;
             }
         }
@@ -624,8 +627,9 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
         return;
     }
 
-    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
-        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
+        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
@@ -701,8 +705,9 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
         "TargetNode is %{public}s, id is %{public}s",
         container->GetWindowId(), static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
         dragFrameNode->GetTag().c_str(), dragFrameNode->GetInspectorId()->c_str());
-    if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
-        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
+    if ((V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag() ||
+        V2::EMBEDDED_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) &&
+        (!IsUIExtensionShowPlaceholder(dragFrameNode))) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
@@ -1768,5 +1773,18 @@ void DragDropManager::FireOnDragLeave(
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
         }
     }
+}
+
+bool DragDropManager::IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_RETURN(node, true);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto manager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(manager, true);
+    return manager->IsShowPlaceholder(node->GetId());
+#endif
+    return true;
 }
 } // namespace OHOS::Ace::NG
