@@ -954,8 +954,8 @@ void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool sh
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    manager->RemovePreviewBadgeNode();
     if (!startDrag) {
+        manager->RemovePreviewBadgeNode();
         manager->RemoveGatherNodeWithAnimation();
     }
     if (showAnimation) {
