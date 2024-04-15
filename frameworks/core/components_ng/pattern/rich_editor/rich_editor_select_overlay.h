@@ -53,7 +53,7 @@ public:
 
 private:
     void RemoveAreaChangeInner();
-    void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle) override;
+    void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType);
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
