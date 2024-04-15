@@ -3048,8 +3048,7 @@ void FrameNode::Layout()
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
-    bool isFocusOnOverlay = pipeline->CheckOverlayFocus();
-    AvoidKeyboard(isFocusOnPage || isFocusOnOverlay);
+    AvoidKeyboard(isFocusOnPage);
     bool needSyncRsNode = false;
     bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode);
     // skip wrapping task if node will not sync
