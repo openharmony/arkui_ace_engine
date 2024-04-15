@@ -897,4 +897,141 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
+
+
+/**
+ * @tc.name: TextClockTest014
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    model.SetHoursWest(HOURS_WEST);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    auto node = [](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(HOURS_WEST, config.timeZoneOffset_);
+                EXPECT_EQ(true, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextClockTest015
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    model.SetHoursWest(HOURS_WEST);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    controller->Stop();
+    auto node = [](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(HOURS_WEST, config.timeZoneOffset_);
+                EXPECT_EQ(false, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextClockTest016
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    float hoursWest = 8;
+    model.SetHoursWest(hoursWest);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    auto node = [=](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(hoursWest, config.timeZoneOffset_);
+                EXPECT_EQ(true, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextClockTest017
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and get frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    float hoursWest = 8;
+    model.SetHoursWest(hoursWest);
+    auto controller = pattern->GetTextClockController();
+    ASSERT_NE(controller, nullptr);
+    controller->Start();
+    controller->Stop();
+    auto node = [=](TextClockConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(hoursWest, config.timeZoneOffset_);
+                EXPECT_EQ(false, config.started_);
+                return nullptr;
+            };
+    
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+}
 } // namespace OHOS::Ace::NG
