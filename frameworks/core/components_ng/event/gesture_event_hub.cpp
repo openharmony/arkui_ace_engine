@@ -548,12 +548,15 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     } else {
         auto coordinateX = frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
-        auto rateX = NearZero(frameNodeSize_.Width()) ? 0.0f : (info.GetGlobalLocation().GetX() - coordinateX)
-            / frameNodeSize_.Width();
-        auto rateY = NearZero(frameNodeSize_.Height()) ? 0.0f : (info.GetGlobalLocation().GetY() - coordinateY)
-            / frameNodeSize_.Height();
-        result.SetX(-rateX * size.Width());
-        result.SetY(-rateY * size.Height());
+        if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width())) {
+            result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+            result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+        } else {
+            auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
+            auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
+            result.SetX(-rateX * size.Width());
+            result.SetY(-rateY * size.Height());
+        }
     }
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);
