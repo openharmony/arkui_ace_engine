@@ -13,6 +13,14 @@
  * limitations under the License.
  */
 
+const overrideMap = new Map();
+overrideMap.set(
+  "ArkCheckboxComponent",
+  new Map([
+    ["Symbol(width)", CheckboxWidthModifier],
+    ["Symbol(height)", CheckboxHeightModifier],
+  ])
+);
 function applyAndMergeModifier(instance, modifier) {
   let myMap = modifier._modifiersWithKeys;
   myMap.setOnChange((value) => {
@@ -44,13 +52,28 @@ class ModifierUtils {
   }
   static mergeMaps(stageMap, newMap) {
     newMap.forEach((value, key) => {
-      stageMap.set(key, copyModifierWithKey(value));
+      stageMap.set(key, this.copyModifierWithKey(value));
     });
-    return stageMap;
+  }
+  static mergeMapsEmplace(stageMap, newMap, componentOverrideMap) {
+    newMap.forEach((value, key) => {
+      if (componentOverrideMap.has(key.toString())) {
+        const newValue = new (componentOverrideMap.get(key.toString()))(value.value);
+        stageMap.set(key, newValue);
+      } else {
+        stageMap.set(key, this.copyModifierWithKey(value));
+      }
+    });
   }
   static applyAndMergeModifier(instance, modifier) {
     let component = instance;
-    mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+    if (component.constructor.name && overrideMap.has(component.constructor.name)) {
+      const componentOverrideMap = overrideMap.get(component.constructor.name);
+      this.mergeMapsEmplace(component._modifiersWithKeys, modifier._modifiersWithKeys,
+        componentOverrideMap);
+    } else {
+      this.mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+    }
   }
   static applySetOnChange(modifier) {
     let myMap = modifier._modifiersWithKeys;
@@ -787,7 +810,7 @@ class SliderModifier extends ArkSliderComponent {
   }
 }
 class SpanModifier extends ArkSpanComponent {
-   constructor(nativePtr, classType) {
+  constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
