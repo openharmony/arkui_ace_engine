@@ -48,7 +48,7 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetFirstHandleInfo()
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
-    handleInfo.paintRect = pattern->GetTextSelector().firstHandle;
+    handleInfo.paintRect = pattern->textSelector_.firstHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
     return handleInfo;
 }
@@ -58,7 +58,7 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
-    handleInfo.paintRect = pattern->GetTextSelector().secondHandle;
+    handleInfo.paintRect = pattern->textSelector_.secondHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
     return handleInfo;
 }
@@ -118,7 +118,7 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
 void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirst)
 {
     auto pattern = GetPattern<RichEditorPattern>();
-    auto textSelector = pattern->GetTextSelector();
+    auto& textSelector = pattern->textSelector_;
     auto currentHandleIndex = pattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirst) {
         pattern->HandleSelectionChange(currentHandleIndex, textSelector.destinationOffset);
@@ -145,7 +145,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
         handleRect.ToString().c_str(), isFirstHandle);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    auto textSelector = pattern->GetTextSelector();
+    auto& textSelector = pattern->textSelector_;
     auto selectStart = std::min(textSelector.baseOffset, textSelector.destinationOffset);
     auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
     pattern->FireOnSelect(selectStart, selectEnd);
@@ -190,8 +190,8 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
         return;
     }
     bool isShowItem = pattern->copyOption_ != CopyOptions::None;
-    menuInfo.showCopy = isShowItem && hasValue && !pattern->GetTextSelector().SelectNothing();
-    menuInfo.showCut = isShowItem && hasValue && !pattern->GetTextSelector().SelectNothing();
+    menuInfo.showCopy = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
+    menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
     pattern->UpdateSelectMenuInfo(menuInfo);
