@@ -170,7 +170,8 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
     overlayLayoutProperty->UpdateMeasureType(NG::MeasureType::MATCH_PARENT);
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
+        overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()),
+                                                Dimension(padding.Offset().GetY()));
         auto renderContext = overlayNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
