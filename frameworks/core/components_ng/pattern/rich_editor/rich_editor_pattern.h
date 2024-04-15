@@ -590,7 +590,7 @@ private:
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
-    void HandleOnlyImageSelected(const Offset& globalOffset);
+    void HandleOnlyImageSelected(const Offset& globalOffset, const bool isFingerSelected);
     void CalcCaretInfoByClick(const Offset& touchOffset);
     void HandleEnabled();
     void InitMouseEvent();
@@ -607,6 +607,7 @@ private:
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
+    void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void FireOnSelectionChange(const int32_t caretPosition);
