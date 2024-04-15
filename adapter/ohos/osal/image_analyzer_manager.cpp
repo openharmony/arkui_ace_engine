@@ -169,13 +169,13 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
     CHECK_NULL_VOID(overlayLayoutProperty);
     overlayLayoutProperty->UpdateMeasureType(NG::MeasureType::MATCH_PARENT);
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
-    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
+        overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
         auto renderContext = overlayNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
     }
+    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
