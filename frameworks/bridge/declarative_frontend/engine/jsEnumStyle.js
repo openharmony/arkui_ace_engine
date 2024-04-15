@@ -1820,10 +1820,12 @@ class NavPathStack {
     }
     return -1;
   }
-  initNavPathIndex() {
+  initNavPathIndex(pathName) {
     this.popArray = [];
-    for (let i = 0; i < this.pathArray.length; i++) {
-      this.pathArray[i].index = i;
+    for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
+      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+        this.pathArray[i].index = i;
+      }
     }
   }
   getAllPathIndex() {

@@ -285,7 +285,7 @@ void NavigationPattern::UpdateNavPathList()
     }
     navigationStack_->ClearPreBuildNodeList();
     navigationStack_->SetNavPathList(navPathList);
-    navigationStack_->InitNavPathIndex();
+    navigationStack_->InitNavPathIndex(pathNames);
 }
 
 void NavigationPattern::RefreshNavDestination()
