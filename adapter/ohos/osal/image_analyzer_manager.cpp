@@ -18,7 +18,6 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "js_native_api_types.h"
 
-#include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_adapter.h"
