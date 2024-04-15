@@ -167,6 +167,7 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
+    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -200,6 +201,16 @@ void NavigationPattern::OnModifyDone()
         CHECK_NULL_VOID(dividerNode);
         dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         dividerNode->MarkModifyDone();
+    }
+}
+
+void NavigationPattern::OnLanguageConfigurationUpdate()
+{
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRightToLeft != isRightToLeft_) {
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
