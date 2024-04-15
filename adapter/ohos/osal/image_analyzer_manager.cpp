@@ -18,6 +18,7 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "js_native_api_types.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_adapter.h"
@@ -184,23 +185,26 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
 void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     CHECK_NULL_VOID(geometryNode);
+    CHECK_NULL_VOID(frameNode_);
     bool isUIConfigUpdate = false;
 
-    if (analyzerUIConfig_.contentWidth != geometryNode->GetContentSize().Width() ||
-        analyzerUIConfig_.contentHeight != geometryNode->GetContentSize().Height()) {
-        analyzerUIConfig_.contentWidth = geometryNode->GetContentSize().Width();
-        analyzerUIConfig_.contentHeight = geometryNode->GetContentSize().Height();
-        isUIConfigUpdate = true;
-    }
-
-    CHECK_NULL_VOID(frameNode_);
+    NG::SizeF size;
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
+        size = geometryNode->GetContentSize();
         auto layoutProps = frameNode_->GetLayoutProperty<NG::ImageLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
         if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
             analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
             isUIConfigUpdate = true;
         }
+    } else {
+        size = geometryNode->GetFrameSize();
+    }
+
+    if (analyzerUIConfig_.contentWidth != size.Width() || analyzerUIConfig_.contentHeight != size.Height()) {
+        analyzerUIConfig_.contentWidth = size.Width();
+        analyzerUIConfig_.contentHeight = size.Height();
+        isUIConfigUpdate = true;
     }
 
     auto renderContext = frameNode_->GetRenderContext();
