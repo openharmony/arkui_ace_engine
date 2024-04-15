@@ -949,6 +949,7 @@ void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
 {
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
+    popupPattern->ResetFocusState();
     BlurLowerNode(popupNode);
     auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this)]() {
         auto overlayManager = weak.Upgrade();
