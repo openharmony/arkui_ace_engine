@@ -129,7 +129,7 @@ public:
     void SetParagraphId(uint32_t id) override
     {
         if (paragraph_) {
-            paragraph_->SetParagraphId(id);
+            paragraph_->SetParagraghId(id);
         }
     }
     
