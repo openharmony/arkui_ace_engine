@@ -136,7 +136,8 @@ public:
                                                                      NavDestinationState::ON_APPEAR);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->AddBuildFinishCallBack([weakEventHub = WeakClaim(this)]() {
+        auto navigationManager = pipeline->GetNavigationManager();
+        navigationManager->AddNavigationUpdateCallback([weakEventHub = WeakClaim(this)]() {
             auto eventHub = weakEventHub.Upgrade();
             CHECK_NULL_VOID(eventHub);
             if (eventHub->onAppear_) {

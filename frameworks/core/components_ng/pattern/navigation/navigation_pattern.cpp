@@ -1483,8 +1483,7 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
             pattern->MarkNeedSyncWithJsStack();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            auto navigationManager = context->GetNavigationManager();
-            navigationManager->AddNavigationUpdateCallback([weakPattern]() {
+            context->AddBuildFinishCallBack([weakPattern]() {
                 auto pattern = weakPattern.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->SyncWithJsStackIfNeeded();
@@ -1691,19 +1690,11 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto navigationManager = pipeline->GetNavigationManager();
+    navigationManager->FireNavigationUpdateCallback();
     if (!isAnimated) {
-        pipeline->AddBuildFinishCallBack([weakNavigation = WeakClaim(this),
-            weakPreDestination = WeakPtr<NavDestinationGroupNode>(preDestination),
-            weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
-            isPopPage, isNeedVisible]() {
-            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(weakNavigation.Upgrade());
-            CHECK_NULL_VOID(navigationPattern);
-            auto preDestination = weakPreDestination.Upgrade();
-            auto topDestination = weakTopDestination.Upgrade();
-            navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage);
-            navigationPattern->TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
-        });
-        
+        FireShowAndHideLifecycle(preDestination, topDestination, isPopPage);
+        TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;
     }
     pipeline->AddAfterLayoutTask([weakNavigation = WeakClaim(this),
