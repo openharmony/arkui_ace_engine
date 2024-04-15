@@ -237,6 +237,11 @@ public:
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
 
+    void SetImageAnimator(bool isImageAnimator)
+    {
+        isImageAnimator_ = isImageAnimator;
+    }
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -276,7 +281,7 @@ private:
      * @param dstSize The size of the image to be decoded.
      */
     void StartDecoding(const SizeF& dstSize);
-    bool CheckIfNeeedLayout();
+    bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
@@ -391,6 +396,7 @@ private:
     int32_t formAnimationRemainder_ = 0;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
+    bool isImageAnimator_ = false;
 };
 
 } // namespace OHOS::Ace::NG
