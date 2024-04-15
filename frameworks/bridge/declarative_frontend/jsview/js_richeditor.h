@@ -153,7 +153,7 @@ private:
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
     static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
-    bool CheckImageSource(std::string assetSrc)
+    bool CheckImageSource(std::string assetSrc);
 
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
