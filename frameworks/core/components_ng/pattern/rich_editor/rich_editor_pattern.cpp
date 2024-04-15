@@ -1708,20 +1708,15 @@ bool RichEditorPattern::HandleUserGestureEvent(
     return false;
 }
 
-void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset)
+void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool isFingerSelected)
 {
-    Offset offset;
-    if (usingMouseRightButton_) {
-        auto textRect = GetTextRect();
-        textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
-        textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
-        offset = Offset(textRect.GetX(), textRect.GetY());
-    } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto offsetF = host->GetPaintRectOffset();
-        offset = Offset(offsetF.GetX(), offsetF.GetY());
+    if (IsSelected() && (!isFingerSelected || IsHandlesShow())) {
+        return;
     }
+    auto textRect = GetTextRect();
+    textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
+    textRect.SetHeight(textRect.Height() - std::max(baselineOffset_, 0.0f));
+    Offset offset = Offset(textRect.GetX(), textRect.GetY());
     auto textOffset = globalOffset - offset;
     int32_t currentPosition = paragraphs_.GetIndex(textOffset);
     currentPosition = std::min(currentPosition, GetTextContentLength());
@@ -1733,6 +1728,11 @@ void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset)
     if (results.size() == 1 && results.front().type == SelectSpanType::TYPEIMAGE && !isOnlyImageDrag_) {
         textSelector_.Update(currentPosition, nextPosition);
         isOnlyImageDrag_ = true;
+        showSelect_ = false;
+        CalculateHandleOffsetAndShowOverlay();
+        if (IsHandlesShow()) {
+            TextPattern::CloseSelectOverlay(false);
+        }
     }
 }
 
@@ -2057,12 +2057,22 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         HandleUserLongPressEvent(info);
     }
+    bool isDoubleClick = caretUpdateType_== CaretUpdateType::DOUBLE_CLICK;
+    if (isDoubleClick && info.GetSourceTool() == SourceTool::FINGER && IsSelected()) {
+        showSelect_ = true;
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
     bool isLongpressedByMouse = isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED;
     if (JudgeDraggable(info) || isLongpressedByMouse) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    HandleDoubleClickOrLongPress(info, host);
+}
+
+void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host)
+{
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     isLongPress_ = true;
@@ -4126,10 +4136,14 @@ void RichEditorPattern::InitTouchEvent()
 
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touchInfo = info.GetTouches().front();
+    auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        HandleOnlyImageSelected(touchInfo.GetLocalLocation(), info.GetSourceTool() == SourceTool::FINGER);
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
+        isOnlyImageDrag_ = false;
+        showSelect_ = true;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
         HandleTouchMove(info.GetTouches().front().GetLocalLocation());
@@ -4228,6 +4242,7 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
         };
         AutoScrollByEdgeDetection(param, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()),
             EdgeDetectionStrategy::OUT_BOUNDARY);
+        showSelect_ = true;
     }
     if (textSelector_.SelectNothing()) {
         if (!caretTwinkling_) {
@@ -4245,7 +4260,6 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
-    HandleOnlyImageSelected(info.GetGlobalLocation());
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -4882,7 +4896,7 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
     auto offset = host->GetPaintRectOffset();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     auto eventHub = host->GetEventHub<EventHub>();
-    if (GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
+    if (copyOption_ != CopyOptions::None && (textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         auto panOffset = OffsetF(localOffset.GetX(), localOffset.GetY()) - GetTextRect().GetOffset() +
