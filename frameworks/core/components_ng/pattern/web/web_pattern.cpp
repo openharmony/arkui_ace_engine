@@ -578,15 +578,15 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         std::string linkUrl = delegate_->dragData_->GetLinkURL();
         std::string linkTitle = delegate_->dragData_->GetLinkTitle();
         if (!plainContent.empty()) {
-            dropMenuState_ = false;
+            isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddPlainTextRecord(aceUnifiedData, plainContent);
         }
         if (!htmlContent.empty()) {
-            dropMenuState_ = false;
+            isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddHtmlRecord(aceUnifiedData, htmlContent, "");
         }
         if (!linkUrl.empty()) {
-            dropMenuState_ = true;
+            isDragEndMenuShow_ = false;
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
         }
@@ -605,7 +605,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
 
 void WebPattern::OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName)
 {
-    dropMenuState_ = true;
+    isDragEndMenuShow_ = false;
     std::string fullName;
     if (delegate_->tempDir_.empty()) {
         fullName = "/data/storage/el2/base/haps/entry/temp/dragdrop/" + fileName;
@@ -760,7 +760,7 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->dropMenuState_ = true;
+        pattern->isDragEndMenuShow_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,
             "DragDrop event WebEventHub onDragLeaveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
@@ -2280,8 +2280,8 @@ void WebPattern::DragDropSelectionMenu()
         TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web menu controller status. dropMenuState_：%{publc}d", dropMenuState_);
-    if (dropMenuState_ || IsImageDrag()) {
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu status. isDragEndMenuShow_：%{publc}d", isDragEndMenuShow_);
+    if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
     auto host = GetHost();

@@ -593,7 +593,7 @@ private:
     int32_t dropX_ = 0;
     int32_t dropY_ = 0;
     int onDragMoveCnt = 0;
-    bool dropMenuState_ = false;
+    bool isDragEndMenuShow_ = false;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> dropParams_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> menuCallback_ = nullptr;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
