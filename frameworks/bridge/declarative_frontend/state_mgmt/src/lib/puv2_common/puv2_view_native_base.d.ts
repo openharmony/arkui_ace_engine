@@ -19,7 +19,7 @@
  *  all definitions in this file are framework internal
  */
 declare class NativeViewPartialUpdate {
-  constructor(    );
+  constructor();
   markNeedUpdate(): void;
   findChildById(compilerAssignedUniqueChildId: string): View;
   syncInstanceId(): void;
