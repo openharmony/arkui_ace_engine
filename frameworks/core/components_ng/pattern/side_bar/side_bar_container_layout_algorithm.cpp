@@ -745,7 +745,8 @@ SideBarPosition SideBarContainerLayoutAlgorithm::GetSideBarPositionWithRtl(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
 {
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
-    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL) {
+    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL ||
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         sideBarPosition = (sideBarPosition == SideBarPosition::START) ? SideBarPosition::END : SideBarPosition::START;
     }
     return sideBarPosition;

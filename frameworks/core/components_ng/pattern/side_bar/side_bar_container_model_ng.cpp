@@ -61,6 +61,9 @@ void SideBarContainerModelNG::Create()
     CHECK_NULL_VOID(sideBarContainerNode);
 
     stack->Push(sideBarContainerNode);
+    auto pattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetRightToLeftMode(AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
 void SideBarContainerModelNG::SetSideBarContainerType(SideBarContainerType type)
