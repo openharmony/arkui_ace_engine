@@ -31,7 +31,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float SWIPER_TH = 0.25f;
-constexpr float SWIPER_SPEED_TH = 1200.f;
+constexpr float NEW_SWIPER_TH = 0.5f;
+constexpr float SWIPER_SPEED_TH = 1500.f;
 constexpr float SWIPE_RATIO = 0.6f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
@@ -656,7 +657,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(listItemEventHub);
     float end = 0.0f;
     float friction = GetFriction();
-    float threshold = SWIPER_TH;
+    float threshold = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? NEW_SWIPER_TH : SWIPER_TH;
     float speedThreshold = SWIPER_SPEED_TH;
     bool reachRightSpeed = info.GetMainVelocity() > speedThreshold;
     bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
