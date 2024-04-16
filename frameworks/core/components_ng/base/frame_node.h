@@ -805,6 +805,7 @@ public:
 
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
+    bool CheckAncestorPageShow();
 
 protected:
     void DumpInfo() override;
