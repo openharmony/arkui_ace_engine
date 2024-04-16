@@ -6442,17 +6442,16 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     }
 
     auto wInsertValue = StringUtils::ToWstring(insertValue);
-    std::wstring textTemp = L"";
-    if (style) {
-        textTemp = wInsertValue;
-    } else {
+    std::wstring textTemp = wInsertValue;
+    if (!style) {
         if (typingStyle_.has_value() && spanNode && !HasSameTypingStyle(spanNode)) {
             style = typingTextStyle_;
-        }
-        if (spanNode && spanNode->GetSpanItem()) {
+            ++spanIndex; // create a new span When have a different typingStyle
+            offsetInSpan = 0;
+        } else if (spanNode && spanNode->GetSpanItem()) {
             textTemp = StringUtils::ToWstring(spanNode->GetSpanItem()->content);
+            textTemp.insert(offsetInSpan, wInsertValue);
         }
-        textTemp.insert(offsetInSpan, wInsertValue);
     }
 
     auto it = textTemp.find(lineSeparator);
