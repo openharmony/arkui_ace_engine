@@ -150,6 +150,13 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     int32_t orgAction = pointerEvent->GetPointerAction();
     SetTouchEventType(orgAction, event);
     UpdateTouchEvent(pointerEvent, event);
+    if (event.sourceType == SourceType::TOUCH && event.sourceTool == SourceTool::PEN) {
+        // Pen use type double XY position.
+        event.x = item.GetWindowXPos();
+        event.y = item.GetWindowYPos();
+        event.screenX = item.GetDisplayXPos();
+        event.screenY = item.GetDisplayYPos();
+    }
     return event;
 }
 
@@ -310,6 +317,11 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     auto sourceTool = GetSourceTool(item.GetToolType());
     if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
         events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+        // Pen use type double XY position.
+        events.x = item.GetWindowXPos();
+        events.y = item.GetWindowYPos();
+        events.screenX = item.GetDisplayXPos();
+        events.screenY = item.GetDisplayYPos();
     }
     events.touchEventId = pointerEvent->GetId();
 }
