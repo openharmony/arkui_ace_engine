@@ -103,7 +103,8 @@ public:
     void OnModifyDone() override;
 
     void OnColorConfigurationUpdate() override;
-
+    void OnLanguageConfigurationUpdate() override;
+  
 private:
     void OnAttachToFrameNode() override;
     int32_t TotalCount() const;
@@ -124,7 +125,9 @@ private:
     void SetAccessibilityAction();
     static void ButtonSkipColorConfigurationUpdate(const RefPtr<FrameNode>& buttonNode);
     WeakPtr<FocusHub> GetFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
-
+    bool isRightToLeft_ = false;
+    RefPtr<FrameNode> leftImage_;
+    RefPtr<FrameNode> rightImage_;
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
