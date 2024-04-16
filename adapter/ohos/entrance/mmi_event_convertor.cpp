@@ -367,6 +367,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     TimeStamp time(microseconds);
     event.time = time;
     event.touchEventId = pointerEvent->GetId();
+    event.targetDisplayId = pointerEvent->GetTargetDisplayId();
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
