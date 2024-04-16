@@ -105,9 +105,11 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->HasFocus());
     CHECK_NULL_VOID(SelectOverlayIsOn());
+    CHECK_NULL_VOID(!pattern->spans_.empty());
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
+    pattern->magnifierController_->SetLocalOffset(localOffset);
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
         .handleRect = handleRect,
         .isFirstHandle = isFirst,
@@ -154,6 +156,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
+    pattern->magnifierController_->UpdateShowMagnifier();
     if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
