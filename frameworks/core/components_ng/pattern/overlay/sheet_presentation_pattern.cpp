@@ -1651,10 +1651,10 @@ void SheetPresentationPattern::FireOnHeightDidChange()
 
 void SheetPresentationPattern::FireOnDetentsDidChange(float height)
 {
-    auto sheetType = GetSheetType();
-    if (sheetType != SheetType::SHEET_BOTTOM) {
+    if (sheetType_ != SheetType::SHEET_BOTTOM || NearEqual(preDetentsHeight_, height)) {
         return;
     }
     OnDetentsDidChange(height);
+    preDetentsHeight_ = height;
 }
 } // namespace OHOS::Ace::NG
