@@ -91,6 +91,8 @@ std::string srcimages = "common/images/mmm.jpg";
 const std::string VALUE_EMPTY = "";
 const std::string VALUE_X = "X";
 const std::string VALUE_CX = "CX";
+const std::string VALUE_TAB = "TAB";
+const std::string VALUE_DPAD_UP = "DPAD_UP";
 ViewAbstractModelNG viewAbstractModelNG;
 auto callback = []() { srcimages = "test"; };
 int32_t flag = 0;
@@ -2214,6 +2216,55 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest041, TestSize.Level1)
     ViewAbstract::SetMouseResponseRegion(AceType::RawPtr(FRAME_NODE_REGISTER), responseRegion);
     EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->minSize.value().Width().has_value());
     EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->maxSize.value().Width().has_value());
+}
+
+/**
+ * @tc.name: ViewAbstractTest042
+ * @tc.desc: Test the SetKeyboardShortcut of View_Abstract for tab/Up arrow/Down arrow/Left arrow/Right arrow key.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a FrameNode and get eventManager.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto eventManager = PipelineContext::GetCurrentContext()->GetEventManager();
+    /**
+     * @tc.steps: step2. call SetKeyboardShortcut with tab and ModifierKey.
+     * @tc.expected: add fail
+     */
+    std::vector<ModifierKey> keys;
+    keys.push_back(ModifierKey::SHIFT);
+    ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    keys.clear();
+
+    /**
+     * @tc.steps: step3. call SetKeyboardShortcut with up arrow.
+     * @tc.expected: add success
+     */
+    ViewAbstract::SetKeyboardShortcut(VALUE_DPAD_UP, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+    keys.clear();
+
+    /**
+     * @tc.steps: step4. call SetKeyboardShortcut with up arrow and ModifierKey.
+     * @tc.expected: add success
+     */
+    keys.push_back(ModifierKey::ALT);
+    ViewAbstract::SetKeyboardShortcut(VALUE_DPAD_UP, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+    keys.clear();
+
+    /**
+     * @tc.steps: step5. call SetKeyboardShortcut with tab.
+     * @tc.expected: add success
+     */
+
+    ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
 }
 
 /**
