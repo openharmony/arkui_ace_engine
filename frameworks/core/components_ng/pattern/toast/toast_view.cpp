@@ -91,6 +91,8 @@ void ToastView::UpdateTextLayoutProperty(
     CHECK_NULL_VOID(toastTheme);
     auto fontSize = toastTheme->GetTextStyle().GetFontSize();
     auto padding = toastTheme->GetPadding();
+    auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
+    auto textColor = toastTheme->GetTextStyle().GetTextColor();
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
     paddings.bottom = NG::CalcLength(padding.Bottom());
@@ -102,20 +104,12 @@ void ToastView::UpdateTextLayoutProperty(
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateLayoutDirection((isRightToLeft ? TextDirection::RTL : TextDirection::LTR));
     textLayoutProperty->UpdatePadding(paddings);
+    textLayoutProperty->UpdateTextColor(textColor);
+    textLayoutProperty->UpdateFontWeight(fontWeight);
 
-    auto textContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textContext);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto blurStyleTextColor = toastTheme->GetBlurStyleTextColor();
-        textLayoutProperty->UpdateTextColor(blurStyleTextColor);
-        textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
-    } else {
-        auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
-        auto textColor = toastTheme->GetTextStyle().GetTextColor();
-        textLayoutProperty->UpdateTextColor(textColor);
-        textLayoutProperty->UpdateFontWeight(fontWeight);
     }
 }
 void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
