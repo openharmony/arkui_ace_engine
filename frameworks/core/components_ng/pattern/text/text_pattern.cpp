@@ -303,7 +303,11 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (IsDraggable(info.GetLocalLocation())) {
+    auto localOffset = info.GetLocalLocation();
+    if (selectOverlay_->HasRenderTransform()) {
+        localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    }
+    if (IsDraggable(localOffset)) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
         gestureHub->SetIsTextDraggable(true);
@@ -311,8 +315,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
     textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
@@ -332,6 +335,9 @@ void TextPattern::HandleSpanLongPressEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
 
     auto localLocation = info.GetLocalLocation();
+    if (selectOverlay_->HasRenderTransform()) {
+        localLocation = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1852,6 +1858,9 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
+    if (selectOverlay_->HasRenderTransform()) {
+        return selectOverlay_->GetPaintOffsetWithoutTransform() - rootOffset;
+    }
     return host->GetPaintRectOffset() - rootOffset;
 }
 
@@ -1870,6 +1879,9 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
     CHECK_NULL_RETURN(host, false);
     auto offset = host->GetPaintRectOffset();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
+    if (selectOverlay_->HasRenderTransform()) {
+        localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    }
     return IsDraggable(localOffset);
 }
 
@@ -3191,5 +3203,12 @@ void TextPattern::ProcessSpanString()
     if (contentMod_) {
         contentMod_->ContentChange();
     }
+}
+
+Offset TextPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
+{
+    auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
+    selectOverlay_->RevertLocalPointWithTransform(localPoint);
+    return Offset(localPoint.GetX(), localPoint.GetY());
 }
 } // namespace OHOS::Ace::NG

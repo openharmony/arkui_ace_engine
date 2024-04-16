@@ -202,6 +202,11 @@ public:
         return contentRect_;
     }
 
+    virtual RectF GetPaintContentRect()
+    {
+        return contentRect_;
+    }
+
     virtual int32_t GetContentWideTextLength()
     {
         return 0;
