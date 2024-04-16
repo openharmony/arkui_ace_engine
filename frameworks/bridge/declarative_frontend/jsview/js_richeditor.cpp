@@ -1139,6 +1139,12 @@ void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef
         height = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
+    } else {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        height = theme->GetTextStyle().GetLineHeight();
+        updateSpanStyle.updateLineHeight = height;
+        style.SetLineHeight(height);
     }
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
@@ -1147,6 +1153,12 @@ void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
     } else if (letters.Unit() == DimensionUnit::PERCENT) {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        letters = theme->GetTextStyle().GetLetterSpacing();
+        updateSpanStyle.updateLetterSpacing = letters;
+        style.SetLetterSpacing(letters);
+    } else {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         letters = theme->GetTextStyle().GetLetterSpacing();
