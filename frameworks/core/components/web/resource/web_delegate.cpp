@@ -101,6 +101,8 @@ const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
+static bool g_isNativeType = false;
+
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
     "GBK",          "IBM866",       "ISO-2022-JP",  "ISO-8859-10",
@@ -5275,6 +5277,7 @@ void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const doub
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
+        IsNativeType(x, y);
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchPress(id, x, y, from_overlay);
     }
@@ -5339,6 +5342,9 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
 void WebDelegate::OnFocus()
 {
     ACE_DCHECK(nweb_ != nullptr);
+    if (g_isNativeType) {
+        return;
+    }
     if (nweb_) {
         nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
     }
@@ -5355,8 +5361,39 @@ bool WebDelegate::NeedSoftKeyboard()
 void WebDelegate::OnBlur()
 {
     ACE_DCHECK(nweb_ != nullptr);
+    if (g_isNativeType) {
+        return;
+    }
     if (nweb_) {
         nweb_->OnBlur(blurReason_);
+    }
+}
+
+void WebDelegate::IsNativeType(const double& x, const double& y)
+{
+    g_isNativeType = false;
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+    auto iter = embedDataInfo_.begin();
+    for (; iter != embedDataInfo_.end(); iter++) {
+        EmbedInfo info;
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
+        if (dataInfo == nullptr) {
+            continue;
+        }
+
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        if (embedInfo) {
+            double width = embedInfo->GetWidth();
+            double height = embedInfo->GetHeight();
+            double embedX = embedInfo->GetX();
+            double embedY = embedInfo->GetY();
+            if (embedX <= x && x <= (embedX + width) && embedY <= y && y <= (embedY + height)) {
+                g_isNativeType = true;
+                break;
+            }
+        }
     }
 }
 
