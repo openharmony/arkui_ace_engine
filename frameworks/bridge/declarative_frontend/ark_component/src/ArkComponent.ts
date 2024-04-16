@@ -3782,40 +3782,61 @@ const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '
 class UICommonEvent {
   private _nodePtr: Object | null;
   private _instanceId: number;
+  private _clickEvent?: (event: ClickEvent) => void;
+  private _touchEvent?: (event: TouchEvent) => void;
+  private _onAppearEvent?: () => void;
+  private _onDisappearEvent?: () => void;
+  private _onKeyEvent?: (event: KeyEvent) => void;
+  private _onFocusEvent?: () => void;
+  private _onBlur?: () => void;
+  private _onHoverEvent?: (isHover: boolean, event: HoverEvent) => void;
+  private _onMouseEvent?: (event: MouseEvent) => void;
+  private _onSizeChangeEvent?: SizeChangeCallback;
+
   setInstanceId(instanceId: number): void {
     this._instanceId = instanceId;
   }
   setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
-  setOnClick(callback: (event?: ClickEvent) => void): void {
+  setOnClick(callback: (event: ClickEvent) => void): void {
+    this._clickEvent = callback;
     getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
   }
-  setOnTouch(callback: (event?: TouchEvent) => void): void {
+  setOnTouch(callback: (event: TouchEvent) => void): void {
+    this._touchEvent = callback;
     getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback, this._instanceId);
   }
   setOnAppear(callback: () => void): void {
+    this._onAppearEvent = callback;
     getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback, this._instanceId);
   }
   setOnDisappear(callback: () => void): void {
+    this._onDisappearEvent = callback;
     getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
   }
-  setOnKeyEvent(callback: (event?: KeyEvent) => void): void {
+  setOnKeyEvent(callback: (event: KeyEvent) => void): void {
+    this._onKeyEvent = callback;
     getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback, this._instanceId);
   }
   setOnFocus(callback: () => void): void {
+    this._onFocusEvent = callback;
     getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback, this._instanceId);
   }
   setOnBlur(callback: () => void): void {
+    this._onBlur = callback;
     getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback, this._instanceId);
   }
-  setOnHover(callback: (isHover?: boolean, event?: HoverEvent) => void): void {
+  setOnHover(callback: (isHover: boolean, event: HoverEvent) => void): void {
+    this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
   }
-  setOnMouse(callback: (event?: MouseEvent) => void): void {
+  setOnMouse(callback: (event: MouseEvent) => void): void {
+    this._onMouseEvent = callback;
     getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
   }
   setOnSizeChange(callback: SizeChangeCallback): void {
+    this._onSizeChangeEvent = callback;
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
   }
 }

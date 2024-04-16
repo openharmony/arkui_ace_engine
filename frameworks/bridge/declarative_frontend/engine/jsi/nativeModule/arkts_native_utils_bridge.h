@@ -66,6 +66,81 @@ T* GetPointerField(ArkUIRuntimeCallInfo* runtimeCallInfo)
     return pointer;
 }
 
+template<typename T>
+class JsWeak {
+public:
+    JsWeak() {}
+    ~JsWeak()
+    {
+        value_.Reset();
+    }
+
+    JsWeak(const JsWeak<T>& rhs) : value_(rhs.value_)
+    {
+        value_.SetWeakCallback(this, Reset, nullptr);
+    }
+
+    JsWeak(JsWeak<T>&& rhs) : value_(std::move(rhs.value_))
+    {
+        value_.SetWeakCallback(this, Reset, nullptr);
+        rhs.value_.Reset();
+    }
+
+    explicit JsWeak(const T& rhs) : value_(rhs)
+    {
+        value_.SetWeakCallback(this, Reset, nullptr);
+    }
+
+    JsWeak<T>& operator=(const JsWeak<T>& rhs)
+    {
+        value_.Reset();
+        value_ = rhs.value_;
+        value_.SetWeakCallback(this, Reset, nullptr);
+        return *this;
+    }
+
+    JsWeak<T>& operator=(const T& rhs)
+    {
+        value_ = rhs;
+        value_.SetWeakCallback(this, Reset, nullptr);
+        return *this;
+    }
+
+    JsWeak<T>& operator=(JsWeak<T>&& rhs)
+    {
+        value_.Reset();
+        value_ = std::move(rhs.value_);
+        value_.SetWeakCallback(this, Reset, nullptr);
+
+        rhs.value_.Reset();
+        return *this;
+    }
+
+    bool IsEmpty() const
+    {
+        return value_.IsEmpty();
+    }
+
+    void Reset()
+    {
+        value_.Reset();
+    }
+
+    T Lock() const
+    {
+        return T(value_);
+    }
+
+    static void Reset(void* ref)
+    {
+        auto that = reinterpret_cast<JsWeak<T>*>(ref);
+        that->Reset();
+    }
+
+private:
+    T value_;
+};
+
 class NativeUtilsBridge {
 public:
     static ArkUINativeModuleValue CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo);
