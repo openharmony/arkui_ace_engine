@@ -831,6 +831,8 @@ public:
     void OnIntelligentTrackingPreventionResult(
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
+    void ScaleGestureChange(double scale, double centerX, double centerY);
+    
 private:
     void InitWebEvent();
     void RegisterWebEvent();

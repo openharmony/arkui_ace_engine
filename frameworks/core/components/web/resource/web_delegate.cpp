@@ -6303,4 +6303,14 @@ void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)
         },
         TaskExecutor::TaskType::PLATFORM);
 }
+
+void WebDelegate::ScaleGestureChange(double scale, double centerX, double centerY)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->ScaleGestureChange(scale, centerX, centerY);
+    }
+#endif
+}
 } // namespace OHOS::Ace

@@ -180,6 +180,9 @@ constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
+constexpr int32_t DEFAULT_PINCH_FINGER = 2;
+constexpr double DEFAULT_PINCH_DISTANCE = 4.0;
+
 WebPattern::WebPattern() = default;
 
 WebPattern::WebPattern(const std::string& webSrc,
@@ -260,6 +263,7 @@ void WebPattern::InitEvent()
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
     InitPanEvent(gestureHub);
+    InitPinchEvent(gestureHub);
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -349,6 +353,47 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
         delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
             event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
     }
+}
+
+void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (pinchGesture_) {
+        return;
+    }
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleScaleGestureChange(event);
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->pinchValue_ = pattern->pinchValue_ * event.GetScale();
+        return;
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
+
+    pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
+    pinchGesture_->SetPriority(GesturePriority::Parallel);
+    pinchGesture_->SetOnActionStartId(actionStartTask);
+    pinchGesture_->SetOnActionUpdateId(actionUpdateTask);
+    pinchGesture_->SetOnActionEndId(actionEndTask);
+    pinchGesture_->SetOnActionCancelId(actionCancelTask);
+    gestureHub->AddGesture(pinchGesture_);
+}
+
+void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale =  pinchValue_ * event.GetScale();
+    double centerX =  event.GetPinchCenter().GetX();
+    double centerY =  event.GetPinchCenter().GetY();
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HandleScaleGestureChange scale: %{public}lf centerX: %{public}lf centerY: %{public}lf",
+        scale, centerX, centerY);
+    delegate_->ScaleGestureChange(scale, centerX, centerY);
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
