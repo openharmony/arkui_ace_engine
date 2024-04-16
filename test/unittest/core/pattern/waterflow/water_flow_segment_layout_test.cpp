@@ -1122,6 +1122,34 @@ HWTEST_F(WaterFlowSegmentTest, Segmented006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Segmented007
+ * @tc.desc: Layout WaterFlow with SEGMENT_7 and change RowGaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Segmented007, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_4);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.0f/3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(400.0f/3*2, 0, 400.0f/3, 100)));
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(400.0f/3*2, 0, 400.0f/3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0, 0, 400.0f/3, 100)));
+}
+
+
+/**
  * @tc.name: CheckHeight001
  * @tc.desc: Layout WaterFlow and check if callback height is used
  * @tc.type: FUNC
