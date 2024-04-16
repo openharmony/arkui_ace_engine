@@ -134,7 +134,7 @@ class LengthMetric {
       this.value = value;
     } else {
       this.unit = LengthUnit.VP;
-      this.value = 0;
+      this.value = unit === undefined? value : 0;
     }
   }
   static px(value: number) {
@@ -163,7 +163,7 @@ class LengthMetrics {
           this.value = value;
       } else {
           this.unit = LengthUnit.VP;
-          this.value = 0;
+          this.value = unit === undefined? value : 0;
       }
   }
   static px(value: number) {
