@@ -60,7 +60,7 @@ void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, float& maxDista
         CHECK_NULL_VOID(imageNode);
         auto width = child.width;
         auto height = child.height;
-        OffsetF curPos = {child.offset.GetX() + width / 2, child.offset.GetY() + height / 2};
+        OffsetF curPos = {child.offset.GetX() + child.halfWidth, child.offset.GetY() + child.halfHeight};
         float dis = sqrt(pow(gatherNodeCenter.GetX() - curPos.GetX(), 2) +
             pow(gatherNodeCenter.GetY() - curPos.GetY(), 2));
         maxDistance = std::max(maxDistance, dis);
@@ -120,7 +120,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
                 CHECK_NULL_VOID(imageNode);
                 auto imageContext = imageNode->GetRenderContext();
                 CHECK_NULL_VOID(imageContext);
-                auto curPos = child.offset + OffsetF(child.width / 2.0f, child.height / 2.0f);
+                auto curPos = child.offset + OffsetF(child.halfWidth, child.halfHeight);
                 auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, maxTranslation,
                     maxDistance, minDistance);
                 imageContext->UpdatePosition(OffsetT<Dimension>(
