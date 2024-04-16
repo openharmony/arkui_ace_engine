@@ -309,17 +309,6 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
 }
 
-
-void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
-{
-    auto pattern = GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
-        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
-        pattern->ResetSelection();
-    }
-}
-
 std::optional<SelectOverlayInfo> RichEditorSelectOverlay::GetSelectOverlayInfo()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
@@ -332,6 +321,13 @@ bool RichEditorSelectOverlay::IsSingleHandleShow()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_RETURN(manager, false);
     return manager->IsSingleHandle();
+}
+
+void RichEditorSelectOverlay::UpdateMenuOffset()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AREA | DIRTY_ALL_MENU_ITEM);
 }
 
 bool RichEditorSelectOverlay::IsHandlesShow()
