@@ -452,6 +452,102 @@ bool ParseLocationPropsEdges(const JSCallbackInfo& info, EdgesParam& edges)
     return useEdges;
 }
 
+void ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
+{
+    if (obj->HasProperty("value")) {
+        auto value = obj->GetProperty("value");
+        if (!value->IsNull() && value->IsNumber()) {
+            auto defaultUnit = DimensionUnit::VP;
+            auto unitValue = obj->GetProperty("unit");
+            if (!unitValue->IsNull() && unitValue->IsNumber()) {
+                defaultUnit = static_cast<DimensionUnit>(unitValue->ToNumber<int32_t>());
+            }
+            CalcDimension dimension(value->ToNumber<float>(), defaultUnit);
+            result = dimension;
+        }
+    }
+}
+
+bool ParseLocalizedEdges(const JSCallbackInfo& info, EdgesParam& edges)
+{
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return false;
+    }
+
+    bool useLocalizedEdges = false;
+    CalcDimension start;
+    CalcDimension end;
+    CalcDimension top;
+    CalcDimension bottom;
+    JSRef<JSObject> LocalizeEdgesObj = JSRef<JSObject>::Cast(arg);
+
+    if (LocalizeEdgesObj->GetProperty("start")->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(LocalizeEdgesObj->GetProperty("start"));
+        ParseJsLengthMetrics(startObj, start);
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            edges.SetRight(start);
+        } else {
+            edges.SetLeft(start);
+        }
+        useLocalizedEdges = true;
+    }
+    if (LocalizeEdgesObj->GetProperty("end")->IsObject()) {
+        JSRef<JSObject> endObj = JSRef<JSObject>::Cast(LocalizeEdgesObj->GetProperty("end"));
+        ParseJsLengthMetrics(endObj, end);
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            edges.SetLeft(end);
+        } else {
+            edges.SetRight(end);
+        }
+        useLocalizedEdges = true;
+    }
+    if (LocalizeEdgesObj->GetProperty("top")->IsObject()) {
+        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(LocalizeEdgesObj->GetProperty("top"));
+        ParseJsLengthMetrics(topObj, top);
+        edges.SetTop(top);
+        useLocalizedEdges = true;
+    }
+    if (LocalizeEdgesObj->GetProperty("bottom")->IsObject()) {
+        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(LocalizeEdgesObj->GetProperty("bottom"));
+        ParseJsLengthMetrics(bottomObj, bottom);
+        edges.SetBottom(bottom);
+        useLocalizedEdges = true;
+    }
+    return useLocalizedEdges;
+}
+
+bool ParseMarkAnchorPosition(const JSCallbackInfo& info, CalcDimension& x, CalcDimension& y)
+{
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return false;
+    }
+
+    bool useMarkAnchorPosition = false;
+    CalcDimension start;
+    CalcDimension top;
+    JSRef<JSObject> LocalizeEdgesObj = JSRef<JSObject>::Cast(arg);
+
+    if (LocalizeEdgesObj->GetProperty("start")->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(LocalizeEdgesObj->GetProperty("start"));
+        ParseJsLengthMetrics(startObj, start);
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            x = -start;
+        } else {
+            x = start;
+        }
+        useMarkAnchorPosition = true;
+    }
+    if (LocalizeEdgesObj->GetProperty("top")->IsObject()) {
+        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(LocalizeEdgesObj->GetProperty("top"));
+        ParseJsLengthMetrics(topObj, top);
+        y = top;
+        useMarkAnchorPosition = true;
+    }
+    return useMarkAnchorPosition;
+}
+
 RefPtr<JsFunction> ParseDragStartBuilderFunc(const JSRef<JSVal>& info)
 {
     JSRef<JSVal> builder;
@@ -1886,7 +1982,9 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
     CalcDimension y;
     OHOS::Ace::EdgesParam edges;
 
-    if (ParseLocationProps(info, x, y)) {
+    if (ParseLocalizedEdges(info, edges)) {
+        ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
+    } else if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetPosition(x, y);
     } else if (ParseLocationPropsEdges(info, edges)) {
         ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
@@ -1899,7 +1997,10 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 {
     CalcDimension x;
     CalcDimension y;
-    if (ParseLocationProps(info, x, y)) {
+
+    if (ParseMarkAnchorPosition(info, x, y)) {
+        ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
+    } else if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
     } else {
         ViewAbstractModel::GetInstance()->MarkAnchor(0.0_vp, 0.0_vp);
@@ -1912,7 +2013,9 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
     CalcDimension y;
     OHOS::Ace::EdgesParam edges;
 
-    if (ParseLocationProps(info, x, y)) {
+    if (ParseLocalizedEdges(info, edges)) {
+        ViewAbstractModel::GetInstance()->SetOffsetEdges(edges);
+    } else if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetOffset(x, y);
     } else if (ParseLocationPropsEdges(info, edges)) {
         ViewAbstractModel::GetInstance()->SetOffsetEdges(edges);
