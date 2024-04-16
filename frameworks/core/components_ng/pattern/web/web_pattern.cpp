@@ -2280,7 +2280,7 @@ void WebPattern::DragDropSelectionMenu()
         TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu status. isDragEndMenuShow_：%{publc}d", isDragEndMenuShow_);
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_：%{publc}d", isDragEndMenuShow_);
     if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
