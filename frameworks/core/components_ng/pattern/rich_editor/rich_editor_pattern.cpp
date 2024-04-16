@@ -5346,6 +5346,9 @@ float RichEditorPattern::GetCrossOverHeight() const
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto rootHeight = pipeline->GetRootHeight();
     auto keyboardY = rootHeight - pipeline->GetSafeAreaManager()->GetKeyboardInset().Length();
+    if (GreatOrEqual(keyboardY, rootHeight)) {
+        return 0.0f;
+    }
     float height = contentRect_.Bottom();
     float frameY = parentGlobalOffset_.GetY() + contentRect_.GetY();
     float bottom = frameY + height;
