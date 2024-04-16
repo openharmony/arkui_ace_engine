@@ -1284,9 +1284,9 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
             OHOS::Rosen::Range<float> rsBlueRandom(blueRandom.first, blueRandom.second);
             OHOS::Rosen::Range<float> rsAlphaRandom(alphaRandom.first, alphaRandom.second);
             std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> invalidCurve;
-            return OHOS::Rosen::ParticleColorParaType(rsInitRange, 
-                static_cast<OHOS::Rosen::DistributionType>(colorDistInt), OHOS::Rosen::ParticleUpdator::RANDOM, rsRedRandom,
-                rsGreenRandom, rsBlueRandom, rsAlphaRandom, invalidCurve);
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange,
+                static_cast<OHOS::Rosen::DistributionType>(colorDistInt), OHOS::Rosen::ParticleUpdator::RANDOM,
+                rsRedRandom, rsGreenRandom, rsBlueRandom, rsAlphaRandom, invalidCurve);
         } else if (updateType == UpdaterType::CURVE) {
             auto& curveConfig = config.GetAnimationArray();
             std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> valChangeOverLife;
@@ -1303,10 +1303,10 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
                     OHOS::Rosen::RSColor(toColor.GetRed(), toColor.GetGreen(), toColor.GetBlue(), toColor.GetAlpha()),
                     startMills, endMills, rsCurve));
             }
-            return OHOS::Rosen::ParticleColorParaType(rsInitRange, 
-                static_cast<OHOS::Rosen::DistributionType>(colorDistInt), ParticleUpdator::CURVE, OHOS::Rosen::Range<float>(),
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange,
+                static_cast<OHOS::Rosen::DistributionType>(colorDistInt), ParticleUpdator::CURVE,
                 OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
-                valChangeOverLife);
+                OHOS::Rosen::Range<float>(), valChangeOverLife);
         }
     }
     return ConvertParticleDefaultColorOption(rsInitRange);
