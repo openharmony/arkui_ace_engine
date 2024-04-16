@@ -173,9 +173,6 @@ void RatingPattern::UpdatePaintConfig()
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
 {
-    if (UseContentModifier()) {
-        return nullptr;
-    }
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
@@ -209,6 +206,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
             backgroundImageCanvas_->IsStatic())) {
         ratingModifier_->SetNeedDraw(true);
     }
+    ratingModifier_->SetUseContentModifier(UseContentModifier());
     auto reverse = ratingLayoutProperty->GetLayoutDirection() == TextDirection::RTL;
     auto paintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_, reverse);
     paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
@@ -451,9 +449,6 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::HandleTouchUp()
 {
-    if (UseContentModifier()) {
-        return;
-    }
     CHECK_NULL_VOID(!IsIndicator());
     state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -461,9 +456,6 @@ void RatingPattern::HandleTouchUp()
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
 {
-    if (UseContentModifier()) {
-        return;
-    }
     CHECK_NULL_VOID(!IsIndicator());
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
@@ -482,9 +474,6 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
-    if (UseContentModifier()) {
-        return;
-    }
     CHECK_NULL_VOID(!IsIndicator());
     auto eventPointX = info.GetLocalLocation().GetX();
     if (Negative(eventPointX)) {
@@ -838,6 +827,7 @@ void RatingPattern::LoadBackground()
 void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     // Reset image state code.
     imageReadyStateCode_ = 0;
     imageSuccessStateCode_ = 0;
@@ -861,7 +851,6 @@ void RatingPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-    FireBuilder();
 }
 
 // XTS inspector code
@@ -932,11 +921,19 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 
 void RatingPattern::FireBuilder()
 {
-    CHECK_NULL_VOID(makeFunc_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAtIndex(0);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
     host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
@@ -944,7 +941,9 @@ void RatingPattern::FireBuilder()
 
 RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
 {
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto property = GetLayoutProperty<RatingLayoutProperty>();
