@@ -231,10 +231,6 @@ void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const Offs
         !isCustomSize_) {
         float rectItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
         float rectItemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
-        if (currentIndexFlag) {
-            rectItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
-            rectItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
-        }
         float rectLeft =
             (axis_ == Axis::HORIZONTAL ? center.GetX() - rectItemWidth * 0.5 : center.GetY() - rectItemHeight * 0.5);
         float rectTop =
