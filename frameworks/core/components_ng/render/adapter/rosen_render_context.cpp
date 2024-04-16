@@ -1282,8 +1282,9 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
             OHOS::Rosen::Range<float> rsBlueRandom(blueRandom.first, blueRandom.second);
             OHOS::Rosen::Range<float> rsAlphaRandom(alphaRandom.first, alphaRandom.second);
             std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> invalidCurve;
-            return OHOS::Rosen::ParticleColorParaType(rsInitRange, OHOS::Rosen::ParticleUpdator::RANDOM, rsRedRandom,
-                rsGreenRandom, rsBlueRandom, rsAlphaRandom, invalidCurve);
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange, OHOS::Rosen::DistributionType::UNIFORM,
+                OHOS::Rosen::ParticleUpdator::RANDOM, rsRedRandom, rsGreenRandom, rsBlueRandom, rsAlphaRandom,
+                invalidCurve);
         } else if (updateType == UpdaterType::CURVE) {
             auto& curveConfig = config.GetAnimationArray();
             std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> valChangeOverLife;
@@ -1300,9 +1301,9 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
                     OHOS::Rosen::RSColor(toColor.GetRed(), toColor.GetGreen(), toColor.GetBlue(), toColor.GetAlpha()),
                     startMills, endMills, rsCurve));
             }
-            return OHOS::Rosen::ParticleColorParaType(rsInitRange, ParticleUpdator::CURVE, OHOS::Rosen::Range<float>(),
-                OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
-                valChangeOverLife);
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange, OHOS::Rosen::DistributionType::UNIFORM,
+                ParticleUpdator::CURVE, OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
+                OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), valChangeOverLife);
         }
     }
     return ConvertParticleDefaultColorOption(rsInitRange);
@@ -1313,15 +1314,15 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleDefaultColorOpti
 {
     std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> invalidCurve;
     if (rsInitRangeOpt.has_value()) {
-        return OHOS::Rosen::ParticleColorParaType(rsInitRangeOpt.value(), OHOS::Rosen::ParticleUpdator::NONE,
-            OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
-            OHOS::Rosen::Range<float>(), invalidCurve);
+        return OHOS::Rosen::ParticleColorParaType(rsInitRangeOpt.value(), OHOS::Rosen::DistributionType::UNIFORM,
+            OHOS::Rosen::ParticleUpdator::NONE, OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
+            OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), invalidCurve);
     }
     return OHOS::Rosen::ParticleColorParaType(
         OHOS::Rosen::Range<OHOS::Rosen::RSColor>(
             OHOS::Rosen::RSColor(PARTICLE_DEFAULT_COLOR), OHOS::Rosen::RSColor(PARTICLE_DEFAULT_COLOR)),
-        OHOS::Rosen::ParticleUpdator::NONE, OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
-        OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), invalidCurve);
+        OHOS::Rosen::DistributionType::UNIFORM, OHOS::Rosen::ParticleUpdator::NONE, OHOS::Rosen::Range<float>(),
+        OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), invalidCurve);
 }
 
 Rosen::ParticleParaType<float> RosenRenderContext::ConvertParticleFloatOption(
