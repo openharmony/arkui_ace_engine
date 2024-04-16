@@ -4806,7 +4806,7 @@ void RichEditorPattern::OnAreaChangedInner()
         textSelector_.selectionDestinationOffset.SetX(
             CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
         CreateHandles();
-        selectOverlay_->HideMenu();
+        selectOverlay_->HideMenu(true);
     }
 }
 
@@ -5327,7 +5327,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
             scrollBar->PlayScrollBarAppearAnimation();
         }
         if (SelectOverlayIsOn()) {
-            selectOverlay_->HideMenu();
+            selectOverlay_->HideMenu(true);
         }
         return true;
     }
