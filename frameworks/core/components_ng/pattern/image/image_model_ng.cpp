@@ -327,6 +327,7 @@ void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
 void ImageModelNG::SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
 }
 
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
@@ -413,6 +414,7 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolatio
 void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, frameNode);
 }
 
 void ImageModelNG::SetDraggable(FrameNode *frameNode, bool draggable)
