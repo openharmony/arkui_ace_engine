@@ -2055,6 +2055,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
 void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caretUpdateType=%{public}d", caretUpdateType_);
+    textResponseType_ = TextResponseType::LONG_PRESS;
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         HandleUserLongPressEvent(info);
     }
@@ -2088,11 +2089,9 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         RequestKeyboard(false, true, true);
     }
     if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
-        if (selectOverlay_->SelectOverlayIsOn() && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
-            selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
-        } else {
-            selectOverlay_->ProcessOverlay({.animation = true});
-        }
+        int32_t requestCode = (selectOverlay_->SelectOverlayIsOn() && caretUpdateType_ == CaretUpdateType::LONG_PRESSED)
+            ? REQUEST_RECREATE : 0;
+        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = requestCode});
         FireOnSelectionChange(selectStart, selectEnd);
         if (!selectOverlay_->IsSingleHandle()) {
             StopTwinkling();
@@ -4797,11 +4796,7 @@ void RichEditorPattern::CloseSelectionMenu()
 
 void RichEditorPattern::CloseSelectOverlay()
 {
-    if (!selectOverlayProxy_ || selectOverlayProxy_->IsClosed()) {
-        return;
-    }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "CloseSelectOverlay");
-    TextPattern::CloseSelectOverlay(true);
     selectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
 }
 
@@ -5439,6 +5434,7 @@ void RichEditorPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
+    selectOverlay_->UpdateMenuOffset();
     if (IsSelectAreaVisible()) {
         selectOverlay_->ShowMenu();
     }
@@ -5628,7 +5624,7 @@ void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
         } else {
             MoveFirstHandle(newOffset);
         }
-        TextPattern::OnHandleMove(param.handleRect, param.isFirstHandle);
+        selectOverlay_->OnHandleMove(param.handleRect, param.isFirstHandle);
         if (NearEqual(newOffset, 0.0f)) {
             return;
         }

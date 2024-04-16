@@ -46,9 +46,10 @@ public:
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override {};
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
+    void UpdateMenuOffset();
     bool IsHandlesShow();
 
 private:
