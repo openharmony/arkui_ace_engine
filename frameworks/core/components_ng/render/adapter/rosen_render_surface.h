@@ -119,11 +119,15 @@ public:
 
     void releaseSurfaceBuffers() override;
 
+    void UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height) override;
+
     void SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height) override;
 
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
     void SetTransformHint(Rotation dmRotation) override;
+
+    void DumpInfo() override;
 
 private:
     void PostRenderOnlyTaskToUI();
