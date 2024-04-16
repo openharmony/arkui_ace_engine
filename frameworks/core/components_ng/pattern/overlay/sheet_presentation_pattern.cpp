@@ -612,9 +612,9 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         CHECK_NULL_VOID(ref);
         if (!ref->GetAnimationBreak()) {
             ref->SetAnimationProcess(false);
+            ref->ChangeSheetPage(ref->height_);
         } else {
             ref->isAnimationBreak_ = false;
-            ref->ChangeSheetPage(ref->height_);
         }
         ref->AvoidAiBar();
         ref->isNeedProcessHeight_ = false;
@@ -1638,8 +1638,11 @@ void SheetPresentationPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("detents' Size: ").append(std::to_string(sheetStyle.detents.size())));
 }
 
-void SheetPresentationPattern::FireOnHeightDidChange()
+void SheetPresentationPattern::FireOnHeightDidChange(float height)
 {
+    if (NearEqual(preDidHeight_, height)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP) {
@@ -1647,6 +1650,7 @@ void SheetPresentationPattern::FireOnHeightDidChange()
     } else {
         OnHeightDidChange(height_);
     }
+    preDidHeight_ = height;
 }
 
 void SheetPresentationPattern::FireOnDetentsDidChange(float height)

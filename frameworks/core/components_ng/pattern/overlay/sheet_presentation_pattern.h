@@ -151,7 +151,7 @@ public:
         }
     }
 
-    void FireOnHeightDidChange();
+    void FireOnHeightDidChange(float height);
 
     bool HasOnHeightDidChange()
     {
@@ -475,6 +475,7 @@ private:
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
 
+    float preDidHeight_ = 0.0f;
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height

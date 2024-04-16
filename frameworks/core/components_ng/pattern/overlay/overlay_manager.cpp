@@ -3445,7 +3445,7 @@ void OverlayManager::PlaySheetTransition(
                 auto overlay = weak.Upgrade();
                 CHECK_NULL_VOID(overlay);
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
-                pattern->FireOnHeightDidChange();
+                pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
         sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
@@ -3495,6 +3495,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
         sheetPattern->ResetToInvisible();
         sheetPattern->SetCurrentHeight(sheetHeight_);
         sheetPattern->StartOffsetEnteringAnimation();
+        sheetPattern->FireOnHeightDidChange(sheetHeight_);
         sheetPattern->StartAlphaEnteringAnimation([sheetWK = WeakClaim(RawPtr(sheetNode))] {
             auto sheet = sheetWK.Upgrade();
             CHECK_NULL_VOID(sheet);
