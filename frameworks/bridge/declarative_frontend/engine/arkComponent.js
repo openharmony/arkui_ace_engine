@@ -14353,7 +14353,12 @@ class ArkSliderComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -14361,10 +14366,11 @@ class ArkSliderComponent extends ArkComponent {
   }
   makeContentModifierNode(context, sliderConfiguration) {
     sliderConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.sliderNode)) {
+    if (isUndefined(this.sliderNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.sliderNode = new xNode.BuilderNode(context);
       this.sliderNode.build(this.builder, sliderConfiguration);
+      this.needRebuild = false;
     } else {
       this.sliderNode.update(sliderConfiguration);
     }
