@@ -278,29 +278,36 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuWrapperPattern->HasPreviewTransitionEffect()) {
+        auto layoutProperty = imageNode->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    } else {
+        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+        auto previewBeforeAnimationScale =
+            LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+        auto previewAfterAnimationScale =
+            LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
 
-    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
-    auto previewBeforeAnimationScale =
-        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
-    auto previewAfterAnimationScale =
-        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+        imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
 
-    imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
+        AnimationOption scaleOption = AnimationOption();
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
+            menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
+        scaleOption.SetCurve(motion);
+        scaleOption.SetOnFinishEvent(
+            []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
+        AnimationUtils::Animate(
+            scaleOption,
+            [imageContext, previewAfterAnimationScale]() {
+                if (imageContext) {
+                    imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+                }
+            },
+            scaleOption.GetOnFinishEvent());
+    }
 
-    AnimationOption scaleOption = AnimationOption();
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
-        menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
-    scaleOption.SetCurve(motion);
-    scaleOption.SetOnFinishEvent(
-        []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
-    AnimationUtils::Animate(
-        scaleOption,
-        [imageContext, previewAfterAnimationScale]() {
-            if (imageContext) {
-                imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
-            }
-        },
-        scaleOption.GetOnFinishEvent());
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
 }
 
@@ -390,18 +397,8 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     imageNode->MountToParent(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->HasPreviewTransitionEffect()) {
-        auto layoutProperty = imageNode->GetLayoutProperty();
-        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-        ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
-    } else {
-        ShowPixelMapAnimation(imageNode, menuNode);
-        ShowGatherAnimation(imageNode, menuNode);
-    }
+    ShowPixelMapAnimation(imageNode, menuNode);
+    ShowGatherAnimation(imageNode, menuNode);
 }
 
 void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
