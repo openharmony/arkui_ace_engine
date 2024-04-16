@@ -1003,4 +1003,16 @@ bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebU
     
     return result;
 }
+
+std::vector<int8_t> WebClientImpl::GetWordSelection(const std::string& text, int8_t offset) {
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return { -1, -1 };
+    }
+
+    std::vector<int8_t> result = delegate->GetWordSelection(text, offset);
+    
+    return result;
+}
 } // namespace OHOS::Ace
