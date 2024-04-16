@@ -632,6 +632,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     if (start > length || end < 0 || start == end) {
         return;
     }
+
     OperationRecord record;
     record.beforeCaretPosition = start;
     std::wstringstream wss;
@@ -645,6 +646,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     ClearRedoOperationRecords();
     record.afterCaretPosition = start;
     AddOperationRecord(record);
+
     auto startInfo = GetSpanPositionInfo(start);
     auto endInfo = GetSpanPositionInfo(end - 1);
     if (startInfo.spanIndex_ == endInfo.spanIndex_) {
@@ -660,9 +662,9 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     SetCaretOffset(start);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (host->GetChildren().empty() || GetTextContentLength() == 0) {
+    auto childrens = host->GetChildren();
+    if (childrens.empty() || GetTextContentLength() == 0) {
         SetCaretPosition(0);
-        textForDisplay_.clear();
     }
     UpdateSpanPosition();
     AfterChangeText(changeValue);
@@ -1232,6 +1234,8 @@ bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanNode>& spanNode)
 
 void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle)
 {
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(imageNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -4474,7 +4478,6 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (IsShowSelectMenuUsingMouse() || isUsingExternalKeyboard) {
         CloseSelectOverlay();
     } else {
-        CHECK_NULL_VOID(selectOverlayProxy_);
         selectOverlayProxy_->ShowOrHiddenMenu(true);
     }
 }
