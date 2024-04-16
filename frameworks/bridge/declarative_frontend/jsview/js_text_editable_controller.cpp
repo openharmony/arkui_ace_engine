@@ -97,7 +97,7 @@ void JSTextEditableController::SetTextSelection(const JSCallbackInfo& info)
         int32_t selectionStart = start->ToNumber<int32_t>();
         int32_t selectionEnd = end->ToNumber<int32_t>();
 
-        if (info.Length() == 3) { /* 3:args number */
+        if (info.Length() == 3 && info[2]->IsObject()) { /* 2, 3:args number */
             SelectionOptions optionTemp;
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetTextSelection: The selectionOption is set");
             JSRef<JSObject> optionsObj = JSRef<JSObject>::Cast(info[2]); /* 2:args number */
