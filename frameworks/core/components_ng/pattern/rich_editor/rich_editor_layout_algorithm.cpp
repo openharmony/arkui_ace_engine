@@ -108,6 +108,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     SizeF res;
     int32_t lastPlaceholderIndex = 0;
     float textHeight = 0.0f;
+    uint32_t paragraphId = 0;
     for (auto&& group : spans_) {
         // layout each paragraph
         ACE_SCOPED_TRACE("LayoutEachParagraph");
@@ -124,6 +125,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         if (!paragraph) {
             continue;
         }
+        paragraph->SetParagraphId(paragraphId++);
         float shadowOffset = GetShadowOffset(group);
         res.AddHeight(shadowOffset);
         textHeight += paragraph->GetHeight();
