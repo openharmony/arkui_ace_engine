@@ -290,6 +290,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
                 pattern->ResetSelection();
             }
+            break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
             break;
@@ -298,10 +299,15 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
 {
+    TAG_LOGD(AceLogTag::ACE_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
         pattern->ResetSelection();
+    }
+    if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
+        pattern->ResetSelection();
+        pattern->StartTwinkling();
     }
 }
 
