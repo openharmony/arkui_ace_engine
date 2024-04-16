@@ -343,6 +343,9 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 
 void CustomPaintPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
+    if (!isSetTextDirection_) {
+        SetTextDirection(TextDirection::INHERIT);
+    }
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.FillText(paintWrapper, text, x, y, maxWidth);
     };
@@ -354,6 +357,9 @@ void CustomPaintPattern::FillText(const std::string& text, double x, double y, s
 
 void CustomPaintPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
+    if (!isSetTextDirection_) {
+        SetTextDirection(TextDirection::INHERIT);
+    }
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.StrokeText(paintWrapper, text, x, y, maxWidth);
     };
