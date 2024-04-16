@@ -65,6 +65,7 @@
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
+#include "bridge/declarative_frontend/jsview/js_drawing_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
@@ -577,6 +578,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ColorMetrics", JSColorMetrics::JSBind },
     { "FormLink", JSFormLink::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
+    { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
@@ -748,6 +750,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
+    { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },

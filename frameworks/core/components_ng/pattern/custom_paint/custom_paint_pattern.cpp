@@ -912,6 +912,18 @@ double CustomPaintPattern::GetHeight()
     return canvasSize_->Height();
 }
 
+void CustomPaintPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+{
+    paintMethod_->SetRSCanvasCallback(callback);
+}
+
+void CustomPaintPattern::SetInvalidate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::SetTextDirection(TextDirection direction)
 {
     auto host = GetHost();
