@@ -345,6 +345,9 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
 {
     StopMotion();
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag start, localLocation: %{public}s, "
+        "globalLocation: %{public}s",
+        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
             scrollBarProxy_->NotifyScrollStart();
@@ -369,6 +372,9 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 {
     auto velocity = info.GetMainVelocity();
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, position is %{public}f and %{public}f, "
+        "velocity is %{public}f",
+        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
