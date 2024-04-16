@@ -157,7 +157,17 @@ public:
 
     void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
+    }
+
+    RefPtr<FrameNode> GetContentModifierNode()
+    {
+        return contentModifierNode_;
     }
 
     void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)

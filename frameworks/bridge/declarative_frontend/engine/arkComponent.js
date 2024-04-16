@@ -14970,7 +14970,12 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -14978,10 +14983,11 @@ class ArkCheckboxComponent extends ArkComponent {
   }
   makeContentModifierNode(context, checkBoxConfiguration) {
     checkBoxConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.checkboxNode)) {
+    if (isUndefined(this.checkboxNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.checkboxNode = new xNode.BuilderNode(context);
       this.checkboxNode.build(this.builder, checkBoxConfiguration);
+      this.needRebuild = false;
     } else {
       this.checkboxNode.update(checkBoxConfiguration);
     }
