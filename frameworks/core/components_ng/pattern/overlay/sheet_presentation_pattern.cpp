@@ -1233,11 +1233,24 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option,
             [context, this]() {
                 if (context) {
+                    DismissSheetShadow(context);
                     context->OnTransformTranslateUpdate({ 0.0f, pageHeight_, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
     }
+}
+
+void SheetPresentationPattern::DismissSheetShadow(const RefPtr<RenderContext>& context)
+{
+    auto shadow = context->GetBackShadow();
+    if (!shadow.has_value()) {
+        shadow = Shadow::CreateShadow(ShadowStyle::None);
+    }
+    auto color = shadow->GetColor();
+    auto newColor = color.ChangeAlpha(0);
+    shadow->SetColor(newColor);
+    context->UpdateBackShadow(shadow.value());
 }
 
 void SheetPresentationPattern::ClipSheetNode()
@@ -1257,7 +1270,7 @@ void SheetPresentationPattern::ClipSheetNode()
     auto sheetType = GetSheetType();
     std::string clipPath;
     float half = 0.5f;
-    if (sheetSize.Width() * half < sheetRadius.Value()) {
+    if (sheetSize.Width() * half < sheetRadius.ConvertToPx()) {
         sheetRadius = Dimension(sheetSize.Width() * half);
     }
     if (sheetType == SheetType::SHEET_POPUP) {

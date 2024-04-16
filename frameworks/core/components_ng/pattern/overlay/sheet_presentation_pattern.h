@@ -450,6 +450,7 @@ private:
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);
+    void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);

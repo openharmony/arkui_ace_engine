@@ -3065,9 +3065,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         CHECK_NULL_VOID(topModalNode);
         if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG &&
             topModalNode->GetPattern<SheetPresentationPattern>()->GetTargetId() == targetId) {
-            if (sheetStyle.backgroundColor.has_value()) {
-                topModalNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
-            }
+            SetSheetBackgroundColor(topModalNode, sheetTheme, sheetStyle);
             auto topModalRenderContext = topModalNode->GetRenderContext();
             CHECK_NULL_VOID(topModalRenderContext);
             if (sheetStyle.backgroundBlurStyle.has_value()) {
@@ -3574,6 +3572,19 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
                 HitTestMode::HTMTRANSPARENT);
         }
         context->OpacityAnimation(option, 1.0, 0.0);
+    }
+}
+
+void OverlayManager::SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
+    const NG::SheetStyle& sheetStyle)
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (sheetStyle.backgroundColor.has_value()) {
+            sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
+        }
+    } else {
+        sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value_or(
+            sheetTheme->GetSheetBackgoundColor()));
     }
 }
 

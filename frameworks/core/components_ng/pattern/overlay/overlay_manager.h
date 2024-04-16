@@ -531,6 +531,8 @@ private:
     void FireModalPageHide();
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
+    void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
+        const NG::SheetStyle& sheetStyle);
 
     bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
     bool ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode);
