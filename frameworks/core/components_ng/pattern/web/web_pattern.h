@@ -709,6 +709,7 @@ private:
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
+    std::list<TouchInfo> touchOverlayInfo_;
     bool isPopup_ = false;
     int32_t tooltipTextId_ = -1;
     int32_t tooltipId_ = -1;
