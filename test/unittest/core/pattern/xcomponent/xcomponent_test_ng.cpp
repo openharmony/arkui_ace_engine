@@ -2006,7 +2006,7 @@ HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
     pattern->EnableAnalyzer(true);
     EXPECT_TRUE(pattern->isEnableAnalyzer_);
 
-    if (ImageAnalyzerMgr::GetInstance()->IsImageAnalyzerSupported()) {
+    if (ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()) {
         EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
     } else {
         EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
