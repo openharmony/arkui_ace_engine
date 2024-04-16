@@ -254,6 +254,10 @@ struct GridLayoutInfo {
 
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,
         float mainGap, float& targetPos);
+
+    using MatIter = std::map<int32_t, std::map<int32_t, int32_t>>::const_iterator;
+    MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
+    void ClearHeightsFromMatrix(int32_t lineIdx);
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]

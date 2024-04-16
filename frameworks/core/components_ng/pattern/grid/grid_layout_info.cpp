@@ -688,4 +688,33 @@ float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, fl
     float bottomPos = offset + heightInView;
     return bottomPos - mainSize;
 }
+
+void GridLayoutInfo::ClearHeightsFromMatrix(int32_t lineIdx)
+{
+    auto lineIt = lineHeightMap_.find(lineIdx);
+    if (lineIt == lineHeightMap_.end()) {
+        return;
+    }
+    if (gridMatrix_.find(lineIdx) != gridMatrix_.end()) {
+        lineIt++;
+    }
+    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+}
+
+MatIter GridLayoutInfo::FindStartLineInMatrix(MatIter iter, int32_t index) const
+{
+    if (iter == gridMatrix_.end() || iter == gridMatrix_.begin()) {
+        return iter;
+    }
+
+    --iter;
+    int32_t maxValue = 0;
+    while (CheckRow(maxValue, iter->second, index)) {
+        if (iter == gridMatrix_.begin()) {
+            return iter;
+        }
+        --iter;
+    }
+    return ++iter;
+}
 } // namespace OHOS::Ace::NG

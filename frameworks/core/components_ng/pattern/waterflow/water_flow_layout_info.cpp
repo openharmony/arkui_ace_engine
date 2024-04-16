@@ -229,7 +229,10 @@ void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
     if (resetFrom > endIndex_) {
         return;
     }
-    Reset();
+    maxHeight_ = 0.0f;
+    jumpIndex_ = EMPTY_JUMP_INDEX;
+    startIndex_ = resetFrom;
+    ClearCacheAfterIndex(resetFrom - 1);
 }
 
 int32_t WaterFlowLayoutInfo::GetCrossCount() const
