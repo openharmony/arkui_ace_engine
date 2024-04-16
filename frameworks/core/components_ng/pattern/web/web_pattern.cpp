@@ -586,30 +586,21 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         std::string linkUrl = delegate_->dragData_->GetLinkURL();
         std::string linkTitle = delegate_->dragData_->GetLinkTitle();
         if (!plainContent.empty()) {
+            isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddPlainTextRecord(aceUnifiedData, plainContent);
         }
         if (!htmlContent.empty()) {
+            isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddHtmlRecord(aceUnifiedData, htmlContent, "");
         }
         if (!linkUrl.empty()) {
+            isDragEndMenuShow_ = false;
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
         }
         std::string fileName = delegate_->dragData_->GetImageFileName();
         if (!fileName.empty()) {
-            std::string fullName;
-            if (delegate_->tempDir_.empty()) {
-                fullName = "/data/storage/el2/base/haps/entry/temp/dragdrop/" + fileName;
-            } else {
-                fullName = delegate_->tempDir_ + "/dragdrop/" + fileName;
-            }
-            AppFileService::ModuleFileUri::FileUri fileUri(fullName);
-            TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, FileUri:%{public}s, image path:%{public}s",
-                fileUri.ToString().c_str(), fullName.c_str());
-            std::vector<std::string> urlVec;
-            std::string udmfUri = fileUri.ToString();
-            urlVec.emplace_back(udmfUri);
-            UdmfClient::GetInstance()->AddFileUriRecord(aceUnifiedData, urlVec);
+            OnDragFileNameStart(aceUnifiedData, fileName);
         } else {
             TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event start, dragdata has no image file uri, just pass");
         }
@@ -618,6 +609,24 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         return dragDropInfo;
     }
     return dragDropInfo;
+}
+
+void WebPattern::OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName)
+{
+    isDragEndMenuShow_ = false;
+    std::string fullName;
+    if (delegate_->tempDir_.empty()) {
+        fullName = "/data/storage/el2/base/haps/entry/temp/dragdrop/" + fileName;
+    } else {
+        fullName = delegate_->tempDir_ + "/dragdrop/" + fileName;
+    }
+    AppFileService::ModuleFileUri::FileUri fileUri(fullName);
+    TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, FileUri:%{public}s, image path:%{public}s",
+        fileUri.ToString().c_str(), fullName.c_str());
+    std::vector<std::string> urlVec;
+    std::string udmfUri = fileUri.ToString();
+    urlVec.emplace_back(udmfUri);
+    UdmfClient::GetInstance()->AddFileUriRecord(aceUnifiedData, urlVec);
 }
 
 void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
@@ -759,6 +768,7 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isDragEndMenuShow_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,
             "DragDrop event WebEventHub onDragLeaveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
@@ -774,6 +784,7 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             "DragDrop event WebEventHub onDragEndId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->HandleDragEnd(pattern->dropX_, pattern->dropY_);
+        pattern->DragDropSelectionMenu();
     };
     // set custom OnDragStart function
     eventHub->SetOnDragEnd(std::move(onDragEndId));
@@ -2273,11 +2284,52 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
     }
+    dropParams_ = params;
+    menuCallback_ = callback;
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
     return selectOverlayProxy_ ? true : false;
+}
+
+void WebPattern::DragDropSelectionMenu()
+{
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    if (overlayType == INVALID_OVERLAY) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_：%{publc}d", isDragEndMenuShow_);
+    if (!isDragEndMenuShow_ || IsImageDrag()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsCurrentFocus()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event web page has lost focus, no need to draw menu handles");
+        return;
+    }
+    SelectOverlayInfo selectInfo;
+    selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+    selectInfo.firstHandle.isShow = IsTouchHandleShow(startSelectionHandle_);
+    selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+    selectInfo.secondHandle.isShow = IsTouchHandleShow(endSelectionHandle_);
+    selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+    QuickMenuIsNeedNewAvoid(selectInfo, dropParams_, startSelectionHandle_, endSelectionHandle_);
+    selectInfo.menuInfo.menuIsShow = true;
+    RegisterSelectOverlayCallback(selectInfo, dropParams_, menuCallback_);
+    RegisterSelectOverlayEvent(selectInfo);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!selectOverlayProxy_) {
+        selectOverlayProxy_ =
+            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
+    }
 }
 
 RectF WebPattern::ComputeClippedSelectionBounds(
