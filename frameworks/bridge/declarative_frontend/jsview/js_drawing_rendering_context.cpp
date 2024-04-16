@@ -28,8 +28,6 @@
 
 namespace OHOS::Ace::Framework {
 
-JSDrawingRenderingContext::JSDrawingRenderingContext() {}
-
 void JSDrawingRenderingContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDrawingRenderingContext>::Declare("DrawingRenderingContext");
@@ -56,6 +54,11 @@ void JSDrawingRenderingContext::Destructor(JSDrawingRenderingContext* controller
     if (controller != nullptr) {
         controller->DecRefCount();
     }
+}
+
+JSDrawingRenderingContext::JSDrawingRenderingContext()
+{
+    SetInstanceId(Container::CurrentIdSafely());
 }
 
 void JSDrawingRenderingContext::JsGetCanvas(const JSCallbackInfo& info)

@@ -19,7 +19,6 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
@@ -28,7 +27,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSDrawingRenderingContext : public JSCanvasRenderer {
+class JSDrawingRenderingContext : public Referenced {
 public:
     JSDrawingRenderingContext();
     ~JSDrawingRenderingContext() override = default;
@@ -45,6 +44,18 @@ public:
     void SetRSCanvasCallback(RefPtr<AceType>& canvasPattern);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSDrawingRenderingContext);
+    void SetCanvasPattern(const RefPtr<AceType>& canvas)
+    {
+        canvasPattern_ = canvas;
+    }
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
+protected:
+    RefPtr<AceType> canvasPattern_;
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
     JSRef<JSVal> jsCanvasVal_;
