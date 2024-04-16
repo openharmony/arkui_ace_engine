@@ -38,7 +38,6 @@ public:
     static int32_t CalculateTranslateDegree(int32_t hostId);
 
 protected:
-    void OnModifyDone() override;
     void OnAttachToFrameNode() override;
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
