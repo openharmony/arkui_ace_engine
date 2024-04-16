@@ -5459,8 +5459,8 @@ void RichEditorPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
-    selectOverlay_->UpdateMenuOffset();
     if (IsSelectAreaVisible()) {
+        selectOverlay_->UpdateMenuOffset();
         selectOverlay_->ShowMenu();
     }
 }
