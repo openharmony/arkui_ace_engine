@@ -18,6 +18,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -90,6 +91,13 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
     float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
     auto itemHeight = std::max(leftRowHeight, rightRowHeight);
+
+    bool needExpandContent = false;
+    float emptyWidth = 0.0f;
+    if (contentWidth < minRowWidth) {
+        emptyWidth = minRowWidth - contentWidth;
+        needExpandContent = true;
+    }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         layoutWrapper->GetGeometryNode()->SetContentSize(
             SizeF(std::max(minRowWidth, contentWidth), std::max(itemHeight, minItemHeight)));
@@ -105,6 +113,30 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         idealSize.SetWidth(idealWidth);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+
+        float newLeftRowWidth = idealWidth - rightRowWidth - padding.Width() - middleSpace;
+        if (newLeftRowWidth > leftRowWidth) {
+            emptyWidth = newLeftRowWidth - leftRowWidth;
+            needExpandContent = true;
+        }
+    }
+
+    if (needExpandContent) {
+        auto menuItemNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(menuItemNode);
+        auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto contentNode = pattern->GetContentNode();
+        CHECK_NULL_VOID(contentNode);
+
+        auto newRowSize = leftRow->GetGeometryNode()->GetFrameSize();
+        newRowSize.SetWidth(emptyWidth + newRowSize.Width());
+        leftRow->GetGeometryNode()->SetFrameSize(newRowSize);
+
+        auto oldTextSize = contentNode->GetGeometryNode()->GetFrameSize();
+        float newTextWidth = emptyWidth + oldTextSize.Width();
+        childConstraint.minSize.SetWidth(newTextWidth);
+        contentNode->Measure(childConstraint);
     }
 }
 

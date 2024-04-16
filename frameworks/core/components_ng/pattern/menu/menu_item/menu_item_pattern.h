@@ -189,6 +189,7 @@ private:
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
 
     bool IsDisabled();
     void UpdateDisabledStyle();
@@ -206,6 +207,10 @@ private:
 
     void RecordChangeEvent() const;
 
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;
@@ -216,6 +221,9 @@ private:
 
     bool isChanged_ = false;
     bool isHovered_ = false;
+    bool isFocused_ = false;
+    bool isFocusShadowSet_ = false;
+    bool isFocusBGColorSet_ = false;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 

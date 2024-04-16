@@ -21,10 +21,13 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -166,6 +169,126 @@ void MenuItemPattern::OnModifyDone()
     SetAccessibilityAction();
 
     host->GetRenderContext()->SetClipToBounds(true);
+
+    InitFocusEvent();
+
+    auto layoutProp = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    if (!layoutProp->GetMarginProperty()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        MarginProperty margin;
+        auto defaultMargin = CalcLength(Dimension(0.0));
+        auto verticalMargin = CalcLength(static_cast<float>(theme->GetMenuItemTopBottomMargin().ConvertToPx()));
+        margin.SetEdges(defaultMargin, defaultMargin, verticalMargin, verticalMargin);
+        layoutProp->UpdateMargin(margin);
+    }
+}
+
+void MenuItemPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+void MenuItemPattern::HandleFocusEvent()
+{
+    isFocused_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(theme->GetMenuItemFocusedBgColor());
+        isFocusBGColorSet_ = true;
+    }
+    if (!renderContext->HasBackShadow()) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(theme->GetMenuItemFocusedShadowStyle());
+        if (shadowStyle != ShadowStyle::None) {
+            Shadow shadow;
+            if (!GetShadowFromTheme(shadowStyle, shadow)) {
+                shadow = Shadow::CreateShadow(shadowStyle);
+            }
+            renderContext->UpdateBackShadow(shadow);
+            isFocusShadowSet_ = true;
+        }
+    }
+
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    CHECK_NULL_VOID(leftRow);
+    auto menuNode = GetMenu();
+    auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+    UpdateText(leftRow, menuProperty, false);
+}
+
+void MenuItemPattern::HandleBlurEvent()
+{
+    isFocused_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (isFocusBGColorSet_) {
+        renderContext->ResetBackgroundColor();
+        renderContext->SetBackgroundColor(theme->GetBackgroundColor().GetValue());
+        isFocusBGColorSet_ = false;
+    }
+    if (isFocusShadowSet_) {
+        renderContext->ResetBackShadow();
+        renderContext->SetShadowRadius(0.0f);
+        isFocusShadowSet_ = false;
+    }
+
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    CHECK_NULL_VOID(leftRow);
+    auto menuNode = GetMenu();
+    auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+    UpdateText(leftRow, menuProperty, false);
 }
 
 void MenuItemPattern::OnAfterModifyDone()
@@ -730,6 +853,26 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
+
+    UpdateFont(menuProperty, theme, isLabel);
+
+    textProperty->UpdateContent(content);
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
+    textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
+    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
+    node->MarkModifyDone();
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto& node = isLabel ? label_ : content_;
+    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
     auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
     auto fontWeight = isLabel ? itemProperty->GetLabelFontWeight() : itemProperty->GetFontWeight();
@@ -737,6 +880,9 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
+    if (!isLabel && !itemProperty->HasFontColor() && isFocused_) {
+        fontColor = theme->GetMenuItemFocusedTextColor();
+    }
     auto menuItemNode = GetHost();
     UpdateFontColor(
         node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
@@ -751,12 +897,6 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
-    textProperty->UpdateContent(content);
-    textProperty->UpdateMaxLines(1);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void MenuItemPattern::UpdateTextNodes()

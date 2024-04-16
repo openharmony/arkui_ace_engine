@@ -268,6 +268,10 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag) : t
     if (LessOrEqual(previewScale_, 0.0f)) {
         previewScale_ = 1.0f;
     }
+
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    targetSecurity_ = static_cast<float>(theme->GetMenuTargetSecuritySpace().ConvertToPx());
 }
 
 MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
