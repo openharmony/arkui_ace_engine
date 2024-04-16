@@ -2286,7 +2286,6 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
             pixmap = CreatePixelMapFromNapiValue(info[0]);
         }
 #endif
-        CHECK_NULL_VOID(pixmap);
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
     }
 

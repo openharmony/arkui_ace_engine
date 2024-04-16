@@ -683,6 +683,9 @@ void RosenRenderContext::PaintBackground()
         PaintRSBgImage();
 #endif
     } else {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            rsNode_->SetBgImage(std::make_shared<Rosen::RSImage>());
+        }
         return;
     }
 
@@ -707,6 +710,9 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
 {
     CHECK_NULL_VOID(rsNode_);
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
+        bgImage_ = nullptr;
+        bgLoadingCtx_ = nullptr;
+        PaintBackground();
         return;
     }
     if (!bgLoadingCtx_ || src != bgLoadingCtx_->GetSourceInfo()) {
