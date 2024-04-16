@@ -2233,8 +2233,8 @@ void TextPattern::SetFadeout(const bool& left, const bool& right, const float& g
     overlayRenderContext->UpdateBackBlendMode(BlendMode::DST_IN);
     overlayRenderContext->UpdateBackBlendApplyType(BlendApplyType::FAST);
 
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextPattern::BeforeCreateLayoutWrapper()

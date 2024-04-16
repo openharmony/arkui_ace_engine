@@ -817,12 +817,6 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
         PauseTextRace();
     }
     ResumeTextRace(false);
-
-    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textPattern);
-    auto host = textPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextContentModifier::StopTextRace()
