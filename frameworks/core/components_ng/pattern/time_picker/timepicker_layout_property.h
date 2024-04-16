@@ -88,16 +88,13 @@ public:
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
 
         auto options = JsonUtil::Create(true);
-
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            options->Put("hour", TimeFormat::GetHourFormat(
-                GetPrefixHourValue(0), GetIsUseMilitaryTimeValue(false)).c_str());
-            options->Put("minute", TimeFormat::GetMinuteFormat(GetPrefixMinuteValue(0)).c_str());
-            if (GetPrefixSecondValue(0) != static_cast<int32_t>(ZeroPrefixType::OFF)) {
-                options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
-            }
-            json->PutExtAttr("dateTimeOptions", options, filter);
+        options->Put("hour", TimeFormat::GetHourFormat(
+            GetPrefixHourValue(0), GetIsUseMilitaryTimeValue(false)).c_str());
+        options->Put("minute", TimeFormat::GetMinuteFormat(GetPrefixMinuteValue(0)).c_str());
+        if (GetPrefixSecondValue(0) != static_cast<int32_t>(ZeroPrefixType::OFF)) {
+            options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
         }
+        json->PutExtAttr("dateTimeOptions", options, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsUseMilitaryTime, bool, PROPERTY_UPDATE_MEASURE);
