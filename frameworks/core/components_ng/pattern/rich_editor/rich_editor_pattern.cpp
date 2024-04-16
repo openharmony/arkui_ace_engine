@@ -4793,11 +4793,7 @@ void RichEditorPattern::CloseSelectionMenu()
 
 void RichEditorPattern::CloseSelectOverlay()
 {
-    if (!selectOverlayProxy_ || selectOverlayProxy_->IsClosed()) {
-        return;
-    }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "CloseSelectOverlay");
-    TextPattern::CloseSelectOverlay(true);
     selectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
 }
 
