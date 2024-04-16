@@ -2795,8 +2795,28 @@ void RosenRenderContext::OnePixelRounding()
         roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
         nodeHeightI = nodeHeightTemp;
     }
-
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight) - RoundValueToPixelGrid(innerLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom) - RoundValueToPixelGrid(innerTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0]);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1]);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
@@ -2858,8 +2878,30 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
         roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
         nodeHeightI = nodeHeightTemp;
     }
-
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
+            RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
+            RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 
