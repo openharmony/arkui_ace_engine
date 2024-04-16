@@ -38,12 +38,12 @@ void ImageAnalyzerManager::DestroyAnalyzerOverlay()
 
 bool ImageAnalyzerManager::IsSupportImageAnalyzerFeature()
 {
-    return true;
+    return false;
 }
 
 bool ImageAnalyzerManager::IsOverlayCreated()
 {
-    return true;
+    return false;
 }
 
 void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
