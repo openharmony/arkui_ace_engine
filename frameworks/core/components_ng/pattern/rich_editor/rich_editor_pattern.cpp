@@ -2684,8 +2684,8 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
     RichEditorChangeValue changeValue;
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::INSERT));
     ClearRedoOperationRecords();
-    InsertValueOperation(insertValue, &record, isIME);
     record.afterCaretPosition = caretPosition_ + moveLength_ + StringUtils::ToWstring(insertValue).length();
+    InsertValueOperation(insertValue, &record, isIME);
     if (isDragSponsor_) {
         record.deleteCaretPostion = dragRange_.first;
     }
