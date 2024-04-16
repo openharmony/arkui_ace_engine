@@ -2170,6 +2170,9 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
     auto onTextSelectorChange = [weak = WeakClaim(this), &selector = textSelector_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (!selector.SelectNothing()) {
+            pattern->StopTwinkling();
+        }
         pattern->FireOnSelectionChange(selector);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
