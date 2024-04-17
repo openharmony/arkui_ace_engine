@@ -3807,7 +3807,8 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
-std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset) {
+std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
+{
     return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace::NG
