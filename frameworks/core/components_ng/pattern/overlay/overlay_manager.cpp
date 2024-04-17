@@ -3018,7 +3018,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
     std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode)
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -3029,12 +3030,15 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                              shouldDismiss = std::move(shouldDismiss), onWillAppear = std::move(onWillAppear),
                              onWillDisappear = std::move(onWillDisappear),
                              onHeightDidChange = std::move(onHeightDidChange),
-                             onDetentsDidChange  = std::move(onDetentsDidChange), targetNode]() mutable {
+                             onDetentsDidChange  = std::move(onDetentsDidChange),
+                             onWidthDidChange  = std::move(onWidthDidChange),
+                             onTypeDidChange  = std::move(onTypeDidChange), targetNode]() mutable {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildtitleNodeFunc),
             sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
-            std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange), targetNode);
+            std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange),
+            std::move(onWidthDidChange), std::move(onTypeDidChange), targetNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
@@ -3047,7 +3051,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
     std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode)
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode)
 {
     int32_t targetId = targetNode->GetId();
     auto rootNode = FindWindowScene(targetNode);
@@ -3096,20 +3101,21 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
                 CHECK_NULL_VOID(maskRenderContext);
                 maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
             }
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnWillDisappear(std::move(onWillDisappear));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnHeightDidChange(std::move(onHeightDidChange));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnDetentsDidChange(
-                std::move(onDetentsDidChange));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
+            auto topModalNodePattern = topModalNode->GetPattern<SheetPresentationPattern>();
+            topModalNodePattern->UpdateOnAppear(std::move(onAppear));
+            topModalNodePattern->UpdateOnDisappear(std::move(onDisappear));
+            topModalNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+            topModalNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+            topModalNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+            topModalNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+            topModalNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+            topModalNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
             layoutProperty->UpdateSheetStyle(sheetStyle);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             pipeline->FlushUITasks();
             ComputeSheetOffset(sheetStyle, topModalNode);
-            auto sheetType = topModalNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
-            if (sheetType != SheetType::SHEET_POPUP &&
-                !topModalNode->GetPattern<SheetPresentationPattern>()->GetAnimationProcess()) {
+            auto sheetType = topModalNodePattern->GetSheetType();
+            if (sheetType != SheetType::SHEET_POPUP && !topModalNodePattern->GetAnimationProcess()) {
                 PlaySheetTransition(topModalNode, true, false, false);
             }
             return;
@@ -3153,18 +3159,20 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     if (sheetStyle.shadow.has_value()) {
         sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
     }
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnWillDisappear(std::move(onWillDisappear));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnHeightDidChange(std::move(onHeightDidChange));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnDetentsDidChange(
-        std::move(onDetentsDidChange));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetNodePattern->UpdateOnAppear(std::move(onAppear));
+    sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
+    sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+    sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+    sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+    sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+    sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+    sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
     sheetMap_[targetId] = WeakClaim(RawPtr(sheetNode));
     modalStack_.push(WeakClaim(RawPtr(sheetNode)));
     SaveLastModalNode();
     // create maskColor node
-    auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
+    auto sheetType = sheetNodePattern->GetSheetType();
     auto maskNode = FrameNode::CreateFrameNode(
         V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     CHECK_NULL_VOID(maskNode);
@@ -3428,6 +3436,8 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
+        sheetPattern->FireOnTypeDidChange();
+        sheetPattern->FireOnWidthDidChange(sheetNode);
         option.SetOnFinishEvent(
             [sheetWK = WeakClaim(RawPtr(sheetNode)), weak = AceType::WeakClaim(this), isFirst = isFirstTransition] {
                 auto sheetNode = sheetWK.Upgrade();
