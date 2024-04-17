@@ -17,6 +17,7 @@
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -202,6 +203,12 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scrollBar and initialize related properties.
      */
+    MockPipelineContext::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ScrollBarTheme>()));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
