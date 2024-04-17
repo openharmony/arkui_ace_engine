@@ -52,6 +52,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (!GetHost() || !GetHost()->IsActive()) {
+            return nullptr;
+        }
         if (UseContentModifier()) {
             return nullptr;
         }
