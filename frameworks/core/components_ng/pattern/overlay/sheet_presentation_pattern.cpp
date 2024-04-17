@@ -1026,7 +1026,6 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, sheetType);
     auto windowRect = pipelineContext->GetCurrentWindowRect();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
@@ -1037,7 +1036,9 @@ SheetType SheetPresentationPattern::GetSheetType()
     if (windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
         return SheetType::SHEET_BOTTOM;
     }
-
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
+        return SheetType::SHEET_BOTTOM;
+    }
     if (sheetThemeType_ == "auto") {
         if (IsFold()) {
             sheetType = SheetType::SHEET_CENTER;
