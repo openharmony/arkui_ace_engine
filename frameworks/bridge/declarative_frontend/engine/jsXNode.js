@@ -855,6 +855,11 @@ const __creatorMap__ = new Map([
                 return new ArkRowComponent(node, type);
             });
         }],
+    ["Stack", (context) => {
+            return new TypedFrameNode(context, "Stack", (node, type) => {
+                return new ArkStackComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {

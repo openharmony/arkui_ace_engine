@@ -18,8 +18,8 @@ build_component_ng("base_ng") {
   sources = [
     "distributed_ui.cpp",
     "extension_handler.cpp",
-    "frame_node_creator.cpp",
     "frame_node.cpp",
+    "frame_node_creator.cpp",
     "geometry_node.cpp",
     "inspector.cpp",
     "inspector_filter.cpp",

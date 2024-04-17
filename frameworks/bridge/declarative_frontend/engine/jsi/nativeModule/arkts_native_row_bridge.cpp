@@ -93,13 +93,13 @@ ArkUINativeModuleValue RowBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension sapce;
-    ArkTSUtils::ParseJsDimensionVp(vm, secondArg, sapce, false);
-    if (LessNotEqual(sapce.Value(), 0.0)) {
+    CalcDimension space;
+    ArkTSUtils::ParseJsDimensionVp(vm, secondArg, space, false);
+    if (LessNotEqual(space.Value(), 0.0)) {
         GetArkUINodeModifiers()->getRowModifier()->resetRowSpace(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getRowModifier()->setRowSpace(nativeNode, sapce.Value(), static_cast<int>(sapce.Unit()));
+    GetArkUINodeModifiers()->getRowModifier()->setRowSpace(nativeNode, space.Value(), static_cast<int>(space.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

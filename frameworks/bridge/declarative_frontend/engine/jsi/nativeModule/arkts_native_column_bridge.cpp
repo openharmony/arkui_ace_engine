@@ -96,14 +96,14 @@ ArkUINativeModuleValue ColumnBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension sapce;
-    ArkTSUtils::ParseJsDimensionVp(vm, secondArg, sapce, false);
-    if (LessNotEqual(sapce.Value(), 0.0)) {
+    CalcDimension space;
+    ArkTSUtils::ParseJsDimensionVp(vm, secondArg, space, false);
+    if (LessNotEqual(space.Value(), 0.0)) {
         GetArkUINodeModifiers()->getColumnModifier()->resetColumnSpace(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getColumnModifier()->setColumnSpace(
-        nativeNode, sapce.Value(), static_cast<int>(sapce.Unit()));
+        nativeNode, space.Value(), static_cast<int>(space.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

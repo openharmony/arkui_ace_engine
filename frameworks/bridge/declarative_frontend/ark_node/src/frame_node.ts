@@ -514,6 +514,11 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkRowComponent(node, type);
       })
     }],
+    ["Stack", (context: UIContext) => {
+      return new TypedFrameNode(context, "Stack", (node: NodePtr, type: ModifierType) => {
+        return new ArkStackComponent(node, type);
+      })
+    }],
   ]
 )
 

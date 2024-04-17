@@ -8028,6 +8028,12 @@ class ArkStackComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      this.alignContent(value[0].alignContent);
+    }
+    return this
+  }
   alignContent(value) {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;

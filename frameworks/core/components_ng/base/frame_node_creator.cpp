@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node_creator.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -41,6 +42,11 @@ RefPtr<FrameNode> FrameNodeCreator::GetOrCreateTypedFrameNode(int32_t nodeId, co
                 [](const std::string& type, int32_t nodeId) {
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+                } },
+            { V2::STACK_ETS_TAG,
+                [](const std::string& type, int32_t nodeId) {
+                    return FrameNode::GetOrCreateFrameNode(
+                        type, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
                 } },
         };
     

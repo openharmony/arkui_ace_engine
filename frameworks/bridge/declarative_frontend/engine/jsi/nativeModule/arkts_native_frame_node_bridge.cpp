@@ -112,7 +112,7 @@ ArkUINativeModuleValue FrameNodeBridge::MakeFrameNodeInfo(EcmaVM* vm, ArkUINodeH
     return obj;
 }
 
-void AddAttachFuncCallback(EcmaVM* vm, const RefPtr<FrameNode> node)
+void AddAttachFuncCallback(EcmaVM* vm, const RefPtr<FrameNode>& node)
 {
     auto global = JSNApi::GetGlobalObject(vm);
     auto funcName = panda::StringRef::NewFromUtf8(vm, "__AttachToMainTree__");

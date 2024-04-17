@@ -122,6 +122,8 @@ declare class ArkColumnComponent extends ArkComponent {}
 
 declare class ArkRowComponent extends ArkComponent {}
 
+declare class ArkStackComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;
