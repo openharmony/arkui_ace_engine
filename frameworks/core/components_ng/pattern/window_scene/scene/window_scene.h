@@ -39,6 +39,7 @@ protected:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnMountToParentDone() override;
 
     void OnActivation() override;
     void OnConnect() override;
