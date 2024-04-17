@@ -43,6 +43,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 0;
+const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(-1, 1, 328, 34);
 } // namespace
 std::unique_ptr<SwiperModel> SwiperModel::instance_ = nullptr;
 std::mutex SwiperModel::mutex_;
@@ -766,7 +767,7 @@ void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 
 void JSSwiper::SetCurve(const JSCallbackInfo& info)
 {
-    RefPtr<Curve> curve = Curves::LINEAR;
+    RefPtr<Curve> curve = DEFAULT_CURVE;
     if (info[0]->IsString()) {
         curve = CreateCurve(info[0]->ToString());
     } else if (info[0]->IsObject()) {
