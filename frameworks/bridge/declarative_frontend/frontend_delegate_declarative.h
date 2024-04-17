@@ -228,6 +228,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
     void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuInnerNG(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
 
     Rect GetBoundingRectData(NodeId nodeId) override;
 

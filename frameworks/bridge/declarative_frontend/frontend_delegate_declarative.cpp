@@ -1873,37 +1873,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "show action menu with new pipeline");
-        dialogProperties.onSuccess = std::move(callback);
-        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
-            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-                TaskExecutor::TaskType::JS);
-        };
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
-        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-        taskExecutor_->PostTask(
-            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                RefPtr<NG::FrameNode> dialog;
-                if (dialogProperties.isShowInSubWindow) {
-                    dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
-                    CHECK_NULL_VOID(dialog);
-                    if (dialogProperties.isModal) {
-                        DialogProperties Maskarg;
-                        Maskarg.isMask = true;
-                        Maskarg.autoCancel = dialogProperties.autoCancel;
-                        auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
-                        CHECK_NULL_VOID(mask);
-                        overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
-                    }
-                } else {
-                    dialog = overlayManager->ShowDialog(
-                        dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
-                    CHECK_NULL_VOID(dialog);
-                }
-            },
-            TaskExecutor::TaskType::UI);
+        ShowActionMenuInnerNG(dialogProperties, button, std::move(callback));
         return;
     }
 
@@ -1935,6 +1905,42 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(context);
     context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+}
+
+void FrontendDelegateDeclarative::ShowActionMenuInnerNG(DialogProperties& dialogProperties,
+    const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show action menu with new pipeline");
+    dialogProperties.onSuccess = std::move(callback);
+    dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+        taskExecutor->PostTask(
+            [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); }, TaskExecutor::TaskType::JS);
+    };
+    auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    taskExecutor_->PostTask(
+        [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            RefPtr<NG::FrameNode> dialog;
+            if (dialogProperties.isShowInSubWindow) {
+                dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
+                CHECK_NULL_VOID(dialog);
+                if (dialogProperties.isModal) {
+                    DialogProperties Maskarg;
+                    Maskarg.isMask = true;
+                    Maskarg.autoCancel = dialogProperties.autoCancel;
+                    auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                    CHECK_NULL_VOID(mask);
+                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+                }
+            } else {
+                dialog = overlayManager->ShowDialog(
+                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+                CHECK_NULL_VOID(dialog);
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateDeclarative::ShowActionMenu(
