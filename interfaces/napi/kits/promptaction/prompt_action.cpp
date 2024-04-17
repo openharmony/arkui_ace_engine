@@ -820,9 +820,10 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     shadowType =
         std::clamp(shadowType, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
+    valueType = GetValueType(env, fillApi);
     bool isFilled = false;
-    if (napi_get_value_bool(env, fillApi, &isFilled) == napi_ok) {
-        isFilled = true;
+    if (valueType == napi_boolean) {
+        napi_get_value_bool(env, fillApi, &isFilled);
     }
     shadow.SetIsFilled(isFilled);
 }
