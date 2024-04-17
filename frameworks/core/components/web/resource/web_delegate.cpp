@@ -27,6 +27,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
+#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -60,8 +61,6 @@
 #include "core/components_ng/base/ui_node.h"
 #include "frameworks/base/utils/system_properties.h"
 #endif
-
-#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 
 namespace OHOS::Ace {
 
@@ -665,30 +664,42 @@ WebDelegateObserver::~WebDelegateObserver() {}
 
 void WebDelegateObserver::NotifyDestory()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory start");
     if (delegate_) {
         delegate_->UnRegisterScreenLockFunction();
     }
     auto context = context_.Upgrade();
     if (!context) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory context is null, enter EventHandler to destroy");
         auto currentHandler = OHOS::AppExecFwk::EventHandler::Current();
         currentHandler->PostTask(
             [weak = WeakClaim(this)]() {
                 auto observer = weak.Upgrade();
-                CHECK_NULL_VOID(observer);
+                if (!observer) {
+                    TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler observer is null");
+                    return;
+                }
                 if (observer->delegate_) {
+                    TAG_LOGD(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler start destroy");
                     observer->delegate_.Reset();
                 }
             },
             DESTRUCT_DELAY_MILLISECONDS);
     }
-    CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
+    if (!taskExecutor) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory taskExecutor is null");
+        return;
+    }
     taskExecutor->PostDelayedTask(
         [weak = WeakClaim(this), taskExecutor = taskExecutor]() {
             auto observer = weak.Upgrade();
-            CHECK_NULL_VOID(observer);
+            if (!observer) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory observer is null");
+                return;
+            }
             if (observer->delegate_) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory start destroy");
                 observer->delegate_.Reset();
             }
         },
