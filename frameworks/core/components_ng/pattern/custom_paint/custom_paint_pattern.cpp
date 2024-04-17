@@ -919,6 +919,8 @@ void CustomPaintPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, doubl
 
 void CustomPaintPattern::SetInvalidate()
 {
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {};
+    paintMethod_->PushTask(task);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

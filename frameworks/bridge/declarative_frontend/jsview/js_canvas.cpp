@@ -57,7 +57,6 @@ void JSCanvas::Create(const JSCallbackInfo& info)
             if (jsContext) {
                 jsContext->SetInstanceId(Container::CurrentId());
                 jsContext->SetCanvasPattern(canvasPattern);
-                jsContext->SetAntiAlias();
                 jsContext->SetRSCanvasCallback(canvasPattern);
             }
         } else {
