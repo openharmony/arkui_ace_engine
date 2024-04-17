@@ -795,7 +795,8 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
     GridLayoutInfo oldInfo;
     oldInfo.crossCount_ = 2;
     oldInfo.childrenCount_ = 12;
-    oldInfo.gridMatrix_ = MATRIX_DEMO_6;
+    // simulate reset after template change
+    oldInfo.gridMatrix_.clear();
     oldInfo.currentOffset_ = -10.0f;
     oldInfo.startMainLineIndex_ = 2;
     oldInfo.startIndex_ = 3;
