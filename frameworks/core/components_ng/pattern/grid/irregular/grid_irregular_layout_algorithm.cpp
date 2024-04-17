@@ -232,7 +232,8 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 
     // adjust offset
     if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
-        float overDis = -info.GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_, false), mainGap_);
+        float overDis =
+            -info.GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_, false), mainGap_);
         if (Negative(overDis)) {
             return;
         }

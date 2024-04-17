@@ -1306,25 +1306,24 @@ float GridPattern::EstimateHeight() const
     }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
-        auto lineIndex = 0;
-        scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
-        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) -
-               gridLayoutInfo_.currentOffset_;
-    } else {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, 0.0);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, 0.0);
-        const auto& info = gridLayoutInfo_;
-        auto viewScopeSize = geometryNode->GetPaddingSize();
-        auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-        if (!layoutProperty->GetLayoutOptions().has_value()) {
-            return info.GetContentOffset(mainGap);
-        }
-
-        return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+        const auto* infoPtr = UseIrregularLayout() ? &gridLayoutInfo_ : &scrollGridLayoutInfo_;
+        int32_t lineIndex = 0;
+        infoPtr->GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
+        return infoPtr->GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - gridLayoutInfo_.currentOffset_;
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    const auto& info = gridLayoutInfo_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    if (!layoutProperty->GetLayoutOptions().has_value()) {
+        return info.GetContentOffset(mainGap);
+    }
+
+    return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
 }
 
 float GridPattern::GetAverageHeight() const
