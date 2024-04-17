@@ -34,6 +34,7 @@ void SwiperTestNg::SetUpTestSuite()
     swiperIndicatorTheme->hoverArrowBackgroundColor_ = HOVER_ARROW_COLOR;
     swiperIndicatorTheme->clickArrowBackgroundColor_ = CLICK_ARROW_COLOR;
     swiperIndicatorTheme->arrowDisabledAlpha_ = ARROW_DISABLED_ALPHA;
+    swiperIndicatorTheme->indicatorPaddingDot_ = INDICATOR_PADDING_HOVER;
     swiperIndicatorTheme->size_ = Dimension(6.f);
     TextStyle textStyle;
     textStyle.SetTextColor(INDICATOR_TEXT_FONT_COLOR);
