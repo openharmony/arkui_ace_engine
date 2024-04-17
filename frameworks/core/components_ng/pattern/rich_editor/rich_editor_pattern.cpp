@@ -6139,21 +6139,20 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
     record.beforeCaretPosition = dragRange_.first;
     RichEditorChangeValue changeValue;
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DRAG));
-    if (currentPosition < dragRange_.first) {
-        HandleOnDragInsertValue(insertValue);
-        if (isDeleteSelect) {
+    if (isDeleteSelect) {
+        if (currentPosition < dragRange_.first) {
+            HandleOnDragInsertValue(insertValue);
             dragRange_.first += strLength;
             dragRange_.second += strLength;
             HandleOnDragDeleteForward();
+            caretPosition_ += strLength;
+        } else if (currentPosition > dragRange_.second) {
+            HandleOnDragInsertValue(insertValue);
+            int32_t delLength = HandleOnDragDeleteForward();
+            caretPosition_ -= (delLength - strLength);
         }
-        caretPosition_ += strLength;
-    } else if (currentPosition > dragRange_.second) {
+    } else {
         HandleOnDragInsertValue(insertValue);
-        int32_t delLength = 0;
-        if (isDeleteSelect) {
-            delLength = HandleOnDragDeleteForward();
-        }
-        caretPosition_ -= (delLength - strLength);
     }
     AfterChangeText(changeValue);
 }
