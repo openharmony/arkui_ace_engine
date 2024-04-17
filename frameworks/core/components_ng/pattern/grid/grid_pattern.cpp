@@ -341,12 +341,13 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
+    bool regular = !UseIrregularLayout();
     float mainGap = GetMainGap();
-    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap, regular);
     if (gridLayoutInfo_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
-            if (UseIrregularLayout()) {
+            if (!regular) {
                 overScroll = gridLayoutInfo_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
             } else {
                 overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
@@ -451,7 +452,7 @@ void GridPattern::CheckScrollable()
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     if (((gridLayoutInfo_.endIndex_ - gridLayoutInfo_.startIndex_ + 1) < gridLayoutInfo_.childrenCount_) ||
-        (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap()) > GetMainContentSize())) {
+        (gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap(), !UseIrregularLayout()) > GetMainContentSize())) {
         scrollable_ = true;
     } else {
         if (gridLayoutInfo_.startMainLineIndex_ != 0 || GetAlwaysEnabled()) {
@@ -1512,7 +1513,8 @@ float GridPattern::GetEndOffset()
 {
     float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
     float mainGap = GetMainGap();
-    float heightInView = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+    bool regular = !UseIrregularLayout();
+    float heightInView = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap, regular);
     if (GetAlwaysEnabled()) {
         float totalHeight = gridLayoutInfo_.GetTotalLineHeight(mainGap);
         if (GreatNotEqual(contentHeight, totalHeight)) {
@@ -1520,11 +1522,11 @@ float GridPattern::GetEndOffset()
         }
     }
 
-    if (UseIrregularLayout()) {
-        float disToBot = gridLayoutInfo_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
-        return gridLayoutInfo_.currentOffset_ - disToBot;
+    if (regular) {
+        return contentHeight - heightInView;
     }
-    return contentHeight - heightInView;
+    float disToBot = gridLayoutInfo_.GetDistanceToBottom(contentHeight, heightInView, mainGap);
+    return gridLayoutInfo_.currentOffset_ - disToBot;
 }
 
 void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
