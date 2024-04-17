@@ -265,7 +265,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
 
 RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
 {
-    auto* fontSpan = obj->Unwrap<JSFontSpan>();
+    auto* base = obj->Unwrap<AceType>();
+    auto* fontSpan = AceType::DynamicCast<JSFontSpan>(base);
     if (fontSpan && fontSpan->GetFontSpan()) {
         return AceType::MakeRefPtr<FontSpan>(fontSpan->GetFontSpan()->GetFont(), start, start + length);
     }
@@ -274,7 +275,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsFontSpan(int32_t start, int32_t length, JS
 
 RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
 {
-    auto* decorationSpan = obj->Unwrap<JSDecorationSpan>();
+    auto* base = obj->Unwrap<AceType>();
+    auto* decorationSpan = AceType::DynamicCast<JSDecorationSpan>(base);
     if (decorationSpan && decorationSpan->GetDecorationSpan()) {
         return AceType::MakeRefPtr<DecorationSpan>(decorationSpan->GetDecorationSpan()->GetTextDecorationType(),
             decorationSpan->GetDecorationSpan()->GetColor(), start, start + length);
@@ -284,7 +286,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t leng
 
 RefPtr<SpanBase> JSSpanString::ParseJsBaselineOffsetSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
 {
-    auto* baselineOffsetSpan = obj->Unwrap<JSBaselineOffsetSpan>();
+    auto* base = obj->Unwrap<AceType>();
+    auto* baselineOffsetSpan = AceType::DynamicCast<JSBaselineOffsetSpan>(base);
     if (baselineOffsetSpan && baselineOffsetSpan->GetBaselineOffsetSpan()) {
         return AceType::MakeRefPtr<BaselineOffsetSpan>(
             baselineOffsetSpan->GetBaselineOffsetSpan()->GetBaselineOffset(), start, start + length);
@@ -294,7 +297,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsBaselineOffsetSpan(int32_t start, int32_t 
 
 RefPtr<SpanBase> JSSpanString::ParseJsLetterSpacingSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
 {
-    auto* letterSpacingSpan = obj->Unwrap<JSLetterSpacingSpan>();
+    auto* base = obj->Unwrap<AceType>();
+    auto* letterSpacingSpan = AceType::DynamicCast<JSLetterSpacingSpan>(base);
     if (letterSpacingSpan && letterSpacingSpan->GetLetterSpacingSpan()) {
         return AceType::MakeRefPtr<LetterSpacingSpan>(
             letterSpacingSpan->GetLetterSpacingSpan()->GetLetterSpacing(), start, start + length);
@@ -304,7 +308,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsLetterSpacingSpan(int32_t start, int32_t l
 
 RefPtr<SpanBase> JSSpanString::ParseJsGestureSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
 {
-    auto* gestureSpan = obj->Unwrap<JSGestureSpan>();
+    auto* base = obj->Unwrap<AceType>();
+    auto* gestureSpan = AceType::DynamicCast<JSGestureSpan>(base);
     if (gestureSpan && gestureSpan->GetGestureSpan()) {
         return AceType::MakeRefPtr<GestureSpan>(
             gestureSpan->GetGestureSpan()->GetGestureStyle(), start, start + length);
@@ -314,7 +319,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsGestureSpan(int32_t start, int32_t length,
 
 RefPtr<SpanBase> JSSpanString::ParseJsTextShadowSpan(int32_t start, int32_t length, JSRef<JSObject> obj)
 {
-    auto* textShadowSpan = obj->Unwrap<JSTextShadowSpan>();
+    auto* base = obj->Unwrap<AceType>();
+    auto* textShadowSpan = AceType::DynamicCast<JSTextShadowSpan>(base);
     if (textShadowSpan && textShadowSpan->GetTextShadowSpan()) {
         return AceType::MakeRefPtr<TextShadowSpan>(
             textShadowSpan->GetTextShadowSpan()->GetTextShadow(), start, start + length);
