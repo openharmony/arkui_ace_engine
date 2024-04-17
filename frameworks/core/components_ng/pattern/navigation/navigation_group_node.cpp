@@ -231,10 +231,12 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
             auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
             if (navDestinationPattern->GetIsOnShow()) {
+                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
                 pattern->NotifyDestinationLifecycle(navDestination,
                     NavDestinationLifecycle::ON_HIDE, true);
                 navDestinationPattern->SetIsOnShow(false);
             }
+            pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
             auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
             if (shallowBuilder) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
@@ -1010,13 +1012,19 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
         }
         NavigationPattern::FireNavigationStateChange(navDestination, lifecycle);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-        eventHub->FireOnHiddenEvent(pattern->GetName());
-        auto navigationPattern = GetPattern<NavigationPattern>();
-        navigationPattern->NotifyPageHide(pattern->GetName());
-        pattern->SetIsOnShow(false);
-        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-        navDestination->SetJSViewActive(false);
+        if (lifecycle == NavDestinationLifecycle::ON_HIDE) {
+            eventHub->FireOnHiddenEvent(pattern->GetName());
+            auto navigationPattern = GetPattern<NavigationPattern>();
+            navigationPattern->NotifyPageHide(pattern->GetName());
+            pattern->SetIsOnShow(false);
+            navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            navDestination->SetJSViewActive(false);
+        } else {
+            eventHub->FireOnWillHide();
+        }
     }
-    hideNodes_.clear();
+    if (lifecycle == NavDestinationLifecycle::ON_HIDE) {
+        hideNodes_.clear();
+    }
 }
 } // namespace OHOS::Ace::NG

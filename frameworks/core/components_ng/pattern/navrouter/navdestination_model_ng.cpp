@@ -531,4 +531,36 @@ void NavDestinationModelNG::SetBackgroundColor(FrameNode* frameNode, const Color
     ViewAbstract::SetBackgroundColor(frameNode, color);
     navDestinationPattern->SetIsUserDefinedBgColor(true);
 }
+
+void NavDestinationModelNG::SetOnWillAppear(std::function<void()>&& willAppear)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillAppear(willAppear);
+}
+
+void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillHide(willHide);
+}
+
+void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillShow(willShow);
+}
+
+void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAppear)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
+}
 } // namespace OHOS::Ace::NG

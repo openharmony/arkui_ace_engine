@@ -192,9 +192,13 @@ enum class NavigationOperation {
 };
 
 enum NavDestinationLifecycle {
+    ON_WILL_APPEAR,
     ON_APPEAR,
+    ON_WILL_SHOW,
     ON_SHOW,
+    ON_WILL_HIDE,
     ON_HIDE,
+    ON_WILL_DISAPPEAR,
     ON_DISAPPEAR
 };
 
