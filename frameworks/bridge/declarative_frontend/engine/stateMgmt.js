@@ -4316,6 +4316,35 @@ UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
 */
 // denotes a missing elemntId, this is the case during initial render
 const UndefinedElmtId = -1;
+// UpdateFuncRecord: misc framework-internal info related to updating of a UINode C++ object 
+// that TS side needs to know. 
+// updateFunc_  lambda function to update the UINode
+// JS interface class reference (it only has static functions)
+class UpdateFuncRecord {
+    constructor(params) {
+        this.updateFunc_ = params.updateFunc;
+        this.classObject_ = params.classObject;
+        this.node_ = params.node;
+    }
+    getUpdateFunc() {
+        return this.updateFunc_;
+    }
+    getComponentClass() {
+        return this.classObject_;
+    }
+    getComponentName() {
+        return (this.classObject_ && ("name" in this.classObject_)) ? Reflect.get(this.classObject_, "name") : "unspecified UINode";
+    }
+    getPopFunc() {
+        return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop : () => { };
+    }
+    getNode() {
+        return this.node_;
+    }
+    setNode(node) {
+        this.node_ = node;
+    }
+}
 // NativeView
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -4353,7 +4382,49 @@ class ViewPU extends NativeViewPartialUpdate {
         this.dirtDescendantElementIds_ = new Set();
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
-        this.updateFuncByElmtId = new Map();
+        this.updateFuncByElmtId = new class UpdateFuncsByElmtId {
+            constructor() {
+                this.map_ = new Map();
+            }
+            delete(elmtId) {
+                return this.map_.delete(elmtId);
+            }
+            set(elmtId, params) {
+                (typeof params == "object") ?
+                    this.map_.set(elmtId, new UpdateFuncRecord(params))
+                    : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params }));
+            }
+            get(elmtId) {
+                return this.map_.get(elmtId);
+            }
+            keys() {
+                return this.map_.keys();
+            }
+            clear() {
+                return this.map_.clear();
+            }
+            get size() {
+                return this.map_.size;
+            }
+            forEach(callbackfn) {
+                this.map_.forEach(callbackfn);
+            }
+            // dump info about known elmtIds to a string
+            // use function only for debug output and DFX.
+            debugInfoRegisteredElmtIds() {
+                let result = "";
+                let sepa = "";
+                this.map_.forEach((value, elmtId) => {
+                    result += `${sepa}${value.getComponentName()}[${elmtId}]`;
+                    sepa = ", ";
+                });
+                return result;
+            }
+            debugInfoElmtId(elmtId) {
+                const updateFuncEntry = this.map_.get(elmtId);
+                return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
+            }
+        };
         // set of all @Local/StorageLink/Prop variables owned by this ViwPU
         this.ownStorageLinksProps_ = new Set();
         // my LocalStorage instance, shared with ancestor Views.
@@ -4474,13 +4545,7 @@ class ViewPU extends NativeViewPartialUpdate {
     // dump info about known elmtIds to a string
     // use function only for debug output and DFX.
     debugInfoRegisteredElmtIds() {
-        let result = "";
-        let sepa = "";
-        this.updateFuncByElmtId.forEach((value, elmtId) => {
-            result += `${sepa}${value.componentName}[${elmtId}]`;
-            sepa = ", ";
-        });
-        return result;
+        return this.updateFuncByElmtId.debugInfoRegisteredElmtIds();
     }
     // for given elmtIds look up their component name/type and format a string out of this info
     // use function only for debug output and DFX.
@@ -4494,9 +4559,7 @@ class ViewPU extends NativeViewPartialUpdate {
         return result;
     }
     debugInfoElmtId(elmtId) {
-        var _a;
-        const compName = (_a = this.updateFuncByElmtId.get(elmtId)) === null || _a === void 0 ? void 0 : _a.componentName;
-        return `${compName ? compName : 'unknown component type'}[${elmtId}]`;
+        return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
     }
     dumpStateVars() {
         
@@ -4621,13 +4684,13 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         // do not process an Element that has been marked to be deleted
-        const updateFunc1 = this.updateFuncByElmtId.get(elmtId);
-        const updateFunc = updateFunc1 === null || updateFunc1 === void 0 ? void 0 : updateFunc1.updateFunc;
-        const componentName = updateFunc1 ? updateFunc1.componentName : "unknown component type";
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = entry ? entry.getUpdateFunc() : undefined;
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
             stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
         }
         else {
+            const componentName = entry.getComponentName();
             
             this.isRenderInProgress = true;
             updateFunc(elmtId, /* isFirstRender */ false);
@@ -4855,15 +4918,19 @@ class ViewPU extends NativeViewPartialUpdate {
     // executed on first render only
     // kept for backward compatibility with old ace-ets2bundle
     observeComponentCreation(compilerAssignedUpdateFunc) {
+        const updateFunc = (elmtId, isFirstRender) => {
+            
+            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+            
+        };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        
-        compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
         // in observeComponentCreation function we do not get info about the component name, in 
         // observeComponentCreation2 we do.
-        this.updateFuncByElmtId.set(elmtId, { updateFunc: compilerAssignedUpdateFunc, componentName: "unknown" });
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc });
         // add element id -> owningviewpu
         UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
-        
+        updateFunc(elmtId, /* is first render */ true);
+
     }
     // executed on first render only
     // added July 2023, replaces observeComponentCreation
@@ -4884,7 +4951,7 @@ class ViewPU extends NativeViewPartialUpdate {
             
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName });
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject });
         // add element id -> owningviewpu
         UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         updateFunc(elmtId, /* is first render */ true);
@@ -4937,7 +5004,8 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.delete(oldElmtId);
         this.updateFuncByElmtId.set(newElmtId, {
             updateFunc: compilerAssignedUpdateFunc,
-            componentName: oldEntry ? oldEntry.componentName : "unknown"
+            classObject: oldEntry && oldEntry.getComponentClass(),
+            node: oldEntry && oldEntry.getNode()
         });
         node.updateId(newElmtId);
         node.updateRecycleElmtId(oldElmtId, newElmtId);
