@@ -154,7 +154,7 @@ HWTEST_F(RenderPropertyTestNg, GraphicsPropertyTest001, TestSize.Level1)
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("color"), "#FF000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetX"), "0.000000");
     EXPECT_EQ(json->GetValue(SHADOW_TEST)->GetString("offsetY"), "0.000000");
-    EXPECT_EQ(json->GetString("dynamicDimming"), "0.5");
+    EXPECT_EQ(json->GetDouble("dynamicDimming"), 0.5);
 }
 
 /**
