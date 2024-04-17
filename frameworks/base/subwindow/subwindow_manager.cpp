@@ -778,6 +778,7 @@ void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std:
     tmpPromptAttr.showInSubWindow = false;
     auto containerId = Container::CurrentId();
     // for pa service
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "container %{public}d open the custom dialog", containerId);
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subWindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subWindow);

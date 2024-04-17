@@ -820,8 +820,8 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
         rootNode->RemoveChild(toastNodeWeak.Upgrade());
     }
     toastMap_.clear();
-    auto align = Alignment::ParseAlignment(alignment);
-    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft, showMode, align, offset);
+    ToastInfo toastInfo = {message, duration, bottom, isRightToLeft, showMode, alignment, offset};
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
     CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
     // mount to parent
@@ -1802,6 +1802,7 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
         return;
     }
     if (dialogProps.customBuilder) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "open custom dialog with custom builder.");
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         dialogProps.customBuilder();
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
