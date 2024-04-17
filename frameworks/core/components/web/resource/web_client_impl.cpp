@@ -1008,7 +1008,8 @@ std::vector<int8_t> WebClientImpl::GetWordSelection(const std::string& text, int
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_RETURN(delegate, { -1, -1 });
+    std::vector<int8_t> vec = { -1, -1 };
+    CHECK_NULL_RETURN(delegate, vec);
     return delegate->GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace

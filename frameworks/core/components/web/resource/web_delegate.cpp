@@ -6317,7 +6317,8 @@ void WebDelegate::ScaleGestureChange(double scale, double centerX, double center
 std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_t offset)
 {
     auto webPattern = webPattern_.Upgrade();
-    CHECK_NULL_RETURN(webPattern, { -1, -1 });
+    std::vector<int8_t> vec = { -1, -1 };
+    CHECK_NULL_RETURN(webPattern, vec);
     return webPattern->GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace
