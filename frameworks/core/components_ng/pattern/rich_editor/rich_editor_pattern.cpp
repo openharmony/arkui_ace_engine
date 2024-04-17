@@ -4561,29 +4561,18 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 void RichEditorPattern::ResetAfterPaste()
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ResetAfterPaste");
-    OperationRecord record;
-    record.beforeCaretPosition = caretPosition_ + moveLength_;
     auto pasteStr = GetPasteStr();
-    record.addText = pasteStr;
-    RichEditorChangeValue changeValue;
-    CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::INSERT));
     SetCaretSpanIndex(-1);
     StartTwinkling();
     CloseSelectOverlay();
-    if (textSelector_.IsValid()) {
-        SetCaretPosition(textSelector_.GetTextStart());
-        record.beforeCaretPosition = caretPosition_;
-        auto length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-        textSelector_.Update(-1, -1);
-        record.deleteText = StringUtils::ToString(DeleteForwardOperation(length));
-        ResetSelection();
-    }
     InsertValueByPaste(pasteStr);
     ClearPasteStr();
-    record.afterCaretPosition = caretPosition_ + moveLength_;
-    ClearRedoOperationRecords();
-    AddOperationRecord(record);
-    AfterChangeText(changeValue);
+}
+
+void RichEditorPattern::InsertValueByPaste(const std::string& pasteStr)
+{
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "InsertValueByPaste");
+    InsertValue(pasteStr, false);
 }
 
 void RichEditorPattern::HandleOnPaste()
@@ -4616,84 +4605,6 @@ void RichEditorPattern::HandleOnPaste()
         richEditor->ResetAfterPaste();
     };
     clipboard_->GetData(pasteCallback);
-}
-
-void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
-{
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
-    RefPtr<UINode> child;
-    TextInsertValueInfo info;
-    CalcInsertValueObj(info);
-    TextSpanOptions options;
-    options.value = insertValue;
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        options.style = typingTextStyle_.value();
-    }
-    auto newSpanOffset = caretPosition_ + moveLength_;
-    isTextChange_ = true;
-    moveDirection_ = MoveDirection::FORWARD;
-    moveLength_ += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
-    if (caretSpanIndex_ == -1) {
-        child = GetChildByIndex(info.GetSpanIndex());
-        if (child && child->GetTag() == V2::SPAN_ETS_TAG) {
-            auto spanNode = DynamicCast<SpanNode>(child);
-            CHECK_NULL_VOID(spanNode);
-            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
-                options.offset = newSpanOffset;
-                caretSpanIndex_ = AddTextSpanOperation(options, true);
-            } else {
-                InsertValueToSpanNode(spanNode, insertValue, info);
-            }
-            return;
-        } else if (!child) {
-            auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
-            if (spanNodeBefore == nullptr) {
-                caretSpanIndex_ = AddTextSpanOperation(options, true);
-            } else if ((typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) ||
-                spanNodeBefore->GetTag() != V2::SPAN_ETS_TAG) {
-                auto spanNode = DynamicCast<SpanNode>(child);
-                CreateTextSpanNode(spanNode, info, insertValue, false);
-                caretSpanIndex_ = info.GetSpanIndex();
-            } else {
-                InsertValueToBeforeSpan(spanNodeBefore, insertValue);
-                caretSpanIndex_ = info.GetSpanIndex() - 1;
-            }
-            return;
-        }
-    } else {
-        child = GetChildByIndex(caretSpanIndex_);
-        if (child && child->GetTag() == V2::SPAN_ETS_TAG) {
-            auto spanNode = DynamicCast<SpanNode>(child);
-            CHECK_NULL_VOID(spanNode);
-            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
-                options.offset = newSpanOffset;
-                caretSpanIndex_ = AddTextSpanOperation(options, true);
-            } else {
-                InsertValueToBeforeSpan(spanNode, insertValue);
-            }
-            return;
-        }
-    }
-    if (child && (child->GetTag() == V2::IMAGE_ETS_TAG || child->GetTag() == V2::SYMBOL_SPAN_ETS_TAG)) {
-        auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
-        if (spanNodeBefore != nullptr && caretSpanIndex_ == -1 && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG) {
-            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
-                options.offset = newSpanOffset;
-                caretSpanIndex_ = AddTextSpanOperation(options, true);
-            } else {
-                InsertValueToBeforeSpan(spanNodeBefore, insertValue);
-                caretSpanIndex_ = info.GetSpanIndex() - 1;
-            }
-        } else {
-            if (caretSpanIndex_ == -1) {
-                caretSpanIndex_ = AddTextSpanOperation(options, true, info.GetSpanIndex(), false, false);
-            } else {
-                caretSpanIndex_ = AddTextSpanOperation(options, true, caretSpanIndex_ + 1);
-            }
-        }
-    } else {
-        caretSpanIndex_ = AddTextSpanOperation(options, true);
-    }
 }
 
 void RichEditorPattern::SetCaretSpanIndex(int32_t index)
