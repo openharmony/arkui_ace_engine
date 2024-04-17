@@ -55,7 +55,8 @@ void CustomPaintPattern::OnAttachToFrameNode()
             AceType::MakeRefPtr<RenderingContext2DModifier>();
     }
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_);
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         UpdateTextDirection(TextDirection::RTL);
     }
 }
@@ -1113,7 +1114,7 @@ void CustomPaintPattern::Reset()
 
 void CustomPaintPattern::OnLanguageConfigurationUpdate()
 {
-    if (isSetTextDirection_) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || isSetTextDirection_) {
         return;
     }
     UpdateTextDirection(AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
