@@ -508,7 +508,12 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
       return new TypedFrameNode(context, "Column", (node: NodePtr, type: ModifierType) => {
         return new ArkColumnComponent(node, type);
       })
-    }]
+    }],
+    ["Row", (context: UIContext) => {
+      return new TypedFrameNode(context, "Row", (node: NodePtr, type: ModifierType) => {
+        return new ArkRowComponent(node, type);
+      })
+    }],
   ]
 )
 

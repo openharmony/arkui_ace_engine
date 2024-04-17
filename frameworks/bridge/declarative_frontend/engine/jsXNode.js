@@ -849,7 +849,12 @@ const __creatorMap__ = new Map([
             return new TypedFrameNode(context, "Column", (node, type) => {
                 return new ArkColumnComponent(node, type);
             });
-        }]
+        }],
+    ["Row", (context) => {
+            return new TypedFrameNode(context, "Row", (node, type) => {
+                return new ArkRowComponent(node, type);
+            });
+        }],
 ]);
 class TypedNode {
     static createNode(context, type) {

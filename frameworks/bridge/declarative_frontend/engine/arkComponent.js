@@ -4214,7 +4214,7 @@ class ColumnSpaceModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().column.resetSapce(node);
+      getUINativeModule().column.resetSpace(node);
     }
     else {
       getUINativeModule().column.setSpace(node, this.value);
@@ -6339,9 +6339,34 @@ class RowJustifyContentlModifier extends ModifierWithKey {
   }
 }
 RowJustifyContentlModifier.identity = Symbol('rowJustifyContent');
+
+class RowSpaceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().row.resetSpace(node);
+    }
+    else {
+      getUINativeModule().row.setSpace(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RowSpaceModifier.identity = Symbol('rowSpace');
+
 class ArkRowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, RowSpaceModifier.identity, RowSpaceModifier, value[0].space);
+    }
+    return this
   }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);

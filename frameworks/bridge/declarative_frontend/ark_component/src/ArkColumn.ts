@@ -55,7 +55,7 @@ class ColumnSpaceModifier extends ModifierWithKey<string | number> {
   static identity:Symbol = Symbol('columnSpace');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().column.resetSapce(node);
+      getUINativeModule().column.resetSpace(node);
     }
     else {
       getUINativeModule().column.setSpace(node, this.value);

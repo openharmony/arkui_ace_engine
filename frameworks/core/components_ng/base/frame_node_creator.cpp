@@ -37,6 +37,11 @@ RefPtr<FrameNode> FrameNodeCreator::GetOrCreateTypedFrameNode(int32_t nodeId, co
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
                 } },
+            { V2::ROW_ETS_TAG,
+                [](const std::string& type, int32_t nodeId) {
+                    return FrameNode::GetOrCreateFrameNode(
+                        type, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+                } },
         };
     
     auto iter = nodeCreate.find(type);
