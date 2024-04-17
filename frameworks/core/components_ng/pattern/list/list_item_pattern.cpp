@@ -275,8 +275,14 @@ void ListItemPattern::MarkDirtyNode()
 
 void ListItemPattern::ChangeAxis(Axis axis)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
     axis_ = axis;
-    InitSwiperAction(true);
+    if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
+        InitSwiperAction(true);
+    }
 }
 
 void ListItemPattern::InitSwiperAction(bool axisChanged)
