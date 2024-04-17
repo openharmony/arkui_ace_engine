@@ -1221,6 +1221,9 @@ HWTEST_F(ListLayoutTestNg, Pattern011, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetContentEndOffsetValue(), 10.f);
     EXPECT_EQ(pattern_->contentStartOffset_, 10.f);
     EXPECT_EQ(pattern_->contentEndOffset_, 10.f);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(5.f), 0.f);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(0.f), 0.f);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(-5.f), -5.f);
 
     /**
      * @tc.cases: contentStartOffset_ + contentEndOffset_ >= contentMainSize

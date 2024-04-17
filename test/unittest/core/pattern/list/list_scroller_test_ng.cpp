@@ -2014,7 +2014,7 @@ HWTEST_F(ListScrollerTestNg, Pattern017, TestSize.Level1)
     /**
      * @tc.steps: step1. create List
      */
-    Create([=](ListModelNG model) { CreateItem(20); });
+    Create([](ListModelNG model) { CreateItem(20); });
     EXPECT_EQ(pattern_->startIndex_, 0);
     EXPECT_EQ(pattern_->endIndex_, 7);
     EXPECT_EQ(pattern_->currentOffset_, 0);
@@ -2383,5 +2383,163 @@ HWTEST_F(ListScrollerTestNg, PostListItemPressStyleTask_scroll002, TestSize.Leve
             EXPECT_FALSE(child.second.isPressed);
         }
     }
+}
+
+/**
+ * @tc.name: OnScrollVisibleContentChange001
+ * @tc.desc: Test OnScrollVisibleContentChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, OnScrollVisibleContentChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     * @tc.expected: Init callback OnScrollVisibleContentChange
+     */
+    ListItemIndex startInfo, endInfo;
+    auto onVisibleChange = [&startInfo, &endInfo](ListItemIndex start, ListItemIndex end) {
+        startInfo = start;
+        endInfo = end;
+    };
+    Create([onVisibleChange](ListModelNG model) {
+        model.SetOnScrollVisibleContentChange(onVisibleChange);
+        CreateItem(20);
+    });
+    ListItemIndex startTop = { 0 };
+    ListItemIndex endTop = { 7 };
+    EXPECT_TRUE(IsEqual(startInfo, startTop));
+    EXPECT_TRUE(IsEqual(endInfo, endTop));
+
+    /**
+     * @tc.steps: step2. scroll to the end
+     * @tc.expected: Init callback OnScrollVisibleContentChange
+     */
+    ListItemIndex startBottom = { 12 };
+    ListItemIndex endBottom = { 19 };
+    pattern_->ScrollTo(1200);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(startInfo, startBottom));
+    EXPECT_TRUE(IsEqual(endInfo, endBottom));
+
+    /**
+     * @tc.steps: step3. create List with ContentStartOffset, ContentEndOffset and Space
+     * @tc.expected: endTop.index = 6
+     */
+    endTop = { 6 };
+    Create([onVisibleChange](ListModelNG model) {
+        model.SetContentStartOffset(50.f);
+        model.SetContentEndOffset(50.f);
+        model.SetSpace(Dimension(10.f));
+        model.SetOnScrollVisibleContentChange(onVisibleChange);
+        CreateItem(20);
+    });
+    EXPECT_TRUE(IsEqual(startInfo, startTop));
+    EXPECT_TRUE(IsEqual(endInfo, endTop));
+
+    /**
+     * @tc.steps: step4. scroll to the end
+     * @tc.expected: startBottom.index = 13
+     */
+    startBottom = { 13 };
+    pattern_->ScrollTo(1500);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(startInfo, startBottom));
+    EXPECT_TRUE(IsEqual(endInfo, endBottom));
+
+    /**
+     * @tc.steps: step5. create List with multiple Lanes
+     * @tc.expected: endTop.index = 15
+     */
+    endTop = { 15 };
+    Create([onVisibleChange](ListModelNG model) {
+        model.SetLanes(2);
+        model.SetOnScrollVisibleContentChange(onVisibleChange);
+        CreateItem(20);
+    });
+    EXPECT_TRUE(IsEqual(startInfo, startTop));
+    EXPECT_TRUE(IsEqual(endInfo, endTop));
+
+     /**
+     * @tc.steps: step6. scroll to the end
+     * @tc.expected: startBottom.index = 4
+     */
+    startBottom = { 4 };
+    pattern_->ScrollTo(200);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(startInfo, startBottom));
+    EXPECT_TRUE(IsEqual(endInfo, endBottom));
+}
+
+/**
+ * @tc.name: OnScrollVisibleContentChange002
+ * @tc.desc: Test OnScrollVisibleContentChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, OnScrollVisibleContentChange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     * @tc.expected: Init callback OnScrollVisibleContentChange
+     */
+    ListItemIndex startInfo, endInfo;
+    auto onVisibleChange = [&startInfo, &endInfo](ListItemIndex start, ListItemIndex end) {
+        startInfo = start;
+        endInfo = end;
+    };
+    Create([onVisibleChange](ListModelNG model) {
+        model.SetOnScrollVisibleContentChange(onVisibleChange);
+        CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    });
+    ListItemIndex startExpect = { 0, 2 };
+    ListItemIndex endExpect = { 1, 1, 2 };
+    EXPECT_TRUE(IsEqual(startInfo, startExpect));
+    EXPECT_TRUE(IsEqual(endInfo, endExpect));
+
+    /**
+     * @tc.steps: step2. scroll to 30
+     * @tc.cases: indexChanged == startChanged == endChanged == false
+     * @tc.expected: startExpect.index = 0
+     */
+    pattern_->ScrollTo(30);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 30);
+    EXPECT_TRUE(IsEqual(startInfo, startExpect));
+    EXPECT_TRUE(IsEqual(endInfo, endExpect));
+
+    /**
+     * @tc.steps: step3. scroll to 60
+     * @tc.cases: startChanged == true and indexChanged == endChanged == false
+     * @tc.expected: startExpect.indexInGroup = 0
+     */
+    startExpect = { 0, 1, 0 };
+    pattern_->ScrollTo(60);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 60);
+    EXPECT_TRUE(IsEqual(startInfo, startExpect));
+    EXPECT_TRUE(IsEqual(endInfo, endExpect));
+
+    /**
+     * @tc.steps: step4. scroll to 120
+     * @tc.cases: endChanged == true and indexChanged == startChanged == false
+     * @tc.expected: endExpect.indexInGroup = 3
+     */
+    endExpect = { 1, 1, 3 };
+    pattern_->ScrollTo(120);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 120);
+    EXPECT_TRUE(IsEqual(startInfo, startExpect));
+    EXPECT_TRUE(IsEqual(endInfo, endExpect));
+
+    /**
+     * @tc.steps: step4. scroll to 240
+     * @tc.expected: endExpect.index = 1
+     */
+    startExpect = { 0, 1, 1 };
+    endExpect = { 1, 3, -1 };
+    pattern_->ScrollTo(240);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 240);
+    EXPECT_TRUE(IsEqual(startInfo, startExpect));
+    EXPECT_TRUE(IsEqual(endInfo, endExpect));
 }
 } // namespace OHOS::Ace::NG
