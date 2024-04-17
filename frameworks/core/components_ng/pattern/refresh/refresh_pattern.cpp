@@ -419,6 +419,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         scrollOffset_ = std::clamp(scrollOffset_ + delta * friction, 0.0f, MAX_OFFSET);
         remain = NearZero(friction) ? delta : delta - (scrollOffset_ - lastScrollOffset) / friction;
         if (!isSourceFromAnimation_) {
+            FireOnOffsetChange(Dimension(scrollOffset_).ConvertToVp());
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
                 UpdateFirstChildPlacement();
@@ -429,10 +430,6 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 UpdateRefreshStatus(RefreshStatus::DRAG);
             } else {
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
-            }
-            if ((refreshStatus_ == RefreshStatus::DRAG || refreshStatus_ == RefreshStatus::OVER_DRAG) &&
-                Positive(scrollOffset_)) {
-                FireOnOffsetChange(Dimension(scrollOffset_).ConvertToVp());
             }
         }
         UpdateFirstChildPlacement();
