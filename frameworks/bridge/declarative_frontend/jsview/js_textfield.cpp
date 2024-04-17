@@ -387,13 +387,19 @@ void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
     int32_t caretPosition = 0;
-    if (!ParseJsInt32(info[0], caretPosition)) {
-        return;
-    }
-    if (caretPosition < 0) {
-        return;
+    auto tempInfo = info[0];
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!ParseJsInt32(tempInfo, caretPosition) || caretPosition < 0) {
+            caretPosition = 0;
+        }
+    } else {
+        if (!ParseJsInt32(tempInfo, caretPosition)) {
+            return;
+        }
+        if (caretPosition < 0) {
+            return;
+        }
     }
     TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
 }
