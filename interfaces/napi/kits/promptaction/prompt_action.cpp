@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -271,7 +271,13 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT, alignment, offset);
+    if (showMode == NG::ToastShowMode::DEFAULT) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
+        delegate->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
+        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+    }
 #endif
     return nullptr;
 }
