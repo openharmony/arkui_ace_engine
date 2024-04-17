@@ -2523,6 +2523,10 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         auto sizeType = static_cast<BackgroundImageSizeType>(info[0]->ToNumber<int32_t>());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+            (sizeType < BackgroundImageSizeType::CONTAIN || sizeType > BackgroundImageSizeType::FILL)) {
+            sizeType = BackgroundImageSizeType::AUTO;
+        }
         bgImgSize.SetSizeTypeX(sizeType);
         bgImgSize.SetSizeTypeY(sizeType);
     } else {

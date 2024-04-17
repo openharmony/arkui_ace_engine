@@ -2661,6 +2661,10 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
 
     if (imageSizeArg->IsNumber()) {
         auto sizeType = imageSizeArg->ToNumber(vm)->Value();
+        if (sizeType < static_cast<uint32_t>(BackgroundImageSizeType::CONTAIN) ||
+            sizeType > static_cast<uint32_t>(BackgroundImageSizeType::FILL)) {
+            sizeType = static_cast<uint32_t>(BackgroundImageSizeType::AUTO);
+        }
         typeWidth = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
         typeHeight = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
     } else {
