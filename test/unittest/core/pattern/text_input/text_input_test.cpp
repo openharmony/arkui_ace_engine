@@ -4413,7 +4413,7 @@ HWTEST_F(TextFieldUXTest, FontFeature004, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, HandleOnDeleteAction001, TestSize.Level1)
 {
-#if defined(__HuaweiLite__) && (!defined(__OHOS__))
+#if defined(__HuaweiLite__) || defined(__OHOS__)
     // use system icudt .dat file
     std::string dataPath = "/system/usr/ohos_icu";
 #else
