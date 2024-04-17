@@ -883,9 +883,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                                           : targetIndexValue + TotalCount();
                 isNeedBackwardTranslate = itemPosition_.find(firstItemIndex) != itemPosition_.end();
             }
-            bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ ||
-                                                itemPosition_.find(lastItemIndex) == itemPosition_.end() ||
-                                                isNeedBackwardTranslate;
+            bool isNeedPlayTranslateAnimation =
+                translateAnimationIsRunning_ ||
+                (IsLoop() && itemPosition_.find(lastItemIndex) == itemPosition_.end()) || isNeedBackwardTranslate;
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
