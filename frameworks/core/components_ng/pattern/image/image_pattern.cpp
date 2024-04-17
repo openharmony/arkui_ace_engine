@@ -330,7 +330,7 @@ void ImagePattern::OnImageLoadSuccess()
     host->MarkNeedRenderOnly();
 }
 
-bool ImagePattern::CheckIfNeeedLayout()
+bool ImagePattern::CheckIfNeedLayout()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
@@ -357,9 +357,18 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    if (CheckIfNeeedLayout()) {
+    if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    } else {
+        return;
+    }
+
+    // 1. If PropertyChangeFlag contains PROPERTY_UPDATE_MEASURE,
+    //    the image will be decoded after layout.
+    // 2. The image node in imageAnimator will not be decoded after layout, decode directly.
+    auto layoutProp = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    if (!((layoutProp->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+        isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
 }

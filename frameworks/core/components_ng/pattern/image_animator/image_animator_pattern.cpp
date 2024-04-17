@@ -241,6 +241,10 @@ void ImageAnimatorPattern::GenerateCachedImages()
     }
     while (cacheImages_.size() < cacheImageNum) {
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetImageAnimator(true);
         auto imageLayoutProperty = imageNode->GetLayoutProperty();
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         imageLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
