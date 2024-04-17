@@ -244,6 +244,8 @@ public:
         }
     }
 
+    void RecordHitEmptyMessage(const TouchEvent& touchPoint, const std::string& resultInfo);
+
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();

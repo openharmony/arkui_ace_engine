@@ -1895,6 +1895,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
      */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
 
@@ -1910,7 +1911,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1
     ASSERT_NE(frameNode, nullptr);
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
-    EXPECT_EQ(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle(), true);
+    ASSERT_TRUE(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle());
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
 }
 
@@ -1941,7 +1942,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1
     ASSERT_NE(checkBoxPaintProperty, nullptr);
     auto json = JsonUtil::Create(true);
     checkBoxPaintProperty->ToJsonValue(json, filter);
-    EXPECT_EQ(json->GetString("shape"), "1");
+    EXPECT_EQ(json->GetString("checkboxShape"), "1");
 }
 
 /**

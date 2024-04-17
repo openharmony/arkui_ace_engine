@@ -73,10 +73,10 @@ namespace OHOS::Ace::NG {
  *          |--[maxRecover, minimize, close](button)
  */
 namespace {
-const Dimension MENU_CONTAINER_WIDTH = 240.0_vp;
+const Dimension MENU_CONTAINER_WIDTH = 232.0_vp;
 const Dimension MENU_CONTAINER_HEIGHT = 96.0_vp;
 const Dimension MENU_ITEM_RADIUS = 12.0_vp;
-const Dimension MENU_ITEM_WIDTH = 240.0_vp;
+const Dimension MENU_ITEM_WIDTH = 232.0_vp;
 const Dimension MENU_ITEM_HEIGHT = 48.0_vp;
 const Dimension MENU_ITEM_LEFT_PADDING = 12.0_vp;
 const Dimension MENU_ITEM_TEXT_WIDTH = 144.0_vp;
@@ -434,13 +434,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(
     // add icon and label
     containerTitleRow->AddChild(leftIcon);
     containerTitleRow->AddChild(text);
-    if (chooseCurrent) {
-        auto chooseIcon = BuildMenuItemIcon(InternalResource::ResourceId::IC_WINDOW_MENU_OK);
-        auto iconLayoutProperty = chooseIcon->GetLayoutProperty<ImageLayoutProperty>();
-        PaddingProperty chooseIconLeftPadding;
-        chooseIconLeftPadding.left = CalcLength(MENU_ITEM_TEXT_PADDING);
-        containerTitleRow->AddChild(BuildMenuItemPadding(chooseIconLeftPadding, chooseIcon));
-    }
     auto hub = containerTitleRow->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(hub, nullptr);
     hub->AddClickEvent(event);

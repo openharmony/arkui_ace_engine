@@ -173,6 +173,9 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
         info_.ClearCacheAfterIndex(updateIdx - 1);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
+    if (!wrapper_->IsContraintNoChanged()) {
+        postJumpOffset_ = PrepareJump(info_);
+    }
 }
 
 void WaterFlowSegmentedLayout::SegmentInit(

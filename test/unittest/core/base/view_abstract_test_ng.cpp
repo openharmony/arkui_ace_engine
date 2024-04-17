@@ -41,6 +41,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components/common/layout/position_param.h"
 #include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "frameworks/core/pipeline/base/element.h"
 
@@ -2265,6 +2266,90 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
 
     ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
     EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
+}
+
+/**
+ * @tc.name: ViewAbstractOffsetEdges001
+ * @tc.desc: test offset attribute, use Edges type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use ViewAbstract::SetOffsetEdges.
+     * @tc.expected: success set render property offsetEdges value.
+     */
+    EdgesParam edges;
+    CalcDimension top(30, DimensionUnit::VP);
+    CalcDimension left(20, DimensionUnit::VP);
+    edges.SetTop(top);
+    edges.SetLeft(left);
+    ViewAbstract::SetOffsetEdges(edges);
+
+    EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOffsetEdgesValue(EdgesParam {}).top.value_or(Dimension {}).ConvertToVp(), 30.0f);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOffsetEdgesValue(EdgesParam {}).left.value_or(Dimension {}).ConvertToVp(), 20.0f);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: ViewAbstractPositionEdges001
+ * @tc.desc: test position attribute, use Edges type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractPositionEdges001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use ViewAbstract::SetPositionEdges.
+     * @tc.expected: success set render property PositionEdges value.
+     */
+    EdgesParam edges;
+    CalcDimension bottom(30, DimensionUnit::VP);
+    CalcDimension right(20, DimensionUnit::VP);
+    edges.SetBottom(bottom);
+    edges.SetRight(right);
+    ViewAbstract::SetPositionEdges(edges);
+
+    EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetPositionEdgesValue(EdgesParam {}).bottom.value_or(Dimension {}).ConvertToVp(), 30.0f);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetPositionEdgesValue(EdgesParam {}).right.value_or(Dimension {}).ConvertToVp(), 20.0f);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**

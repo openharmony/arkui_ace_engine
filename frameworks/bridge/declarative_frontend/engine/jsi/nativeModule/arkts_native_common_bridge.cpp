@@ -3773,11 +3773,19 @@ ArkUINativeModuleValue CommonBridge::SetLayoutWeight(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    int32_t layoutWeight = 0;
+    float layoutWeight = 0.0f;
     if (secondArg->IsNumber()) {
-        layoutWeight = secondArg->Int32Value(vm);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            layoutWeight = secondArg->ToNumber(vm)->Value();
+        } else {
+            layoutWeight = secondArg->Int32Value(vm);
+        }
     } else if (secondArg->IsString()) {
-        layoutWeight = StringUtils::StringToInt(secondArg->ToString(vm)->ToString());
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            layoutWeight = StringUtils::StringToFloat(secondArg->ToString(vm)->ToString());
+        } else {
+            layoutWeight = StringUtils::StringToInt(secondArg->ToString(vm)->ToString());
+        }
     }
     GetArkUINodeModifiers()->getCommonModifier()->setLayoutWeight(nativeNode, layoutWeight);
     return panda::JSValueRef::Undefined(vm);

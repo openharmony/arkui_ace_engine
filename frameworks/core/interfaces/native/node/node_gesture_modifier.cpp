@@ -96,7 +96,7 @@ ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, Ar
         swipeDirection.type = SwipeDirection::HORIZONTAL;
     }
     if (directions & ArkUI_GESTURE_DIRECTION_VERTICAL) {
-        swipeDirection.type = SwipeDirection::VERTICAL;
+        swipeDirection.type += SwipeDirection::VERTICAL;
     }
     auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
     swipeGestureObject->IncRefCount();

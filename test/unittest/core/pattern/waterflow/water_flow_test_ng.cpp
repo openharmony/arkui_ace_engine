@@ -112,6 +112,7 @@ void WaterFlowTestNg::GetInstance()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    frameNode_->isConstraintNotChanged_ = true;
     pattern_ = frameNode_->GetPattern<WaterFlowPattern>();
     eventHub_ = frameNode_->GetEventHub<WaterFlowEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<WaterFlowLayoutProperty>();

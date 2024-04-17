@@ -60,6 +60,13 @@ public:
     {
         RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>(dividerMap);
         CHECK_NULL_VOID(dividerList_);
+        auto dividerlist = dividerList_->Get();
+        CHECK_NULL_VOID(dividerlist);
+        auto lastLda = AceType::DynamicCast<ListDividerArithmetic>(dividerlist);
+        CHECK_NULL_VOID(lastLda);
+        if (lastLda->IsSurfaceChange(lda)) {
+            dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lastLda));
+        }
         dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
     }
 

@@ -244,6 +244,10 @@ void SystemWindowScene::LostViewFocus()
 {
     TAG_LOGI(
         AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d lost focus", GetFrameName().c_str(), GetFrameId());
+    auto focusHub = GetFocusHub();
+    if (!focusHub || !focusHub->IsCurrentFocus()) {
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto screenNode = pipeline->GetScreenNode();

@@ -36,6 +36,7 @@ template("ace_capability_ohos_source_set") {
     external_deps = [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
+      "hicollie:libhicollie",
       "hilog:libhilog",
       "ipc:ipc_core",
       "preferences:native_preferences",
@@ -45,6 +46,8 @@ template("ace_capability_ohos_source_set") {
       external_deps += [ "pasteboard:pasteboard_client" ]
       defines += [ "SYSTEM_CLIPBOARD_SUPPORTED" ]
     }
+
+    sources += [ "xcollie/xcollieInterface_impl.cpp" ]
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]

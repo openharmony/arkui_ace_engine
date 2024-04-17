@@ -562,9 +562,7 @@ void PipelineContext::IsCloseSCBKeyboard()
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto manager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
-    CHECK_NULL_VOID(manager);
-    if (container->IsKeyboard() || !manager->HasKeyboard()) {
+    if (container->IsKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in keyboard.");
         return;
     }
@@ -572,6 +570,7 @@ void PipelineContext::IsCloseSCBKeyboard()
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
+        FocusHub::CloseKeyboard();
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",

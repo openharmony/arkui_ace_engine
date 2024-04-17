@@ -65,7 +65,6 @@ int32_t SubwindowOhos::id_ = 0;
 static std::atomic<int32_t> gToastDialogId = 0;
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Create Subwindow, parent container id is %{public}d", instanceId);
     return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
 }
 
@@ -73,6 +72,8 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
 {
     SetSubwindowId(windowId_);
     id_++;
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Create Subwindow, subwindow id %{public}d, container id %{public}d", windowId_,
+        instanceId);
 }
 
 void SubwindowOhos::InitContainer()
@@ -676,6 +677,7 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
 
 void SubwindowOhos::DeleteHotAreas(int32_t overlayId)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", overlayId);
     hotAreasMap_.erase(overlayId);
     std::vector<Rosen::Rect> hotAreas;
     for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
@@ -692,7 +694,9 @@ void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayI
 
     std::vector<Rosen::Rect> hotAreas;
     Rosen::Rect rosenRect {};
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "set hot area %{public}d", overlayId);
     for (const auto& rect : rects) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set hot area rect %{public}s", rect.ToString().c_str());
         RectConverter(rect, rosenRect);
         hotAreas.emplace_back(rosenRect);
     }
@@ -807,8 +811,8 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     return dialog;
 }
 
-RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(const DialogProperties& dialogProps,
-    const RefPtr<NG::UINode>& customNode)
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
+    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -854,8 +858,7 @@ void SubwindowOhos::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
     return overlay->CloseDialog(dialogNode);
 }
 
-void SubwindowOhos::OpenCustomDialogNG(
-    const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "open customDialog ng subwindow enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -874,6 +877,8 @@ void SubwindowOhos::OpenCustomDialogNG(
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlay);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
+            parentContainerId_, GetSubwindowId());
     }
     SubwindowManager::GetInstance()->SetDialogSubWindowId(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
@@ -888,7 +893,8 @@ void SubwindowOhos::OpenCustomDialogNG(
 
 void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter, child container id %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -901,7 +907,8 @@ void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
 
 void SubwindowOhos::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng subwindow enter, child container id %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1094,7 +1101,6 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
 void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for Service enter");
     bool ret = CreateEventRunner();
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
@@ -1148,7 +1154,7 @@ void SubwindowOhos::ShowToastForService(const std::string& message, int32_t dura
 void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowToastForService(message, duration, bottom, showMode, alignment, offset);
     } else {
@@ -1182,7 +1188,6 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog for service enter");
     bool ret = CreateEventRunner();
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
@@ -1227,7 +1232,6 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
 void SubwindowOhos::ShowDialogForAbility(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog for ability enter");
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1248,7 +1252,6 @@ void SubwindowOhos::ShowDialogForAbility(const PromptDialogAttr& dialogAttr, con
 void SubwindowOhos::ShowDialogForService(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog for service enter");
     bool ret = CreateEventRunner();
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create event runner failed");
@@ -1293,7 +1296,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show dialog, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowDialogForService(title, message, buttons, autoCancel, std::move(callback), callbacks);
     } else {
@@ -1304,7 +1307,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
 void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show dialog with attr, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowDialogForService(dialogAttr, buttons, std::move(callback), callbacks);
     } else {
@@ -1312,14 +1315,15 @@ void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::ve
     }
 }
 
-void SubwindowOhos::OpenCustomDialogForAbility(const PromptDialogAttr& dialogAttr,
-    std::function<void(int32_t)>&& callback)
+void SubwindowOhos::OpenCustomDialogForAbility(
+    const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
 {
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "open custom dialog");
     SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     if (!aceContainer) {
+        TAG_LOGW(
+            AceLogTag::ACE_SUB_WINDOW, "open dialog fail, the container %{public}d can not find", childContainerId_);
         return;
     }
 
@@ -1331,15 +1335,16 @@ void SubwindowOhos::OpenCustomDialogForAbility(const PromptDialogAttr& dialogAtt
     delegate->OpenCustomDialog(dialogAttr, std::move(callback));
 }
 
-void SubwindowOhos::OpenCustomDialogForService(const PromptDialogAttr& dialogAttr,
-    std::function<void(int32_t)>&& callback)
+void SubwindowOhos::OpenCustomDialogForService(
+    const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
 {
     // temporary not support
-    LOGW("temporary not support for service by promptAction with CustomBuilder");
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "temporary not support for service by promptAction with CustomBuilder");
 }
 
 void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "open custom dialog, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         OpenCustomDialogForService(dialogAttr, std::move(callback));
     } else {
@@ -1457,7 +1462,7 @@ void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, 
 void SubwindowOhos::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show action menu enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show custom dialog, window parent id is %{public}d", parentContainerId_);
     if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
         ShowActionMenuForService(title, button, std::move(callback));
     } else {

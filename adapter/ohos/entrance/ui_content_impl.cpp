@@ -75,6 +75,7 @@
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/xcollie/xcollieInterface.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -134,6 +135,8 @@ const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputEvent.enabled
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
+constexpr uint32_t TIMEOUT_LIMIT = 60;
+constexpr int32_t COUNT_LIMIT = 3;
 
 using ContentFinishCallback = std::function<void()>;
 using ContentStartAbilityCallback = std::function<void(const std::string& address)>;
@@ -1205,6 +1208,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         ImageFileCache::GetInstance().SetCacheFileInfo();
+        XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
