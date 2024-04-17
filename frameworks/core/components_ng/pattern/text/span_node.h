@@ -137,7 +137,7 @@ public:                                                                         
     }
 
 namespace OHOS::Ace::NG {
-using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
+using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
@@ -365,7 +365,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_MAP);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);

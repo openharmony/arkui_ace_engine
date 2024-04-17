@@ -103,7 +103,7 @@ public:
         return nullptr;
     };
     virtual void SetClipEdge() = 0;
-    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
+    virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
 

@@ -90,7 +90,7 @@ public:
     void SetCancelIconColor(const Color& iconColor) override {};
     void SetIsShowCancelButton(bool isShowCancelButton) override {};
     void SetSelectAllValue(bool isSetSelectAllValue) override {};
-    void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
+    void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

@@ -176,7 +176,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
-    std::optional<NG::FONT_FEATURES_MAP> updateFontFeature = std::nullopt;
+    std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;

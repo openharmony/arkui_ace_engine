@@ -75,8 +75,8 @@ constexpr int32_t BUTTON_INDEX = 4;
 const std::string EMPTY_VALUE;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 } // namespace
 
 class SearchTestNg : public testing::Test {

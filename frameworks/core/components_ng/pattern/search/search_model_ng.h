@@ -74,7 +74,7 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
-    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void UpdateInspectorId(const std::string& key) override;
     void SetSelectedBackgroundColor(const Color& value) override;
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
@@ -107,7 +107,7 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
-    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);

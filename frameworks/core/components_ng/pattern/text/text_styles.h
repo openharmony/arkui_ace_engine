@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
-using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
+using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
@@ -32,7 +32,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_MAP);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);

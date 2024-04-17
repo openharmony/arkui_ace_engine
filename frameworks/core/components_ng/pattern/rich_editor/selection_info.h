@@ -26,7 +26,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 namespace OHOS::Ace {
-using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
+using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 enum GetSpansMethod : int32_t {
     GETSPANS,
     ONSELECT,
@@ -63,7 +63,7 @@ struct SymbolSpanStyle {
     double lineHeight = 0.0;
     double letterSpacing = 0.0;
     std::string symbolColor;
-    FONT_FEATURES_MAP fontFeature;
+    FONT_FEATURES_LIST fontFeature;
     int32_t fontWeight = 0;
     uint32_t renderingStrategy;
     uint32_t effectStrategy;
@@ -76,7 +76,7 @@ struct TextStyleResult {
     double letterSpacing = 0.0;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
-    FONT_FEATURES_MAP fontFeature;
+    FONT_FEATURES_LIST fontFeature;
     std::string fontFamily;
     int32_t decorationType = 0;
     std::string decorationColor;
