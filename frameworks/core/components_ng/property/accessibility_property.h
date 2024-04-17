@@ -386,28 +386,28 @@ public:
 
     class Level {
     public:
-        inline static const std::string AUTO = "auto";
-        inline static const std::string YES = "yes";
-        inline static const std::string NO = "no";
+        inline static const std::string AUTO_STR = "auto";
+        inline static const std::string YES_STR = "yes";
+        inline static const std::string NO_STR = "no";
         inline static const std::string NO_HIDE_DESCENDANTS = "no-hide-descendants";
     };
 
     virtual std::string GetAccessibilityLevel() const
     {
         if (!accessibilityLevel_.has_value()) {
-            return Level::AUTO;
+            return Level::AUTO_STR;
         }
         return accessibilityLevel_.value();
     }
 
     void SetAccessibilityLevel(const std::string& accessibilityLevel)
     {
-        if (accessibilityLevel == Level::YES ||
-            accessibilityLevel == Level::NO ||
+        if (accessibilityLevel == Level::YES_STR ||
+            accessibilityLevel == Level::NO_STR ||
             accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
             accessibilityLevel_ = accessibilityLevel;
         } else {
-            accessibilityLevel_ = Level::AUTO;
+            accessibilityLevel_ = Level::AUTO_STR;
         }
     }
 
