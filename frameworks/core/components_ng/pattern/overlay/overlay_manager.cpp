@@ -3083,6 +3083,11 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             if (sheetStyle.borderWidth.has_value()) {
                 layoutProperty->UpdateBorderWidth(sheetStyle.borderWidth.value());
                 topModalRenderContext->UpdateBorderWidth(sheetStyle.borderWidth.value());
+            } else {
+                BorderWidthProperty borderWidth;
+                borderWidth.SetBorderWidth(0.0_vp);
+                layoutProperty->UpdateBorderWidth(borderWidth);
+                topModalRenderContext->UpdateBorderWidth(borderWidth);
             }
             if (sheetStyle.borderStyle.has_value()) {
                 topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
