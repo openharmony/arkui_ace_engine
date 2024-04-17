@@ -700,5 +700,10 @@ bool PipelineBase::HasFloatTitle() const
 {
     return true;
 }
+
+Dimension NG::PipelineContext::GetCustomTitleHeight()
+{
+    return Dimension();
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
