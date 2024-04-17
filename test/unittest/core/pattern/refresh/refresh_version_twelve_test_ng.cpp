@@ -126,7 +126,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset04, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is DRAG
      */
     pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 }
 
@@ -168,7 +168,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrRefreshOffset05, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
     pattern_->HandleDragUpdate((OVERDRAG_OFFSET).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 }
 
@@ -256,7 +256,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh03, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is DRAG
      */
     pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 }
 
@@ -298,7 +298,7 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh04, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
     pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 }
 
@@ -337,14 +337,14 @@ HWTEST_F(RefreshVersionTwelveTestNg, AttrPullToRefresh05, TestSize.Level1)
      * @tc.steps: step3. HandleDragUpdate, the delta greater than TRIGGER_REFRESH_DISTANCE
      * @tc.expected: offset is 64.f
      */
-    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx() / pattern_->CalculateFriction());
+    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(Dimension(offset, DimensionUnit::VP), TRIGGER_REFRESH_DISTANCE);
 
     /**
      * @tc.steps: step4. HandleDragUpdate, the delta -TRIGGER_LOADING_DISTANCE
      * @tc.expected: offset is 48.f
      */
-    pattern_->HandleDragUpdate(-(TRIGGER_LOADING_DISTANCE).ConvertToPx() / pattern_->CalculateFriction());
+    pattern_->HandleDragUpdate(-(TRIGGER_LOADING_DISTANCE).ConvertToPx() / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(Dimension(offset, DimensionUnit::VP), TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE);
 }
 
