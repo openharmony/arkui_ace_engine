@@ -668,6 +668,7 @@ private:
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
+    bool CheckSafeAreaIsExpand();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
