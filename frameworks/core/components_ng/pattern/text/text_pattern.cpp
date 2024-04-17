@@ -1282,7 +1282,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
                 PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
                     result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
                 UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
-            } else {
+            } else if (result.valueString.size() > 1) {
                 UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
             }
         }
