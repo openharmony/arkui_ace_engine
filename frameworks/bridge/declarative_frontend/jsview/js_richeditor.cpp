@@ -73,10 +73,25 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
-namespace {
-
-std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
+CalcDimension JSRichEditor::ParseLengthMetrics(const JSRef<JSObject>& obj)
+{
+    CalcDimension size;
+    auto value = 0.0;
+    auto valueObj = obj->GetProperty("value");
+    if (!valueObj->IsNull() && valueObj->IsNumber()) {
+        value = valueObj->ToNumber<float>();
+    }
+    auto unit = DimensionUnit::VP;
+    auto unitObj = obj->GetProperty("unit");
+    if (!unitObj->IsNull() && unitObj->IsNumber()) {
+        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
+    }
+    if (value >= 0 && unit != DimensionUnit::PERCENT) {
+        size = CalcDimension(value, unit);
+    }
+    return size;
+}
+std::optional<NG::MarginProperty> JSRichEditor::ParseMarginAttr(JsiRef<JSVal> marginAttr)
 {
     std::optional<NG::MarginProperty> marginProp = std::nullopt;
     CalcDimension length;
@@ -89,6 +104,11 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
         marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     } else if (marginAttr->IsObject()) {
         auto marginObj = JSRef<JSObject>::Cast(marginAttr);
+        if (marginObj->HasProperty("value")) {
+            length = ParseLengthMetrics(marginObj);
+            marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+            return marginProp;
+        }
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
         std::optional<CalcDimension> top;
@@ -99,7 +119,7 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
     return marginProp;
 }
 
-std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
+std::optional<NG::BorderRadiusProperty> JSRichEditor::ParseBorderRadiusAttr(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
     CalcDimension radiusDim;
@@ -121,6 +141,13 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
         prop = borderRadius;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (object->HasProperty("value")) {
+            NG::BorderRadiusProperty borderRadius;
+            borderRadius.SetRadius(ParseLengthMetrics(object));
+            borderRadius.multiValued = false;
+            prop = borderRadius;
+            return prop;
+        }
         CalcDimension topLeft;
         CalcDimension topRight;
         CalcDimension bottomLeft;
@@ -136,8 +163,6 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
     }
     return prop;
 }
-
-} // namespace
 
 void JSRichEditor::Create(const JSCallbackInfo& info)
 {
@@ -1115,10 +1140,10 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
     if (!layoutStyleObject->IsUndefined()) {
         auto marginAttr = layoutStyleObject->GetProperty("margin");
-        imageStyle.marginProp = ParseMarginAttr(marginAttr);
+        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
         updateSpanStyle_.marginProp = imageStyle.marginProp;
         auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
-        imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
+        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
         updateSpanStyle_.borderRadius = imageStyle.borderRadius;
     }
     return imageStyle;

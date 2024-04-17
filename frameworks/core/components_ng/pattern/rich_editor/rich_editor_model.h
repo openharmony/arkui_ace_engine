@@ -19,6 +19,7 @@
 #include <functional>
 #include <mutex>
 #include <optional>
+#include <string>
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
@@ -33,86 +34,9 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/paragraph.h"
 namespace OHOS::Ace {
-struct UserGestureOptions {
-    GestureEventFunc onClick;
-    GestureEventFunc onLongPress;
-};
-
-struct ImageSpanSize {
-    CalcDimension width;
-    CalcDimension height;
-
-    std::string ToString() const
-    {
-        auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, width);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, height);
-        return jsonValue->ToString();
-    }
-};
-
-struct ImageSpanAttribute {
-    std::optional<ImageSpanSize> size;
-    std::optional<VerticalAlign> verticalAlign;
-    std::optional<ImageFit> objectFit;
-    std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
-    std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
-
-    std::string ToString() const
-    {
-        auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, size);
-        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, verticalAlign);
-        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, objectFit);
-        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, marginProp);
-        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
-        return jsonValue->ToString();
-    }
-};
-
-struct SpanOptionBase {
-    std::optional<int32_t> offset;
-    UserGestureOptions userGestureOption;
-
-    std::string ToString() const
-    {
-        auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
-        return jsonValue->ToString();
-    }
-};
-
-struct ImageSpanOptions : SpanOptionBase {
-    std::optional<int32_t> offset;
-    std::optional<std::string> image;
-    std::optional<std::string> bundleName;
-    std::optional<std::string> moduleName;
-    std::optional<RefPtr<PixelMap>> imagePixelMap;
-    std::optional<ImageSpanAttribute> imageAttribute;
-
-    std::string ToString() const
-    {
-        auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, bundleName);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, moduleName);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
-        if (imagePixelMap && *imagePixelMap) {
-            std::string pixSize = "[";
-            pixSize += std::to_string((*imagePixelMap)->GetWidth());
-            pixSize += "*";
-            pixSize += std::to_string((*imagePixelMap)->GetHeight());
-            pixSize += "]";
-            jsonValue->Put("pixelMapSize", pixSize.c_str());
-        }
-        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, imageAttribute);
-        return jsonValue->ToString();
-    }
-};
-
 struct SpanPositionInfo {
     SpanPositionInfo(int32_t index, int32_t start, int32_t end, int32_t offset)
         : spanIndex_(index), spanStart_(start), spanEnd_(end), spanOffset_(offset)
@@ -322,7 +246,8 @@ public:
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
-    virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
+    virtual void UpdateSpanStyle(
+        int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
     virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
     virtual SelectionInfo GetSpansInfo(int32_t start, int32_t end) = 0;

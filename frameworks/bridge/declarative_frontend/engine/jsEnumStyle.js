@@ -2844,4 +2844,5 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
+  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
 })(StyledStringKey || (StyledStringKey = {}));

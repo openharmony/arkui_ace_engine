@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H
 
-#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -51,7 +50,7 @@ public:
     void GetFontStyle(const JSCallbackInfo& info);
     void SetFontStyle(const JSCallbackInfo& info);
 
-    RefPtr<FontSpan>& GetFontSpan();
+    const RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);
 
 private:
@@ -163,5 +162,39 @@ private:
     RefPtr<TextShadowSpan> textShadowSpan_;
 };
 
+class JSImageAttachment : public virtual AceType {
+    DECLARE_ACE_TYPE(JSImageAttachment, AceType)
+
+public:
+    JSImageAttachment() = default;
+    ~JSImageAttachment() override = default;
+    static void Constructor(const JSCallbackInfo &args);
+    static void Destructor(JSImageAttachment *imageSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<ImageSpan> ParseJsImageSpan(const JSRef<JSObject> &obj);
+    void GetImageSrc(const JSCallbackInfo &info);
+    void SetImageSrc(const JSCallbackInfo &info) {}
+    void GetImageSize(const JSCallbackInfo &info);
+    void SetImageSize(const JSCallbackInfo &info) {}
+    void GetImageVerticalAlign(const JSCallbackInfo &info);
+    void SetImageVerticalAlign(const JSCallbackInfo &info) {}
+    void GetImageObjectFit(const JSCallbackInfo &info);
+    void SetImageObjectFit(const JSCallbackInfo &info) {}
+    void GetImageLayoutStyle(const JSCallbackInfo &info);
+    void SetImageLayoutStyle(const JSCallbackInfo &info) {}
+
+    const RefPtr<ImageSpan>& GetImageSpan();
+    void SetImageSpan(const RefPtr<ImageSpan>& imageSpan);
+    const ImageSpanOptions& GetImageOptions() const;
+
+private:
+    static ImageSpanOptions CreateImageOptions(const JSRef<JSObject>& obj);
+    static ImageSpanAttribute ParseJsImageSpanAttribute(const JSRef<JSObject>& obj);
+    static JSRef<JSObject> CreateEdge(const NG::PaddingPropertyT<NG::CalcLength>& edge);
+    static JSRef<JSObject> CreateBorderRadius(const NG::BorderRadiusProperty& borderRadius);
+
+    ACE_DISALLOW_COPY_AND_MOVE(JSImageAttachment);
+    RefPtr<ImageSpan> imageSpan_;
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

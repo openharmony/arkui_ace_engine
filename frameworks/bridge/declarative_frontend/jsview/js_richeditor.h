@@ -71,6 +71,9 @@ public:
     static void CreateJsRichEditorCommonEvent(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info);
+    static std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
+    static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
+    static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,

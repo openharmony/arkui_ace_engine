@@ -74,6 +74,7 @@ public:
     ~TextPattern() override = default;
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
+    std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
 
     virtual int32_t GetTextContentLength();
 
@@ -664,6 +665,10 @@ private:
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    // SpanString
+    void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
+    void ProcessSpanString();
     // to check if drag is in progress
     void SetCurrentDragTool(SourceTool tool)
     {
