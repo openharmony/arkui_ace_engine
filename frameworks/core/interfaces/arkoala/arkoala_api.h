@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 90
+#define ARKUI_FULL_API_VERSION 91
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 90
+#define ARKUI_NODE_API_VERSION 91
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -554,7 +554,9 @@ enum ArkUINodeType {
     ARKUI_GRID_ITEM,
     ARKUI_CUSTOM,
     ARKUI_WATER_FLOW,
-    ARKUI_FLOW_ITEM
+    ARKUI_FLOW_ITEM,
+    ARKUI_BLANK,
+    ARKUI_DIVIDER,
 };
 
 enum ArkUIEventCategory {
@@ -632,6 +634,7 @@ enum ArkUIEventSubKind {
     ON_GRID_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_GRID,
     ON_GRID_START,
     ON_GRID_STOP,
+    ON_GRID_SCROLL_TO_INDEX,
 
     ON_SIDEBAR_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SIDEBAR,
 
@@ -2232,6 +2235,8 @@ struct ArkUIBlankModifier {
     void (*resetColor)(ArkUINodeHandle node);
     void (*setBlankHeight)(ArkUINodeHandle node, ArkUI_Float32 heightValue, ArkUI_Int32 heightUnit);
     void (*resetBlankHeight)(ArkUINodeHandle node);
+    void (*setBlankMin)(ArkUINodeHandle node, ArkUI_Float32 minValue, ArkUI_Int32 minUnit);
+    void (*resetBlankMin)(ArkUINodeHandle node);
 };
 
 struct ArkUICounterModifier {
