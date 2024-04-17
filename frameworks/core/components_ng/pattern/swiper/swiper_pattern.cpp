@@ -2604,8 +2604,9 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         nextIndex = direction ? firstIndex + 1 : firstItemInfoInVisibleArea.first;
     }
 
-    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    if (swiperLayoutProperty && SwiperUtils::IsStretch(swiperLayoutProperty) && GetDisplayCount() == 1) {
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    // don't run this in nested scroll. Parallel nested scroll can deviate > 1 page from currentIndex_
+    if (!childScrolling_ && SwiperUtils::IsStretch(props) && GetDisplayCount() == 1) {
         nextIndex = ComputeNextIndexInSinglePage(velocity, onlyDistance);
     }
 
