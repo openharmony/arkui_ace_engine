@@ -292,6 +292,16 @@ public:
         stateManagerEnable_ = stateManagerEnable;
     }
 
+    static void SetFaultInjectEnabled(bool faultInjectEnable)
+    {
+        faultInjectEnabled_ = faultInjectEnable;
+    }
+
+    static bool GetFaultInjectEnabled()
+    {
+        return faultInjectEnabled_;
+    }
+
     static bool GetBuildTraceEnabled()
     {
         return buildTraceEnable_;
@@ -531,6 +541,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
+    static bool faultInjectEnabled_;
 };
 
 } // namespace OHOS::Ace

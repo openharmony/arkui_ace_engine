@@ -288,6 +288,11 @@ bool IsAcePerformanceMonitorEnabled()
 }
 } // namespace
 
+bool IsFaultInjectEnabled()
+{
+    return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
@@ -339,6 +344,7 @@ bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -474,6 +480,7 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+    faultInjectEnabled_  = IsFaultInjectEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;

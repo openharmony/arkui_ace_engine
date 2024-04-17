@@ -74,6 +74,9 @@ void SystemWindowScene::OnVisibleChange(bool visible)
     } else if (session_->NeedCheckContextTransparent()) {
         checkContextTransparentTask_.Cancel();
     }
+    if (SystemProperties::GetFaultInjectEnabled() && session_->NeedCheckContextTransparent()) {
+        PostFaultInjectTask();
+    }
 }
 
 void SystemWindowScene::OnAttachToFrameNode()
@@ -274,5 +277,24 @@ void SystemWindowScene::PostCheckContextTransparentTask()
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(std::move(checkContextTransparentTask_), TaskExecutor::TaskType::UI, DELAY_TIME);
+}
+
+void SystemWindowScene::PostFaultInjectTask()
+{
+    auto task = ([weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+        renderContext->SetOpacity(0.0f);
+        host->MarkDirtyNode();
+    });
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME);
 }
 } // namespace OHOS::Ace::NG
