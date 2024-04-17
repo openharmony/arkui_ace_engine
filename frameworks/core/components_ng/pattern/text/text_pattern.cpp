@@ -2171,7 +2171,7 @@ void TextPattern::EnsureOverlayExists()
     if (!overlayNode) {
         auto builderFunc = []() -> RefPtr<UINode> {
             auto uiNode =
-                FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                FrameNode::GetOrCreateFrameNode(V2::RECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                     []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
             return uiNode;
         };
@@ -2193,10 +2193,15 @@ void TextPattern::EnsureOverlayExists()
 
         auto renderContext = overlayNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(INT32_MAX);
         auto focusHub = overlayNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(false);
+
+        auto frameRenderContext = GetRenderContext();
+        CHECK_NULL_VOID(frameRenderContext);
+        frameRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+        frameRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -2215,8 +2220,6 @@ void TextPattern::SetFadeout(const bool& left, const bool& right, const float& g
     CHECK_NULL_VOID(frameNode);
     auto overlayNode = frameNode->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
-    auto frameRenderContext = GetRenderContext();
-    CHECK_NULL_VOID(frameRenderContext);
     auto overlayRenderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(overlayRenderContext);
 
@@ -2227,13 +2230,10 @@ void TextPattern::SetFadeout(const bool& left, const bool& right, const float& g
     gradient.AddColor(CreateTextGradientColor(leftFadeout_ ? gradientPercent : 0, Color::WHITE));
     gradient.AddColor(CreateTextGradientColor(rightFadeout_ ? (1 - gradientPercent) : 1, Color::WHITE));
     gradient.AddColor(CreateTextGradientColor(1, Color::TRANSPARENT));
-    frameRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    frameRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
     overlayRenderContext->UpdateLinearGradient(gradient);
+    overlayRenderContext->UpdateZIndex(INT32_MAX);
     overlayRenderContext->UpdateBackBlendMode(BlendMode::DST_IN);
     overlayRenderContext->UpdateBackBlendApplyType(BlendApplyType::FAST);
-
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     overlayNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
