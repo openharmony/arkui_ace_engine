@@ -174,6 +174,7 @@ bool ResourceAdapterImplV2::NeedUpdateResConfig(const std::shared_ptr<Global::Re
 
 void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
+    std::lock_guard<std::mutex> lock(updateResConfigMutex_);
     auto resConfig = ConvertConfigToGlobal(config);
     auto needUpdateResConfig = NeedUpdateResConfig(resConfig_, resConfig) || themeFlag;
     if (sysResourceManager_ && resConfig != nullptr && needUpdateResConfig) {
