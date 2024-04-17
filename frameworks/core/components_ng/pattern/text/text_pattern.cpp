@@ -2586,11 +2586,12 @@ void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
     }
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
+    auto contentSize = geometryNode->GetContentSize();
     CHECK_NULL_VOID(paragraph_);
-    if (paragraph_->GetTextWidth() < frameSize.Width()) {
+    if (paragraph_->GetTextWidth() < contentSize.Width()) {
         return;
     }
+    auto frameSize = geometryNode->GetFrameSize();
     auto relativeSelfLeftOffsetX =
         std::max(-1 * host->GetOffsetRelativeToWindow().GetX(), rect.GetOffset().GetX() - paragraph_->GetTextWidth());
     rect.SetLeft(relativeSelfLeftOffsetX);
