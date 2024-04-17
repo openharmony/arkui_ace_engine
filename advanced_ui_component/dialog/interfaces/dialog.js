@@ -678,8 +678,10 @@ export class SelectDialog extends ViewPU {
       List.width('100%');
       List.clip(false);
       List.onFocus(() => {
-          this.contentScroller.scrollEdge(Edge.Top);
-          focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+          if (!this.contentScroller.isAtEnd()) {
+              this.contentScroller.scrollEdge(Edge.Top);
+              focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+          }
       });
       List.defaultFocus(this.buttons?.length == 0 ? true : false);
       if (!q14) {
