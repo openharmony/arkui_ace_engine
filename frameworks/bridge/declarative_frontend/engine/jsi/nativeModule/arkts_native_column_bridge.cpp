@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h"
+
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -66,8 +68,7 @@ ArkUINativeModuleValue ColumnBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtime
         value = secondArg->Int32Value(vm);
         if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
             (value == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
-            (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
-            (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
+            (value == static_cast<int32_t>(FlexAlign::CENTER)) || (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
             GetArkUINodeModifiers()->getColumnModifier()->setColumnAlignItems(nativeNode, value);
         } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             GetArkUINodeModifiers()->getColumnModifier()->resetColumnAlignItems(nativeNode);
@@ -87,4 +88,33 @@ ArkUINativeModuleValue ColumnBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runti
     GetArkUINodeModifiers()->getColumnModifier()->resetColumnAlignItems(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ColumnBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CalcDimension sapce;
+    ArkTSUtils::ParseJsDimensionVp(vm, secondArg, sapce, false);
+    if (LessNotEqual(sapce.Value(), 0.0)) {
+        GetArkUINodeModifiers()->getColumnModifier()->resetColumnSpace(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getColumnModifier()->setColumnSpace(
+        nativeNode, sapce.Value(), static_cast<int>(sapce.Unit()));
+    return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ColumnBridge::ResetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getColumnModifier()->resetColumnSpace(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+} // namespace OHOS::Ace::NG

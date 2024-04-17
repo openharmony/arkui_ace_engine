@@ -17,9 +17,11 @@
 
 #include "jsnapi_expo.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "core/components_ng/base/frame_node_creator.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
@@ -110,19 +112,14 @@ ArkUINativeModuleValue FrameNodeBridge::MakeFrameNodeInfo(EcmaVM* vm, ArkUINodeH
     return obj;
 }
 
-ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+void AddAttachFuncCallback(EcmaVM* vm, const RefPtr<FrameNode> node)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    node->SetExclusiveEventForChild(true);
-    auto pattern = node->GetPattern<NG::CustomFrameNodePattern>();
     auto global = JSNApi::GetGlobalObject(vm);
     auto funcName = panda::StringRef::NewFromUtf8(vm, "__AttachToMainTree__");
     auto obj = global->Get(vm, funcName);
     panda::Local<panda::FunctionRef> attachFunc = obj;
     if (obj->IsFunction()) {
-        pattern->SetOnAttachFunc([vm, func = panda::CopyableGlobal(vm, attachFunc)](int32_t nodeId) {
+        node->SetOnAttachFunc([vm, func = panda::CopyableGlobal(vm, attachFunc)](int32_t nodeId) {
             panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
             func->Call(vm, func.ToLocal(), params, ArraySize(params));
         });
@@ -131,12 +128,38 @@ ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* ru
     obj = global->Get(vm, funcName);
     panda::Local<panda::FunctionRef> detachFunc = obj;
     if (detachFunc->IsFunction()) {
-        pattern->SetOnDetachFunc([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
+        node->SetOnDetachFunc([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
             panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
             func->Call(vm, func.ToLocal(), params, ArraySize(params));
         });
     }
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    node->SetExclusiveEventForChild(true);
+    AddAttachFuncCallback(vm, node);
     FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
+    const char* keys[] = { "nodeId", "nativeStrongRef" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
+    auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return reslut;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
+    std::string type = firstArg->IsString() ? firstArg->ToString(vm)->ToString() : "";
+    auto node = NG::FrameNodeCreator::GetOrCreateTypedFrameNode(nodeId, type);
+    if (node) {
+        node->SetExclusiveEventForChild(true);
+    }
+    AddAttachFuncCallback(vm, node);
     const char* keys[] = { "nodeId", "nativeStrongRef" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);

@@ -103,11 +103,22 @@ declare interface CommonAttribute { }
 
 declare interface AttributeModifier<T> { }
 
+declare enum ModifierType {
+  ORIGIN = 0,
+  STATE = 1,
+  FRAME_NODE = 2,
+}
+
 declare class ArkComponent {
   nativePtr: NodePtr;
-  _modifiersWithKeys: FrameNodeAttributeMap;
-  constructor(nativePtr: NodePtr);
+  constructor(nativePtr: NodePtr, classType?: ModifierType);
+  setNodePtr(noed: NodePtr);
+  initialize(...args: Object[]);
 }
+
+declare class ArkTextComponent extends ArkComponent {}
+
+declare class ArkColumnComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

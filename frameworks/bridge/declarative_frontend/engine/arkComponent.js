@@ -25,6 +25,7 @@ let ModifierType;
 (function (ModifierType) {
     ModifierType[ModifierType['ORIGIN'] = 0] = 'ORIGIN';
     ModifierType[ModifierType['STATE'] = 1] = 'STATE';
+    ModifierType[ModifierType['FRAME_NODE'] = 1] = 'FRAME_NODE';
 })(ModifierType || (ModifierType = {}));
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
@@ -2569,17 +2570,82 @@ function modifierWithKey(modifiers, identity, modifierClass, value) {
     modifiers.set(identity, new modifierClass(value));
   }
 }
+
+class ObservedMap {
+  constructor() {
+      this.map_ = new Map();
+  }
+  clear() {
+      this.map_.clear();
+  }
+  delete(key) {
+      return this.map_.delete(key);
+  }
+  forEach(callbackfn, thisArg) {
+      this.map_.forEach(callbackfn, thisArg);
+  }
+  get(key) {
+      return this.map_.get(key);
+  }
+  has(key) {
+      return this.map_.has(key);
+  }
+  set(key, value) {
+      const _a = this.changeCallback;
+      this.map_.set(key, value);
+      _a === null || _a === void 0 ? void 0 : _a(key, value);
+      return this;
+  }
+  get size() {
+      return this.map_.size;
+  }
+  entries() {
+      return this.map_.entries();
+  }
+  keys() {
+      return this.map_.keys();
+  }
+  values() {
+      return this.map_.values();
+  }
+  [Symbol.iterator]() {
+      return this.map_.entries();
+  }
+  get [Symbol.toStringTag]() {
+      return 'ObservedMapTag';
+  }
+  setOnChange(callback) {
+      if (this.changeCallback === undefined) {
+          this.changeCallback = callback;
+      }
+  }
+}
+
 class ArkComponent {
   constructor(nativePtr, classType) {
     this._modifiers = new Map();
-    this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    if (classType === ModifierType.FRAME_NODE) {
+      this._modifiersWithKeys = new ObservedMap();
+      this._modifiersWithKeys.setOnChange((key, value) => {
+        if (this.nativePtr === undefined) {
+          return;
+        }
+        value.applyStage(this.nativePtr);
+        getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+      })
+    } else {
+      this._modifiersWithKeys = new Map();
+    }
     if (classType === ModifierType.STATE) {
       this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
     this._nativePtrChanged = false;
+  }
+  setNodePtr(nodePtr) {
+    this.nativePtr = nodePtr;
   }
   getOrCreateGestureEvent() {
     if (this._gestureEvent !== null) {
@@ -4141,9 +4207,34 @@ class ColumnJustifyContentModifier extends ModifierWithKey {
   }
 }
 ColumnJustifyContentModifier.identity = Symbol('columnJustifyContent');
+
+class ColumnSpaceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().column.resetSapce(node);
+    }
+    else {
+      getUINativeModule().column.setSpace(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ColumnSpaceModifier.identity = Symbol('columnSpace');
+
 class ArkColumnComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ColumnSpaceModifier.identity, ColumnSpaceModifier, value[0].space);
+    }
+    return this
   }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, ColumnAlignItemsModifier.identity, ColumnAlignItemsModifier, value);
@@ -8478,9 +8569,29 @@ class TextClipModifier extends ModifierWithKey {
   }
 }
 TextClipModifier.identity = Symbol('textClip');
+
+class TextContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.setContent(node, "");
+    }
+    else {
+      getUINativeModule().text.setContent(node, this.value);
+    }
+  }
+}
+TextContentModifier.identity = Symbol('textContent');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  initialize(content) {
+    modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, content[0]);
+    return this;
   }
   enableDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
