@@ -336,6 +336,9 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
         info.offsetEnd_ = false;
     }
     info.prevOffset_ = info.currentOffset_;
+
+    auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    info.hasBigItem_ = !props->GetLayoutOptions()->irregularIndexes.empty();
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)

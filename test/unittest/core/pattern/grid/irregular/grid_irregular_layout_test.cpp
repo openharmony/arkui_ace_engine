@@ -1553,6 +1553,7 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_TRUE(info.offsetEnd_);
+    EXPECT_TRUE(info.hasBigItem_);
 }
 
 /**

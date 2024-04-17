@@ -204,6 +204,7 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
     for (auto it : lastLine->second) {
         maxIdx = std::max(maxIdx, it.second);
     }
+    maxIdx = std::max(maxIdx, FindEndIdx(endLine).itemIdx);
     return maxIdx - minIdx + 1;
 }
 
