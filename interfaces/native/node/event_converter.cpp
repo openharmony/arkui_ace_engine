@@ -198,6 +198,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_GESTURE_SWIPE;
         case NODE_ON_WILL_SCROLL:
             return ON_WILL_SCROLL;
+        case NODE_ON_TOUCH_INTERCEPT:
+            return ON_TOUCH_INTERCEPT;
+        case NODE_ON_REACH_END:
+            return ON_REACH_END;
         default:
             return -1;
     }
@@ -284,6 +288,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
         case ON_WILL_SCROLL:
             return NODE_ON_WILL_SCROLL;
+        case ON_TOUCH_INTERCEPT:
+            return NODE_ON_TOUCH_INTERCEPT;
+        case ON_REACH_END:
+            return NODE_ON_REACH_END;
         default:
             return -1;
     }
@@ -307,6 +315,7 @@ bool IsTouchEvent(ArkUI_Int32 type)
 {
     switch (type) {
         case NODE_TOUCH_EVENT:
+        case NODE_ON_TOUCH_INTERCEPT:
             return true;
         default:
             return false;
@@ -331,7 +340,8 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         }
         case TOUCH_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
-            event->kind = ConvertToNodeEventType(ON_TOUCH);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
         default:

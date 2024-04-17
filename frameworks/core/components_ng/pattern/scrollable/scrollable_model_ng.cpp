@@ -177,4 +177,12 @@ int32_t ScrollableModelNG::GetAlwaysEnabled(FrameNode* frameNode)
     return pattern->GetAlwaysEnabled();
 }
 
+void ScrollableModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
+
 } // namespace OHOS::Ace::NG

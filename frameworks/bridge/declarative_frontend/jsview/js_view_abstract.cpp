@@ -25,7 +25,6 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
-#include "interfaces/native/native_event.h"
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"

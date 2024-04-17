@@ -32,6 +32,7 @@ struct ArkUI_Node {
     ArkUINodeHandle uiNodeHandle = nullptr;
     void* extraData = nullptr;
     void* extraCustomData = nullptr;
+    ArkUI_LengthMetricUnit lengthMetricUnit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
 };
 
 struct ArkUI_Context {
@@ -76,5 +77,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent);
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
+
+int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit);
 
 }; // namespace OHOS::Ace::NodeModel
