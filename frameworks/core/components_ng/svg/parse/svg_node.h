@@ -128,6 +128,16 @@ public:
         colorFilter_ = colorFilter;
     }
 
+    void SetEffectFilterArea(const Rect& effectFilterArea)
+    {
+        effectFilterArea_ = effectFilterArea;
+    }
+
+    Rect GetEffectFilterArea() const
+    {
+        return effectFilterArea_;
+    }
+
     std::optional<ImageColorFilter> GetColorFilter() const
     {
         return colorFilter_;
@@ -208,6 +218,9 @@ protected:
     uint8_t opacity_ = 0xFF;
     float smoothEdge_ = 0.0f;
     std::optional<ImageColorFilter> colorFilter_;
+    Rect effectFilterArea_;
+    double useOffsetX_ = 0.0;
+    double useOffsetY_ = 0.0;
 
     bool hrefFill_ = true;   // get fill attributes from reference
     bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference
