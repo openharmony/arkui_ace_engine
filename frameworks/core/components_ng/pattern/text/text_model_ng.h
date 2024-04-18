@@ -71,7 +71,7 @@ public:
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
-    void SetClipEdge() override;
+    void SetClipEdge(bool clip) override;
     void SetFontFeature(const FONT_FEATURES_MAP& value) override;
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;

@@ -70,14 +70,18 @@ const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 
 void TextPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
             host->GetRenderContext()->UpdateClipEdge(true);
+            host->GetRenderContext()->SetClipToFrame(true);
         }
+    }
+    if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
+        host->GetRenderContext()->SetUsingContentRectForRenderFrame(true, true);
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();

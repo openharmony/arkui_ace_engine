@@ -283,17 +283,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
         CHECK_NULL_VOID(paragraph_);
         auto& canvas = drawingContext.canvas;
-        canvas.Save();
         if (!textRacing_) {
-            auto contentSize = contentSize_->Get();
-            auto contentOffset = contentOffset_->Get();
-            if (clip_ && clip_->Get() &&
-                (!fontSize_.has_value() || !fontSizeFloat_ ||
-                    NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-                RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-                    contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-                canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-            }
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 ResetImageNodeList();
@@ -302,9 +292,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             // Racing
             float textRacePercent = marqueeDirection_ ==
                 MarqueeDirection::LEFT ? GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
-            if (clip_ && clip_->Get()) {
-                canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
-            }
             float paragraph1Offset =
                 (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
             if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
@@ -318,7 +305,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 DrawImageNodeList(drawingContext.width, paragraph1Offset, paragraph2Offset);
             }
         }
-        canvas.Restore();
     } else {
         DrawObscuration(drawingContext);
     }

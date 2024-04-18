@@ -84,9 +84,9 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     SizeF contentSize = paintWrapper->GetContentSize();
     textContentModifier_->SetContentSize(contentSize);
-    auto offset = paintWrapper->GetContentOffset();
+    auto offset = OffsetF(0.0, 0.0);
     textContentModifier_->SetContentOffset(offset);
-    auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    auto paintOffset = OffsetF(0.0, -std::min(baselineOffset_, 0.0f));
     textContentModifier_->SetPrintOffset(paintOffset);
 
     auto frameNode = textPattern->GetHost();

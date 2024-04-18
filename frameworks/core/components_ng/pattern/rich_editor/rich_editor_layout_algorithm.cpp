@@ -235,7 +235,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
-    auto contentOffset = TextLayoutAlgorithm::GetContentOffset(layoutWrapper);
+    auto contentOffset = TextLayoutAlgorithm::SetContentOffset(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, contentOffset);
     auto pattern = host->GetPattern<RichEditorPattern>();

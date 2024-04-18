@@ -61,7 +61,7 @@ public:
     void SetCopyOption(CopyOptions copyOption) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override {};
     void SetEllipsisMode(EllipsisMode modal) override {};
-    void SetClipEdge() override {};
+    void SetClipEdge(bool clip) override {};
     void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
     void SetMarqueeOptions(const NG::TextMarqueeOptions& options) override {};
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};

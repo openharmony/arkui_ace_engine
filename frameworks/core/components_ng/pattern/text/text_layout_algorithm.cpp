@@ -482,7 +482,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     return ret;
 }
 
-OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+OffsetF TextLayoutAlgorithm::SetContentOffset(LayoutWrapper* layoutWrapper)
 {
     OffsetF contentOffset(0.0, 0.0);
     CHECK_NULL_RETURN(layoutWrapper, contentOffset);
@@ -504,6 +504,12 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
         content->SetOffset(contentOffset);
     }
     return contentOffset;
+}
+
+OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+{
+    SetContentOffset(layoutWrapper);
+    return OffsetF(0.0, 0.0);
 }
 
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
