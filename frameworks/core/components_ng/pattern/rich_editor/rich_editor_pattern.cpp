@@ -2658,6 +2658,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
     overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
     overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
+    contentChange_ = false;
     keyboardOverlay_ = overlayManager;
     OffsetF caretOffset;
     float caretHeight = 0.0f;
@@ -2673,6 +2674,7 @@ bool RichEditorPattern::CloseCustomKeyboard()
     CHECK_NULL_RETURN(keyboardOverlay_, false);
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isCustomKeyboardAttached_ = false;
+    contentChange_ = false;
     return true;
 }
 
@@ -5273,6 +5275,9 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
 
 float RichEditorPattern::GetCrossOverHeight() const
 {
+    if (!keyboardAvoidance_ || !contentChange_) {
+        return 0.0f;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto rootHeight = pipeline->GetRootHeight();

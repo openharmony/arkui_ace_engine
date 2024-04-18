@@ -571,6 +571,11 @@ public:
         return MakeRefPtr<RichEditorAccessibilityProperty>();
     }
 
+    void SetContentChange(bool onChange)
+    {
+        contentChange_ = onChange;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -866,6 +871,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
     int32_t richEditorInstanceId_;
+    bool contentChange_ = false;
 };
 } // namespace OHOS::Ace::NG
 
