@@ -168,7 +168,11 @@ public:
     float GetMainContentSize() const override
     {
         return contentMainSize_;
-    };
+    }
+    int32_t GetLanes() const
+    {
+        return lanes_;
+    }
 
     void UpdatePosMapStart(float delta);
     void UpdatePosMapEnd();

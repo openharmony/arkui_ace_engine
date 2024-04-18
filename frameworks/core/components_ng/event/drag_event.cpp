@@ -368,6 +368,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
+        if (actuator->userCallback_) {
+            auto customLongPress = actuator->userCallback_->GetLongPressEventFunc();
+            if (customLongPress) {
+                customLongPress(info);
+            }
+        }
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();

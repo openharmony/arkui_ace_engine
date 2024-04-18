@@ -337,6 +337,19 @@ void UINode::DoAddChild(
     MarkNeedSyncRenderTree(true);
 }
 
+RefPtr<FrameNode> UINode::GetParentFrameNode() const
+{
+    auto parent = GetParent();
+    while (parent) {
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parent);
+        if (parentFrame) {
+            return parentFrame;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> UINode::GetFocusParent() const
 {
     auto parentUi = GetParent();
@@ -1057,6 +1070,26 @@ RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool
         index -= count;
     }
     return nullptr;
+}
+
+int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+{
+    int32_t index = 0;
+    for (const auto& child : GetChildren()) {
+        if (InstanceOf<FrameNode>(child)) {
+            if (child == node) {
+                return index;
+            } else {
+                return -1;
+            }
+        }
+        int32_t childIndex = child->GetFrameNodeIndex(node);
+        if (childIndex >= 0) {
+            return index + childIndex;
+        }
+        index += static_cast<uint32_t>(child->FrameCount());
+    }
+    return -1;
 }
 
 void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)

@@ -39,6 +39,7 @@ public:
     virtual ~LazyForEachModel() = default;
 
     virtual void Create(const RefPtr<LazyForEachActuator>& actuator) = 0;
+    virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
 
 private:
     static std::unique_ptr<LazyForEachModel> instance_;
