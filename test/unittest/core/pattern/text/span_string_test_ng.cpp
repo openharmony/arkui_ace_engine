@@ -35,10 +35,24 @@
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+const uint32_t GESTURE_INDEX1 = 1;
+void ConstructGestureStyle(GestureStyle& gestureInfo)
+{
+    auto onClick = [](const BaseEventInfo* info) {};
+    auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+    gestureInfo.onClick = std::move(tmpClickFunc);
+
+    auto onLongPress = [](const BaseEventInfo* info) {};
+    auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
+    gestureInfo.onLongPress = std::move(tmpLongPressFunc);
+}
+} // namespace
 
 class SpanStringTestNg : public testing::Test {
 public:
@@ -534,5 +548,190 @@ HWTEST_F(SpanStringTestNg, MutableSpanString008, TestSize.Level1)
         AceType::MakeRefPtr<FontSpan>(fonts[3], 5, 6), AceType::MakeRefPtr<FontSpan>(fonts[4], 6, 9) };
     spanMap = spanString1->GetSpansMap();
     EXPECT_TRUE(CompareSpanList(spanMap[SpanType::Font], resultList4));
+}
+
+/**
+ * @tc.name: GestureSpanString001
+ * @tc.desc: Test the construction of the gesture type in spanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GestureSpanString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create spanBases and gestureInfo
+     */
+    std::vector<RefPtr<SpanBase>> spanBases;
+    GestureStyle gestureInfo;
+    ConstructGestureStyle(gestureInfo);
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891", spanBases);
+
+    /**
+     * @tc.steps: step2. compare SpansMap and gestureInfo
+     * @tc.expect: The number of spanItems in the spanString is 2
+     */
+    auto spanMap = spanStringWithSpans->GetSpansMap();
+    std::list<RefPtr<SpanBase>> resultList = { AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3) };
+    EXPECT_FALSE(CompareSpanList(spanMap[SpanType::Gesture], resultList));
+    EXPECT_EQ(spanStringWithSpans->GetSpanItems().size(), 2);
+}
+
+/**
+ * @tc.name: GestureSpanString002
+ * @tc.desc: Test the manifestations of the gesture type in the textPattern after it is constructed in spanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GestureSpanString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create spanBases and gestureInfo
+     */
+    std::vector<RefPtr<SpanBase>> spanBases;
+    GestureStyle gestureInfo;
+    ConstructGestureStyle(gestureInfo);
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891", spanBases);
+
+    std::list<RefPtr<SpanBase>> resultList = { AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3),
+        AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 3) };
+    auto spanMap = spanStringWithSpans->GetSpansMap();
+
+    EXPECT_FALSE(CompareSpanList(spanMap[SpanType::Gesture], resultList));
+
+    /**
+     * @tc.steps: step2. Create textPattern and construct property string scene for textPattern
+     */
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    auto textController = textPattern->GetTextController();
+    textController->SetStyledString(spanStringWithSpans);
+
+    auto spans = spanStringWithSpans->GetSpanItems();
+    textPattern->SetSpanItemChildren(spans);
+    textPattern->SetSpanStringMode(true);
+
+    /**
+     * @tc.steps: step2. Call the BeforeCreateLayoutWrapper function
+     * @tc.expect: The click and long press event of the textPattern is initialized
+     *             and the number of spanItems in the spanString is 2
+     */
+    textPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(textPattern->GetSpanItemChildren().size(), 3);
+    EXPECT_TRUE(textPattern->clickEventInitialized_);
+    EXPECT_NE(textPattern->longPressEvent_, nullptr);
+}
+
+/**
+ * @tc.name: GestureSpanString003
+ * @tc.desc: Test some edge case of AddSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GestureSpanString03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create spanString and textPattern
+     */
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+
+    /**
+     * @tc.steps: step2. Call the AddSpan function
+     * @tc.expect: The number of spanBases for gesture types is 1
+     */
+    GestureStyle gestureInfo;
+    ConstructGestureStyle(gestureInfo);
+    auto spanBase = AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 10);
+    spanStringWithSpans->AddSpan(spanBase);
+    auto spanMap = spanStringWithSpans->GetSpansMap();
+    EXPECT_EQ(spanMap[SpanType::Gesture].size(), 1);
+
+    /**
+     * @tc.steps: step3. Call the BeforeCreateLayoutWrapper function of textPattern
+     * @tc.expect: The number of spans for text is 3 and second span has event
+     */
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    auto textController = textPattern->GetTextController();
+    textController->SetStyledString(spanStringWithSpans);
+    textPattern->SetSpanStringMode(true);
+    textPattern->BeforeCreateLayoutWrapper();
+
+    auto spanItems = textPattern->GetSpanItemChildren();
+    EXPECT_EQ(spanItems.size(), 3);
+    EXPECT_TRUE(textPattern->clickEventInitialized_);
+    EXPECT_NE(textPattern->longPressEvent_, nullptr);
+    auto iter = spanItems.begin();
+    std::advance(iter, GESTURE_INDEX1);
+    EXPECT_NE((*iter)->onClick, nullptr);
+    EXPECT_NE((*iter)->onLongPress, nullptr);
+}
+
+/**
+ * @tc.name: GestureSpanString004
+ * @tc.desc: Test some edge case of ReplaceString/RemoveString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GestureSpanString004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MutableSpanString and textPattern
+     */
+    GestureStyle gestureInfo;
+    ConstructGestureStyle(gestureInfo);
+    std::vector<RefPtr<SpanBase>> spanBases;
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
+    spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("01234567891", spanBases);
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(textPattern)));
+    auto textController = textPattern->GetTextController();
+    textController->SetStyledString(spanString);
+
+    auto spans = spanString->GetSpanItems();
+    textPattern->SetSpanItemChildren(spans);
+
+    auto spanItems = textPattern->GetSpanItemChildren();
+    EXPECT_EQ(spanItems.size(), 3);
+    EXPECT_NE(spanItems.front()->onClick, nullptr);
+    EXPECT_NE(spanItems.front()->onLongPress, nullptr);
+
+    /**
+     * @tc.steps: step2. Call the ReplaceString function
+     * @tc.expect: The number of spanItems for textPattern is 4 and the events for each span were as expected
+     */
+    spanString->ReplaceString(0, 2, "a");
+    spanItems = textPattern->GetSpanItemChildren();
+    EXPECT_EQ(spanItems.size(), 3);
+
+    auto iter = spanItems.begin();
+    EXPECT_NE((*iter)->onClick, nullptr);
+    EXPECT_NE((*iter)->onLongPress, nullptr);
+    iter++;
+    EXPECT_EQ((*iter)->onClick, nullptr);
+    EXPECT_EQ((*iter)->onLongPress, nullptr);
+    iter++;
+    EXPECT_NE((*iter)->onClick, nullptr);
+    EXPECT_NE((*iter)->onLongPress, nullptr);
+
+    /**
+     * @tc.steps: step3. Call the RemoveString function
+     * @tc.expect: The number of spanItems for textPattern is 3
+     */
+    spanString->RemoveString(7, 3);
+    textController->SetStyledString(spanString);
+    spanItems = textPattern->GetSpanItemChildren();
+    EXPECT_EQ(spanItems.size(), 2);
+    iter = spanItems.begin();
+    EXPECT_NE((*iter)->onClick, nullptr);
+    EXPECT_NE((*iter)->onLongPress, nullptr);
+    iter++;
+    EXPECT_EQ((*iter)->onClick, nullptr);
+    EXPECT_EQ((*iter)->onLongPress, nullptr);
 }
 } // namespace OHOS::Ace::NG
