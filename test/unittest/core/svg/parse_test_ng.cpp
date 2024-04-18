@@ -307,17 +307,13 @@ constexpr uint32_t RED_COLOR = 0xffff0000;
 constexpr uint32_t GREEN_COLOR = 0xff00ff00;
 
 const std::string FE_FLOOD_AND_COMPOSITE =
-    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" >"
     "<filter id=\"colorMatrix\">"
-        "<feFlood flood-color=\"red\" flood-opacity=\"0\" result=\"flood\" />"
-        "<feFlood flood-color=\"green\" flood-opacity=\"1\" result=\"flood1\" />"
-        "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\""
-            "operator=\"xor\" result=\"composite\" k1=\"1\" k2=\"0\"/>"
-    "</filter>"
-    "<g>"
-        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
-    "</g>"
-"</svg>";
+    "<feFlood flood-color=\"red\" flood-opacity=\"0\" result=\"flood\" /><feFlood flood-color=\"green\" "
+    "flood-opacity=\"1\" result=\"flood1\" />"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"xor\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/></filter>"
+    "<g><rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" /></g></svg>";
 
 const std::string FE_BLEND =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
@@ -1306,7 +1302,6 @@ HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
     ImageSourceInfo src;
     src.SetFillColor(Color::BLACK);
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
-    CHECK_NULL_VOID(svgDom);
     EXPECT_NE(svgDom, nullptr);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
