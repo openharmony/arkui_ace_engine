@@ -386,9 +386,12 @@ protected:
     LayoutConstraintF childLayoutConstraint_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     RefPtr<ListPositionMap> posMap_;
+    std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     void CheckJumpToIndex();
+    void CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper, int32_t startIndex,
+        float& startPos, bool isGroup, bool forwardLayout);
 
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);

@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <unordered_set>
+#include <utility>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -646,8 +647,42 @@ bool ListLayoutAlgorithm::CheckJumpValid(LayoutWrapper* layoutWrapper)
     return true;
 }
 
+void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper, int32_t startIndex,
+    float& startPos, bool isGroup, bool forwardLayout)
+{
+    if (!isGroup || IsScrollSnapAlignCenter(layoutWrapper) ||
+        (forwardLayout && NonNegative(startPos)) || (!forwardLayout && LessOrEqual(startPos, contentMainSize_))) {
+        return;
+    }
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(startIndex);
+    CHECK_NULL_VOID(wrapper);
+    int32_t id = wrapper->GetHostNode()->GetId();
+    isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (!isGroup) {
+        return;
+    }
+    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", startIndex);
+    SetListItemGroupParam(wrapper, startIndex, startPos, forwardLayout, listLayoutProperty, false);
+    wrapper->Measure(GetGroupLayoutConstraint());
+    auto algorithmWrapper = wrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(algorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    startPos = itemGroup->GetRefPos();
+    ListItemInfo itemInfo;
+    if (forwardLayout) {
+        itemInfo = { id, startPos, startPos + childrenSize_->GetChildSize(startIndex), isGroup };
+    } else {
+        itemInfo = { id, startPos - childrenSize_->GetChildSize(startIndex), startPos, isGroup };
+    }
+    firstItemInfo_ = std::make_pair(startIndex, itemInfo);
+}
+
 void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 {
+    bool startItemIsGroup = false;
+    bool endItemIsGroup = false;
     int32_t startIndex = 0;
     int32_t endIndex = 0;
     int32_t midIndex = 0;
@@ -683,6 +718,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         targetIndexStaged_ = targetIndex_;
     }
     if (!itemPosition_.empty()) {
+        startItemIsGroup = itemPosition_.begin()->second.isGroup;
+        endItemIsGroup = itemPosition_.rbegin()->second.isGroup;
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
         itemTotalSize = endPos - startPos;
@@ -743,32 +780,39 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = childrenSize_ ?
                 GetChildHeight(layoutWrapper, midIndex) : MeasureAndGetChildHeight(layoutWrapper, midIndex);
+            startIndex = midIndex;
+            endIndex = midIndex;
         }
         if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop) ||
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) {
+            startIndex = GetLanesFloor(layoutWrapper, startIndex);
             if (overScrollTop && !canOverScroll_) {
                 startPos = startMainPos_ + contentStartOffset_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
-                midIndex = GetLanesFloor(layoutWrapper, midIndex);
-                LayoutForward(layoutWrapper, midIndex, midItemMidPos - midItemHeight / 2.0f);
-            } else {
-                startIndex = GetLanesFloor(layoutWrapper, startIndex);
-                LayoutForward(layoutWrapper, startIndex, startPos);
+                startPos = midItemMidPos - midItemHeight / 2.0f;
             }
+            if (childrenSize_) {
+                CheckAndMeasureStartItem(layoutWrapper, startIndex, startPos, startItemIsGroup, true);
+                posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_);
+            }
+            LayoutForward(layoutWrapper, startIndex, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
             }
         } else {
+            endIndex = GetLanesCeil(layoutWrapper, endIndex);
             if (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_)) {
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
-                endIndex = midIndex;
                 endPos = midItemMidPos + midItemHeight / 2.0f;
             }
-            endIndex = GetLanesCeil(layoutWrapper, endIndex);
+            if (childrenSize_) {
+                CheckAndMeasureStartItem(layoutWrapper, endIndex, endPos, endItemIsGroup, false);
+                posMap_->OptimizeBeforeMeasure(endIndex, endPos, currentOffset_, contentMainSize_);
+            }
             LayoutBackward(layoutWrapper, endIndex, endPos);
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
@@ -783,24 +827,33 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     if (currentIndex + 1 >= totalItemCount_) {
         return 0;
     }
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
-    CHECK_NULL_RETURN(wrapper, 0);
-    int32_t id = wrapper->GetHostNode()->GetId();
-    ++currentIndex;
-    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    if (isGroup) {
-        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
-        SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
-        wrapper->Measure(childLayoutConstraint_);
-    } else if (CheckNeedMeasure(wrapper)) {
-        ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
-        wrapper->Measure(childLayoutConstraint_);
+    if (!firstItemInfo_ || firstItemInfo_.value().first != currentIndex + 1) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
+        CHECK_NULL_RETURN(wrapper, 0);
+        int32_t id = wrapper->GetHostNode()->GetId();
+        ++currentIndex;
+        bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+        if (isGroup) {
+            auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
+            SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
+            wrapper->Measure(childLayoutConstraint_);
+        } else if (CheckNeedMeasure(wrapper)) {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
+            wrapper->Measure(childLayoutConstraint_);
+        }
+        float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+            GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        endPos = startPos + mainLen;
+        itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
+    } else {
+        ++currentIndex;
+        itemPosition_[currentIndex] = firstItemInfo_.value().second;
+        endPos = itemPosition_[currentIndex].endPos;
     }
-    float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
-        GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
-    endPos = startPos + mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
+    if (firstItemInfo_) {
+        firstItemInfo_.reset();
+    }
     OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
     return 1;
 }
@@ -811,33 +864,39 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     if (currentIndex - 1 < 0) {
         return 0;
     }
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
-    CHECK_NULL_RETURN(wrapper, 0);
-    int32_t id = wrapper->GetHostNode()->GetId();
-    --currentIndex;
-    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    if (isGroup) {
-        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
-        ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
-        wrapper->Measure(childLayoutConstraint_);
-    } else if (CheckNeedMeasure(wrapper)) {
-        ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
-        wrapper->Measure(childLayoutConstraint_);
+    if (!firstItemInfo_ || firstItemInfo_.value().first != currentIndex - 1) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
+        CHECK_NULL_RETURN(wrapper, 0);
+        int32_t id = wrapper->GetHostNode()->GetId();
+        --currentIndex;
+        bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+        if (isGroup) {
+            auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+            SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
+            wrapper->Measure(childLayoutConstraint_);
+        } else if (CheckNeedMeasure(wrapper)) {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
+            wrapper->Measure(childLayoutConstraint_);
+        }
+        float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
+            GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        startPos = endPos - mainLen;
+        itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
+    } else {
+        --currentIndex;
+        itemPosition_[currentIndex] = firstItemInfo_.value().second;
+        startPos = itemPosition_[currentIndex].startPos;
     }
-    float mainLen = childrenSize_ ? childrenSize_->GetChildSize(currentIndex) :
-        GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
-    startPos = endPos - mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
+    if (firstItemInfo_) {
+        firstItemInfo_.reset();
+    }
     OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
     return 1;
 }
 
 void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos)
 {
-    if (childrenSize_ && itemPosition_.empty() && !overScrollFeature_ && !jumpIndex_ && !targetIndex_) {
-        posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_);
-    }
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
     float endMainPos = overScrollFeature_ ?
@@ -914,9 +973,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
 
 void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos)
 {
-    if (childrenSize_ && itemPosition_.empty() && !overScrollFeature_ && !jumpIndex_ && !targetIndex_) {
-        posMap_->OptimizeBeforeMeasure(endIndex, endPos, currentOffset_, contentMainSize_);
-    }
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
     float startMainPos = overScrollFeature_ ?
