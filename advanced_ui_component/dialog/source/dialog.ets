@@ -344,8 +344,10 @@ export struct SelectDialog{
           })
         }.width('100%').clip(false)
         .onFocus(() => {
-          this.contentScroller.scrollEdge(Edge.Top);
-          focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+          if (!this.contentScroller.isAtEnd()) {
+            this.contentScroller.scrollEdge(Edge.Top);
+            focusControl.requestFocus(String(FIRST_ITEM_INDEX));
+          }
         })
         .defaultFocus(this.buttons?.length == 0 ? true : false)
       }
