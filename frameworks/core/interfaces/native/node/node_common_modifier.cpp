@@ -4649,7 +4649,8 @@ void GetBackgroundImage(ArkUINodeHandle node, ArkUIBackgroundImage* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    options->src = ViewAbstract::GetBackgroundImageSrc(frameNode).c_str();
+    g_strValue = ViewAbstract::GetBackgroundImageSrc(frameNode);
+    options->src = g_strValue.c_str();
     options->repeat = static_cast<int>(ViewAbstract::GetBackgroundImageRepeat(frameNode));
 }
 
