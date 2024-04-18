@@ -104,6 +104,7 @@ bool InitialFullNodeImpl(int version)
         }
     }
 
+    impl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
     impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
     return true;
 }
