@@ -37,6 +37,7 @@
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "rosen_render_context.h"
 
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -619,6 +620,23 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnForegroundEffectUpdate(float radius)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    CalcDimension value;
+    value.SetValue(static_cast<double>(radius));
+    float radiusPx = context->NormalizeToPx(value);
+#ifndef USE_ROSEN_DRAWING
+    float foreRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float foreRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    rsNode_->SetForegroundEffectRadius(foreRadius);
     RequestNextFrame();
 }
 
@@ -1368,6 +1386,7 @@ public:
     {
         if (pixelMap == nullptr) {
             TAG_LOGW(AceLogTag::ACE_DRAG, "pixelMap is null!");
+            g_pixelMap = nullptr;
             thumbnailGet.notify_all();
             return;
         }
@@ -1538,6 +1557,7 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         AddOrChangeScaleModifier(
             rsNode_, transformMatrixModifier_->scaleXY, transformMatrixModifier_->scaleXYValue, scaleValue);
     } else {
+        Rosen::Vector2f xyPerspectiveValue { transform.perspective[0], transform.perspective[1] };
         Rosen::Vector2f xyTranslateValue { transform.translate[0], transform.translate[1] };
         Rosen::Quaternion quaternion { static_cast<float>(transform.quaternion.GetX()),
             static_cast<float>(transform.quaternion.GetY()), static_cast<float>(transform.quaternion.GetZ()),
@@ -1545,6 +1565,8 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         Rosen::Vector2f scaleValue { transform.scale[0], transform.scale[1] };
         Rosen::Vector2f skewValue { transform.skew[0], transform.skew[1] };
 
+        AddOrChangePerspectiveModifier(rsNode_, transformMatrixModifier_->perspectiveXY,
+            transformMatrixModifier_->perspectiveXYValue, xyPerspectiveValue);
         AddOrChangeTranslateModifier(rsNode_, transformMatrixModifier_->translateXY,
             transformMatrixModifier_->translateXYValue, xyTranslateValue);
         AddOrChangeScaleModifier(
@@ -2774,8 +2796,28 @@ void RosenRenderContext::OnePixelRounding()
         roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
         nodeHeightI = nodeHeightTemp;
     }
-
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight) - RoundValueToPixelGrid(innerLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom) - RoundValueToPixelGrid(innerTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0]);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1]);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
@@ -2837,8 +2879,30 @@ void RosenRenderContext::OnePixelRounding(bool isRound, uint8_t flag)
         roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
         nodeHeightI = nodeHeightTemp;
     }
-
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+
+    if (borderWidth_ != Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f)) {
+        // round inner
+        float innerLeft = relativeLeft + borderWidth_[0];
+        float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+        float innerTop = relativeTop + borderWidth_[1];
+        float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+        float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
+            RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
+        float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
+            RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
+        // update border
+        float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
+        float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
+        float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
+        float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
+        BorderWidthPropertyF borderWidthPropertyF;
+        borderWidthPropertyF.leftDimen = borderLeftI;
+        borderWidthPropertyF.topDimen = borderTopI;
+        borderWidthPropertyF.rightDimen = borderRightI;
+        borderWidthPropertyF.bottomDimen = borderBottomI;
+        UpdateBorderWidthF(borderWidthPropertyF);
+    }
 }
 
 
@@ -2965,6 +3029,11 @@ void RosenRenderContext::OnOffsetEdgesUpdate(const EdgesParam& /*value*/)
 }
 
 void RosenRenderContext::OnAnchorUpdate(const OffsetT<Dimension>& /*value*/)
+{
+    SetPositionToRSNode();
+}
+
+void RosenRenderContext::RecalculatePosition()
 {
     SetPositionToRSNode();
 }
@@ -4096,19 +4165,22 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
         case PageTransitionType::EXIT_POP:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
-            pageTransitionRectF = RectF(rect.Width() * HALF, 0.0f, rect.Width() * HALF, REMOVE_CLIP_SIZE);
+            pageTransitionRectF = RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF,
+                REMOVE_CLIP_SIZE);
             translate.x = Dimension(rect.Width() * HALF);
             break;
         case PageTransitionType::ENTER_POP:
             initialBackgroundColor = MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
-            pageTransitionRectF = RectF(0.0f, 0.0f, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
+            pageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width() * PARENT_PAGE_OFFSET,
+                REMOVE_CLIP_SIZE);
             translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
             break;
         case PageTransitionType::EXIT_PUSH:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = MASK_COLOR;
-            pageTransitionRectF = RectF(0.0f, 0.0f, rect.Width() * PARENT_PAGE_OFFSET, REMOVE_CLIP_SIZE);
+            pageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width() * PARENT_PAGE_OFFSET,
+                REMOVE_CLIP_SIZE);
             translate.x = Dimension(-rect.Width() * PARENT_PAGE_OFFSET);
             break;
         default:
@@ -4156,7 +4228,7 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
-    resultEffect->SetPageTransitionRectF(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE));
+    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE));
     resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
     resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     return resultEffect;
@@ -4222,7 +4294,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         UpdateTransformScale(VectorF(1.0f, 1.0f));
         UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
-        ClipWithRRect(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE),
+        ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
             RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::CloseImplicitAnimation();
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
@@ -4231,7 +4303,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
-    ClipWithRRect(RectF(0.0f, 0.0f, rect.Width(), REMOVE_CLIP_SIZE),
+    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
@@ -4252,6 +4324,15 @@ void RosenRenderContext::MaskAnimation(const Color& initialBackgroundColor, cons
     AnimationUtils::OpenImplicitAnimation(maskOption, maskOption.GetCurve(), nullptr);
     SetActualForegroundColor(backgroundColor);
     AnimationUtils::CloseImplicitAnimation();
+}
+
+float RosenRenderContext::GetStatusBarHeight()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto statusBarHeight = safeAreaInsets.top_.Length();
+    return static_cast<float>(statusBarHeight);
 }
 
 void RosenRenderContext::PaintOverlayText()
@@ -4341,6 +4422,13 @@ void RosenRenderContext::OnLightIntensityUpdate(const float lightIntensity)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnLightColorUpdate(const Color& lightColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetLightColor(lightColor.GetValue());
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnLightIlluminatedUpdate(const uint32_t lightIlluminated)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -4384,7 +4472,7 @@ void RosenRenderContext::ResetSharedTranslate()
 void RosenRenderContext::ResetPageTransitionEffect()
 {
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
+    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     MaskAnimation(DEFAULT_MASK_COLOR, DEFAULT_MASK_COLOR);
 }

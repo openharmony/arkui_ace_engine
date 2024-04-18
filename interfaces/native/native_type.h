@@ -75,12 +75,48 @@ typedef struct ArkUI_DrawContext ArkUI_DrawContext;
  * @since 12
  */
 typedef struct ArkUI_Node* ArkUI_NodeHandle;
+
 /**
  * @brief Defines the pointer to the custom dialog box controller of ArkUI on the native side.
  *
  * @since 12
  */
 typedef struct ArkUI_NativeDialog* ArkUI_NativeDialogHandle;
+
+/**
+ * @brief 提供ArkUI native UI的上下文实例对象定义。
+ *
+ * @since 12
+ */
+
+struct ArkUI_Context;
+
+/**
+ * @brief 定义ArkUI native UI的上下文实例对象指针定义。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_Context* ArkUI_ContextHandle;
+
+/**
+ * @brief Defines the event callback type.
+ *
+ * @since 12
+ */
+typedef struct {
+    /** Custom type. */
+    void* userData;
+    /** Event callback. */
+    void (*callback)(void* userData);
+} ArkUI_ContextCallback;
+
+/**
+ * @brief Defines the water flow section configuration.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_WaterFlowSectionOption ArkUI_WaterFlowSectionOption;
+
 /**
  * @brief Provides the number types of ArkUI in the native code.
  *
@@ -1070,8 +1106,7 @@ typedef enum {
     /** The items in the container are stretched and padded along the cross axis. */
     ARKUI_ITEM_ALIGNMENT_STRETCH,
     /** The items in the container are aligned in such a manner that their text baselines are aligned along the
-     * cross axis.
-     */
+     *  cross axis. */
     ARKUI_ITEM_ALIGNMENT_BASELINE,
 } ArkUI_ItemAlignment;
 
@@ -1264,7 +1299,7 @@ typedef enum {
     ARKUI_LINEAR_GRADIENT_DIRECTION_RIGHT_BOTTOM,
     /** No gradient. */
     ARKUI_LINEAR_GRADIENT_DIRECTION_NONE,
-    /** 自定义渐变方向. */
+    /** Custom direction. */
     ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM,
 } ArkUI_LinearGradientDirection;
 
@@ -1329,6 +1364,19 @@ typedef enum {
 } ArkUI_TransitionEdge;
 
 /**
+ * @brief Defines how the specified blend mode is applied.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** The content of the view is blended in sequence on the target image. */
+    BLEND_APPLY_TYPE_FAST = 0,
+    /** The content of the component and its child components are drawn on the offscreen canvas, and then blended with
+    the existing content on the canvas. */
+    BLEND_APPLY_TYPE_OFFSCREEN,
+} ArkUI_BlendApplyType;
+
+/**
  * @brief Defines a mask area.
  *
  * @since 12
@@ -1368,33 +1416,51 @@ typedef struct {
     int32_t y;
 } ArkUI_IntOffset;
 
-/**
- * @brief 嵌套滚动选项.
- *
- * @since 12
- */
-typedef enum {
-    /** 只自身滚动，不与父组件联动. */
-    ARKUI_SELF_ONLY = 0,
-    /** 自身先滚动，自身滚动到边缘以后父组件滚动. */
-    ARKUI_SELF_FIRST,
-    /** 父组件先滚动，父组件滚动到边缘以后自身滚动. */
-    ARKUI_PARENT_FIRST,
-    /** 自身和父组件同时滚动. */
-    ARKUI_PARALLEL,
-} ArkUI_NestedScrollMode;
 
 /**
- * @brief 指定的混合模式应用于视图的内容选项.
+ * @brief Describes the margins of a component.
+ *
+ * @since 12
+ */
+typedef struct {
+    /** Top margin, in vp. */
+    float top;
+    /** Right margin, in vp. */
+    float right;
+    /** Bottom margin, in vp. */
+    float bottom;
+    /** Left margin, in vp. */
+    float left;
+} ArkUI_Margin;
+
+/**
+ * @brief Enumerates the animation onFinish callback types.
  *
  * @since 12
  */
 typedef enum {
-    /** 在目标图像上按顺序混合视图的内容. */
-    ARKUI_BLEND_APPLY_TYPE_FAST = 0,
-    /** 将此组件和子组件内容绘制到离屏画布上，然后整体进行混合. */
-    ARKUI_BLEND_APPLY_TYPE_OFFSCREEN,
-} ArkUI_BlendApplyType;
+    /** The callback is invoked when the entire animation is removed once it has finished. */
+    ARKUI_FINISH_CALLBACK_REMOVED = 0,
+    /** The callback is invoked when the animation logically enters the falling state, though it may still be in its
+      * long tail state. */
+    ARKUI_FINISH_CALLBACK_LOGICALLY,
+} ArkUI_FinishCallbackType;
+
+/**
+ * @brief Enumerates the component units.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Default, which is fp for fonts and vp for non-fonts. */
+    ARKUI_LENGTH_METRIC_UNIT_DEFAULT = -1,
+    /** px. */
+    ARKUI_LENGTH_METRIC_UNIT_PX = 0,
+    /** vp. */
+    ARKUI_LENGTH_METRIC_UNIT_VP,
+    /** fp. */
+    ARKUI_LENGTH_METRIC_UNIT_FP
+} ArkUI_LengthMetricUnit;
 
 /**
 * @brief Creates a size constraint.
@@ -1547,6 +1613,130 @@ void* OH_ArkUI_DrawContext_GetCanvas(ArkUI_DrawContext* context);
 */
 ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context);
 
+/**
+* @brief Creates water flow section configuration.
+*
+* @return Returns the water flow section configuration.
+* @since 12
+*/
+ArkUI_WaterFlowSectionOption* OH_ArkUI_WaterFlowSectionOption_Create();
+
+/**
+* @brief Destroys the pointer to a water flow section configuration.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_Dispose(ArkUI_WaterFlowSectionOption* option);
+
+/**
+* @brief Sets the number of items in a water flow section.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @param itemCount Indicates the number of items in the water flow section.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_SetItemCount(ArkUI_WaterFlowSectionOption* option,
+    int32_t index, int32_t itemCount);
+
+/**
+* @brief Obtains the number of items in the water flow section that matches the specified index.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @return Returns the number of items in the water flow section.
+* @since 12
+*/
+int32_t OH_ArkUI_WaterFlowSectionOption_GetItemCount(ArkUI_WaterFlowSectionOption* option, int32_t index);
+
+/**
+* @brief Sets the number of columns (in a vertical layout) or rows (in a horizontal layout) of a water flow.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @param crossCount Indicates the number of columns or rows, depending on the layout direction.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_SetCrossCount(ArkUI_WaterFlowSectionOption* option,
+    int32_t index, int32_t crossCount);
+
+/**
+* @brief Obtains the number of columns (in a vertical layout) or rows (in a horizontal layout) in the water flow section
+* that matches the specified index.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @return Returns the number of columns or rows.
+* @since 12
+*/
+int32_t OH_ArkUI_WaterFlowSectionOption_GetCrossCount(ArkUI_WaterFlowSectionOption* option, int32_t index);
+
+/**
+* @brief Sets the gap between columns in the specified water flow section.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @param columnGap Indicates the gap between columns to set.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_SetColumnGap(ArkUI_WaterFlowSectionOption* option,
+    int32_t index, float columnGap);
+
+/**
+* @brief Obtains the gap between columns in the water flow section that matches the specified index.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @return Returns the gap between columns.
+* @since 12
+*/
+float OH_ArkUI_WaterFlowSectionOption_GetColumnGap(ArkUI_WaterFlowSectionOption* option, int32_t index);
+
+/**
+* @brief Sets the gap between rows in the specified water flow section.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @param rowGap Indicates the gap between rows to set.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_SetRowGap(ArkUI_WaterFlowSectionOption* option,
+    int32_t index, float rowGap);
+
+/**
+* @brief Obtains the gap between rows in the water flow section that matches the specified index.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @return Returns the gap between rows.
+* @since 12
+*/
+float OH_ArkUI_WaterFlowSectionOption_GetRowGap(ArkUI_WaterFlowSectionOption* option, int32_t index);
+
+/**
+* @brief Sets the margins for the specified water flow section.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @param marginTop Indicates the top margin of the water flow section.
+* @param marginRight Indicates the right margin of the water flow section.
+* @param marginBottom Indicates the bottom margin of the water flow section.
+* @param marginLeft Indicates the left margin of the water flow section.
+* @since 12
+*/
+void OH_ArkUI_WaterFlowSectionOption_SetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index,
+    float marginTop, float marginRight, float marginBottom, float marginLeft);
+
+/**
+* @brief Obtains the margins of the water flow section that matches the specified index.
+*
+* @param option Indicates the pointer to a water flow section configuration.
+* @param index Indicates the index of the target water flow section.
+* @return Returns the margins.
+* @since 12
+*/
+ArkUI_Margin OH_ArkUI_WaterFlowSectionOption_GetMargin(ArkUI_WaterFlowSectionOption* option, int32_t index);
 #ifdef __cplusplus
 };
 #endif

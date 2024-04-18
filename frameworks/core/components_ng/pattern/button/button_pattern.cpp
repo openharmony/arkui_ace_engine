@@ -187,16 +187,21 @@ void ButtonPattern::HandleFocusEvent(RefPtr<ButtonLayoutProperty> layoutProperty
 
     if (buttonStyle != ButtonStyleMode::TEXT) {
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme->GetShadowNormal()));
-        shadowModify_ = (graphics->GetBackShadowValue() == shadow);
+        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
+            shadowModify_ = true;
+        }
         if (shadowModify_) {
             ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowFocus());
             buttonRenderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
         }
     }
-    VectorF scale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
-    scaleModify_ = transform->GetTransformScale() == scale;
+    float scaleFocus = buttonTheme->GetScaleFocus();
+    VectorF scale(scaleFocus, scaleFocus);
+    if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+        scaleModify_ = true;
+    }
     if (scaleModify_) {
-        buttonRenderContext->SetScale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
+        buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
     if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
         bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
@@ -226,14 +231,18 @@ void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
         Shadow shadow = Shadow::CreateShadow(shadowStyle);
         buttonRenderContext->UpdateBackShadow(shadow);
+        shadowModify_ = false;
     }
     if (scaleModify_) {
+        scaleModify_ = false;
         buttonRenderContext->SetScale(1.0f, 1.0f);
     }
     if (bgColorModify_) {
+        bgColorModify_ = false;
         buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
     if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
+        focusTextColorModify_ = false;
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode();
     }
@@ -260,6 +269,7 @@ void ButtonPattern::InitFocusEvent()
     auto focusHub = host->GetOrCreateFocusHub();
     auto focusTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
         theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle focus event");
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent(property, renderContext, theme, textPorerty, node);
@@ -269,6 +279,7 @@ void ButtonPattern::InitFocusEvent()
 
     auto blurTask = [weak = WeakClaim(this), property = layoutProperty, renderContext = buttonRenderContext,
         theme = buttonTheme, textPorerty = textLayoutProperty, node = textNode]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle blur event");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent(property, renderContext, theme, textPorerty, node);
@@ -366,10 +377,12 @@ void ButtonPattern::InitTouchEvent()
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
             info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
             buttonPattern->OnTouchUp();
         }
     };
@@ -403,6 +416,7 @@ void ButtonPattern::InitHoverEvent()
         return;
     }
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle hover %{public}d", isHover);
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleHoverEvent(isHover);
@@ -520,6 +534,7 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, i
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button animate touch from %{public}d to %{public}d", typeFrom, typeTo);
     Color blendColorFrom = GetColorFromType(theme, typeFrom);
     Color blendColorTo = GetColorFromType(theme, typeTo);
     renderContext->BlendBgColor(blendColorFrom);

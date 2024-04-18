@@ -612,7 +612,7 @@ export class SelectDialog extends ViewPU {
   buildContent(s12 = null) {
     this.observeComponentCreation((d15, e15) => {
       ViewStackProcessor.StartGetAccessRecordingFor(d15);
-      Scroll.create();
+      Scroll.create(this.contentScroller);
       Scroll.scrollBar(BarState.Auto);
       if (!e15) {
         Scroll.pop();
@@ -674,11 +674,11 @@ export class SelectDialog extends ViewPU {
     If.pop();
     this.observeComponentCreation((p14, q14) => {
       ViewStackProcessor.StartGetAccessRecordingFor(p14);
-      List.create({ space: 1, scroller: this.contentScroller });
+      List.create({ space: 1 });
       List.width('100%');
       List.clip(false);
       List.onFocus(() => {
-          this.contentScroller.scrollToIndex(FIRST_ITEM_INDEX);
+          this.contentScroller.scrollEdge(Edge.Top);
           focusControl.requestFocus(String(FIRST_ITEM_INDEX));
       });
       List.defaultFocus(this.buttons?.length == 0 ? true : false);
@@ -774,7 +774,10 @@ export class SelectDialog extends ViewPU {
               Radio.id(String(d13));
               Radio.onFocus(() => {
                   if (d13 == FIRST_ITEM_INDEX) {
-                      this.contentScroller.scrollToIndex(FIRST_ITEM_INDEX);
+                      this.contentScroller.scrollEdge(Edge.Top);
+                  }
+                  else if (d13 == this.radioContent.length - 1) {
+                     this.contentScroller.scrollEdge(Edge.Bottom);
                   }
               });
               if (!b14) {

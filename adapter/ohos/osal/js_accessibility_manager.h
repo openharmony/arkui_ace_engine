@@ -283,6 +283,10 @@ private:
         const RefPtr<NG::PipelineContext>& context,
         const CommonProperty& commonProperty, const SearchParameter& searchParam);
 
+    void FindTextByTextHint(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const RefPtr<NG::PipelineContext>& context,
+        const CommonProperty& commonProperty, const SearchParameter& searchParam);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     bool isReg_ = false;

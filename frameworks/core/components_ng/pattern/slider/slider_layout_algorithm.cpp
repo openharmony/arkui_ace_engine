@@ -71,7 +71,7 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+        return std::nullopt;
     }
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(sliderLayoutProperty, std::nullopt);

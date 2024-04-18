@@ -24,6 +24,10 @@ void SwiperTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
+
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
     swiperIndicatorTheme->color_ = Color::FromString("#182431");
     swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
@@ -32,11 +36,11 @@ void SwiperTestNg::SetUpTestSuite()
     swiperIndicatorTheme->arrowDisabledAlpha_ = ARROW_DISABLED_ALPHA;
     swiperIndicatorTheme->size_ = Dimension(6.f);
     TextStyle textStyle;
-    textStyle.SetTextColor(Color::FromString("#ff182431"));
-    textStyle.SetFontSize(Dimension(14.f));
-    textStyle.SetFontWeight(FontWeight::W800);
+    textStyle.SetTextColor(INDICATOR_TEXT_FONT_COLOR);
+    textStyle.SetFontSize(INDICATOR_TEXT_FONT_SIZE);
+    textStyle.SetFontWeight(INDICATOR_TEXT_FONT_WEIGHT);
     swiperIndicatorTheme->digitalIndicatorTextStyle_ = textStyle;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(SwiperIndicatorTheme::TypeId())).WillRepeatedly(Return(swiperIndicatorTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
@@ -56,6 +60,10 @@ void SwiperTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    controller_ = nullptr;
+    indicatorNode_ = nullptr;
+    leftArrowNode_ = nullptr;
+    rightArrowNode_ = nullptr;
 }
 
 void SwiperTestNg::GetInstance()
@@ -68,6 +76,19 @@ void SwiperTestNg::GetInstance()
     paintProperty_ = frameNode_->GetPaintProperty<SwiperPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();
     controller_ = pattern_->GetSwiperController();
+
+    int index = pattern_->RealTotalCount();
+    if (pattern_->IsShowIndicator() && pattern_->HasIndicatorNode()) {
+        indicatorNode_ = GetChildFrameNode(frameNode_, index);
+        index += 1;
+    }
+    if (pattern_->HasLeftButtonNode()) {
+        leftArrowNode_ = GetChildFrameNode(frameNode_, index);
+        index += 1;
+    }
+    if (pattern_->HasRightButtonNode()) {
+        rightArrowNode_ = GetChildFrameNode(frameNode_, index);
+    }
 }
 
 void SwiperTestNg::Create(const std::function<void(SwiperModelNG)>& callback)
@@ -96,19 +117,37 @@ void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& call
 void SwiperTestNg::CreateItem(int32_t itemNumber)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
-        TextModelNG model;
-        model.Create("text");
+        ButtonModelNG buttonModelNG;
+        buttonModelNG.CreateWithLabel("label");
         ViewStackProcessor::GetInstance()->Pop();
     }
 }
 
 void SwiperTestNg::CreateItemWithSize(float width, float height)
 {
-    TextModelNG model;
-    model.Create("text");
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel("label");
     ViewAbstract::SetWidth(CalcLength(width));
     ViewAbstract::SetHeight(CalcLength(height));
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+void SwiperTestNg::ShowNext()
+{
+    controller_->ShowNext();
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::ShowPrevious()
+{
+    controller_->ShowPrevious();
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperTestNg::ChangeIndex(int32_t index)
+{
+    controller_->ChangeIndex(index, false);
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -123,8 +162,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode);
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
     firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
@@ -287,8 +325,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode);
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
     firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
@@ -505,8 +542,7 @@ HWTEST_F(SwiperTestNg, PostTranslateTask002, TestSize.Level1)
      * @tc.steps: step3. Swipe to last item and call PostTranslateTask
      * @tc.expected: Can not swipe to next
      */
-    controller_->SwipeToWithoutAnimation(3);
-    FlushLayoutTask(frameNode_);
+    ChangeIndex(3);
     pattern_->PostTranslateTask(DEFAULT_INTERVAL);
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
 }
@@ -573,8 +609,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
     int32_t nextIndex = 1;
     bool restartAutoPlay = true;
     bool forceStop = true;
@@ -591,11 +625,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish001, TestSize.Level1)
                 continue;
             }
             pattern_->isFinishAnimation_ = true;
-            frameNode_->AddChild(indicatorNode);
+            frameNode_->AddChild(indicatorNode_);
             pattern_->isVisible_ = false;
         }
-            frameNode_->AddChild(leftArrowNode);
-        frameNode_->AddChild(indicatorNode);
+            frameNode_->AddChild(leftArrowNode_);
+        frameNode_->AddChild(indicatorNode_);
         forceStop = false;
         pattern_->isVisible_ = true;
         frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
@@ -725,9 +759,9 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset003, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, -10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 0.f);
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 20.f);
 }
 
 /**
@@ -744,9 +778,9 @@ HWTEST_F(SwiperTestNg, UpdateCurrentOffset004, TestSize.Level1)
     EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
     pattern_->childScrolling_ = true;
     pattern_->UpdateCurrentOffset(10.f);
-    EXPECT_EQ(pattern_->currentDelta_, -10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 0.f);
     pattern_->UpdateCurrentOffset(-20.f);
-    EXPECT_EQ(pattern_->currentDelta_, 10.f);
+    EXPECT_EQ(pattern_->currentDelta_, 20.f);
 }
 
 /**
@@ -773,8 +807,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
     pattern_->leftButtonId_.reset();
     pattern_->rightButtonId_ = 1;
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
@@ -788,7 +820,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level
         for (int j = 0; j <= 1; j++) {
             pattern_->BeforeCreateLayoutWrapper();
             if (i == 1) {
-                frameNode_->AddChild(leftArrowNode);
+                frameNode_->AddChild(leftArrowNode_);
                 continue;
             }
             pattern_->rightButtonId_.reset();
@@ -797,7 +829,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level
         pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(0);
     }
 
-    frameNode_->AddChild(rightArrowNode);
+    frameNode_->AddChild(rightArrowNode_);
     pattern_->currentIndex_ = 0;
     pattern_->oldIndex_ = 0;
     for (int i = 0; i <= 1; i++) {
@@ -827,8 +859,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level
             pattern_->jumpIndex_ = 10;
             pattern_->rightButtonId_.reset();
             pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-            frameNode_->AddChild(leftArrowNode);
-            frameNode_->AddChild(rightArrowNode);
+            frameNode_->AddChild(leftArrowNode_);
+            frameNode_->AddChild(rightArrowNode_);
         }
         pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
         pattern_->jumpIndex_ = -1;
@@ -847,8 +879,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternIsVisibleChildrenSizeLessThanSwiper001, Test
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto leftArrowNode = GetChildFrameNode(frameNode_, 5);
-    auto rightArrowNode = GetChildFrameNode(frameNode_, 6);
     layoutProperty_->UpdateDisplayCount(5);
     pattern_->IsVisibleChildrenSizeLessThanSwiper();
     pattern_->leftButtonId_.reset();
@@ -1063,7 +1093,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
     int32_t nextIndex = 1;
     bool restartAutoPlay = true;
     bool forceStop = true;
@@ -1153,9 +1182,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
     pattern_->rightButtonId_ = 1;
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
-    auto leftArrowNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
+    auto leftArrowNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
         []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    auto rightArrowNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
+    auto rightArrowNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
         []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
 
     /**
@@ -1274,8 +1303,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap003, TestSize.Level1
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode);
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
     firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
@@ -1402,8 +1430,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap005, TestSize.Level1
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode);
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
     firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));

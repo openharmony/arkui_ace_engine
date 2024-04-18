@@ -306,7 +306,7 @@ declare class ArkGridColComponent extends ArkComponent implements GridColAttribu
     gridColOffset(value: number | GridColColumnOption): GridColAttribute;
     order(value: number | GridColColumnOption): GridColAttribute;
 }
-declare class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
+declare class ImageColorFilterModifier extends ModifierWithKey<ColorFilter | DrawingColorFilter> {
     constructor(value: ColorFilter);
     static identity: Symbol;
     applyPeer(node: KNode, reset: boolean): void;
@@ -1925,3 +1925,7 @@ declare class ArkEffectComponentComponent extends ArkComponent implements Effect
 }
 declare class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
 }
+
+declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
+declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
+declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}

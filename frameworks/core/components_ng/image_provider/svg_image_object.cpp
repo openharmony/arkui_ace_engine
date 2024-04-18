@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
     auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF(), data);
-    if (!obj->MakeSvgDom(data, src.GetFillColor())) {
+    if (!obj->MakeSvgDom(data, src)) {
         return nullptr;
     }
     return obj;
@@ -51,7 +51,7 @@ void SvgImageObject::MakeCanvasImage(
         ctx->FailCallback("svgImageData is null when SvgImageObject try MakeSvgDom");
         return;
     }
-    auto svgDomBase = MakeSvgDom(svgImageData_, src.GetFillColor());
+    auto svgDomBase = MakeSvgDom(svgImageData_, src);
     if (!svgDomBase) {
         ctx->FailCallback("MakeSvgDom failed");
         return;
@@ -60,18 +60,18 @@ void SvgImageObject::MakeCanvasImage(
     ctx->SuccessCallback(canvasImage);
 }
 
-RefPtr<SvgDomBase> SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor)
+RefPtr<SvgDomBase> SvgImageObject::MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src)
 {
     RefPtr<SvgDomBase> svgDomBase;
 #ifndef USE_ROSEN_DRAWING
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
-    svgDomBase = skiaImageData->MakeSvgDom(svgFillColor);
+    svgDomBase = skiaImageData->MakeSvgDom(src.GetFillColor());
 #else
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
     CHECK_NULL_RETURN(rosenImageData, nullptr);
     // update SVGSkiaDom
-    svgDomBase = rosenImageData->MakeSvgDom(svgFillColor);
+    svgDomBase = rosenImageData->MakeSvgDom(src);
 #endif
     CHECK_NULL_RETURN(svgDomBase, nullptr);
     imageSize_ = svgDomBase->GetContainerSize();

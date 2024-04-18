@@ -318,7 +318,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const auto dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
         info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding start.
@@ -326,7 +326,6 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (!moved_ || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
         startIncreaseTime_ = currentTime;
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().BeginListFling();
         }
@@ -396,8 +395,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     // avoid no render frame when drag end
     HandleDragUpdate(info);
 
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}lf and %{public}lf, "
-        "velocity is %{public}lf",
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}f and %{public}f, "
+        "velocity is %{public}f",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
@@ -433,7 +432,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }
@@ -451,6 +449,13 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     SetDelayedTask();
 }
 
+inline void ReportSlideOn()
+{
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
+}
+
 void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
 {
     if (!isSpringAnimationStop_) {
@@ -460,7 +465,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         GetFrictionProperty();
     }
     StopSnapController();
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}lf, velocity is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}f, velocity is %{public}f",
         mainPosition, correctVelocity);
     float friction = sFriction_.value_or(friction_);
     initVelocity_ = correctVelocity;
@@ -484,7 +489,6 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
-        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }
@@ -510,6 +514,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     frictionOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_DEBUG_SCOPED_TRACE(
         "Scrollable start friction animation, start:%f, end:%f, vel:%f", mainPosition, finalPosition_, initVelocity_);
+    ReportSlideOn();
     frictionOffsetProperty_->AnimateWithVelocity(option, finalPosition_, initVelocity_,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -695,7 +700,7 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
 
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}f, position is %{public}f",
         currentPos_, position);
     currentVelocity_ = snapVelocity_;
     if (NearEqual(currentPos_, position)) {
@@ -758,8 +763,8 @@ void Scrollable::OnAnimateStop()
 void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, mainVelocity is %{public}lf, minExtent is "
-        "%{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, initMaxExtent is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, mainVelocity is %{public}f, minExtent is "
+        "%{public}f, maxExtent is %{public}f, initMinExtent is %{public}f, initMaxExtent is %{public}f",
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     if (!isSpringAnimationStop_ || (skipRestartSpring_ && NearEqual(mainVelocity, 0.0f, 0.001f))) {
         return;
@@ -800,7 +805,7 @@ void Scrollable::StartSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
     });
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    ReportSlideOn();
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
 }
@@ -808,8 +813,8 @@ void Scrollable::StartSpringMotion(
 void Scrollable::UpdateSpringMotion(
     double mainPosition, const ExtentPair& extent, const ExtentPair& initExtent)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, minExtent is "
-        "%{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, initMaxExtent is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, minExtent is "
+        "%{public}f, maxExtent is %{public}f, initMinExtent is %{public}f, initMaxExtent is %{public}f",
         mainPosition, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     if (isSpringAnimationStop_) {
         return;
@@ -854,8 +859,7 @@ void Scrollable::UpdateSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
     });
-    
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+    ReportSlideOn();
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
 }
@@ -900,7 +904,7 @@ void Scrollable::ProcessSpringMotion(double position)
 {
     // Do not round when the current position is less than 0.5 px from the final position.
     position = NearEqual(position, finalPosition_, 0.5) ? position : Round(position);
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}f, position is %{public}f",
         currentPos_, position);
     auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -948,7 +952,7 @@ void Scrollable::ProcessScrollMotion(double position)
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, currentVelocity_ is %{public}lf, "
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, currentVelocity_ is %{public}f, "
         "needScrollSnapChange_ is %{public}u",
         position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {

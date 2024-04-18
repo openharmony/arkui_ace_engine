@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -698,7 +699,6 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         return false;
     }
 
-    ScrollToLastFocusIndex();
     if (!CalculatePosition()) {
         return false;
     }
@@ -831,6 +831,17 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
     }
     if (focusType_ != FocusType::SCOPE || (focusType_ == FocusType::SCOPE && focusDepend_ == FocusDependence::SELF)) {
         return RequestFocusImmediately();
+    }
+
+    auto curFrameNode = GetFrameNode();
+    auto curPattern = curFrameNode ? curFrameNode->GetPattern<ScrollablePattern>() : nullptr;
+    auto scrollIndexAbility = curPattern ? curPattern->GetScrollIndexAbility() : nullptr;
+    if (scrollIndexAbility) {
+        scrollIndexAbility(isHead ? FocusHub::SCROLL_TO_HEAD : FocusHub::SCROLL_TO_TAIL);
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
     }
 
     std::list<RefPtr<FocusHub>> focusNodes;
@@ -1126,7 +1137,6 @@ void FocusHub::OnFocusNode()
     if (parentFocusHub) {
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
-    HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
     auto rootNode = pipeline->GetRootElement();
     auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
     if (rootFocusHub && pipeline->GetIsFocusActive()) {
@@ -1340,6 +1350,11 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles, bool forceUpdate)
 bool FocusHub::PaintAllFocusState()
 {
     if (PaintFocusState()) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto focusManager = pipeline ? pipeline->GetFocusManager() : nullptr;
+        if (focusManager) {
+            focusManager->SetLastFocusStateNode(AceType::Claim(this));
+        }
         return !isFocusActiveWhenFocused_;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
@@ -1790,33 +1805,95 @@ RefPtr<FocusView> FocusHub::GetFirstChildFocusView()
     return nullptr;
 }
 
-void FocusHub::HandleParentScroll() const
+bool FocusHub::TriggerFocusScroll()
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto* context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    if (!context->GetIsFocusActive() || (focusType_ != FocusType::NODE && !isFocusUnit_)) {
-        return;
+    CHECK_NULL_RETURN(context, false);
+    if (!context->GetIsFocusActive() || (focusType_ == FocusType::DISABLE && !isFocusUnit_)) {
+        return false;
     }
+    return ScrollByOffset();
+}
+
+bool FocusHub::ScrollByOffset()
+{
     auto parent = GetParentFocusHub();
     RefPtr<FrameNode> parentFrame;
     RefPtr<Pattern> parentPattern;
+    bool ret = false;
     while (parent) {
         if (parent->isFocusUnit_) {
-            return;
+            return false;
         }
         parentFrame = parent->GetFrameNode();
         if (!parentFrame) {
             parent = parent->GetParentFocusHub();
             continue;
         }
-        parentPattern = parentFrame->GetPattern();
-        if (parentPattern && parentPattern->ScrollToNode(GetFrameNode())) {
-            return;
+        if (ScrollByOffsetToParent(parentFrame)) {
+            ret = true;
         }
         parent = parent->GetParentFocusHub();
     }
+    return ret;
+}
+
+bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) const
+{
+    auto curFrameNode = GetFrameNode();
+    CHECK_NULL_RETURN(curFrameNode, false);
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    auto parentPattern = parentFrameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(parentPattern, false);
+
+    auto scrollAbility = parentPattern->GetScrollOffsetAbility();
+    auto scrollFunc = scrollAbility.first;
+    auto scrollAxis = scrollAbility.second;
+    if (!scrollFunc || scrollAxis == Axis::NONE) {
+        return false;
+    }
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, false);
+    auto parentFrameSize = parentGeometryNode->GetFrameSize();
+    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
+    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
+    auto curGeometry = curFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(curGeometry, false);
+    auto curFrameSize = curGeometry->GetFrameSize();
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
+        "%{public}s/%{public}d - %{public}s-%{public}s is (%{public}f,%{public}f).",
+        curFrameNode->GetTag().c_str(), curFrameNode->GetId(), curFrameOffsetToWindow.ToString().c_str(),
+        curFrameSize.ToString().c_str(), parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(),
+        parentFrameOffsetToWindow.ToString().c_str(), parentFrameSize.ToString().c_str(), offsetToTarFrame.GetX(),
+        offsetToTarFrame.GetY());
+
+    float diffToTarFrame = scrollAxis == Axis::VERTICAL ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
+    if (NearZero(diffToTarFrame)) {
+        return false;
+    }
+    float curFrameLength = scrollAxis == Axis::VERTICAL ? curFrameSize.Height() : curFrameSize.Width();
+    float parentFrameLength = scrollAxis == Axis::VERTICAL ? parentFrameSize.Height() : parentFrameSize.Width();
+    float moveOffset = 0.0;
+    if (LessNotEqual(diffToTarFrame, 0)) {
+        moveOffset = -diffToTarFrame;
+    } else if (GreatNotEqual(diffToTarFrame + curFrameLength, parentFrameLength)) {
+        moveOffset = parentFrameLength - diffToTarFrame - curFrameLength;
+    }
+    if (!NearZero(moveOffset)) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
+            moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
+        auto ret = scrollFunc(moveOffset);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+        return ret;
+    }
+    return false;
 }
 
 bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncRequest)
@@ -1832,8 +1909,7 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncReq
         return false;
     }
     auto result = true;
-    if ((isSyncRequest && !focusNode->IsSyncRequestFocusable()) ||
-        (!isSyncRequest && !focusNode->IsFocusable())) {
+    if ((isSyncRequest && !focusNode->IsSyncRequestFocusable()) || (!isSyncRequest && !focusNode->IsFocusable())) {
         result = false;
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.",

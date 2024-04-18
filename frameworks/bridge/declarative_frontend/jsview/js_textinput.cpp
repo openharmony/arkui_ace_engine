@@ -55,6 +55,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("width", &JSTextField::JsWidth);
     JSClass<JSTextInput>::StaticMethod("height", &JSTextField::JsHeight);
     JSClass<JSTextInput>::StaticMethod("padding", &JSTextField::JsPadding);
+    JSClass<JSTextInput>::StaticMethod("margin", &JSTextField::JsMargin);
     JSClass<JSTextInput>::StaticMethod("border", &JSTextField::JsBorder);
     JSClass<JSTextInput>::StaticMethod("borderWidth", &JSTextField::JsBorderWidth);
     JSClass<JSTextInput>::StaticMethod("borderColor", &JSTextField::JsBorderColor);
@@ -114,6 +115,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextInput>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
     JSClass<JSTextInput>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
+    JSClass<JSTextInput>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
+    JSClass<JSTextInput>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
 
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }

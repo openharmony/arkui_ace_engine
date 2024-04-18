@@ -61,10 +61,10 @@ public:
         ResetEnableSmoothEffect();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     std::string ProgressOptions() const;
-    void ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     std::string ToJsonGradientColor() const;
 
     ACE_DEFINE_PROPERTY_GROUP(ProgressPaintDate, ProgressDate);

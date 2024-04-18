@@ -57,7 +57,7 @@ struct Font {
         if (fontFamiliesNG.has_value() && other.fontFamiliesNG) {
             auto curFontFamilies = fontFamiliesNG.value();
             auto otherFontFamilies = other.fontFamiliesNG.value();
-            if (curFontFamilies.size() !=otherFontFamilies.size()) {
+            if (curFontFamilies.size() != otherFontFamilies.size()) {
                 return false;
             }
             for (size_t i = 0; i < curFontFamilies.size(); ++i) {
@@ -72,6 +72,36 @@ struct Font {
     std::string GetFontColor() const
     {
         return fontColor.has_value() ? fontColor.value().ColorToString() : "";
+    }
+
+    std::string GetFontFamily() const
+    {
+        if (!fontFamiliesNG.has_value() || fontFamiliesNG.value().empty()) {
+            return "";
+        }
+        std::stringstream ss;
+        auto fontFamily = fontFamiliesNG.value();
+        ss << fontFamily[0];
+
+        for (uint32_t index = 1; index < fontFamily.size(); ++index) {
+            ss << "," << fontFamily[index];
+        }
+        return ss.str();
+    }
+
+    std::optional<FontWeight> GetFontWeight() const
+    {
+        return fontWeight;
+    }
+
+    std::optional<Dimension> GetFontSize() const
+    {
+        return fontSize;
+    }
+
+    std::optional<FontStyle> GetFontStyle() const
+    {
+        return fontStyle;
     }
 };
 
@@ -306,6 +336,8 @@ public:
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
     virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
 
+    virtual void SetTextOverflow(Ace::TextOverflow value) {};
+    virtual void SetTextIndent(const Dimension& value) {};
 private:
     static std::unique_ptr<TextFieldModel> instance_;
     static std::mutex mutex_;

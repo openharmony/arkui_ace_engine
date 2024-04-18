@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -38,21 +39,23 @@ constexpr int32_t SHEET_HALF_SIZE = 2;
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    const auto& pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    const auto& overlay = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    const auto& overlayNode = AceType::DynamicCast<FrameNode>((overlay->GetRootNode()).Upgrade());
-    CHECK_NULL_VOID(overlayNode);
-    const auto& overlayLayoutProp = overlayNode->GetLayoutProperty();
-    CHECK_NULL_VOID(overlayLayoutProp);
-    auto layoutConstraint = overlayLayoutProp->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
     auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     sheetStyle_ = layoutProperty->GetSheetStyleValue();
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (!layoutConstraint) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "fail to measure sheet due to layoutConstraint is nullptr");
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
     auto maxSize = layoutConstraint->maxSize;
     if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
+        auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+        layoutConstraint = parentConstraint.value();
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
         maxSize = layoutConstraint->maxSize;
         sheetMaxHeight_ = maxSize.Height();
         sheetMaxWidth_ = maxSize.Width();
@@ -75,7 +78,6 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
         auto childConstraint = CreateSheetChildConstraint(layoutProperty);
         layoutConstraint->percentReference = SizeF(sheetWidth_, sheetHeight_);
-        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
@@ -137,6 +139,8 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
+        sheetOffsetX_, sheetOffsetY_);
     OffsetF positionOffset;
     positionOffset.SetX(sheetOffsetX_);
     positionOffset.SetY(0.0f);

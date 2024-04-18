@@ -249,6 +249,18 @@ void PipelineBase::SetFontScale(float fontScale)
     }
 }
 
+void PipelineBase::SetFontWeightScale(float fontWeightScale)
+{
+    const static float CARD_MAX_FONT_WEIGHT_SCALE = 1.3f;
+    if (!NearEqual(fontWeightScale_, fontWeightScale)) {
+        fontWeightScale_ = fontWeightScale;
+        if (isJsCard_ && GreatOrEqual(fontWeightScale_, CARD_MAX_FONT_WEIGHT_SCALE)) {
+            fontWeightScale_ = CARD_MAX_FONT_WEIGHT_SCALE;
+        }
+        fontManager_->RebuildFontNode();
+    }
+}
+
 double PipelineBase::NormalizeToPx(const Dimension& dimension) const
 {
     if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
@@ -691,11 +703,13 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
+#ifdef OHOS_STANDARD_SYSTEM
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown()) {
             // subwindow is shown, main window no need to handle the keyboard event
             return;
         }
+#endif
     }
     double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {

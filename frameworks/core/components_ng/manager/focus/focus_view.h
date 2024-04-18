@@ -81,6 +81,11 @@ public:
         return isViewHasFocused_;
     }
 
+    void SetIsDefaultHasBeFocused(bool isDefaultHasBeFocused)
+    {
+        isDefaultHasBeFocused_ = isDefaultHasBeFocused;
+    }
+
 private:
     bool isDefaultHasBeFocused_ = false;
     bool isViewRootScopeFocused_ = true;

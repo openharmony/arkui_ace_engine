@@ -28,12 +28,14 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_adapter.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -60,8 +62,8 @@ struct SpanNodeInfo {
     RefPtr<UINode> containerSpanNode;
 };
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern, public TextDragBase, public TextBase, public SpanWatcher {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, SpanWatcher);
+class TextPattern : public virtual Pattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
 
 public:
     TextPattern()
@@ -281,7 +283,6 @@ public:
     virtual void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
     void CreateHandles() override;
-
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
     // end of TextDragBase implementations
@@ -512,8 +513,7 @@ public:
     {
         return isSpanStringMode_;
     }
-    void UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems) override;
-
+    void SetStyledString(const RefPtr<SpanString>& value);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
@@ -634,6 +634,7 @@ protected:
     RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
 
     OffsetF parentGlobalOffset_;
+    std::optional<TextResponseType> textResponseType_;
 
     friend class TextContentModifier;
 private:
@@ -670,7 +671,7 @@ private:
     void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     // to check if drag is in progress
     void SetCurrentDragTool(SourceTool tool)
     {
@@ -713,12 +714,10 @@ private:
     SourceTool lastDragTool_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
-    std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
     mutable std::list<RefPtr<UINode>> childNodes_;
     bool isShowMenu_ = true;
-    std::function<void()> processOverlayDelayTask_;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);

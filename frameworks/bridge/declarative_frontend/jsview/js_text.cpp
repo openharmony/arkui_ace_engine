@@ -309,7 +309,7 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
 }
@@ -317,7 +317,7 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
 }
@@ -414,7 +414,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
 }
@@ -472,7 +472,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return;
+        value = 0;
     }
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
@@ -491,9 +491,9 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode]
-            (const BaseEventInfo* info) {
+            (BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
@@ -906,10 +906,29 @@ void JSTextController::CloseSelectionMenu()
     controller->CloseSelectionMenu();
 }
 
+void JSTextController::SetStyledString(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+    if (!spanString) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto spanStringController = spanString->GetController();
+    CHECK_NULL_VOID(spanStringController);
+    controller->SetStyledString(spanStringController);
+}
+
 void JSTextController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextController>::Declare("TextController");
     JSClass<JSTextController>::Method("closeSelectionMenu", &JSTextController::CloseSelectionMenu);
+    JSClass<JSTextController>::CustomMethod("setStyledString", &JSTextController::SetStyledString);
     JSClass<JSTextController>::Bind(globalObj, JSTextController::Constructor, JSTextController::Destructor);
 }
 

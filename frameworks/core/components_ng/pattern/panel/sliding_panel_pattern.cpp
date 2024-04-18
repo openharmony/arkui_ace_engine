@@ -29,6 +29,7 @@
 #include "core/animation/spring_animation.h"
 #include "core/components/close_icon/close_icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -868,25 +869,31 @@ void SlidingPanelPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)
     host->MarkDirtyNode(extraFlag);
 }
 
-void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    Pattern::ToJsonValue(json);
+    Pattern::ToJsonValue(json, filter);
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary" };
-    json->Put(
-        "type", PANEL_TYPE[static_cast<int32_t>(layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR))]);
+    json->PutExtAttr("type",
+        PANEL_TYPE[static_cast<int32_t>(layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR))], filter);
     static const char* PANEL_MODE[] = { "PanelMode.Mini", "PanelMode.Half", "PanelMode.Full" };
-    json->Put("mode", PANEL_MODE[static_cast<int32_t>(layoutProperty->GetPanelMode().value_or(PanelMode::HALF))]);
-    json->Put("dragBar", layoutProperty->GetHasDragBar().value_or(true) ? "true" : "false");
-    json->Put("show", layoutProperty->GetIsShow().value_or(true) ? "true" : "false");
-    json->Put("miniHeight", layoutProperty->GetMiniHeight().value_or(miniHeight_).ToString().c_str());
-    json->Put("halfHeight", layoutProperty->GetHalfHeight().value_or(halfHeight_).ToString().c_str());
-    json->Put("fullHeight", layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str());
-    json->Put("customHeight", layoutProperty->GetFullHeight().value_or(customHeight_).ToString().c_str());
-    json->Put(
-        "backgroundMask", layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str());
-    json->Put("showCloseIcon", layoutProperty->GetShowCloseIcon().value_or(false) ? "true" : "false");
+    json->PutExtAttr("mode",
+        PANEL_MODE[static_cast<int32_t>(layoutProperty->GetPanelMode().value_or(PanelMode::HALF))], filter);
+    json->PutExtAttr("dragBar", layoutProperty->GetHasDragBar().value_or(true) ? "true" : "false", filter);
+    json->PutExtAttr("show", layoutProperty->GetIsShow().value_or(true) ? "true" : "false", filter);
+    json->PutExtAttr("miniHeight",
+        layoutProperty->GetMiniHeight().value_or(miniHeight_).ToString().c_str(), filter);
+    json->PutExtAttr("halfHeight",
+        layoutProperty->GetHalfHeight().value_or(halfHeight_).ToString().c_str(), filter);
+    json->PutExtAttr("fullHeight",
+        layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str(), filter);
+    json->PutExtAttr("customHeight",
+        layoutProperty->GetFullHeight().value_or(customHeight_).ToString().c_str(), filter);
+    json->PutExtAttr("backgroundMask",
+        layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
+    json->PutExtAttr("showCloseIcon",
+        layoutProperty->GetShowCloseIcon().value_or(false) ? "true" : "false", filter);
 }
 
 RefPtr<UINode> SlidingPanelPattern::GetChildNodeByTag(const std::string& tagName) const

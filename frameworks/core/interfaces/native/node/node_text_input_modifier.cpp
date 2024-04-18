@@ -652,11 +652,11 @@ ArkUI_Uint32 GetTextInputCaretColor(ArkUINodeHandle node)
     return TextFieldModelNG::GetCaretColor(frameNode).GetValue();
 }
 
-ArkUI_Float32 GetTextInputCaretStyle(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputCaretStyle(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetCaretStyle(frameNode).Value();
+    return TextFieldModelNG::GetCaretStyle(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_Bool GetTextInputShowUnderline(ArkUINodeHandle node)
@@ -693,7 +693,7 @@ void GetTextInputPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     CHECK_NULL_VOID(frameNode);
     Font value = TextFieldModelNG::GetPlaceholderFont(frameNode);
     if (value.fontSize.has_value()) {
-        font->fontSize = value.fontSize.value().Value();
+        font->fontSize = value.fontSize.value().GetNativeValue(static_cast<DimensionUnit>(font->fontSizeUnit));
     }
     if (value.fontWeight.has_value()) {
         font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
@@ -765,11 +765,11 @@ ArkUI_Int32 GetTextInputCancelButtonStyle(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCleanNodeStyle(frameNode));
 }
 
-ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetCancelIconSize(frameNode).Value();
+    return TextFieldModelNG::GetCancelIconSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_CharPtr getTextInputTextCancelIconSrc(ArkUINodeHandle node)
@@ -815,11 +815,11 @@ ArkUI_Int32 GetTextInputFontWeight(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetFontWeight(frameNode));
 }
 
-ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetFontSize(frameNode).Value();
+    return TextFieldModelNG::GetFontSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)

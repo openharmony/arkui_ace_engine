@@ -857,7 +857,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     return this;
   }
   font(value: Font): SpanAttribute {
-    modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier, value?.size);
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value?.weight);
+    modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value?.family);
+    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value?.style);
     return this;
   }
   lineHeight(value: Length): SpanAttribute {
@@ -903,7 +906,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
 }
 // @ts-ignore
 globalThis.Span.attributeModifier = function (modifier: ArkComponent): void {
-  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+  attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr: KNode) => {
     return new ArkSpanComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.SpanModifier(nativePtr, classType);

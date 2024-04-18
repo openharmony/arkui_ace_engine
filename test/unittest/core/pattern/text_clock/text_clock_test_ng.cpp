@@ -37,6 +37,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr int32_t HOURS_WEST = -8;
 inline const std::string CLOCK_FORMAT = "aa h:m:s";
 inline const std::string UTC_1 = "1000000000000";
@@ -171,7 +172,7 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
 
     textClockLayoutProperty->UpdateFontFamily(FONT_FAMILY_VALUE);
     auto json = JsonUtil::Create(true);
-    textClockLayoutProperty->ToJsonValue(json);
+    textClockLayoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(textClockLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
 }
 

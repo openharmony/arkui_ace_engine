@@ -196,6 +196,7 @@ bool GridIrregularFiller::UpdateLength(float& len, float targetLen, int32_t& row
 void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(itemIdx);
+    CHECK_NULL_VOID(child);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
@@ -210,10 +211,10 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t item
     constraint.percentReference.SetCrossSize(crossLen, info_->axis_);
     if (info_->axis_ == Axis::VERTICAL) {
         constraint.maxSize = SizeF { crossLen, Infinity<float>() };
-        constraint.selfIdealSize = OptionalSizeF(crossLen, std::nullopt);
+        constraint.parentIdealSize = OptionalSizeF(crossLen, std::nullopt);
     } else {
         constraint.maxSize = SizeF { Infinity<float>(), crossLen };
-        constraint.selfIdealSize = OptionalSizeF(std::nullopt, crossLen);
+        constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
 
     child->Measure(constraint);

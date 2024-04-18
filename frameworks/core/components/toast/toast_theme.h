@@ -76,6 +76,7 @@ public:
             theme->backgroundColor_ = toastPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->radius_ = Radius(toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp),
                 toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp));
+            theme->blurStyleTextColor_ = toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR_BLUR, Color());
         }
     };
 
@@ -136,6 +137,11 @@ public:
         return marging_;
     }
 
+    const Color& GetBlurStyleTextColor() const
+    {
+        return blurStyleTextColor_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -151,6 +157,7 @@ private:
     Dimension minFontSize_;
     uint32_t textMaxLines_ = 1;
     Edge marging_;
+    Color blurStyleTextColor_;
 };
 
 } // namespace OHOS::Ace

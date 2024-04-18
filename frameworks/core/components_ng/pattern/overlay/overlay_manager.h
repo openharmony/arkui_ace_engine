@@ -68,8 +68,10 @@ struct PopupInfo {
 struct GatherNodeChildInfo {
     WeakPtr<FrameNode> imageNode;
     OffsetF offset;
-    float width = 0.0;
-    float height = 0.0;
+    float width = 0.0f;
+    float height = 0.0f;
+    float halfWidth = 0.0f;
+    float halfHeight = 0.0f;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -358,13 +360,15 @@ public:
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-         std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode);
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode);
     void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
         std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode);
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
@@ -401,10 +405,11 @@ public:
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-        const RefPtr<NG::FrameNode>& targetNode,  std::string longestContent, int32_t menuSize);
-    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode,  std::string longestContent, int32_t menuSize);
-    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect, std::string longestContent,
-        int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
+        const RefPtr<NG::FrameNode>& targetNode, const std::string& longestContent, int32_t menuSize);
+    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
+    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
+        const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
+    void CloseUIExtensionMenu(const std::function<void(const std::string&)>& onClickMenu, int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -461,7 +466,7 @@ public:
     {
         return gatherNodeWeak_.Upgrade();
     }
-    std::vector<GatherNodeChildInfo> GetGatherNodeChildrenInfo()
+    const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo()
     {
         return gatherNodeChildrenInfo_;
     }
@@ -480,6 +485,7 @@ public:
     }
     bool CheckPageNeedAvoidKeyboard() const;
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
+    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
 
 private:
     void PopToast(int32_t targetId);
@@ -529,6 +535,8 @@ private:
     void FireModalPageHide();
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
+    void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
+        const NG::SheetStyle& sheetStyle);
 
     bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
     bool ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode);
@@ -561,6 +569,8 @@ private:
     void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
         const WeakPtr<OverlayManager> weak, int32_t instanceId);
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
+    void RemoveMenuNotInSubWindow(
+        const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak);
 
     bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
     void HandleModalShow(std::function<void(const std::string&)>&& callback,

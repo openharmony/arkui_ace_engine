@@ -88,6 +88,8 @@ constexpr uint64_t TIMESTAMP_1 = 100;
 constexpr uint64_t TIMESTAMP_2 = 101;
 constexpr uint64_t TIMESTAMP_3 = 102;
 constexpr uint64_t TIMESTAMP_4 = 103;
+
+const InspectorFilter filter;
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
@@ -172,7 +174,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg003, TestSize.Level1)
 {
     auto jsonValue = std::make_unique<JsonValue>();
     FRAME_NODE->GetOrCreateFocusHub();
-    FRAME_NODE->FocusToJsonValue(jsonValue);
+    FRAME_NODE->FocusToJsonValue(jsonValue, filter);
     EXPECT_FALSE(jsonValue->GetBool("enabled", false));
 }
 
@@ -623,7 +625,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToJsonValue007, TestSize.Level1)
     gestureEventHub->SetResponseRegion(responseRegion);
 
     auto jsonValue = JsonUtil::Create(true);
-    FRAME_NODE->ToJsonValue(jsonValue);
+    FRAME_NODE->ToJsonValue(jsonValue, filter);
     EXPECT_TRUE(jsonValue);
 
     /**
@@ -634,7 +636,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToJsonValue007, TestSize.Level1)
     FRAME_NODE->renderContext_ = nullptr;
     FRAME_NODE->eventHub_->focusHub_ = nullptr;
     auto jsonValue2 = JsonUtil::Create(true);
-    FRAME_NODE->ToJsonValue(jsonValue2);
+    FRAME_NODE->ToJsonValue(jsonValue2, filter);
     FRAME_NODE->FromJson(jsonValue2);
     EXPECT_TRUE(jsonValue2);
 }
@@ -1738,7 +1740,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      * @tc.steps: step2. construct parameters.
      * @tc.expected: expect cover branch layoutProperty_ is nullptr.
      */
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_EQ(FRAME_NODE2->layoutProperty_, nullptr);
 
     /**
@@ -1747,7 +1749,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      */
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     FRAME_NODE2->layoutProperty_ = layoutProperty;
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_NE(FRAME_NODE2->layoutProperty_, nullptr);
 
     /**
@@ -1756,7 +1758,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      */
     FRAME_NODE2->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
 
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_NE(FRAME_NODE2->layoutProperty_->calcLayoutConstraint_, nullptr);
 
     /**
@@ -1765,7 +1767,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
      */
     std::optional<CalcLength> len = CalcLength("auto");
     FRAME_NODE2->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
-    FRAME_NODE2->GeometryNodeToJsonValue(value);
+    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
     EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
 
     FRAME_NODE2->layoutProperty_ = nullptr;

@@ -283,9 +283,9 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    InitCapture();
     InitIndicator();
     InitArrow();
+    InitCapture();
     SetLazyLoadIsLoop();
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
@@ -883,9 +883,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                                           : targetIndexValue + TotalCount();
                 isNeedBackwardTranslate = itemPosition_.find(firstItemIndex) != itemPosition_.end();
             }
-            bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ ||
-                                                itemPosition_.find(lastItemIndex) == itemPosition_.end() ||
-                                                isNeedBackwardTranslate;
+            bool isNeedPlayTranslateAnimation =
+                translateAnimationIsRunning_ ||
+                (IsLoop() && itemPosition_.find(lastItemIndex) == itemPosition_.end()) || isNeedBackwardTranslate;
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -1166,11 +1166,15 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
         proxy->SetIndex(item.first);
         proxy->SetPosition(position);
         proxy->SetMainAxisLength(mainAxisLength);
-        proxy->SetFinishTransitionEvent([weak = WeakClaim(this), &item]() {
+        proxy->SetFinishTransitionEvent([weak = WeakClaim(this), index = item.first]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            item.second.isFinishAnimation = true;
-            swiper->OnSwiperCustomAnimationFinish(item);
+            auto item = swiper->itemPositionInAnimation_.find(index);
+            if (item == swiper->itemPositionInAnimation_.end()) {
+                return;
+            }
+            item->second.isFinishAnimation = true;
+            swiper->OnSwiperCustomAnimationFinish(*item);
         });
         transition(proxy);
     }
@@ -1590,15 +1594,22 @@ void SwiperPattern::StopTranslateAnimation()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         translateAnimationIsRunning_ = false;
-        AnimationOption option;
-        option.SetCurve(Curves::LINEAR);
-        option.SetDuration(0);
-        translateAnimation_ = AnimationUtils::StartAnimation(
-            option, [host, weak = WeakClaim(this)]() {
-                auto swiper = weak.Upgrade();
-                CHECK_NULL_VOID(swiper);
-                host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
-            });
+
+        if (NearZero(translateAnimationEndPos_ - currentOffset_)) {
+            AnimationUtils::StopAnimation(translateAnimation_);
+            targetIndex_.reset();
+        } else {
+            AnimationOption option;
+            option.SetCurve(Curves::LINEAR);
+            option.SetDuration(0);
+            translateAnimation_ = AnimationUtils::StartAnimation(
+                option, [host, weak = WeakClaim(this)]() {
+                    auto swiper = weak.Upgrade();
+                    CHECK_NULL_VOID(swiper);
+                    host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
+                });
+            }
+
         OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_, true);
     }
 }
@@ -1991,6 +2002,13 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             return;
         }
     }
+    if (!IsLoop() && GetEdgeEffect() != EdgeEffect::SPRING) {
+        if (IsOutOfStart(offset)) {
+            offset = - itemPosition_.begin()->second.startPos;
+        } else if (IsOutOfEnd(offset)) {
+            offset = CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+        }
+    }
     currentDelta_ = currentDelta_ - offset;
     currentIndexOffset_ += offset;
     if (isDragging_ || childScrolling_) {
@@ -2018,9 +2036,9 @@ bool SwiperPattern::CheckOverScroll(float offset)
             break;
         case EdgeEffect::NONE:
             if (IsOutOfBoundary(offset)) {
-                currentDelta_ = currentDelta_ - offset;
                 auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                     CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+                currentDelta_ = currentDelta_ - realOffset;
                 HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
@@ -2063,9 +2081,9 @@ bool SwiperPattern::FadeOverScroll(float offset)
         auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == 0 && offset < 0.0f) ||
                                (itemPosition_.rbegin()->first == TotalCount() - 1 && offset > 0.0f);
         if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
-            currentDelta_ = currentDelta_ - offset;
             auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                 CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+            currentDelta_ = currentDelta_ - realOffset;
             HandleSwiperCustomAnimation(realOffset);
         }
         auto host = GetHost();
@@ -2339,10 +2357,6 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     if (removeEventCallback) {
         removeEventCallback();
     }
-#ifdef OHOS_PLATFORM
-    // Increase the cpu frequency when sliding.
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
 
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
@@ -2463,10 +2477,6 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
             return;
         }
     }
-
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
 
     // nested and reached end, need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
@@ -2594,8 +2604,9 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         nextIndex = direction ? firstIndex + 1 : firstItemInfoInVisibleArea.first;
     }
 
-    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    if (swiperLayoutProperty && SwiperUtils::IsStretch(swiperLayoutProperty) && GetDisplayCount() == 1) {
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    // don't run this in nested scroll. Parallel nested scroll can deviate > 1 page from currentIndex_
+    if (!childScrolling_ && SwiperUtils::IsStretch(props) && GetDisplayCount() == 1) {
         nextIndex = ComputeNextIndexInSinglePage(velocity, onlyDistance);
     }
 
@@ -2607,6 +2618,27 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         nextIndex = std::clamp(nextIndex, 0, std::max(0, TotalCount() - GetDisplayCount()));
     }
     return nextIndex;
+}
+
+bool SwiperPattern::NeedStartNewAnimation(const OffsetF& offset) const
+{
+    if (itemPositionInAnimation_.empty()) {
+        return true;
+    }
+
+    for (const auto& animationItem : itemPositionInAnimation_) {
+        auto iter = itemPosition_.find(animationItem.first);
+        if (iter == itemPosition_.end()) {
+            return true;
+        }
+        if ((animationItem.second.node && animationItem.second.finalOffset != offset) ||
+            !NearEqual(animationItem.second.startPos, iter->second.startPos) ||
+            !NearEqual(animationItem.second.endPos, iter->second.endPos)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void SwiperPattern::PlayPropertyTranslateAnimation(
@@ -2629,26 +2661,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         offset.AddY(translate);
     }
     if (usePropertyAnimation_) {
-        auto startNewAnimationFlag = false;
-        if (itemPositionInAnimation_.empty()) {
-            startNewAnimationFlag = true;
-        }
-        if (!startNewAnimationFlag) {
-            for (const auto& animationItem : itemPositionInAnimation_) {
-                auto iter = itemPosition_.find(animationItem.first);
-                if (iter == itemPosition_.end()) {
-                    startNewAnimationFlag = true;
-                    break;
-                }
-                if (animationItem.second.finalOffset != offset ||
-                    !NearEqual(animationItem.second.startPos, iter->second.startPos) ||
-                    !NearEqual(animationItem.second.endPos, iter->second.endPos)) {
-                    startNewAnimationFlag = true;
-                    break;
-                }
-            }
-        }
-        if (!startNewAnimationFlag) {
+        if (!NeedStartNewAnimation(offset)) {
             stopIndicatorAnimation_ = false;
             return;
         }
@@ -2668,6 +2681,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     auto finishCallback = [weak = WeakClaim(this), offset]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
         }
@@ -2691,6 +2707,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         if (!swiperPattern) {
             return;
         }
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
         }
@@ -2929,6 +2948,7 @@ void SwiperPattern::PlayTranslateAnimation(
     host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, startPos);
     translateAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
+    translateAnimationEndPos_ = endPos;
     translateAnimation_ = AnimationUtils::StartAnimation(
         option, [host, weak, startPos, endPos, nextIndex, velocity]() {
             host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);
@@ -3097,7 +3117,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
-            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "Swiper");
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = true;

@@ -29,6 +29,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+const InspectorFilter filter;
+} // namespace
+
 class GridColTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -81,7 +85,7 @@ HWTEST_F(GridColTestNg, GridColDefault001, TestSize.Level1)
     auto clone = layoutProperty->Clone();
     clone.Reset();
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_NE(json->ToString(), "");
 }
 

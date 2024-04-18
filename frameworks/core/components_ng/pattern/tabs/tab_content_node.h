@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT TabContentNode : public FrameNode {
     DECLARE_ACE_TYPE(TabContentNode, FrameNode);
@@ -29,7 +30,7 @@ public:
         : FrameNode(tag, nodeId, pattern, isRoot)
     {}
     ~TabContentNode() = default;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnAttachToMainTree(bool recursive) override;
     void OnDetachFromMainTree(bool recursive) override;
 

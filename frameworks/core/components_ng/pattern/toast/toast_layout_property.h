@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TOAST_TOAST_LAYOUT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 
@@ -24,6 +25,15 @@ namespace OHOS::Ace::NG {
 enum class ToastShowMode {
     DEFAULT = 0,
     TOP_MOST = 1,
+};
+struct ToastInfo {
+    std::string message;
+    int32_t duration = 0;
+    std::string bottom;
+    bool isRightToLeft = false;
+    ToastShowMode showMode = ToastShowMode::DEFAULT;
+    int32_t alignment = 0;
+    std::optional<DimensionOffset> offset;
 };
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);
@@ -53,20 +63,20 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowMode, ToastShowMode, PROPERTY_UPDATE_LAYOUT);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("Bottom", GetBottom()->ToString().c_str());
-        json->Put("ToastShowMode",
-            GetShowModeValue(ToastShowMode::DEFAULT) == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST");
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("Bottom", GetBottom()->ToString().c_str(), filter);
+        json->PutExtAttr("ToastShowMode",
+            GetShowModeValue(ToastShowMode::DEFAULT) == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST", filter);
         if (HasToastAlignment()) {
-            json->Put("alignment",
-                GetToastAlignmentValue(Alignment::BOTTOM_CENTER).GetAlignmentStr(TextDirection::AUTO).c_str());
+            json->PutExtAttr("alignment", GetToastAlignmentValue(Alignment::BOTTOM_CENTER)
+                .GetAlignmentStr(TextDirection::AUTO).c_str(), filter);
         }
         auto offsetValue = JsonUtil::Create(true);
         offsetValue->Put("dX", propToastOffset_.value_or(DimensionOffset()).GetX().ConvertToVp());
         offsetValue->Put("dY", propToastOffset_.value_or(DimensionOffset()).GetY().ConvertToVp());
-        json->Put("offset", offsetValue);
+        json->PutExtAttr("offset", offsetValue, filter);
     }
 
 private:

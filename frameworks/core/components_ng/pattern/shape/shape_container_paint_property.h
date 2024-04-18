@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/image_mesh.h"
 #include "core/components/shape/shape_component.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_view_box.h"
@@ -60,9 +61,9 @@ public:
         ResetShapeViewBox();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        ShapePaintProperty::ToJsonValue(json);
+        ShapePaintProperty::ToJsonValue(json, filter);
         auto viewBoxJson = JsonUtil::Create(true);
         if (propShapeViewBox_.has_value()) {
             viewBoxJson->Put("x", propShapeViewBox_.value().Left().ToString().c_str());
@@ -70,7 +71,7 @@ public:
             viewBoxJson->Put("width", propShapeViewBox_.value().Width().ToString().c_str());
             viewBoxJson->Put("height", propShapeViewBox_.value().Height().ToString().c_str());
         }
-        json->Put("viewPort", viewBoxJson);
+        json->PutExtAttr("viewPort", viewBoxJson, filter);
 
         auto meshJson = JsonUtil::Create(true);
         if (propImageMesh_.has_value() && meshJson) {
@@ -85,7 +86,7 @@ public:
             meshJson->Put("row", propImageMesh_->GetRow());
             meshJson->Put("column", propImageMesh_->GetColumn());
         }
-        json->Put("mesh", meshJson);
+        json->PutExtAttr("mesh", meshJson, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMesh, ImageMesh, PROPERTY_UPDATE_RENDER);

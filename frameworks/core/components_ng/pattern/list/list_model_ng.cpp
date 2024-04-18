@@ -678,4 +678,12 @@ void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onSc
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
+RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateListChildrenMainSize();
+}
 } // namespace OHOS::Ace::NG

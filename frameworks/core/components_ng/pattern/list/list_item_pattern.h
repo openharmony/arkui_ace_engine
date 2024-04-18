@@ -29,6 +29,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 enum class ListItemSwipeIndex {
     SWIPER_END = -1,
@@ -88,7 +89,7 @@ public:
         return MakeRefPtr<ListItemEventHub>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void SetStartNode(const RefPtr<NG::UINode>& startNode);
 
@@ -114,42 +115,14 @@ public:
         return endNodeIndex_ >= 0;
     }
 
-    int32_t GetStartNodeIndex()
-    {
-        return startNodeIndex_;
-    }
-
-    int32_t GetEndNodeIndex()
-    {
-        return endNodeIndex_;
-    }
-
-    int32_t GetChildNodeIndex()
-    {
-        return childNodeIndex_;
-    }
-
-    float GetStartNodeSize()
-    {
-        return startNodeSize_;
-    }
-
-    float GetEndNodeSize()
-    {
-        return endNodeSize_;
-    }
-
-    float GetCurOffset()
-    {
-        return curOffset_;
-    }
-
     ListItemSwipeIndex GetSwiperIndex()
     {
         return swiperIndex_;
     }
 
     RefPtr<FrameNode> GetListFrameNode() const;
+
+    RefPtr<FrameNode> GetParentFrameNode() const;
 
     Axis GetAxis() const;
 
@@ -229,6 +202,7 @@ public:
 
     bool GetLayouted() const;
     float GetEstimateHeight(float estimateHeight, Axis axis) const;
+    bool ClickJudge(const PointF& localPoint);
 
 protected:
     void OnModifyDone() override;

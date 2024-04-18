@@ -17,13 +17,14 @@
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
+  // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private nodePtr_: NodePtr;
   constructor(uiContext: UIContext, options: RenderOptions) {
     let jsBuilderNode = new JSBuilderNode(uiContext, options);
     this._JSBuilderNode = jsBuilderNode;
-    let id = Symbol('BuilderNode');
+    let id = Symbol('BuilderRootFrameNode');
     BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
-    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id });
+    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
   }
   public update(params: Object) {
     this._JSBuilderNode.update(params);
@@ -49,6 +50,7 @@ class JSBuilderNode extends BaseNode {
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
+  private _nativeRef: NativeStrongRef;
 
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
@@ -102,10 +104,12 @@ class JSBuilderNode extends BaseNode {
     this.params_ = params;
     this.updateFuncByElmtId.clear();
     this.nodePtr_ = super.create(builder.builder, this.params_);
+    this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
-      this.frameNode_ = new FrameNode(this.uiContext_, 'BuilderNode');
+      this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
     }
-    this.frameNode_.setNodePtr(this.nodePtr_);
+    this.frameNode_.setNodePtr(this._nativeRef);
+    this.frameNode_.setRenderNode(this._nativeRef);
     this.frameNode_.setBaseNode(this);
     __JSScopeUtil__.restoreInstanceId();
   }
@@ -169,7 +173,7 @@ class JSBuilderNode extends BaseNode {
     const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
       classObject && "pop" in classObject ? classObject.pop! : () => { };
-    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+    const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
@@ -228,7 +232,7 @@ class JSBuilderNode extends BaseNode {
     if (idGenFunc === undefined) {
       idGenFuncUsesIndex = true;
       // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
-      idGenFunc = (item: any, index: number) => {
+      idGenFunc = (item: any, index: number): string => {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {
@@ -292,11 +296,13 @@ class JSBuilderNode extends BaseNode {
   public getNodePtr(): NodePtr {
     return this.nodePtr_;
   }
-  public dispose() {
+  public dispose(): void {
+    this.frameNode_?.dispose();
+  }
+  public disposeNode(): void {
+    super.disposeNode();
     this.nodePtr_ = null;
-    super.dispose();
-    if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
-      this.frameNode_.setNodePtr(null);
-    }
+    this._nativeRef = null;
+    this.frameNode_?.resetNodePtr();
   }
 }

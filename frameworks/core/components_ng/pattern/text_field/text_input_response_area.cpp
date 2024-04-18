@@ -20,7 +20,9 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -28,6 +30,8 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/mouse_event.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -167,6 +171,17 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
     auto longPressCallback = [](GestureEvent& info) {
         LOGI("PasswordResponseArea long press");
     };
+    auto mouseTask = [id = Container::CurrentId(), weak = hostPattern_](MouseInfo& info) {
+        info.SetStopPropagation(true);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto textfield = DynamicCast<TextFieldPattern>(pattern);
+        CHECK_NULL_VOID(textfield);
+        textfield->RestoreDefaultMouseState();
+    };
+    auto inputHub = node->GetOrCreateInputEventHub();
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
     gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
 }
@@ -368,7 +383,7 @@ bool UnitResponseArea::IsShowUnit()
     CHECK_NULL_RETURN(pattern, false);
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textFieldPattern, false);
-    return textFieldPattern->IsShowUnit();
+    return textFieldPattern->IsUnderlineMode();
 } // UnitResponseArea end
 
 void CleanNodeResponseArea::InitResponseArea()

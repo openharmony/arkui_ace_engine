@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
@@ -117,9 +118,9 @@ public:
         return -1;
     }
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("scrollable", IsScrollable());
+        json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);
     }
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
@@ -352,6 +353,11 @@ public:
         accessibilityText_ = text;
     }
 
+    void SetAccessibilityTextHint(const std::string& text)
+    {
+        textTypeHint_ = text;
+    }
+
     void SetAccessibilityDescription(const std::string& accessibilityDescription)
     {
         accessibilityDescription_ = accessibilityDescription;
@@ -382,6 +388,16 @@ public:
     std::string GetAccessibilityDescription() const
     {
         return accessibilityDescription_.value_or("");
+    }
+
+    std::string GetTextType() const
+    {
+        return textTypeHint_.value_or("");
+    }
+
+    virtual float GetScrollOffSet()
+    {
+        return 0.0f;
     }
 
     class Level {
@@ -464,11 +480,6 @@ private:
 
     bool HasAction() const;
 
-    virtual float GetScrollOffSet()
-    {
-        return 0.0f;
-    }
-
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;
@@ -489,6 +500,7 @@ protected:
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
+    std::optional<std::string> textTypeHint_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

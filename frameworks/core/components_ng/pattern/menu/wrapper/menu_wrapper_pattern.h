@@ -23,7 +23,9 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
@@ -252,6 +254,41 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
+    {
+        filterColumnNode_ = columnNode;
+    }
+
+    RefPtr<FrameNode> GetFilterColumnNode()
+    {
+        return filterColumnNode_;
+    }
+    
+    void DumpInfo() override;
+
+    MenuDumpInfo GetDumpInfo() const
+    {
+        return dumpInfo_;
+    }
+
+    void SetDumpInfo(const MenuDumpInfo& dumpInfo)
+    {
+        dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
+        dumpInfo_.menuType = dumpInfo.menuType;
+        dumpInfo_.enableArrow = dumpInfo.enableArrow;
+        dumpInfo_.targetNode = dumpInfo.targetNode;
+        dumpInfo_.targetOffset = dumpInfo.targetOffset;
+        dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
+        dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
+        dumpInfo_.top = dumpInfo.top;
+        dumpInfo_.bottom = dumpInfo.bottom;
+        dumpInfo_.globalLocation = dumpInfo.globalLocation;
+        dumpInfo_.originPlacement = dumpInfo.originPlacement;
+        dumpInfo_.finalPosition = dumpInfo.finalPosition;
+        dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -290,7 +327,9 @@ private:
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
+    MenuDumpInfo dumpInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
+    RefPtr<FrameNode> filterColumnNode_;
 };
 } // namespace OHOS::Ace::NG
 

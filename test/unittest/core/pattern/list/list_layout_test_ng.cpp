@@ -1202,6 +1202,45 @@ HWTEST_F(ListLayoutTestNg, Pattern010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Pattern011
+ * @tc.desc: Test ContentStartOffset and ContentEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Pattern011, TestSize.Level1)
+{
+    /**
+     * @tc.cases: contentStartOffset_ + contentEndOffset_ < contentMainSize
+     * @tc.expected: contentStartOffset_ = 10.f and contentEndOffset_ = 10.f
+     */
+    Create([](ListModelNG model) {
+        model.SetContentStartOffset(10.f);
+        model.SetContentEndOffset(10.f);
+        CreateItem(20);
+    });
+    EXPECT_EQ(layoutProperty_->GetContentStartOffsetValue(), 10.f);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffsetValue(), 10.f);
+    EXPECT_EQ(pattern_->contentStartOffset_, 10.f);
+    EXPECT_EQ(pattern_->contentEndOffset_, 10.f);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(5.f), 0.f);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(0.f), 0.f);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(-5.f), -5.f);
+
+    /**
+     * @tc.cases: contentStartOffset_ + contentEndOffset_ >= contentMainSize
+     * @tc.expected: contentStartOffset_ = 0.f and contentEndOffset_ = 0.f
+     */
+    Create([](ListModelNG model) {
+        model.SetContentStartOffset(0.5f * LIST_HEIGHT);
+        model.SetContentEndOffset(0.5f * LIST_HEIGHT);
+        CreateItem(20);
+    });
+    EXPECT_EQ(layoutProperty_->GetContentStartOffsetValue(), 0.5f * LIST_HEIGHT);
+    EXPECT_EQ(layoutProperty_->GetContentEndOffsetValue(), 0.5f * LIST_HEIGHT);
+    EXPECT_EQ(pattern_->contentStartOffset_, 0.f);
+    EXPECT_EQ(pattern_->contentEndOffset_, 0.f);
+}
+
+/**
  * @tc.name: ListItemGroupCreateForCardModeTest001
  * @tc.desc: Test the initialization of listItem in card mode.
  * @tc.type: FUNC
@@ -1524,9 +1563,7 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask001, TestSize.Level1)
     /**
      * @tc.steps: step1. Init List.
      */
-    CreateWithItem([](ListModelNG model) {
-        model.SetDivider(ITEM_DIVIDER);
-    });
+    CreateWithItem([](ListModelNG model) { model.SetDivider(ITEM_DIVIDER); });
     int cur = 0;
     for (auto& child : pattern_->itemPosition_) {
         child.second.id += cur;

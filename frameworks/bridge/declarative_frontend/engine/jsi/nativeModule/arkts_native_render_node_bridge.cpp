@@ -17,15 +17,99 @@
 
 #include <cstdint>
 
+#include "canvas_napi/js_canvas.h"
+#include "jsnapi_expo.h"
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/shape.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/render_node/render_node_properties.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/render_node/render_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t DEFAULT_COLOR = 0xFF000000;
+}
+
+ArkUINativeModuleValue RenderNodeBridge::CreateRenderNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
+        V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    RenderNodeBridge::SetOnDraw(frameNode, runtimeCallInfo);
+    return NativeUtilsBridge::CreateStrongRef(vm, frameNode);
+}
+
+void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal<panda::ObjectRef>> object,
+    NG::DrawingContext& context, Local<panda::StringRef> funcName)
+{
+    auto obj = object.Lock();
+    CHECK_NULL_VOID(!obj.IsEmpty());
+    CHECK_NULL_VOID(obj->IsObject());
+    auto funcObj = obj->Get(vm, funcName);
+    CHECK_NULL_VOID(funcObj->IsFunction());
+    panda::Local<panda::FunctionRef> func = funcObj;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    Framework::ScopeRAII scope(env);
+
+    const char* keysOfSize[] = { "height", "width" };
+    Local<JSValueRef> valuesOfSize[] = {
+        panda::NumberRef::New(vm, static_cast<double>(PipelineBase::Px2VpWithCurrentDensity(context.height))),
+        panda::NumberRef::New(vm, static_cast<double>(PipelineBase::Px2VpWithCurrentDensity(context.width)))
+    };
+    auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfSize);
+    auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+    OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+    napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+    if (unwrapCanvas) {
+        unwrapCanvas->SaveCanvas();
+        unwrapCanvas->ClipCanvas(context.width, context.height);
+    }
+
+    auto jsCanvasVal = NapiValueToLocalValue(jsCanvas);
+    Local<JSValueRef> values[] = { sizeObj, jsCanvasVal };
+    const char* keys[] = { "size", "canvas" };
+    auto contextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    contextObj->SetNativePointerFieldCount(vm, 1);
+    JSValueWrapper valueWrapper = contextObj;
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_wrap(
+        env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+    panda::Local<panda::JSValueRef> params[1] = { contextObj };
+    func->Call(vm, obj.ToLocal(), params, 1);
+    if (unwrapCanvas) {
+        unwrapCanvas->RestoreCanvas();
+        unwrapCanvas->ResetCanvas();
+    }
+}
+
+void RenderNodeBridge::SetOnDraw(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_VOID(firstArg->IsObject());
+    auto obj = Local<panda::ObjectRef>(firstArg);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "draw");
+    auto funcObj = obj->Get(vm, funcName);
+    CHECK_NULL_VOID(funcObj->IsFunction());
+    auto drawCallback = [vm, object = JsWeak(panda::CopyableGlobal(vm, obj))](NG::DrawingContext& context) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto funcName = panda::StringRef::NewFromUtf8(vm, "draw");
+        RenderNodeBridge::FireDrawCallback(vm, object, context, funcName);
+    };
+    auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
+    pattern->SetDrawCallback(std::move(drawCallback));
 }
 
 ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -204,7 +288,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetScale(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> scaleX = runtimeCallInfo->GetCallArgRef(1);
     float scaleXValue = 0;
     if (scaleX->IsNumber()) {
@@ -243,7 +327,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetPivot(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> pivotX = runtimeCallInfo->GetCallArgRef(1);
     float pivotXValue = 0;
     if (pivotX->IsNumber()) {
@@ -266,7 +350,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetFrame(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> positionX = runtimeCallInfo->GetCallArgRef(1);
     float positionXValue = 0;
     if (positionX->IsNumber()) {
@@ -341,7 +425,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetTranslate(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    
+
     Local<JSValueRef> translateX = runtimeCallInfo->GetCallArgRef(1);
     float translateXValue = 0;
     if (translateX->IsNumber()) {
@@ -354,8 +438,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetTranslate(ArkUIRuntimeCallInfo* runt
         translateYValue = translateY->ToNumber(vm)->Value();
     }
 
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setTranslate(
-        nativeNode, translateXValue, translateYValue, 0);
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setTranslate(nativeNode, translateXValue, translateYValue, 0);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -379,10 +462,8 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderStyle(ArkUIRuntimeCallInfo* ru
     auto bottomStyleValue = static_cast<BorderStyle>(bottomStyle);
 
     GetArkUINodeModifiers()->getRenderNodeModifier()->setBorderStyle(nativeNode,
-        static_cast<ArkUI_Int32>(leftStyleValue),
-        static_cast<ArkUI_Int32>(topStyleValue),
-        static_cast<ArkUI_Int32>(rightStyleValue),
-        static_cast<ArkUI_Int32>(bottomStyleValue));
+        static_cast<ArkUI_Int32>(leftStyleValue), static_cast<ArkUI_Int32>(topStyleValue),
+        static_cast<ArkUI_Int32>(rightStyleValue), static_cast<ArkUI_Int32>(bottomStyleValue));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -452,9 +533,8 @@ ArkUINativeModuleValue RenderNodeBridge::SetRectMask(ArkUIRuntimeCallInfo* runti
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);
     auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
 
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setRectMask(nativeNode,
-        leftValue, topValue, rightValue - leftValue, bottomValue - topValue,
-        fillColorValue, strokeColorValue, strokeWidthValue);
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRectMask(nativeNode, leftValue, topValue,
+        rightValue - leftValue, bottomValue - topValue, fillColorValue, strokeColorValue, strokeWidthValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -472,9 +552,8 @@ ArkUINativeModuleValue RenderNodeBridge::SetCircleMask(ArkUIRuntimeCallInfo* run
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5, DEFAULT_COLOR);
     auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6, 0.0f);
 
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setCircleMask(nativeNode,
-        centerXValue, centerYValue, radiusValue,
-        fillColorValue, strokeColorValue, strokeWidthValue);
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setCircleMask(
+        nativeNode, centerXValue, centerYValue, radiusValue, fillColorValue, strokeColorValue, strokeWidthValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -506,11 +585,9 @@ ArkUINativeModuleValue RenderNodeBridge::SetRoundRectMask(ArkUIRuntimeCallInfo* 
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 14, DEFAULT_COLOR);
     auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 15, 0.0f);
 
-    ArkUI_Float32 roundRect[] = {
-        topLeftXValue, topLeftYValue, topRightXValue, topRightYValue,
-        bottomLeftXValue, bottomLeftYValue, bottomRightXValue, bottomRightYValue,
-        leftValue, topValue, rightValue - leftValue, bottomValue - topValue
-    };
+    ArkUI_Float32 roundRect[] = { topLeftXValue, topLeftYValue, topRightXValue, topRightYValue, bottomLeftXValue,
+        bottomLeftYValue, bottomRightXValue, bottomRightYValue, leftValue, topValue, rightValue - leftValue,
+        bottomValue - topValue };
 
     GetArkUINodeModifiers()->getRenderNodeModifier()->setRoundRectMask(
         nativeNode, roundRect, sizeof(roundRect), fillColorValue, strokeColorValue, strokeWidthValue);
@@ -533,9 +610,8 @@ ArkUINativeModuleValue RenderNodeBridge::SetOvalMask(ArkUIRuntimeCallInfo* runti
     auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6, DEFAULT_COLOR);
     auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7, 0.0f);
 
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setOvalMask(nativeNode,
-        leftValue, topValue, rightValue - leftValue, bottomValue - topValue,
-        fillColorValue, strokeColorValue, strokeWidthValue);
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setOvalMask(nativeNode, leftValue, topValue,
+        rightValue - leftValue, bottomValue - topValue, fillColorValue, strokeColorValue, strokeWidthValue);
     return panda::JSValueRef::Undefined(vm);
 }
 

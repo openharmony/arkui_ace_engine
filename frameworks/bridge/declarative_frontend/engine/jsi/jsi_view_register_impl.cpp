@@ -55,6 +55,7 @@
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "bridge/declarative_frontend/jsview/js_color_metrics.h"
 #include "bridge/declarative_frontend/jsview/js_column.h"
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
@@ -64,6 +65,7 @@
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
+#include "bridge/declarative_frontend/jsview/js_drawing_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
@@ -130,6 +132,7 @@
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
+#include "bridge/declarative_frontend/jsview/js_repeat.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
@@ -507,8 +510,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Span", JSSpan::JSBind },
     { "SpanString", JSSpanString::JSBind },
     { "MutableSpanString", JSMutableSpanString::JSBind },
-    { "FontSpan", JSFontSpan::JSBind },
+    { "TextStyle", JSFontSpan::JSBind },
+    { "DecorationStyle", JSDecorationSpan::JSBind },
+    { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
+    { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
     { "GestureSpan", JSGestureSpan::JSBind },
+    { "TextShadowSpan", JSTextShadowSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
@@ -568,8 +575,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
+    { "ColorMetrics", JSColorMetrics::JSBind },
     { "FormLink", JSFormLink::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
+    { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
@@ -584,8 +593,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Span", JSSpan::JSBind },
     { "SpanString", JSSpanString::JSBind },
     { "MutableSpanString", JSMutableSpanString::JSBind },
-    { "FontSpan", JSFontSpan::JSBind },
+    { "TextStyle", JSFontSpan::JSBind },
+    { "DecorationStyle", JSDecorationSpan::JSBind },
+    { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
+    { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
     { "GestureSpan", JSGestureSpan::JSBind },
+    { "TextShadowSpan", JSTextShadowSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
@@ -610,6 +623,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
+    { "RepeatNative", JSRepeat::JSBind },
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },
@@ -736,6 +750,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
+    { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
@@ -762,6 +777,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
+    { "ColorMetrics", JSColorMetrics::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
     { "FormComponent", JSForm::JSBind },
@@ -835,6 +851,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
+    JSColorMetrics::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSWebController::JSBind(globalObj);
@@ -872,6 +889,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
+    JSColorMetrics::JSBind(globalObj);
     for (auto& iter : formBindFuncs) {
         iter.second(globalObj);
     }
@@ -1019,6 +1037,7 @@ void JsBindFormViews(
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
         JSLinearGradient::JSBind(globalObj);
+        JSColorMetrics::JSBind(globalObj);
         JSPath2D::JSBind(globalObj);
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);

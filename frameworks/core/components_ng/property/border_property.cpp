@@ -15,9 +15,11 @@
 
 #include "border_property.h"
 
+#include "core/components_ng/base/inspector_filter.h"
+
 namespace OHOS::Ace::NG {
 void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
-    bool isOutline) const
+    const InspectorFilter& filter, bool isOutline) const
 {
     static const char* BORDER_STYLE[] = {
         "BorderStyle.Solid",
@@ -38,11 +40,11 @@ void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::uni
         res->Put("top", style[static_cast<int>(styleTop.value_or(BorderStyle::SOLID))]);
         res->Put("right", style[static_cast<int>(styleRight.value_or(BorderStyle::SOLID))]);
         res->Put("bottom", style[static_cast<int>(styleBottom.value_or(BorderStyle::SOLID))]);
-        json->Put(isOutline ? "outlineStyle" : "borderStyle", res);
+        json->PutExtAttr(isOutline ? "outlineStyle" : "borderStyle", res, filter);
         borderJson->Put("style", res);
     } else {
-        json->Put(isOutline ? "outlineStyle" : "borderStyle",
-            style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
+        json->PutExtAttr(isOutline ? "outlineStyle" : "borderStyle",
+            style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))], filter);
         borderJson->Put("style", style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
     }
 }
@@ -57,8 +59,8 @@ std::string BorderWidthPropertyT<Dimension>::ToString() const
     return str;
 }
 
-void BorderWidthPropertyT<Dimension>::ToJsonValue(
-    std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson, bool isOutline) const
+void BorderWidthPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& json,
+    std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, bool isOutline) const
 {
     if (multiValued) {
         auto res = JsonUtil::Create(true);
@@ -68,11 +70,11 @@ void BorderWidthPropertyT<Dimension>::ToJsonValue(
         res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
         borderJson->Put("width", res);
-        json->Put(isOutline ? "outlineWidth" : "borderWidth", res);
+        json->PutExtAttr(isOutline ? "outlineWidth" : "borderWidth", res, filter);
     } else {
         auto left = leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString();
         borderJson->Put("width", left.c_str());
-        json->Put(isOutline ? "outlineWidth" : "borderWidth", left.c_str());
+        json->PutExtAttr(isOutline ? "outlineWidth" : "borderWidth", left.c_str(), filter);
     }
 }
 
@@ -98,8 +100,8 @@ bool BorderWidthPropertyT<Dimension>::UpdateWithCheck(const BorderWidthPropertyT
     return isModified;
 }
 
-void BorderColorProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
-    bool isOutline) const
+void BorderColorProperty::ToJsonValue(std::unique_ptr<JsonValue>& json,
+    std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, bool isOutline) const
 {
     if (multiValued) {
         auto res = JsonUtil::Create(true);
@@ -109,11 +111,11 @@ void BorderColorProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::uni
         res->Put("bottom", bottomColor.value_or(Color()).ColorToString().c_str());
 
         borderJson->Put("color", res);
-        json->Put(isOutline ? "outlineColor" : "borderColor", res);
+        json->PutExtAttr(isOutline ? "outlineColor" : "borderColor", res, filter);
     } else {
         auto left = leftColor.value_or(Color()).ColorToString();
         borderJson->Put("color", left.c_str());
-        json->Put(isOutline ? "outlineColor" : "borderColor", left.c_str());
+        json->PutExtAttr(isOutline ? "outlineColor" : "borderColor", left.c_str(), filter);
     }
 }
 
@@ -127,8 +129,8 @@ std::string BorderColorProperty::ToString() const
     return str;
 }
 
-void BorderRadiusPropertyT<Dimension>::ToJsonValue(
-    std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson, bool isOutline) const
+void BorderRadiusPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& json,
+    std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, bool isOutline) const
 {
     if (multiValued) {
         auto res = JsonUtil::Create(true);
@@ -137,11 +139,11 @@ void BorderRadiusPropertyT<Dimension>::ToJsonValue(
         res->Put("bottomLeft", radiusBottomLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("bottomRight", radiusBottomRight.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
-        json->Put(isOutline ? "outlineRadius" : "borderRadius", res);
+        json->PutExtAttr(isOutline ? "outlineRadius" : "borderRadius", res, filter);
         borderJson->Put("radius", res);
     } else {
         auto left = radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString();
-        json->Put(isOutline ? "outlineRadius" : "borderRadius", left.c_str());
+        json->PutExtAttr(isOutline ? "outlineRadius" : "borderRadius", left.c_str(), filter);
         borderJson->Put("radius", left.c_str());
     }
 }

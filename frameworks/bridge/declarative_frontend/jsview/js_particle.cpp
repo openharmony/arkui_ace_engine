@@ -386,7 +386,7 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
     }
     particle.SetCount(count);
 
-    auto lifeTime = 1000;
+    int64_t lifeTime = 1000;
     auto lifeTimeJsValue = particleJsObject->GetProperty("lifetime");
     if (lifeTimeJsValue->IsNumber()) {
         auto lifeTimeIntValue = lifeTimeJsValue->ToNumber<int64_t>();
@@ -395,7 +395,7 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
         }
     }
     particle.SetLifeTime(lifeTime);
-    auto lifeTimeRange = 0;
+    int64_t lifeTimeRange = 0;
     auto lifeTimeRangeJsValue = particleJsObject->GetProperty("lifetimeRange");
     if (lifeTimeRangeJsValue->IsNumber()) {
         auto lifeTimeRangeIntValue = lifeTimeRangeJsValue->ToNumber<int64_t>();

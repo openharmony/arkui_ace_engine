@@ -227,19 +227,6 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
         return;
     }
     bool isHideSelectionMenu = layoutProperty->GetSelectionMenuHiddenValue(false);
-    if (IsUsingMouse()) {
-        auto manager = SelectContentOverlayManager::GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        menuInfo.menuIsShow = !isHideSelectionMenu || manager->IsOpen();
-    } else {
-        menuInfo.menuIsShow = (hasText || IsShowPaste()) && !isHideSelectionMenu && IsShowMenu();
-    }
-    menuInfo.menuDisable = isHideSelectionMenu;
-    menuInfo.showPaste = IsShowPaste();
-    menuInfo.menuType = IsUsingMouse() ? OptionMenuType::MOUSE_MENU : OptionMenuType::TOUCH_MENU;
-    menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
-    menuInfo.showCut = menuInfo.showCopy;
-    menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     auto isSupportCameraInput = inputMethod &&
@@ -249,6 +236,20 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     auto isSupportCameraInput = false;
 #endif
     menuInfo.showCameraInput = !pattern->IsSelected() && isSupportCameraInput && !pattern->HasCustomKeyboard();
+    if (IsUsingMouse()) {
+        auto manager = SelectContentOverlayManager::GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        menuInfo.menuIsShow = !isHideSelectionMenu || manager->IsOpen();
+    } else {
+        menuInfo.menuIsShow = (hasText || IsShowPaste() || menuInfo.showCameraInput) &&
+            !isHideSelectionMenu && IsShowMenu();
+    }
+    menuInfo.menuDisable = isHideSelectionMenu;
+    menuInfo.showPaste = IsShowPaste();
+    menuInfo.menuType = IsUsingMouse() ? OptionMenuType::MOUSE_MENU : OptionMenuType::TOUCH_MENU;
+    menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
+    menuInfo.showCut = menuInfo.showCopy;
+    menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
 }
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)

@@ -404,47 +404,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     }
 }
 
-void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
-{
-    CHECK_NULL_VOID(columnNode);
-
-    auto filterRenderContext = columnNode->GetRenderContext();
-    CHECK_NULL_VOID(filterRenderContext);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-
-    auto maskColor = menuTheme->GetPreviewMenuMaskColor();
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::BACKGROUND_THIN;
-    styleOption.colorMode = ThemeColorMode::SYSTEM;
-
-    AnimationOption option;
-    option.SetDuration(menuTheme->GetFilterAnimationDuration());
-    option.SetCurve(Curves::SHARP);
-    option.SetOnFinishEvent([] {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        auto manager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->SetFilterActive(false);
-    });
-    filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
-    AnimationUtils::Animate(
-        option,
-        [filterRenderContext, styleOption, maskColor]() {
-            CHECK_NULL_VOID(filterRenderContext);
-            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-                filterRenderContext->UpdateBackBlurStyle(styleOption);
-            } else {
-                filterRenderContext->UpdateBackgroundColor(maskColor);
-            }
-        },
-        option.GetOnFinishEvent());
-}
-
-void SetFilter(const RefPtr<FrameNode>& targetNode)
+void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
 {
     auto parent = targetNode->GetParent();
     CHECK_NULL_VOID(parent);
@@ -466,17 +426,25 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
         columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         // set filter
         auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow()) {
+        CHECK_NULL_VOID(container);
+        if (container->IsScenceBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
+            manager->ShowFilterAnimation(columnNode);
+        } else if (container->IsUIExtensionWindow()) {
+            // mount filter node on subwindow to ensure filter node's size equals to host window's size
+            CHECK_NULL_VOID(menuWrapperNode);
+            auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(menuWrapperPattern);
+            menuWrapperPattern->SetFilterColumnNode(columnNode);
         } else {
             columnNode->MountToParent(parent);
             columnNode->OnMountToParentDone();
             manager->SetHasFilter(true);
             manager->SetFilterColumnNode(columnNode);
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            manager->ShowFilterAnimation(columnNode);
         }
-        ShowFilterAnimation(columnNode);
     }
 }
 } // namespace
@@ -592,7 +560,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     }
     if (type == MenuType::CONTEXT_MENU && menuParam.previewMode != MenuPreviewMode::NONE) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        SetFilter(targetNode);
+        SetFilter(targetNode, wrapperNode);
         if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
             SetPixelMap(targetNode, wrapperNode);
         }
@@ -642,6 +610,9 @@ RefPtr<FrameNode> MenuView::Create(
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
+            auto focusHub = optionNode->GetOrCreateFocusHub();
+            CHECK_NULL_RETURN(focusHub, nullptr);
+            focusHub->SetIsDefaultFocus(true);
         }
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);

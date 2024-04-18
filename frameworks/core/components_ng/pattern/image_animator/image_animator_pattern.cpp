@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -81,15 +82,22 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
         return;
     }
     nowImageIndex_ = index;
+    bool isShowingSrc = IsShowingSrc(imageFrameNode, images_[index].src);
     auto cacheImageIter = FindCacheImageNode(images_[index].src);
-    if (IsShowingSrc(imageFrameNode, images_[index].src)) {
-        ACE_SCOPED_TRACE("ImageAnimator same src %s, index %d", images_[index].src.c_str(), index);
+    std::string traceTag = images_[index].src;
+    if (images_[index].pixelMap != nullptr) {
+        isShowingSrc = IsShowingSrc(imageFrameNode, images_[index].pixelMap);
+        cacheImageIter = FindCacheImageNode(images_[index].pixelMap);
+        traceTag = "PixelMap";
+    }
+    if (isShowingSrc) {
+        ACE_SCOPED_TRACE("ImageAnimator same src %s, index %d", traceTag.c_str(), index);
         UpdateShowingImageInfo(imageFrameNode, index);
     } else if (cacheImageIter == cacheImages_.end()) {
-        ACE_SCOPED_TRACE("ImageAnimator no cache found, src %s, index %d", images_[index].src.c_str(), index);
+        ACE_SCOPED_TRACE("ImageAnimator no cache found, src %s, index %d", traceTag.c_str(), index);
         UpdateShowingImageInfo(imageFrameNode, index);
     } else if (cacheImageIter->isLoaded) {
-        ACE_SCOPED_TRACE("ImageAnimator useCache src %s, index %d", images_[index].src.c_str(), index);
+        ACE_SCOPED_TRACE("ImageAnimator useCache src %s, index %d", traceTag.c_str(), index);
         auto cacheImageNode = cacheImageIter->imageNode;
         host->RemoveChild(imageFrameNode);
         host->AddChild(cacheImageNode, DEFAULT_NODE_SLOT, true);
@@ -100,8 +108,9 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
         cacheImages_.emplace_back(newCacheImageStruct);
         UpdateShowingImageInfo(cacheImageNode, index);
     } else {
+        UpdateShowingImageInfo(imageFrameNode, index);
         // wait for cache image loading
-        ACE_SCOPED_TRACE("ImageAnimator waitForCache src %s, index %d", images_[index].src.c_str(), index);
+        ACE_SCOPED_TRACE("ImageAnimator waitForCache src %s, index %d", traceTag.c_str(), index);
         return;
     }
     // update cache images
@@ -118,8 +127,12 @@ void ImageAnimatorPattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& image
 {
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(
-        images_[index].src, images_[index].bundleName, images_[index].moduleName));
+    if (images_[index].pixelMap == nullptr) {
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(
+            images_[index].src, images_[index].bundleName, images_[index].moduleName));
+    } else {
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(images_[index].pixelMap));
+    }
     MarginProperty margin;
     if (!fixedSize_) {
         margin.left = CalcLength(images_[index].left);
@@ -148,13 +161,30 @@ void ImageAnimatorPattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, in
     }
     auto imageLayoutProperty = cacheImage.imageNode->GetLayoutProperty<ImageLayoutProperty>();
     const auto& image = images_[index];
-    auto preSrc =
-        imageLayoutProperty->HasImageSourceInfo() ? imageLayoutProperty->GetImageSourceInfoValue().GetSrc() : "";
-    if (preSrc != image.src) {
-        // need to cache newImage
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(image.src, image.bundleName, image.moduleName));
-        cacheImage.index = index;
-        cacheImage.isLoaded = false;
+    if (image.pixelMap == nullptr) {
+        auto preSrc =
+            imageLayoutProperty->HasImageSourceInfo() ? imageLayoutProperty->GetImageSourceInfoValue().GetSrc() : "";
+        if (preSrc != image.src) {
+            // need to cache newImage
+            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(image.src, image.bundleName, image.moduleName));
+            cacheImage.index = index;
+            cacheImage.isLoaded = false;
+        }
+    } else {
+        // pixelmap
+        if (imageLayoutProperty->HasImageSourceInfo()) {
+            auto preSrc = imageLayoutProperty->GetImageSourceInfoValue().GetPixmap();
+            if (preSrc != image.pixelMap) {
+                // need to cache newImage
+                imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(image.pixelMap));
+                cacheImage.index = index;
+                cacheImage.isLoaded = false;
+            }
+        } else {
+            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(image.pixelMap));
+            cacheImage.index = index;
+            cacheImage.isLoaded = false;
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -175,6 +205,17 @@ void ImageAnimatorPattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, in
         CalcSize(CalcLength(hostSize.Width()), CalcLength(hostSize.Height())));
     cacheImage.imageNode->GetGeometryNode()->SetContentSize(hostSize);
     cacheImage.imageNode->MarkModifyDone();
+}
+
+std::list<ImageAnimatorPattern::CacheImageStruct>::iterator ImageAnimatorPattern::FindCacheImageNode(
+    const RefPtr<PixelMap>& src)
+{
+    for (auto iter = cacheImages_.begin(); iter != cacheImages_.end(); ++iter) {
+        if (IsShowingSrc(iter->imageNode, src)) {
+            return iter;
+        }
+    }
+    return cacheImages_.end();
 }
 
 std::list<ImageAnimatorPattern::CacheImageStruct>::iterator ImageAnimatorPattern::FindCacheImageNode(
@@ -200,6 +241,10 @@ void ImageAnimatorPattern::GenerateCachedImages()
     }
     while (cacheImages_.size() < cacheImageNum) {
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetImageAnimator(true);
         auto imageLayoutProperty = imageNode->GetLayoutProperty();
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         imageLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
@@ -317,19 +362,19 @@ void ImageAnimatorPattern::UpdateEventCallback()
     }
 }
 
-void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    Pattern::ToJsonValue(json);
+    Pattern::ToJsonValue(json, filter);
     static const char* STATUS_MODE[] = { "AnimationStatus.Initial", "AnimationStatus.Running", "AnimationStatus.Paused",
         "AnimationStatus.Stopped" };
-    json->Put("state", STATUS_MODE[static_cast<int32_t>(status_)]);
-    json->Put("duration", std::to_string(animator_->GetDuration()).c_str());
-    json->Put("reverse", isReverse_ ? "true" : "false");
-    json->Put("fixedSize", fixedSize_ ? "true" : "false");
+    json->PutExtAttr("state", STATUS_MODE[static_cast<int32_t>(status_)], filter);
+    json->PutExtAttr("duration", std::to_string(animator_->GetDuration()).c_str(), filter);
+    json->PutExtAttr("reverse", isReverse_ ? "true" : "false", filter);
+    json->PutExtAttr("fixedSize", fixedSize_ ? "true" : "false", filter);
     static const char* FILL_MODE[] = { "FillMode.None", "FillMode.Forwards", "FillMode.Backwards", "FillMode.Both" };
-    json->Put("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())]);
-    json->Put("iterations", std::to_string(animator_->GetIteration()).c_str());
-    json->Put("images", ImagesToString().c_str());
+    json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())], filter);
+    json->PutExtAttr("iterations", std::to_string(animator_->GetIteration()).c_str(), filter);
+    json->PutExtAttr("images", ImagesToString().c_str(), filter);
 }
 
 std::string ImageAnimatorPattern::ImagesToString() const
@@ -430,9 +475,16 @@ void ImageAnimatorPattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& ima
                 LOGW("ImageAnimator showImage index is invalid");
                 return;
             }
-            if (pattern->nowImageIndex_ == iter->index &&
-                IsShowingSrc(cacheImageNode, pattern->images_[pattern->nowImageIndex_].src)) {
-                pattern->SetShowingIndex(pattern->nowImageIndex_);
+            if (pattern->images_[pattern->nowImageIndex_].pixelMap == nullptr) {
+                if (pattern->nowImageIndex_ == iter->index &&
+                    IsShowingSrc(cacheImageNode, pattern->images_[pattern->nowImageIndex_].src)) {
+                    pattern->SetShowingIndex(pattern->nowImageIndex_);
+                }
+            } else {
+                if (pattern->nowImageIndex_ == iter->index &&
+                    IsShowingSrc(cacheImageNode, pattern->images_[pattern->nowImageIndex_].pixelMap)) {
+                    pattern->SetShowingIndex(pattern->nowImageIndex_);
+                }
             }
         });
 }
@@ -441,6 +493,13 @@ bool ImageAnimatorPattern::IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode,
 {
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     return imageLayoutProperty->HasImageSourceInfo() && imageLayoutProperty->GetImageSourceInfoValue().GetSrc() == src;
+}
+
+bool ImageAnimatorPattern::IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const RefPtr<PixelMap>& src)
+{
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    return imageLayoutProperty->HasImageSourceInfo()
+        && imageLayoutProperty->GetImageSourceInfoValue().GetPixmap() == src;
 }
 
 bool ImageAnimatorPattern::IsFormRender()
@@ -493,6 +552,12 @@ void ImageAnimatorPattern::SetIteration(int32_t iteration)
 
 void ImageAnimatorPattern::SetDuration(int32_t duration)
 {
+    if (durationTotal_ == 0) {
+        for (int i = 0; i < images_.size(); i++) {
+            images_[i].duration = duration / images_.size();
+            durationTotal_ += images_[i].duration;
+        }
+    }
     int32_t finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
     if (IsFormRender()) {
         finalDuration = finalDuration < DEFAULT_DURATION ? finalDuration : DEFAULT_DURATION;

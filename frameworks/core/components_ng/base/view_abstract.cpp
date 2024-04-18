@@ -47,7 +47,9 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -344,6 +346,19 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle)
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
         }
+    }
+}
+
+void ViewAbstract::SetForegroundEffect(float radius)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateForegroundEffect(radius);
     }
 }
 
@@ -1345,6 +1360,29 @@ void ViewAbstract::MarkAnchor(const OffsetT<Dimension> &value)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
+}
+
+void ViewAbstract::ResetPosition()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parentNode);
+
+    // Row/Column/Flex measure and layout differently depending on whether the child nodes have position property.
+    if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RecalculatePosition();
+    }
 }
 
 void ViewAbstract::SetZIndex(int32_t value)
@@ -2636,6 +2674,14 @@ void ViewAbstract::SetLightIntensity(const float value)
     ACE_UPDATE_RENDER_CONTEXT(LightIntensity, value);
 }
 
+void ViewAbstract::SetLightColor(const Color& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LightColor, value);
+}
+
 void ViewAbstract::SetLightIlluminated(const uint32_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2817,10 +2863,10 @@ void ViewAbstract::SetFlexGrow(FrameNode* frameNode, float value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value, frameNode);
 }
 
-void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, int32_t value)
+void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, float value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, value, frameNode);
 }
 
 void ViewAbstract::ResetMaxSize(FrameNode* frameNode, bool resetWidth)
@@ -3459,9 +3505,9 @@ Dimension ViewAbstract::GetFlexBasis(FrameNode* frameNode)
     return value;
 }
 
-float ViewAbstract::GetMinWidth(FrameNode* frameNode)
+Dimension ViewAbstract::GetMinWidth(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3470,15 +3516,15 @@ float ViewAbstract::GetMinWidth(FrameNode* frameNode)
     if (size.has_value()) {
         auto width = size->Width();
         if (width.has_value()) {
-            value = width.value().GetDimension().Value();
+            return width.value().GetDimension();
         }
     }
     return value;
 }
 
-float ViewAbstract::GetMaxWidth(FrameNode* frameNode)
+Dimension ViewAbstract::GetMaxWidth(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3487,15 +3533,15 @@ float ViewAbstract::GetMaxWidth(FrameNode* frameNode)
     if (size.has_value()) {
         auto width = size->Width();
         if (width.has_value()) {
-            value = width.value().GetDimension().Value();
+            return width.value().GetDimension();
         }
     }
     return value;
 }
 
-float ViewAbstract::GetMinHeight(FrameNode* frameNode)
+Dimension ViewAbstract::GetMinHeight(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3504,15 +3550,15 @@ float ViewAbstract::GetMinHeight(FrameNode* frameNode)
     if (size.has_value()) {
         auto height = size->Height();
         if (height.has_value()) {
-            value = height.value().GetDimension().Value();
+            return height.value().GetDimension();
         }
     }
     return value;
 }
 
-float ViewAbstract::GetMaxHeight(FrameNode* frameNode)
+Dimension ViewAbstract::GetMaxHeight(FrameNode* frameNode)
 {
-    float value = 0.0f;
+    Dimension value = Dimension(0.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3521,7 +3567,7 @@ float ViewAbstract::GetMaxHeight(FrameNode* frameNode)
     if (size.has_value()) {
         auto height = size->Height();
         if (height.has_value()) {
-            value = height.value().GetDimension().Value();
+            return height.value().GetDimension();
         }
     }
     return value;
@@ -3648,9 +3694,9 @@ Alignment ViewAbstract::GetAlign(FrameNode *frameNode)
     return value;
 }
 
-float ViewAbstract::GetWidth(FrameNode* frameNode)
+Dimension ViewAbstract::GetWidth(FrameNode* frameNode)
 {
-    float value = -1.0f;
+    Dimension value = Dimension(-1.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3659,15 +3705,15 @@ float ViewAbstract::GetWidth(FrameNode* frameNode)
     if (size.has_value()) {
         auto width = size->Width();
         if (width.has_value()) {
-            value = width.value().GetDimension().Value();
+            return width.value().GetDimension();
         }
     }
     return value;
 }
 
-float ViewAbstract::GetHeight(FrameNode* frameNode)
+Dimension ViewAbstract::GetHeight(FrameNode* frameNode)
 {
-    float value = -1.0f;
+    Dimension value = Dimension(-1.0f);
     const auto& layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, value);
     const auto& property = layoutProperty->GetCalcLayoutConstraint();
@@ -3676,7 +3722,7 @@ float ViewAbstract::GetHeight(FrameNode* frameNode)
     if (size.has_value()) {
         auto height = size->Height();
         if (height.has_value()) {
-            value = height.value().GetDimension().Value();
+            return height.value().GetDimension();
         }
     }
     return value;
@@ -4003,5 +4049,25 @@ void ViewAbstract::SetBackgroundImageResizableSlice(const ImageResizableSlice& s
 void ViewAbstract::SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageResizableSlice, slice, frameNode);
+}
+
+void ViewAbstract::SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc&& touchInterceptFunc)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+}
+
+float ViewAbstract::GetLayoutWeight(FrameNode* frameNode)
+{
+    float layoutWeight = 0.0f;
+    CHECK_NULL_RETURN(frameNode, layoutWeight);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, layoutWeight);
+    auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    if (magicItemProperty.HasLayoutWeight()) {
+        return magicItemProperty.GetLayoutWeight().value_or(layoutWeight);
+    }
+    return layoutWeight;
 }
 } // namespace OHOS::Ace::NG

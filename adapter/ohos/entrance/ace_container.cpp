@@ -1727,6 +1727,16 @@ void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
     pipelineContext->SetFontScale(fontScale);
 }
 
+void AceContainer::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontWeightScale(fontWeightScale);
+}
+
 bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
 {
     std::regex pattern("\"font\":(\\d+)");
@@ -1977,6 +1987,25 @@ bool AceContainer::endsWith(std::string str, std::string suffix)
     return str.substr(str.length() - suffix.length()) == suffix;
 }
 
+void AceContainer::SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig)
+{
+    if (IsKeyboard()) {
+        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
+        return;
+    }
+    if (!parsedConfig.fontScale.empty()) {
+        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
+        auto instanceId = instanceId_;
+        SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
+    }
+    if (!parsedConfig.fontWeightScale.empty()) {
+        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
+            parsedConfig.fontWeightScale.c_str());
+        auto instanceId = instanceId_;
+        SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
+    }
+}
+
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
     if (!parsedConfig.IsValid()) {
@@ -2040,6 +2069,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
             CheckAndSetFontFamily();
         }
     }
+    SetFontScaleAndWeightScale(parsedConfig);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {

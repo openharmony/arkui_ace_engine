@@ -25,6 +25,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -115,6 +116,9 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
     if (!curRecognizer) {
+        if (point.type == TouchType::DOWN) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "SequencedRecognizer curRecognizer is invalid");
+        }
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return true;
     }
@@ -147,6 +151,34 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     }
 
     if ((point.type == TouchType::UP) && (refereeState_ == RefereeState::PENDING)) {
+        DeadlineTimer();
+    }
+    return true;
+}
+
+bool SequencedRecognizer::HandleEvent(const AxisEvent& point)
+{
+    auto iter = recognizers_.begin();
+    std::advance(iter, currentIndex_);
+    RefPtr<NGGestureRecognizer> curRecognizer = *iter;
+    if (!curRecognizer) {
+        GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return true;
+    }
+    if (currentIndex_ > 0) {
+        auto prevState = curRecognizer->GetRefereeState();
+        if (prevState == RefereeState::READY) {
+            // the prevState is ready, need to pass axis-begin event to the new coming recognizer.
+            auto event = point;
+            event.action = AxisAction::BEGIN;
+            curRecognizer->HandleEvent(event);
+        }
+    }
+    if (point.action != AxisAction::NONE) {
+        curRecognizer->HandleEvent(point);
+    }
+
+    if ((point.action == AxisAction::END) && (refereeState_ == RefereeState::PENDING)) {
         DeadlineTimer();
     }
     return true;

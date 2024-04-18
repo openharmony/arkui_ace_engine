@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_owner.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_style.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
@@ -56,17 +57,18 @@ public:
         ResetRefreshSizeScaleRatio();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
+        PaintProperty::ToJsonValue(json, filter);
 
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto progressTheme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
 
-        json->Put("color", propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str());
-        json->Put("enableLoading", GetEnableLoading().value_or(true) ? "true" : "false");
+        json->PutExtAttr("color",
+            propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("enableLoading", GetEnableLoading().value_or(true) ? "true" : "false", filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_RENDER);

@@ -51,6 +51,7 @@ constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstac
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
+constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engine.bundle.name";
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -287,6 +288,11 @@ bool IsAcePerformanceMonitorEnabled()
 }
 } // namespace
 
+bool IsFaultInjectEnabled()
+{
+    return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
@@ -338,6 +344,7 @@ bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -356,6 +363,11 @@ void SystemProperties::InitDeviceType(DeviceType)
 int SystemProperties::GetArkProperties()
 {
     return system::GetIntParameter<int>("persist.ark.properties", -1);
+}
+
+std::string SystemProperties::GetMemConfigProperty()
+{
+    return system::GetParameter("persist.ark.mem_config_property", "");
 }
 
 std::string SystemProperties::GetArkBundleName()
@@ -468,6 +480,7 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+    faultInjectEnabled_  = IsFaultInjectEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -498,7 +511,15 @@ ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
     // Default value of font weight scale is 1.0.
     std::string prop =
         "persist.sys.font_wght_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return std::stof(system::GetParameter(prop, "1.0"));
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+}
+
+ACE_WEAK_SYM float SystemProperties::GetFontScale()
+{
+    // Default value of font size scale is 1.0.
+    std::string prop =
+        "persist.sys.font_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
@@ -679,5 +700,10 @@ void SystemProperties::SetSecurityDevelopermodeLayoutTraceEnabled(bool layoutTra
 void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 {
     debugBoundaryEnabled_ = debugBoundaryEnabled && developerModeOn_;
+}
+
+std::string SystemProperties::GetAtomicServiceBundleName()
+{
+    return system::GetParameter(DISTRIBUTE_ENGINE_BUNDLE_NAME, "");
 }
 } // namespace OHOS::Ace

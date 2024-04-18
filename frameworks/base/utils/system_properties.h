@@ -151,6 +151,11 @@ public:
     static float GetFontWeightScale();
 
     /*
+     * Get size scale of device.
+     */
+    static float GetFontScale();
+
+    /*
      * Get density of default display.
      */
     static double GetResolution()
@@ -287,6 +292,16 @@ public:
         stateManagerEnable_ = stateManagerEnable;
     }
 
+    static void SetFaultInjectEnabled(bool faultInjectEnable)
+    {
+        faultInjectEnabled_ = faultInjectEnable;
+    }
+
+    static bool GetFaultInjectEnabled()
+    {
+        return faultInjectEnabled_;
+    }
+
     static bool GetBuildTraceEnabled()
     {
         return buildTraceEnable_;
@@ -351,6 +366,8 @@ public:
     }
 
     static int GetArkProperties();
+
+    static std::string GetMemConfigProperty();
 
     static std::string GetArkBundleName();
 
@@ -470,6 +487,8 @@ public:
         return acePerformanceMonitorEnable_;
     }
 
+    static std::string GetAtomicServiceBundleName();
+
 private:
     static bool traceEnabled_;
     static bool developerModeOn_;
@@ -522,6 +541,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
+    static bool faultInjectEnabled_;
 };
 
 } // namespace OHOS::Ace

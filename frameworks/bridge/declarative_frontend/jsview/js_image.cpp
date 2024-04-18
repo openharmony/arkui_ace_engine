@@ -105,6 +105,9 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
 
 void JSImage::SetAlt(const JSCallbackInfo& args)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (args.Length() < 1) {
         return;
     }
@@ -151,11 +154,17 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
 
 void JSImage::SetMatchTextDirection(bool value)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetMatchTextDirection(value);
 }
 
 void JSImage::SetFitOriginalSize(bool value)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetFitOriginSize(value);
 }
 
@@ -249,14 +258,20 @@ void JSImage::Create(const JSCallbackInfo& info)
     RefPtr<PixelMap> pixmap = nullptr;
 
     // input is PixelMap / Drawable
-    if (!srcValid) {
+    if (!srcValid && !isCard) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (!isCard) {
-            if (IsDrawable(info[0])) {
-                pixmap = GetDrawablePixmap(info[0]);
+        std::vector<RefPtr<PixelMap>> pixelMaps;
+        int32_t duration = -1;
+        int32_t iterations = 1;
+        if (IsDrawable(info[0])) {
+            if (GetPixelMapListFromAnimatedDrawable(info[0], pixelMaps, duration, iterations)) {
+                CreateImageAnimation(pixelMaps, duration, iterations);
+                return;
             } else {
-                pixmap = CreatePixelMapFromNapiValue(info[0]);
+                pixmap = GetDrawablePixmap(info[0]);
             }
+        } else {
+            pixmap = CreatePixelMapFromNapiValue(info[0]);
         }
 #endif
     }
@@ -287,6 +302,9 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
 
 void JSImage::JsImageResizable(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     auto infoObj = info[0];
     ImageResizableSlice sliceResult;
     if (!infoObj->IsObject()) {
@@ -342,11 +360,17 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetImageSourceSize(JSViewAbstract::ParseSize(info));
 }
 
 void JSImage::SetImageFill(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -367,6 +391,9 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
 void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (info.Length() < 1) {
         ImageModel::GetInstance()->SetImageRenderMode(ImageRenderMode::ORIGINAL);
         return;
@@ -385,6 +412,9 @@ void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
 
 void JSImage::SetImageInterpolation(int32_t imageInterpolation)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     auto interpolation = static_cast<ImageInterpolation>(imageInterpolation);
     if (interpolation < ImageInterpolation::NONE || interpolation > ImageInterpolation::HIGH) {
         interpolation = ImageInterpolation::NONE;
@@ -437,11 +467,17 @@ void JSImage::JsBlur(const JSCallbackInfo& info)
 
 void JSImage::SetAutoResize(bool autoResize)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetAutoResize(autoResize);
 }
 
 void JSImage::SetSyncLoad(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -558,6 +594,17 @@ void JSImage::SetSmoothEdge(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetSmoothEdge(static_cast<float>(parseRes));
 }
 
+void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
+{
+    std::vector<ImageProperties> imageList;
+    for (int i = 0; i < pixelMaps.size(); i++) {
+        ImageProperties image;
+        image.pixelMap = pixelMaps[i];
+        imageList.push_back(image);
+    }
+    ImageModel::GetInstance()->CreateAnimation(imageList, duration, iterations);
+}
+
 void JSImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImage>::Declare("Image");
@@ -649,6 +696,9 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto enumNumber = info[0]->ToNumber<int>();
@@ -662,6 +712,9 @@ void JSImage::SetCopyOption(const JSCallbackInfo& info)
 
 void JSImage::EnableAnalyzer(bool isEnableAnalyzer)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->EnableAnalyzer(isEnableAnalyzer);
 }
 

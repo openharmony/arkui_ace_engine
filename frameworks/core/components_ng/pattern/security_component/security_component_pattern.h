@@ -25,6 +25,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 constexpr int32_t DEFAULT_SECURITY_COMPONENT_CLICK_DISTANCE = 15;
 constexpr uint64_t MAX_REGISTER_WAITING_TIME = 3000; // 3000ms
 constexpr int32_t MAX_RETRY_TIMES = 3;
@@ -97,8 +99,8 @@ protected:
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-    void ToJsonValueRect(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool IsParentMenu(RefPtr<FrameNode>& secCompNode);
 private:
     void HandleClickEventFromTouch(const TouchEventInfo& info);
@@ -106,12 +108,14 @@ private:
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
 #ifdef SECURITY_COMPONENT_ENABLE
-    void RegisterSecurityComponentAsync();
+    void RegisterSecurityComponentAsync(int32_t instanceID);
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();
     void UnregisterSecurityComponent();
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
+    void DoTriggerOnclick(int32_t result);
+    void TriggerOnclick(int32_t instance_, int32_t result);
 #endif
     std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;

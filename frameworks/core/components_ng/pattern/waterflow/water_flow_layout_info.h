@@ -65,6 +65,8 @@ public:
 
     bool ReachStart(float prevOffset, bool firstLayout) const;
     bool ReachEnd(float prevOffset) const;
+    float JumpToTargetAlign(const std::pair<float, float>& item) const;
+    void JumpTo(const std::pair<float, float>& item);
 
     /**
      * @brief Get the Segment index of a FlowItem

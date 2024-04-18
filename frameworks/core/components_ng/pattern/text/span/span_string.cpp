@@ -17,6 +17,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
 
 namespace OHOS::Ace {
 SpanString::SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans) : SpanString(text)
@@ -35,7 +36,6 @@ SpanString::SpanString(const std::string& text) : text_(text)
 SpanString::~SpanString()
 {
     spansMap_.clear();
-    watchers_.clear();
     spans_.clear();
 }
 
@@ -92,7 +92,6 @@ void SpanString::ApplyToSpans(
             it = spans_.insert(std::next(it), newSpan);
         }
     }
-    NotifySpanWatcher();
 }
 
 void SpanString::SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int32_t, int32_t> interval)
@@ -159,13 +158,9 @@ void SpanString::MergeIntervals(std::list<RefPtr<SpanBase>>& spans)
 
 void SpanString::AddSpan(const RefPtr<SpanBase>& span)
 {
-    if (!span) {
+    if (!span || !CheckRange(span->GetStartIndex(), span->GetLength())) {
         return;
     }
-    if (!CheckRange(span->GetStartIndex(), span->GetLength())) {
-        return;
-    }
-    auto spans = spansMap_[span->GetSpanType()];
     auto start = span->GetStartIndex();
     auto end = span->GetEndIndex();
     if (spansMap_.find(span->GetSpanType()) == spansMap_.end()) {
@@ -173,12 +168,61 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
     }
+    RemoveSpan(start, span->GetLength(), span->GetSpanType());
+    auto spans = spansMap_[span->GetSpanType()];
     ApplyToSpans(span, { start, end }, SpanOperation::ADD);
     SplitInterval(spans, { start, end });
     spans.emplace_back(span);
     SortSpans(spans);
     MergeIntervals(spans);
     spansMap_[span->GetSpanType()] = spans;
+}
+
+void SpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
+{
+    if (!CheckRange(start, length)) {
+        return;
+    }
+    auto it = spansMap_.find(key);
+    if (it == spansMap_.end()) {
+        return;
+    }
+    auto spans = spansMap_[key];
+    auto end = start + length;
+
+    auto defaultSpan = GetDefaultSpan(key);
+    CHECK_NULL_VOID(defaultSpan);
+    defaultSpan->UpdateStartIndex(start);
+    defaultSpan->UpdateEndIndex(end);
+    ApplyToSpans(defaultSpan, { start, end }, SpanOperation::REMOVE);
+    SplitInterval(spans, { start, end });
+    SortSpans(spans);
+    MergeIntervals(spans);
+    if (spans.empty()) {
+        spansMap_.erase(key);
+    } else {
+        spansMap_[key] = spans;
+    }
+}
+
+RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
+{
+    switch (type) {
+        case SpanType::Font:
+            return MakeRefPtr<FontSpan>();
+        case SpanType::TextShadow:
+            return MakeRefPtr<TextShadowSpan>();
+        case SpanType::Gesture:
+            return MakeRefPtr<GestureSpan>();
+        case SpanType::Decoration:
+            return MakeRefPtr<DecorationSpan>();
+        case SpanType::BaselineOffset:
+            return MakeRefPtr<BaselineOffsetSpan>();
+        case SpanType::LetterSpacing:
+            return MakeRefPtr<LetterSpacingSpan>();
+        default:
+            return nullptr;
+    }
 }
 
 bool SpanString::CheckRange(int32_t start, int32_t length, bool allowLengthZero) const
@@ -353,10 +397,20 @@ RefPtr<SpanBase> SpanString::GetSpan(int32_t start, int32_t length, SpanType spa
 
 bool SpanString::operator==(const SpanString& other) const
 {
-    if (text_ != other.text_ || spansMap_.size() != other.spansMap_.size()) {
+    if (text_ != other.text_) {
         return false;
     }
+    auto size = spansMap_.size() - (spansMap_.find(SpanType::Gesture) == spansMap_.end() ? 0 : 1);
+    auto sizeOther =
+        other.spansMap_.size() - (other.spansMap_.find(SpanType::Gesture) == other.spansMap_.end() ? 0 : 1);
+    if (size != sizeOther) {
+        return false;
+    }
+
     for (const auto& map : spansMap_) {
+        if (map.first == SpanType::Gesture) {
+            continue;
+        }
         auto spansOtherMap = other.spansMap_.find(map.first);
         if (spansOtherMap == other.spansMap_.end()) {
             return false;
@@ -376,25 +430,6 @@ bool SpanString::operator==(const SpanString& other) const
         }
     }
     return true;
-}
-
-void SpanString::AddSpanWatcher(const WeakPtr<SpanWatcher>& watcher)
-{
-    watchers_.emplace_back(watcher);
-}
-
-void SpanString::NotifySpanWatcher()
-{
-    if (spans_.empty()) {
-        spans_.emplace_back(GetDefaultSpanItem(""));
-    }
-    for (const auto& item : watchers_) {
-        auto watcher = item.Upgrade();
-        if (!watcher) {
-            continue;
-        }
-        watcher->UpdateSpanItems(spans_);
-    }
 }
 
 const std::list<RefPtr<NG::SpanItem>>& SpanString::GetSpanItems() const

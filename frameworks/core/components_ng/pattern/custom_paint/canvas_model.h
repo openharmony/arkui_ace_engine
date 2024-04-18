@@ -24,6 +24,7 @@ namespace OHOS::Ace {
 class CanvasModel {
 public:
     static CanvasModel* GetInstance();
+    static CanvasModel* GetInstanceNG();
     virtual ~CanvasModel() = default;
 
     virtual RefPtr<AceType> Create() = 0;

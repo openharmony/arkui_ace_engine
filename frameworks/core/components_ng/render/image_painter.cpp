@@ -51,6 +51,11 @@ void ApplyCover(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, R
     srcRect.SetOffset(Alignment::GetAlignPosition(rawPicSize, srcRect.GetSize(), Alignment::CENTER));
 }
 
+void ApplyCoverTopLeft(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+{
+    ApplyCover(rawPicSize, dstSize, srcRect, dstRect);
+}
+
 void ApplyFitWidth(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
     if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
@@ -241,6 +246,9 @@ void ImagePainter::ApplyImageFit(
             break;
         case ImageFit::COVER:
             ApplyCover(rawPicSize, dstSize, srcRect, dstRect);
+            break;
+        case ImageFit::COVER_TOP_LEFT:
+            ApplyCoverTopLeft(rawPicSize, dstSize, srcRect, dstRect);
             break;
         case ImageFit::FITWIDTH:
             ApplyFitWidth(rawPicSize, dstSize, srcRect, dstRect);

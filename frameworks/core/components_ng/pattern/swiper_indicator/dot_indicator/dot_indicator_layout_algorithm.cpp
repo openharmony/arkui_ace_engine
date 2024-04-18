@@ -44,7 +44,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    auto itemCount = swiperPattern->RealTotalCount();
+    auto itemCount = swiperPattern->TotalCount();
     auto direction = swiperPattern->GetDirection();
 
     auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();
@@ -83,8 +83,9 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         allPointDiameterSum = userItemWidth * (itemCount - 1) + userSelectedItemWidth;
     }
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1);
+    Dimension paddingSide = theme->GetIndicatorPaddingDot();
     auto indicatorWidth =
-        indicatorPadding.ConvertToPx() + allPointDiameterSum + allPointSpaceSum + indicatorPadding.ConvertToPx();
+        paddingSide.ConvertToPx() + allPointDiameterSum + allPointSpaceSum + paddingSide.ConvertToPx();
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;

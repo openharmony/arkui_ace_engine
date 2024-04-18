@@ -45,9 +45,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -736,15 +736,19 @@ void TextFieldPattern::HandleFocusEvent()
     if (isSelectAll && !contentController_->IsEmpty()) {
         needSelectAll_ = true;
     }
+    bool needTwinkling = true;
     if (IsNormalInlineState()) {
         ApplyInlineTheme();
         inlineFocusState_ = true;
-        if (contentController_->IsEmpty()) {
-            StartTwinkling();
-        } else {
+        if (!contentController_->IsEmpty()) {
             inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
+            if (inlineSelectAllFlag_) {
+                needTwinkling = false;
+            }
         }
-    } else {
+        ProcessResponseArea();
+    }
+    if (needTwinkling) {
         StartTwinkling();
     }
     NotifyOnEditChanged(true);
@@ -1591,7 +1595,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         for (const auto& record : records) {
             str += record;
         }
-        pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
             return;
@@ -1614,6 +1617,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
+        pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
     };
 }
 
@@ -2322,8 +2326,7 @@ void TextFieldPattern::AutoFillValueChanged()
     auto autoContentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (autoContentType == TextContentType::PERSON_FULL_NAME || autoContentType == TextContentType::PERSON_LAST_NAME ||
-        autoContentType == TextContentType::PERSON_FIRST_NAME) {
+    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END) {
         container->UpdatePopupUIExtension(host);
     }
 }
@@ -2652,6 +2655,21 @@ void TextFieldPattern::OnHover(bool isHover)
     isOnHover_ = isHover;
 }
 
+void TextFieldPattern::RestoreDefaultMouseState()
+{
+    int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = GetSCBSystemWindowId();
+#endif
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    pipeline->SetMouseStyleHoldNode(id);
+    pipeline->ChangeMouseStyle(id, MouseFormat::DEFAULT, windowId);
+}
+
 void TextFieldPattern::ChangeMouseState(
     const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass)
 {
@@ -2666,15 +2684,13 @@ void TextFieldPattern::ChangeMouseState(
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
         if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
-            pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
+            RestoreDefaultMouseState();
         } else {
             pipeline->SetMouseStyleHoldNode(frameId);
             pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
         }
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
-        pipeline->FreeMouseStyleHoldNode(frameId);
+        RestoreDefaultMouseState();
     }
 }
 
@@ -5149,6 +5165,7 @@ void TextFieldPattern::RestorePreInlineStates()
     ApplyNormalTheme();
     ApplyUnderlineTheme();
     ProcessInnerPadding();
+    ProcessResponseArea();
 }
 
 void TextFieldPattern::TextAreaInputRectUpdate(RectF& rect)
@@ -5320,40 +5337,44 @@ bool TextFieldPattern::IsUnspecifiedOrTextType() const
     return inputType == TextInputType::UNSPECIFIED || inputType == TextInputType::TEXT;
 }
 
-void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("placeholder", GetPlaceHolder().c_str());
-    json->Put("text", contentController_->GetTextValue().c_str());
-    json->Put("fontSize", GetFontSize().c_str());
-    json->Put("fontColor", GetTextColor().c_str());
-    json->Put("fontStyle", GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
-    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str());
-    json->Put("fontFamily", GetFontFamily().c_str());
-    json->Put("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str());
-    json->Put("caretColor", GetCaretColor().c_str());
-    json->Put("type", TextInputTypeToString().c_str());
-    json->Put("contentType", TextContentTypeToString().c_str());
-    json->Put("placeholderColor", GetPlaceholderColor().c_str());
-    json->Put("placeholderFont", GetPlaceholderFont().c_str());
-    json->Put("enterKeyType", TextInputActionToString().c_str());
+    json->PutExtAttr("placeholder", GetPlaceHolder().c_str(), filter);
+    json->PutExtAttr("text", contentController_->GetTextValue().c_str(), filter);
+    json->PutExtAttr("fontSize", GetFontSize().c_str(), filter);
+    json->PutExtAttr("fontColor", GetTextColor().c_str(), filter);
+    json->PutExtAttr("fontStyle",
+        GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic", filter);
+    json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight()).c_str(), filter);
+    json->PutExtAttr("fontFamily", GetFontFamily().c_str(), filter);
+    json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(GetTextAlign()).c_str(), filter);
+    json->PutExtAttr("caretColor", GetCaretColor().c_str(), filter);
+    json->PutExtAttr("type", TextInputTypeToString().c_str(), filter);
+    json->PutExtAttr("contentType", TextContentTypeToString().c_str(), filter);
+    json->PutExtAttr("placeholderColor", GetPlaceholderColor().c_str(), filter);
+    json->PutExtAttr("placeholderFont", GetPlaceholderFont().c_str(), filter);
+    json->PutExtAttr("enterKeyType", TextInputActionToString().c_str(), filter);
     auto maxLength = GetMaxLength();
-    json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
-    json->Put("inputFilter", GetInputFilter().c_str());
-    json->Put("copyOption", GetCopyOptionString().c_str());
-    json->Put("style", GetInputStyleString().c_str());
+    json->PutExtAttr("maxLength",
+        GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);
+    json->PutExtAttr("inputFilter", GetInputFilter().c_str(), filter);
+    json->PutExtAttr("copyOption", GetCopyOptionString().c_str(), filter);
+    json->PutExtAttr("style", GetInputStyleString().c_str(), filter);
+
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("onIconSrc", GetShowResultImageSrc().c_str());
     jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
-    json->Put("passwordIcon", jsonValue->ToString().c_str());
-    json->Put("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined");
+    json->PutExtAttr("passwordIcon", jsonValue->ToString().c_str(), filter);
+    json->PutExtAttr("showError", GetErrorTextState() ? GetErrorTextString().c_str() : "undefined", filter);
     auto maxLines = GetMaxLines();
-    json->Put("maxLines", GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str());
-    json->Put("barState", GetBarStateString().c_str());
-    json->Put("caretPosition", std::to_string(GetCaretIndex()).c_str());
-    json->Put("normalUnderlineColor", GetNormalUnderlineColorStr().c_str());
-    json->Put("typingUnderlineColor", GetTypingUnderlineColorStr().c_str());
-    json->Put("errorUnderlineColor", GetErrorUnderlineColorStr().c_str());
-    json->Put("disableUnderlineColor", GetDisableUnderlineColorStr().c_str());
+    json->PutExtAttr("maxLines",
+        GreatOrEqual(maxLines, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLines).c_str(), filter);
+    json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
+    json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
+    json->PutExtAttr("normalUnderlineColor", GetNormalUnderlineColorStr().c_str(), filter);
+    json->PutExtAttr("typingUnderlineColor", GetTypingUnderlineColorStr().c_str(), filter);
+    json->PutExtAttr("errorUnderlineColor", GetErrorUnderlineColorStr().c_str(), filter);
+    json->PutExtAttr("disableUnderlineColor", GetDisableUnderlineColorStr().c_str(), filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -5366,7 +5387,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonShowCounterOptions->Put("thresholdPercentage", counterType);
     jsonShowCounterOptions->Put("highlightBorder", showBorder);
     jsonShowCounter->Put("options", jsonShowCounterOptions);
-    json->Put("showCounter", jsonShowCounter);
+    json->PutExtAttr("showCounter", jsonShowCounter, filter);
 }
 
 void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -5528,7 +5549,7 @@ void TextFieldPattern::StopEditing()
 #else
     if (isCustomKeyboardAttached_) {
 #endif
-        NotifyOnEditChanged(false);
+        FocusHub::LostFocusToViewRoot();
     }
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
@@ -5991,9 +6012,12 @@ void TextFieldPattern::ProcessResponseArea()
         return;
     }
 
-    if (IsShowUnit()) {
+    if (IsUnderlineMode()) {
         responseArea_ = AceType::MakeRefPtr<UnitResponseArea>(WeakClaim(this), unitNode_);
         responseArea_->InitResponseArea();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
@@ -6403,7 +6427,7 @@ void TextFieldPattern::SetThemeBorderAttr()
     CHECK_NULL_VOID(theme);
     if (!paintProperty->HasBorderColorFlagByUser()) {
         BorderColorProperty borderColor;
-        borderColor.SetColor(Color::BLACK);
+        borderColor.SetColor(theme->GetTextInputColor());
         renderContext->UpdateBorderColor(borderColor);
     } else {
         renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
@@ -6420,7 +6444,7 @@ void TextFieldPattern::SetThemeBorderAttr()
 
     if (!paintProperty->HasBorderWidthFlagByUser()) {
         BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+        borderWidth.SetBorderWidth(theme->GetTextInputWidth());
         renderContext->UpdateBorderWidth(borderWidth);
         layoutProperty->UpdateBorderWidth(borderWidth);
     } else {

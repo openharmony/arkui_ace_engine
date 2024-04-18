@@ -114,11 +114,12 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         RefPtr<Paragraph>& paragraph, float removeValue = 0.0f);
     SizeF GetConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
     SizeF PlaceHolderMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth = 0.0f);
-    SizeF TextInputMeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
+    SizeF TextInputMeasureContent(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper, float imageWidth);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
@@ -139,7 +140,7 @@ protected:
 
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
-
+    Dimension textIndent_ = 0.0_px;
 private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
@@ -147,9 +148,11 @@ private:
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);
+    void UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
+        bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty);
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
-
+    void ApplyIndent(double width);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

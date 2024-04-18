@@ -1658,7 +1658,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with status changed");
     DialogProperties dialogProperties = {
         .title = title,
         .content = message,
@@ -1672,7 +1672,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
@@ -1695,6 +1695,15 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
+    if (dialogAttr.shadow.has_value()) {
+        dialogProperties.shadow = dialogAttr.shadow.value();
+    }
+    if (dialogAttr.backgroundColor.has_value()) {
+        dialogProperties.backgroundColor = dialogAttr.backgroundColor.value();
+    }
+    if (dialogAttr.backgroundBlurStyle.has_value()) {
+        dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
@@ -1702,7 +1711,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
     std::function<void(bool)>&& onStatusChanged)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr for status changed");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
@@ -1738,7 +1747,6 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
 {
     DialogProperties dialogProperties = { .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .onWillDismiss = dialogAttr.customOnWillDismiss,
         .backgroundColor = dialogAttr.backgroundColor,
@@ -1772,6 +1780,13 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        dialogProperties.isSysBlurStyle = false;
+    } else {
+        if (dialogAttr.backgroundBlurStyle.has_value()) {
+            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+        }
+    }
     return dialogProperties;
 }
 
@@ -1780,14 +1795,15 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
 {
     DialogProperties dialogProperties = ParsePropertiesFromAttr(dialogAttr);
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Dialog IsCurrentUseNewPipeline.");
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog IsCurrentUseNewPipeline.");
         auto task = [dialogAttr, dialogProperties, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
             CHECK_NULL_VOID(overlayManager);
-            LOGI("Begin to open custom dialog ");
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "open custom dialog isShowInSubWindow %{public}d",
+                dialogProperties.isShowInSubWindow);
             if (dialogProperties.isShowInSubWindow) {
                 SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callback));
                 if (dialogProperties.isModal) {
-                    LOGW("temporary not support isShowInSubWindow and isModal");
+                    TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
                 }
             } else {
                 overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
@@ -1804,7 +1820,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
 {
     auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
-        LOGI("begin to close custom dialog.");
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
@@ -1817,7 +1833,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
 {
     auto task = [node, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
         CHECK_NULL_VOID(overlayManager);
-        LOGI("begin to close custom dialog.");
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
         overlayManager->CloseCustomDialog(node, std::move(callback));
         SubwindowManager::GetInstance()->CloseCustomDialogNG(node, std::move(callback));
     };
@@ -1857,6 +1873,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "show action menu with new pipeline");
         dialogProperties.onSuccess = std::move(callback);
         dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
@@ -1936,7 +1953,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(
 void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
     std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter with status changed");
     DialogProperties dialogProperties = {
         .title = title,
         .autoCancel = true,
@@ -1950,7 +1967,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
 void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogAttr,
     const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter with attr");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .autoCancel = true,

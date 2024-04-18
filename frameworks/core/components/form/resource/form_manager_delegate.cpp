@@ -758,12 +758,6 @@ void FormManagerDelegate::ReAddForm()
     }
 }
 
-void FormManagerDelegate::SetVisibleChange(bool isVisible)
-{
-    CHECK_NULL_VOID(formRendererDispatcher_);
-    formRendererDispatcher_->SetVisibleChange(isVisible);
-}
-
 void FormManagerDelegate::SetObscured(bool isObscured)
 {
     CHECK_NULL_VOID(formRendererDispatcher_);

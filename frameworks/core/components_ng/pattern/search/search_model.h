@@ -86,6 +86,9 @@ public:
     virtual void UpdateInspectorId(const std::string& key) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
 
+    virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};
+    virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
+    virtual void SetTextIndent(const Dimension& value) {};
 private:
     static std::unique_ptr<SearchModel> instance_;
     static std::mutex mutex_;

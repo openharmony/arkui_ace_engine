@@ -52,11 +52,20 @@ void JSCanvas::Create(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pattern);
     auto canvasPattern = CanvasModel::GetInstance()->GetTaskPool(pattern);
     if (info.Length() > 0 && info[0]->IsObject()) {
-        JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
-        if (jsContext) {
-            jsContext->SetInstanceId(Container::CurrentId());
-            jsContext->SetCanvasPattern(canvasPattern);
-            jsContext->SetAntiAlias();
+        if (JSRef<JSObject>::Cast(info[0])->HasProperty("canvas")) {
+            JSDrawingRenderingContext* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSDrawingRenderingContext>();
+            if (jsContext) {
+                jsContext->SetInstanceId(Container::CurrentId());
+                jsContext->SetCanvasPattern(canvasPattern);
+                jsContext->SetRSCanvasCallback(canvasPattern);
+            }
+        } else {
+            JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
+            if (jsContext) {
+                jsContext->SetInstanceId(Container::CurrentId());
+                jsContext->SetCanvasPattern(canvasPattern);
+                jsContext->SetAntiAlias();
+            }
         }
     }
     CanvasModel::GetInstance()->PushCanvasPattern(pattern);

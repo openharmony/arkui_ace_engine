@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,6 +112,8 @@ public:
     void UpdateFillRuleForPath2D(const CanvasFillRule rule);
     double GetWidth();
     double GetHeight();
+    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
+    void SetInvalidate();
 
     LineDashParam GetLineDash() const;
     void UpdateLineDash(const std::vector<double>& segments);
@@ -172,6 +174,8 @@ private:
     void UpdateAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     bool IsSupportImageAnalyzerFeature();
+    void OnLanguageConfigurationUpdate() override;
+    void UpdateTextDirection(TextDirection direction);
 
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
@@ -181,6 +185,7 @@ private:
     DirtySwapConfig recordConfig_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
+    bool isSetTextDirection_ = false;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
 

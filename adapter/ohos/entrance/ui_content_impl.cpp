@@ -75,6 +75,7 @@
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/xcollie/xcollieInterface.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -134,6 +135,8 @@ const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputEvent.enabled
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const int32_t REQUEST_CODE = -1;
+constexpr uint32_t TIMEOUT_LIMIT = 60;
+constexpr int32_t COUNT_LIMIT = 3;
 
 using ContentFinishCallback = std::function<void()>;
 using ContentStartAbilityCallback = std::function<void(const std::string& address)>;
@@ -1154,6 +1157,18 @@ std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
 }
 // ArkTSCard end
 
+void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId)
+{
+    if (container->IsKeyboard()) {
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "Keyboard does not adjust font");
+        return;
+    }
+    float fontScale = SystemProperties::GetFontScale();
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
+    container->SetFontScale(instanceId, fontScale);
+    container->SetFontWeightScale(instanceId, fontWeightScale);
+}
+
 UIContentErrorCode UIContentImpl::CommonInitialize(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
@@ -1193,6 +1208,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         ImageFileCache::GetInstance().SetCacheFileInfo();
+        XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
@@ -1558,6 +1574,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
     container->CheckAndSetFontFamily();
+    SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
@@ -1918,6 +1935,9 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
+            parsedConfig.fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+            parsedConfig.fontWeightScale =
+                        config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
             container->UpdateConfiguration(parsedConfig, config->GetName());
             LOGI("[%{public}d][%{public}s][%{public}s] UIContentImpl: UpdateConfiguration called End, name:%{public}s",
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());

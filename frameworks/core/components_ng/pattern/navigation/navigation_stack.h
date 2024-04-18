@@ -120,7 +120,7 @@ public:
     virtual bool IsEmpty();
     virtual std::vector<std::string> GetAllPathName();
     virtual std::vector<int32_t> GetAllPathIndex();
-    virtual void InitNavPathIndex() {}
+    virtual void InitNavPathIndex(const std::vector<std::string>& pathNames) {}
     virtual void Pop();
     virtual void Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo = nullptr);
     virtual void Push(const std::string& name, int32_t index);
@@ -163,6 +163,16 @@ public:
     virtual int32_t GetJsIndexFromNativeIndex(int32_t index) { return -1; }
     virtual void MoveIndexToTop(int32_t index) {}
 
+    const WeakPtr<UINode>& GetNavigationNode()
+    {
+        return navigationNode_;
+    }
+
+    void SetNavigationNode(const WeakPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = navigationNode;
+    }
+
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
@@ -175,6 +185,7 @@ protected:
     NavPathList preNavPathList_;
     NavPathList cacheNodes_;
     bool animated_ = true;
+    WeakPtr<UINode> navigationNode_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H

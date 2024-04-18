@@ -48,6 +48,7 @@ public:
     MOCK_METHOD(void, PushFront, (RefPtr<AssetProvider> provider), (override));
     MOCK_METHOD(void, PushBack, (RefPtr<AssetProvider> provider), (override));
     MOCK_METHOD(RefPtr<Asset>, GetAsset, (const std::string& assetName), (override));
+    MOCK_METHOD(std::vector<RefPtr<Asset>>, GetAssetFromI18n, (const std::string& assetName), (override));
     MOCK_METHOD(std::string, GetAssetPath, (const std::string& /* assetName */, bool /* isAddHapPath */),
         (override));
     MOCK_METHOD(void, SetLibPath, (const std::string& appLibPathKey, const std::vector<std::string>& packagePath),

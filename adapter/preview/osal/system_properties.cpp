@@ -92,6 +92,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
+bool SystemProperties::faultInjectEnabled_ = false;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -292,5 +293,10 @@ bool SystemProperties::GetSideBarContainerBlurEnable()
 float SystemProperties::GetDefaultResolution()
 {
     return 1.0f;
+}
+
+std::string SystemProperties::GetAtomicServiceBundleName()
+{
+    return UNDEFINED_PARAM;
 }
 } // namespace OHOS::Ace

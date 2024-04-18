@@ -16,6 +16,7 @@
 /// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
 
 class ComponentContent {
+  // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private builderNode_: BuilderNode;
   constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object) {
     let builderNode = new BuilderNode(uiContext, {});

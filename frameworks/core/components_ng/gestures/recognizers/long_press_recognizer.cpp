@@ -121,6 +121,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "Long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -131,8 +133,6 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -164,7 +164,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
-    auto pointsCount = static_cast<int32_t>(touchPoints_.size());
+    auto pointsCount = GetValidFingersCount();
 
     if (pointsCount == fingers_) {
         refereeState_ = RefereeState::DETECTING;
@@ -230,8 +230,9 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }
-    if (refereeState_ == RefereeState::SUCCEED) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCancelMsg();
+        refereeState_ = RefereeState::READY;
     } else {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }

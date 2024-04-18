@@ -66,6 +66,8 @@ public:
 
     virtual RefPtr<Asset> GetAsset(const std::string& assetName) = 0;
 
+    virtual std::vector<RefPtr<Asset>> GetAssetFromI18n(const std::string& assetName) = 0;
+
     virtual std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) = 0;
 
     virtual void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) = 0;

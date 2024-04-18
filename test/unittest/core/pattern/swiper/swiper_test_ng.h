@@ -27,10 +27,15 @@
 #include "core/animation/animator.h"
 #include "core/animation/spring_curve.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/button/button_theme.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -69,6 +74,9 @@ const SwiperArrowParameters ARROW_PARAMETERS = {
 const Color HOVER_ARROW_COLOR = Color::GRAY;
 const Color CLICK_ARROW_COLOR = Color::FromString("#19182431");
 constexpr double ARROW_DISABLED_ALPHA = 0.5;
+const Color INDICATOR_TEXT_FONT_COLOR = Color::FromString("#ff182431");
+const Dimension INDICATOR_TEXT_FONT_SIZE = Dimension(14.f);
+const FontWeight INDICATOR_TEXT_FONT_WEIGHT = FontWeight::W800;
 
 class SwiperTestNg : public TestNG {
 public:
@@ -82,6 +90,9 @@ public:
     void CreateWithItem(const std::function<void(SwiperModelNG)>& callback = nullptr, int32_t itemNumber = ITEM_NUMBER);
     static void CreateItem(int32_t itemNumber = ITEM_NUMBER);
     static void CreateItemWithSize(float width, float height);
+    void ShowNext();
+    void ShowPrevious();
+    void ChangeIndex(int32_t index);
 
     void InitCaptureTest();
     void CreateWithCustomAnimation();
@@ -93,6 +104,10 @@ public:
     RefPtr<SwiperPaintProperty> paintProperty_;
     RefPtr<SwiperAccessibilityProperty> accessibilityProperty_;
     RefPtr<SwiperController> controller_;
+
+    RefPtr<FrameNode> indicatorNode_;
+    RefPtr<FrameNode> leftArrowNode_;
+    RefPtr<FrameNode> rightArrowNode_;
 };
 } // namespace OHOS::Ace::NG
 

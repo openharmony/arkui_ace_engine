@@ -67,6 +67,25 @@ public:
         }
     }
 
+    void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
+    {
+        lastFocusStateNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+        isNeedTriggerScroll_ = true;
+    }
+    RefPtr<FocusHub> GetLastFocusStateNode() const
+    {
+        return lastFocusStateNode_.Upgrade();
+    }
+
+    void SetNeedTriggerScroll(bool isNeedTriggerScroll)
+    {
+        isNeedTriggerScroll_ = isNeedTriggerScroll;
+    }
+    bool GetNeedTriggerScroll() const
+    {
+        return isNeedTriggerScroll_;
+    }
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
 
@@ -74,6 +93,9 @@ private:
     WeakPtr<FocusView> lastFocusView_;
 
     RequestFocusCallback requestCallback_;
+
+    WeakPtr<FocusHub> lastFocusStateNode_;
+    bool isNeedTriggerScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

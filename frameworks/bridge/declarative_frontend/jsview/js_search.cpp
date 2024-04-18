@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
@@ -62,6 +63,8 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -123,6 +126,9 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
     JSClass<JSSearch>::StaticMethod("selectedBackgroundColor", &JSSearch::SetSelectedBackgroundColor);
+    JSClass<JSSearch>::StaticMethod("inputFilter", &JSSearch::SetInputFilter);
+    JSClass<JSSearch>::StaticMethod("onEditChange", &JSSearch::SetOnEditChange);
+    JSClass<JSSearch>::StaticMethod("textIndent", &JSSearch::SetTextIndent);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -442,6 +448,55 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
     }
 }
 
+void JSSearch::SetInputFilter(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto tmpInfo = info[0];
+    std::string inputFilter;
+    if (tmpInfo->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
+        return;
+    }
+    if (!ParseJsString(tmpInfo, inputFilter)) {
+        return;
+    }
+    if (!CheckRegexValid(inputFilter)) {
+        inputFilter = "";
+    }
+    if (info.Length() > 1 && tmpInfo->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(tmpInfo));
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(info);
+        };
+        SearchModel::GetInstance()->SetInputFilter(inputFilter, resultId);
+        return;
+    }
+    SearchModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
+}
+
+void JSSearch::SetOnEditChange(const JSCallbackInfo& info)
+{
+    auto tmpInfo = info[0];
+    CHECK_NULL_VOID(tmpInfo->IsFunction());
+    JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(tmpInfo));
+    SearchModel::GetInstance()->SetOnEditChanged(std::move(callback));
+}
+
+void JSSearch::SetTextIndent(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseJsDimensionVpNG(info[0], value, true)) {
+        value.Reset();
+    }
+    SearchModel::GetInstance()->SetTextIndent(value);
+}
+
 void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 {
     auto value = JSRef<JSVal>::Cast(info[0]);
@@ -512,7 +567,9 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     auto themeFontWeight = theme->GetFontWeight();
     Font font {.fontSize = themeFontSize, .fontWeight = themeFontWeight, .fontStyle = Ace::FontStyle::NORMAL};
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        SearchModel::GetInstance()->SetTextFont(font);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            SearchModel::GetInstance()->SetTextFont(font);
+        }
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);

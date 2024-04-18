@@ -36,7 +36,6 @@ public:
     void InsertString(int32_t start, const std::string& other);
     void RemoveString(int32_t start, int32_t length);
     void ReplaceSpan(int32_t start, int32_t length, const RefPtr<SpanBase>& span);
-    void RemoveSpan(int32_t start, int32_t length, SpanType key);
     void RemoveSpans(int32_t start, int32_t length);
     void ClearAllSpans();
     void ReplaceSpanString(int32_t start, int32_t length, const RefPtr<SpanString>& spanString);
@@ -47,7 +46,6 @@ private:
     void KeepSpansOrder();
     void ApplyReplaceStringToSpans(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
     void ApplyReplaceStringToSpanBase(int32_t start, int32_t length, const std::string& other, SpanStringOperation op);
-    static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
     static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
     bool InsertUseFrontStyle(int32_t start);

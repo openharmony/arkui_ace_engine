@@ -31,6 +31,10 @@
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::Constants {
+namespace {
+const std::string FONTWEIGHT = "wght";
+constexpr float DEFAULT_MULTIPLE = 100.0f;
+} // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
@@ -408,9 +412,14 @@ Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle tex
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle)
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
-    txtStyle.font_weight = ConvertTxtFontWeight(textStyle.GetFontWeight());
-    // Font size must be px when transferring to txt::TextStyle
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    // Font size must be px when transferring to txt::TextStyle
     if (pipelineContext) {
         txtStyle.font_size = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
@@ -516,7 +525,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
     }
 
     txtStyle.letterSpacing = NormalizeToPx(textStyle.GetLetterSpacing());
-
+    txtStyle.baseLineShift = -NormalizeToPx(textStyle.GetBaselineOffset());
     if (textStyle.isSymbolGlyph_) {
         txtStyle.isSymbolGlyph = true;
         const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
@@ -594,9 +603,14 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
-    txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
-    // Font size must be px when transferring to Rosen::TextStyle
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    // Font size must be px when transferring to Rosen::TextStyle
     if (pipelineContext) {
         txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
@@ -619,6 +633,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     if (pipelineContext) {
         txtStyle.letterSpacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
+        txtStyle.baseLineShift = -pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
     }
 
     if (textStyle.isSymbolGlyph_) {

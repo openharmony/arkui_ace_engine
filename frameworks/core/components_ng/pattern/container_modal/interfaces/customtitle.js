@@ -134,6 +134,7 @@ export class Index extends ViewPU {
       Image.focusable(false);
       Image.margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL });
       Image.opacity(this.iconOpacity);
+      Image.draggable(false);
       if (!isInitialRender) {
         Image.pop();
       }

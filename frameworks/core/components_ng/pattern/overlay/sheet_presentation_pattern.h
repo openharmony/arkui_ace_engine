@@ -107,6 +107,7 @@ public:
     void OnDisappear()
     {
         if (onDisappear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onDisappear state.");
             isExecuteOnDisappear_ = true;
             onDisappear_();
         }
@@ -120,6 +121,7 @@ public:
     void OnWillDisappear()
     {
         if (onWillDisappear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
             onWillDisappear_();
         }
     }
@@ -132,6 +134,7 @@ public:
     void OnAppear()
     {
         if (onAppear_) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onAppear state.");
             onAppear_();
         }
     }
@@ -148,7 +151,7 @@ public:
         }
     }
 
-    void FireOnHeightDidChange();
+    void FireOnHeightDidChange(float height);
 
     bool HasOnHeightDidChange()
     {
@@ -172,6 +175,33 @@ public:
 
     void FireOnDetentsDidChange(float height);
 
+    void UpdateOnWidthDidChange(std::function<void(const float)>&& onWidthDidChange)
+    {
+        onWidthDidChange_ = std::move(onWidthDidChange);
+    }
+
+    void onWidthDidChange(float currentWidth) const
+    {
+        if (onWidthDidChange_) {
+            onWidthDidChange_(currentWidth);
+        }
+    }
+
+    void FireOnWidthDidChange(RefPtr<FrameNode> sheetNode);
+
+    void UpdateOnTypeDidChange(std::function<void(const float)>&& onTypeDidChange)
+    {
+        onTypeDidChange_ = std::move(onTypeDidChange);
+    }
+
+    void onTypeDidChange(float currentType) const
+    {
+        if (onTypeDidChange_) {
+            onTypeDidChange_(currentType);
+        }
+    }
+
+    void FireOnTypeDidChange();
 
     void CallShouldDismiss()
     {
@@ -447,6 +477,7 @@ private:
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);
+    void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
@@ -467,15 +498,20 @@ private:
     std::function<void()> shouldDismiss_;
     std::function<void(const float)> onHeightDidChange_;
     std::function<void(const float)> onDetentsDidChange_;
+    std::function<void(const float)> onWidthDidChange_;
+    std::function<void(const float)> onTypeDidChange_;
     std::function<void()> onAppear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
 
+    float preDidHeight_ = 0.0f;
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
+    float preWidth_ = 0.0f;
+    int32_t preType_ = -1;
     float statusBarHeight_ = .0f;
     bool isExecuteOnDisappear_ = false;
     bool windowRotate_ = false;
@@ -502,11 +538,14 @@ private:
 
     bool show_ = true;
     bool isDrag_ = false;
+    bool isNeedProcessHeight_ = false;
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
+
+    float preDetentsHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "base/ressched/ressched_report.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -431,7 +432,8 @@ void DistributedUI::DumpNode(
     nodeObject->Put(DISTRIBUTE_UI_OPERATION, static_cast<int32_t>(op));
 
     std::unique_ptr<JsonValue> childObject = NodeObject::Create();
-    node->ToJsonValue(childObject);
+    InspectorFilter filter;
+    node->ToJsonValue(childObject, filter);
     nodeObject->Put(DISTRIBUTE_UI_ATTRS, (std::unique_ptr<NodeObject>&)childObject);
 }
 

@@ -61,6 +61,9 @@ public:
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
+    void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
+    void SetOnEditChanged(std::function<void(bool)>&& func) override;
+    void SetTextIndent(const Dimension& value) override;
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
     void SetType(TextInputType value) override;

@@ -32,6 +32,8 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 enum class DialogContentNode {
     TITLE = 0,
     SUBTITLE,
@@ -109,7 +111,7 @@ public:
 
     void BuildChild(const DialogProperties& dialogProperties);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     const std::string& GetTitle()
     {
@@ -162,6 +164,8 @@ public:
     void OnColorConfigurationUpdate() override;
 
     void OnLanguageConfigurationUpdate() override;
+
+    void DumpInfo() override;
 
     bool AvoidBottom() const override
     {
@@ -227,6 +231,9 @@ private:
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
 
@@ -268,6 +275,8 @@ private:
     void UpdateSheetIconAndText();
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void DumpBoolProperty();
+    void DumpObjectProperty();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -285,6 +294,7 @@ private:
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
+    RefPtr<RenderContext> contentRenderContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 

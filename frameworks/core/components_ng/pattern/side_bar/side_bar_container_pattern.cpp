@@ -103,6 +103,13 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     }
 
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sideBarNode = GetSideBarNode(host);
+    CHECK_NULL_VOID(sideBarNode);
+    if (!newShowSideBar && sideBarNode->IsFirstBuilding()) {
+        SetSideBarActive(false, false);
+    }
     if (newShowSideBar == showSideBar_) {
         return;
     }
@@ -934,6 +941,7 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
 
     auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
+    dividerFrameNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->SetMouseResponseRegion(mouseRegion);

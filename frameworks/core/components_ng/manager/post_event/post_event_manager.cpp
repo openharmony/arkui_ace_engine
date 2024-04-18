@@ -70,6 +70,7 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = touchEvent.sourceType;
     touchRestrict.touchEvent = touchEvent;
+    touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
     auto result = eventManager->PostEventTouchTest(scalePoint, targetNode, touchRestrict);
     if (!result) {
         return false;

@@ -271,6 +271,14 @@ void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
 }
 
+void SwiperModelNG::SetIndicatorInteractive(FrameNode* frameNode, bool interactive)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorInteractive(interactive);
+}
+
 void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

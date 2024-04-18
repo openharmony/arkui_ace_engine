@@ -30,6 +30,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
+const NG::InspectorFilter filter;
 std::string srcimages = "test";
 constexpr char TAG_ROOT[] = "root";
 const std::string MATRIX_STRING1 = "1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,";
@@ -184,7 +185,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest004, TestSize.Level1)
      * @tc.steps: step2. push propProgressMask_ is null.push propPixelStretchEffect_ is null.
      */
     auto json = JsonUtil::Create(true);
-    renderContext.ToJsonValue(json);
+    renderContext.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results..
@@ -219,7 +220,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest005, TestSize.Level1)
      */
     MakeProperty(renderContext);
     renderContext.propProgressMask_ = CreateProgressMaskProperty();
-    renderContext.ToJsonValue(json);
+    renderContext.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -253,7 +254,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest006, TestSize.Level1)
      */
     MakeProperty(renderContext);
     renderContext.propPixelStretchEffect_ = std::move(pixStretchEffectOption);
-    renderContext.ToJsonValue(json);
+    renderContext.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -284,7 +285,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest007, TestSize.Level1)
     MakeProperty(renderContext);
     renderContext.propBackgroundColor_ = BLACK;
     renderContext.propForegroundColor_ = WHITE;
-    renderContext.ToJsonValue(json);
+    renderContext.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.
@@ -311,7 +312,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level1)
      */
     MakeProperty(renderContext);
     renderContext.propTransformMatrix_ = Matrix4::CreateIdentity();;
-    renderContext.ToJsonValue(json);
+    renderContext.ToJsonValue(json, filter);
 
     /**
      * @tc.expected: Return expected results.

@@ -37,6 +37,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
+#include "nlohmann/json.hpp"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -114,6 +115,19 @@ bool IsUIExtensionOrEmbeddedComponent(const RefPtr<NG::UINode>& node)
 {
     return node &&
         (node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || node->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG);
+}
+
+bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_RETURN(node, true);
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto manager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(manager, true);
+    return manager->IsShowPlaceholder(node->GetId());
+#endif
+    return true;
 }
 
 Accessibility::EventType ConvertStrToEventType(const std::string& type)
@@ -615,6 +629,7 @@ RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
     for (const auto& child : node->GetChildren()) {
         auto extensionNode = AceType::DynamicCast<NG::FrameNode>(child);
         if (IsUIExtensionOrEmbeddedComponent(child) && extensionNode &&
+            !IsUIExtensionShowPlaceholder(extensionNode) &&
             (extensionNode->GetUiExtensionId() > NG::UI_EXTENSION_UNKNOW_ID) &&
             (((extensionNode->GetUiExtensionId() <= NG::UI_EXTENSION_ID_FIRST_MAX) &&
             (NG::UI_EXTENSION_OFFSET_MAX == uiExtensionOffset)) ||
@@ -711,6 +726,7 @@ RefPtr<NG::FrameNode> FindInputFocus(const RefPtr<NG::UINode>& node, int32_t foc
     for (const auto& focusChild : focusChildren) {
         auto extensionNode = focusChild->GetFrameNode();
         if ((extensionNode && IsUIExtensionOrEmbeddedComponent(extensionNode)) &&
+            !IsUIExtensionShowPlaceholder(extensionNode) &&
             (extensionNode->GetUiExtensionId() > NG::UI_EXTENSION_UNKNOW_ID) &&
             (((extensionNode->GetUiExtensionId() <= NG::UI_EXTENSION_ID_FIRST_MAX) &&
             (NG::UI_EXTENSION_OFFSET_MAX == uiExtensionOffset)) ||
@@ -847,8 +863,8 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
                     return result;
                 }
 #endif
-                nodes.push(frameNode);
             }
+            nodes.push(Referenced::RawPtr(child));
         }
     }
     return nullptr;
@@ -1102,6 +1118,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
         nodeInfo.SetRange(rangeInfo);
     }
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
+    nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
     nodeInfo.SetChecked(accessibilityProperty->IsChecked());
     nodeInfo.SetSelected(accessibilityProperty->IsSelected());
@@ -1244,7 +1261,7 @@ void UpdateWebAccessibilityElementInfo(RefPtr<NG::WebAccessibilityNode> node,
 void UpdateChildrenOfAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo)
 {
-    if (!IsUIExtensionOrEmbeddedComponent(node)) {
+    if (!IsUIExtensionOrEmbeddedComponent(node) || IsUIExtensionShowPlaceholder(node)) {
         std::vector<int64_t> children;
         for (const auto& item : node->GetChildren()) {
             GetFrameNodeChildren(item, children, commonProperty.pageId);
@@ -1582,7 +1599,7 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
                 infos.push_back(nodeInfo);
                 continue;
             }
-            if (!IsUIExtensionOrEmbeddedComponent(frameNodeParent)) {
+            if (!IsUIExtensionOrEmbeddedComponent(frameNodeParent) || IsUIExtensionShowPlaceholder(frameNodeParent)) {
                 infos.push_back(nodeInfo);
                 GetChildrenFromFrameNode(frameNodeParent, children, commonProperty.pageId);
                 GetChildrenFromWebNode(frameNodeParent, children, ngPipeline);
@@ -2526,13 +2543,17 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
     GenerateCommonProperty(ngPipeline, commonProperty, pipeline);
     AccessibilityElementInfo nodeInfo;
     UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
-    if (IsUIExtensionOrEmbeddedComponent(frameNode)) {
+    if (IsUIExtensionOrEmbeddedComponent(frameNode) && !IsUIExtensionShowPlaceholder(frameNode)) {
         SearchParameter param {-1, "", PREFETCH_RECURSIVE_CHILDREN, NG::UI_EXTENSION_OFFSET_MAX};
         std::list<AccessibilityElementInfo> extensionElementInfos;
         SearchExtensionElementInfoNG(param, frameNode, extensionElementInfos, nodeInfo);
     }
     DumpCommonPropertyNG(nodeInfo);
     DumpAccessibilityPropertyNG(nodeInfo);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty) {
+        DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
+    }
     DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
 }
 
@@ -2678,7 +2699,7 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
             DumpTreeNodeInfoNG(frameChild, depth + 1, commonProperty, children.size());
         }
     }
-    if (IsUIExtensionOrEmbeddedComponent(node)) {
+    if (IsUIExtensionOrEmbeddedComponent(node) && !IsUIExtensionShowPlaceholder(node)) {
         std::list<AccessibilityElementInfo> extensionElementInfos;
         auto pipeline = context_.Upgrade();
         CHECK_NULL_VOID(pipeline);
@@ -2892,7 +2913,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
     auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
     CHECK_NULL_VOID(node);
     UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
-    if (IsUIExtensionOrEmbeddedComponent(node)) {
+    if (IsUIExtensionOrEmbeddedComponent(node) && !IsUIExtensionShowPlaceholder(node)) {
         SearchParameter param {-1, "", mode, uiExtensionOffset};
         SearchExtensionElementInfoNG(param, node, infos, nodeInfo);
     }
@@ -2984,7 +3005,8 @@ RefPtr<NG::FrameNode> JsAccessibilityManager::FindNodeFromRootByExtensionId(
         auto current = nodes.front();
         nodes.pop();
         frameNode = AceType::DynamicCast<NG::FrameNode>(current);
-        if (IsUIExtensionOrEmbeddedComponent(frameNode) && (uiExtensionId == frameNode->GetUiExtensionId())) {
+        if (IsUIExtensionOrEmbeddedComponent(frameNode) && !IsUIExtensionShowPlaceholder(frameNode) &&
+            (uiExtensionId == frameNode->GetUiExtensionId())) {
             return frameNode;
         }
         const auto& children = current->GetChildren();
@@ -3021,7 +3043,19 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    SearchParameter param {0, text, 0, uiExtensionOffset};
+    nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
+    if (textJson.is_null() || !textJson.contains("type")) {
+        return;
+    }
+    if (textJson["type"] == "textType") {
+        SearchParameter param {0, text, 0, uiExtensionOffset};
+        FindTextByTextHint(node, infos, ngPipeline, commonProperty, param);
+        return;
+    }
+    if (!textJson.contains("value")) {
+        return;
+    }
+    SearchParameter param {0, textJson["value"], 0, uiExtensionOffset};
     FindText(node, infos, ngPipeline, commonProperty, param);
 }
 
@@ -3183,7 +3217,7 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t
     if (!node) {
         return info.SetValidElement(false);
     }
-    if (IsUIExtensionOrEmbeddedComponent(node)) {
+    if (IsUIExtensionOrEmbeddedComponent(node) && !IsUIExtensionShowPlaceholder(node)) {
         SearchParameter transferSearchParam {NG::UI_EXTENSION_ROOT_ID, "", focusType, uiExtensionOffset};
         OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(transferSearchParam, node, info);
         return SetUiExtensionAbilityParentIdForFocus(node, uiExtensionOffset, info);
@@ -3195,7 +3229,7 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t
     if (focusType == FOCUS_TYPE_INPUT) {
         resultNode = FindInputFocus(node, focusType, info, uiExtensionOffset, context);
     }
-    if ((!resultNode) || IsUIExtensionOrEmbeddedComponent(resultNode)) {
+    if ((!resultNode) || (IsUIExtensionOrEmbeddedComponent(resultNode) && !IsUIExtensionShowPlaceholder(resultNode))) {
         return;
     }
     CommonProperty commonProperty;
@@ -4255,7 +4289,7 @@ void JsAccessibilityManager::FindText(const RefPtr<NG::UINode>& node,
             infos.emplace_back(nodeInfo);
         }
     }
-    if (IsUIExtensionOrEmbeddedComponent(frameNode)) {
+    if (IsUIExtensionOrEmbeddedComponent(frameNode) && !IsUIExtensionShowPlaceholder(frameNode)) {
         auto infosByIPC = SearchElementInfosByTextNG(NG::UI_EXTENSION_ROOT_ID, searchParam.text,
             frameNode, searchParam.uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
         if (!infosByIPC.empty()) {
@@ -4270,6 +4304,46 @@ void JsAccessibilityManager::FindText(const RefPtr<NG::UINode>& node,
     if (!node->GetChildren().empty()) {
         for (const auto& child : node->GetChildren()) {
             FindText(child, infos, context, commonProperty, searchParam);
+        }
+    }
+}
+
+void JsAccessibilityManager::FindTextByTextHint(const RefPtr<NG::UINode>& node,
+    std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::PipelineContext>& context,
+    const CommonProperty& commonProperty, const SearchParameter& searchParam)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    if (frameNode && !frameNode->IsInternal()) {
+        std::string text = searchParam.text;
+        nlohmann::json textJson = nlohmann::json::parse(text, nullptr, false);
+        std::string value = "";
+        if (!textJson.is_null() && textJson.contains("value")) {
+            value = textJson["value"];
+        }
+        std::string textType = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetTextType();
+        nlohmann::json textTypeJson = nlohmann::json::parse(textType, nullptr, false);
+        if (!textTypeJson.is_null() && textTypeJson.contains("type") && textTypeJson["type"] == value) {
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
+            infos.emplace_back(nodeInfo);
+        }
+    }
+    if (IsUIExtensionOrEmbeddedComponent(frameNode)) {
+        auto infosByIPC = SearchElementInfosByTextNG(NG::UI_EXTENSION_ROOT_ID, searchParam.text,
+            frameNode, searchParam.uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
+        if (!infosByIPC.empty()) {
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
+            ConvertExtensionAccessibilityNodeId(infosByIPC, frameNode, searchParam.uiExtensionOffset, nodeInfo);
+            for (auto& info : infosByIPC) {
+                infos.emplace_back(info);
+            }
+        }
+    }
+    if (!node->GetChildren().empty()) {
+        for (const auto& child : node->GetChildren()) {
+            FindTextByTextHint(child, infos, context, commonProperty, searchParam);
         }
     }
 }

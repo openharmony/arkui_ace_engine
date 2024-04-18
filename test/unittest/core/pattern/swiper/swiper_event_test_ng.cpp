@@ -63,15 +63,8 @@ GestureEvent SwiperEventTestNg::CreateDragInfo(bool moveDirection)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::TOUCHPAD);
     info.SetGlobalLocation(Offset(100.f, 100.f));
-    if (moveDirection) {
-        // drag to right item
-        info.SetMainDelta(-DRAG_DELTA);
-        info.SetMainVelocity(-2000.f);
-    } else {
-        // drag to left item
-        info.SetMainDelta(DRAG_DELTA);
-        info.SetMainVelocity(2000.f);
-    }
+    info.SetMainDelta(moveDirection ? -DRAG_DELTA : DRAG_DELTA);
+    info.SetMainVelocity(moveDirection ? -2000.f : 2000.f);
     return info;
 }
 
@@ -369,131 +362,6 @@ HWTEST_F(SwiperEventTestNg, HandleDrag008, TestSize.Level1)
      */
     HandleDragEnd(info);
     EXPECT_FALSE(pattern_->targetIndex_.has_value());
-}
-
-/**
- * @tc.name: SwiperPatternTriggerEventOnFinish001
- * @tc.desc: TriggerEventOnFinish
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperPatternTriggerEventOnFinish001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    int32_t nextIndex = 1;
-    pattern_->preTargetIndex_ = 1;
-    pattern_->currentIndex_ = 1;
-
-    /**
-     * @tc.steps: step2. call TriggerEventOnFinish.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->TriggerEventOnFinish(nextIndex);
-            if (i == 1) {
-                break;
-            }
-            nextIndex = 2;
-            pattern_->isFinishAnimation_ = true;
-        }
-        pattern_->isFinishAnimation_ = false;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternHandleMouseEvent001
- * @tc.desc: HandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperPatternHandleMouseEvent001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    auto info = MouseInfo();
-    layoutProperty_->UpdateShowIndicator(true);
-
-    /**
-     * @tc.steps: step2. call HandleMouseEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->HandleMouseEvent(info);
-        layoutProperty_->UpdateShowIndicator(false);
-    }
-}
-
-/**
- * @tc.name: PanEvent001
- * @tc.desc: PanEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, PanEvent001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    auto actionStart = pattern_->panEvent_->GetActionStartEventFunc();
-    auto actionUpdate = pattern_->panEvent_->GetActionUpdateEventFunc();
-    auto actionEnd = pattern_->panEvent_->GetActionEndEventFunc();
-    auto actionCancel = pattern_->panEvent_->GetActionCancelEventFunc();
-
-    GestureEvent info;
-    info.SetInputEventType(InputEventType::AXIS);
-    info.SetSourceTool(SourceTool::MOUSE);
-    info.SetMainDelta(10.f);
-    actionStart(info);
-    actionUpdate(info);
-    actionEnd(info);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-
-    info.SetMainDelta(-10.f);
-    actionStart(info);
-    actionUpdate(info);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-    actionEnd(info);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
-}
-
-/**
- * @tc.name: SwiperPatternInitHoverMouseEvent001
- * @tc.desc: InitHoverMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperPatternInitHoverMouseEvent001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    eventHub_->AttachHost(frameNode_);
-    pattern_->hoverEvent_ = nullptr;
-    auto info = MouseInfo();
-
-    /**
-     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->InitHoverMouseEvent();
-    pattern_->hoverEvent_->onHoverCallback_(true);
-    pattern_->mouseEvent_->onMouseCallback_(info);
-    layoutProperty_->UpdateShowIndicator(false);
-    pattern_->InitHoverMouseEvent();
-    pattern_->hoverEvent_->onHoverCallback_(true);
-}
-
-/**
- * @tc.name: SwiperPatternHandleTouchDown001
- * @tc.desc: HandleTouchDown
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->usePropertyAnimation_ = true;
-
-    /**
-     * @tc.steps: step2. call HandleTouchDown.
-     * @tc.expected: Related function runs ok.
-     */
-    TouchLocationInfo touchLocationInfo("down", 0);
-    touchLocationInfo.SetTouchType(TouchType::DOWN);
-    pattern_->HandleTouchDown(touchLocationInfo);
 }
 
 /**
@@ -830,51 +698,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperInit001
- * @tc.desc: InitIndicator
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperInit001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    EXPECT_EQ(frameNode_->children_.size(), 5);
-}
-
-/**
- * @tc.name: SwiperInit002
- * @tc.desc: InitOnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperInit002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub_, FocusType::DISABLE, false);
-    pattern_->InitOnKeyEvent(focusHub);
-    KeyEvent event = KeyEvent();
-    event.action = KeyAction::DOWN;
-    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(event));
-}
-
-/**
- * @tc.name: SwiperFunc001
- * @tc.desc: OnKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperFunc001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    KeyEvent event = KeyEvent();
-    event.action = KeyAction::CLICK;
-    EXPECT_FALSE(pattern_->OnKeyEvent(event));
-    event.action = KeyAction::DOWN;
-    EXPECT_FALSE(pattern_->OnKeyEvent(event));
-    event.code = KeyCode::KEY_DPAD_LEFT;
-    EXPECT_TRUE(pattern_->OnKeyEvent(event));
-    event.code = KeyCode::KEY_DPAD_RIGHT;
-    EXPECT_TRUE(pattern_->OnKeyEvent(event));
-}
-
-/**
  * @tc.name: SwiperFunc002
  * @tc.desc: OnVisibleChange
  * @tc.type: FUNC
@@ -897,57 +720,59 @@ HWTEST_F(SwiperEventTestNg, SwiperFunc002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperFunc003
- * @tc.desc: OnIndexChange
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperFunc003, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    EXPECT_EQ(pattern_->TotalCount(), 4);
-}
-
-/**
- * @tc.name: SwiperPatternOnIndexChange001
- * @tc.desc: OnIndexChange
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, SwiperPatternOnIndexChange001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayArrow(true); // show arrow
-        model.SetHoverShow(false);
-        model.SetArrowStyle(ARROW_PARAMETERS);
-    });
-    layoutProperty_->UpdateShowIndicator(false);
-    pattern_->leftButtonId_.reset();
-    ASSERT_EQ(pattern_->TotalCount(), 6);
-    pattern_->oldIndex_ = 1;
-    layoutProperty_->UpdateIndex(2);
-
-    /**
-     * @tc.steps: step3. call OnIndexChange.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->OnIndexChange();
-}
-
-/**
- * @tc.name: SwiperPatternOnVisibleChange001
+ * @tc.name: SwiperPatternOnVisibleChange003
  * @tc.desc: OnVisibleChange
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperEventTestNg, SwiperPatternOnVisibleChange001, TestSize.Level1)
+HWTEST_F(SwiperEventTestNg, SwiperPatternOnVisibleChange003, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->isInit_ = false;
     pattern_->isWindowShow_ = false;
 
     /**
-     * @tc.steps: step2. call OnVisibleChange.
+     * @tc.cases: call OnVisibleChange.
      * @tc.expected: Related function runs ok.
      */
+    pattern_->isInit_ = true;
     pattern_->OnVisibleChange(true);
+    EXPECT_TRUE(pattern_->isInit_);
+}
+
+/**
+ * @tc.name: OnIndexChange001
+ * @tc.desc: OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnIndexChange001, TestSize.Level1)
+{
+    bool isTrigger = false;
+    auto onChangeEvent = [&isTrigger](const BaseEventInfo* info) { isTrigger = true; };
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetOnChangeEvent(std::move(onChangeEvent));
+    });
+
+    /**
+     * @tc.steps: step1. Call ShowNext
+     * @tc.expected: Trigger onChangeEvent
+     */
+    ShowNext();
+    EXPECT_TRUE(isTrigger);
+
+    /**
+     * @tc.steps: step2. Call ShowPrevious
+     * @tc.expected: Trigger onChangeEvent
+     */
+    isTrigger = false;
+    ShowPrevious();
+    EXPECT_TRUE(isTrigger);
+
+    /**
+     * @tc.steps: step3. Call ChangeIndex
+     * @tc.expected: Trigger onChangeEvent
+     */
+    isTrigger = false;
+    ChangeIndex(3);
+    EXPECT_TRUE(isTrigger);
 }
 
 /**
@@ -1003,5 +828,66 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     EXPECT_FALSE(pattern_->childScrolling_);
 
     pattern_->NotifyParentScrollEnd();
+}
+
+/**
+ * @tc.name: OnChange001
+ * @tc.desc: Test OnChange event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnChange001, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto onChange = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        currentIndex = swiperInfo->GetIndex();
+    };
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetOnChange(std::move(onChange));
+    });
+
+    /**
+     * @tc.steps: step1. Show next page
+     * @tc.expected: currentIndex change to 1
+     */
+    ShowNext();
+    EXPECT_EQ(currentIndex, 1);
+
+    /**
+     * @tc.steps: step2. Show previous page
+     * @tc.expected: currentIndex change to 0
+     */
+    ShowPrevious();
+    EXPECT_EQ(currentIndex, 0);
+}
+
+/**
+ * @tc.name: OnAnimation001
+ * @tc.desc: Test OnAnimationStart OnAnimationEnd event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnAnimation001, TestSize.Level1)
+{
+    bool isAnimationStart = false;
+    auto onAnimationStart =
+        [&isAnimationStart](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+            isAnimationStart = true;
+        };
+    bool isAnimationEnd = false;
+    auto onAnimationEnd = [&isAnimationEnd](int32_t index, const AnimationCallbackInfo& info) {
+        isAnimationEnd = true;
+    };
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetOnAnimationStart(std::move(onAnimationStart));
+        model.SetOnAnimationEnd(std::move(onAnimationEnd));
+    });
+
+    /**
+     * @tc.steps: step1. Show next page
+     * @tc.expected: Animation event will be called
+     */
+    ShowNext();
+    EXPECT_TRUE(isAnimationStart);
+    EXPECT_TRUE(isAnimationEnd);
 }
 } // namespace OHOS::Ace::NG

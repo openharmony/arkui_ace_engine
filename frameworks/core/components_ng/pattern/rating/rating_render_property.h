@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <string>
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
@@ -48,11 +49,11 @@ public:
         propTouchStar_.reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        json->Put("rating", std::to_string(propRatingScore_.value_or(0.0)).c_str());
+        json->PutExtAttr("rating", std::to_string(propRatingScore_.value_or(0.0)).c_str(), filter);
         constexpr double DEFAULT_STEP_SIZE = 0.5;
-        json->Put("stepSize", std::to_string(propStepSize_.value_or(DEFAULT_STEP_SIZE)).c_str());
+        json->PutExtAttr("stepSize", std::to_string(propStepSize_.value_or(DEFAULT_STEP_SIZE)).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RatingScore, double, PROPERTY_UPDATE_RENDER);

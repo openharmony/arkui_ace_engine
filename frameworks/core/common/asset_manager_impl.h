@@ -42,6 +42,7 @@ class AssetProviderImpl : public AssetProvider {
 
 public:
     virtual std::unique_ptr<AssetMapping> GetAsMapping(const std::string& assetName) const = 0;
+    virtual std::vector<std::unique_ptr<AssetMapping>> GetAsMappingFromI18n(const std::string& assetName) const = 0;
 };
 
 class ACE_EXPORT AssetManagerImpl final : public AssetManager {
@@ -53,6 +54,7 @@ public:
     void PushFront(RefPtr<AssetProvider> provider) override;
     void PushBack(RefPtr<AssetProvider> provider) override;
     RefPtr<Asset> GetAsset(const std::string& assetName) override;
+    std::vector<RefPtr<Asset>> GetAssetFromI18n(const std::string& assetName) override;
     std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
     void SetLibPath(const std::string& appLibPathKey, const std::vector<std::string>& packagePath) override;
     std::vector<std::string> GetLibPath() const override;

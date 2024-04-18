@@ -35,6 +35,7 @@
 #include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_g.h"
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
+#include "frameworks/core/components_ng/svg/parse/svg_image.h"
 #include "frameworks/core/components_ng/svg/parse/svg_line.h"
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 #include "frameworks/core/components_ng/svg/parse/svg_path.h"
@@ -69,6 +70,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "feOffset", []() -> RefPtr<SvgNode> { return SvgFeOffset::Create(); } },
     { "filter", []() -> RefPtr<SvgNode> { return SvgFilter::Create(); } },
     { "g", []() -> RefPtr<SvgNode> { return SvgG::Create(); } },
+    { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
     { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
     { "linearGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateLinearGradient(); } },
     { "mask", []() -> RefPtr<SvgNode> { return SvgMask::Create(); } },
@@ -99,12 +101,11 @@ SvgDom::SvgDom()
 
 SvgDom::~SvgDom() {}
 
-RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color)
+RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& src)
 {
     RefPtr<SvgDom> svgDom = AceType::MakeRefPtr<SvgDom>();
-    if (color) {
-        svgDom->fillColor_ = color;
-    }
+    svgDom->fillColor_ = src.GetFillColor();
+    svgDom->path_ = src.GetSrc();
     bool ret = svgDom->ParseSvg(svgStream);
     if (ret) {
         return svgDom;
@@ -150,6 +151,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
     CHECK_NULL_RETURN(node, nullptr);
     node->SetContext(svgContext_);
+    node->SetImagePath(path_);
     ParseAttrs(dom, xmlNode, node);
     for (auto* child = dom.getFirstChild(xmlNode, nullptr); child; child = dom.getNextSibling(child)) {
         const auto& childNode = TranslateSvgNode(dom, child, node);
@@ -303,7 +305,7 @@ void SvgDom::DrawImage(
         root_->SetSmoothEdge(smoothEdge_);
     }
     root_->SetColorFilter(colorFilter_);
-    root_->Draw(canvas, layout, fillColor_);
+    root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
     canvas.Restore();
 }
 

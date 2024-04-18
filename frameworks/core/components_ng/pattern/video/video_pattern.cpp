@@ -277,7 +277,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& stateChangedEvent = [videoPattern, uiTaskExecutor](PlaybackStatus status) {
-        uiTaskExecutor.PostSyncTask([&videoPattern, status] {
+        uiTaskExecutor.PostTask([videoPattern, status] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
@@ -286,7 +286,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& errorEvent = [videoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([&videoPattern] {
+        uiTaskExecutor.PostTask([videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);

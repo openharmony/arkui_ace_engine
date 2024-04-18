@@ -37,12 +37,14 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
@@ -78,6 +80,15 @@ GradientColor CreateTextGradientColor(float percent, Color color)
 
 void TextPattern::OnAttachToFrameNode()
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
+            host->GetRenderContext()->UpdateClipEdge(true);
+        }
+    }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -357,7 +368,11 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetClipEdge().value_or(false)) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (renderContext->GetClipEdge().value_or(clip)) {
         if (localOffset.GetX() < textContentGlobalOffset.GetX()) {
             localOffset.SetX(textContentGlobalOffset.GetX());
         } else if (GreatOrEqual(localOffset.GetX(), textContentGlobalOffset.GetX() + contentRect_.Width())) {
@@ -677,7 +692,11 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
     CHECK_NULL_RETURN(host, false);
     PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
         static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
-    if (!renderContext->GetClipEdge().value_or(false) && overlayMod_) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (!renderContext->GetClipEdge().value_or(clip) && overlayMod_) {
         textContentRect = overlayMod_->GetBoundsRect();
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
@@ -709,13 +728,11 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
             if (rect.IsInRegion(textOffset)) {
                 CHECK_NULL_RETURN(!item->onClick, true);
                 clickedSpanPosition_ = -1;
-                break;
+                return false;
             }
         }
-        if (clickedSpanPosition_ == -1) {
-            break;
-        }
     }
+    clickedSpanPosition_ = -1;
     return false;
 }
 
@@ -1319,7 +1336,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
                 PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
                     result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
                 UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
-            } else {
+            } else if (result.valueString.size() > 1) {
                 UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
             }
         }
@@ -1549,7 +1566,10 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
-            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren);
+            RichEditorDragInfo info;
+            info.firstHandle = pattern->textSelector_.firstHandle;
+            info.secondHandle = pattern->textSelector_.secondHandle;
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
@@ -1780,7 +1800,8 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
             BorderRadiusProperty brp;
             auto jsonObject = JsonUtil::Create(true);
             auto jsonBorder = JsonUtil::Create(true);
-            imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
+            InspectorFilter emptyFilter;
+            imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder, emptyFilter);
             resultObject.imageStyle.borderRadius = jsonObject->GetValue("borderRadius")->IsObject()
                                                        ? jsonObject->GetValue("borderRadius")->ToString()
                                                        : jsonObject->GetString("borderRadius");
@@ -1950,15 +1971,15 @@ void TextPattern::InitCopyOption()
     }
 }
 
-void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("enableDataDetector", textDetectEnable_ ? "true" : "false");
+    json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
-    json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+    json->PutExtAttr("dataDetectorConfig", jsonValue->ToString().c_str(), filter);
     const auto& selector = GetTextSelector();
     auto result = "[" + std::to_string(selector.GetTextStart()) + "," + std::to_string(selector.GetTextEnd()) + "]";
-    json->Put("selection", result.c_str());
+    json->PutExtAttr("selection", result.c_str(), filter);
 }
 
 void TextPattern::OnAfterModifyDone()
@@ -2071,10 +2092,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void TextPattern::ProcessOverlayAfterLayout()
 {
-    if (processOverlayDelayTask_) {
-        processOverlayDelayTask_();
-        processOverlayDelayTask_ = nullptr;
-    } else if (selectOverlay_->SelectOverlayIsOn()) {
+    if (selectOverlay_->SelectOverlayIsOn()) {
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
     }
@@ -2398,16 +2416,18 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
-    if (selectOverlay_->SelectOverlayIsOn()) {
-        if (selectOverlay_->IsShowMouseMenu()) {
-            CloseSelectOverlay();
-        } else {
-            processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+    CHECK_NULL_VOID(selectOverlay_->SelectOverlayIsOn());
+    if (selectOverlay_->IsShowMouseMenu()) {
+        CloseSelectOverlay();
+    } else {
+        auto context = PipelineContext::GetCurrentContextSafely();
+        if (context) {
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->CalculateHandleOffsetAndShowOverlay();
                 pattern->ShowSelectOverlay({ .menuIsShow = false });
-            };
+            });
         }
     }
 }
@@ -2747,7 +2767,11 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(gestureHub, paintMethod);
     std::vector<DimensionRect> hotZoneRegions;
     DimensionRect hotZoneRegion;
-    if (!context->GetClipEdge().value_or(false)) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (!context->GetClipEdge().value_or(clip)) {
         CHECK_NULL_RETURN(paragraph_, paintMethod);
         RectF boundsRect = overlayMod_->GetBoundsRect();
         auto boundsWidth = contentRect_.GetX() + std::ceil(static_cast<float>(paragraph_->GetLongestLine()));
@@ -3051,9 +3075,9 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
     return resultObject;
 }
 
-void TextPattern::UpdateSpanItems(const std::list<RefPtr<SpanItem>>& spanItems)
+void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
-    spans_ = spanItems;
+    spans_ = value->GetSpanItems();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

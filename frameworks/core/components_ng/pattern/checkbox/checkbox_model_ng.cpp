@@ -71,6 +71,16 @@ void CheckBoxModelNG::SetUnSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color);
 }
+
+void CheckBoxModelNG::SetBuilder(std::optional<std::function<void(void)>>& buildFunc)
+{
+    const auto& frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(checkBoxPattern);
+    checkBoxPattern->SetIndicatorBuilder(buildFunc);
+}
+
 void CheckBoxModelNG::SetCheckboxStyle(CheckBoxStyle checkboxStyle)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle);

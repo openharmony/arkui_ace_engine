@@ -136,6 +136,7 @@ public:
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
+    virtual void SetParagraphId(uint32_t id) = 0;
 };
 } // namespace OHOS::Ace::NG
 

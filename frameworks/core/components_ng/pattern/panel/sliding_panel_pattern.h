@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class SlidingPanelPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(SlidingPanelPattern, Pattern, FocusView);
@@ -88,7 +89,7 @@ public:
     void UpdateCurrentOffset(float offset);
     void UpdateCurrentOffsetOnAnimate(float currentOffset);
     void MarkDirtyNode(PropertyChangeFlag extraFlag);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     void OnModifyDone() override;

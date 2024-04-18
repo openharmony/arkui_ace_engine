@@ -94,6 +94,7 @@ const char PATTERN_BG_COLOR_FOCUSED[] = "bg_color_focused";
 const char PATTERN_BG_COLOR_DISABLED_ALPHA[] = "bg_color_disabled_alpha";
 const char PATTERN_BG_COLOR_ALPHA[] = "bg_color_alpha";
 const char PATTERN_TEXT_COLOR[] = "text_color";
+const char PATTERN_TEXT_COLOR_BLUR[] = "text_color_blur_style";
 const char PATTERN_TEXT_COLOR_ALPHA[] = "text_color_alpha";
 const char PATTERN_TEXT_COLOR_FOCUSED[] = "text_color_focused";
 const char PATTERN_TEXT_COLOR_SELECTED[] = "text_color_selected";

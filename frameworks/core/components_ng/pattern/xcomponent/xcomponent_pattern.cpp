@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
-#include "interfaces/native/native_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
+#include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
+#include "base/log/frame_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/ressched/ressched_report.h"
@@ -53,6 +55,24 @@ namespace {
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
+std::string XComponentTypeToString(XComponentType type)
+{
+    switch (type) {
+        case XComponentType::UNKNOWN:
+            return "unknown";
+        case XComponentType::SURFACE:
+            return "surface";
+        case XComponentType::COMPONENT:
+            return "component";
+        case XComponentType::TEXTURE:
+            return "texture";
+        case XComponentType::NODE:
+            return "node";
+        default:
+            return "unknown";
+    }
+}
+
 OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
 {
     switch (touchType) {
@@ -268,6 +288,9 @@ void XComponentPattern::OnAttachToFrameNode()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EnableSelfRender();
+    }
 }
 
 void XComponentPattern::OnModifyDone()
@@ -370,6 +393,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().DisableSelfRender();
+    }
 }
 
 void XComponentPattern::SetMethodCall()
@@ -461,12 +487,20 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return false;
 }
 
-void XComponentPattern::OnPaint()
+void XComponentPattern::DumpInfo()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateBackgroundColor(Color::BLACK);
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_));
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(XComponentTypeToString(type_)));
+    DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_));
+}
+
+void XComponentPattern::DumpAdvanceInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("surfaceRect: ").append(RectF { localPosition_, surfaceSize_ }.ToString()));
+    if (renderSurface_) {
+        renderSurface_->DumpInfo();
+    }
 }
 
 void XComponentPattern::NativeXComponentChange(float width, float height)
@@ -572,6 +606,8 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
             static_cast<uint32_t>(surfaceRect.Height() * viewScale));
         NativeXComponentChange(surfaceRect.Width(), surfaceRect.Height());
     }
+    renderSurface_->UpdateSurfaceSizeInUserData(
+        static_cast<uint32_t>(surfaceRect.Width()), static_cast<uint32_t>(surfaceRect.Height()));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();

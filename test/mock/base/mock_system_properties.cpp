@@ -61,6 +61,7 @@ bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
+bool SystemProperties::faultInjectEnabled_ = false;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
@@ -155,5 +156,10 @@ bool SystemProperties::GetSideBarContainerBlurEnable()
 float SystemProperties::GetDefaultResolution()
 {
     return 1.0f;
+}
+
+std::string SystemProperties::GetAtomicServiceBundleName()
+{
+    return {};
 }
 } // namespace OHOS::Ace

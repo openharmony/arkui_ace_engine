@@ -16,15 +16,16 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 #include "core/components/scroll/scroll_bar_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    PaintProperty::ToJsonValue(json);
-    json->Put("scrollBar", GetBarStateString().c_str());
-    json->Put("scrollBarColor", GetBarColor().ColorToString().c_str());
-    json->Put("scrollBarWidth", GetBarWidth().ToString().c_str());
+    PaintProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("scrollBar", GetBarStateString().c_str(), filter);
+    json->PutExtAttr("scrollBarColor", GetBarColor().ColorToString().c_str(), filter);
+    json->PutExtAttr("scrollBarWidth", GetBarWidth().ToString().c_str(), filter);
 }
 
 Color ScrollablePaintProperty::GetBarColor() const

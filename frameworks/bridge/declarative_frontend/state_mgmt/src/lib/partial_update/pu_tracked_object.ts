@@ -30,7 +30,7 @@ class TrackedObject {
   private static readonly ___TRACKED_PREFIX_LEN = TrackedObject.___TRACKED_PREFIX.length;
 
   public static isCompatibilityMode(obj: Object): boolean {
-    return !obj || (typeof obj !== "object") || !Reflect.has(obj, TrackedObject.___IS_TRACKED_OPTIMISED);
+    return !obj || (typeof obj !== 'object') || !Reflect.has(obj, TrackedObject.___IS_TRACKED_OPTIMISED);
   }
 
   public static needsPropertyReadCb(obj: Object): boolean {
@@ -50,12 +50,12 @@ class TrackedObject {
     if (!obj1 || !obj2 || (typeof obj1 !== 'object') || (typeof obj2 !== 'object') ||
       (obj1.constructor !== obj2.constructor) ||
       TrackedObject.isCompatibilityMode(obj1)) {
-      stateMgmtConsole.debug(`TrackedObject.notifyObjectValueAssignment notifying change as assignment (non-optimised)`)
+      stateMgmtConsole.debug(`TrackedObject.notifyObjectValueAssignment notifying change as assignment (non-optimised)`);
       notifyPropertyChanged.call(obSelf);
       return false;
     }
 
-    stateMgmtConsole.debug(`TrackedObject.notifyObjectValueAssignment notifying actually changed properties (optimised)`)
+    stateMgmtConsole.debug(`TrackedObject.notifyObjectValueAssignment notifying actually changed properties (optimised)`);
     const obj1Raw = ObservedObject.GetRawObject(obj1);
     const obj2Raw = ObservedObject.GetRawObject(obj2);
     let shouldFakePropPropertyBeNotified: boolean = false;
@@ -72,7 +72,7 @@ class TrackedObject {
         }
       });
     // notify this non-existing object property has changed only if some of the tracked properties changed.
-    // SynchedPropertyOneWay.reset() report a 'read' on this property, thereby creating a dependency
+    // SynchedPropertyOneWay reset() report a 'read' on this property, thereby creating a dependency
     // reporting the property as changed causes @Prop sync from source
     if (shouldFakePropPropertyBeNotified) {
       stateMgmtConsole.debug(`   ... TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY - notifying`);
@@ -81,7 +81,7 @@ class TrackedObject {
 
     // always notify this non-existing object property has changed for SynchedPropertyNestedObject as 
     // the object has changed in assigment.
-    // SynchedPropertyNestedObject.set() reports a 'read' on this property, thereby creating a dependency
+    // SynchedPropertyNestedObject set() reports a 'read' on this property, thereby creating a dependency
     // reporting the property as changed causes @ObjectLink sync from source
     stateMgmtConsole.debug(`   ... TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY - notifying`);
     notifyTrackedPropertyChange.call(obSelf, TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY);

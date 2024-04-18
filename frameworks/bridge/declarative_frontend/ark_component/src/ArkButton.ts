@@ -89,6 +89,9 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   setContentModifier(modifier: ContentModifier<ButtonConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);

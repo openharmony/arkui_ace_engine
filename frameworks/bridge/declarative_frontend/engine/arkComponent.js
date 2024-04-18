@@ -1116,6 +1116,31 @@ class BackgroundImagePositionModifier extends ModifierWithKey {
   }
 }
 BackgroundImagePositionModifier.identity = Symbol('backgroundImagePosition');
+class BackgroundImageResizableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageResizable(node);
+    }
+    else {
+      let sliceTop, sliceBottom, sliceLeft, sliceRight;
+      if (!isUndefined(this.value.slice)) {
+        let tempSlice = this.value.slice;
+        sliceTop = tempSlice.top;
+        sliceBottom = tempSlice.bottom;
+        sliceLeft = tempSlice.left;
+        sliceRight = tempSlice.right;
+      }
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+BackgroundImageResizableModifier.identity = Symbol('backgroundImageResizable');
 class LinearGradientBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2796,6 +2821,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BackgroundImagePositionModifier.identity, BackgroundImagePositionModifier, value);
     return this;
   }
+  backgroundImageResizable(value) {
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageResizableModifier.identity, BackgroundImageResizableModifier, value);
+    return this;
+  }
   backgroundBlurStyle(value, options) {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity, BackgroundBlurStyleModifier, undefined);
@@ -3772,33 +3801,43 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   setOnClick(callback) {
+    this._clickEvent = callback;
     getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
   }
   setOnTouch(callback) {
+    this._touchEvent = callback;
     getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback, this._instanceId);
   }
   setOnAppear(callback) {
+    this._onAppearEvent = callback;
     getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback, this._instanceId);
   }
   setOnDisappear(callback) {
+    this._onDisappearEvent = callback;
     getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback) {
+    this._onKeyEvent = callback;
     getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback, this._instanceId);
   }
   setOnFocus(callback) {
+    this._onFocusEvent = callback;
     getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback, this._instanceId);
   }
   setOnBlur(callback) {
+    this._onBlur = callback;
     getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback, this._instanceId);
   }
   setOnHover(callback) {
+    this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback) {
+    this._onMouseEvent = callback;
     getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
   }
   setOnSizeChange(callback) {
+    this._onSizeChangeEvent = callback;
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
   }
 }
@@ -3829,6 +3868,32 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
     }
   } else {
     applyUIAttributes(modifier, nativeNode, component);
+    component.applyModifierPatch();
+  }
+}
+
+function attributeModifierFuncWithoutStateStyles(modifier, componentBuilder, modifierBuilder) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      modifier.applyNormalAttribute(component);
+      component.applyModifierPatch();
+    }
+  } else {
+    modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
   }
 }
@@ -7499,7 +7564,14 @@ class ArkSpanComponent {
     return this;
   }
   font(value) {
-    modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
+      value === null || value === void 0 ? void 0 : value.size);
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
+      value === null || value === void 0 ? void 0 : value.weight);
+    modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier,
+      value === null || value === void 0 ? void 0 : value.family);
+    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier,
+      value === null || value === void 0 ? void 0 : value.style);
     return this;
   }
   lineHeight(value) {
@@ -7546,7 +7618,7 @@ class ArkSpanComponent {
 // @ts-ignore
 if (globalThis.Span !== undefined) {
   globalThis.Span.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
       return new ArkSpanComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SpanModifier(nativePtr, classType);
@@ -11080,6 +11152,9 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().button.setContentModifierBuilder(this.nativePtr, this);
@@ -11984,6 +12059,9 @@ class ArkToggleComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, this);
@@ -12723,6 +12801,9 @@ class ArkRadioComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, this);
@@ -12993,6 +13074,10 @@ class ArkTimePickerComponent extends ArkComponent {
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
+  dateTimeOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity, TimepickerDateTimeOptionsModifier, value);
+    return this;
+  }
 }
 class TimepickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -13134,6 +13219,21 @@ class TimepickerUseMilitaryTimeModifier extends ModifierWithKey {
   }
 }
 TimepickerUseMilitaryTimeModifier.identity = Symbol('timepickerUseMilitaryTime');
+
+class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
+    }
+  }
+}
+TimepickerDateTimeOptionsModifier.identity = Symbol('timepickerDateTimeOptions');
 
 // @ts-ignore
 if (globalThis.TimePicker !== undefined) {
@@ -13489,6 +13589,9 @@ class ArkSliderComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().slider.setContentModifierBuilder(this.nativePtr, this);
@@ -13840,6 +13943,9 @@ class ArkRatingComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().rating.setContentModifierBuilder(this.nativePtr, this);
@@ -13938,6 +14044,9 @@ class ArkCheckboxComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().checkbox.setContentModifierBuilder(this.nativePtr, this);
@@ -14496,6 +14605,23 @@ class CheckboxGroupHeightModifier extends ModifierWithKey {
   }
 }
 CheckboxGroupHeightModifier.identity = Symbol('checkboxGroupHeight');
+class CheckboxGroupStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().checkboxgroup.resetCheckboxGroupStyle(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupStyle(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CheckboxGroupStyleModifier.identity = Symbol('checkboxgroupStyle');
 class ArkCheckboxGroupComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14529,6 +14655,10 @@ class ArkCheckboxGroupComponent extends ArkComponent {
   }
   height(value) {
     modifierWithKey(this._modifiersWithKeys, CheckboxGroupHeightModifier.identity, CheckboxGroupHeightModifier, value);
+    return this;
+  }
+  checkboxShape(value) {
+    modifierWithKey(this._modifiersWithKeys, CheckboxGroupStyleModifier.identity, CheckboxGroupStyleModifier, value);
     return this;
   }
 }
@@ -19557,6 +19687,10 @@ class ArkSwiperComponent extends ArkComponent {
   nestedScroll(value) {
     throw new Error('Method not implemented.');
   }
+  indicatorInteractive(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
+    return this;
+  }
 }
 class SwiperNextMarginModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -19984,6 +20118,19 @@ class SwiperEnabledModifier extends ModifierWithKey {
   }
 }
 SwiperEnabledModifier.identity = Symbol('swiperenabled');
+class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetIndicatorInteractive(node);
+    } else {
+      getUINativeModule().swiper.setIndicatorInteractive(node, this.value);
+    }
+  }
+}
+SwiperIndicatorInteractiveModifier.identity = Symbol('indicatorInteractive');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {

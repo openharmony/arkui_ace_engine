@@ -205,6 +205,12 @@ public:
 
     bool RemoveOverlay();
     void MarkDirtyOverlay();
+
+    bool IsOnShow()
+    {
+        return isOnShow_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;

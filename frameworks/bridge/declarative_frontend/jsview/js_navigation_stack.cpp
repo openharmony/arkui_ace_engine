@@ -244,14 +244,21 @@ std::vector<int32_t> JSNavigationStack::GetAllPathIndex()
     return pathIndex;
 }
 
-void JSNavigationStack::InitNavPathIndex()
+void JSNavigationStack::InitNavPathIndex(const std::vector<std::string>& pathNames)
 {
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
 
+    JSRef<JSArray> nameArray = JSRef<JSArray>::New();
+    JSRef<JSVal> params[1];
+    for (size_t i = 0; i < pathNames.size(); i++) {
+        JSRef<JSVal> info = JSRef<JSVal>::Make(ToJSValue(pathNames[i]));
+        nameArray->SetValueAt(i, info);
+    }
+    params[0] = nameArray;
     auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("initNavPathIndex"));
-    func->Call(dataSourceObj_);
+    func->Call(dataSourceObj_, 1, params);
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode)
@@ -368,6 +375,9 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "render current custom node: %{public}s",
                 customNode->GetCustomTag().c_str());
+            // record parent navigationNode before customNode is rendered in case of navDestinationNode
+            auto navigationNode = GetNavigationNode();
+            customNode->SetNavigationNode(navigationNode);
             // render, and find deep further
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {

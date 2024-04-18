@@ -21,6 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -51,10 +52,10 @@ public:
         return key_;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        UINode::ToJsonValue(json);
-        json->Put("key", key_.c_str());
+        UINode::ToJsonValue(json, filter);
+        json->PutExtAttr("key", key_.c_str(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

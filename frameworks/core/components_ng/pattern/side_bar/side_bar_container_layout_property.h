@@ -20,6 +20,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -84,9 +85,9 @@ public:
         ResetMinContentWidth();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
 
         constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
         constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
@@ -116,17 +117,17 @@ public:
         auto maxSideBarWidth = propMaxSideBarWidth_.value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
         auto sideBarPosition = propSideBarPosition_.value_or(SideBarPosition::START);
         auto minContentWidth = propMinContentWidth_.value_or(DEFAULT_MIN_CONTENT_WIDTH);
-        json->Put("type",
-            type == SideBarContainerType::EMBED ? "SideBarContainerType.Embed" : "SideBarContainerType.OVERLAY");
-        json->Put("showSideBar", propShowSideBar_.value_or(true) ? "true" : "false");
-        json->Put("showControlButton", propShowControlButton_.value_or(true) ? "true" : "false");
-        json->Put("sideBarWidth", std::to_string(sideBarWidth.Value()).c_str());
-        json->Put("minSideBarWidth", std::to_string(minSideBarWidth.Value()).c_str());
-        json->Put("maxSideBarWidth", std::to_string(maxSideBarWidth.Value()).c_str());
-        json->Put("autoHide", propAutoHide_.value_or(true) ? "true" : "false");
-        json->Put("sideBarPosition",
-            sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End");
-        json->Put("minContentWidth", std::to_string(minContentWidth.Value()).c_str());
+        json->PutExtAttr("type", type == SideBarContainerType::EMBED ?
+            "SideBarContainerType.Embed" : "SideBarContainerType.OVERLAY", filter);
+        json->PutExtAttr("showSideBar", propShowSideBar_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("showControlButton", propShowControlButton_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("sideBarWidth", std::to_string(sideBarWidth.Value()).c_str(), filter);
+        json->PutExtAttr("minSideBarWidth", std::to_string(minSideBarWidth.Value()).c_str(), filter);
+        json->PutExtAttr("maxSideBarWidth", std::to_string(maxSideBarWidth.Value()).c_str(), filter);
+        json->PutExtAttr("autoHide", propAutoHide_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("sideBarPosition",
+            sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End", filter);
+        json->PutExtAttr("minContentWidth", std::to_string(minContentWidth.Value()).c_str(), filter);
 
         // divider
         Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
@@ -146,7 +147,7 @@ public:
         jsonDivider->Put("startMargin", startMargin.ToString().c_str());
         jsonDivider->Put("endMargin", endMargin.ToString().c_str());
         jsonDivider->Put("color", color.ColorToString().c_str());
-        json->Put("divider", jsonDivider->ToString().c_str());
+        json->PutExtAttr("divider", jsonDivider->ToString().c_str(), filter);
 
         CHECK_NULL_VOID(propControlButtonStyle_);
         auto left = propControlButtonStyle_->propControlButtonLeft.value_or(DEFAULT_CONTROL_BUTTON_LEFT);
@@ -168,7 +169,7 @@ public:
         jsonIcon->Put("switching", propControlButtonStyle_->propControlButtonSwitchingIconInfo->GetSrc().c_str());
 
         jsonControl->Put("icon", jsonIcon);
-        json->Put("controlButton", jsonControl->ToString().c_str());
+        json->PutExtAttr("controlButton", jsonControl->ToString().c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideBarContainerType, SideBarContainerType, PROPERTY_UPDATE_MEASURE);

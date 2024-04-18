@@ -23,6 +23,7 @@
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
@@ -114,9 +115,9 @@ public:
         buttonType_ = buttonType;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        Pattern::ToJsonValue(json);
+        Pattern::ToJsonValue(json, filter);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
@@ -126,43 +127,43 @@ public:
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
         auto textStyle = buttonTheme->GetTextStyle();
-        json->Put(
-            "type", host->GetTag() == "Toggle"
-                        ? "ToggleType.Button"
-                        : ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
-        json->Put("fontSize",
+        json->PutExtAttr("type", host->GetTag() == "Toggle" ? "ToggleType.Button" :
+            ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str(), filter);
+        json->PutExtAttr("fontSize",
             layoutProperty->GetFontSizeValue(layoutProperty->HasLabel() ? textStyle.GetFontSize() : Dimension(0))
                 .ToString()
-                .c_str());
-        json->Put("fontWeight",
-            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-        json->Put("fontColor", layoutProperty->GetFontColor()
+                .c_str(), filter);
+        json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(
+            layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str(), filter);
+        json->PutExtAttr("fontColor", layoutProperty->GetFontColor()
                                    .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
                                    .ColorToString()
-                                   .c_str());
+                                   .c_str(), filter);
         auto fontFamilyVector =
             layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
         std::string fontFamily = fontFamilyVector.at(0);
         for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
             fontFamily += ',' + fontFamilyVector.at(i);
         }
-        json->Put("fontFamily", fontFamily.c_str());
-        json->Put("fontStyle", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-                                   ? "FontStyle.Normal"
-                                   : "FontStyle.Italic");
-        json->Put("label", layoutProperty->GetLabelValue("").c_str());
+        json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
+        json->PutExtAttr("fontStyle",
+            layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ?
+                "FontStyle.Normal" : "FontStyle.Italic", filter);
+        json->PutExtAttr("label", layoutProperty->GetLabelValue("").c_str(), filter);
         auto eventHub = host->GetEventHub<ButtonEventHub>();
         CHECK_NULL_VOID(eventHub);
-        json->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
+        json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
+
         auto optionJson = JsonUtil::Create(true);
         optionJson->Put(
             "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
         optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
-        json->Put("options", optionJson->ToString().c_str());
+        json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
+
         auto fontJsValue = JsonUtil::Create(true);
         fontJsValue->Put("size", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
         fontJsValue->Put("weight",
-            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str());
         fontJsValue->Put("family", fontFamily.c_str());
         fontJsValue->Put(
             "style", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
@@ -180,13 +181,17 @@ public:
                 layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
                 .c_str());
         labelJsValue->Put("font", fontJsValue->ToString().c_str());
-        json->Put("labelStyle", labelJsValue->ToString().c_str());
-        json->Put("buttonStyle",
-            ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE)).c_str());
-        json->Put("controlSize",
-            ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL)).c_str());
-        json->Put(
-            "role", ConvertButtonRoleToString(layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL)).c_str());
+        json->PutExtAttr("labelStyle", labelJsValue->ToString().c_str(), filter);
+
+        json->PutExtAttr("buttonStyle",
+            ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE))
+            .c_str(), filter);
+        json->PutExtAttr("controlSize",
+            ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL))
+            .c_str(), filter);
+        json->PutExtAttr(
+            "role", ConvertButtonRoleToString(layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL))
+            .c_str(), filter);
     }
 
     static std::string ConvertButtonRoleToString(ButtonRole buttonRole)

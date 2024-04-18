@@ -85,6 +85,7 @@ public:
     virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
+    virtual void SetForegroundEffect(float radius) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -151,6 +152,7 @@ public:
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+    virtual void ResetPosition() {};
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
@@ -316,7 +318,9 @@ public:
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange) = 0;
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange) = 0;
     virtual void DismissContentCover() = 0;
     virtual void DismissSheet() = 0;
     virtual void DismissDialog() {};
@@ -324,6 +328,7 @@ public:
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
     virtual void SetAccessibilityText(const std::string& text) = 0;
+    virtual void SetAccessibilityTextHint(const std::string& text) = 0;
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
@@ -350,6 +355,7 @@ public:
     virtual void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
     virtual void SetLightIntensity(const float value) = 0;
+    virtual void SetLightColor(const Color& value) = 0;
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;

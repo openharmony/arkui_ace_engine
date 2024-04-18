@@ -153,9 +153,17 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
-void JSSwiper::SetIndicatorInteractive(bool indicatorInteractive)
+void JSSwiper::SetIndicatorInteractive(const JSCallbackInfo& info)
 {
-    SwiperModel::GetInstance()->SetIndicatorInteractive(indicatorInteractive);
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsBoolean()) {
+        SwiperModel::GetInstance()->SetIndicatorInteractive(info[0]->ToBoolean());
+    } else {
+        SwiperModel::GetInstance()->SetIndicatorInteractive(true);
+    }
 }
 
 void JSSwiper::SetAutoPlay(bool autoPlay)

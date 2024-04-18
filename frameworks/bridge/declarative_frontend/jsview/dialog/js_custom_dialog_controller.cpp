@@ -177,6 +177,16 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.backgroundColor = backgroundColor;
         }
 
+        // Parse backgroundBlurStyle.
+        auto backgroundBlurStyle = constructorArg->GetProperty("backgroundBlurStyle");
+        if (backgroundBlurStyle->IsNumber()) {
+            auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
+            if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+                blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+                instance->dialogProperties_.backgroundBlurStyle = blurStyle;
+            }
+        }
+
         auto execContext = info.GetExecutionContext();
         // Parse openAnimation.
         auto openAnimationValue = constructorArg->GetProperty("openAnimation");
@@ -274,10 +284,10 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
             dialogProperties_.windowScene = parent;
         }
     }
-    dialogProperties_.isSysBlurStyle = false;
+    dialogProperties_.isSysBlurStyle =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? true : false;
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, WeakClaim(this), dialogs_, pending_,
         isShown_, std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
-    return;
 }
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)

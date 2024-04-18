@@ -97,10 +97,27 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
+    JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRefresh>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSRefresh>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSRefresh::SetPullDownRatio(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    std::optional<float> pulldownRatio = std::nullopt;
+    if (!args->IsNumber()) {
+        RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
+        return;
+    }
+    pulldownRatio = std::clamp(args->ToNumber<float>(), 0.f, 1.f);
+    RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
 }
 
 void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
@@ -222,6 +239,7 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
+        RefreshModel::GetInstance()->ResetOnOffsetChange();
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));

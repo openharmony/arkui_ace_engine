@@ -14,6 +14,19 @@
  */
 /// <reference path='./import.ts' />
 
+const overrideMap = new Map<string, Map<string,
+  new (value: string | number | boolean | object) => ModifierWithKey<string | number | boolean | object>>>();
+
+
+overrideMap.set('ArkCheckboxComponent', new Map([
+  ['Symbol(width)', CheckboxWidthModifier],
+  ['Symbol(height)', CheckboxHeightModifier]
+]));
+
+overrideMap.set('ArkTextComponent', new Map([
+  ['Symbol(foregroundColor)', TextForegroundColorModifier]
+]));
+
 function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
   let myMap = modifier._modifiersWithKeys as ModifierMap;
   myMap.setOnChange((value: AttributeModifierWithKey) => {
@@ -77,18 +90,37 @@ class ModifierUtils {
   }
 
   static mergeMaps(stageMap: Map<Symbol, AttributeModifierWithKey>,
-    newMap: Map<Symbol, AttributeModifierWithKey>): Map<Symbol, AttributeModifierWithKey> {
+    newMap: Map<Symbol, AttributeModifierWithKey>): void {
     newMap.forEach((value, key) => {
-      stageMap.set(key, copyModifierWithKey(value));
+      stageMap.set(key, this.copyModifierWithKey(value));
     });
+  }
 
-    return stageMap;
+  static mergeMapsEmplace<T0 extends string | number | boolean | object, M0 extends ModifierWithKey<T0>>(
+    stageMap: Map<Symbol, AttributeModifierWithKey>,
+    newMap: Map<Symbol, AttributeModifierWithKey>,
+    componentOverrideMap: Map<string, new (value: T0) => M0>): void {
+      newMap.forEach((value, key) => {
+        if (componentOverrideMap.has(key.toString())) {
+          //@ts-ignore
+          const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
+          stageMap.set(key, newValue);
+        } else {
+          stageMap.set(key, this.copyModifierWithKey(value));
+        }
+      });
   }
 
   static applyAndMergeModifier<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(instance: T, modifier: M): void {
     // @ts-ignore
     let component: C = instance as C;
-    mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+    if (component.constructor.name && overrideMap.has(component.constructor.name)) {
+      const componentOverrideMap = overrideMap.get(component.constructor.name);
+      this.mergeMapsEmplace(component._modifiersWithKeys, modifier._modifiersWithKeys,
+        componentOverrideMap);
+    } else {
+      this.mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+    }
   }
 
   static applySetOnChange<T, M extends ArkComponent | ArkSpanComponent, C extends ArkComponent | ArkSpanComponent>(modifier: M): void {

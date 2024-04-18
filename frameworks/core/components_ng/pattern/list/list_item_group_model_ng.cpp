@@ -110,4 +110,12 @@ void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, FrameNode* footerNode
     pattern->AddFooter(AceType::Claim<UINode>(footerNode));
 }
 
+RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateListChildrenMainSize();
+}
 } // namespace OHOS::Ace::NG

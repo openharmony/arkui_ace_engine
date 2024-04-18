@@ -19,7 +19,6 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
-#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -84,6 +83,7 @@ void WindowScene::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
+    session_->SetAttachState(true);
     session_->SetUINodeId(host->GetAccessibilityId());
     auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
         const std::vector<DimensionRect>& responseRegion) {
@@ -136,8 +136,19 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
+    session_->SetAttachState(false);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain][WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
         session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
+}
+
+void WindowScene::OnMountToParentDone()
+{
+    if (snapshotNode_) {
+        snapshotNode_->MovePosition(-1);
+    }
+    if (startingNode_) {
+        startingNode_->MovePosition(-1);
+    }
 }
 
 void WindowScene::RegisterFocusCallback()

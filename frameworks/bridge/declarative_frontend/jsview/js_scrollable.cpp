@@ -18,36 +18,29 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/base/view_stack_model.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
-const int32_t EDGE_EFFECT_PARAM_COUNT = 2;
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 } // namespace
 
-EdgeEffect JSScrollable::ParseEdgeEffect(const JSCallbackInfo& info, EdgeEffect defaultValue)
+EdgeEffect JSScrollable::ParseEdgeEffect(const JSRef<JSVal>& jsValue, EdgeEffect defaultValue)
 {
-    if (info.Length() < 1) {
-        return defaultValue;
-    }
     auto edgeEffect = static_cast<int32_t>(defaultValue);
-    if (info[0]->IsNull() || info[0]->IsUndefined() || !JSViewAbstract::ParseJsInt32(info[0], edgeEffect) ||
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !JSViewAbstract::ParseJsInt32(jsValue, edgeEffect) ||
         edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
         edgeEffect = static_cast<int32_t>(defaultValue);
     }
     return static_cast<EdgeEffect>(edgeEffect);
 }
 
-bool JSScrollable::ParseAlwaysEnable(const JSCallbackInfo& info, bool defaultValue)
+bool JSScrollable::ParseAlwaysEnable(const JSRef<JSVal>& jsValue, bool defaultValue)
 {
     auto alwaysEnabled = defaultValue;
-    if (info.Length() == EDGE_EFFECT_PARAM_COUNT) {
-        auto paramObject = JSRef<JSObject>::Cast(info[1]);
-        if (!(info[1]->IsNull() || info[1]->IsUndefined())) {
-            JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
-            alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : false;
-        }
+    if (!(jsValue->IsNull() || jsValue->IsUndefined())) {
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
+        alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : defaultValue;
     }
     return alwaysEnabled;
 }

@@ -17,7 +17,12 @@
 
 #include "jsnapi_expo.h"
 
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 ArkUINodeHandle FrameNodeBridge::GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -89,17 +94,87 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
 ArkUINativeModuleValue FrameNodeBridge::IsModifiable(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::BooleanRef::New(vm, false));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->isModifiable(nativeNode);
     return panda::BooleanRef::New(vm, result);
 }
+
+ArkUINativeModuleValue FrameNodeBridge::MakeFrameNodeInfo(EcmaVM* vm, ArkUINodeHandle frameNode)
+{
+    const char* keys[] = { "nodeId", "nodePtr" };
+    auto nodeId = GetArkUINodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(frameNode);
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), panda::NativePointerRef::New(vm, frameNode) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return obj;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    node->SetExclusiveEventForChild(true);
+    auto pattern = node->GetPattern<NG::CustomFrameNodePattern>();
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "__AttachToMainTree__");
+    auto obj = global->Get(vm, funcName);
+    panda::Local<panda::FunctionRef> attachFunc = obj;
+    if (obj->IsFunction()) {
+        pattern->SetOnAttachFunc([vm, func = panda::CopyableGlobal(vm, attachFunc)](int32_t nodeId) {
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        });
+    }
+    funcName = panda::StringRef::NewFromUtf8(vm, "__DetachToMainTree__");
+    obj = global->Get(vm, funcName);
+    panda::Local<panda::FunctionRef> detachFunc = obj;
+    if (detachFunc->IsFunction()) {
+        pattern->SetOnDetachFunc([vm, func = panda::CopyableGlobal(vm, detachFunc)](int32_t nodeId) {
+            panda::Local<panda::JSValueRef> params[] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        });
+    }
+    FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
+    const char* keys[] = { "nodeId", "nativeStrongRef" };
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
+    auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return reslut;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getFrameNodeModifier()->invalidate(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void FrameNodeBridge::SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_VOID(firstArg->IsObject());
+    auto obj = Local<panda::ObjectRef>(firstArg);
+    auto funcName = panda::StringRef::NewFromUtf8(vm, "onDraw");
+    auto funcObj = obj->Get(vm, funcName);
+    CHECK_NULL_VOID(funcObj->IsFunction());
+    auto drawCallback = [vm, object = JsWeak(panda::CopyableGlobal(vm, obj))](NG::DrawingContext& context) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto funcName = panda::StringRef::NewFromUtf8(vm, "onDraw");
+        RenderNodeBridge::FireDrawCallback(vm, object, context, funcName);
+    };
+    auto pattern = frameNode->GetPattern<NG::CustomFrameNodePattern>();
+    pattern->SetDrawCallback(std::move(drawCallback));
+}
+
 ArkUINativeModuleValue FrameNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::BooleanRef::New(vm, true));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -111,7 +186,6 @@ ArkUINativeModuleValue FrameNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runtim
 ArkUINativeModuleValue FrameNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::BooleanRef::New(vm, true));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -129,7 +203,6 @@ ArkUINativeModuleValue FrameNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* r
 ArkUINativeModuleValue FrameNodeBridge::RemoveChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -141,7 +214,6 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveChild(ArkUIRuntimeCallInfo* runtim
 ArkUINativeModuleValue FrameNodeBridge::ClearChildren(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -151,7 +223,6 @@ ArkUINativeModuleValue FrameNodeBridge::ClearChildren(ArkUIRuntimeCallInfo* runt
 ArkUINativeModuleValue FrameNodeBridge::GetChildrenCount(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NumberRef::New(vm, 0));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, 0));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -161,59 +232,58 @@ ArkUINativeModuleValue FrameNodeBridge::GetChildrenCount(ArkUIRuntimeCallInfo* r
 ArkUINativeModuleValue FrameNodeBridge::GetChild(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     int index = secondArg->ToNumber(vm)->Value();
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getChild(nativeNode, index);
-    return panda::NativePointerRef::New(vm, nodePtr);
+    CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetFirst(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getFirst(nativeNode);
-    return panda::NativePointerRef::New(vm, nodePtr);
+    CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetNextSibling(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getNextSibling(nativeNode);
-    return panda::NativePointerRef::New(vm, nodePtr);
+    CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetPreviousSibling(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getPreviousSibling(nativeNode);
-    return panda::NativePointerRef::New(vm, nodePtr);
+    CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetParent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getParent(nativeNode);
-    return panda::NativePointerRef::New(vm, nodePtr);
+    CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NumberRef::New(vm, -1));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -468,15 +538,18 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onClick = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
-                       GestureEvent& info) {
+    auto onClick = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                       containerId](GestureEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
         auto obj = CreateGestureEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { obj };
-        func->Call(vm, func.ToLocal(), params, 1);
+        function->Call(vm, function.ToLocal(), params, 1);
     };
     NG::ViewAbstract::SetJSFrameNodeOnClick(frameNode, std::move(onClick));
     return panda::JSValueRef::Undefined(vm);
@@ -524,6 +597,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         panda::FunctionRef::New(vm, Framework::JsStopPropagation));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
         panda::FunctionRef::New(vm, Framework::JsGetHistoricalPoints));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
+        panda::FunctionRef::New(vm, Framework::JsPreventDefault));
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return eventObj;
 }
@@ -545,15 +620,18 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
     auto obj = secondeArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
-    auto onTouch = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
-                       TouchEventInfo& info) {
+    auto onTouch = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                       containerId](TouchEventInfo& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
         auto eventObj = CreateTouchEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
-        func->Call(vm, func.ToLocal(), params, 1);
+        function->Call(vm, function.ToLocal(), params, 1);
     };
     NG::ViewAbstract::SetJSFrameNodeOnTouch(frameNode, std::move(onTouch));
     return panda::JSValueRef::Undefined(vm);
@@ -577,12 +655,16 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnAppear(ArkUIRuntimeCallInfo* runtim
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onAppear = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId]() {
+    auto onAppear = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                        containerId]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
     };
     NG::ViewAbstract::SetJSFrameNodeOnAppear(frameNode, std::move(onAppear));
     return panda::JSValueRef::Undefined(vm);
@@ -606,13 +688,16 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onDisappear = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode),
+    auto onDisappear = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
                            containerId]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
     };
     NG::ViewAbstract::SetJSFrameNodeOnDisappear(frameNode, std::move(onDisappear));
     return panda::JSValueRef::Undefined(vm);
@@ -636,11 +721,14 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runt
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onKeyEvent = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
-                          KeyEventInfo& info) {
+    auto onKeyEvent = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                          containerId](KeyEventInfo& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
             "stopPropagation", "intentionCode" };
@@ -656,7 +744,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runt
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
         panda::Local<panda::JSValueRef> params[] = { obj };
-        func->Call(vm, func.ToLocal(), params, 1);
+        function->Call(vm, function.ToLocal(), params, 1);
     };
 
     NG::ViewAbstract::SetJSFrameNodeOnKeyCallback(frameNode, std::move(onKeyEvent));
@@ -681,12 +769,16 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnFocus(ArkUIRuntimeCallInfo* runtime
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onFocus = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId]() {
+    auto onFocus = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                       containerId]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
     };
     NG::ViewAbstract::SetJSFrameNodeOnFocusCallback(frameNode, std::move(onFocus));
     return panda::JSValueRef::Undefined(vm);
@@ -710,12 +802,16 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnBlur(ArkUIRuntimeCallInfo* runtimeC
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onBlur = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId]() {
+    auto onBlur = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                      containerId]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
     };
     NG::ViewAbstract::SetJSFrameNodeOnBlurCallback(frameNode, std::move(onBlur));
     return panda::JSValueRef::Undefined(vm);
@@ -739,11 +835,14 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onHover = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
-                       bool isHover, HoverInfo& hoverInfo) {
+    auto onHover = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                       containerId](bool isHover, HoverInfo& hoverInfo) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
         auto isHoverParam = panda::BooleanRef::New(vm, isHover);
         const char* keys[] = {
@@ -760,7 +859,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
-        func->Call(vm, func.ToLocal(), params, ArraySize(params));
+        function->Call(vm, function.ToLocal(), params, ArraySize(params));
     };
     NG::ViewAbstract::SetJSFrameNodeOnHover(frameNode, std::move(onHover));
     return panda::JSValueRef::Undefined(vm);
@@ -823,15 +922,18 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtime
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onMouse = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
-                       MouseInfo& info) {
+    auto onMouse = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                       containerId](MouseInfo& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
         auto obj = CreateMouseInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { obj };
-        func->Call(vm, func.ToLocal(), params, 1);
+        function->Call(vm, function.ToLocal(), params, 1);
     };
     NG::ViewAbstract::SetJSFrameNodeOnMouse(frameNode, std::move(onMouse));
     return panda::JSValueRef::Undefined(vm);
@@ -855,11 +957,14 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnSizeChange(ArkUIRuntimeCallInfo* ru
     auto containerId = GetInstanceId(runtimeCallInfo);
     CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = obj;
-    auto onSizeChange = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode), containerId](
-                            const NG::RectF& oldRect, const NG::RectF& rect) {
+    auto onSizeChange = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), node = AceType::WeakClaim(frameNode),
+                            containerId](const NG::RectF& oldRect, const NG::RectF& rect) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         PipelineContext::SetCallBackNode(node);
         double density = PipelineBase::GetCurrentDensity();
         const char* keys[] = { "width", "height" };
@@ -870,7 +975,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnSizeChange(ArkUIRuntimeCallInfo* ru
             panda::NumberRef::New(vm, rect.Height() / density) };
         auto newSize = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, newValues);
         panda::Local<panda::JSValueRef> params[2] = { oldSize, newSize };
-        func->Call(vm, func.ToLocal(), params, 2);
+        function->Call(vm, function.ToLocal(), params, 2);
     };
     NG::ViewAbstract::SetJSFrameNodeOnSizeChange(frameNode, std::move(onSizeChange));
     return panda::JSValueRef::Undefined(vm);
@@ -896,14 +1001,17 @@ ArkUINativeModuleValue FrameNodeBridge::RegisterFrameCallback(ArkUIRuntimeCallIn
     auto obj = firstArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
-    auto getVsyncFunc = [vm, func = panda::CopyableGlobal(vm, func), containerId]() {
+    auto getVsyncFunc = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)), containerId]() {
         panda::LocalScope pandaScope(vm);
         ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction());
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto frontend = container->GetFrontend();
         CHECK_NULL_VOID(frontend);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        function->Call(vm, function.ToLocal(), nullptr, 0);
     };
     auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));

@@ -341,6 +341,7 @@ class UIContext {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
         if (!nodePtr) {
+            __JSScopeUtil__.restoreInstanceId();
             return null;
         }
         let xNode = globalThis.requireNapi('arkui.node');

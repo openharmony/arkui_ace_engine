@@ -421,6 +421,15 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit6, TestSize.Level1)
     auto testSize5 = Alignment::GetAlignPosition(dstsize, dstRect_.GetSize(), Alignment::CENTER);
     EXPECT_EQ(testSize5.GetX(), 0);
     EXPECT_EQ(testSize5.GetY(), 0);
+
+    /**
+     * @tc.steps9: callback ApplyImageFit when ImageFit::COVER_TOP_LEFT.
+     * @tc.expected: expect testsize6.GetX() and testsize6.GetY() are 1.
+     */
+    imagePainter.ApplyImageFit(ImageFit::COVER_TOP_LEFT, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto testSize6 = Alignment::GetAlignPosition(dstsize, dstRect_.GetSize(), Alignment::CENTER);
+    EXPECT_EQ(testSize6.GetX(), 0);
+    EXPECT_EQ(testSize6.GetY(), 0);
 }
 
 /**
@@ -682,5 +691,15 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageFit11, TestSize.Level1
     auto testSize5 = Alignment::GetAlignPosition(dstsize, dstRect_.GetSize(), Alignment::CENTER);
     EXPECT_EQ(testSize5.GetX(), 0);
     EXPECT_EQ(testSize5.GetY(), 0);
+
+    /**
+     * @tc.steps7: callback ApplyImageFit when ImageFit::COVER_TOP_LEFT.
+     * @tc.expected: expect testsize6.GetX() and testsize6.GetY() are 0.
+     */
+    rawpicsize = { -1, -1 };
+    imagePainter.ApplyImageFit(ImageFit::COVER_TOP_LEFT, rawpicsize, dstsize, srcRect_, dstRect_);
+    auto testSize6 = Alignment::GetAlignPosition(dstsize, dstRect_.GetSize(), Alignment::CENTER);
+    EXPECT_EQ(testSize6.GetX(), 0);
+    EXPECT_EQ(testSize6.GetY(), 0);
 }
 } // namespace OHOS::Ace

@@ -706,10 +706,7 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(asyncCtx->env, &scope);
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
-        napi_close_handle_scope(asyncCtx->env, scope);
     };
 
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
@@ -843,10 +840,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 windowId, true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-                napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(asyncCtx->env, &scope);
                 HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
-                napi_close_handle_scope(asyncCtx->env, scope);
             };
 
             int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData,
@@ -1476,6 +1470,29 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
 }
 #endif
 
+// The default empty implementation function setForegroundColor for dragPreview.
+static napi_value JsDragPreviewSetForegroundColor(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
+// The default empty implementation function animate for dragPreview.
+static napi_value JsDragPreviewAnimate(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
+// The default empty constructor for dragPreview.
+static napi_value DragPreviewConstructor(napi_env env, napi_callback_info info)
+{
+    napi_value thisArg = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, &data);
+    napi_value global = nullptr;
+    napi_get_global(env, &global);
+    return thisArg;
+}
+
 static napi_value DragControllerExport(napi_env env, napi_value exports)
 {
     napi_value dragStatus = nullptr;
@@ -1486,11 +1503,20 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
     napi_create_uint32(env, DRAG_ENDED, &prop);
     napi_set_named_property(env, dragStatus, "ENDED", prop);
 
+    napi_property_descriptor dragPreviewDesc[] = {
+        DECLARE_NAPI_FUNCTION("setForegroundColor", JsDragPreviewSetForegroundColor),
+        DECLARE_NAPI_FUNCTION("animate", JsDragPreviewAnimate),
+    };
+    napi_value classDragPreview = nullptr;
+    napi_define_class(env, "DragPreview", NAPI_AUTO_LENGTH, DragPreviewConstructor, nullptr,
+        sizeof(dragPreviewDesc) / sizeof(*dragPreviewDesc), dragPreviewDesc, &classDragPreview);
+
     napi_property_descriptor dragControllerDesc[] = {
         DECLARE_NAPI_FUNCTION("executeDrag", JSExecuteDrag),
         DECLARE_NAPI_FUNCTION("getDragPreview", JSGetDragPreview),
         DECLARE_NAPI_FUNCTION("createDragAction", JSCreateDragAction),
         DECLARE_NAPI_PROPERTY("DragStatus", dragStatus),
+        DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };
     NAPI_CALL(env, napi_define_properties(
                        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));

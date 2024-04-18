@@ -24,6 +24,8 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT RatingLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(RatingLayoutProperty, LayoutProperty);
 
@@ -46,9 +48,9 @@ public:
         ResetRatingPropertyGroup();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         ACE_PROPERTY_TO_JSON_VALUE(propRatingPropertyGroup_, RatingPropertyGroup);
     }
 

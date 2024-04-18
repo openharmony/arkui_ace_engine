@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -682,6 +682,15 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
+    if (dialogAttr.shadow.has_value()) {
+        dialogProperties.shadow = dialogAttr.shadow.value();
+    }
+    if (dialogAttr.backgroundColor.has_value()) {
+        dialogProperties.backgroundColor = dialogAttr.backgroundColor.value();
+    }
+    if (dialogAttr.backgroundBlurStyle.has_value()) {
+        dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
@@ -713,7 +722,6 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
 {
     DialogProperties dialogProperties = { .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
         .onWillDismiss = dialogAttr.customOnWillDismiss,
         .backgroundColor = dialogAttr.backgroundColor,
@@ -746,6 +754,13 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        dialogProperties.isSysBlurStyle = false;
+    } else {
+        if (dialogAttr.backgroundBlurStyle.has_value()) {
+            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+        }
     }
     return dialogProperties;
 }
@@ -1038,6 +1053,7 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
                 Maskarg.autoCancel = dialogProperties.autoCancel;
                 auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                 CHECK_NULL_VOID(mask);
+                overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
             }
         } else {
             dialog = overlayManager->ShowDialog(

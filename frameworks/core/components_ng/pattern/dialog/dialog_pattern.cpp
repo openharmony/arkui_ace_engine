@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -35,6 +36,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -90,6 +92,11 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
+
+std::string GetBoolStr(bool isTure)
+{
+    return isTure ? "True" : "False";
+}
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -106,6 +113,7 @@ void DialogPattern::OnModifyDone()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
+    InitFocusEvent(focusHub);
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -213,6 +221,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
 {
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
+    contentRenderContext_ = contentRenderContext;
     UpdateBgBlurStyle(contentRenderContext, props);
     if (props.borderRadius.has_value()) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -993,15 +1002,46 @@ bool DialogPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onFocus = [wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(std::move(onFocus));
+
+    auto onBlur = [wp = WeakClaim(this)]() {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(std::move(onBlur));
+}
+
+void DialogPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOff());
+    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(Shadow::CreateShadow(defaultShadowOff)));
+}
+
+void DialogPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+    auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOn());
+    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(Shadow::CreateShadow(defaultShadowOn)));
+}
+
 // XTS inspector
-void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetTag() == V2::ALERT_DIALOG_ETS_TAG || host->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
-        json->Put("title", title_.c_str());
-        json->Put("subtitle", subtitle_.c_str());
-        json->Put("message", message_.c_str());
+        json->PutExtAttr("title", title_.c_str(), filter);
+        json->PutExtAttr("subtitle", subtitle_.c_str(), filter);
+        json->PutExtAttr("message", message_.c_str(), filter);
     }
 }
 
@@ -1151,6 +1191,94 @@ void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, 
     }
     if (colRenderContext->GetBackBlurStyle().has_value()) {
         colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());
+    }
+}
+
+void DialogPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Type: " + DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type));
+    if (!dialogProperties_.title.empty()) {
+        DumpLog::GetInstance().AddDesc("Title: " + dialogProperties_.title);
+    }
+    if (!dialogProperties_.subtitle.empty()) {
+        DumpLog::GetInstance().AddDesc("Subtitle: " + dialogProperties_.subtitle);
+    }
+    if (!dialogProperties_.content.empty()) {
+        DumpLog::GetInstance().AddDesc("Content: " + dialogProperties_.content);
+    }
+    if (!dialogProperties_.checkboxContent.empty()) {
+        DumpLog::GetInstance().AddDesc("CheckboxContent: " + dialogProperties_.checkboxContent);
+    }
+    DumpLog::GetInstance().AddDesc(
+        "DialogButtonDirection: " +
+        DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(dialogProperties_.buttonDirection));
+
+    if (dialogProperties_.backgroundBlurStyle.has_value()) {
+        DumpLog::GetInstance().AddDesc(
+            "BackgroundBlurStyle: " + std::to_string(dialogProperties_.backgroundBlurStyle.value()));
+    }
+    if (dialogProperties_.borderWidth.has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderWidth: " + dialogProperties_.borderWidth.value().ToString());
+    }
+    if (dialogProperties_.borderColor.has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderColor: " + dialogProperties_.borderColor.value().ToString());
+    }
+    if (dialogProperties_.backgroundColor.has_value()) {
+        DumpLog::GetInstance().AddDesc("BackgroundColor: " + dialogProperties_.backgroundColor.value().ToString());
+    }
+    if (dialogProperties_.borderRadius.has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderRadius: " + dialogProperties_.borderRadius.value().ToString());
+    }
+    DumpBoolProperty();
+    DumpObjectProperty();
+}
+
+void DialogPattern::DumpBoolProperty()
+{
+    DumpLog::GetInstance().AddDesc("AutoCancel: " + GetBoolStr(dialogProperties_.autoCancel));
+    DumpLog::GetInstance().AddDesc("CustomStyle: " + GetBoolStr(dialogProperties_.customStyle));
+    DumpLog::GetInstance().AddDesc("IsMenu: " + GetBoolStr(dialogProperties_.isMenu));
+    DumpLog::GetInstance().AddDesc("IsSelect: " + GetBoolStr(dialogProperties_.isSelect));
+    DumpLog::GetInstance().AddDesc("IsMask: " + GetBoolStr(dialogProperties_.isMask));
+    DumpLog::GetInstance().AddDesc("IsModal: " + GetBoolStr(dialogProperties_.isModal));
+    DumpLog::GetInstance().AddDesc("IsScenceBoardDialog: " + GetBoolStr(dialogProperties_.isScenceBoardDialog));
+    DumpLog::GetInstance().AddDesc("IsSysBlurStyle: " + GetBoolStr(dialogProperties_.isSysBlurStyle));
+    DumpLog::GetInstance().AddDesc("IsShowInSubWindow: " + GetBoolStr(dialogProperties_.isShowInSubWindow));
+}
+
+void DialogPattern::DumpObjectProperty()
+{
+    DumpLog::GetInstance().AddDesc(
+        "Alignment: " + DialogAlignmentUtils::ConvertDialogAlignmentToString(dialogProperties_.alignment));
+    DumpLog::GetInstance().AddDesc("Offset: { dx: " + dialogProperties_.offset.GetX().ToString() +
+                                   " dy: " + dialogProperties_.offset.GetY().ToString() + " }");
+    if (dialogProperties_.buttons.size() > 0) {
+        std::stringstream butonInfoSteam;
+        butonInfoSteam << "Buttons: [";
+        for (auto buttonInfo : dialogProperties_.buttons) {
+            butonInfoSteam << "{ text: " << buttonInfo.text << " , color: " << buttonInfo.textColor << " }, ";
+        }
+        butonInfoSteam << "]";
+        DumpLog::GetInstance().AddDesc(butonInfoSteam.str());
+    }
+    if (dialogProperties_.shadow.has_value()) {
+        auto shadow = dialogProperties_.shadow.value();
+        std::stringstream butonInfoSteam;
+        static const int32_t precision = 2;
+        butonInfoSteam << "Shadow: {";
+        butonInfoSteam << " radius:" << std::fixed << std::setprecision(precision) << shadow.GetBlurRadius();
+        butonInfoSteam << " style:" << std::to_string(static_cast<int32_t>(shadow.GetStyle()));
+        butonInfoSteam << " type:" << std::to_string(static_cast<int32_t>(shadow.GetShadowType()));
+        butonInfoSteam << " fill:" << GetBoolStr(shadow.GetIsFilled());
+        butonInfoSteam << " offset:" << shadow.GetOffset().ToString();
+        butonInfoSteam << " }";
+        DumpLog::GetInstance().AddDesc(butonInfoSteam.str());
+    }
+    if (dialogProperties_.maskColor.has_value()) {
+        DumpLog::GetInstance().AddDesc("MaskColor: " + dialogProperties_.maskColor.value().ToString());
+    }
+    if (dialogProperties_.maskRect.has_value()) {
+        DumpLog::GetInstance().AddDesc("MaskRect: " + dialogProperties_.maskRect.value().ToString());
     }
 }
 } // namespace OHOS::Ace::NG

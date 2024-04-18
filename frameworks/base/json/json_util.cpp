@@ -175,6 +175,23 @@ bool JsonValue::Put(const char* key, const char* value)
     return true;
 }
 
+bool JsonValue::PutFixedAttr(const char* key, const char* value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, const char* value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
 const JsonObject* JsonValue::GetJsonObject() const
 {
     return object_;
@@ -192,6 +209,24 @@ bool JsonValue::Put(const char* key, const std::unique_ptr<JsonValue>& value)
 
     cJSON_AddItemToObject(object_, key, jsonObject);
     return true;
+}
+
+bool JsonValue::PutFixedAttr(const char* key, const std::unique_ptr<JsonValue>& value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, const std::unique_ptr<JsonValue>& value,
+    const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
 }
 
 // add item to array
@@ -223,6 +258,23 @@ bool JsonValue::Put(const char* key, size_t value)
     return true;
 }
 
+bool JsonValue::PutFixedAttr(const char* key, size_t value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, size_t value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
 bool JsonValue::Put(const char* key, int32_t value)
 {
     if (key == nullptr) {
@@ -237,9 +289,43 @@ bool JsonValue::Put(const char* key, int32_t value)
     return true;
 }
 
+bool JsonValue::PutFixedAttr(const char* key, int32_t value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, int32_t value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
 bool JsonValue::Put(const char* key, int64_t value)
 {
     return Put(key, static_cast<double>(value));
+}
+
+bool JsonValue::PutFixedAttr(const char* key, int64_t value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, int64_t value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
 }
 
 bool JsonValue::Put(const char* key, double value)
@@ -256,8 +342,28 @@ bool JsonValue::Put(const char* key, double value)
     return true;
 }
 
+bool JsonValue::PutFixedAttr(const char* key, double value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, double value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
 JsonObject* JsonValue::ReleaseJsonObject()
 {
+    if (!isRoot_) {
+        return nullptr;
+    }
     JsonObject* object = object_;
     object_ = nullptr;
     return object;
@@ -268,8 +374,17 @@ bool JsonValue::PutRef(const char* key, std::unique_ptr<JsonValue>&& value)
     if (key == nullptr || value == nullptr) {
         return false;
     }
-    cJSON_AddItemToObject(object_, key, value->ReleaseJsonObject());
-    return true;
+    /*
+    * If value is root, it controls the lifecycle of JsonObject, we can just move it into current object
+    * Else we need to copy the JsonObject and put the new object in current object
+    */
+    if (value->isRoot_) {
+        cJSON_AddItemToObject(object_, key, value->ReleaseJsonObject());
+        return true;
+    } else {
+        std::unique_ptr<JsonValue> lValue = std::move(value);
+        return Put(key, lValue);
+    }
 }
 
 bool JsonValue::PutRef(std::unique_ptr<JsonValue>&& value)
@@ -277,8 +392,17 @@ bool JsonValue::PutRef(std::unique_ptr<JsonValue>&& value)
     if (value == nullptr) {
         return false;
     }
-    cJSON_AddItemToArray(object_, value->ReleaseJsonObject());
-    return true;
+    /*
+    * If value is root, it controls the lifecycle of JsonObject, we can just move it into current object
+    * Else we need to copy the JsonObject and put the new object in current object
+    */
+    if (value->isRoot_) {
+        cJSON_AddItemToArray(object_, value->ReleaseJsonObject());
+        return true;
+    } else {
+        std::unique_ptr<JsonValue> lValue = std::move(value);
+        return Put(lValue);
+    }
 }
 
 bool JsonValue::Replace(const char* key, double value)
@@ -310,6 +434,23 @@ bool JsonValue::Put(const char* key, bool value)
     }
     cJSON_AddItemToObject(object_, key, child);
     return true;
+}
+
+bool JsonValue::PutFixedAttr(const char* key, bool value,
+    const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
+{
+    if (filter.CheckFixedAttr(attr)) {
+        return Put(key, value);
+    }
+    return false;
+}
+
+bool JsonValue::PutExtAttr(const char* key, bool value, const NG::InspectorFilter& filter)
+{
+    if (filter.CheckExtAttr(key)) {
+        return Put(key, value);
+    }
+    return false;
 }
 
 bool JsonValue::Replace(const char* key, bool value)

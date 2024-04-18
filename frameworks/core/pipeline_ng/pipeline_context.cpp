@@ -562,9 +562,7 @@ void PipelineContext::IsCloseSCBKeyboard()
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto manager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
-    CHECK_NULL_VOID(manager);
-    if (container->IsKeyboard() || !manager->HasKeyboard()) {
+    if (container->IsKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in keyboard.");
         return;
     }
@@ -572,6 +570,7 @@ void PipelineContext::IsCloseSCBKeyboard()
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
+        FocusHub::CloseKeyboard();
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
@@ -667,6 +666,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocusView();
         FlushFocus();
+        FlushFocusScroll();
     }
     // Close input method in the SCB window.
     IsCloseSCBKeyboard();
@@ -850,6 +850,19 @@ void PipelineContext::FlushFocusView()
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
         lastFocusViewHub->IsFocusableNode()) {
         lastFocusView->RequestDefaultFocus();
+    }
+}
+
+void PipelineContext::FlushFocusScroll()
+{
+    CHECK_NULL_VOID(focusManager_);
+    if (!focusManager_->GetNeedTriggerScroll()) {
+        return;
+    }
+    auto lastFocusStateNode = focusManager_->GetLastFocusStateNode();
+    CHECK_NULL_VOID(lastFocusStateNode);
+    if (!lastFocusStateNode->TriggerFocusScroll()) {
+        focusManager_->SetNeedTriggerScroll(false);
     }
 }
 
@@ -1519,19 +1532,27 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
+        float keyboardPosition = rootHeight_ - keyboardHeight;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+        float keyboardOffset = safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY());
         }
-        if (NearZero(keyboardHeight)) {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (LessOrEqual(positionY, rootHeight_ - keyboardHeight)) {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (positionY > rootHeight_ - keyboardHeight) {
-            safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight) - safeHeight);
+        if (!NearZero(keyboardOffset)) {
+            auto offsetY = keyboardPosition - safeAreaManager_->GetLastKeyboardPoistion();
+            safeAreaManager_->UpdateKeyboardOffset(keyboardOffset + offsetY);
         } else {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            if (NearZero(keyboardHeight)) {
+                safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            } else if (LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
+                safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            } else if (positionY + safeHeight > rootHeight_ - keyboardHeight) {
+                safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight) - safeHeight);
+            } else {
+                safeAreaManager_->UpdateKeyboardOffset(0.0f);
+            }
         }
+        safeAreaManager_->SetLastKeyboardPoistion(keyboardPosition);
         SyncSafeArea(true);
         // layout immediately
         FlushUITasks();
@@ -1878,6 +1899,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
+        touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
@@ -2165,7 +2187,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             DumpLog::GetInstance().OutPutBySize();
         }
     } else if (params[0] == "-navigation") {
-        auto navigationDumpMgr = GetNavigationDumpManager();
+        auto navigationDumpMgr = GetNavigationManager();
         if (navigationDumpMgr) {
             navigationDumpMgr->OnDumpInfo();
         }
@@ -2376,6 +2398,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
     eventManager_->MouseTest(scaleEvent, node, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -2403,6 +2426,7 @@ void PipelineContext::FlushMouseEvent()
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
     eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
@@ -2568,7 +2592,11 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             TouchRestrict touchRestrict { TouchRestrict::NONE };
             touchRestrict.sourceType = event.sourceType;
             touchRestrict.hitTestType = SourceType::TOUCH;
-            eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+            touchRestrict.inputEventType = InputEventType::AXIS;
+            // If received rotate event, no need to touchtest.
+            if (!event.isRotationEvent) {
+                eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+            }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
     } else if (isBeforeDragHandleAxis_ && event.action == AxisAction::END) {
@@ -3448,6 +3476,22 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_RETURN(containerPattern, -1);
     return containerPattern->GetContainerModalTitleHeight();
+}
+
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(rootNode_, nullptr);
+    return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+}
+
+Dimension PipelineContext::GetCustomTitleHeight()
+{
+    auto containerModal = GetContainerModalNode();
+    CHECK_NULL_RETURN(containerModal, Dimension());
+    return containerModal->GetPattern<ContainerModalPattern>()->GetCustomTitleHeight();
 }
 
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)

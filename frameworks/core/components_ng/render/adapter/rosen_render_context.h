@@ -175,6 +175,7 @@ public:
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
+    void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
@@ -210,6 +211,7 @@ public:
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
+    float GetStatusBarHeight();
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
@@ -279,6 +281,7 @@ public:
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnPositionEdgesUpdate(const EdgesParam& value) override;
+    void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -422,6 +425,7 @@ private:
 
     void OnLightPositionUpdate(const TranslateOptions& position) override;
     void OnLightIntensityUpdate(const float lightIntensity) override;
+    void OnLightColorUpdate(const Color& lightColor) override;
     void OnLightIlluminatedUpdate(const uint32_t lightIlluminated) override;
     void OnIlluminatedBorderWidthUpdate(const Dimension& illuminatedBorderWidth) override;
     void OnBloomUpdate(const float bloomIntensity) override;
