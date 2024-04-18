@@ -154,6 +154,8 @@ public:
 
     void SetFormBackgroundColor(const std::string& color) override;
 
+    void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) override;
+
     SerializeableObjectArray DumpUITree() override
     {
         CHECK_NULL_RETURN(uiManager_, SerializeableObjectArray());
@@ -346,6 +348,7 @@ private:
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
     std::string formData_;
+    bool fontScaleFollowSystem_ = true;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
     std::unordered_map<int32_t, int32_t> popupUIExtensionRecords_;

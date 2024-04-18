@@ -242,7 +242,7 @@ void PipelineBase::SetFontScale(float fontScale)
     const static float CARD_MAX_FONT_SCALE = 1.3f;
     if (!NearEqual(fontScale_, fontScale)) {
         fontScale_ = fontScale;
-        if (isJsCard_ && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
+        if ((isJsCard_ || isFormRender_) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
             fontScale_ = CARD_MAX_FONT_SCALE;
         }
         fontManager_->RebuildFontNode();
