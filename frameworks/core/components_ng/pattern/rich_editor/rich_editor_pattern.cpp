@@ -5629,10 +5629,6 @@ bool RichEditorPattern::NeedAiAnalysis(
         return false;
     }
 
-    if (pos == static_cast<int32_t>(content.length())) {
-        return false;
-    }
-
     if (IsClickBoundary(pos) && targeType == CaretUpdateType::PRESSED) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary,return!");
         return false;
