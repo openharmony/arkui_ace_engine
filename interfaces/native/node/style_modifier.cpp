@@ -1073,10 +1073,10 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
     auto isCustomDirection = item->value[NUM_1].i32 == static_cast<ArkUI_Int32>(ARKUI_LINEAR_GRADIENT_DIRECTION_CUSTOM);
     ArkUIInt32orFloat32 values[NUM_4] = {
-        {static_cast<ArkUI_Int32>(isCustomDirection ? true : false)}, //angleHasValue
-        {item->value[NUM_0].f32}, //angleValue
-        {item->value[NUM_1].i32}, //directionValue
-        {item->value[NUM_2].i32}  //repeating
+        {.i32 = static_cast<ArkUI_Int32>(isCustomDirection)}, //angleHasValue
+        {.f32 = item->value[NUM_0].f32}, //angleValue
+        {.i32 = item->value[NUM_1].i32}, //directionValue
+        {.i32 = item->value[NUM_2].i32}  //repeating
     };
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setLinearGradient(
@@ -2004,46 +2004,47 @@ int32_t SetSweepGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     ArkUIInt32orFloat32 values[NUM_13] = {
-        {static_cast<ArkUI_Int32>(false)},
-        {static_cast<ArkUI_Float32>(DEFAULT_X)},
-        {static_cast<ArkUI_Int32>(unit)},
-        {static_cast<ArkUI_Int32>(false)},
-        {static_cast<ArkUI_Float32>(DEFAULT_Y)},
-        {static_cast<ArkUI_Int32>(unit)},
-        {static_cast<ArkUI_Int32>(false)},
-        {static_cast<ArkUI_Float32>(NUM_0)},
-        {static_cast<ArkUI_Int32>(false)},
-        {static_cast<ArkUI_Float32>(NUM_0)},
-        {static_cast<ArkUI_Int32>(false)},
-        {static_cast<ArkUI_Float32>(NUM_0)},
-        {static_cast<ArkUI_Int32>(false)}};
+        {.i32 = static_cast<ArkUI_Int32>(false)},
+        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_X)},
+        {.i32 = static_cast<ArkUI_Int32>(unit)},
+        {.i32 = static_cast<ArkUI_Int32>(false)},
+        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_Y)},
+        {.i32 = static_cast<ArkUI_Int32>(unit)},
+        {.i32 = static_cast<ArkUI_Int32>(false)},
+        {.f32 = static_cast<ArkUI_Float32>(NUM_0)},
+        {.i32 = static_cast<ArkUI_Int32>(false)},
+        {.f32 = static_cast<ArkUI_Float32>(NUM_0)},
+        {.i32 = static_cast<ArkUI_Int32>(false)},
+        {.f32 = static_cast<ArkUI_Float32>(NUM_0)},
+        {.i32 = static_cast<ArkUI_Int32>(false)}};
 
     if (item->size > NUM_0) {
-        values[NUM_0] = {static_cast<ArkUI_Int32>(true)};
-        values[NUM_1] = { item->value[NUM_0].f32 };
+        values[NUM_0].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_1].f32 = item->value[NUM_0].f32;
     }
 
     if (item->size > NUM_1) {
-        values[NUM_3] = {static_cast<ArkUI_Int32>(true)};
-        values[NUM_4] = {item->value[NUM_1].f32};
+        values[NUM_3].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_4].f32 = item->value[NUM_1].f32;
     }
 
     if (item->size > NUM_2) {
-        values[NUM_6] = {static_cast<ArkUI_Int32>(true)};
-        values[NUM_7] = {item->value[NUM_2].f32};
+        values[NUM_6].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_7].f32 = item->value[NUM_2].f32;
     }
 
     if (item->size > NUM_3) {
-        values[NUM_8] = {static_cast<ArkUI_Int32>(true)};
-        values[NUM_9] = {item->value[NUM_3].f32};
+        values[NUM_8].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_9].f32 = item->value[NUM_3].f32;
     }
 
     if (item->size > NUM_4) {
-        values[NUM_10] = {static_cast<ArkUI_Int32>(true)};
-        values[NUM_11] = {item->value[NUM_4].f32};
+        values[NUM_10].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_11].f32 = item->value[NUM_4].f32;
     }
 
-    values[NUM_12] = {(item->size > NUM_5) ? item->value[NUM_5].i32 : static_cast<ArkUI_Int32>(true)};
+    values[NUM_12].i32 = item->size > NUM_5 ? item->value[NUM_5].i32 : static_cast<ArkUI_Int32>(true);
+
     fullImpl->getNodeModifiers()->getCommonModifier()->setSweepGradient(
         node->uiNodeHandle, values, NUM_13, colors, size * NUM_3);
     return ERROR_CODE_NO_ERROR;
@@ -2118,35 +2119,34 @@ int32_t SetRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     }
 
     ArkUIInt32orFloat32 values[NUM_10] = {
-        { static_cast<ArkUI_Int32>(false) },
-        { static_cast<ArkUI_Float32>(DEFAULT_X) },
-        { static_cast<ArkUI_Float32>(unit) },
-        { static_cast<ArkUI_Int32>(false) },
-        { static_cast<ArkUI_Float32>(DEFAULT_Y) },
-        { static_cast<ArkUI_Float32>(unit) },
-        { static_cast<ArkUI_Int32>(false) },
-        { static_cast<ArkUI_Float32>(NUM_0) },
-        { static_cast<ArkUI_Float32>(unit) },
-        { static_cast<ArkUI_Int32>(false) }
+        {.i32 = static_cast<ArkUI_Int32>(false) },
+        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_X) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) },
+        {.i32 = static_cast<ArkUI_Int32>(false) },
+        {.f32 = static_cast<ArkUI_Float32>(DEFAULT_Y) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) },
+        {.i32 = static_cast<ArkUI_Int32>(false) },
+        {.f32 = static_cast<ArkUI_Float32>(NUM_0) },
+        {.i32 = static_cast<ArkUI_Float32>(unit) },
+        {.i32 = static_cast<ArkUI_Int32>(false) }
     };
 
     if (item->size > NUM_0) {
-        values[NUM_0] = { static_cast<ArkUI_Int32>(true) };
-        values[NUM_1] = { item->value[NUM_0].f32 };
+        values[NUM_0].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_1].f32 = item->value[NUM_0].f32;
     }
 
     if (item->size > NUM_1) {
-        values[NUM_3] = { static_cast<ArkUI_Int32>(true) };
-        values[NUM_4] = { item->value[NUM_1].f32 };
+        values[NUM_3].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_4].f32 = item->value[NUM_1].f32;
     }
 
     if (item->size > NUM_2) {
-        values[NUM_6] = { static_cast<ArkUI_Int32>(true) };
-        values[NUM_7] = { item->value[NUM_2].f32 };
+        values[NUM_6].i32 = static_cast<ArkUI_Int32>(true);
+        values[NUM_7].f32 = item->value[NUM_2].f32;
     }
 
-    values[NUM_9] = {(item->size > NUM_4) ? item->value[NUM_3].i32 : static_cast<ArkUI_Int32>(false) };
-
+    values[NUM_9].i32 = item->size > NUM_3 ? item->value[NUM_3].i32 : static_cast<ArkUI_Int32>(false);
     fullImpl->getNodeModifiers()->getCommonModifier()->setRadialGradient(
         node->uiNodeHandle, values, NUM_10, colors, size * NUM_3);
     return ERROR_CODE_NO_ERROR;
