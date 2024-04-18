@@ -119,11 +119,11 @@ void BaseTextSelectOverlay::ShowMenu()
     manager->ShowOptionMenu();
 }
 
-void BaseTextSelectOverlay::HideMenu()
+void BaseTextSelectOverlay::HideMenu(bool noAnimation)
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->HideOptionMenu();
+    manager->HideOptionMenu(noAnimation);
 }
 
 void BaseTextSelectOverlay::DisableMenu()

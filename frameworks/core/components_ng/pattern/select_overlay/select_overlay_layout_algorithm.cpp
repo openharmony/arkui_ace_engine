@@ -464,23 +464,30 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(float menuWidth, floa
     auto menuSpacing = static_cast<float>(menuSpacingBetweenText + menuSpacingBetweenHandle);
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
+    auto viewPort = pipeline->GetRootRect();
+    auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
+    auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)
+                                          : viewPort.Bottom() - menuHeight;
     // 顶部避让
     auto offsetY = selectArea.Top() - menuSpacing - menuHeight;
     if (!upHandle.isShow || LessOrEqual(offsetY, topArea)) {
-        // 上手柄不可见或顶部避让失败 -> 底部避让
-        auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
+        selectArea = selectArea.IntersectRectT(viewPort);
+        auto offsetUponSelectArea = selectArea.Top() - menuSpacingBetweenText - menuHeight;
+        auto offsetBetweenSelectArea = std::clamp(
+            (double)(selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f, (double)topArea, bottomLimitOffsetY);
         if (downHandle.isShow) {
             offsetY = selectArea.Bottom() + menuSpacing;
-            auto viewPort = pipeline->GetRootRect();
-            if ((hasKeyboard && (offsetY + menuHeight + safeSpacing) > keyboardInsert.start) ||
-                (offsetY + menuHeight) > viewPort.Bottom()) {
-                // 底部避让失败 -> 选区中间位置
-                selectArea = selectArea.IntersectRectT(viewPort);
-                offsetY = std::max((float)topArea, (selectArea.Top() + selectArea.Bottom() - menuHeight) / 2.0f);
+            if (offsetY > bottomLimitOffsetY) {
+                // 底部避让失败 -> 选区上方 > 选区中间
+                offsetY = !upHandle.isShow && LessNotEqual(topArea, offsetUponSelectArea) ? offsetUponSelectArea
+                                                                                          : offsetBetweenSelectArea;
             }
         } else {
-            // 上下手柄均不可见 -> 选区底部并且满足安全距离
-            offsetY = std::min((double)selectArea.Bottom(), keyboardInsert.start - safeSpacing) - menuHeight;
+            // 上下手柄均不可见 -> 选区上方 > 选区底部
+            auto offsetUnderSelectArea =
+                std::clamp((double)selectArea.Bottom() - menuHeight, (double)topArea, bottomLimitOffsetY);
+            offsetY = !upHandle.isShow && LessNotEqual(topArea, offsetUponSelectArea) ? offsetUponSelectArea
+                                                                                      : offsetUnderSelectArea;
         }
     }
     return OffsetF(positionX, offsetY);
