@@ -142,6 +142,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSGestureSpan);
     RefPtr<GestureSpan> gestureSpan_;
 };
+
 class JSTextShadowSpan : public virtual AceType {
     DECLARE_ACE_TYPE(JSTextShadowSpan, AceType)
 

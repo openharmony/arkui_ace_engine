@@ -30,6 +30,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -3828,5 +3829,10 @@ bool WebPattern::CheckSafeAreaIsExpand()
         return true;
     }
     return false;
+}
+
+std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
+{
+    return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace::NG

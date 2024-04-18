@@ -78,7 +78,7 @@ public:
     void CloseOverlay(bool animation, CloseReason reason);
     void ToggleMenu();
     void ShowMenu();
-    void HideMenu();
+    void HideMenu(bool noAnimation = false);
     void DisableMenu();
     void EnableMenu();
     void UpdateAllHandlesOffset();

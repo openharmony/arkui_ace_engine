@@ -267,6 +267,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
     if (other.length() == 0 || start > len) {
         return;
     }
+    bool useFrontStyle = InsertUseFrontStyle(start);
     auto wOther = StringUtils::ToWstring(other);
     auto text = GetWideString();
     text = GetWideStringSubstr(text, 0, start) + wOther + GetWideStringSubstr(text, start);
@@ -280,7 +281,6 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
         spans_.emplace_back(spanItem);
         return;
     }
-    bool useFrontStyle = InsertUseFrontStyle(start);
     for (auto& span : spans_) {
         auto spanItemStart = span->interval.first;
         auto spanItemEnd = span->interval.second;

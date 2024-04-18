@@ -34,12 +34,21 @@ RefPtr<SvgNode> SvgImage::Create()
     return AceType::MakeRefPtr<SvgImage>();
 }
 
-void SvgImage::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
+void SvgImage::OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     auto declaration = AceType::DynamicCast<SvgImageDeclaration>(declaration_);
     CHECK_NULL_VOID(declaration);
     if (declaration->GetHref().empty()) {
         LOGW("Svg image href is empty");
+        return;
+    }
+
+    auto x = ConvertDimensionToPx(declaration->GetX(), viewPort, SvgLengthType::HORIZONTAL);
+    auto y = ConvertDimensionToPx(declaration->GetY(), viewPort, SvgLengthType::VERTICAL);
+    auto width = ConvertDimensionToPx(declaration->GetWidth(), viewPort, SvgLengthType::HORIZONTAL);
+    auto height = ConvertDimensionToPx(declaration->GetHeight(), viewPort, SvgLengthType::VERTICAL);
+    if (LessOrEqual(width, 0.0f) || LessOrEqual(height, 0.0f)) {
+        LOGW("Svg image size is illegal");
         return;
     }
 
@@ -55,14 +64,10 @@ void SvgImage::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<
         default:
             LOGW("Unknown svg href src type");
     }
-
     CHECK_NULL_VOID(data);
     RSImage image;
     image.MakeFromEncoded(data);
-
-    auto dstRect = RSRect(declaration->GetX().Value(), declaration->GetY().Value(),
-        declaration->GetWidth().Value() + declaration->GetX().Value(),
-        declaration->GetHeight().Value() + declaration->GetY().Value());
+    auto dstRect = CalcDstRect(Size(image.GetWidth(), image.GetHeight()), Rect(x, y, width, height));
     canvas.DrawImageRect(image, dstRect, RSSamplingOptions());
 }
 
@@ -145,5 +150,18 @@ SrcType SvgImage::ParseHrefAttr(const std::string& uri)
     } else {
         return SrcType::ASSET;
     }
+}
+
+RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
+{
+    if (NearEqual(realSize.Width(), 0.0f) || NearEqual(realSize.Height(), 0.0f)) {
+        return RSRect(0, 0, 0, 0);
+    }
+    auto scaleValue = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
+    auto spaceX = viewBox.Width() - realSize.Width() * scaleValue;
+    auto spaceY = viewBox.Height() - realSize.Height() * scaleValue;
+    auto offsetX = viewBox.Left() + spaceX * 0.5f; // 0.5f Align Center
+    auto offsetY = viewBox.Right() + spaceY * 0.5f; // 0.5f Align Center
+    return RSRect(offsetX, offsetY, realSize.Width() * scaleValue + offsetX, realSize.Height() * scaleValue + offsetY);
 }
 } // namespace OHOS::Ace::NG

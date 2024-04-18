@@ -1202,7 +1202,7 @@ void JSRichEditorController::ParseJsTextStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();

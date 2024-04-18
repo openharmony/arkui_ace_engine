@@ -192,6 +192,8 @@ public:
     static void ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold);
     static void ReportPageDepthOverflow(const std::string& pageUrl, int32_t depth, int32_t threshold);
     static void ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold);
+    static void ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
+        int32_t appRotation, int32_t windowMode);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

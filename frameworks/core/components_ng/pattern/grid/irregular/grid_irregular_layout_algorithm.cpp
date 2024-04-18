@@ -232,7 +232,8 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 
     // adjust offset
     if (!overScroll_ && info.endIndex_ == info.childrenCount_ - 1) {
-        float overDis = -info.GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_), mainGap_);
+        float overDis =
+            -info.GetDistanceToBottom(mainSize, info.GetTotalHeightOfItemsInView(mainGap_, false), mainGap_);
         if (Negative(overDis)) {
             return;
         }
@@ -328,7 +329,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
     float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info.axis_);
 
     info.lastMainSize_ = mainSize;
-    info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_);
+    info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_, false);
 
     if (info.reachEnd_) {
         info.offsetEnd_ = NonPositive(info.GetDistanceToBottom(mainSize, info.totalHeightOfItemsInView_, mainGap_));
@@ -336,6 +337,9 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
         info.offsetEnd_ = false;
     }
     info.prevOffset_ = info.currentOffset_;
+
+    auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    info.hasBigItem_ = !props->GetLayoutOptions()->irregularIndexes.empty();
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)

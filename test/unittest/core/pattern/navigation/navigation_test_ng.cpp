@@ -32,6 +32,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -6890,5 +6891,57 @@ HWTEST_F(NavigationTestNg, NavigationLoadPage004, TestSize.Level1)
     auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());
     EXPECT_NE(destinationPattern, nullptr);
     EXPECT_EQ(destinationPattern->GetName(), "pageOne");
+}
+
+/**
+ * @tc.name: NavigationManager001
+ * @tc.desc: Test navigation manager get navigationInfo success or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create navigation node and set navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationNode, nullptr);
+
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto navigationStack = pattern->GetNavigationStack();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+
+    /**
+     * @tc.steps:step2. get navigation info from empty node, and check the return value
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    auto result = navigationMgr->GetNavigationInfo(nullptr);
+    ASSERT_EQ(result, nullptr);
+
+    /**
+     * @tc.steps:step3. get navigation info from navbar node, and check the return value
+     */
+    result = navigationMgr->GetNavigationInfo(navBarNode);
+    ASSERT_NE(result, nullptr);
+    auto navigationId = result->navigationId;
+    ASSERT_EQ(navigationId, "");
+    auto stack = result->pathStack;
+    ASSERT_EQ(stack, navigationStack);
 }
 } // namespace OHOS::Ace::NG

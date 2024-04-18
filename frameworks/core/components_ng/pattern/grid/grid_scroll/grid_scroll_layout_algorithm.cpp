@@ -726,11 +726,11 @@ OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
 {
     OffsetF offset = currOffset;
     for (int32_t lastCrossIndex = currLineIndex - 1; lastCrossIndex >= 0; lastCrossIndex--) {
-        auto LastGridMatrixIter = gridLayoutInfo_.gridMatrix_.find(lastCrossIndex);
-        if (LastGridMatrixIter == gridLayoutInfo_.gridMatrix_.end()) {
+        auto lastGridMatrixIter = gridLayoutInfo_.gridMatrix_.find(lastCrossIndex);
+        if (lastGridMatrixIter == gridLayoutInfo_.gridMatrix_.end()) {
             continue;
         }
-        auto lastGridItemRecord = LastGridMatrixIter->second;
+        const auto& lastGridItemRecord = lastGridMatrixIter->second;
         auto lastLineCrossItem = lastGridItemRecord.find(currentCrossIndex);
         if (lastLineCrossItem == lastGridItemRecord.end()) {
             continue;

@@ -453,6 +453,11 @@ void RichEditorEventHub::FireOnDidChange(const std::list<RichEditorAbstractSpanR
 
 bool RichEditorEventHub::HasOnDidChange() const
 {
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->SetContentChange(true);
     return static_cast<bool>(onDidChange_);
 }
 

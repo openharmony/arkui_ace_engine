@@ -176,6 +176,7 @@ private:
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     RefPtr<FrameNode> GetSideBarNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetFirstFrameNode(const RefPtr<UINode>& host) const;
     RefPtr<FrameNode> GetSideBarNodeOrFirstChild() const;
     RefPtr<FrameNode> GetControlButtonNode() const;
     RefPtr<FrameNode> GetContentNode(const RefPtr<FrameNode>& host) const;

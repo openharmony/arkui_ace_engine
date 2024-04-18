@@ -323,9 +323,10 @@ std::list<RefPtr<SpanBase>> SpanString::GetSubSpanList(
     std::list<RefPtr<SpanBase>> res;
     int32_t end = start + length;
     for (auto& span : spans) {
-        int32_t spanStart = span->GetStartIndex();
-        int32_t spanEnd = span->GetEndIndex();
-        if ((start <= spanStart && spanStart < end) || (start <= spanEnd && spanEnd <= end)) {
+        auto intersection = span->GetIntersectionInterval({ start, end });
+        if (intersection) {
+            int32_t spanStart = span->GetStartIndex();
+            int32_t spanEnd = span->GetEndIndex();
             spanStart = spanStart <= start ? 0 : spanStart - start;
             spanEnd = spanEnd < end ? spanEnd - start : end - start;
             if (spanStart == spanEnd) {
@@ -379,13 +380,11 @@ RefPtr<SpanBase> SpanString::GetSpan(int32_t start, int32_t length, SpanType spa
     }
     int32_t end = start + length;
     auto spanBaseList = spansMap_.find(spanType)->second;
-    for (auto itr = spanBaseList.begin(); itr != spanBaseList.end(); ++itr) {
-        auto spanBase = *itr;
-
-        if ((start <= spanBase->GetStartIndex() && spanBase->GetStartIndex() < end) ||
-            (start <= spanBase->GetEndIndex() && spanBase->GetEndIndex() <= end)) {
-            int32_t newStart = start <= spanBase->GetStartIndex() ? spanBase->GetStartIndex() : start;
-            int32_t newEnd = spanBase->GetEndIndex() < end ? spanBase->GetEndIndex() : end;
+    for (auto& spanBase : spanBaseList) {
+        auto intersection = spanBase->GetIntersectionInterval({ start, end });
+        if (intersection) {
+            int32_t newStart = intersection->first;
+            int32_t newEnd = intersection->second;
             if (newStart == newEnd) {
                 continue;
             }

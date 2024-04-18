@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "base/log/log_wrapper.h"
+#include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/utils.h"
@@ -223,7 +224,9 @@ RefPtr<FrameNode> SideBarContainerPattern::GetContentNode(const RefPtr<FrameNode
     auto iter = children.rbegin();
     std::advance(iter, CONTENT_INDEX);
     auto contentNode = AceType::DynamicCast<FrameNode>(*iter);
-    CHECK_NULL_RETURN(contentNode, nullptr);
+    if (!contentNode) {
+        contentNode = GetFirstFrameNode(*iter);
+    }
 
     return contentNode;
 }
@@ -240,9 +243,27 @@ RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNode(const RefPtr<FrameNode
     auto iter = children.rbegin();
     std::advance(iter, SIDE_BAR_INDEX);
     auto sideBarNode = AceType::DynamicCast<FrameNode>(*iter);
-    CHECK_NULL_RETURN(sideBarNode, nullptr);
+    if (!sideBarNode) {
+        sideBarNode = GetFirstFrameNode(*iter);
+    }
 
     return sideBarNode;
+}
+
+RefPtr<FrameNode> SideBarContainerPattern::GetFirstFrameNode(const RefPtr<UINode>& host) const
+{
+    CHECK_NULL_RETURN(host, nullptr);
+    auto children = host->GetChildren();
+    while (!children.empty()) {
+        auto firstChild = children.front();
+        auto firstChildNode = AceType::DynamicCast<FrameNode>(firstChild);
+        if (firstChildNode) {
+            return firstChildNode;
+        }
+        children = firstChild->GetChildren();
+    }
+    TAG_LOGI(AceLogTag::ACE_SIDEBAR, "SideBarContainer can't find child frameNode to set ZIndex");
+    return nullptr;
 }
 
 RefPtr<FrameNode> SideBarContainerPattern::GetSideBarNodeOrFirstChild() const
