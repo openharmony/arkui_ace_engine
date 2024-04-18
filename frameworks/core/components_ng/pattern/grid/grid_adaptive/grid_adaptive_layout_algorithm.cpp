@@ -115,6 +115,13 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(gridLayoutProperty);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = gridLayoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, frameSize);
+    auto direction = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+
     int32_t total = layoutWrapper->GetTotalChildCount();
     for (int32_t index = 0; index < total; ++index) {
         if (index < displayCount_) {
@@ -123,7 +130,12 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 continue;
             }
             // TODO: add center position when grid item is less than ceil.
-            childWrapper->GetGeometryNode()->SetMarginFrameOffset(CalculateChildOffset(index, layoutWrapper));
+            auto childOffset = CalculateChildOffset(index, layoutWrapper);
+            if (direction == TextDirection::RTL) {
+                childOffset.SetX(frameSize.CrossSize(Axis::VERTICAL) - childOffset.GetX() -
+                                 childWrapper->GetGeometryNode()->GetMarginFrameSize().Width());
+            }
+            childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
             childWrapper->Layout();
         } else {
             layoutWrapper->RemoveChildInRenderTree(index);

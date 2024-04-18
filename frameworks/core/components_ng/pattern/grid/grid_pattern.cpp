@@ -314,8 +314,17 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (layoutProperty->IsReverse()) {
+        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
+            source != SCROLL_FROM_JUMP) {
+            offset = -offset;
+        }
+    }
+
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
+    if (!HandleEdgeEffect(offset, source, GetContentSize(), layoutProperty->IsReverse())) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -1881,5 +1890,14 @@ inline bool GridPattern::UseIrregularLayout() const
 {
     return SystemProperties::GetGridIrregularLayoutEnabled() &&
            GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions();
+}
+
+bool GridPattern::IsReverse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, false);
+    return gridLayoutProperty->IsReverse();
 }
 } // namespace OHOS::Ace::NG
