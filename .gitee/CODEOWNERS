@@ -294,7 +294,22 @@ frameworks/core/components_ng/image_provider/  @wu-yinxiao
 frameworks/core/components_ng/svg/  @wu-yinxiao
 
 [Advanced UI Components]
-advanced_ui_component/ @youzhi92 @hanyujia1
+advanced_ui_component/ @youzhi92
+advanced_ui_component/composelistitem @hanyujia1
+advanced_ui_component/composetitlebar @hanyujia1
+advanced_ui_component/dialog @hanyujia1
+advanced_ui_component/editabletitlebar @hanyujia1
+advanced_ui_component/exceptionprompt @hanyujia1
+advanced_ui_component/filter @hanyujia1
+advanced_ui_component/gridobjectsortcomponent @hanyujia1
+advanced_ui_component/progressbutton @hanyujia1
+advanced_ui_component/selecttitlebar @hanyujia1
+advanced_ui_component/subheader @hanyujia1
+advanced_ui_component/swiperefresher @hanyujia1
+advanced_ui_component/tabtitlebar @hanyujia1
+advanced_ui_component/toolbar @hanyujia1
+advanced_ui_component/treeview @hanyujia1
+advanced_ui_component/splitlayout @hanyujia1
 
 [Build configs]
 build/ @sunfei2021
