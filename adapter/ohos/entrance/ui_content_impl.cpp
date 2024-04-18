@@ -1083,6 +1083,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     if (isFormRender_) {
         Platform::AceViewOhos::SurfaceChanged(aceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
+        SetFontScaleAndWeightScale(container, instanceId_);
         // Set sdk version in module json mode for form
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
