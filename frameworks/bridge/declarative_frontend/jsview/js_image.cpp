@@ -267,9 +267,8 @@ void JSImage::Create(const JSCallbackInfo& info)
             if (GetPixelMapListFromAnimatedDrawable(info[0], pixelMaps, duration, iterations)) {
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
-            } else {
-                pixmap = GetDrawablePixmap(info[0]);
             }
+            pixmap = GetDrawablePixmap(info[0]);
         } else {
             pixmap = CreatePixelMapFromNapiValue(info[0]);
         }
