@@ -1086,7 +1086,7 @@ public:
 
     virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault() {}
+    virtual void RestoreDefault(int32_t windowId = 0) {}
 
     void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {

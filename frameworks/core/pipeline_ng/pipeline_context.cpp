@@ -3364,7 +3364,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
     }
 }
 
-void PipelineContext::RestoreDefault()
+void PipelineContext::RestoreDefault(int32_t windowId)
 {
     auto window = GetWindow();
     CHECK_NULL_VOID(window);
@@ -3372,7 +3372,7 @@ void PipelineContext::RestoreDefault()
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
-    mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
+    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetWindowId(), MouseFormat::DEFAULT);
 }
 
 void PipelineContext::OpenFrontendAnimation(
