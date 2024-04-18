@@ -2571,6 +2571,21 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
         TaskExecutor::TaskType::UI);
 }
 
+std::vector<Ace::RectF> AceContainer::GetOverlayNodePositions()
+{
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(pipeline, {});
+    return pipeline->GetOverlayNodePositions();
+}
+
+void AceContainer::RegisterOverlayNodePositionsUpdateCallback(
+    const std::function<void(std::vector<Ace::RectF>)>&& callback)
+{
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RegisterOverlayNodePositionsUpdateCallback(std::move(callback));
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {

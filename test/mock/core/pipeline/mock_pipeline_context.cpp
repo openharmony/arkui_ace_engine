@@ -555,6 +555,15 @@ void PipelineContext::FlushFocusView()
     }
 }
 
+void PipelineContext::SetOverlayNodePositions(std::vector<Ace::RectF> rects) {}
+
+std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions() { return {}; }
+
+void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
+    const std::function<void(std::vector<Ace::RectF>)>&& callback) {}
+
+void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

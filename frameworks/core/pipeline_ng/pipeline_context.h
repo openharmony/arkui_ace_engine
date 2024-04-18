@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <utility>
 
+#include "interfaces/inner_api/ace/arkui_rect.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
@@ -678,6 +680,15 @@ public:
 
     Dimension GetCustomTitleHeight();
 
+    void SetOverlayNodePositions(std::vector<Ace::RectF> rects);
+
+    std::vector<Ace::RectF> GetOverlayNodePositions();
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>&& callback);
+
+    void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -887,6 +898,8 @@ private:
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+    std::vector<Ace::RectF> overlayNodePositions_;
+    std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;
