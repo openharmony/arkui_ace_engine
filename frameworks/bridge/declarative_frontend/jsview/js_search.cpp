@@ -456,7 +456,7 @@ void JSSearch::SetInputFilter(const JSCallbackInfo& info)
     auto tmpInfo = info[0];
     std::string inputFilter;
     if (tmpInfo->IsUndefined()) {
-        TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
+        SearchModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
         return;
     }
     if (!ParseJsString(tmpInfo, inputFilter)) {
