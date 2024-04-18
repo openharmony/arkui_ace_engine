@@ -86,8 +86,8 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
-constexpr uint32_t POPUPSIZE_HEIGHT = 200;
-constexpr uint32_t POPUPSIZE_WIDTH = 400;
+constexpr uint32_t POPUPSIZE_HEIGHT = 0;
+constexpr uint32_t POPUPSIZE_WIDTH = 0;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
