@@ -115,7 +115,7 @@ void JSFontSpan::ParseJsFontSize(const JSRef<JSObject>& obj, Font& font)
             if (!fontSizeUnit->IsNull() && fontSizeUnit->IsNumber()) {
                 unit = static_cast<DimensionUnit>(fontSizeUnit->ToNumber<int32_t>());
             }
-            if (value >= 0) {
+            if (value >= 0 && unit != DimensionUnit::PERCENT) {
                 size = CalcDimension(value, unit);
             }
         }

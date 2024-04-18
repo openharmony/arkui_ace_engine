@@ -222,6 +222,90 @@ HWTEST_F(SpanStringTestNg, SpanString004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanStringTest005
+ * @tc.desc: Test basic function of DecorationSpan/BaselineOffsetSpan/LetterSpacingSpan/TextShadowSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
+{
+    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, 0, 1));
+    spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
+    spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3));
+    Shadow textShadow;
+    textShadow.SetBlurRadius(0.0);
+    textShadow.SetColor(Color::BLUE);
+    textShadow.SetOffsetX(5.0);
+    textShadow.SetOffsetY(5.0);
+    vector<Shadow> textShadows { textShadow };
+    spanString3->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9));
+
+    auto firstSpans = spanString3->GetSpans(2, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto letterSpacingSpan = AceType::DynamicCast<LetterSpacingSpan>(firstSpans[0]);
+    EXPECT_NE(letterSpacingSpan, nullptr);
+    EXPECT_EQ(letterSpacingSpan->GetStartIndex(), 2);
+    EXPECT_EQ(letterSpacingSpan->GetEndIndex(), 3);
+    EXPECT_TRUE(letterSpacingSpan->GetLetterSpacing() == Dimension(5));
+
+    auto secondSpans = spanString3->GetSpans(1, 1);
+    EXPECT_EQ(secondSpans.size(), 2);
+
+    auto thirdSpans = spanString3->GetSpans(0, 1);
+    EXPECT_EQ(thirdSpans.size(), 3);
+
+    auto fourthSpans = spanString3->GetSpans(3, 1);
+    EXPECT_EQ(fourthSpans.size(), 0);
+
+    auto fifthSpans = spanString3->GetSpans(0, 9);
+    EXPECT_EQ(fifthSpans.size(), 4);
+}
+
+/**
+ * @tc.name: SpanStringTest006
+ * @tc.desc: Test basic function of DecorationSpan/BaselineOffsetSpan/LetterSpacingSpan/TextShadowSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
+{
+    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, 0, 1));
+    spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
+    spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
+    Shadow textShadow;
+    textShadow.SetBlurRadius(0.0);
+    textShadow.SetColor(Color::BLUE);
+    textShadow.SetOffsetX(5.0);
+    textShadow.SetOffsetY(5.0);
+    vector<Shadow> textShadows { textShadow };
+    spanString3->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(textShadows, 8, 10));
+    auto subSpanString = spanString3->GetSubSpanString(0, 10);
+    EXPECT_TRUE(subSpanString->IsEqualToSpanString(spanString3));
+    auto firstSpans = spanString3->GetSpans(5, 1);
+    auto letterSpacingSpan = AceType::DynamicCast<LetterSpacingSpan>(firstSpans[0]);
+    EXPECT_NE(letterSpacingSpan, nullptr);
+    EXPECT_EQ(letterSpacingSpan->GetStartIndex(), 5);
+    EXPECT_EQ(letterSpacingSpan->GetEndIndex(), 6);
+    EXPECT_TRUE(letterSpacingSpan->GetLetterSpacing() == Dimension(5));
+
+    auto secondSpans = spanString3->GetSpans(1, 2);
+    EXPECT_EQ(secondSpans.size(), 1);
+    auto baselineOffsetSpan = AceType::DynamicCast<BaselineOffsetSpan>(secondSpans[0]);
+    EXPECT_NE(baselineOffsetSpan, nullptr);
+    EXPECT_EQ(baselineOffsetSpan->GetStartIndex(), 1);
+    EXPECT_EQ(baselineOffsetSpan->GetEndIndex(), 2);
+    EXPECT_TRUE(baselineOffsetSpan->GetBaselineOffset() == Dimension(4));
+
+    auto thirdSpans = spanString3->GetSpans(8, 1);
+    EXPECT_EQ(thirdSpans.size(), 1);
+    auto textShadowSpan = AceType::DynamicCast<TextShadowSpan>(thirdSpans[0]);
+    EXPECT_NE(textShadowSpan, nullptr);
+    EXPECT_EQ(textShadowSpan->GetStartIndex(), 8);
+    EXPECT_EQ(textShadowSpan->GetEndIndex(), 9);
+    EXPECT_TRUE(textShadowSpan->GetTextShadow()[0] == textShadow);
+}
+
+/**
  * @tc.name: SpanStringTest001
  * @tc.desc: Test basic function of ReplaceString/InsertString/RemoveString
  * @tc.type: FUNC
