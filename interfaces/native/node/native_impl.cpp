@@ -201,7 +201,7 @@ void* OH_ArkUI_GetNativeAPI(ArkUI_NativeAPIVariantKind type, int32_t version)
 
 void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const char* structName)
 {
-    if (!OHOS::Ace::NodeModel::GetFullImpl()) {
+    if (!OHOS::Ace::NodeModel::InitialFullImpl()) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
             "fail to get %{public}d node api family, impl library is not found", type);
         return nullptr;

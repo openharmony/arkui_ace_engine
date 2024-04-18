@@ -74,7 +74,7 @@ void* FindFunction(void* library, const char* name)
 
 ArkUIFullNodeAPI* impl = nullptr;
 
-ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
+bool InitialFullNodeImpl(int version)
 {
     if (!impl) {
         typedef ArkUIAnyAPI* (*GetAPI_t)(int);
@@ -82,37 +82,42 @@ ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
         void* module = FindModule();
         if (module == nullptr) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
-            return nullptr;
+            return false;
         }
         // Note, that RTLD_DEFAULT is ((void *) 0).
         getAPI = reinterpret_cast<GetAPI_t>(FindFunction(module, "GetArkUIAnyFullNodeAPI"));
         if (!getAPI) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find GetArkUIAnyFullNodeAPI()");
-            return nullptr;
+            return false;
         }
 
         impl = reinterpret_cast<ArkUIFullNodeAPI*>((*getAPI)(version));
         if (!impl) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "getAPI() returned null");
-            return nullptr;
+            return false;
         }
 
         if (impl->version != version) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE,
                 "API version mismatch: expected %{public}d, but get the version %{public}d", version, impl->version);
-            return nullptr;
+            return false;
         }
     }
 
     impl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
     impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
-    return impl;
+    return true;
 }
 } // namespace
 
 ArkUIFullNodeAPI* GetFullImpl()
 {
-    return GetAnyFullNodeImpl(ARKUI_NODE_API_VERSION);
+    return impl;
+}
+
+bool InitialFullImpl()
+{
+    return InitialFullNodeImpl(ARKUI_NODE_API_VERSION);
 }
 
 struct InnerEventExtraParam {
