@@ -63,6 +63,34 @@ enum class ResourceType : uint32_t {
 
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
+struct LocalizedCalcDimension {
+    std::optional<CalcDimension> start;
+    std::optional<CalcDimension> end;
+    std::optional<CalcDimension> top;
+    std::optional<CalcDimension> bottom;
+};
+
+struct CommonCalcDimension {
+    std::optional<CalcDimension> left;
+    std::optional<CalcDimension> right;
+    std::optional<CalcDimension> top;
+    std::optional<CalcDimension> bottom;
+};
+
+struct LocalizedColor {
+    std::optional<Color> start;
+    std::optional<Color> end;
+    std::optional<Color> top;
+    std::optional<Color> bottom;
+};
+
+struct CommonColor {
+    std::optional<Color> left;
+    std::optional<Color> right;
+    std::optional<Color> top;
+    std::optional<Color> bottom;
+};
+
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
 RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>& jsObj);
 RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
@@ -154,6 +182,11 @@ public:
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
+    static void ParseLocalizedMarginOrLocalizedPaddingCorner(
+        const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension);
+    static void ParseCommonMarginOrPaddingCorner(
+        const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension);
+    static void GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
     static void JsOutline(const JSCallbackInfo& info);
     static void JsOutlineWidth(const JSCallbackInfo& info);
     static void JsOutlineColor(const JSCallbackInfo& info);
@@ -173,6 +206,8 @@ public:
     static void ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageDimension(
         const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension);
+    static void ParseBorderImageLengthMetrics(
+        const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension);
     static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset);
     static void JsUseEffect(const JSCallbackInfo& info);
     static void JsUseShadowBatching(const JSCallbackInfo& info);
