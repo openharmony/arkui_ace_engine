@@ -849,7 +849,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateCurrentIndex(swiperLayoutAlgorithm->GetCurrentIndex());
         AdjustCurrentFocusIndex();
         auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentFocusIndex_));
-        if (curChild) {
+        if (curChild && IsContentFocused()) {
             auto curChildFrame = curChild->GetHostNode();
             CHECK_NULL_RETURN(curChildFrame, false);
             FlushFocus(curChildFrame);

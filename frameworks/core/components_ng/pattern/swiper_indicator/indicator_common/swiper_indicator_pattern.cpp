@@ -132,6 +132,10 @@ void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestu
 
 void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
+    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+        return;
+    }
+
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         isClicked_ = true;
         HandleMouseClick(info);
