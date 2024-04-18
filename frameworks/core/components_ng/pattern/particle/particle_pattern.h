@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARTICLE_PARTICLE_PATTERN_H
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/particle/particle_model.h"
 
 namespace OHOS::Ace::NG {
   
@@ -29,6 +30,7 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
     void OnAttachToMainTree() override;
+    void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
 
     bool HaveUnVisibleParent() const
     {
@@ -40,8 +42,19 @@ public:
         haveUnVisibleParent_ = haveUnVisibleParent;
     }
 
+    const std::vector<ParticleDisturbance>& GetPDisturbance() const
+    {
+        return disturbance_;
+    }
+
+    void SetDisturbance(std::vector<ParticleDisturbance> disturbance)
+    {
+        disturbance_ = disturbance;
+    }
+
 private:
     bool haveUnVisibleParent_ = false;
+    std::vector<ParticleDisturbance> disturbance_;
 };
 } // namespace OHOS::Ace
 

@@ -1601,6 +1601,11 @@ struct ArkUIListItemGroupModifier {
     void (*listItemGroupSetFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
 };
 
+struct ArkUIParticleModifier {
+    void (*SetDisturbanceField)(ArkUINodeHandle node, const ArkUIInt32orFloat32* valuesArray, ArkUI_Int32 length);
+    void (*ResetDisturbanceField)(ArkUINodeHandle node);
+};
+
 struct ArkUISwiperModifier {
     void (*setSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit);
     void (*resetSwiperNextMargin)(ArkUINodeHandle node);
@@ -3379,6 +3384,7 @@ struct ArkUINodeModifiers {
     const ArkUITextClockControllerModifier* (*getTextClockControllerModifier)();
     const ArkUIRichEditorControllerModifier* (*getRichEditorControllerModifier)();
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
+    const ArkUIParticleModifier* (*getParticleModifier)();
 };
 
 // same as inner defines in property.h

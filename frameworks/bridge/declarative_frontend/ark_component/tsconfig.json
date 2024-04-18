@@ -93,7 +93,7 @@
         "src/ArkGridContainer.ts",
         "src/ArkDatePicker.ts",
         "src/ArkEffectComponent.ts",
-        "src/ArkRemoteWindow.ts"      
+        "src/ArkRemoteWindow.ts"
     ],
     "compilerOptions": {
         "module": "none",

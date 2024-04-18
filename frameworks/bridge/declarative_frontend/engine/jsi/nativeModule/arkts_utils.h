@@ -131,6 +131,19 @@ public:
         }
         return false;
     }
+    
+template <class T>
+static bool ParseNumberFromObject(const EcmaVM* vm, const Local<panda::ObjectRef>& args, std::string key, T& result)
+{
+    Local<JSValueRef> jsValueRef = args->Get(vm, panda::StringRef::NewFromUtf8(vm, key.c_str()));
+    if (!jsValueRef->IsNumber()) {
+        result = 0;
+        return false;
+    }
+    result = static_cast<T>(jsValueRef->ToNumber(vm)->Value());
+    return true;
+}
+
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

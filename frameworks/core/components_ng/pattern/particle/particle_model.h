@@ -21,13 +21,37 @@
 #include <mutex>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/particle_property.h"
 namespace OHOS::Ace {
+
+enum class ParticleDisturbanceShapeType :uint32_t { REACT, CIRCLE, ELLIPSE };
+
+struct ParticleDisturbance {
+    float strength = 0.0f;
+    ParticleDisturbanceShapeType shape = ParticleDisturbanceShapeType::REACT;
+    int  size[2] = {0, 0};
+    int  position[2] = {0, 0};
+    int feather = 0;
+    float noiseScale = 1.0f;
+    float noiseFrequency = 1.0f;
+    float noiseAmplitude = 1.0f;
+
+    bool operator!=(const ParticleDisturbance& data) const
+    {
+        return !(NearEqual(strength, data.strength) && shape == data.shape&& size[0] == data.size[0] &&
+               size[1] == data.size[1] && position[0] == data.position[0] && position[1] == data.position[1] &&
+               feather == data.feather && NearEqual(noiseScale, data.noiseScale) &&
+               NearEqual(noiseFrequency, data.noiseFrequency) && NearEqual(noiseAmplitude, data.noiseAmplitude));
+    }
+};
+
 class ACE_EXPORT ParticleModel {
 public:
     static ParticleModel* GetInstance();
     virtual ~ParticleModel() = default;
     virtual void Create(std::list<NG::ParticleOption>& arrayValue) = 0;
+    virtual void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray) = 0;
 
 private:
     static std::unique_ptr<ParticleModel> instance_;

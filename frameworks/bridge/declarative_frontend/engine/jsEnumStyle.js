@@ -2635,6 +2635,13 @@ var ParticleUpdater;
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
 
+var DisturbanceFieldsShape;
+(function (DisturbanceFieldsShape) {
+  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 2] = "CIRCLE";
+})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
+
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {
   SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";

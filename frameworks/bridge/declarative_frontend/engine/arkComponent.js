@@ -21691,3 +21691,46 @@ if (globalThis.RemoteWindow !== undefined) {
   };
 }
 
+class ParticleDisturbanceFieldModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().particle.ResetDisturbanceField(node);
+    }
+    else {
+      getUINativeModule().particle.SetDisturbanceField(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+ParticleDisturbanceFieldModifier.identity = Symbol('disturbanceFields');
+
+/// <reference path='./import.ts' />
+class ArkParticleComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  disturbanceFields(value) {
+     modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.Particle !== undefined) {
+
+  // @ts-ignore
+  globalThis.Particle.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkParticleComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ParticleModifier(nativePtr, classType);
+    });
+  };
+}
+
