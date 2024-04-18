@@ -427,6 +427,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMotionPath));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMotionPath"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMotionPath));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMotionBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMotionBlur));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMotionBlur"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMotionBlur));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGroupDefaultFocus"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGroupDefaultFocus));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGroupDefaultFocus"),

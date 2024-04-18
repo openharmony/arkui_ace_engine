@@ -132,6 +132,7 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
+    static void SetMotionBlur(const MotionBlurOption &motionBlurOption);
     static void SetBackgroundEffect(const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
     static void SetForegroundEffect(float radius);
@@ -509,6 +510,7 @@ public:
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
+    static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);

@@ -680,6 +680,11 @@ public:
         ViewAbstract::SetFrontBlur(radius, blurOption);
     }
 
+    void SetMotionBlur(const MotionBlurOption& motionBlurOption) override
+    {
+        ViewAbstract::SetMotionBlur(motionBlurOption);
+    }
+
     void SetBackShadow(const std::vector<Shadow>& shadows) override
     {
         if (!shadows.empty()) {

@@ -86,6 +86,7 @@ struct CustomBackgroundProperty {
 };
 
 struct ForegroundProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MotionBlur, MotionBlurOption);
     bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
     {
         if (!option.has_value()) {

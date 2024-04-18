@@ -3911,6 +3911,37 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JsMotionBlur(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    MotionBlurOption option;
+    double x = 0.0;
+    double y = 0.0;
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsAnchor = jsObj->GetProperty("anchor");
+    if (!jsAnchor->IsNull() && !jsAnchor->IsUndefined() && jsAnchor->IsObject()) {
+        JSRef<JSObject> jsAnchorObj = JSRef<JSObject>::Cast(jsAnchor);
+        ParseJsDouble(jsAnchorObj->GetProperty("x"), x);
+        ParseJsDouble(jsAnchorObj->GetProperty("y"), y);
+    }
+    CalcDimension radius;
+    if (!ParseJsDimensionVp(jsObj->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    if (LessNotEqual(x, 0.0)) {
+        x = 0.0;
+    }
+    if (LessNotEqual(y, 0.0)) {
+        y = 0.0;
+    }
+    option.radius = radius;
+    option.anchor.x = std::clamp(x, 0.0, 1.0);
+    option.anchor.y = std::clamp(y, 0.0, 1.0);
+    ViewAbstractModel::GetInstance()->SetMotionBlur(option);
+}
+
 void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 {
     Color colorBlend;
@@ -7225,6 +7256,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("overlay", &JSViewAbstract::JsOverlay);
 
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
+    JSClass<JSViewAbstract>::StaticMethod("motionBlur", &JSViewAbstract::JsMotionBlur);
     JSClass<JSViewAbstract>::StaticMethod("useEffect", &JSViewAbstract::JsUseEffect);
     JSClass<JSViewAbstract>::StaticMethod("useShadowBatching", &JSViewAbstract::JsUseShadowBatching);
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
