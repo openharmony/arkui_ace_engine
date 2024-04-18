@@ -577,5 +577,19 @@ void SetImageOnError(ArkUINodeHandle node, void* extraParam)
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
 }
+
+void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onSvgPlayFinishEvent = [node, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_SVG_PLAY_FINISH;
+        SendArkUIAsyncEvent(&event);
+    };
+    ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onSvgPlayFinishEvent));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -472,6 +472,14 @@ void ImageModelNG::SetOnError(FrameNode* frameNode, std::function<void(const Loa
     eventHub->SetOnError(std::move(callback));
 }
 
+void ImageModelNG::SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFinish(std::move(callback));
+}
+
 ImageSourceInfo ImageModelNG::GetSrc(FrameNode* frameNode)
 {
     ImageSourceInfo defaultImageSourceInfo;

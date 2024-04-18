@@ -120,6 +120,7 @@ public:
     {
         return isSingleRange_;
     }
+    static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
