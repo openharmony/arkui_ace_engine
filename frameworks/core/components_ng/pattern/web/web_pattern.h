@@ -478,6 +478,7 @@ public:
     void SetAccessibilityState(bool state);
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
 
 private:
     void RegistVirtualKeyBoardListener();
