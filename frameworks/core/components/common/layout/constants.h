@@ -219,6 +219,12 @@ enum class TextDataDetectType {
     ADDRESS,
 };
 
+enum class LineBreakStrategy {
+    GREEDY = 0,
+    HIGH_QUALITY,
+    BALANCED,
+};
+
 enum class WhiteSpace {
     NORMAL,
     PRE,

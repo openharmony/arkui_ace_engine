@@ -244,7 +244,6 @@ private:
     RefPtr<ResourceObject> resourceObject_;
 };
 
-
 enum class PropertyInfo {
     FONTSIZE = 0,
     FONTCOLOR,
@@ -263,6 +262,7 @@ enum class PropertyInfo {
     SYMBOL_RENDERING_STRATEGY,
     SYMBOL_EFFECT_STRATEGY,
     WORD_BREAK,
+    LINE_BREAK_STRATEGY,
     FONTFEATURE,
 };
 
@@ -376,6 +376,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();

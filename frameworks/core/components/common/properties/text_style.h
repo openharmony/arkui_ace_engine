@@ -636,6 +636,16 @@ public:
         return textBackgroundStyle_;
     }
 
+    LineBreakStrategy GetLineBreakStrategy() const
+    {
+        return lineBreakStrategy_;
+    }
+
+    void SetLineBreakStrategy(const LineBreakStrategy breakStrategy)
+    {
+        lineBreakStrategy_ = breakStrategy;
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -658,6 +668,7 @@ public:
         JSON_STRING_PUT_INT(jsonValue, wordBreak_);
         JSON_STRING_PUT_INT(jsonValue, textCase_);
         JSON_STRING_PUT_INT(jsonValue, ellipsisMode_);
+        JSON_STRING_PUT_INT(jsonValue, lineBreakStrategy_);
 
         std::stringstream ss;
         std::for_each(renderColors_.begin(), renderColors_.end(), [&ss](const Color& c) { ss << c.ToString() << ","; });
@@ -695,6 +706,7 @@ private:
     WordBreak wordBreak_ { WordBreak::BREAK_WORD };
     TextCase textCase_ { TextCase::NORMAL };
     EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
+    LineBreakStrategy lineBreakStrategy_ { LineBreakStrategy::GREEDY };
     Color textColor_ { Color::BLACK };
     Color textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;

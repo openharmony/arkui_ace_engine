@@ -224,10 +224,12 @@ struct UpdateParagraphStyle {
         textAlign.reset();
         leadingMargin.reset();
         wordBreak.reset();
+        lineBreakStrategy.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<WordBreak> wordBreak;
+    std::optional<LineBreakStrategy> lineBreakStrategy;
 
     std::string ToString() const
     {
@@ -235,6 +237,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, textAlign);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, leadingMargin);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, wordBreak);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
         return jsonValue->ToString();
     }
 };

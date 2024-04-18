@@ -1089,6 +1089,7 @@ ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(
         .wordBreak = textStyle.GetWordBreak(),
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .textOverflow = textStyle.GetTextOverflow(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
     };
 }
 } // namespace OHOS::Ace::NG

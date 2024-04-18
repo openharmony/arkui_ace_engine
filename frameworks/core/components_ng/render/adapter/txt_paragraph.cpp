@@ -63,6 +63,7 @@ void TxtParagraph::CreateBuilder()
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
     style.textSplitRatio = TEXT_SPLIT_RATIO;
+    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
@@ -74,6 +75,7 @@ void TxtParagraph::CreateBuilder()
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
 #else
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
+    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
 #endif
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE

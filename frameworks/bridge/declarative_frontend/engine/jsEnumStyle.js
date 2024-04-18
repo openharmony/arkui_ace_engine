@@ -104,6 +104,13 @@ var EllipsisMode;
   EllipsisMode[EllipsisMode["END"] = 2] = "end";
 })(EllipsisMode || (EllipsisMode = {}));
 
+var LineBreakStrategy;
+(function (LineBreakStrategy) {
+  LineBreakStrategy[LineBreakStrategy["GREEDY"] = 0] = "greedy";
+  LineBreakStrategy[LineBreakStrategy["HIGH_QUALITY"] = 1] = "highquality";
+  LineBreakStrategy[LineBreakStrategy["BALANCED"] = 2] = "balanced";
+})(LineBreakStrategy || (LineBreakStrategy = {}));
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";

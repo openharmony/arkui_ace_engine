@@ -199,6 +199,7 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
     leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
     paragraphStyleObj->SetPropertyObject("leadingMargin", leadingMarginArray);
     paragraphStyleObj->SetProperty<int32_t>("wordBreak", textStyleResult.wordBreak);
+    paragraphStyleObj->SetProperty<int32_t>("lineBreakStrategy", textStyleResult.lineBreakStrategy);
     return paragraphStyleObj;
 }
 
@@ -259,6 +260,7 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     auto obj = JSRef<JSObject>::New();
     obj->SetProperty<int32_t>("textAlign", info.textAlign);
     obj->SetProperty<int32_t>("wordBreak", info.wordBreak);
+    obj->SetProperty<int32_t>("lineBreakStrategy", info.lineBreakStrategy);
 
     auto lmObj = JSRef<JSObject>::New();
     auto size = JSRef<JSArray>::New();
@@ -1912,6 +1914,19 @@ void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>&
     style.wordBreak = WORD_BREAK_TYPES[index];
 }
 
+void JSRichEditorController::ParseLineBreakStrategyParagraphStyle(
+    const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
+{
+    auto breakStrategyObj = styleObject->GetProperty("lineBreakStrategy");
+    if (!breakStrategyObj->IsNull() && breakStrategyObj->IsNumber()) {
+        auto breakStrategy = static_cast<LineBreakStrategy>(breakStrategyObj->ToNumber<int32_t>());
+        if (breakStrategy < LineBreakStrategy::GREEDY || breakStrategy > LineBreakStrategy::BALANCED) {
+            breakStrategy = LineBreakStrategy::GREEDY;
+        }
+        style.lineBreakStrategy = breakStrategy;
+    }
+}
+
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -1924,6 +1939,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         style.textAlign = align;
     }
 
+    ParseLineBreakStrategyParagraphStyle(styleObject, style);
     ParseWordBreakParagraphStyle(styleObject, style);
 
     auto lm = styleObject->GetProperty("leadingMargin");
