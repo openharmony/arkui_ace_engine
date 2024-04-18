@@ -194,7 +194,7 @@ void SetTextAreaPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIReso
             font.fontSize = CalcDimension(size->value, unitEnum);
         }
     } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);

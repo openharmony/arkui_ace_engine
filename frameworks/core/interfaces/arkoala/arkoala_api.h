@@ -1228,8 +1228,8 @@ struct ArkUICommonModifier {
     void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     ArkUI_Float32 (*getLayoutWeight)(ArkUINodeHandle node);
-    void (*setBackgroundImageSizeWidthUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
-        ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight, ArkUI_Int32 unit);
+    void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
+        ArkUI_Int32 unit);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2223,6 +2223,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputAdaptMaxFontSize)(ArkUINodeHandle node);
     void (*setTextInputHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextInputHeightAdaptivePolicy)(ArkUINodeHandle node);
+    void (*setTextInputPlaceholderFontEnum)(ArkUINodeHandle node, const struct ArkUIResourceLength* size,
+        ArkUI_Int32 weight, ArkUI_CharPtr family, ArkUI_Int32 style);
 };
 
 struct ArkUIWebModifier {
