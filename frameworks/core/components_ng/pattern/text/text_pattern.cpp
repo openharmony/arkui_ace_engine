@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #include <cstdint>
+#include <iterator>
 #include <stack>
 #include <string>
 
@@ -37,6 +38,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -47,6 +49,7 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -209,6 +212,15 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     textSelector_.secondHandle = secondHandle;
 }
 
+std::list<ResultObject> TextPattern::GetSpansInfoInStyledString(int32_t start, int32_t end)
+{
+    std::list<ResultObject> resultObjects;
+    for (const auto& item : spans_) {
+        resultObjects.emplace_back(item->GetSpanResultObject(start, end));
+    }
+    return resultObjects;
+}
+
 SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method)
 {
     int32_t index = 0;
@@ -235,6 +247,11 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length) ||
         (method == GetSpansMethod::ONSELECT && realStart == realEnd)) {
         selection.SetResultObjectList(resultObjects);
+        return selection;
+    }
+    if (isSpanStringMode_) {
+        auto result = GetSpansInfoInStyledString(realStart, realEnd);
+        selection.SetResultObjectList(result);
         return selection;
     }
     auto children = GetAllChildren();
@@ -2261,32 +2278,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (!isSpanStringMode_) {
         PreCreateLayoutWrapper();
     } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        textForDisplay_.clear();
-        host->Clean();
-        for (const auto& span : spans_) {
-            textForDisplay_ += span->content;
-            if (span->onClick) {
-                auto gestureEventHub = host->GetOrCreateGestureEventHub();
-                InitClickEvent(gestureEventHub);
-            }
-            if (span->onLongPress) {
-                auto gestureEventHub = host->GetOrCreateGestureEventHub();
-                InitLongPressEvent(gestureEventHub);
-            }
-        }
-        if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
-            dataDetectorAdapter_->textForAI_ = textForDisplay_;
-            dataDetectorAdapter_->aiDetectInitialized_ = false;
-        }
-        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
-            dataDetectorAdapter_->StartAITask();
-        }
-        // mark content dirty
-        if (contentMod_) {
-            contentMod_->ContentChange();
-        }
+        ProcessSpanString();
     }
 }
 
@@ -3078,9 +3070,116 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
 
 void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
+    isSpanStringMode_ = true;
     spans_ = value->GetSpanItems();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto options = imageItem->options;
+    auto imageInfo = CreateImageSourceInfo(options);
+    imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
+    auto index = host->GetChildren().size();
+    imageNode->MountToParent(host, index);
+    auto gesture = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetHitTestMode(HitTestMode::HTMNONE);
+    if (options.imageAttribute.has_value()) {
+        auto imgAttr = options.imageAttribute.value();
+        if (imgAttr.size.has_value()) {
+            imageLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(imgAttr.size.value().width), CalcLength(imgAttr.size.value().height)));
+        }
+        if (imgAttr.verticalAlign.has_value()) {
+            imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
+        }
+        if (imgAttr.objectFit.has_value()) {
+            imageLayoutProperty->UpdateImageFit(imgAttr.objectFit.value());
+        }
+        if (imgAttr.marginProp.has_value()) {
+            imageLayoutProperty->UpdateMargin(imgAttr.marginProp.value());
+        }
+        if (imgAttr.paddingProp.has_value()) {
+            imageLayoutProperty->UpdatePadding(imgAttr.paddingProp.value());
+        }
+        if (imgAttr.borderRadius.has_value()) {
+            auto imageRenderCtx = imageNode->GetRenderContext();
+            imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
+            imageRenderCtx->SetClipToBounds(true);
+        }
+    }
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
+    imageItem->imageNodeId = imageNode->GetId();
+    imageNode->SetImageItem(imageItem);
+}
+
+ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
+{
+    std::string src;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::string bundleName;
+    std::string moduleName;
+    if (options.image.has_value()) {
+        src = options.image.value();
+    }
+    if (options.imagePixelMap.has_value()) {
+        pixMap = options.imagePixelMap.value();
+    }
+    if (options.bundleName.has_value()) {
+        bundleName = options.bundleName.value();
+    }
+    if (options.moduleName.has_value()) {
+        moduleName = options.moduleName.value();
+    }
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (!options.imagePixelMap.has_value()) {
+            return { src, bundleName, moduleName };
+        }
+        return ImageSourceInfo(pixMap);
+#else
+        return { src, bundleName, moduleName };
+#endif
+}
+
+void TextPattern::ProcessSpanString()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    textForDisplay_.clear();
+    dataDetectorAdapter_->textForAI_.clear();
+    host->Clean();
+
+    // 适配AI&&挂载image节点
+    auto imageChildren = host->GetChildren();
+    for (const auto& span : spans_) {
+        auto imageSpan = DynamicCast<ImageSpanItem>(span);
+        if (imageSpan) {
+            dataDetectorAdapter_->textForAI_ += '\n';
+            MountImageNode(imageSpan);
+        } else {
+            dataDetectorAdapter_->textForAI_ += span->content;
+        }
+        textForDisplay_ += span->content;
+    }
+    if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
+        dataDetectorAdapter_->aiDetectInitialized_ = false;
+    }
+    if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+        dataDetectorAdapter_->StartAITask();
+    }
+
+    // mark content dirty
+    if (contentMod_) {
+        contentMod_->ContentChange();
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -40,7 +40,7 @@ class ACE_EXPORT SpanString : public SpanStringBase {
 
 public:
     explicit SpanString(const std::string& text);
-    SpanString(const std::string& text, std::vector<RefPtr<SpanBase>>& spans);
+    explicit SpanString(const ImageSpanOptions& options);
     ~SpanString() override;
     const std::string& GetString() const;
     std::wstring GetWideString();
@@ -57,12 +57,12 @@ public:
     void AddSpan(const RefPtr<SpanBase>& span);
     void RemoveSpan(int32_t start, int32_t length, SpanType key);
     bool CheckRange(int32_t start, int32_t length, bool allowLengthZero = false) const;
+    void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
 
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
         int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;
-    void BindWithSpans(std::vector<RefPtr<SpanBase>> spans);
     void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
     void SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int32_t, int32_t> interval);
     void ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation);
@@ -70,6 +70,12 @@ protected:
     bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
     static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
+    void AddImageSpan(const RefPtr<SpanBase>& span);
+    int32_t GetStepsByPosition(int32_t pos);
+    void UpdateSpansWithOffset(int32_t start, int32_t offset);
+    void UpdateSpanMapWithOffset(int32_t start, int32_t offset);
+    void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset);
+    void RemoveImageSpan(int32_t start, int32_t end);
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;

@@ -15,20 +15,22 @@
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 
-#include <string>
 #include <numeric>
+#include <string>
 
 #include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -241,7 +243,7 @@ void JSFontSpan::GetFontFamily(const JSCallbackInfo& info)
 
 void JSFontSpan::SetFontFamily(const JSCallbackInfo& info) {}
 
-RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
+const RefPtr<FontSpan>& JSFontSpan::GetFontSpan()
 {
     return fontSpan_;
 }
@@ -605,4 +607,261 @@ void JSTextShadowSpan::SetTextShadowSpan(const RefPtr<TextShadowSpan>& textShado
     textShadowSpan_ = textShadowSpan;
 }
 
+// JSImageAttachment
+void JSImageAttachment::Constructor(const JSCallbackInfo& args)
+{
+    auto imageAttachment = Referenced::MakeRefPtr<JSImageAttachment>();
+    imageAttachment->IncRefCount();
+
+    RefPtr<ImageSpan> span;
+    if (args.Length() <= 0) {
+        ImageSpanOptions imageOption;
+        span = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    } else {
+        span = JSImageAttachment::ParseJsImageSpan(JSRef<JSObject>::Cast(args[0]));
+    }
+    imageAttachment->imageSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(imageAttachment));
+}
+
+void JSImageAttachment::Destructor(JSImageAttachment* imageSpan)
+{
+    if (imageSpan != nullptr) {
+        imageSpan->DecRefCount();
+    }
+}
+
+void JSImageAttachment::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSImageAttachment>::Declare("ImageAttachment");
+    JSClass<JSImageAttachment>::CustomProperty(
+        "value", &JSImageAttachment::GetImageSrc, &JSImageAttachment::SetImageSrc);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "size", &JSImageAttachment::GetImageSize, &JSImageAttachment::SetImageSize);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "verticalAlign", &JSImageAttachment::GetImageVerticalAlign, &JSImageAttachment::SetImageVerticalAlign);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "layoutStyle", &JSImageAttachment::GetImageLayoutStyle, &JSImageAttachment::SetImageLayoutStyle);
+    JSClass<JSImageAttachment>::Bind(globalObj, JSImageAttachment::Constructor, JSImageAttachment::Destructor);
+}
+
+RefPtr<ImageSpan> JSImageAttachment::ParseJsImageSpan(const JSRef<JSObject>& obj)
+{
+    auto imageOptions = JSImageAttachment::CreateImageOptions(obj);
+    auto imageAttribute = JSImageAttachment::ParseJsImageSpanAttribute(obj);
+    imageOptions.imageAttribute = imageAttribute;
+    auto imageSpan = MakeRefPtr<ImageSpan>(imageOptions);
+    return imageSpan;
+}
+
+ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& obj)
+{
+    ImageSpanOptions options;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, options);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, options);
+    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+
+    std::string imageSrc;
+    std::string bundleName;
+    std::string moduleName;
+    auto imageValue = obj->GetProperty("value");
+    bool srcValid = JSContainerBase::ParseJsMedia(imageValue, imageSrc);
+    if (isCard && imageValue->IsString()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(imageSrc);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            imageSrc.clear();
+        }
+    }
+    JSImage::GetJsMediaBundleInfo(imageValue, bundleName, moduleName);
+    options.image = imageSrc;
+    options.bundleName = bundleName;
+    options.moduleName = moduleName;
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (!isCard) {
+            if (JSImage::IsDrawable(imageValue)) {
+                options.imagePixelMap = GetDrawablePixmap(imageValue);
+            } else {
+                options.imagePixelMap = CreatePixelMapFromNapiValue(imageValue);
+            }
+        }
+#endif
+    }
+    return options;
+}
+
+ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSObject>& obj)
+{
+    ImageSpanAttribute imageStyle;
+    auto sizeObj = obj->GetProperty("size");
+    if (sizeObj->IsObject()) {
+        ImageSpanSize imageSize;
+        JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
+        JSRef<JSVal> width = size->GetProperty("width");
+        CalcDimension imageSpanWidth;
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth)) {
+            imageSize.width = imageSpanWidth;
+        }
+        JSRef<JSVal> height = size->GetProperty("height");
+        CalcDimension imageSpanHeight;
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight)) {
+            imageSize.height = imageSpanHeight;
+        }
+        imageStyle.size = imageSize;
+    }
+    JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
+    if (!verticalAlign->IsNull()) {
+        auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
+        if (align < VerticalAlign::TOP || align > VerticalAlign::NONE) {
+            align = VerticalAlign::BOTTOM;
+        }
+        imageStyle.verticalAlign = align;
+    }
+    JSRef<JSVal> objectFit = obj->GetProperty("objectFit");
+    if (!objectFit->IsNull() && objectFit->IsNumber()) {
+        auto fit = static_cast<ImageFit>(objectFit->ToNumber<int32_t>());
+        if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+            fit = ImageFit::COVER;
+        }
+        imageStyle.objectFit = fit;
+    } else {
+        imageStyle.objectFit = ImageFit::COVER;
+    }
+    auto layoutStyleObj = obj->GetProperty("layoutStyle");
+    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+    if (!layoutStyleObject->IsUndefined()) {
+        auto marginAttr = layoutStyleObject->GetProperty("margin");
+        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
+        auto paddingAttr = layoutStyleObject->GetProperty("padding");
+        imageStyle.paddingProp = JSRichEditor::ParseMarginAttr(paddingAttr);
+        auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
+        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
+    }
+    return imageStyle;
+}
+
+void JSImageAttachment::GetImageSrc(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageOptions = imageSpan_->GetImageSpanOptions();
+    JSRef<JSVal> ret;
+    if (imageOptions.image.has_value()) {
+        ret = JSRef<JSVal>::Make(ToJSValue(imageOptions.image.value()));
+    }
+    if (imageOptions.imagePixelMap.has_value()) {
+#ifdef PIXEL_MAP_SUPPORTED
+        ret = ConvertPixmap(imageOptions.imagePixelMap.value());
+#endif
+    }
+    info.SetReturnValue(ret);
+}
+
+void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->size.has_value()) {
+        return;
+    }
+    auto imageSize = JSRef<JSObject>::New();
+    imageSize->SetProperty<float>("width", imageAttr->size->width.ConvertToPx());
+    imageSize->SetProperty<float>("height", imageAttr->size->height.ConvertToPx());
+    info.SetReturnValue(imageSize);
+}
+
+void JSImageAttachment::GetImageVerticalAlign(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->verticalAlign.has_value()) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(imageAttr->verticalAlign.value()))));
+}
+
+void JSImageAttachment::GetImageObjectFit(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value() || !imageAttr->objectFit.has_value()) {
+        return;
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(imageAttr->objectFit.value()))));
+}
+
+JSRef<JSObject> JSImageAttachment::CreateEdge(const NG::PaddingPropertyT<NG::CalcLength>& edge)
+{
+    auto obj = JSRef<JSObject>::New();
+    if (edge.top.has_value()) {
+        obj->SetProperty("top", edge.top->GetDimension().ConvertToVp());
+    }
+    if (edge.bottom.has_value()) {
+        obj->SetProperty("bottom", edge.bottom->GetDimension().ConvertToVp());
+    }
+    if (edge.left.has_value()) {
+        obj->SetProperty("left", edge.left->GetDimension().ConvertToVp());
+    }
+    if (edge.right.has_value()) {
+        obj->SetProperty("right", edge.right->GetDimension().ConvertToVp());
+    }
+    return obj;
+}
+
+JSRef<JSObject> JSImageAttachment::CreateBorderRadius(const NG::BorderRadiusProperty& borderRadius)
+{
+    auto jsBorderRadius = JSRef<JSObject>::New();
+    if (borderRadius.radiusTopLeft.has_value()) {
+        jsBorderRadius->SetProperty("topLeft", borderRadius.radiusTopLeft->ConvertToVp());
+    }
+    if (borderRadius.radiusTopRight.has_value()) {
+        jsBorderRadius->SetProperty("topRight", borderRadius.radiusTopRight->ConvertToVp());
+    }
+    if (borderRadius.radiusBottomLeft.has_value()) {
+        jsBorderRadius->SetProperty("bottomLeft", borderRadius.radiusBottomLeft->ConvertToVp());
+    }
+    if (borderRadius.radiusBottomRight.has_value()) {
+        jsBorderRadius->SetProperty("bottomRight", borderRadius.radiusBottomRight->ConvertToVp());
+    }
+    return jsBorderRadius;
+}
+
+void JSImageAttachment::GetImageLayoutStyle(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value()) {
+        return;
+    }
+    auto layoutStyle = JSRef<JSObject>::New();
+    if (imageAttr->marginProp.has_value()) {
+        layoutStyle->SetPropertyObject("margin", CreateEdge(imageAttr->marginProp.value()));
+    }
+    if (imageAttr->paddingProp.has_value()) {
+        layoutStyle->SetPropertyObject("padding", CreateEdge(imageAttr->paddingProp.value()));
+    }
+    if (imageAttr->borderRadius.has_value()) {
+        layoutStyle->SetPropertyObject("borderRadius", CreateBorderRadius(imageAttr->borderRadius.value()));
+    }
+    info.SetReturnValue(layoutStyle);
+}
+
+const RefPtr<ImageSpan>& JSImageAttachment::GetImageSpan()
+{
+    return imageSpan_;
+}
+
+void JSImageAttachment::SetImageSpan(const RefPtr<ImageSpan>& imageSpan)
+{
+    imageSpan_ = imageSpan;
+}
+
+const ImageSpanOptions& JSImageAttachment::GetImageOptions() const
+{
+    return imageSpan_->GetImageSpanOptions();
+}
 } // namespace OHOS::Ace::Framework

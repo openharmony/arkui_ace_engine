@@ -138,13 +138,16 @@ HWTEST_F(SpanStringTestNg, SpanString002, TestSize.Level1)
     std::vector<RefPtr<SpanBase>> spans;
     spans.push_back(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 3));
     spans.push_back(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
-    auto spanStringWithSpans1 = AceType::MakeRefPtr<SpanString>("01234567891", spans);
-    auto spanStringWithSpans2 = AceType::MakeRefPtr<SpanString>("01234567891", spans);
+    auto spanStringWithSpans1 = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans1->BindWithSpans(spans);
+    auto spanStringWithSpans2 = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans2->BindWithSpans(spans);
     EXPECT_TRUE(spanStringWithSpans1->IsEqualToSpanString(spanStringWithSpans2));
     std::vector<RefPtr<SpanBase>> spans1;
     spans1.push_back(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 3));
     spans1.push_back(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 7));
-    auto spanStringWithSpans3 = AceType::MakeRefPtr<SpanString>("01234567891", spans1);
+    auto spanStringWithSpans3 = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans3->BindWithSpans(spans1);
     EXPECT_FALSE(spanStringWithSpans3->IsEqualToSpanString(spanStringWithSpans2));
     auto subSpanStringWithSpans2 = spanStringWithSpans2->GetSubSpanString(0, 7);
     auto subSpanStringWithSpans3 = spanStringWithSpans3->GetSubSpanString(0, 7);
@@ -648,7 +651,8 @@ HWTEST_F(SpanStringTestNg, GestureSpanString001, TestSize.Level1)
     GestureStyle gestureInfo;
     ConstructGestureStyle(gestureInfo);
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891", spanBases);
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans->BindWithSpans(spanBases);
 
     /**
      * @tc.steps: step2. compare SpansMap and gestureInfo
@@ -675,7 +679,8 @@ HWTEST_F(SpanStringTestNg, GestureSpanString002, TestSize.Level1)
     ConstructGestureStyle(gestureInfo);
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891", spanBases);
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans->BindWithSpans(spanBases);
 
     std::list<RefPtr<SpanBase>> resultList = { AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3),
         AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 3) };
@@ -769,7 +774,8 @@ HWTEST_F(SpanStringTestNg, GestureSpanString004, TestSize.Level1)
     std::vector<RefPtr<SpanBase>> spanBases;
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("01234567891", spanBases);
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("01234567891");
+    spanString->BindWithSpans(spanBases);
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
