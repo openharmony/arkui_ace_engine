@@ -294,7 +294,7 @@ frameworks/core/components_ng/image_provider/  @wu-yinxiao
 frameworks/core/components_ng/svg/  @wu-yinxiao
 
 [Advanced UI Components]
-advanced_ui_component/ @youzhi92
+advanced_ui_component/ @youzhi92 @hanyujia1
 
 [Build configs]
 build/ @sunfei2021
