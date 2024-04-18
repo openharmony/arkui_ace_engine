@@ -49,7 +49,7 @@ public:
 protected:
     void SetPathSize(const JSCallbackInfo& info);
     size_t lastPathSize_ = 0;
-    panda::CopyableGlobal<panda::JSValueRef> thisObj_;
+    panda::CopyableGlobal<panda::JSValueRef> pathCmdObj_;
     RefPtr<CanvasPath2D> path2d_;
 };
 
