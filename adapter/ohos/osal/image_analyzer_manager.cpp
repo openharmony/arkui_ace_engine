@@ -185,22 +185,19 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
     CHECK_NULL_VOID(frameNode_);
     bool isUIConfigUpdate = false;
 
-    NG::SizeF size;
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        size = geometryNode->GetContentSize();
         auto layoutProps = frameNode_->GetLayoutProperty<NG::ImageLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
         if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
             analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
             isUIConfigUpdate = true;
         }
-    } else {
-        size = geometryNode->GetFrameSize();
     }
 
-    if (analyzerUIConfig_.contentWidth != size.Width() || analyzerUIConfig_.contentHeight != size.Height()) {
-        analyzerUIConfig_.contentWidth = size.Width();
-        analyzerUIConfig_.contentHeight = size.Height();
+    NG::SizeF frameSize = geometryNode->GetFrameSize();
+    if (analyzerUIConfig_.contentWidth != frameSize.Width() || analyzerUIConfig_.contentHeight != frameSize.Height()) {
+        analyzerUIConfig_.contentWidth = frameSize.Width();
+        analyzerUIConfig_.contentHeight = frameSize.Height();
         isUIConfigUpdate = true;
     }
 
