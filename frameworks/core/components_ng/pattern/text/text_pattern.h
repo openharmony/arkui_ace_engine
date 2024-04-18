@@ -404,6 +404,7 @@ public:
     virtual void CheckHandles(SelectHandleInfo& handleInfo) {};
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
+    void SetFadeout(const bool& left, const bool& right, const float& gradientPercent);
 
 #ifndef USE_GRAPHIC_TEXT_GINE
     static RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
@@ -558,6 +559,10 @@ protected:
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
+    void InitFocusEvent();
+    void InitHoverEvent();
+    void RecoverCopyOption();
+    void InitCopyOption();
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
@@ -601,6 +606,8 @@ protected:
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
+    bool focusInitialized_ = false;
+    bool hoverInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -656,6 +663,7 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
+    void EnsureOverlayExists();
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void ProcessBoundRectByTextMarquee(RectF& rect);
@@ -688,7 +696,10 @@ private:
     bool isSpanStringMode_ = false;
     int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
-
+    bool leftFadeout_ = false;
+    bool rightFadeout_ = false;
+    float gradientPercent_ = 0.0;
+    bool isMarqueeRunning_ = false;
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeholderIndex_;

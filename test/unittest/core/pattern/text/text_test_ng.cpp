@@ -2108,7 +2108,8 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textContentModifier.SetParagraph(paragraph);
     // call onDraw function(textRacing_ = true)
-    textContentModifier.StartTextRace(6, 3, MarqueeDirection::LEFT, 0);
+    MarqueeOption option;
+    textContentModifier.StartTextRace(option);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
     textContentModifier.onDraw(context);
     // call onDraw function(textRacing_ = false)
@@ -2681,10 +2682,10 @@ HWTEST_F(TextTestNg, TextPatternTest004, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call OnModifyDone function.
-     * @tc.expected: The copyOption_ value is equal to CopyOptions::None.
+     * @tc.expected: The copyOption_ value is equal to CopyOptions::InApp.
      */
     textPattern->OnModifyDone();
-    EXPECT_EQ(textPattern->copyOption_, CopyOptions::None);
+    EXPECT_EQ(textPattern->copyOption_, CopyOptions::InApp);
 }
 
 /**

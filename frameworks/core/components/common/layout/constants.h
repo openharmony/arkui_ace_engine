@@ -261,6 +261,11 @@ enum class TextMarqueeState {
     FINISH,
 };
 
+enum class MarqueeStartPolicy {
+    DEFAULT = 0,
+    ON_FOCUS,
+};
+
 // overflow-x: visible|hidden|scroll|auto|no-display|no-content;
 enum class TextFieldOverflowX {
     VISIBLE,

@@ -996,6 +996,12 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(args);
+    ParseMarqueeParam(paramObject, options);
+    TextModel::GetInstance()->SetMarqueeOptions(options);
+}
+
+void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options)
+{
     auto getStart = paramObject->GetProperty("start");
     if (getStart->IsBoolean()) {
         options.UpdateTextMarqueeStart(getStart->ToBoolean());
@@ -1021,7 +1027,7 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
     auto delay = paramObject->GetProperty("delay");
     if (delay->IsNumber()) {
         auto delayDouble = delay->ToNumber<double>();
-        int32_t delayValue = static_cast<int32_t>(delayDouble);
+        auto delayValue = static_cast<int32_t>(delayDouble);
         if (delayValue < 0) {
             delayValue = 0;
         }
@@ -1034,7 +1040,16 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
             getFromStart->ToBoolean() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
     }
 
-    TextModel::GetInstance()->SetMarqueeOptions(options);
+    auto getFadeout = paramObject->GetProperty("fadeout");
+    if (getFadeout->IsBoolean()) {
+        options.UpdateTextMarqueeFadeout(getFadeout->ToBoolean());
+    }
+
+    auto getStartPolicy = paramObject->GetProperty("marqueeStartPolicy");
+    if (getStartPolicy->IsNumber()) {
+        auto startPolicy = static_cast<MarqueeStartPolicy>(getStartPolicy->ToNumber<int32_t>());
+        options.UpdateTextMarqueeStartPolicy(startPolicy);
+    }
 }
 
 void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)

@@ -78,8 +78,9 @@ public:
     static void SetFontFeature(const JSCallbackInfo &info);
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetMarqueeOptions(const JSCallbackInfo& info);
+    static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
-    
+
 private:
     static RefPtr<TextComponentV2> GetComponent();
 };
