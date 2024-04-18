@@ -1118,6 +1118,8 @@ public:
         return clipboard_;
     }
 
+    const Dimension& GetAvoidSoftKeyboardOffset() const override;
+
 protected:
     virtual void InitDragEvent();
 
@@ -1170,10 +1172,7 @@ private:
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ProcessOverlayAfterLayout(bool isGlobalAreaChanged);
-    void ProcessOverlay(const OverlayRequest& request = OverlayRequest())
-    {
-        selectOverlay_->ProcessOverlay(request);
-    }
+    void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
     bool SelectOverlayIsOn()
     {
