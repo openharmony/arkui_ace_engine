@@ -91,6 +91,7 @@ public:
         float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         switchModifier_->SetBoundsRect(boundsRect);
+        paintWrapper->FlushContentModifier();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
