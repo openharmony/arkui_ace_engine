@@ -507,7 +507,7 @@ void DialogLayoutAlgorithm::SetSubWindowHotarea(
             rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
         }
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetDialogHotAreas(rects, frameNodeId, subWindowId_);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNodeId, subWindowId_);
     }
 }
 
