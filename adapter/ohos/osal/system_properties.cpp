@@ -122,6 +122,11 @@ bool IsBuildTraceEnabled()
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
 }
 
+bool IsSyncDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.sync.debug.enabled", "false") == "true");
+}
+
 bool IsDeveloperModeOn()
 {
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
@@ -300,6 +305,7 @@ bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerM
 bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -466,6 +472,7 @@ void SystemProperties::InitDeviceInfo(
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
     stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+    syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
