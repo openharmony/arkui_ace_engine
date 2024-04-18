@@ -4945,7 +4945,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     CHECK_NULL_VOID(frameNode);
 
     RSNode::ExecuteWithoutAnimation([this, &frameNode, isTransitionIn]() {
-        if (isTransitionIn && disappearingTransitionCount_ == 0) {
+        if (isTransitionIn && disappearingTransitionCount_ == 0 && appearingTransitionCount_ == 0) {
             // transitionIn, reset to state before attaching in case of node reappear
             transitionEffect_->Attach(Claim(this), true);
         }
