@@ -181,6 +181,15 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
     return true;
 }
 
+void DragEventActuator::RestartDragTask(const GestureEvent& info)
+{
+    auto gestureInfo = const_cast<GestureEvent&>(info);
+    if (actionStart_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
+        actionStart_(gestureInfo);
+    }
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {

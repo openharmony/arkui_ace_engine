@@ -413,8 +413,16 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     wrapperPattern->HideMenu();
 }
 
-void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuWrapper)
+void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<GestureEventHub>& gestureHub,
+    const RefPtr<FrameNode>& menuWrapper)
 {
+    auto dragEventActuator = targetGestureHub->GetDragEventActuator();
+    auto actionStartTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](
+                               const GestureEvent& info) {
+        auto dragEventActuator = actuator.Upgrade();
+        CHECK_NULL_VOID(dragEventActuator);
+        dragEventActuator->RestartDragTask(info);
+    };
     auto actionEndTask = [menuWrapper](const GestureEvent& info) {
         auto offsetX = static_cast<float>(info.GetOffsetX());
         auto offsetY = static_cast<float>(info.GetOffsetY());
@@ -426,7 +434,8 @@ void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameN
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
-    auto panEvent = AceType::MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
+    auto panEvent =
+        AceType::MakeRefPtr<PanEvent>(std::move(actionStartTask), nullptr, std::move(actionEndTask), nullptr);
     gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
@@ -501,7 +510,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     CHECK_NULL_VOID(hub);
     auto imageGestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureHub);
-    InitPanEvent(imageGestureHub, wrapperNode);
+    InitPanEvent(gestureHub, imageGestureHub, wrapperNode);
 
     if (!menuParam.isShowHoverImage) {
         ShowGatherAnimation(target, wrapperNode);
@@ -511,6 +520,9 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
     imageNode->MarkModifyDone();
     imageNode->MountToParent(wrapperNode);
+    auto geometryNode = imageNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameOffset(imageOffset);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     ShowPixelMapAnimation(imageNode, wrapperNode, previewNode, menuParam);
@@ -747,11 +759,17 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         wrapperNode.Reset();
         return menuNode;
     }
-    if (type == MenuType::CONTEXT_MENU && menuParam.previewMode != MenuPreviewMode::NONE) {
+    if (type == MenuType::CONTEXT_MENU) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         SetFilter(targetNode, wrapperNode);
-        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
+            menuParam.isShowHoverImage) {
             SetPixelMap(targetNode, wrapperNode, previewNode, menuParam);
+        }
+        if (menuParam.previewMode == MenuPreviewMode::NONE) {
+            auto renderContext = menuNode->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, wrapperNode);
+            renderContext->UpdateZIndex(1);
         }
         if (menuParam.previewMode == MenuPreviewMode::CUSTOM) {
             previewNode->MountToParent(wrapperNode);
