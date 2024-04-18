@@ -38,7 +38,13 @@ constexpr float HALF = 0.5f;
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
 struct GridLayoutInfo {
-    float GetTotalHeightOfItemsInView(float mainGap) const;
+    /**
+     * @param regular running regular/irregular layout. For compatibility.
+     * Because in regular we used to add starting lines that are above viewport.
+     *
+     * @return height of all lines in viewport.
+     */
+    float GetTotalHeightOfItemsInView(float mainGap, bool regular = true) const;
 
     void UpdateStartIndexByStartLine()
     {
@@ -103,6 +109,7 @@ struct GridLayoutInfo {
     /**
      * @brief Traverse the matrix backward to find the last item index, starting from Line [endLine].
      *
+     * Intended to work on irregular layout.
      * @param endLine index of the line to start traversing.
      * @return last item index above endLine (inclusive) and the position it resides in.
      */
