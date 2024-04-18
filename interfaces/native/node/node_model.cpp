@@ -115,7 +115,7 @@ ArkUIFullNodeAPI* GetFullImpl()
     return impl;
 }
 
-bool InitialGetFullImpl()
+bool InitialFullImpl()
 {
     return InitialFullNodeImpl(ARKUI_NODE_API_VERSION);
 }

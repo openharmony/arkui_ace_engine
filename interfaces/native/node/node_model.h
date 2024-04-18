@@ -50,7 +50,7 @@ struct ArkUIFullNodeAPI;
 
 namespace OHOS::Ace::NodeModel {
 
-bool InitialGetFullImpl();
+bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
