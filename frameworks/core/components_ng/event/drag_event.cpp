@@ -214,8 +214,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     gestureHub->SetIsTextDraggable(false);
                     return;
                 }
-                if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
-                    gestureHub->SetIsTextDraggable(true);
+                if (!gestureHub->GetIsTextDraggable()) {
+                    gestureHub->SetPixelMap(nullptr);
+                } else if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
                     if (textDragCallback_) {
                         textDragCallback_(info.GetGlobalLocation());
                     }

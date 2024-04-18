@@ -1959,30 +1959,32 @@ bool RichEditorPattern::CloseKeyboard(bool forceClose)
     return false;
 }
 
-bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
+void RichEditorPattern::HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    if (copyOption_ == CopyOptions::None) {
-        return false;
-    }
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(hub, false);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+    auto gestureHub = GetGestureEventHub();
+    if (gestureHub && copyOption_ != CopyOptions::None && BetweenSelectedPosition(info.GetGlobalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
-        auto selectStart = textSelector_.GetTextStart();
-        auto selectEnd = textSelector_.GetTextEnd();
-        auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-        auto resultObjects = textSelectInfo.GetSelection().resultObjects;
-        auto iter =
-            std::find_if(resultObjects.begin(), resultObjects.end(), [](ResultObject& obj) { return obj.isDraggable; });
-        gestureHub->SetIsTextDraggable(iter != resultObjects.end());
-        return true;
+        bool isContentDraggalbe = JudgeContentDraggable();
+        gestureHub->SetIsTextDraggable(isContentDraggalbe);
+        isInterceptEvent = true;
+    } else {
+        isInterceptEvent = false;
+        if (gestureHub) {
+            gestureHub->SetIsTextDraggable(false);
+        }
     }
-    gestureHub->SetIsTextDraggable(false);
-    return false;
+}
+
+bool RichEditorPattern::JudgeContentDraggable()
+{
+    if (!IsSelected() || copyOption_ == CopyOptions::None) {
+        return false ;
+    }
+    auto selectInfo = GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
+    auto selResult = selectInfo.GetSelection().resultObjects;
+    auto iter = std::find_if(selResult.begin(), selResult.end(), [](ResultObject& obj) { return obj.isDraggable; });
+    return iter != selResult.end();
 }
 
 void RichEditorPattern::CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight)
@@ -2068,8 +2070,11 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         showSelect_ = true;
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
-    bool isLongpressedByMouse = isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED;
-    if (JudgeDraggable(info) || isLongpressedByMouse) {
+    bool isInterceptEvent = false;
+    HandleDraggableFlag(info, isInterceptEvent);
+    // check current is mouse long press
+    isInterceptEvent |= (isMousePressed_ && caretUpdateType_== CaretUpdateType::LONG_PRESSED);
+    if (isInterceptEvent) {
         return;
     }
     auto host = GetHost();
@@ -4041,6 +4046,12 @@ void RichEditorPattern::RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>
     }
 }
 
+RefPtr<GestureEventHub> RichEditorPattern::GetGestureEventHub() {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return host->GetOrCreateGestureEventHub();
+}
+
 void RichEditorPattern::DeleteTextSpanInfo(const RefPtr<FrameNode>& host,
     std::set<int32_t, std::greater<int32_t>>& SpanNodes, const RichEditorAbstractSpanResult& spanResult)
 {
@@ -4133,10 +4144,7 @@ void RichEditorPattern::MoveCaretAfterTextChange()
 void RichEditorPattern::InitTouchEvent()
 {
     CHECK_NULL_VOID(!touchListener_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto gesture = host->GetOrCreateGestureEventHub();
+    auto gesture = GetGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -4643,29 +4651,37 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
     return [wk = WeakClaim(this)](const Offset& point) {
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->BetweenSelectedPosition(point)) {
-            auto host = pattern->GetHost();
-            auto children = host->GetChildren();
-            std::list<RefPtr<FrameNode>> imageChildren;
-            for (const auto& child : children) {
-                auto node = DynamicCast<FrameNode>(child);
-                if (!node) {
-                    continue;
-                }
-                auto tag = node->GetTag();
-                if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-                    imageChildren.emplace_back(node);
-                }
-            }
-            RichEditorDragInfo info;
-            info.handleColor = pattern->GetCaretColor();
-            info.selectedBackgroundColor = pattern->GetSelectedBackgroundColor();
-            pattern->CalculateHandleOffsetAndShowOverlay();
-            info.firstHandle = pattern->textSelector_.firstHandle;
-            info.secondHandle = pattern->textSelector_.secondHandle;
-            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
-            FrameNode::ProcessOffscreenNode(pattern->dragNode_);
+        if (!pattern->BetweenSelectedPosition(point)) {
+            return;
         }
+        auto gesture = pattern->GetGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        auto isContentDraggable = pattern->JudgeContentDraggable();
+        if (!isContentDraggable) {
+            gesture->SetIsTextDraggable(false);
+            return;
+        }
+        auto host = pattern->GetHost();
+        auto children = host->GetChildren();
+        std::list<RefPtr<FrameNode>> imageChildren;
+        for (const auto& child : children) {
+            auto node = DynamicCast<FrameNode>(child);
+            if (!node) {
+                continue;
+            }
+            auto tag = node->GetTag();
+            if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+                imageChildren.emplace_back(node);
+            }
+        }
+        RichEditorDragInfo info;
+        info.handleColor = pattern->GetCaretColor();
+        info.selectedBackgroundColor = pattern->GetSelectedBackgroundColor();
+        pattern->CalculateHandleOffsetAndShowOverlay();
+        info.firstHandle = pattern->textSelector_.firstHandle;
+        info.secondHandle = pattern->textSelector_.secondHandle;
+        pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
+        FrameNode::ProcessOffscreenNode(pattern->dragNode_);
     };
 }
 
@@ -4816,7 +4832,7 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
     auto offset = host->GetPaintRectOffset();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     auto eventHub = host->GetEventHub<EventHub>();
-    if (copyOption_ != CopyOptions::None && (textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
+    if (copyOption_ != CopyOptions::None && GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
         auto panOffset = OffsetF(localOffset.GetX(), localOffset.GetY()) - GetTextRect().GetOffset() +
@@ -5411,11 +5427,7 @@ bool RichEditorPattern::IsReachedBoundary(float offset)
 
 void RichEditorPattern::CheckScrollable()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    auto gestureHub = GetGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     scrollable_ = GetTextContentLength() > 0 && GreatNotEqual(richTextRect_.Height(), contentRect_.Height());
     SetScrollEnable(scrollable_);
@@ -5924,9 +5936,7 @@ void RichEditorPattern::OnVirtualKeyboardAreaChanged()
 
 void RichEditorPattern::ResetDragOption()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    auto gestureEventHub = GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     if (gestureEventHub->GetIsTextDraggable()) {
         CloseSelectOverlay();
