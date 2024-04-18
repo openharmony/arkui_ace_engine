@@ -26,8 +26,10 @@ public:
     void SetBlankMin(const Dimension& blankMin) override;
     void SetHeight(const Dimension& height) override;
     void SetColor(const Color& color) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColor(FrameNode* frameNode, const Color& color);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
+    static void SetBlankMin(FrameNode* frameNode, const Dimension& blankMin);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_NG_H

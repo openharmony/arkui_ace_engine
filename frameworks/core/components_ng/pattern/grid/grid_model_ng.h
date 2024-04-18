@@ -74,6 +74,8 @@ public:
 
     DisplayMode GetDisplayMode() const override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate);
     static void SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGap);

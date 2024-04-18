@@ -46,6 +46,7 @@
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
+#include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -337,6 +338,13 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnReachEnd,
 };
 
+const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::SetOnGridScrollIndex,
+};
+
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, ArkUI_Int64 extraParam)
 {
@@ -484,6 +492,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_GRID: {
+            // grid event type.
+            if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = GRID_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

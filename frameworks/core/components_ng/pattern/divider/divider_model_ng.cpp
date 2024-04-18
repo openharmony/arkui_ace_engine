@@ -33,6 +33,14 @@ void DividerModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> DividerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+
+    return frameNode;
+}
+
 void DividerModelNG::Vertical(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(DividerLayoutProperty, Vertical, value);
