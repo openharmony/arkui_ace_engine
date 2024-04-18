@@ -1201,10 +1201,11 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     double currentVisibleRatio =
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
+        auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
         ProcessAllVisibleCallback(visibleAreaUserRatios, visibleAreaUserCallback,
-            currentVisibleRatio, lastVisibleCallbackRatio_);
+            currentVisibleRatio, lastVisibleCallbackRatio);
         ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback,
-            currentVisibleRatio, lastVisibleCallbackRatio_);
+            currentVisibleRatio, lastVisibleCallbackRatio);
         lastVisibleRatio_ = currentVisibleRatio;
     }
 }
