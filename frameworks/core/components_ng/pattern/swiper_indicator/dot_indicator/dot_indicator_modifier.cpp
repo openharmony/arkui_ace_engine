@@ -231,10 +231,6 @@ void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const Offs
         !isCustomSize_) {
         float rectItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
         float rectItemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
-        if (currentIndexFlag) {
-            rectItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
-            rectItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
-        }
         float rectLeft =
             (axis_ == Axis::HORIZONTAL ? center.GetX() - rectItemWidth * 0.5 : center.GetY() - rectItemHeight * 0.5);
         float rectTop =
@@ -602,8 +598,7 @@ void DotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& v
     AnimationOption option;
     option.SetCurve(curve);
     option.SetDuration(animationDuration_);
-    blackPointsAnimation_ =
-        AnimationUtils::StartAnimation(option, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
+    AnimationUtils::StartAnimation(option, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
 }
 
 void DotIndicatorModifier::PlayOpacityAnimation()
@@ -776,7 +771,14 @@ void DotIndicatorModifier::StopAnimation(bool ifImmediately)
             modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
         });
     }
-    AnimationUtils::StopAnimation(blackPointsAnimation_);
+    AnimationOption option;
+    option.SetDuration(0);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->vectorBlackPointCenterX_->Set(modifier->vectorBlackPointCenterX_->Get());
+    });
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;

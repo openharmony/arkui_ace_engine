@@ -177,6 +177,11 @@ std::shared_ptr<Media::PixelMap> DrawableDescriptor::GetPixelMap()
     return nullptr;
 }
 
+DrawableDescriptor::DrawableType DrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::BASE;
+}
+
 std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource(
     DrawableItem& drawableItem, uint32_t& errorCode)
 {
@@ -523,6 +528,11 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
     return nullptr;
 }
 
+DrawableDescriptor::DrawableType LayeredDrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::LAYERED;
+}
+
 std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 {
     std::string data;
@@ -568,6 +578,11 @@ std::shared_ptr<Media::PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
         return nullptr;
     }
     return pixelMapList_[0];
+}
+
+DrawableDescriptor::DrawableType AnimatedDrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::ANIMATED;
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> AnimatedDrawableDescriptor::GetPixelMapList()

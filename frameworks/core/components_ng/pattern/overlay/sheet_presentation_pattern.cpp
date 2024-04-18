@@ -1298,7 +1298,6 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         if (isScrolling_) {
             ScrollTo(.0f);
         }
-        TranslateTo(height_);
     }
     if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED ||
         type == WindowSizeChangeReason::DRAG) {

@@ -20,6 +20,7 @@
 #include "core/event/axis_event.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/node/event_converter.h"
+#include "base/error/error_code.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -954,6 +955,23 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
             break;
     }
     return 0.0;
+}
+
+int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* event, HitTestMode mode)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            touchEvent->interceptResult = static_cast<int32_t>(mode);
+            break;
+        }
+        default:
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
 #ifdef __cplusplus

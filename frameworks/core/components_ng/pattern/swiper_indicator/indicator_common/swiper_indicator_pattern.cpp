@@ -86,19 +86,24 @@ void SwiperIndicatorPattern::OnModifyDone()
 
     swiperEventHub->SetIndicatorOnChange(
         [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
-            auto indicator = weak.Upgrade();
-            CHECK_NULL_VOID(indicator);
-            auto textContext = context.Upgrade();
-            CHECK_NULL_VOID(textContext);
-            if (textContext->swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
-                RefPtr<FrameNode> firstTextNode;
-                RefPtr<FrameNode> lastTextNode;
-                auto layoutProperty = indicator->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-                firstTextNode = DynamicCast<FrameNode>(indicator->GetFirstChild());
-                lastTextNode = DynamicCast<FrameNode>(indicator->GetLastChild());
-                textContext->UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
-            }
-            indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAfterLayoutTask([weak, context]() {
+                auto indicator = weak.Upgrade();
+                CHECK_NULL_VOID(indicator);
+                auto textContext = context.Upgrade();
+                CHECK_NULL_VOID(textContext);
+                if (textContext->swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
+                    RefPtr<FrameNode> firstTextNode;
+                    RefPtr<FrameNode> lastTextNode;
+                    auto layoutProperty = indicator->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+                    firstTextNode = DynamicCast<FrameNode>(indicator->GetFirstChild());
+                    lastTextNode = DynamicCast<FrameNode>(indicator->GetLastChild());
+                    textContext->UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
+                }
+                indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            });
+            pipeline->RequestFrame();
         });
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);

@@ -1164,6 +1164,10 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
         return;
     }
     float fontScale = SystemProperties::GetFontScale();
+    if (isFormRender_ && !fontScaleFollowSystem_) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "setFontScale form default size");
+        fontScale = 1.0f;
+    }
     float fontWeightScale = SystemProperties::GetFontWeightScale();
     container->SetFontScale(instanceId, fontScale);
     container->SetFontWeightScale(instanceId, fontWeightScale);
@@ -1923,9 +1927,10 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    bool formFontUseDefault = isFormRender_ && !fontScaleFollowSystem_;
     taskExecutor->PostTask(
         [weakContainer = WeakPtr<Platform::AceContainer>(container), config, instanceId = instanceId_,
-            bundleName = bundleName_, moduleName = moduleName_]() {
+            bundleName = bundleName_, moduleName = moduleName_, formFontUseDefault]() {
             auto container = weakContainer.Upgrade();
             CHECK_NULL_VOID(container);
             Platform::ParsedConfig parsedConfig;
@@ -1935,7 +1940,13 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             parsedConfig.themeTag = config->GetItem("ohos.application.theme");
-            parsedConfig.fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+            // EtsCard Font followSytem disable
+            if (formFontUseDefault) {
+                LOGW("[%{public}s] UIContentImpl: UpdateConfiguration use default", bundleName.c_str());
+                parsedConfig.fontScale = "1.0";
+            } else {
+                parsedConfig.fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+            }
             parsedConfig.fontWeightScale =
                         config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
             container->UpdateConfiguration(parsedConfig, config->GetName());
@@ -2358,6 +2369,12 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
             pipelineContext->SetAppBgColor(bgColor);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetFontScaleFollowSystem(const bool fontScaleFollowSystem)
+{
+    LOGI("UIContentImpl: SetFontScaleFollowSystem flag is %{public}s", fontScaleFollowSystem ? "true" : "false");
+    fontScaleFollowSystem_ = fontScaleFollowSystem;
 }
 
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,

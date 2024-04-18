@@ -101,6 +101,23 @@ void ScrollBarProxy::NotifyScrollableNode(
     }
 }
 
+void ScrollBarProxy::NotifyScrollBarNode(float distance, int32_t source) const
+{
+    for (const auto& node : scrollableNodes_) {
+        if (node.onPositionChanged == nullptr) {
+            continue;
+        }
+        auto scrollable = node.scrollableNode.Upgrade();
+        if (!scrollable || !CheckScrollable(scrollable)) {
+            continue;
+        }
+        node.onPositionChanged(distance, source);
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
+    }
+}
+
 void ScrollBarProxy::NotifyScrollStart() const
 {
     for (const auto& node : scrollableNodes_) {
@@ -146,7 +163,11 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
         scrollBar->SetControlDistance(controlDistance);
         scrollBar->SetScrollOffset(!scrollable->IsReverse() ? scrollOffset : controlDistance - scrollOffset);
         auto host = scrollBar->GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        } else {
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
     }
 }
 

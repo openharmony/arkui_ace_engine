@@ -30,6 +30,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -202,15 +203,18 @@ WebPattern::WebPattern(const std::string& webSrc,
 
 WebPattern::~WebPattern()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "Web pattern destory");
+    TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
     if (delegate_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
     }
 
     if (observer_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern observer_ start NotifyDestory");
         observer_->NotifyDestory();
     }
     if (isActive_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
         OnInActive();
     }
 }
@@ -1297,14 +1301,16 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
         height, keyboard, GetCoordinatePoint()->GetY(), oldWebHeight);
 
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-        if (GreatOrEqual(newHeight, oldWebHeight)) {
-            newHeight = oldWebHeight;
+        if (!CheckSafeAreaIsExpand()) {
+            double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
+            if (GreatOrEqual(newHeight, oldWebHeight)) {
+                newHeight = oldWebHeight;
+            }
+            if (NearEqual(newHeight, oldWebHeight)) {
+                return;
+            }
+            drawSize_.SetHeight(newHeight);
         }
-        if (NearEqual(newHeight, oldWebHeight)) {
-            return;
-        }
-        drawSize_.SetHeight(newHeight);
         UpdateWebLayoutSize(width, height, true);
     }
 }
@@ -1312,6 +1318,13 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
 void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+    delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         if (webOffset_ == offset) {
             return;
@@ -1321,8 +1334,6 @@ void WebPattern::OnAreaChangedInner()
     UpdateTouchHandleForOverlay();
     if (isInWindowDrag_)
         return;
-    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
-    delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     if (isNeedReDrawRect_) {
         UpdateSlideOffset(true);
     }
@@ -3804,5 +3815,24 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
     };
     std::vector<double> ratioList = {0.0, 1.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+bool WebPattern::CheckSafeAreaIsExpand()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto && opts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(opts, false);
+    if ((opts->type & SAFE_AREA_TYPE_SYSTEM) || (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
+
+std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
+{
+    return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace::NG

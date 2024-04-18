@@ -27,4 +27,5 @@ void SetOnBlur(ArkUINodeHandle node, void* extraParam);
 void SetOnAreaChange(ArkUINodeHandle node, void* extraParam);
 void SetOnClick(ArkUINodeHandle node, void* extraParam);
 void SetOnTouch(ArkUINodeHandle node, void* extraParam);
+void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

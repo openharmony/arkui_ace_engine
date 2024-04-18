@@ -20,7 +20,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow)
+void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnimation)
 {
     if (info_->menuInfo.menuIsShow == menuIsShow) {
         return;
@@ -30,7 +30,7 @@ void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow)
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(host);
     CHECK_NULL_VOID(selectOverlayNode);
     info_->menuInfo.menuIsShow = menuIsShow;
-    selectOverlayNode->UpdateToolBar(false);
+    selectOverlayNode->UpdateToolBar(false, noAnimation);
 }
 
 void SelectContentOverlayPattern::UpdateMenuInfo(const SelectMenuInfo& info)

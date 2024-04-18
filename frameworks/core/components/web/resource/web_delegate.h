@@ -832,6 +832,7 @@ public:
         const std::string& websiteHost, const std::string& trackerHost);
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void ScaleGestureChange(double scale, double centerX, double centerY);
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     
 private:
     void InitWebEvent();

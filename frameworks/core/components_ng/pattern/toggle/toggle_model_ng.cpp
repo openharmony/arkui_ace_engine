@@ -606,4 +606,12 @@ bool ToggleModelNG::GetSwitchIsOn(FrameNode* frameNode)
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwitchPaintProperty, IsOn, value, frameNode, value);
     return value;
 }
+
+Color ToggleModelNG::GetUnselectedColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwitchPaintProperty, UnselectedColor, value, frameNode, Color(DEFAULT_COLOR));
+    return value;
+}
 } // namespace OHOS::Ace::NG

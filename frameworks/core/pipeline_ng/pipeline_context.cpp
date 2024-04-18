@@ -3478,6 +3478,22 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
     return containerPattern->GetContainerModalTitleHeight();
 }
 
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(rootNode_, nullptr);
+    return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+}
+
+Dimension PipelineContext::GetCustomTitleHeight()
+{
+    auto containerModal = GetContainerModalNode();
+    CHECK_NULL_RETURN(containerModal, Dimension());
+    return containerModal->GetPattern<ContainerModalPattern>()->GetCustomTitleHeight();
+}
+
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {

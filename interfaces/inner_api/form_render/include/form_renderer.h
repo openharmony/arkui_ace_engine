@@ -78,6 +78,7 @@ private:
     float height_ = 0.0f;
     float borderWidth_ = 0.0f;
     float lastBorderWidth_ = 0.0f;
+    bool fontScaleFollowSystem_ = true;
     std::string backgroundColor_;
     AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     std::vector<std::string> cachedInfos_;

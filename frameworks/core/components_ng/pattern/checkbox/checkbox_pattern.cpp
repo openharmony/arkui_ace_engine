@@ -924,9 +924,6 @@ void CheckBoxPattern::FireBuilder()
 
 RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
-        return nullptr;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();

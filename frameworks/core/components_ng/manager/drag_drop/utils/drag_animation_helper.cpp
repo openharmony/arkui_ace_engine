@@ -34,8 +34,8 @@ namespace {
     constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
     constexpr float GATHER_SPRING_RESPONSE = 0.304f;
     constexpr float GATHER_SPRING_DAMPING_FRACTION = 0.97f;
-    constexpr float GRID_MOVE_SCALE = 0.05f;
-    constexpr float LIST_MOVE_SCALE = 0.04f;
+    constexpr float GRID_MOVE_SCALE = 0.1f;
+    constexpr float LIST_MOVE_SCALE = 0.1f;
     constexpr float EULER_NUMBER = 2.71828f;
     constexpr float GATHER_OFFSET_RADIUS = 0.1f;
     constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;

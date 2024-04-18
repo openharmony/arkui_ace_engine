@@ -52,6 +52,7 @@ public:
 
     void SetAceAbility(void* aceAbility, const std::shared_ptr<PluginUtils>& pluginUtils)
     {
+        std::lock_guard<std::mutex> lock(pluginUtilsMutex_);
         aceAbility_ = aceAbility;
         pluginUtils_ = pluginUtils;
     };
@@ -65,6 +66,7 @@ public:
 
 private:
     std::mutex mutex_;
+    std::mutex pluginUtilsMutex_;
     std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
     std::mutex nonmatchedContainerMutex_;
     std::unordered_map<std::string, RefPtr<PluginSubContainer>> nonmatchedContainerMap_;

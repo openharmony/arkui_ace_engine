@@ -32,6 +32,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "base/log/dump_log.h"
 #include "base/window/foldable_window.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -1386,8 +1387,8 @@ HWTEST_F(OverlayTestNg, ToastTest004, TestSize.Level1)
      * @tc.expected: toast property has alignment.
      */
     auto offset = DimensionOffset(MENU_OFFSET);
-    auto toastNode =
-        ToastView::CreateToastNode(MESSAGE, BOTTOMSTRING, true, ToastShowMode::DEFAULT, Alignment::TOP_LEFT, offset);
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
     EXPECT_TRUE(toastProperty->HasToastAlignment());
@@ -2464,5 +2465,88 @@ HWTEST_F(OverlayTestNg, ShowAllNodesOnOverlay001, TestSize.Level1)
     overlayManager->ShowAllNodesOnOverlay();
     EXPECT_EQ(frameNode1->layoutProperty_->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_EQ(frameNode2->layoutProperty_->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: ToastDumpInfoTest001
+ * @tc.desc: Test Toast DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastDumpInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. clear dump info and create toast pattern.
+     */
+    DumpLog::GetInstance().description_.clear();
+    auto pattern = AceType::MakeRefPtr<ToastPattern>();
+    ToastInfo info;
+    /**
+     * @tc.steps: step3. set info and dump info.
+     * @tc.expected: dump success, the description not empty
+     */
+    pattern->SetToastInfo(info);
+    pattern->DumpInfo();
+    EXPECT_NE(DumpLog::GetInstance().description_.size(), 0);
+}
+
+/**
+ * @tc.name: DialogDumpInfoTest001
+ * @tc.desc: Test Dialog DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogDumpInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. clear dump info and create dialog pattern.
+     */
+    DumpLog::GetInstance().description_.clear();
+    auto pattern = AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr);
+    /**
+     * @tc.steps: step2. build empty prop.
+     */
+    DialogProperties props;
+    pattern->dialogProperties_ = props;
+    /**
+     * @tc.steps: step3. dump info.
+     * @tc.expected: dump success, the description not empty
+     */
+    pattern->DumpInfo();
+    EXPECT_NE(DumpLog::GetInstance().description_.size(), 0);
+    /**
+     * @tc.steps: step4. make a full property, and retry
+     * @tc.expected: dump success, the description not empty
+     */
+    DumpLog::GetInstance().description_.clear();
+    DialogProperties propsFill {
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = "content",
+        .checkboxContent = "checkboxContent",
+        .alignment = DialogAlignment::CENTER,
+        .autoCancel = false,
+        .customStyle = true,
+        .isMenu = true,
+        .isSelect = true,
+        .offset = DimensionOffset(),
+        .maskColor = std::make_optional(Color::RED),
+        .backgroundColor = std::make_optional(Color::RED),
+        .isShowInSubWindow = true,
+        .buttonDirection = DialogButtonDirection::HORIZONTAL,
+        .isMask = true,
+        .isModal = false,
+        .isScenceBoardDialog = true,
+        .isSysBlurStyle = false,
+        .backgroundBlurStyle = 1,
+        .shadow = std::make_optional<Shadow>(),
+        .borderWidth = std::make_optional<NG::BorderWidthProperty>(),
+        .borderColor = std::make_optional<NG::BorderColorProperty>(),
+        .borderStyle = std::make_optional<NG::BorderStyleProperty>(),
+        .maskRect = std::make_optional<DimensionRect>(),
+    };
+    ButtonInfo info;
+    propsFill.buttons.push_back(info);
+    pattern->dialogProperties_ = props;
+    pattern->DumpInfo();
+    EXPECT_NE(DumpLog::GetInstance().description_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

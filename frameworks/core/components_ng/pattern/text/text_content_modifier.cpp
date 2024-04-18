@@ -20,8 +20,10 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -229,48 +231,66 @@ void TextContentModifier::SetFontReady(bool value)
     }
 }
 
-void TextContentModifier::ResetImageNodeList()
+void TextContentModifier::UpdateImageNodeVisible(const VisibleType visible)
 {
     for (const auto& imageWeak : imageNodeList_) {
         auto imageNode = imageWeak.Upgrade();
         if (!imageNode) {
             continue;
         }
-        auto renderContext = imageNode->GetRenderContext();
-        if (!renderContext) {
+        auto layoutProperty = imageNode->GetLayoutProperty();
+        if (!layoutProperty) {
             continue;
         }
-        auto geometryNode = imageNode->GetGeometryNode();
-        if (!geometryNode) {
-            continue;
-        }
-        renderContext->SetTranslate(0.0f, 0.0f, 0.0f);
+        layoutProperty->UpdateVisibility(visible, true);
     }
 }
 
-void TextContentModifier::DrawImageNodeList(const float drawingContextWidth,
-    const float paragraph1Offset, const float paragraph2Offset)
+void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
 {
-    for (const auto& imageWeak : imageNodeList_) {
-        auto imageNode = imageWeak.Upgrade();
-        if (!imageNode) {
-            continue;
-        }
-        auto renderContext = imageNode->GetRenderContext();
-        if (!renderContext) {
-            continue;
-        }
-        auto geometryNode = imageNode->GetGeometryNode();
-        if (!geometryNode) {
-            continue;
-        }
-        auto offsetX = geometryNode->GetMarginFrameOffset().GetX();
-        if (offsetX + geometryNode->GetFrameSize().Width() + paragraph1Offset > 0) {
-            renderContext->SetTranslate(paragraph1Offset, 0.0f, 0.0f);
-        } else if (offsetX + paragraph2Offset < drawingContextWidth) {
-            renderContext->SetTranslate(paragraph2Offset, 0.0f, 0.0f);
-        } else {
-            renderContext->SetTranslate(paragraph1Offset, 0.0f, 0.0f);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+        CHECK_NULL_VOID(pattern);
+        size_t index = 0;
+        auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+        for (const auto& imageWeak : imageNodeList_) {
+            auto imageChild = imageWeak.Upgrade();
+            if (!imageChild) {
+                continue;
+            }
+            auto rect = rectsForPlaceholders.at(index);
+            auto imagePattern = DynamicCast<ImagePattern>(imageChild->GetPattern());
+            if (!imagePattern) {
+                continue;
+            }
+            auto layoutProperty = imageChild->GetLayoutProperty<ImageLayoutProperty>();
+            if (!layoutProperty) {
+                continue;
+            }
+            const auto& marginProperty = layoutProperty->GetMarginProperty();
+            float marginTop = 0.0f;
+            float marginLeft = 0.0f;
+            if (marginProperty) {
+                marginLeft =
+                    marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
+                marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
+            }
+            auto geometryNode = imageChild->GetGeometryNode();
+            if (!geometryNode) {
+                continue;
+            }
+            RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
+                geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+                        auto canvasImage = imagePattern->GetCanvasImage();
+            if (!canvasImage) {
+                continue;
+            }
+            auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+            if (!pixelMapImage) {
+                continue;
+            }
+            pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
+            ++index;
         }
     }
 }
@@ -295,9 +315,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
             }
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                ResetImageNodeList();
-            }
         } else {
             // Racing
             float textRacePercent = marqueeDirection_ ==
@@ -309,13 +326,12 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
             if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
                 paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
+                PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
             }
             float paragraph2Offset = paragraph1Offset + paragraph_->GetTextWidth() + textRaceSpaceWidth_;
             if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
                 paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
-            }
-            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                DrawImageNodeList(drawingContext.width, paragraph1Offset, paragraph2Offset);
+                PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
             }
         }
         canvas.Restore();
@@ -751,7 +767,7 @@ void TextContentModifier::StartTextRace(const double& step, const int32_t& loop,
     if (!isBounce && !SetTextRace(step, loop, direction, delay)) {
         return;
     }
-
+    UpdateImageNodeVisible(VisibleType::VISIBLE);
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
     option.SetDuration(marqueeDuration_);
@@ -808,7 +824,7 @@ void TextContentModifier::StopTextRace()
     if (!textRacing_) {
         return;
     }
-
+    UpdateImageNodeVisible(VisibleType::INVISIBLE);
     if (raceAnimation_) {
         AnimationUtils::StopAnimation(raceAnimation_);
     }

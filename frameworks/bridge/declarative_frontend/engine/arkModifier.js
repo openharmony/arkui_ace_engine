@@ -15,10 +15,16 @@
 
 const overrideMap = new Map();
 overrideMap.set(
-  "ArkCheckboxComponent",
+  'ArkCheckboxComponent',
   new Map([
-    ["Symbol(width)", CheckboxWidthModifier],
-    ["Symbol(height)", CheckboxHeightModifier],
+    ['Symbol(width)', CheckboxWidthModifier],
+    ['Symbol(height)', CheckboxHeightModifier]
+  ])
+);
+overrideMap.set(
+  'ArkTextComponent',
+  new Map([
+    ['Symbol(foregroundColor)', TextForegroundColorModifier]
   ])
 );
 function applyAndMergeModifier(instance, modifier) {
@@ -58,7 +64,7 @@ class ModifierUtils {
   static mergeMapsEmplace(stageMap, newMap, componentOverrideMap) {
     newMap.forEach((value, key) => {
       if (componentOverrideMap.has(key.toString())) {
-        const newValue = new (componentOverrideMap.get(key.toString()))(value.value);
+        const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
         stageMap.set(key, newValue);
       } else {
         stageMap.set(key, this.copyModifierWithKey(value));

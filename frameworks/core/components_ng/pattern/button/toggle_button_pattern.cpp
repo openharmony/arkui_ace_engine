@@ -100,11 +100,14 @@ void ToggleButtonPattern::OnModifyDone()
     }
     InitButtonAndText();
     HandleEnabled();
-    InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
     SetAccessibilityAction();
     FireBuilder();
+    if (UseContentModifier()) {
+        return;
+    }
+    InitTouchEvent();
 }
 
 void ToggleButtonPattern::SetAccessibilityAction()
@@ -124,7 +127,6 @@ void ToggleButtonPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         pattern->UpdateSelectStatus(false);
     });
-    FireBuilder();
 }
 
 void ToggleButtonPattern::UpdateSelectStatus(bool isSelected)
@@ -367,6 +369,9 @@ void ToggleButtonPattern::FireBuilder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!toggleMakeFunc_.has_value()) {
+        return;
+    }
     host->RemoveChildAtIndex(0);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
@@ -382,9 +387,6 @@ void ToggleButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ToggleButtonPattern::BuildContentModifierNode()
 {
-    if (!toggleMakeFunc_.has_value()) {
-        return nullptr;
-    }
     CHECK_NULL_RETURN(toggleMakeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);

@@ -28,7 +28,7 @@ public:
     explicit SelectContentOverlayPattern(std::shared_ptr<SelectOverlayInfo> info): SelectOverlayPattern(info) {}
     ~SelectContentOverlayPattern() override = default;
 
-    void UpdateMenuIsShow(bool menuIsShow);
+    void UpdateMenuIsShow(bool menuIsShow, bool noAnimation = false);
     void UpdateMenuInfo(const SelectMenuInfo& info);
     void UpdateIsShowHandleLine(bool isShowHandleLine);
     void UpdateIsSingleHandle(bool isSingleHandle);

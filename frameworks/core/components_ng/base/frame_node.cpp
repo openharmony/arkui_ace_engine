@@ -48,6 +48,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
@@ -1136,9 +1137,18 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
+bool FrameNode::CheckAncestorPageShow()
+{
+    auto pageNode = GetPageNode();
+    if (!pageNode) {
+        return true;
+    }
+    return pageNode->GetPattern<PagePattern>()->IsOnShow();
+}
+
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive()) {
+    if (!IsActive() || !CheckAncestorPageShow()) {
         return;
     }
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {
@@ -3050,13 +3060,14 @@ void FrameNode::Layout()
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
     bool needSyncRsNode = false;
-    bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode);
+    DirtySwapConfig config;
+    bool willSyncGeoProperties = OnLayoutFinish(needSyncRsNode, config);
     // skip wrapping task if node will not sync
     CHECK_NULL_VOID(willSyncGeoProperties);
-    auto task = [weak = WeakClaim(this), needSync = needSyncRsNode]() {
+    auto task = [weak = WeakClaim(this), needSync = needSyncRsNode, dirtyConfig = config]() {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        frameNode->SyncGeometryNode(needSync);
+        frameNode->SyncGeometryNode(needSync, dirtyConfig);
     };
     pipeline->AddSyncGeometryNodeTask(task);
     if (IsRootMeasureNode()) {
@@ -3104,7 +3115,7 @@ bool FrameNode::SelfOrParentExpansive()
     return SelfExpansive() || ParentExpansive();
 }
 
-bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
+bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
@@ -3143,7 +3154,10 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
     }
     renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
     renderContext_->SyncPartialRsProperties();
-    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
+    config = { .frameSizeChange = frameSizeChange,
+        .frameOffsetChange = frameOffsetChange,
+        .contentSizeChange = contentSizeChange,
+        .contentOffsetChange = contentOffsetChange };
     // check if need to paint content.
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(layoutAlgorithm_);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -3165,7 +3179,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode)
     return true;
 }
 
-void FrameNode::SyncGeometryNode(bool needSyncRsNode)
+void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
     ACE_LAYOUT_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
@@ -3191,7 +3205,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode)
         }
     }
     if (needSyncRsNode) {
-        pattern_->BeforeSyncGeometryProperties();
+        pattern_->BeforeSyncGeometryProperties(config);
         isLayoutComplete_ = true;
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
         TriggerOnSizeChangeCallback();
