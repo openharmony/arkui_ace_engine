@@ -220,11 +220,12 @@ void FrontendDelegateImpl::GetConfigurationCommon(const std::string& filePath, s
 
     for (const auto& fileName : priorityFileName) {
         auto fileFullPath = filePath + fileName + std::string(FILE_TYPE_JSON);
+#if !defined(PREVIEW)
         if (filePath.compare(I18N_FOLDER) == 0) {
             GetAssetFromI18n(fileFullPath, data);
             continue;
         }
-
+#endif
         std::string content;
         if (GetAssetContent(fileFullPath, content)) {
             auto fileData = ParseFileData(content);
