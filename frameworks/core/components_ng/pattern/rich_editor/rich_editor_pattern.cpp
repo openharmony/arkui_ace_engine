@@ -1235,9 +1235,12 @@ bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanNode>& spanNode)
 
 void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle)
 {
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(imageNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
     if (updateSpanStyle_.updateImageWidth.has_value() || updateSpanStyle_.updateImageHeight.has_value()) {
         imageLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(imageStyle.size.value().width), CalcLength(imageStyle.size.value().height)));
