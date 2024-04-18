@@ -24,6 +24,7 @@ public:
     void UpdateContentModifier();
     RefPtr<ListPaintMethod> UpdateOverlayModifier();
     AssertionResult VerifySticky(int32_t groupIndex, bool isHeader, float expectOffsetY);
+    void UpdateDividerMap();
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -48,6 +49,16 @@ AssertionResult ListLayoutTestNg::VerifySticky(int32_t groupIndex, bool isHeader
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, groupIndex);
     float offsetY = isHeader ? GetChildRect(groupNode, 0).GetY() : GetChildRect(groupNode, 1).GetY();
     return IsEqual(offsetY, expectOffsetY);
+}
+
+void ListLayoutTestNg::UpdateDividerMap()
+{
+    int cur = 0;
+    for (auto& child : pattern_->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+    UpdateContentModifier();
 }
 
 /**
@@ -1006,6 +1017,52 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
     groupPaint->divider_.startMargin = Dimension(LIST_WIDTH / 2);
     groupPaint->divider_.endMargin = Dimension(LIST_WIDTH / 2 + 1);
     groupPaint->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
+}
+
+/**
+ * @tc.name: PaintMethod006
+ * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set divider startMargin and endMargin normal value
+     * @tc.expected: offset.GetX() == startMargin and length = LIST_WIDTH - startMargin - endMargin
+     */
+    auto itemDivider = ITEM_DIVIDER;
+    CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
+    UpdateDividerMap();
+    auto dividerList = pattern_->listContentModifier_->dividerList_->Get();
+    auto dividerMap = AceType::DynamicCast<ListDividerArithmetic>(dividerList)->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 8);
+    auto length = LIST_WIDTH - (ITEM_DIVIDER.startMargin + ITEM_DIVIDER.endMargin).ConvertToPx();
+    EXPECT_EQ(pattern_->listContentModifier_->width_, ITEM_DIVIDER.strokeWidth.ConvertToPx());
+    for (auto child : dividerMap) {
+        EXPECT_EQ(child.second.offset.GetX(), ITEM_DIVIDER.startMargin.ConvertToPx());
+        EXPECT_EQ(child.second.length, length);
+    }
+
+    /**
+     * @tc.steps: step2. Set divider startMargin and endMargin abnormal value
+     * @tc.expected: startMargin == 0 and endMargin == 0
+     */
+    std::vector<V2::ItemDivider> dividerArray = { { Dimension(10), Dimension(-10), Dimension(-10) },
+        { Dimension(10), Dimension(LIST_WIDTH), Dimension(LIST_WIDTH) },
+        { Dimension(10), Dimension(10, DimensionUnit::PERCENT), Dimension(10, DimensionUnit::PERCENT) } };
+    for (auto itemDivider : dividerArray) {
+        layoutProperty_->UpdateDivider(itemDivider);
+        FlushLayoutTask(frameNode_);
+        UpdateDividerMap();
+        dividerList = pattern_->listContentModifier_->dividerList_->Get();
+        dividerMap = AceType::DynamicCast<ListDividerArithmetic>(dividerList)->GetDividerMap();
+        EXPECT_EQ(dividerMap.size(), 8);
+        EXPECT_EQ(pattern_->listContentModifier_->width_, itemDivider.strokeWidth.ConvertToPx());
+        for (auto child : dividerMap) {
+            EXPECT_EQ(child.second.offset.GetX(), 0.f);
+            EXPECT_EQ(child.second.length, LIST_WIDTH);
+        }
+    }
 }
 
 /**
