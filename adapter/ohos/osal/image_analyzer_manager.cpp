@@ -194,10 +194,14 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
         }
     }
 
+    auto layoutProperty = frameNode_->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     NG::SizeF frameSize = geometryNode->GetFrameSize();
-    if (analyzerUIConfig_.contentWidth != frameSize.Width() || analyzerUIConfig_.contentHeight != frameSize.Height()) {
-        analyzerUIConfig_.contentWidth = frameSize.Width();
-        analyzerUIConfig_.contentHeight = frameSize.Height();
+    if (analyzerUIConfig_.contentWidth != frameSize.Width() - padding.Offset().GetX() * 2 ||
+        analyzerUIConfig_.contentHeight != frameSize.Height() - padding.Offset().GetY() * 2) {
+        analyzerUIConfig_.contentWidth = frameSize.Width() - padding.Offset().GetX() * 2;
+        analyzerUIConfig_.contentHeight = frameSize.Height()- padding.Offset().GetY() * 2;
         isUIConfigUpdate = true;
     }
 
