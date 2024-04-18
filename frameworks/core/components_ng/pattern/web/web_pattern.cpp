@@ -1869,8 +1869,10 @@ void WebPattern::OnModifyDone()
 
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
-        auto task = [this]() {
-            InitSlideUpdateListener();
+        auto task = [weak = AceType::WeakClaim(this)]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->InitSlideUpdateListener();
         };
         PostTaskToUI(std::move(task));
     }
