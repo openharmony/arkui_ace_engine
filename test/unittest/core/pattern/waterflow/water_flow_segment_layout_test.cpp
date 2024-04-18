@@ -121,7 +121,7 @@ HWTEST_F(WaterFlowSegmentTest, Fill001, TestSize.Level1)
         },
         false);
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     algo->wrapper_ = AceType::RawPtr(frameNode_);
     algo->mainSize_ = 2000.0f;
     algo->itemsCrossSize_ = { { 50.0f, 50.0f, 50.0f, 50.0f }, {}, { 70.0f, 70.0f, 70.0f } };
@@ -167,7 +167,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
     layoutProperty_->contentConstraint_ = constraint;
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -306,7 +306,7 @@ HWTEST_F(WaterFlowSegmentTest, Layout001, TestSize.Level1)
 {
     SetUpConfig1();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -337,7 +337,7 @@ HWTEST_F(WaterFlowSegmentTest, Layout002, TestSize.Level1)
 {
     SetUpConfig1();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -370,7 +370,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnOffset002, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -430,7 +430,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump001, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -470,7 +470,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump002, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -522,7 +522,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump003, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -563,7 +563,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump004, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -612,7 +612,7 @@ HWTEST_F(WaterFlowSegmentTest, Reset001, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -645,7 +645,7 @@ HWTEST_F(WaterFlowSegmentTest, Reset002, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -705,7 +705,7 @@ HWTEST_F(WaterFlowSegmentTest, Reset003, TestSize.Level1)
 {
     SetUpConfig2();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(WaterFlowLayoutInfo {});
+    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::MakeRefPtr<WaterFlowLayoutInfo>());
     auto& info = algo->info_;
 
     info->footerIndex_ = 0;
@@ -840,7 +840,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
     layoutProperty_->contentConstraint_ = constraint;
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto& info = algo->info_;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -889,7 +890,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented005, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
     layoutProperty_->contentConstraint_ = constraint;
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
     auto& info = algo->info_;
     info->jumpIndex_ = 50;
     info->align_ = ScrollAlign::END;
@@ -903,7 +905,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented005, TestSize.Level1)
     secObj->ChangeData(0, 3, SECTION_5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(secObj->GetSectionInfo().size(), 4);
-    info = pattern_->layoutInfo_;
+    info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->startIndex_, 47);
     EXPECT_EQ(info->segmentTails_.size(), 4);
     EXPECT_EQ(info->segmentTails_[3], 59);
@@ -927,7 +929,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented002, TestSize.Level1)
 {
     SetUpConfig5();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto& info = algo->info_;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -976,7 +979,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented002, TestSize.Level1)
 HWTEST_F(WaterFlowSegmentTest, Segmented003, TestSize.Level1)
 {
     SetUpConfig5();
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto& info = algo->info_;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1029,7 +1033,8 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
 {
     SetUpConfig5();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto& info = algo->info_;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1051,7 +1056,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented004, TestSize.Level1)
     secObj->ChangeData(4, 0, ADD_SECTION_6);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     AddItems(10);
-    info = pattern_->layoutInfo_;
+    info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->itemInfos_.size(), 16);
 
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1201,7 +1206,8 @@ HWTEST_F(WaterFlowSegmentTest, TargetIndex001, TestSize.Level1)
 {
     SetUpConfig5();
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto& info = algo->info_;
     info->targetIndex_ = 50;
@@ -1234,7 +1240,8 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
     layoutProperty_->contentConstraint_ = constraint;
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     // cause layout abort
     auto& info = algo->info_;
@@ -1282,7 +1289,8 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
     layoutProperty_->contentConstraint_ = constraint;
 
-    auto algo = AceType::MakeRefPtr<WaterFlowSegmentedLayout>(pattern_->layoutInfo_);
+    auto algo =
+        AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
     auto& info = algo->info_;
 
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1634,7 +1642,7 @@ HWTEST_F(WaterFlowSegmentTest, Replace002, TestSize.Level1)
     secObj->ChangeData(0, 3, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    
+
     EXPECT_EQ(info->currentOffset_, -300.0f);
     EXPECT_EQ(info->startIndex_, 2);
     EXPECT_EQ(info->storedOffset_, -95);

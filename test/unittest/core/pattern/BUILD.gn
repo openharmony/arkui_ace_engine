@@ -104,6 +104,7 @@ group("core_pattern_unittest") {
     "video:video_test_ng",
     "waterflow:water_flow_test_ng",
     "waterflow:water_flow_test_old",
+    "waterflow:water_flow_test_sw",
     "xcomponent:xcomponent_test_ng",
   ]
 }

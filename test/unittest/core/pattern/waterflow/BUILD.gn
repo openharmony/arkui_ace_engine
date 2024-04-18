@@ -28,3 +28,9 @@ ace_unittest("water_flow_test_ng") {
     "water_flow_test_ng.cpp",
   ]
 }
+
+ace_unittest("water_flow_test_sw") {
+  type = "new"
+  defines = [ "TEST_WATER_FLOW_SW" ]
+  sources = [ "water_flow_test_ng.cpp" ]
+}

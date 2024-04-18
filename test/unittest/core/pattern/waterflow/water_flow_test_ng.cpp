@@ -121,6 +121,9 @@ void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callba
         callback(model);
     }
     GetInstance();
+#ifdef TEST_WATER_FLOW_SW
+    pattern_->layoutMode_ = WaterFlowLayoutMode::SLIDING_WINDOW;
+#endif
     if (flushLayout) {
         FlushLayoutTask(frameNode_);
     }
