@@ -49,7 +49,6 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
 RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
 {
     Media::SourceOptions opts;
-    opts.formatHint = "image/svg+xml";
     uint32_t errorCode = 0;
     auto src = Media::ImageSource::CreateImageSource(filePath, opts, errorCode);
     if (errorCode != Media::SUCCESS) {
@@ -137,5 +136,16 @@ uint32_t ImageSourceOhos::GetFrameCount()
         return 0;
     }
     return frameCount;
+}
+
+std::string ImageSourceOhos::GetEncodedFormat()
+{
+    uint32_t errorCode;
+    auto sourceInfo = imageSource_->GetSourceInfo(errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Get image source info failed, errorCode = %{public}u", errorCode);
+        return "";
+    }
+    return sourceInfo.encodedFormat;
 }
 } // namespace OHOS::Ace

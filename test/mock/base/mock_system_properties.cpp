@@ -62,6 +62,8 @@ bool SystemProperties::acePerformanceMonitorEnable_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
+bool SystemProperties::imageFileCacheConvertAstc_ = true;
+int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
