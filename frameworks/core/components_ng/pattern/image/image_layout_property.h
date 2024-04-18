@@ -117,7 +117,12 @@ public:
         std::string moduleName = json->GetString("moduleName");
         UpdateImageSourceInfo(ImageSourceInfo(src, bundleName, moduleName));
         auto objectFit = json->GetString("objectFit");
-        UpdateImageFit(uMap.count(objectFit) ? uMap.at(objectFit) : ImageFit::COVER);
+        ImageFit imageFit = ImageFit::COVER;
+        auto iter = uMap.find(objectFit);
+        if (iter != uMap.end()) {
+            imageFit = iter->second;
+        }
+        UpdateImageFit(imageFit);
         UpdateAutoResize(json->GetString("autoResize") == "true" ? true : false);
         /* register image frame node to pipeline context to receive memory level notification and window state change
          * notification */

@@ -56,7 +56,11 @@ VisibleType StringToVisibleType(const std::string& str)
         { "Visibility.None", VisibleType::GONE },
     };
 
-    return uMap.count(str) ? uMap.at(str) : VisibleType::VISIBLE;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return VisibleType::VISIBLE;
 }
 
 std::string TextDirectionToString(TextDirection type)
@@ -83,7 +87,11 @@ TextDirection StringToTextDirection(const std::string& str)
         { "Direction.Auto", TextDirection::AUTO },
     };
 
-    return uMap.count(str) ? uMap.at(str) : TextDirection::LTR;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return TextDirection::LTR;
 }
 } // namespace
 

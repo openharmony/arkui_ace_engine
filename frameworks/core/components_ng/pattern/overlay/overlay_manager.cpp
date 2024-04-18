@@ -1363,10 +1363,11 @@ void OverlayManager::ErasePopup(int32_t targetId)
 
 void OverlayManager::DismissPopup()
 {
-    if (!popupMap_.count(dismissPopupId_)) {
+    auto iter = popupMap_.find(dismissPopupId_);
+    if (iter == popupMap_.end()) {
         return;
     }
-    auto popupInfo = popupMap_[dismissPopupId_];
+    auto popupInfo = iter->second;
     popupInfo.markNeedUpdate = true;
     HidePopup(dismissPopupId_, popupInfo);
 }
@@ -3105,8 +3106,9 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         CloseSheet(targetId);
         return;
     }
-    if (sheetMap_.count(targetId)) {
-        auto topModalNode = sheetMap_[targetId].Upgrade();
+    auto iter = sheetMap_.find(targetId);
+    if (iter != sheetMap_.end()) {
+        auto topModalNode = iter->second.Upgrade();
         CHECK_NULL_VOID(topModalNode);
         if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG &&
             topModalNode->GetPattern<SheetPresentationPattern>()->GetTargetId() == targetId) {
@@ -3283,11 +3285,12 @@ void OverlayManager::CloseSheet(int32_t targetId)
     if (modalStack_.empty()) {
         return;
     }
-    if (sheetMap_.empty() || !sheetMap_.count(targetId)) {
+    auto iter = sheetMap_.find(targetId);
+    if (sheetMap_.empty() || iter == sheetMap_.end()) {
         DeleteModal(targetId);
         return;
     }
-    auto sheetNode = sheetMap_[targetId].Upgrade();
+    auto sheetNode = iter->second.Upgrade();
     CHECK_NULL_VOID(sheetNode);
     sheetNode->GetPattern<SheetPresentationPattern>()->SetShowState(false);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
@@ -3325,11 +3328,12 @@ void OverlayManager::DismissSheet()
     if (modalStack_.empty()) {
         return;
     }
-    if (sheetMap_.empty() || !sheetMap_.count(dismissTargetId_)) {
+    auto iter = sheetMap_.find(dismissTargetId_);
+    if (sheetMap_.empty() || iter == sheetMap_.end()) {
         DeleteModal(dismissTargetId_);
         return;
     }
-    auto sheetNode = sheetMap_[dismissTargetId_].Upgrade();
+    auto sheetNode = iter->second.Upgrade();
     CHECK_NULL_VOID(sheetNode);
     if (sheetNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -3797,11 +3801,12 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
     if (modalStack_.empty()) {
         return;
     }
-    if (sheetMap_.empty() || !sheetMap_.count(targetId)) {
+    auto iter = sheetMap_.find(targetId);
+    if (sheetMap_.empty() || iter == sheetMap_.end()) {
         DeleteModal(targetId, false);
         return;
     }
-    auto mapSheetNode = sheetMap_[targetId].Upgrade();
+    auto mapSheetNode = iter->second.Upgrade();
     CHECK_NULL_VOID(mapSheetNode);
     if (mapSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
         return;

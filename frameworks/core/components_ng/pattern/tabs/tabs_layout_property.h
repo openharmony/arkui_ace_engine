@@ -107,7 +107,12 @@ public:
 
         UpdateAxis(json->GetBool("vertical") ? Axis::VERTICAL : Axis::HORIZONTAL);
         auto barPosition = json->GetString("barPosition");
-        UpdateTabBarPosition(uMap.count(barPosition) ? uMap.at(barPosition) : BarPosition::START);
+        BarPosition barPositionEnum = BarPosition::START;
+        auto iter = uMap.find(barPosition);
+        if (iter != uMap.end()) {
+            barPositionEnum = iter->second;
+        }
+        UpdateTabBarPosition(barPositionEnum);
         LayoutProperty::FromJson(json);
     }
 

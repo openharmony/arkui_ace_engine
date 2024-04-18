@@ -5417,7 +5417,12 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
         { "CopyOptions.Distributed", CopyOptions::Distributed },
     };
     auto copyOption = json->GetString("copyOption");
-    layoutProperty->UpdateCopyOptions(uMap.count(copyOption) ? uMap.at(copyOption) : CopyOptions::None);
+    CopyOptions copyOptionsEnum = CopyOptions::None;
+    auto iter = uMap.find(copyOption);
+    if (iter != uMap.end()) {
+        copyOptionsEnum = iter->second;
+    }
+    layoutProperty->UpdateCopyOptions(copyOptionsEnum);
     Pattern::FromJson(json);
 }
 

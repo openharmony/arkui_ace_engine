@@ -240,8 +240,11 @@ void WindowScene::BufferAvailableCallback()
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             Rosen::RSAnimationTimingProtocol protocol;
             protocol.SetDuration(config.duration_);
-            auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
-                Rosen::RSAnimationTimingCurve::DEFAULT;
+            auto curve = Rosen::RSAnimationTimingCurve::DEFAULT;
+            auto iter = curveMap.find(config.curve_);
+            if (iter != curveMap.end()) {
+                curve = iter->second;
+            }
             Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
                 AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
                 rsNode->NotifyTransition(effect, false);
