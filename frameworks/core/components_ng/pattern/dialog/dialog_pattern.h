@@ -165,6 +165,8 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
+    void DumpInfo() override;
+
     bool AvoidBottom() const override
     {
         return false;
@@ -273,6 +275,8 @@ private:
     void UpdateSheetIconAndText();
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void DumpBoolProperty();
+    void DumpObjectProperty();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;

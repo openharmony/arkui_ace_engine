@@ -745,4 +745,16 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
     };
     eventHub->SetOnTouchTestFunc(func);
 }
+
+Dimension ContainerModalPattern::GetCustomTitleHeight()
+{
+    auto customTitleRow = GetCustomTitleRow();
+    Dimension zeroHeight;
+    CHECK_NULL_RETURN(customTitleRow, zeroHeight);
+    auto property = customTitleRow->GetLayoutProperty();
+    if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return zeroHeight;
+    }
+    return titleHeight_;
+}
 } // namespace OHOS::Ace::NG

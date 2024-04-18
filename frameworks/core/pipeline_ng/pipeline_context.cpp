@@ -562,9 +562,7 @@ void PipelineContext::IsCloseSCBKeyboard()
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto manager = DynamicCast<TextFieldManagerNG>(textFieldManager_);
-    CHECK_NULL_VOID(manager);
-    if (container->IsKeyboard() || !manager->HasKeyboard()) {
+    if (container->IsKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in keyboard.");
         return;
     }
@@ -572,6 +570,7 @@ void PipelineContext::IsCloseSCBKeyboard()
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
+        FocusHub::CloseKeyboard();
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
@@ -3477,6 +3476,22 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_RETURN(containerPattern, -1);
     return containerPattern->GetContainerModalTitleHeight();
+}
+
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(rootNode_, nullptr);
+    return AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+}
+
+Dimension PipelineContext::GetCustomTitleHeight()
+{
+    auto containerModal = GetContainerModalNode();
+    CHECK_NULL_RETURN(containerModal, Dimension());
+    return containerModal->GetPattern<ContainerModalPattern>()->GetCustomTitleHeight();
 }
 
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)

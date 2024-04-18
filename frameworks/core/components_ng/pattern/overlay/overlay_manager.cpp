@@ -795,6 +795,12 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
                 context->UpdateOffset(menuAnimationOffset);
             },
             option.GetOnFinishEvent());
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+#endif
     }
     // start animation immediately
     pipeline->RequestFrame();
@@ -814,8 +820,8 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
         rootNode->RemoveChild(toastNodeWeak.Upgrade());
     }
     toastMap_.clear();
-    auto align = Alignment::ParseAlignment(alignment);
-    auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft, showMode, align, offset);
+    ToastInfo toastInfo = {message, duration, bottom, isRightToLeft, showMode, alignment, offset};
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
     CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
     // mount to parent
@@ -917,6 +923,12 @@ void OverlayManager::PopToast(int32_t toastId)
             }
         },
         option.GetOnFinishEvent());
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    auto* transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+#endif
     // start animation immediately
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -985,6 +997,13 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
             popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
             rootNode->RemoveChild(popupNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+            CHECK_NULL_VOID(layoutProp);
+            auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+            if (isShowInSubWindow) {
+                auto subwindowMgr = SubwindowManager::GetInstance();
+                subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
+            }
         } else {
             popupPattern->StartExitingTransitionEffects(popupNode, finish);
         }
@@ -1105,7 +1124,7 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
             rects.emplace_back(rect);
         }
         auto subWindowMgr = SubwindowManager::GetInstance();
-        subWindowMgr->SetPopupHotAreas(rects, popupId, popupPattern->GetContainerId());
+        subWindowMgr->SetHotAreas(rects, popupId, popupPattern->GetContainerId());
     }
 }
 
@@ -1177,8 +1196,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         }
         if (isShowInSubWindow) {
             auto subwindow = SubwindowManager::GetInstance();
-            CHECK_NULL_VOID(subwindow);
-            subwindow->DeletePopupHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
+            subwindow->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
             subwindow->HideSubWindowNG();
         }
     };
@@ -1289,9 +1307,6 @@ void OverlayManager::HideCustomPopups()
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
-                auto subWindowMgr = SubwindowManager::GetInstance();
-                auto popupPattern = popupNode->GetPattern<BubblePattern>();
-                subWindowMgr->DeleteHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
@@ -1317,9 +1332,6 @@ void OverlayManager::HideAllPopups()
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
-                auto subWindowMgr = SubwindowManager::GetInstance();
-                auto popupPattern = popupNode->GetPattern<BubblePattern>();
-                subWindowMgr->DeleteHotAreas(popupNode->GetId(), popupPattern->GetContainerId());
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
@@ -1334,7 +1346,16 @@ void OverlayManager::ErasePopup(int32_t targetId)
     if (it != popupMap_.end()) {
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
-        rootNode->RemoveChild(it->second.popupNode);
+        auto popupNode = it->second.popupNode;
+        CHECK_NULL_VOID(popupNode);
+        auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+        CHECK_NULL_VOID(layoutProp);
+        auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+        if (isShowInSubWindow) {
+            auto subwindowMgr = SubwindowManager::GetInstance();
+            subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
+        }
+        rootNode->RemoveChild(popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         popupMap_.erase(targetId);
     }
@@ -1613,6 +1634,8 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
         }
         rootNode->RemoveChild(node);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto subwindowMgr = SubwindowManager::GetInstance();
+        subwindowMgr->DeleteHotAreas(Container::CurrentId(), node->GetId());
         menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
         break;
     }
@@ -1639,10 +1662,8 @@ void OverlayManager::CleanPopupInSubWindow()
             auto removeNode = HidePopupWithoutAnimation(target, popupInfo);
             if (removeNode) {
                 removeNodes.emplace_back(removeNode);
-                auto popupPattern = removeNode->GetPattern<BubblePattern>();
                 auto subwindowMgr = SubwindowManager::GetInstance();
-                CHECK_NULL_VOID(subwindowMgr);
-                subwindowMgr->DeletePopupHotAreas(removeNode->GetId(), popupPattern->GetContainerId());
+                subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId());
             }
             break;
         }
@@ -1790,6 +1811,7 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
         return;
     }
     if (dialogProps.customBuilder) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "open custom dialog with custom builder.");
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         dialogProps.customBuilder();
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
@@ -2082,9 +2104,27 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(dialogLayoutProp);
     if (dialogLayoutProp && dialogLayoutProp->GetShowInSubWindowValue(false) &&
         dialogLayoutProp->GetIsModal().value_or(true)) {
+        RefPtr<OverlayManager> parentOverlayManager = nullptr;
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+        auto container = Container::Current();
+        auto currentId = Container::CurrentId();
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+            container = AceEngine::Get().GetContainer(currentId);
+            CHECK_NULL_VOID(container);
+        }
+        ContainerScope scope(currentId);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_VOID(context);
+        parentOverlayManager = context->GetOverlayManager();
+#else
         auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
         CHECK_NULL_VOID(parentPipelineContext);
-        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        parentOverlayManager = parentPipelineContext->GetOverlayManager();
+#endif
         CHECK_NULL_VOID(parentOverlayManager);
         RefPtr<FrameNode> maskNode =
             parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
@@ -2548,10 +2588,10 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
             popupMap_.erase(targetId);
             rootNode->RemoveChild(overlay);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+            CHECK_NULL_RETURN(subwindow, false);
+            subwindow->DeleteHotAreas(overlay->GetId());
             if (rootNode->GetChildren().empty()) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
-                CHECK_NULL_RETURN(subwindow, false);
-                subwindow->DeletePopupHotAreas(overlay->GetId());
                 subwindow->HideSubWindowNG();
             }
             return true;
@@ -3018,7 +3058,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
     std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode)
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -3029,12 +3070,15 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                              shouldDismiss = std::move(shouldDismiss), onWillAppear = std::move(onWillAppear),
                              onWillDisappear = std::move(onWillDisappear),
                              onHeightDidChange = std::move(onHeightDidChange),
-                             onDetentsDidChange  = std::move(onDetentsDidChange), targetNode]() mutable {
+                             onDetentsDidChange  = std::move(onDetentsDidChange),
+                             onWidthDidChange  = std::move(onWidthDidChange),
+                             onTypeDidChange  = std::move(onTypeDidChange), targetNode]() mutable {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildtitleNodeFunc),
             sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
-            std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange), targetNode);
+            std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange),
+            std::move(onWidthDidChange), std::move(onTypeDidChange), targetNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
@@ -3047,7 +3091,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
     std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange, const RefPtr<FrameNode>& targetNode)
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode)
 {
     int32_t targetId = targetNode->GetId();
     auto rootNode = FindWindowScene(targetNode);
@@ -3096,20 +3141,21 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
                 CHECK_NULL_VOID(maskRenderContext);
                 maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
             }
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnWillDisappear(std::move(onWillDisappear));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnHeightDidChange(std::move(onHeightDidChange));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnDetentsDidChange(
-                std::move(onDetentsDidChange));
-            topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
+            auto topModalNodePattern = topModalNode->GetPattern<SheetPresentationPattern>();
+            topModalNodePattern->UpdateOnAppear(std::move(onAppear));
+            topModalNodePattern->UpdateOnDisappear(std::move(onDisappear));
+            topModalNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+            topModalNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+            topModalNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+            topModalNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+            topModalNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+            topModalNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
             layoutProperty->UpdateSheetStyle(sheetStyle);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             pipeline->FlushUITasks();
             ComputeSheetOffset(sheetStyle, topModalNode);
-            auto sheetType = topModalNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
-            if (sheetType != SheetType::SHEET_POPUP &&
-                !topModalNode->GetPattern<SheetPresentationPattern>()->GetAnimationProcess()) {
+            auto sheetType = topModalNodePattern->GetSheetType();
+            if (sheetType != SheetType::SHEET_POPUP && !topModalNodePattern->GetAnimationProcess()) {
                 PlaySheetTransition(topModalNode, true, false, false);
             }
             return;
@@ -3153,18 +3199,20 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     if (sheetStyle.shadow.has_value()) {
         sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
     }
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnWillDisappear(std::move(onWillDisappear));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnHeightDidChange(std::move(onHeightDidChange));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnDetentsDidChange(
-        std::move(onDetentsDidChange));
-    sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnAppear(std::move(onAppear));
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetNodePattern->UpdateOnAppear(std::move(onAppear));
+    sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
+    sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+    sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+    sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+    sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+    sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+    sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
     sheetMap_[targetId] = WeakClaim(RawPtr(sheetNode));
     modalStack_.push(WeakClaim(RawPtr(sheetNode)));
     SaveLastModalNode();
     // create maskColor node
-    auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
+    auto sheetType = sheetNodePattern->GetSheetType();
     auto maskNode = FrameNode::CreateFrameNode(
         V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     CHECK_NULL_VOID(maskNode);
@@ -3428,6 +3476,8 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
+        sheetPattern->FireOnTypeDidChange();
+        sheetPattern->FireOnWidthDidChange(sheetNode);
         option.SetOnFinishEvent(
             [sheetWK = WeakClaim(RawPtr(sheetNode)), weak = AceType::WeakClaim(this), isFirst = isFirstTransition] {
                 auto sheetNode = sheetWK.Upgrade();

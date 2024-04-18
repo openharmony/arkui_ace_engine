@@ -2507,6 +2507,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->IsReverse()) {
+                offset = -offset;
+            }
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
         });
         fixedVelocityMotion_->SetVelocity(velocity);

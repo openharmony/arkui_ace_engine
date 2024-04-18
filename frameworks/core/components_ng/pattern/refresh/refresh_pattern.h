@@ -105,7 +105,7 @@ private:
     ScrollResult HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
-    float CalculateFriction();
+    float CalculatePullDownRatio();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
     float GetFollowRatio();

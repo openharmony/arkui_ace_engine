@@ -16,12 +16,14 @@
 #include "core/common/event_manager.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/frame_trace_adapter.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/xcollie/xcollieInterface.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
@@ -177,8 +179,32 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             }
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
+        RecordHitEmptyMessage(touchPoint, resultInfo);
     }
     LogTouchTestResultRecognizers(touchTestResults_[touchPoint.id]);
+}
+
+void EventManager::RecordHitEmptyMessage(const TouchEvent& touchPoint, const std::string& resultInfo)
+{
+    auto hitEmptyMessage = JsonUtil::Create(true);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto windowId = container->GetWindowId();
+    hitEmptyMessage->Put("windowId", static_cast<int32_t>(windowId));
+    auto window = container->GetPipelineContext()->GetWindow();
+    if (window) {
+        hitEmptyMessage->Put("windowName", window->GetWindowName().c_str());
+    }
+    hitEmptyMessage->Put("resultInfo", resultInfo.c_str());
+    hitEmptyMessage->Put("x", touchPoint.x);
+    hitEmptyMessage->Put("y", touchPoint.y);
+    hitEmptyMessage->Put("currentTime", static_cast<int64_t>(touchPoint.time.time_since_epoch().count()));
+    hitEmptyMessage->Put("bundleName", container->GetBundleName().c_str());
+    auto frontEnd = container->GetFrontend();
+    if (frontEnd) {
+        hitEmptyMessage->Put("pageInfo", frontEnd->GetCurrentPageUrl().c_str());
+    }
+    XcollieInterface::GetInstance().TriggerTimerCount("HIT_EMPTY_WARNING", true, hitEmptyMessage->ToString());
 }
 
 void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result)

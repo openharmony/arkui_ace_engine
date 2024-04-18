@@ -131,7 +131,7 @@ public:
 
     std::list<int32_t> GetRouteOfFirstScope() override
     {
-        return { 2, 0 };
+        return {};
     }
 
     std::string GetEntryFocusViewName() override

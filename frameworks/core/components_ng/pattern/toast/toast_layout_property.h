@@ -26,6 +26,15 @@ enum class ToastShowMode {
     DEFAULT = 0,
     TOP_MOST = 1,
 };
+struct ToastInfo {
+    std::string message;
+    int32_t duration = 0;
+    std::string bottom;
+    bool isRightToLeft = false;
+    ToastShowMode showMode = ToastShowMode::DEFAULT;
+    int32_t alignment = 0;
+    std::optional<DimensionOffset> offset;
+};
 class ACE_EXPORT ToastLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ToastLayoutProperty, LayoutProperty);
 

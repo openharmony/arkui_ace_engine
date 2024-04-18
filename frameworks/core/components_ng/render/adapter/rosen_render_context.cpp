@@ -1386,6 +1386,7 @@ public:
     {
         if (pixelMap == nullptr) {
             TAG_LOGW(AceLogTag::ACE_DRAG, "pixelMap is null!");
+            g_pixelMap = nullptr;
             thumbnailGet.notify_all();
             return;
         }
@@ -3028,6 +3029,11 @@ void RosenRenderContext::OnOffsetEdgesUpdate(const EdgesParam& /*value*/)
 }
 
 void RosenRenderContext::OnAnchorUpdate(const OffsetT<Dimension>& /*value*/)
+{
+    SetPositionToRSNode();
+}
+
+void RosenRenderContext::RecalculatePosition()
 {
     SetPositionToRSNode();
 }

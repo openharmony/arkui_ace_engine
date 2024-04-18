@@ -912,7 +912,11 @@ export class CounterComponent extends ViewPU {
             this.inlineStyleOptions = this.options.inlineOptions;
             this.updateInlineStyleOptions()
         } else if (this.type === CounterType.INLINE_DATE) {
-            this.dateStyleOptions = this.options.dateOptions;
+            let options = this.options.dateOptions;
+            options.year = options.year ? options.year : CounterConstant.COUNTER_MIN_YEAR;
+            options.month = options.month ? options.month : CounterConstant.COUNTER_MIN_MONTH;
+            options.day = options.day ? options.day : CounterConstant.COUNTER_MIN_DAY;
+            this.dateStyleOptions = options;
             this.updateDateStyleOptions()
         }
     }
@@ -1905,7 +1909,7 @@ export class CounterComponent extends ViewPU {
                                     this.inputValue = this.value.toString()
                                 }
                             }));
-                            TextInput.focusable(this.focusEnable);
+                            TextInput.focusable(!0);
                             TextInput.focusOnTouch(!0);
                             TextInput.onFocus((() => {
                                 this.focusText = FocusText.TEXT1;
@@ -2040,7 +2044,7 @@ export class CounterComponent extends ViewPU {
                                     this.inputValue = this.value.toString()
                                 }
                             }));
-                            TextInput.focusable(this.focusEnable);
+                            TextInput.focusable(!0);
                             TextInput.focusOnTouch(!0);
                             TextInput.onFocus((() => {
                                 this.focusText = FocusText.TEXT1;

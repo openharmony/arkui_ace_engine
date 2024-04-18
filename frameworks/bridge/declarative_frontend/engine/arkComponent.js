@@ -3801,33 +3801,43 @@ class UICommonEvent {
     this._nodePtr = nodePtr;
   }
   setOnClick(callback) {
+    this._clickEvent = callback;
     getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
   }
   setOnTouch(callback) {
+    this._touchEvent = callback;
     getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback, this._instanceId);
   }
   setOnAppear(callback) {
+    this._onAppearEvent = callback;
     getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback, this._instanceId);
   }
   setOnDisappear(callback) {
+    this._onDisappearEvent = callback;
     getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
   }
   setOnKeyEvent(callback) {
+    this._onKeyEvent = callback;
     getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback, this._instanceId);
   }
   setOnFocus(callback) {
+    this._onFocusEvent = callback;
     getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback, this._instanceId);
   }
   setOnBlur(callback) {
+    this._onBlur = callback;
     getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback, this._instanceId);
   }
   setOnHover(callback) {
+    this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
   }
   setOnMouse(callback) {
+    this._onMouseEvent = callback;
     getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
   }
   setOnSizeChange(callback) {
+    this._onSizeChangeEvent = callback;
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
   }
 }

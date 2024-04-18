@@ -215,11 +215,12 @@ public:
         GridSizeType type = GridSizeType::UNDEFINED);
 
     // position
-    static void SetPosition(const OffsetT<Dimension> &value);
-    static void SetOffset(const OffsetT<Dimension> &value);
+    static void SetPosition(const OffsetT<Dimension>& value);
+    static void SetOffset(const OffsetT<Dimension>& value);
     static void SetPositionEdges(const EdgesParam& value);
     static void SetOffsetEdges(const EdgesParam& value);
-    static void MarkAnchor(const OffsetT<Dimension> &value);
+    static void MarkAnchor(const OffsetT<Dimension>& value);
+    static void ResetPosition();
 
     // render position
     static void SetZIndex(int32_t value);
@@ -491,7 +492,7 @@ public:
     static void ResetFlexShrink(FrameNode* frameNode);
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
-    static void SetLayoutWeight(FrameNode* frameNode, int32_t value);
+    static void SetLayoutWeight(FrameNode* frameNode, float value);
     static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
     static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
     static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
@@ -601,10 +602,10 @@ public:
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);
     static Dimension GetFlexBasis(FrameNode* frameNode);
-    static float GetMinWidth(FrameNode* frameNode);
-    static float GetMaxWidth(FrameNode* frameNode);
-    static float GetMinHeight(FrameNode* frameNode);
-    static float GetMaxHeight(FrameNode* frameNode);
+    static Dimension GetMinWidth(FrameNode* frameNode);
+    static Dimension GetMaxWidth(FrameNode* frameNode);
+    static Dimension GetMinHeight(FrameNode* frameNode);
+    static Dimension GetMaxHeight(FrameNode* frameNode);
     static Dimension GetGrayScale(FrameNode* frameNode);
     static InvertVariant GetInvert(FrameNode* frameNode);
     static Dimension GetSepia(FrameNode* frameNode);
@@ -618,8 +619,8 @@ public:
     static Dimension GetBrightness(FrameNode* frameNode);
     static Dimension GetSaturate(FrameNode* frameNode);
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
-    static float GetWidth(FrameNode* frameNode);
-    static float GetHeight(FrameNode* frameNode);
+    static Dimension GetWidth(FrameNode* frameNode);
+    static Dimension GetHeight(FrameNode* frameNode);
     static Color GetBackgroundColor(FrameNode* frameNode);
     static std::string GetBackgroundImageSrc(FrameNode* frameNode);
     static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
@@ -631,6 +632,8 @@ public:
     static TranslateOptions GetTranslate(FrameNode* frameNode);
     static float GetAspectRatio(FrameNode* frameNode);
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
+    static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
+    static float GetLayoutWeight(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

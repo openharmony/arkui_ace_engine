@@ -64,6 +64,7 @@ public:
         value->propArrowSize_ = CloneArrowSize();
         value->propArrowColor_ = CloneArrowColor();
         value->propLoop_ = CloneLoop();
+        value->propIndicatorInteractive_ = CloneIndicatorInteractive();
         value->propDisableSwipe_ = CloneDisableSwipe();
         value->ignoreItemSpace_ = ignoreItemSpace_;
         return value;
@@ -96,6 +97,7 @@ public:
         ResetArrowSize();
         ResetArrowColor();
         ResetLoop();
+        ResetIndicatorInteractive();
         ResetDisableSwipe();
         ignoreItemSpace_ = false;
     }
@@ -133,6 +135,7 @@ public:
         json->PutExtAttr("arrowColor",
             propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
         json->PutExtAttr("loop", propLoop_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("indicatorInteractive", propIndicatorInteractive_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false", filter);
     }
 
@@ -216,6 +219,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorInteractive, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SwipeByGroup, bool, PROPERTY_UPDATE_MEASURE_SELF);

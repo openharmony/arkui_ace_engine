@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/event/ui_input_event_impl.h"
-#include "interfaces/native/native_event.h"
+#include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -498,6 +498,9 @@ void XComponentPattern::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("surfaceRect: ").append(RectF { localPosition_, surfaceSize_ }.ToString()));
+    if (renderSurface_) {
+        renderSurface_->DumpInfo();
+    }
 }
 
 void XComponentPattern::NativeXComponentChange(float width, float height)
@@ -603,6 +606,8 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
             static_cast<uint32_t>(surfaceRect.Height() * viewScale));
         NativeXComponentChange(surfaceRect.Width(), surfaceRect.Height());
     }
+    renderSurface_->UpdateSurfaceSizeInUserData(
+        static_cast<uint32_t>(surfaceRect.Width()), static_cast<uint32_t>(surfaceRect.Height()));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();

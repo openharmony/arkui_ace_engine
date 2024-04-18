@@ -33,6 +33,7 @@ constexpr int32_t FLOATING_ANIMATE_HANDLE_OPACITY_DURATION = 150;
 constexpr int32_t FLOATING_ANIMATE_BACKGROUND_CHANGE_DURATION = 250;
 constexpr int32_t FLOATING_CANCEL_ANIMATE_TEXT_RECOVERY_DELAY_DURATION = 100;
 constexpr int32_t FLOATING_CANCEL_ANIMATE_TEXT_RECOVERY_DURATION = 200;
+constexpr float HALF_OPACITY = 0.5;
 void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
 {
     auto pattern = DynamicCast<RichEditorDragPattern>(pattern_.Upgrade());
@@ -149,11 +150,13 @@ void RichEditorDragOverlayModifier::PaintSelBackground(RSCanvas& canvas, RefPtr<
     }
     RSBrush selBrush;
     Color selColor = Color::WHITE;
-    selBrush.SetColor(ToRSColor(selColor));
-    selBrush.SetAntiAlias(true);
-    canvas.AttachBrush(selBrush);
-    canvas.DrawPath(*path);
-    canvas.DetachBrush();
+    if (GreatNotEqual(selectedBackgroundOpacity_->Get(), HALF_OPACITY)) {
+        selBrush.SetColor(ToRSColor(selColor));
+        selBrush.SetAntiAlias(true);
+        canvas.AttachBrush(selBrush);
+        canvas.DrawPath(*path);
+        canvas.DetachBrush();
+    }
 
     selColor = Color(selectedColor_->Get());
     selColor = selColor.BlendOpacity(selectedBackgroundOpacity_->Get());

@@ -49,7 +49,7 @@ SafeAreaInsets ContentRootPattern::CreateSafeAreaInsets() const
     // not full-screen in floating window mode, calculate real inset
     if (inset.bottom_.IsValid() && pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
         pipeline->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        auto titleHeight = CONTAINER_TITLE_HEIGHT.ConvertToPx();
+        auto titleHeight = pipeline->GetCustomTitleHeight().ConvertToPx();
         auto borderWidth = CONTAINER_BORDER_WIDTH.ConvertToPx();
         auto botPadding = CONTENT_PADDING.ConvertToPx();
         inset.bottom_.start -= std::round(titleHeight + borderWidth);

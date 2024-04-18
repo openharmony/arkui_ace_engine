@@ -736,16 +736,19 @@ void TextFieldPattern::HandleFocusEvent()
     if (isSelectAll && !contentController_->IsEmpty()) {
         needSelectAll_ = true;
     }
+    bool needTwinkling = true;
     if (IsNormalInlineState()) {
         ApplyInlineTheme();
         inlineFocusState_ = true;
-        if (contentController_->IsEmpty()) {
-            StartTwinkling();
-        } else {
+        if (!contentController_->IsEmpty()) {
             inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
+            if (inlineSelectAllFlag_) {
+                needTwinkling = false;
+            }
         }
         ProcessResponseArea();
-    } else {
+    }
+    if (needTwinkling) {
         StartTwinkling();
     }
     NotifyOnEditChanged(true);
@@ -1592,7 +1595,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         for (const auto& record : records) {
             str += record;
         }
-        pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
             return;
@@ -1615,6 +1617,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
+        pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
     };
 }
 
@@ -2652,6 +2655,21 @@ void TextFieldPattern::OnHover(bool isHover)
     isOnHover_ = isHover;
 }
 
+void TextFieldPattern::RestoreDefaultMouseState()
+{
+    int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = GetSCBSystemWindowId();
+#endif
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    pipeline->SetMouseStyleHoldNode(id);
+    pipeline->ChangeMouseStyle(id, MouseFormat::DEFAULT, windowId);
+}
+
 void TextFieldPattern::ChangeMouseState(
     const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass)
 {
@@ -2666,15 +2684,13 @@ void TextFieldPattern::ChangeMouseState(
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
         if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
-            pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
+            RestoreDefaultMouseState();
         } else {
             pipeline->SetMouseStyleHoldNode(frameId);
             pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
         }
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
-        pipeline->FreeMouseStyleHoldNode(frameId);
+        RestoreDefaultMouseState();
     }
 }
 
@@ -6411,7 +6427,7 @@ void TextFieldPattern::SetThemeBorderAttr()
     CHECK_NULL_VOID(theme);
     if (!paintProperty->HasBorderColorFlagByUser()) {
         BorderColorProperty borderColor;
-        borderColor.SetColor(Color::BLACK);
+        borderColor.SetColor(theme->GetTextInputColor());
         renderContext->UpdateBorderColor(borderColor);
     } else {
         renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
@@ -6428,7 +6444,7 @@ void TextFieldPattern::SetThemeBorderAttr()
 
     if (!paintProperty->HasBorderWidthFlagByUser()) {
         BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+        borderWidth.SetBorderWidth(theme->GetTextInputWidth());
         renderContext->UpdateBorderWidth(borderWidth);
         layoutProperty->UpdateBorderWidth(borderWidth);
     } else {

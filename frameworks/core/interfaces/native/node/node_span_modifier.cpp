@@ -162,11 +162,11 @@ void SetSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 uni
     SpanModelNG::SetFontSize(uiNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
-float GetSpanFontSize(ArkUINodeHandle node)
+float GetSpanFontSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, DEFAULT_FONT_SIZE.Value());
-    return SpanModelNG::GetFontSize(uiNode).Value();
+    return SpanModelNG::GetFontSize(uiNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 void ResetSpanFontSize(ArkUINodeHandle node)

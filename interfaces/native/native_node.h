@@ -36,7 +36,6 @@
 #ifndef ARKUI_NATIVE_NODE_H
 #define ARKUI_NATIVE_NODE_H
 
-#include "native_event.h"
 #include "native_type.h"
 #include "ui_input_event.h"
 
@@ -1370,6 +1369,19 @@ typedef enum {
      *
      */
     NODE_ASPECT_RATIO,
+    /**
+     * @brief Defines the weight of the component within its row, column, or flex container for proportional
+     * distribution of available space within the container.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: weight of the component along the main axis. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: weight of the component along the main axis. \n
+     *
+     */
+    NODE_LAYOUT_WEIGHT,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -1857,6 +1869,18 @@ typedef enum {
      *
      */
     NODE_TOGGLE_VALUE,
+    /**
+     * @brief Defines the color of the component when it is deselected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     *.value[0].u32: background color, in 0xARGB format. For example, 0xFFFF0000 indicates red. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: background color, in 0xARGB format. \n
+     *
+     */
+    NODE_TOGGLE_UNSELECTED_COLOR,
 
     /**
      * @brief Defines the foreground color of the loading progress bar.
@@ -3913,6 +3937,14 @@ typedef enum {
      */
     NODE_ON_CLICK,
     /**
+     * @brief Defines event interception.
+     *
+     * This event is triggered when the component is touched. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
+     */
+    NODE_ON_TOUCH_INTERCEPT,
+    /**
      * @brief Defines the image loading success event.
      *
      * This event is triggered when an image is successfully loaded or decoded. \n
@@ -4285,6 +4317,14 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: current scroll state. \n
      */
     NODE_ON_WILL_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_WATER_FLOW,
+    /**
+     * @brief Defines the event triggered when the <b>ARKUI_NODE_WATER_FLOW</b> component reaches the end edge.
+     *
+     * \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
+     */
+    NODE_ON_REACH_END,
 } ArkUI_NodeEventType;
 
 /**
@@ -5062,6 +5102,16 @@ typedef struct {
      * @return Returns the custom data.
      */
     void* (*getUserData)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief Sets the unit for a component.
+     *
+     * @param node Indicates the component for which you want to set the unit.
+     * @param unit Indicates the unit, which is an enumerated value of {@link ArkUI_LengthMetricUnit}.
+     * The default value is <b>ARKUI_LENGTH_METRIC_UNIT_DEFAULT</b>.
+     * @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
+     */
+    int32_t (*setLengthMetricUnit)(ArkUI_NodeHandle node, ArkUI_LengthMetricUnit unit);
 } ArkUI_NativeNodeAPI_1;
 
 /**

@@ -16,6 +16,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
+#include "base/log/dump_log.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -334,5 +335,29 @@ int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
         paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
     }
     return paragLineHeight;
+}
+
+void ToastPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Message: " + toastInfo_.message);
+    DumpLog::GetInstance().AddDesc("Duration: " + std::to_string(toastInfo_.duration));
+    DumpLog::GetInstance().AddDesc("Bottom: " + toastInfo_.bottom);
+    std::string isRightToLeft = toastInfo_.isRightToLeft ? "true" : "false";
+    DumpLog::GetInstance().AddDesc("IsRightToLeft: " + isRightToLeft);
+    std::string showMode = toastInfo_.showMode == ToastShowMode::DEFAULT ? "DEFAULT" : "TOP_MOST";
+    DumpLog::GetInstance().AddDesc("ShowMode: " + showMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+    if (!toastProp->HasToastAlignment()) {
+        DumpLog::GetInstance().AddDesc("Alignment: NONE");
+    } else {
+        DumpLog::GetInstance().AddDesc(
+            "Alignment: " + toastProp->GetToastAlignmentValue().GetAlignmentStr(toastProp->GetLayoutDirection()));
+    }
+    auto offset = toastProp->GetToastOffsetValue(DimensionOffset());
+    DumpLog::GetInstance().AddDesc(
+        "Offset: { dx: " + offset.GetX().ToString() + " dy: " + offset.GetY().ToString() + " }");
 }
 } // namespace OHOS::Ace::NG

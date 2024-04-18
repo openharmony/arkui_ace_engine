@@ -279,25 +279,22 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest004, TestSize.Lev
     columnAccessibilityProperty2->SetAccessibilityText("column2");
     buttonAccessibilityProperty1->SetAccessibilityDescription("Button1");
 
-    columnFrameNode1->AddChild(buttonNode1);
-    columnFrameNode1->AddChild(buttonNode2);
-    columnFrameNode1->AddChild(columnFrameNode2);
-    columnFrameNode2->AddChild(buttonNode3);
-    columnFrameNode2->AddChild(buttonNode4);
+    columnFrameNode1->frameChildren_.emplace(buttonNode1);
+    columnFrameNode1->frameChildren_.emplace(buttonNode2);
+    columnFrameNode1->frameChildren_.emplace(columnFrameNode2);
+    columnFrameNode2->frameChildren_.emplace(buttonNode3);
+    columnFrameNode2->frameChildren_.emplace(buttonNode4);
 
     auto columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
     columnAccessibilityProperty1->SetAccessibilityGroup(true);
     columnAccessibilityProperty1->SetAccessibilityLevel("yes");
 
-    buttonAccessibilityProperty3->SetAccessibilityText("buttonAccessibilityProperty3");
-    buttonAccessibilityProperty3->SetAccessibilityGroup(true);
-    buttonAccessibilityProperty3->SetAccessibilityLevel("yes");
     auto columnAccessibilityText1 = columnAccessibilityProperty1->GetGroupText();
     /**
      * @tc.expected: step1. expect target text combine
      */
     EXPECT_EQ(buttonAccessibilityProperty1->GetAccessibilityDescription(), "Button1");
-    EXPECT_EQ(columnAccessibilityText1, "Button1, Button2");
+    EXPECT_EQ(columnAccessibilityText1, "Button1, Button2, Button3, Button4");
 
     columnAccessibilityProperty1->SetAccessibilityLevel("no-hide-descendants");
     columnAccessibilityText1 = columnAccessibilityProperty1->GetGroupText();
@@ -380,11 +377,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest006, TestSize.Lev
     auto buttonNode2 =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 3, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode2->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityText("test");
-    columnFrameNode1->AddChild(buttonNode2);
-    columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
-    columnAccessibilityProperty1->SetAccessibilityGroup(true);
-    columnAccessibilityProperty1->SetAccessibilityLevel("yes");
-    text = columnAccessibilityProperty1->GetAccessibilityText();
+    text = buttonNode2->GetAccessibilityProperty<AccessibilityProperty>()->GetAccessibilityText();
     EXPECT_EQ(text, "test");
 }
 } // namespace OHOS::Ace::NG

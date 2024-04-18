@@ -23,6 +23,7 @@
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "native_node.h"
 #include "native_type.h"
+#include "node_extened.h"
 #include "style_modifier.h"
 
 #include "base/error/error_code.h"
@@ -104,6 +105,7 @@ ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
     }
 
     impl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
+    impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
     return impl;
 }
 } // namespace
@@ -343,47 +345,33 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     if (!innerEvent) {
         return;
     }
-    if (!g_eventReceiver && !g_compatibleEventReceiver) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event receiver is not register");
+    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
+    if (nativeNodeEventType == -1) {
         return;
     }
-
-    ArkUI_NodeEvent event;
+    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
-    if (g_nodeSet.count(nodePtr) == 0) {
-        return;
-    }
-    if (!nodePtr->extraData) {
-        return;
-    }
     auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
-    ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(-1);
-    switch (innerEvent->kind) {
-        case COMPONENT_ASYNC_EVENT:
-            subKind = static_cast<ArkUIEventSubKind>(innerEvent->componentAsyncEvent.subKind);
-            break;
-        case TEXT_INPUT:
-            subKind = static_cast<ArkUIEventSubKind>(innerEvent->textInputEvent.subKind);
-            break;
-        case TOUCH_EVENT:
-            subKind = ON_TOUCH;
-            break;
-        default:
-            break; /* Empty */
+    if (!extraData) {
+        return;
     }
-    ArkUI_NodeEventType eventType = static_cast<ArkUI_NodeEventType>(ConvertToNodeEventType(subKind));
     auto innerEventExtraParam = extraData->eventMap.find(eventType);
     if (innerEventExtraParam == extraData->eventMap.end()) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "the event of %{public}d is not register", eventType);
         return;
     }
+    ArkUI_NodeEvent event;
     event.node = nodePtr;
     event.eventId = innerEventExtraParam->second->targetId;
     event.userData = innerEventExtraParam->second->userData;
-    if (g_eventReceiver && ConvertEvent(innerEvent, &event)) {
+    if (!g_eventReceiver && !g_compatibleEventReceiver && (!(event.node) ||
+        (event.node && !(event.node->eventListeners)))) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "event receiver is not register");
+        return;
+    }
+    if ((g_eventReceiver || (event.node && event.node->eventListeners))  && ConvertEvent(innerEvent, &event)) {
         event.targetId = innerEvent->nodeId;
         ArkUI_UIInputEvent uiEvent;
-        if (eventType == NODE_TOUCH_EVENT) {
+        if (eventType == NODE_TOUCH_EVENT || eventType == NODE_ON_TOUCH_INTERCEPT) {
             uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
             uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
             uiEvent.inputEvent = &(innerEvent->touchEvent);
@@ -391,7 +379,7 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         } else {
             event.origin = innerEvent;
         }
-        g_eventReceiver(&event);
+        HandleNodeEvent(&event);
     }
     if (g_compatibleEventReceiver) {
         ArkUI_CompatibleNodeEvent event;
@@ -404,10 +392,76 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
     }
 }
 
+int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
+{
+    int32_t invalidType = -1;
+    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
+    if (!nodePtr || g_nodeSet.count(nodePtr) == 0) {
+        return invalidType;
+    }
+    if (!nodePtr->extraData) {
+        return invalidType;
+    }
+    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
+    ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(-1);
+    switch (innerEvent->kind) {
+        case COMPONENT_ASYNC_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->componentAsyncEvent.subKind);
+            break;
+        case TEXT_INPUT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->textInputEvent.subKind);
+            break;
+        case TOUCH_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchEvent.subKind);
+            break;
+        default:
+            break; /* Empty */
+    }
+    ArkUI_NodeEventType eventType = static_cast<ArkUI_NodeEventType>(ConvertToNodeEventType(subKind));
+    auto innerEventExtraParam = extraData->eventMap.find(eventType);
+    if (innerEventExtraParam == extraData->eventMap.end()) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "the event of %{public}d is not register", eventType);
+        return invalidType;
+    }
+    return static_cast<int32_t>(eventType);
+}
+
+void HandleNodeEvent(ArkUI_NodeEvent* event)
+{
+    if (!event) {
+        return;
+    }
+    if (event->node && event->node->eventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(event->node->eventListeners);
+        if (eventListenersSet) {
+            for (const auto& eventListener : *eventListenersSet) {
+                (*eventListener)(event);
+            }
+        }
+    }
+    if (g_eventReceiver) {
+        g_eventReceiver(event);
+    }
+}
+
 int32_t CheckEvent(ArkUI_NodeEvent* event)
 {
     // TODO.
     return 0;
+}
+
+
+int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
+{
+    if (!nodePtr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!InRegion(static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_DEFAULT),
+        static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    nodePtr->lengthMetricUnit = unit;
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
@@ -449,4 +503,36 @@ void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
     impl->getBasicAPI()->markDirty(nodePtr->uiNodeHandle, flag);
 }
 
+int32_t AddNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
+{
+    if (!nodePtr || !eventReceiver) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!nodePtr->eventListeners) {
+        nodePtr->eventListeners = new std::set<void (*)(ArkUI_NodeEvent*)>();
+    }
+    auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(nodePtr->eventListeners);
+    if (!eventListenersSet) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    eventListenersSet->emplace(eventReceiver);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeEvent* event))
+{
+    if (!nodePtr || !eventReceiver || !nodePtr->eventListeners) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeEvent*)>*>(nodePtr->eventListeners);
+    if (!eventListenersSet) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    eventListenersSet->erase(eventReceiver);
+    if (eventListenersSet->empty()) {
+        delete eventListenersSet;
+        nodePtr->eventListeners = nullptr;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
 } // namespace OHOS::Ace::NodeModel

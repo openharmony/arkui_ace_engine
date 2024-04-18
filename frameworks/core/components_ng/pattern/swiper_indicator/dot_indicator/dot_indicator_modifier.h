@@ -306,7 +306,6 @@ private:
     RefPtr<AnimatablePropertyFloat> backgroundWidthDilateRatio_;
     RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
 
-    std::shared_ptr<AnimationUtils::Animation> blackPointsAnimation_;
     RefPtr<Curve> headCurve_;
     float motionVelocity_ = 0;
 

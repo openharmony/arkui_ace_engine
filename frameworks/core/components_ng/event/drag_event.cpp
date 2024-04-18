@@ -214,8 +214,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     gestureHub->SetIsTextDraggable(false);
                     return;
                 }
-                if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
-                    gestureHub->SetIsTextDraggable(true);
+                if (!gestureHub->GetIsTextDraggable()) {
+                    gestureHub->SetPixelMap(nullptr);
+                } else if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
                     if (textDragCallback_) {
                         textDragCallback_(info.GetGlobalLocation());
                     }
@@ -681,7 +682,7 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     if (pipelineContext->HasFloatTitle()) {
         offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
-        offsetY -= static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx());
+        offsetY -= static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx());
     }
     return OffsetF(offsetX, offsetY);
 }
@@ -1418,7 +1419,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {imageNode, offset, width, height};
+    gatherNodeChildInfo = {imageNode, offset, width, height, width / 2.0f, height / 2.0f};
     return imageNode;
 }
 
@@ -1625,7 +1626,7 @@ void DragEventActuator::HandleTouchMoveEvent()
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
-        manager->RemoveGatherNodeWithAnimation();
+        manager->RemoveGatherNode();
         isOnBeforeLiftingAnimation = false;
     }
 }

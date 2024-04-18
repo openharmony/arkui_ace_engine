@@ -52,7 +52,7 @@ HWTEST_F(RefreshVersionElevenTestNg, Drag001, TestSize.Level1)
      * @tc.steps: step2. HandleDragUpdate, the delta less than TRIGGER_LOADING_DISTANCE
      * @tc.expected: scrollOffset_ is 1.f, onStateChange event triggered and refreshStatus is DRAG
      */
-    pattern_->HandleDragUpdate(1.f / pattern_->CalculateFriction());
+    pattern_->HandleDragUpdate(1.f / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, 1.f);
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 
@@ -69,7 +69,7 @@ HWTEST_F(RefreshVersionElevenTestNg, Drag001, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 16.f(Plus previous delta), onStateChange event is not triggered
      */
     refreshStatus = RefreshStatus::INACTIVE; // for verify onStateChange event
-    pattern_->HandleDragUpdate((TRIGGER_LOADING_DISTANCE.ConvertToPx() - 1.f) / pattern_->CalculateFriction());
+    pattern_->HandleDragUpdate((TRIGGER_LOADING_DISTANCE.ConvertToPx() - 1.f) / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_LOADING_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
 
@@ -79,7 +79,7 @@ HWTEST_F(RefreshVersionElevenTestNg, Drag001, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
     pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx()
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 
@@ -153,7 +153,7 @@ HWTEST_F(RefreshVersionElevenTestNg, CustomDrag001, TestSize.Level1)
      * @tc.steps: step2. HandleDragUpdate, the delta less than TRIGGER_LOADING_DISTANCE
      * @tc.expected: scrollOffset_ is 1.f, onStateChange event triggered and refreshStatus is DRAG
      */
-    pattern_->HandleDragUpdate(1.f / pattern_->CalculateFriction());
+    pattern_->HandleDragUpdate(1.f / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, 1.f);
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
 
@@ -162,7 +162,7 @@ HWTEST_F(RefreshVersionElevenTestNg, CustomDrag001, TestSize.Level1)
      * @tc.expected: scrollOffset_ is 16.f(Plus previous delta), onStateChange event is not triggered
      */
     refreshStatus = RefreshStatus::INACTIVE; // for verify onStateChange event
-    pattern_->HandleDragUpdate((TRIGGER_LOADING_DISTANCE.ConvertToPx() - 1.f) / pattern_->CalculateFriction());
+    pattern_->HandleDragUpdate((TRIGGER_LOADING_DISTANCE.ConvertToPx() - 1.f) / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_LOADING_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
 
@@ -172,7 +172,7 @@ HWTEST_F(RefreshVersionElevenTestNg, CustomDrag001, TestSize.Level1)
      *               onStateChange event triggered and refreshStatus is OVER_DRAG
      */
     pattern_->HandleDragUpdate(((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx())
-                               / pattern_->CalculateFriction());
+                               / pattern_->CalculatePullDownRatio());
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
 

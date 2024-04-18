@@ -48,6 +48,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
@@ -1136,9 +1137,18 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
+bool FrameNode::CheckAncestorPageShow()
+{
+    auto pageNode = GetPageNode();
+    if (!pageNode) {
+        return true;
+    }
+    return pageNode->GetPattern<PagePattern>()->IsOnShow();
+}
+
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive()) {
+    if (!IsActive() || !CheckAncestorPageShow()) {
         return;
     }
     if (eventHub_->HasOnSizeChanged() && lastFrameNodeRect_) {

@@ -178,12 +178,12 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Test HandleScroll, the offset is 20.f.
-     * @tc.expected: The scrollOffset_ of refresh is the sum of lastScrollOffset and 20.f * friction.
+     * @tc.expected: The scrollOffset_ of refresh is the sum of lastScrollOffset and 20.f * pullDownRatio.
      */
     auto lastScrollOffset = pattern_->scrollOffset_;
-    auto friction = pattern_->CalculateFriction();
+    auto pullDownRatio = pattern_->CalculatePullDownRatio();
     swiperPattern_->HandleScroll(static_cast<float>(20.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
-    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * friction);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * pullDownRatio);
 
     /**
      * @tc.steps: step5. Test HandleScrollVelocity, offset is 20.f and the scrollOffset_ of refresh is positive.
@@ -197,14 +197,14 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper001, TestSize.Level1)
     /**
      * @tc.steps: step6. Test HandleScroll, the offset is 40.f.
      * @tc.expected: The scrollOffset_ of refresh is 0.f,
-     *               and the currentDelta_ of swiper is lastDelta - (-40.f + lastScrollOffset / friction).
+     *               and the currentDelta_ of swiper is lastDelta - (-40.f + lastScrollOffset / pullDownRatio).
      */
     lastScrollOffset = pattern_->scrollOffset_;
     auto lastDelta = swiperPattern_->currentDelta_;
-    friction = pattern_->CalculateFriction();
+    pullDownRatio = pattern_->CalculatePullDownRatio();
     swiperPattern_->HandleScroll(static_cast<float>(-40.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, 0.f);
-    EXPECT_EQ(swiperPattern_->currentDelta_, lastDelta - (-40.f + lastScrollOffset / friction));
+    EXPECT_EQ(swiperPattern_->currentDelta_, lastDelta - (-40.f + lastScrollOffset / pullDownRatio));
 }
 
 /**
@@ -261,12 +261,12 @@ HWTEST_F(RefreshTestNg, RefreshNestedSwiper002, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Test HandleScroll, the offset is 40.f.
-     * @tc.expected: The scrollOffset_ of refresh is the sum of lastScrollOffset and 20.f * friction.
+     * @tc.expected: The scrollOffset_ of refresh is the sum of lastScrollOffset and 20.f * pullDownRatio.
      */
     auto lastScrollOffset = pattern_->scrollOffset_;
-    auto friction = pattern_->CalculateFriction();
+    auto pullDownRatio = pattern_->CalculatePullDownRatio();
     swiperPattern_->HandleScroll(static_cast<float>(40.f), SCROLL_FROM_UPDATE, NestedState::GESTURE, 0.f);
-    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * friction);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 20.f * pullDownRatio);
 }
 
 /**
@@ -290,10 +290,10 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll001, TestSize.Level1)
     EXPECT_EQ(res.remain, 0.f);
 
     auto lastScrollOffset = pattern_->scrollOffset_;
-    auto friction = pattern_->CalculateFriction();
+    auto pullDownRatio = pattern_->CalculatePullDownRatio();
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 0.f);
-    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * friction);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * pullDownRatio);
 
     pattern_->scrollOffset_ = 0.f;
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f);
@@ -326,10 +326,10 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll002, TestSize.Level1)
     EXPECT_EQ(res.remain, 0.f);
 
     auto lastScrollOffset = pattern_->scrollOffset_;
-    auto friction = pattern_->CalculateFriction();
+    auto pullDownRatio = pattern_->CalculatePullDownRatio();
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 0.f);
-    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * friction);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * pullDownRatio);
 
     pattern_->scrollOffset_ = 0.f;
     EXPECT_CALL(*mockScroll, HandleScroll(-5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL, 0.f))
@@ -365,7 +365,7 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll003, TestSize.Level1)
     EXPECT_EQ(res.remain, 0.f);
 
     auto lastScrollOffset = pattern_->scrollOffset_;
-    auto friction = pattern_->CalculateFriction();
+    auto pullDownRatio = pattern_->CalculatePullDownRatio();
     EXPECT_CALL(*mockScroll, HandleScroll(5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 0.f, .reachEdge = true }));
@@ -374,13 +374,56 @@ HWTEST_F(RefreshTestNg, RefreshPatternHandleScroll003, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollOffset_, 0.f);
 
     lastScrollOffset = pattern_->scrollOffset_;
-    friction = pattern_->CalculateFriction();
+    pullDownRatio = pattern_->CalculatePullDownRatio();
     EXPECT_CALL(*mockScroll, HandleScroll(5.f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f))
         .Times(1)
         .WillOnce(Return(ScrollResult { .remain = 5.f, .reachEdge = true }));
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL, 0.f);
     EXPECT_EQ(res.remain, 0.f);
-    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * friction);
+    EXPECT_EQ(pattern_->scrollOffset_, lastScrollOffset + 5.f * pullDownRatio);
+}
+
+/**
+ * @tc.name: PullDownRatio001
+ * @tc.desc: Test PullDownRatio
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, PullDownRatio001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Refresh
+     * @tc.expected: layoutProperty_ is not nullptr
+     */
+    Create([](RefreshModelNG model) {});
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set PullDownRatio to 1.0f
+     * @tc.expected: CalculatePullDownRatio return to 1.0f
+     */
+    layoutProperty_->UpdatePullDownRatio(1.0f);
+    EXPECT_EQ(pattern_->CalculatePullDownRatio(), 1.0f);
+
+    /**
+     * @tc.steps: step3. Set PullDownRatio to 0.5f
+     * @tc.expected: CalculatePullDownRatio return to 0.5f
+     */
+    layoutProperty_->UpdatePullDownRatio(0.5f);
+    EXPECT_EQ(pattern_->CalculatePullDownRatio(), 0.5f);
+
+    /**
+     * @tc.steps: step4. Set PullDownRatio to 0.f
+     * @tc.expected: CalculatePullDownRatio return to 0.f
+     */
+    layoutProperty_->UpdatePullDownRatio(0.f);
+    EXPECT_EQ(pattern_->CalculatePullDownRatio(), 0.f);
+
+    /**
+     * @tc.steps: step5. Reset PullDownRatio
+     * @tc.expected: CalculatePullDownRatio return to 1.f
+     */
+    layoutProperty_->ResetPullDownRatio();
+    EXPECT_EQ(pattern_->CalculatePullDownRatio(), 1.0f);
 }
 
 /**

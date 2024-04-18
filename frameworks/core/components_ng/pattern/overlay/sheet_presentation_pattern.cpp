@@ -1034,9 +1034,7 @@ SheetType SheetPresentationPattern::GetSheetType()
 
     auto windowManager = pipelineContext->GetWindowManager();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        windowGlobalRect.Width() < windowGlobalRect.Height() &&
-        windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
+    if (windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
         return SheetType::SHEET_BOTTOM;
     }
 
@@ -1300,7 +1298,6 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         if (isScrolling_) {
             ScrollTo(.0f);
         }
-        TranslateTo(height_);
     }
     if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED ||
         type == WindowSizeChangeReason::DRAG) {
@@ -1660,5 +1657,30 @@ void SheetPresentationPattern::FireOnDetentsDidChange(float height)
     }
     OnDetentsDidChange(height);
     preDetentsHeight_ = height;
+}
+
+void SheetPresentationPattern::FireOnWidthDidChange(RefPtr<FrameNode> sheetNode)
+{
+    auto sheetGeo = sheetNode->GetGeometryNode();
+    CHECK_NULL_VOID(sheetGeo);
+    auto width = sheetGeo->GetFrameSize().Width();
+    if (NearEqual(preWidth_, width)) {
+        return;
+    }
+    onWidthDidChange(width);
+    preWidth_ = width;
+}
+
+void SheetPresentationPattern::FireOnTypeDidChange()
+{
+    auto sheetType = sheetType_;
+    if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW) {
+        sheetType = SheetType::SHEET_BOTTOM;
+    }
+    if (preType_ == sheetType) {
+        return;
+    }
+    onTypeDidChange(sheetType);
+    preType_ = sheetType;
 }
 } // namespace OHOS::Ace::NG

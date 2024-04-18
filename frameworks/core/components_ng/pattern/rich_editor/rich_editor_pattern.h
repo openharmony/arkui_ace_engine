@@ -302,10 +302,12 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
-    bool JudgeDraggable(GestureEvent& info);
+    void HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent);
+    bool JudgeContentDraggable();
     void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
+    RefPtr<GestureEventHub> GetGestureEventHub();
 
     bool IsUsingMouse() const
     {
