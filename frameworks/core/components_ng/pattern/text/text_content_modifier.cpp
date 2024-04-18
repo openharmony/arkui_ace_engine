@@ -833,6 +833,9 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
     }
 
     marqueeSet_ = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::INVISIBLE);
+    }
     if (textRacing_) {
         PauseTextRace();
     }
@@ -842,6 +845,9 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
 void TextContentModifier::StopTextRace()
 {
     marqueeSet_ = false;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::VISIBLE);
+    }
     PauseTextRace();
 }
 
@@ -856,8 +862,7 @@ void TextContentModifier::ResumeTextRace(bool bounce)
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }
-
-    UpdateImageNodeVisible(VisibleType::VISIBLE);
+    
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
     option.SetDuration(marqueeDuration_);
@@ -919,7 +924,6 @@ void TextContentModifier::PauseTextRace()
     if (!textRacing_) {
         return;
     }
-    UpdateImageNodeVisible(VisibleType::INVISIBLE);
     if (raceAnimation_) {
         AnimationUtils::StopAnimation(raceAnimation_);
     }
