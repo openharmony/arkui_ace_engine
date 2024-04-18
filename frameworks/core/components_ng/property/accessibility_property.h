@@ -190,6 +190,8 @@ public:
         return true;
     }
 
+    virtual float GetScrollOffSet() const;
+
     void AddSupportAction(AceAction action)
     {
         supportActions_ |= (1UL << static_cast<uint32_t>(action));
@@ -393,11 +395,6 @@ public:
     std::string GetTextType() const
     {
         return textTypeHint_.value_or("");
-    }
-
-    virtual float GetScrollOffSet()
-    {
-        return 0.0f;
     }
 
     class Level {
