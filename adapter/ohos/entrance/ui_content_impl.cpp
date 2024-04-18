@@ -3060,4 +3060,21 @@ void UIContentImpl::AddWatchSystemParameter()
     SystemProperties::AddWatchSystemParameter(
         ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
 }
+
+std::vector<Ace::RectF> UIContentImpl::GetOverlayNodePositions() const
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_RETURN(container, {});
+    return container->GetOverlayNodePositions();
+}
+
+void UIContentImpl::RegisterOverlayNodePositionsUpdateCallback(
+    const std::function<void(std::vector<Ace::RectF>)>& callback) const
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->RegisterOverlayNodePositionsUpdateCallback(std::move(callback));
+}
 } // namespace OHOS::Ace

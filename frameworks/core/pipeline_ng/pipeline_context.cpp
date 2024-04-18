@@ -3562,4 +3562,27 @@ void PipelineContext::SetUIExtensionImeShow(bool imeShow)
 {
     textFieldManager_->SetUIExtensionImeShow(imeShow);
 }
+
+void PipelineContext::SetOverlayNodePositions(std::vector<Ace::RectF> rects)
+{
+    overlayNodePositions_ = rects;
+}
+
+std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions()
+{
+    return overlayNodePositions_;
+}
+
+void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
+    const std::function<void(std::vector<Ace::RectF>)>&& callback)
+{
+    overlayNodePositionUpdateCallback_ = std::move(callback);
+}
+
+void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects)
+{
+    if (overlayNodePositionUpdateCallback_) {
+        overlayNodePositionUpdateCallback_(rects);
+    }
+}
 } // namespace OHOS::Ace::NG
