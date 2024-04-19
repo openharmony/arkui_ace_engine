@@ -381,7 +381,9 @@ void NavigationPattern::CheckTopNavPathChange(
             auto navDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
             auto navDestinationFocusView = AceType::DynamicCast<FocusView>(navDestinationPattern);
             CHECK_NULL_VOID(navDestinationFocusView);
-            navDestinationFocusView->SetIsViewRootScopeFocused(false);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                navDestinationFocusView->SetIsViewRootScopeFocused(false);
+            }
             navDestinationFocusView->FocusViewShow();
         } else {
             // back to navBar case
@@ -405,7 +407,9 @@ void NavigationPattern::CheckTopNavPathChange(
             navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
             CHECK_NULL_VOID(navBarFocusView);
-            navBarFocusView->SetIsViewRootScopeFocused(false);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                navBarFocusView->SetIsViewRootScopeFocused(false);
+            }
             navBarFocusView->FocusViewShow();
         }
     }
@@ -895,7 +899,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     CHECK_NULL_VOID(navigationFocusHub);
                     auto navDestinationFocusView = navDestinationNode->GetPattern<FocusView>();
                     if (navigationFocusHub->IsCurrentFocus() && navDestinationFocusView) {
-                        navDestinationFocusView->SetIsViewRootScopeFocused(false);
+                        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                            navDestinationFocusView->SetIsViewRootScopeFocused(false);
+                        }
                         navDestinationFocusView->FocusViewShow();
                     }
                 }
