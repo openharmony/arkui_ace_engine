@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/models/offscreen_context_model_impl.h"
 #include "core/components_ng/pattern/canvas_context/offscreen_context_model_ng.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
@@ -212,9 +213,36 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
 
 void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& info)
 {
-    auto retObj = JSRef<JSObject>::New();
-    retObj->SetProperty("__id", id);
-    info.SetReturnValue(retObj);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_VOID(runtime);
+    NativeEngine* nativeEngine = runtime->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value constructor = nullptr;
+    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
+    if (status != napi_ok) {
+        return;
+    }
+    napi_value renderImage = nullptr;
+    napi_create_object(env, &renderImage);
+    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
+    if (status != napi_ok) {
+        return;
+    }
+    void* nativeObj = nullptr;
+    status = napi_unwrap(env, renderImage, &nativeObj);
+    if (status != napi_ok) {
+        return;
+    }
+    auto jsImage = (JSRenderImage*)nativeObj;
+    jsImage->SetContextId(id);
+
+    info.SetReturnValue(JsConverter::ConvertNapiValueToJsVal(renderImage));
 }
 
 } // namespace OHOS::Ace::Framework

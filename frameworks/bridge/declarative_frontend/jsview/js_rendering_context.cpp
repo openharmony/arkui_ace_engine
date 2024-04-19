@@ -238,11 +238,14 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
         panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
         JSValueWrapper valueWrapper = value;
         napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    
-        uint32_t id = 0;
-        napi_value widthId = nullptr;
-        napi_get_named_property(env, napiValue, "__id", &widthId);
-        napi_get_value_uint32(env, widthId, &id);
+        void* nativeObj = nullptr;
+        auto status = napi_unwrap(env, napiValue, &nativeObj);
+        if (status != napi_ok) {
+            return;
+        }
+        auto jsImage = (JSRenderImage*)nativeObj;
+        uint32_t id = jsImage->GetContextId();
+        
         RefPtr<AceType> offscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
         RenderingContextModel::GetInstance()->SetTransferFromImageBitmap(
             canvasPattern_, offscreenPattern);
