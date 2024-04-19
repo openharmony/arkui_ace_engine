@@ -22,16 +22,16 @@ class RosenRenderContext;
 void RosenRenderParticle::UpdateDisturbance(
     const RefPtr<FrameNode>& frameNode, const std::vector<ParticleDisturbance>& disturbanceArray)
 {
-    // auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
-    // auto rsNode = renderContext->GetRSNode();
-    // std::shared_ptr<Rosen::ParticleNoiseFields> fields = std::make_shared<Rosen::ParticleNoiseFields>();
-    // for (auto field : disturbanceArray) {
-    //     Rosen::Vector2f size = { field.size[0], field.size[1] };
-    //     Rosen::Vector2f position = { field.position[0], field.position[1] };
-    //     Rosen::ParticleNoiseField rsField = Rosen::ParticleNoiseField(field.strength, field.shape, size, position,
-    //         field.feather, field.noiseScale, field.noiseFrequency, field.noiseAmplitude);
-    //     fields->AddFiled(rsField);
-    // }
-    // rsNode->SetParticleNoiseField();
+    auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    auto rsNode = renderContext->GetRSNode();
+    std::shared_ptr<Rosen::ParticleNoiseFields> fields = std::make_shared<Rosen::ParticleNoiseFields>();
+     for (auto field : disturbanceArray) {
+         Rosen::Vector2f size = { field.size[0], field.size[1] };
+         Rosen::Vector2f position = { field.position[0], field.position[1] };
+         Rosen::ParticleNoiseField rsField = Rosen::ParticleNoiseField(field.strength, field.shape, size, position,
+             field.feather, field.noiseScale, field.noiseFrequency, field.noiseAmplitude);
+         fields->AddFiled(rsField);
+     }
+     rsNode->SetParticleNoiseField();
 }
 } // namespace OHOS::Ace::NG
