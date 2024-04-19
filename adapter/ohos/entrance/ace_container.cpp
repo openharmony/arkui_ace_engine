@@ -63,6 +63,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
+#include "core/common/container_consts.h"
 #include "core/common/container_scope.h"
 #include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
@@ -114,9 +115,23 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
     const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
 {
+    auto containerId = Container::CurrentId();
+    std::string bundleName = "";
+    std::string moduleName = "";
+    if (context) {
+        bundleName = context->GetBundleName();
+        moduleName = context->GetHapModuleInfo()->name;
+    } else if (abilityInfo) {
+        bundleName = abilityInfo->bundleName;
+        moduleName = abilityInfo->moduleName;
+    }
+
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
+    } else if (containerId >= MIN_SUBCONTAINER_ID &&
+               ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName)) {
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
     } else {
         resourceAdapter = ResourceAdapter::CreateV2();
         resourceAdapter->Init(resourceInfo);
@@ -136,18 +151,8 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     auto defaultBundleName = "";
     auto defaultModuleName = "";
     ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter, true);
-    if (context) {
-        auto bundleName = context->GetBundleName();
-        auto moduleName = context->GetHapModuleInfo()->name;
-        if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
-        }
-    } else if (abilityInfo) {
-        auto bundleName = abilityInfo->bundleName;
-        auto moduleName = abilityInfo->moduleName;
-        if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
-        }
+    if (!bundleName.empty() && !moduleName.empty()) {
+        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
     }
 }
 
