@@ -88,7 +88,6 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridLayoutInfo_.offsetEnd_ = moveToEndLineIndex_ > 0
                                      ? (gridLayoutInfo_.endIndex_ + 1 >= gridLayoutInfo_.childrenCount_)
                                      : gridLayoutInfo_.offsetEnd_;
-    gridLayoutInfo_.offsetUpdated_ = false;
 
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
