@@ -370,12 +370,12 @@ public:
         textIndent_ = textIndent;
     }
 
-    const std::unordered_map<std::string, int32_t>& GetFontFeatures() const
+    const std::list<std::pair<std::string, int32_t>>& GetFontFeatures() const
     {
         return fontFeatures_;
     }
 
-    void SetFontFeatures(const std::unordered_map<std::string, int32_t>& fontFeatures)
+    void SetFontFeatures(const std::list<std::pair<std::string, int32_t>>& fontFeatures)
     {
         fontFeatures_ = fontFeatures;
     }
@@ -680,7 +680,7 @@ public:
 
 private:
     std::vector<std::string> fontFamilies_;
-    std::unordered_map<std::string, int32_t> fontFeatures_;
+    std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;

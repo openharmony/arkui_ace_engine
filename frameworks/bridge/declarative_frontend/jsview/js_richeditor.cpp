@@ -232,7 +232,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
 {
     JSRef<JSObject> symbolSpanStyleObj = JSRef<JSObject>::New();
     symbolSpanStyleObj->SetProperty<std::string>("fontColor", symbolSpanStyle.symbolColor);
-    symbolSpanStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", symbolSpanStyle.fontFeature);
+    symbolSpanStyleObj->SetProperty<NG::FONT_FEATURES_LIST>("fontFeature", symbolSpanStyle.fontFeature);
     symbolSpanStyleObj->SetProperty<double>("fontSize", symbolSpanStyle.fontSize);
     symbolSpanStyleObj->SetProperty<double>("lineHeight", symbolSpanStyle.lineHeight);
     symbolSpanStyleObj->SetProperty<double>("letterSpacing", symbolSpanStyle.letterSpacing);
@@ -1200,7 +1200,7 @@ void JSRichEditorController::ParseJsFontFeatureTextStyle(const JSRef<JSObject>& 
     JSRef<JSVal> fontFeature = styleObject->GetProperty("fontFeature");
     std::string feature;
     if (!fontFeature->IsNull() && JSContainerBase::ParseJsString(fontFeature, feature)) {
-        NG::FONT_FEATURES_MAP fontFeatures = ParseFontFeatureSettings(feature);
+        NG::FONT_FEATURES_LIST fontFeatures = ParseFontFeatureSettings(feature);
         updateSpanStyle.updateFontFeature = fontFeatures;
         style.SetFontFeatures(fontFeatures);
     } else {
