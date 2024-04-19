@@ -3685,7 +3685,7 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
     struct ArkUISizeType maxHeightValue = {0.0, 0};
 
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-    if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth, false)) {
         minWidthValue.value = minWidth.Value();
         minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
         GetArkUINodeModifiers()->getCommonModifier()->setMinWidth(nativeNode, &minWidthValue);
@@ -3693,7 +3693,7 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getCommonModifier()->resetMinWidth(nativeNode);
     }
 
-    if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, maxWidth)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, maxWidth, false)) {
         maxWidthValue.value = maxWidth.Value();
         maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
         GetArkUINodeModifiers()->getCommonModifier()->setMaxWidth(nativeNode, &maxWidthValue);
@@ -3701,7 +3701,7 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxWidth(nativeNode);
     }
 
-    if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, minHeight)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, minHeight, false)) {
         minHeightValue.value = minHeight.Value();
         minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
         GetArkUINodeModifiers()->getCommonModifier()->setMinHeight(nativeNode, &minHeightValue);
@@ -3709,7 +3709,7 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getCommonModifier()->resetMinHeight(nativeNode);
     }
 
-    if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, maxHeight)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, maxHeight, false)) {
         maxHeightValue.value = maxHeight.Value();
         maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
         GetArkUINodeModifiers()->getCommonModifier()->setMaxHeight(nativeNode, &maxHeightValue);
