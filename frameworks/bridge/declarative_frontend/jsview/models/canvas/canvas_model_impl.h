@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,6 @@ namespace OHOS::Ace::Framework {
 class CanvasModelImpl : public OHOS::Ace::CanvasModel {
 public:
     RefPtr<AceType> Create() override;
-    RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) override;
-    void PushCanvasPattern(RefPtr<AceType>& canvasPattern) override;
     void SetOnReady(std::function<void(uint32_t)>&& onReady) override;
 };
 } // namespace OHOS::Ace::Framework
