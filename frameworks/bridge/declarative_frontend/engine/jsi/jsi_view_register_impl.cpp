@@ -787,6 +787,22 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     (*func).second(globalObj);
 }
 
+void JsUINodeRegisterCleanUp(BindingTarget globalObj)
+{
+    // globalObj is panda::Local<panda::ObjectRef>
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+
+    const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
+    if (cleanUpIdleTask->IsFunction()) {
+        LOGI("CleanUpIdleTask is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
+    }
+}
+
 void JsRegisterModules(BindingTarget globalObj, std::string modules)
 {
     std::stringstream input(modules);

@@ -7,7 +7,7 @@ code
 
 // Add "error" and/or "warn" if needed
 func
- = f:("log" / "info" / "debug" ) { return f; }
+ = f:("log" / "info" / "debug" / "propertyAccess" ) { return f; }
 
 console
  = head:"stateMgmtConsole" dot:(_ "." _) func:func _ { return head + '.' + func }

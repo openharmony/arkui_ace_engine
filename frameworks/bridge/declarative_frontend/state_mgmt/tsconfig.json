@@ -53,6 +53,7 @@
     "src/lib/partial_update/pu_synced_property_one_way.ts",
     "src/lib/partial_update/pu_synced_property_two_way.ts",
     "src/lib/partial_update/pu_synced_property_object_nested.ts",
+    "src/lib/partial_update/pu_uinode_registry_proxy.ts",
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
