@@ -15,6 +15,7 @@
 
 #include "accessibility_property.h"
 
+#include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -100,6 +101,11 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         }
         child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text);
     }
+}
+
+float AccessibilityProperty::GetScrollOffSet() const
+{
+    return DEFAULT_ACCESSIBILITY_SCROLL_OFFSET;
 }
 
 std::string AccessibilityProperty::GetAccessibilityText() const

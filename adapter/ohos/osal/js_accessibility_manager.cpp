@@ -1120,6 +1120,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
     nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
+    nodeInfo.SetOffset(accessibilityProperty->GetScrollOffSet());
     nodeInfo.SetChecked(accessibilityProperty->IsChecked());
     nodeInfo.SetSelected(accessibilityProperty->IsSelected());
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
@@ -1847,6 +1848,7 @@ static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo
     DumpLog::GetInstance().AddDesc("hint text: ", nodeInfo.GetHint());
     DumpLog::GetInstance().AddDesc("error text: ", nodeInfo.GetError());
     DumpLog::GetInstance().AddDesc("max text length: ", nodeInfo.GetTextLengthLimit());
+    DumpLog::GetInstance().AddDesc("scroll offset: ", nodeInfo.GetOffset());
     DumpLog::GetInstance().AddDesc("text selection start: ", nodeInfo.GetSelectedBegin());
     DumpLog::GetInstance().AddDesc("text selection end: ", nodeInfo.GetSelectedEnd());
     DumpLog::GetInstance().AddDesc("is multi line: ", BoolToString(nodeInfo.IsPluraLineSupported()));
