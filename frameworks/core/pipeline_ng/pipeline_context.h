@@ -689,14 +689,14 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
-    void SetIsWebSurfaceReady(bool isWebSurfaceReady)
+    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
     {
-        isWebSurfaceReady_ = isWebSurfaceReady;
+        isFreezeFlushMessage_ = isFreezeFlushMessage;
     }
 
-    bool GetIsWebSurfaceReady() const
+    bool IsFreezeFlushMessage() const
     {
-        return isWebSurfaceReady_;
+        return isFreezeFlushMessage_;
     }
 
 protected:
@@ -880,7 +880,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
-    bool isWebSurfaceReady_ = true;
+    bool isFreezeFlushMessage_ = false;
     
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
