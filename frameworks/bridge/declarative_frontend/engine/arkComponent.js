@@ -1438,6 +1438,23 @@ class UseEffectModifier extends ModifierWithKey {
   }
 }
 UseEffectModifier.identity = Symbol('useEffect');
+class ForegroundEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetForegroundEffect(node);
+    }
+    else {
+      getUINativeModule().common.setForegroundEffect(node, this.value.radius);
+    }
+  }
+  checkObjectDiff() {
+    return !(this.value.radius === this.stageValue.radius);
+  }
+}
+ForegroundEffectModifier.identity = Symbol('foregroundEffect');
 class ForegroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3083,6 +3100,10 @@ class ArkComponent {
   }
   borderImage(value) {
     modifierWithKey(this._modifiersWithKeys, BorderImageModifier.identity, BorderImageModifier, value);
+    return this;
+  }
+  foregroundEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, value);
     return this;
   }
   foregroundColor(value) {
