@@ -621,11 +621,9 @@ void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode)
 
 void RichEditorPattern::DeleteSpans(const RangeOptions& options)
 {
-    int32_t start = 0;
-    int32_t end = 0;
     auto length = GetTextContentLength();
-    start = (!options.start.has_value()) ? 0 : options.start.value();
-    end = (!options.end.has_value()) ? length : options.end.value();
+    int32_t start = (!options.start.has_value()) ? 0 : options.start.value();
+    int32_t end = (!options.end.has_value()) ? length : options.end.value();
     if (start > end) {
         std::swap(start, end);
     }
@@ -635,6 +633,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     if (start > length || end < 0 || start == end) {
         return;
     }
+    AdjustSelector(start, end);
     OperationRecord record;
     record.beforeCaretPosition = start;
     std::wstringstream wss;
@@ -981,6 +980,7 @@ int32_t RichEditorPattern::GetCaretPosition()
 bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
 {
     bool success = false;
+    AdjustSelector(caretPosition, false);
     success = SetCaretPosition(caretPosition);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caretPosition=%{public}d, success=%{public}d", caretPosition, success);
     auto host = GetHost();
@@ -2228,12 +2228,23 @@ void RichEditorPattern::AdjustSelector(int32_t& index, bool isFirst)
     CHECK_NULL_VOID((it != spans_.end()));
     auto spanItem = *it;
     CHECK_NULL_VOID(spanItem);
+    auto spanEnd = spanItem->position;
+    auto spanStart = spanEnd - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     if (spanItem->unicode != 0) {
-        auto spanEnd = spanItem->position;
-        auto spanStart = spanEnd - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
         if (index > spanStart && index < spanEnd) {
             index = isFirst ? index - 1 : index + 1;
         }
+        return;
+    }
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    bool isIndexInEmoji = TextEmojiProcessor::IsIndexInEmoji(index - spanStart, spanItem->content,
+        emojiStartIndex, emojiEndIndex);
+    if (isIndexInEmoji) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AdjustSelector index=%{public}d isFirst=%{public}d"
+            "startIndex=%{public}d endIndex=%{public}d",
+            index, isFirst, emojiStartIndex, emojiEndIndex);
+        index = isFirst ? emojiStartIndex : emojiEndIndex;
     }
 }
 

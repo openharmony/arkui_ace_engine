@@ -43,6 +43,7 @@ public:
     static bool IsEmojiModifier(uint32_t codePoint);
     static bool IsTagSpec(uint32_t codePoint);
     static bool IsKeycapBase(uint32_t codePoint);
+    static bool IsIndexInEmoji(int32_t index, std::string content, int32_t& startIndex, int32_t& endIndex);
 
 private:
     static void OnBeginState(uint32_t codePoint, int& state, int& deleteCount, bool isBackward);
@@ -58,6 +59,10 @@ private:
     static bool BackwardDelete(std::u32string& u32Content);
     static bool ForwardDelete(std::u32string& u32Content);
     static bool HandleDeleteAction(std::u32string& u32Content, int32_t deleteCount, bool isBackward);
+    static int32_t GetEmojiLengthBackward(std::u32string& u32Content, int32_t& startIndex, std::u16string u16Content);
+    static int32_t GetEmojiLengthForward(std::u32string& u32Content, int32_t& startIndex, std::u16string u16Content);
+    static int32_t GetEmojiLengthAtEnd(std::u32string u32Content, bool isCountNonEmoji);
+    static int32_t GetEmojiLengthAtFront(std::u32string u32Content, bool isCountNonEmoji);
 };
 
 } // namespace OHOS::Ace
