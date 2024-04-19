@@ -36,7 +36,7 @@ using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
 using ActionScrollBackwardImpl = ActionNoParam;
-using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end, SelectionDirection dir)>;
+using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end, bool isForward)>;
 using ActionCopyImpl = ActionNoParam;
 using ActionCutImpl = ActionNoParam;
 using ActionPasteImpl = ActionNoParam;
@@ -230,10 +230,10 @@ public:
         actionSetSelectionImpl_ = actionSetSelection;
     }
 
-    bool ActActionSetSelection(int32_t start, int32_t end, SelectionDirection dir = NG::DIR_DOWN)
+    bool ActActionSetSelection(int32_t start, int32_t end, bool isForward = false)
     {
         if (actionSetSelectionImpl_) {
-            actionSetSelectionImpl_(start, end, dir);
+            actionSetSelectionImpl_(start, end, isForward);
             return true;
         }
         return false;
