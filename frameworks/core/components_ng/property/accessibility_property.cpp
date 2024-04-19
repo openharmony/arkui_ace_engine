@@ -42,8 +42,7 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
         AceAction::ACTION_SELECT,
         AceAction::ACTION_SET_SELECTION,
         AceAction::ACTION_CLEAR_SELECTION,
-        AceAction::ACTION_SET_CURSOR_INDEX,
-        AceAction::ACTION_GET_CURSOR_INDEX,
+        AceAction::ACTION_SET_CURSOR_POSITION,
     };
 
     std::unordered_set<AceAction> supportActions;
