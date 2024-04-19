@@ -402,7 +402,7 @@ public:
         inline static const std::string AUTO = "auto";
         inline static const std::string YES = "yes";
         inline static const std::string NO = "no";
-        inline static const std::string NO_HIDE_DESCENDANTS = "no-hide-descendants"
+        inline static const std::string NO_HIDE_DESCENDANTS = "no-hide-descendants";
     };
 
     virtual std::string GetAccessibilityLevel() const
