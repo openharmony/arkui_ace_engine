@@ -182,7 +182,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest002, TestSize.Lev
     EXPECT_TRUE(props.ActActionScrollForward());
     props.SetActionSelect([]() {});
     EXPECT_TRUE(props.ActActionSelect());
-    props.SetActionSetSelection([](int32_t start, int32_t end, SelectionDirection dir) {});
+    props.SetActionSetSelection([](int32_t start, int32_t end, bool isforward) {});
     EXPECT_TRUE(props.ActActionSetSelection(0, 1, NG::DIR_NULL));
     props.SetActionSetText([](std::string text) {});
     EXPECT_TRUE(props.ActActionSetText("abc"));
@@ -399,7 +399,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest007, TestSize.Lev
      * @tc.expected: act every action return false
      */
     AccessibilityProperty props;
-    props.SetActionSetSelection([](int32_t start, int32_t end, SelectionDirection dir) {});
+    props.SetActionSetSelection([](int32_t start, int32_t end, bool isforward) {});
     EXPECT_TRUE(props.ActActionSetSelection(0, 1, NG::DIR_NULL));
     props.SetActionSetIndex([](int32_t start) {});
     EXPECT_TRUE(props.ActActionSetIndex(1));
