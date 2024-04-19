@@ -69,7 +69,7 @@ void Camera::Create(const std::function<void(int64_t)>& onCreate)
         if (camera) {
             camera->CreateCamera(onCreate);
         }
-    });
+    }, "ArkUICameraCreate");
 }
 
 void Camera::CreateCamera(const std::function<void(int64_t)>& onCreate)
@@ -154,7 +154,7 @@ void Camera::AddTakePhotoListener(TakePhotoListener&& listener)
         if (camera) {
             camera->OnAddTakePhotoListener(std::move(listener));
         }
-    });
+    }, "ArkUICameraAddTakePhotoListener");
 }
 
 void Camera::OnAddTakePhotoListener(TakePhotoListener&& listener)
@@ -177,7 +177,7 @@ void Camera::AddErrorListener(ErrorListener&& listener)
         if (camera) {
             camera->OnAddErrorListener(std::move(listener));
         }
-    });
+    }, "ArkUICameraAddErrorListener");
 }
 
 void Camera::OnAddErrorListener(ErrorListener&& listener)
