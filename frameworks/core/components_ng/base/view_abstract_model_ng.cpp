@@ -301,7 +301,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                                 builder, targetNode, menuPosition, previewBuildFunc, menuParam);
                         }
                     },
-                    TaskExecutor::TaskType::PLATFORM);
+                    TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
             };
             auto inputHub = targetNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(inputHub);
@@ -342,7 +342,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         NG::ViewAbstractModelNG::CreateCustomMenu(
                             builder, targetNode, menuPosition, previewBuildFunc, menuParam);
                     },
-                    TaskExecutor::TaskType::PLATFORM);
+                    TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
             ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
