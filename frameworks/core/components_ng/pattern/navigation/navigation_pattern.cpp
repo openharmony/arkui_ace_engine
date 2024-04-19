@@ -1724,7 +1724,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
     if (topDestination) {
-        NotifyDestinationLifecycle(topDestination, NavDestinationLifecycle::ON_WILL_SHOW, true);
+        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }
     if (!isAnimated) {
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage);
