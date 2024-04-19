@@ -64,6 +64,7 @@ public:
         ResetForegroundColor();
         ResetSymbolSourceInfo();
         ResetAdaptFontSizeStep();
+        ResetTextMarqueeOptions();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -155,6 +156,8 @@ public:
     }
     std::string GetCopyOptionString() const;
     std::string GetFont() const;
+    std::string GetTextMarqueeOptionsString() const;
+    void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -166,6 +169,7 @@ protected:
         value->propContent_ = CloneContent();
         value->propForegroundColor_ = CloneForegroundColor();
         value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
+        value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
     }
 
 private:
