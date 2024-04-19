@@ -6547,9 +6547,14 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         info.SetOffsetInSpan(0);
         return;
     }
-    info.SetSpanIndex(std::distance(spans_.begin(), it));
-    int32_t spanStart = (*it)->position - StringUtils::ToWstring((*it)->content).length();
-    info.SetOffsetInSpan(textIndex - spanStart);
+    if ((*it)->content.back() == '\n' && (*it)->position == textIndex) { // next line/span begin
+        info.SetSpanIndex(std::distance(spans_.begin(), it) + 1);
+        info.SetOffsetInSpan(0);
+    } else {
+        info.SetSpanIndex(std::distance(spans_.begin(), it));
+        int32_t spanStart = (*it)->position - StringUtils::ToWstring((*it)->content).length();
+        info.SetOffsetInSpan(textIndex - spanStart);
+    }
 }
 
 void RichEditorPattern::GetDeletedSpan(
