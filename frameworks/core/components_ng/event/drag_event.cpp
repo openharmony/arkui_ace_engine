@@ -532,7 +532,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                             CHECK_NULL_VOID(gestureHub);
                             gestureHub->SetPixelMap(customPixelMap);
                             gestureHub->SetDragPreviewPixelMap(customPixelMap);
-                            }, TaskExecutor::TaskType::UI);
+                            }, TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap");
                     }
                 };
 
@@ -1081,7 +1081,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 CHECK_NULL_VOID(callback);
                 callback(onPreDragStatus);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
     } else {
         onPreDragFunc(onPreDragStatus);
     }

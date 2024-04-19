@@ -196,7 +196,7 @@ void SequencedRecognizer::DeadlineTimer()
 
     deadlineTimer_.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(deadlineTimer_, SEQUENCE_GESTURE_TIMEOUT);
+    taskExecutor.PostDelayedTask(deadlineTimer_, SEQUENCE_GESTURE_TIMEOUT, "ArkUIGestureSequencedDeadlineTimer");
 }
 
 void SequencedRecognizer::HandleOverdueDeadline()
