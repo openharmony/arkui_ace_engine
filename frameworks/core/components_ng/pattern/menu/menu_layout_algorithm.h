@@ -29,9 +29,9 @@
 namespace OHOS::Ace::NG {
 
 struct MenuDumpInfo {
-    uint32_t menuPreviewMode;
-    uint32_t menuType;
-    bool enableArrow;
+    uint32_t menuPreviewMode = 0;
+    uint32_t menuType = 0;
+    bool enableArrow = false;
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
@@ -42,7 +42,7 @@ struct MenuDumpInfo {
     OffsetF globalLocation;
     std::string originPlacement;
     OffsetF finalPosition;
-    std::string finalPlacement;
+    std::string finalPlacement = "NONE";
 };
 class MenuLayoutProperty;
 class MenuPattern;

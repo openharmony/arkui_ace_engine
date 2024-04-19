@@ -337,8 +337,17 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    float scale = menuPattern->GetPreviewAfterAnimationScale();
-    previewScale_ = LessOrEqual(scale, 0.0f) ? previewScale_ : scale;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto beforeAnimationScale = menuPattern->GetPreviewBeforeAnimationScale();
+    auto afterAnimationScale = menuPattern->GetPreviewAfterAnimationScale();
+    dumpInfo_.previewBeginScale =
+        LessOrEqual(beforeAnimationScale, 0.0f) ? menuTheme->GetPreviewBeforeAnimationScale() : beforeAnimationScale;
+    dumpInfo_.previewEndScale =
+        LessOrEqual(afterAnimationScale, 0.0f) ? menuTheme->GetPreviewAfterAnimationScale() : afterAnimationScale;
+    previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     dumpInfo_.globalLocation = position_;
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -1305,8 +1314,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(menuTheme);
         auto beforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
         auto afterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
-        dumpInfo_.previewBeginScale = beforeAnimationScale;
-        dumpInfo_.previewEndScale = afterAnimationScale;
         auto menuOriginOffset = menuPosition - (previewOffset_ - previewOriginOffset_) +
                                 FixMenuOriginOffset(beforeAnimationScale, afterAnimationScale);
         menuPattern->SetOriginOffset(menuOriginOffset);
@@ -1373,6 +1380,7 @@ void MenuLayoutAlgorithm::LayoutArrow(const LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateArrowPosition(arrowPosition_);
     paintProperty->UpdateArrowPlacement(arrowPlacement_);
+    dumpInfo_.enableArrow = true;
 }
 
 RefPtr<MenuPaintProperty> MenuLayoutAlgorithm::GetPaintProperty(const LayoutWrapper* layoutWrapper)
@@ -1396,7 +1404,6 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
     auto paintProperty = GetPaintProperty(layoutWrapper);
     CHECK_NULL_RETURN(paintProperty, false);
     propNeedArrow_ = paintProperty->GetEnableArrow().value_or(false);
-    dumpInfo_.enableArrow = propNeedArrow_;
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
