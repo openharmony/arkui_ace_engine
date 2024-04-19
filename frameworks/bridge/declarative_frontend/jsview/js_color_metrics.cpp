@@ -128,10 +128,12 @@ void JSColorMetrics::JsGetAlpha(const JSCallbackInfo& info)
 void JSColorMetrics::JsResourceColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     Color color;
-    if (!JSViewAbstract::ParseJsColor(info[0], color)) {
+    if (!JSViewAbstract::CheckColor(info[0], color, "ColorMetrics", "ResourceColor")) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     JSRef<JSObject> obj = JSClass<JSColorMetrics>::NewInstance();
@@ -143,10 +145,12 @@ void JSColorMetrics::JsResourceColor(const JSCallbackInfo& info)
 void JSColorMetrics::JsNumericColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsNumber()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     Color color;
-    if (!JSViewAbstract::ParseJsColor(info[0], color)) {
+    if (!JSViewAbstract::CheckColor(info[0], color, "ColorMetrics", "ResourceColor")) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     JSRef<JSObject> obj = JSClass<JSColorMetrics>::NewInstance();
@@ -158,11 +162,13 @@ void JSColorMetrics::JsNumericColor(const JSCallbackInfo& info)
 void JSColorMetrics::JsRGBAColor(const JSCallbackInfo& info)
 {
     if (info.Length() < INFO_LENTH_DEFAULT || info.Length() > INFO_LENTH_HAS_ALPHA) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     std::vector<uint8_t> array;
     for (int i = 0; i < info.Length(); i++) {
         if (!info[i]->IsNumber()) {
+            JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
             return;
         }
         array.emplace_back(info[i]->ToNumber<uint8_t>());
@@ -183,6 +189,7 @@ void JSColorMetrics::JsBlendColor(const JSCallbackInfo& info)
 {
     JSColorMetrics* overlayColor = JSRef<JSObject>::Cast(info[0])->Unwrap<JSColorMetrics>();
     if (info.Length() < 1 || !info[0]->IsObject() || !overlayColor) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
     auto blendColor = color_.BlendColor(overlayColor->color_);

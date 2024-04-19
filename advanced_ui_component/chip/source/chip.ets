@@ -441,8 +441,20 @@ export struct ChipComponent {
     if (!this.isShowPressedBackGroundColor) {
       return currentColor
     }
-    return ColorMetrics
-      .resourceColor(currentColor)
+    let sourceColor:ColorMetrics;
+
+    try {
+      sourceColor = ColorMetrics.resourceColor(currentColor);
+    } catch (err) {
+      console.log(err.toString()); 
+      if (this.getChipActive()) {
+        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
+      } else {
+        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
+      }
+    }
+
+    return sourceColor
       .blendColor(ColorMetrics.resourceColor("#19000000"))
       .color
   }
