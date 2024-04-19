@@ -87,7 +87,7 @@ void ImageProvider::ProccessLoadingResult(const RefPtr<TaskExecutor>& taskExecut
                             callback.failedCallback(imageInfo, errorMsg);
                         }
                     },
-                    TaskExecutor::TaskType::UI);
+                    TaskExecutor::TaskType::UI, "ArkUIImageProviderLoadFailed");
                 return;
             }
             auto obj = imageObj->Clone();
@@ -97,7 +97,7 @@ void ImageProvider::ProccessLoadingResult(const RefPtr<TaskExecutor>& taskExecut
                         callback.successCallback(imageInfo, obj);
                     }
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIImageProviderLoadSuccess");
             if (canStartUploadImageObj) {
                 bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
                 obj->UploadToGpuForRender(
@@ -144,7 +144,7 @@ void ImageProvider::ProccessUploadResult(const RefPtr<TaskExecutor>& taskExecuto
                     }
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIImageProviderUploadResult");
     } else {
         LOGW("no uploading image: %{public}s", imageInfo.ToString().c_str());
     }
@@ -320,13 +320,15 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
                 auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, svgThemeColor);
                 if (skiaDom) {
                     taskExecutor->PostTask(
-                        [successCallback, skiaDom] { successCallback(skiaDom); }, TaskExecutor::TaskType::UI);
+                        [successCallback, skiaDom] { successCallback(skiaDom); },
+                        TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomSuccess");
                     return;
                 }
             }
         }
         LOGE("svg data wrong!");
-        taskExecutor->PostTask([failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFailed");
     };
     CancelableTask cancelableTask(std::move(task));
     if (onBackgroundTaskPostCallback) {
@@ -369,12 +371,14 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& d
             auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, svgThemeColor);
             if (skiaDom) {
                 taskExecutor->PostTask(
-                    [successCallback, skiaDom] { successCallback(skiaDom); }, TaskExecutor::TaskType::UI);
+                    [successCallback, skiaDom] { successCallback(skiaDom); },
+                    TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomSuccess");
                 return;
             }
         }
         LOGE("svg data wrong!");
-        taskExecutor->PostTask([failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            [failedCallback] { failedCallback(); }, TaskExecutor::TaskType::UI, "ArkUIImageGetSvgDomFailed");
     };
     CancelableTask cancelableTask(std::move(task));
     if (onBackgroundTaskPostCallback) {
@@ -425,8 +429,9 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
                 auto pipelineContext = context.Upgrade();
                 if (pipelineContext && pipelineContext->GetTaskExecutor()) {
                     auto taskExecutor = pipelineContext->GetTaskExecutor();
-                    taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
-                        TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+                    taskExecutor->PostDelayedTask(
+                        ImageCompressor::GetInstance()->ScheduleReleaseTask(), TaskExecutor::TaskType::UI,
+                        ImageCompressor::releaseTimeMs, "ArkUIImageCompressorScheduleRelease");
                 } else {
                     BackgroundTaskExecutor::GetInstance().PostTask(
                         ImageCompressor::GetInstance()->ScheduleReleaseTask());
@@ -491,7 +496,8 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
                 if (pipelineContext && pipelineContext->GetTaskExecutor()) {
                     auto taskExecutor = pipelineContext->GetTaskExecutor();
                     taskExecutor->PostDelayedTask(ImageCompressor::GetInstance()->ScheduleReleaseTask(),
-                        TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+                        TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs,
+                        "ArkUIImageCompressorScheduleRelease");
                 } else {
                     BackgroundTaskExecutor::GetInstance().PostTask(
                         ImageCompressor::GetInstance()->ScheduleReleaseTask());

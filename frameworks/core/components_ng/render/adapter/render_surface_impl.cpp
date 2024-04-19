@@ -37,8 +37,10 @@ void RenderSurfaceImpl::InitSurface()
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto uiTaskExecutor = SingleTaskExecutor::Make(container->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    auto errorCallback = [weak = WeakClaim(this), uiTaskExecutor](const std::string& errorId,
-                             const std::string& param) { uiTaskExecutor.PostTask([weak, errorId, param] {}); };
+    auto errorCallback = [weak = WeakClaim(this), uiTaskExecutor](
+        const std::string& errorId, const std::string& param) {
+            uiTaskExecutor.PostTask([weak, errorId, param] {}, "ArkUIInitSurfaceError");
+        };
     extSurface_ = AceType::MakeRefPtr<ExtSurface>(container->GetPipelineContext(), errorCallback);
 
     extSurface_->Create([weak = WeakClaim(this), errorCallback](int64_t id) mutable {
@@ -154,7 +156,7 @@ void RenderSurfaceImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
                 surface->SetBounds(id, left, top, width, height);
             }
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISetExtSurfaceBounds");
 }
 
 void RenderSurfaceImpl::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
@@ -173,7 +175,7 @@ void RenderSurfaceImpl::SetIsFullScreen(bool isFullScreen)
                 surface->SetIsFullScreen(fullScreen);
             }
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISetIsFullScreen");
 }
 
 } // namespace OHOS::Ace::NG

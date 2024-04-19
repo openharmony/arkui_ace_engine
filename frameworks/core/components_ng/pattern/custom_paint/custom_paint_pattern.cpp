@@ -1033,7 +1033,7 @@ void CustomPaintPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& on
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    });
+    }, "ArkUICanvasStartImageAnalyzer");
 }
 
 void CustomPaintPattern::StopImageAnalyzer()
