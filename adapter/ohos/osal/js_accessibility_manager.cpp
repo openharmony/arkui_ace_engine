@@ -2253,7 +2253,7 @@ void JsAccessibilityManager::ProcessParameters(
     }
 
     if (op == ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION) {
-+        paramsMap[ACTION_ARGU_SET_OFFSET] = params[EVENT_DUMP_ACTION_PARAM_INDEX];
+        paramsMap[ACTION_ARGU_SET_OFFSET] = params[EVENT_DUMP_ACTION_PARAM_INDEX];
     }
 }
 
