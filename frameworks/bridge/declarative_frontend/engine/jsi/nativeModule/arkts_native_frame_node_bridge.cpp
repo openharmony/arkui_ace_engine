@@ -17,14 +17,16 @@
 
 #include "jsnapi_expo.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
-#include "core/components_ng/base/frame_node_creator.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 ArkUINodeHandle FrameNodeBridge::GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -155,11 +157,25 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
     std::string type = firstArg->IsString() ? firstArg->ToString(vm)->ToString() : "";
-    auto node = NG::FrameNodeCreator::GetOrCreateTypedFrameNode(nodeId, type);
-    if (node) {
-        node->SetExclusiveEventForChild(true);
+    static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
+        { "Column", ARKUI_COLUMN }, { "Row", ARKUI_ROW }, { "Stack", ARKUI_STACK } };
+    ArkUINodeType nodeType = ARKUI_CUSTOM;
+    RefPtr<FrameNode> node;
+    auto iter = typeMap.find(type);
+    if (iter != typeMap.end()) {
+        nodeType = iter->second;
+        if (nodeType != ARKUI_CUSTOM) {
+            auto nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+            // let 'node' take the reference, so decrease ref of C node
+            node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
+            node->DecRefCount();
+            if (node) {
+                node->SetExclusiveEventForChild(true);
+                AddAttachFuncCallback(vm, node);
+            }
+        }
     }
-    AddAttachFuncCallback(vm, node);
+
     const char* keys[] = { "nodeId", "nativeStrongRef" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node) };
     auto reslut = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
@@ -379,8 +395,8 @@ ArkUINativeModuleValue FrameNodeBridge::GetConfigBorderWidth(ArkUIRuntimeCallInf
     Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 8);
     ArkUI_Float32 borderWidthValue[4];
     ArkUI_Int32 borderWidthUnit[4];
-    GetArkUINodeModifiers()->getCommonModifier()->getBorderWidthDimension(nativeNode, borderWidthValue,
-        borderWidthUnit);
+    GetArkUINodeModifiers()->getCommonModifier()->getBorderWidthDimension(
+        nativeNode, borderWidthValue, borderWidthUnit);
     for (int i = 0; i < 4; i++) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2, panda::NumberRef::New(vm, borderWidthValue[i]));
         Framework::ArrayRef::SetValueAt(vm, valueArray, i * 2 + 1, panda::NumberRef::New(vm, borderWidthUnit[i]));
