@@ -82,6 +82,14 @@ public:
         return verticalScrollable || horizontalScrollable;
     }
 
+    bool IsReverse() const
+    {
+        bool columnsTemplateSet = !propColumnsTemplate_.value_or("").empty();
+        bool rowsTemplateSet = !propRowsTemplate_.value_or("").empty();
+        auto isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
+        return isRtl && !columnsTemplateSet && rowsTemplateSet;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnsTemplate, std::string);
     void OnColumnsTemplateUpdate(const std::string& /* columnsTemplate */) const
     {
