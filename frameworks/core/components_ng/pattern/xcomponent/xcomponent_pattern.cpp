@@ -410,7 +410,7 @@ void XComponentPattern::SetMethodCall()
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->ConfigSurface(surfaceWidth, surfaceHeight);
-            });
+            }, "ArkUIXComponentSurfaceConfigChange");
         });
 
     xcomponentController_->SetSurfaceId(surfaceId_);
@@ -1390,7 +1390,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onA
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    });
+    }, "ArkUIXComponentCreateAnalyzerOverlay");
 }
 
 void XComponentPattern::StopImageAnalyzer()
