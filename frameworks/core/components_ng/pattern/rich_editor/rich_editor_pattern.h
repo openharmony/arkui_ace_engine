@@ -571,6 +571,11 @@ public:
         return MakeRefPtr<RichEditorAccessibilityProperty>();
     }
 
+    void AdjustSelector(int32_t& index, bool isFirst);
+    void AdjustSelector(int32_t& start, int32_t& end);
+    void UpdateSelector(int32_t start, int32_t end);
+    std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+
     void SetContentChange(bool onChange)
     {
         contentChange_ = onChange;
