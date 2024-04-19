@@ -1319,12 +1319,14 @@ void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     auto resizeOffset = Offset(offset.GetX(), offset.GetY());
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto geometryNode = frameNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
-    delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
+    if (CheckSafeAreaIsExpand()) {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto geometryNode = frameNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+        delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
+    }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         if (webOffset_ == offset) {
             return;
@@ -1334,6 +1336,7 @@ void WebPattern::OnAreaChangedInner()
     UpdateTouchHandleForOverlay();
     if (isInWindowDrag_)
         return;
+    delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     if (isNeedReDrawRect_) {
         UpdateSlideOffset(true);
     }
