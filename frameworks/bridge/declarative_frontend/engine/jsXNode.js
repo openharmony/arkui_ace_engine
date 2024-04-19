@@ -911,33 +911,7 @@ var LengthUnit;
     LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
     LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
 })(LengthUnit || (LengthUnit = {}));
-class LengthMetric {
-    constructor(value, unit) {
-        if (unit in LengthUnit) {
-            this.unit = unit;
-            this.value = value;
-        }
-        else {
-            this.unit = LengthUnit.VP;
-            this.value = unit === undefined? value : 0;
-        }
-    }
-    static px(value) {
-        return new LengthMetric(value, LengthUnit.PX);
-    }
-    static vp(value) {
-        return new LengthMetric(value, LengthUnit.VP);
-    }
-    static fp(value) {
-        return new LengthMetric(value, LengthUnit.FP);
-    }
-    static percent(value) {
-        return new LengthMetric(value, LengthUnit.PERCENT);
-    }
-    static lpx(value) {
-        return new LengthMetric(value, LengthUnit.LPX);
-    }
-}
+
 class LengthMetrics {
     constructor(value, unit) {
         if (unit in LengthUnit) {
@@ -1518,6 +1492,6 @@ class ComponentContent {
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetric, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent
 };
