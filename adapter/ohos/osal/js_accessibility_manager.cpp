@@ -37,7 +37,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
-#include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "nlohmann/json.hpp"
 
 using namespace OHOS::Accessibility;
