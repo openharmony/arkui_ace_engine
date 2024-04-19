@@ -53,7 +53,7 @@ private:
     void RegisterFocusCallback();
 
     bool destroyed_ = false;
-
+    OHOS::Rosen::WindowMode initWindowMode_;
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
 } // namespace OHOS::Ace::NG
