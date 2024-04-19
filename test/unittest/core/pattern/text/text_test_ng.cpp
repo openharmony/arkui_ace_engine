@@ -1217,7 +1217,7 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, Build).Times(1);
+    EXPECT_CALL(*paragraph, Build).Times(4);
     /**
      * @tc.steps: step1. create textFrameNode.
      */
