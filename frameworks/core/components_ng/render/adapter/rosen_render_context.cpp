@@ -219,6 +219,7 @@ RSBrush GetRsBrush(uint32_t fillColor)
 
     return brush;
 }
+
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -703,13 +704,12 @@ void RosenRenderContext::PaintBackground()
     } else {
         return;
     }
-
+    auto srcSize = bgLoadingCtx_->GetImageSize();
     SizeF renderSize = ImagePainter::CalculateBgImageSize(
-        GetHost()->GetGeometryNode()->GetFrameSize(), bgLoadingCtx_->GetImageSize(), GetBackgroundImageSize());
+        GetHost()->GetGeometryNode()->GetFrameSize(), srcSize, GetBackgroundImageSize());
     OffsetF positionOffset = ImagePainter::CalculateBgImagePosition(
         GetHost()->GetGeometryNode()->GetFrameSize(), renderSize, GetBackgroundImagePosition());
     auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
-    auto srcSize = bgLoadingCtx_->GetImageSize();
     Rosen::Vector4f rect(slice.left.ConvertToPxWithSize(srcSize.Width()),
         slice.top.ConvertToPxWithSize(srcSize.Height()),
         srcSize.Width() - (slice.left + slice.right).ConvertToPxWithSize(srcSize.Width()),
@@ -757,6 +757,18 @@ void RosenRenderContext::OnBackgroundImageResizableSliceUpdate(const ImageResiza
 {
     CHECK_NULL_VOID(rsNode_);
     PaintBackground();
+}
+
+bool RosenRenderContext::HasValidBgImageResizable()
+{
+    CHECK_NULL_RETURN(bgLoadingCtx_, false);
+    auto srcSize = bgLoadingCtx_->GetImageSize();
+    auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
+    auto left = slice.left.ConvertToPxWithSize(srcSize.Width());
+    auto right = slice.right.ConvertToPxWithSize(srcSize.Width());
+    auto top = slice.top.ConvertToPxWithSize(srcSize.Width());
+    auto bottom = slice.bottom.ConvertToPxWithSize(srcSize.Width());
+    return srcSize.Width() > left + right && srcSize.Height() > top + bottom && right > 0 && bottom > 0;
 }
 
 void RosenRenderContext::SetBackBlurFilter()
@@ -1137,7 +1149,9 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
                     Rosen::RectF(0, 0, skiaImage->GetImage()->width(), skiaImage->GetImage()->height()));
             }
         }
-        rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        if (!HasValidBgImageResizable()) {
+            rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        }
 #else
     } else if (InstanceOf<DrawingImage>(image)) {
         auto drawingImage = DynamicCast<DrawingImage>(image);
@@ -1155,7 +1169,9 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
                     Rosen::RectF(0, 0, drawingImage->GetImage()->GetWidth(), drawingImage->GetImage()->GetHeight()));
             }
         }
-        rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        if (!HasValidBgImageResizable()) {
+            rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        }
 #endif
     }
 }
@@ -5288,7 +5304,9 @@ void RosenRenderContext::PaintRSBgImage()
     } else {
         rosenImage->SetImage(image->GetImage());
     }
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    if (!HasValidBgImageResizable()) {
+        rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    }
     rsNode_->SetBgImage(rosenImage);
 }
 
@@ -5302,7 +5320,9 @@ void RosenRenderContext::PaintPixmapBgImage()
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetPixelMap(pixmap->GetPixelMapSharedPtr());
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    if (!HasValidBgImageResizable()) {
+        rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    }
     rsNode_->SetBgImage(rosenImage);
 }
 
