@@ -2895,6 +2895,10 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
             if (popupConfig != customPopupConfigMap_.end()) {
                 auto createConfig = popupConfig->second;
                 popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
+                popupParam->SetOnStateChange(
+                    [createConfig, targetId, this](const std::string& event) {
+                        this->OnPopupStateChange(event, createConfig, targetId);
+                    });
             }
             auto targetNode =
                 AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(targetId));
