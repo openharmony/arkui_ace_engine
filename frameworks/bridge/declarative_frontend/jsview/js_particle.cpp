@@ -591,6 +591,18 @@ void ParseColorOption(JSRef<JSObject>& colorJsObject, OHOS::Ace::NG::ParticleCol
 {
     auto colorRangeJsValue = colorJsObject->GetProperty("range");
     ParseColorInitRange(colorRangeJsValue, colorOption);
+
+    auto colorDist = OHOS::Ace::NG::DistributionType::UNIFORM;
+    auto colorDistJsValue = colorJsObject->GetProperty("distribution");
+    if (colorDistJsValue->IsNumber()) {
+        auto colorDistInt = colorDistJsValue->ToNumber<int32_t>();
+        if (colorDistInt >= static_cast<int32_t>(OHOS::Ace::NG::DistributionType::UNIFORM) &&
+            colorDistInt <= static_cast<int32_t>(OHOS::Ace::NG::DistributionType::GAUSSIAN)) {
+            colorDist = static_cast<OHOS::Ace::NG::DistributionType>(colorDistInt);
+        }
+    }
+    colorOption.SetDistribution(colorDist);
+
     auto updaterJsValue = colorJsObject->GetProperty("updater");
     NG::ParticleColorPropertyUpdater updater;
     if (updaterJsValue->IsObject()) {

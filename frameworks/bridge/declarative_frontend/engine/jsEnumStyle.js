@@ -2635,6 +2635,12 @@ var ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape["ELLIPSE"] = 2] = "ELLIPSE";
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
+var DistributionType;
+(function (DistributionType) {
+  DistributionType[DistributionType["UNIFORM"] = 0] = "UNIFORM";
+  DistributionType[DistributionType["GAUSSIAN"] = 1] = "GAUSSIAN";
+})(DistributionType || (DistributionType = {}));
+
 var ParticleUpdater;
 (function (ParticleUpdater) {
   ParticleUpdater[ParticleUpdater["NONE"] = 0] = "NONE";
