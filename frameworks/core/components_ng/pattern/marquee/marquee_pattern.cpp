@@ -223,7 +223,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 onFinish();
                 return;
             }
-            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI, "ArkUIMarqueePlayAnimation");
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -265,7 +265,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
                     pattern->StartMarqueeAnimation();
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIMarqueeStartAnimation");
     } else {
         lastAnimationParam_.lastStartMilliseconds = ANIMATION_INITIAL_TIME;
         lastAnimationParam_.lastAnimationPosition = 0.0f;

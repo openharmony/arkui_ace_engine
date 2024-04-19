@@ -1192,7 +1192,7 @@ void SelectPattern::OnLanguageConfigurationUpdate()
             }
             
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISelectLanguageConfigUpdate");
 }
 
 Dimension SelectPattern::GetFontSize()

@@ -2034,7 +2034,8 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_);
+    taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_,
+        "ArkUITextFieldCursorTwinkling");
 }
 
 void TextFieldPattern::StartTwinkling()
@@ -2370,7 +2371,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
             }
             pattern->ScrollToSafeArea();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea");
     return true;
 }
 

@@ -918,7 +918,8 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
                 onFinish();
             } else {
-                taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI);
+                taskExecutor->PostTask(
+                    [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUITextStartTextRace");
             }
         });
 }
