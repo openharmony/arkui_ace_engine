@@ -3645,7 +3645,7 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-	int32_t callNumber = accessibilityProperty->ActActionGetIndex();
+    auto callNumber = accessibilityProperty->ActActionGetIndex();
     callback.SetCursorPositionResult(callNumber, requestId);
 }
 
