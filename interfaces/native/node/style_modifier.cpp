@@ -194,7 +194,6 @@ constexpr int32_t CALENDAR_PICKER_FONT_WEIGHT_INDEX = 2;
 constexpr int32_t IMAGE_SIZE_TYPE_CONTAIN_INDEX = 0;
 constexpr int32_t IMAGE_SIZE_TYPE_COVER_INDEX = 1;
 constexpr int32_t IMAGE_SIZE_TYPE_AUTO_INDEX = 2;
-constexpr int32_t IMAGE_SIZE_TYPE_LENGTH_INDEX = 3;
 constexpr int32_t ERROR_CODE = -1;
 const std::string EMPTY_STR = "";
 const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no", "no-hide-descendants" };
@@ -3198,38 +3197,29 @@ int32_t SetTextInputPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_Attribute
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    struct ArkUILengthType size = { nullptr, 16.0, GetDefaultUnit(node, UNIT_FP) };
+    struct ArkUIResourceLength size = { 16.0, GetDefaultUnit(node, UNIT_FP) };
+    int weight = ARKUI_FONT_WEIGHT_NORMAL;
+    int style = ARKUI_FONT_STYLE_NORMAL;
     if (item->size > NUM_0) {
         if (LessNotEqual(item->value[NUM_0].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        size.number = item->value[NUM_0].f32;
+        size.value = item->value[NUM_0].f32;
     }
-    struct ArkUIPlaceholderFontType placeHolderFont = { &size, nullptr, nullptr, 0,
-        ARKUI_FONT_STYLE_NORMAL, ARKUI_FONT_WEIGHT_NORMAL };
     if (item->size > NUM_1) {
         if (item->value[NUM_1].i32 < 0 || item->value[NUM_1].i32 > static_cast<int32_t>(ARKUI_FONT_STYLE_ITALIC)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        placeHolderFont.style = item->value[NUM_1].i32;
+        style = item->value[NUM_1].i32;
     }
     if (item->size > NUM_2) {
         if (item->value[NUM_2].i32 < 0 || item->value[NUM_2].i32 > static_cast<int32_t>(ARKUI_FONT_WEIGHT_REGULAR)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        placeHolderFont.weightEnum = item->value[NUM_2].i32;
+        weight = item->value[NUM_2].i32;
     }
-    if (item->string) {
-        std::vector<std::string> fontFamilies = Framework::ConvertStrToFontFamilies(item->string);
-        auto families = std::make_unique<char*[]>(fontFamilies.size());
-        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-            families[i] = const_cast<char*>(fontFamilies.at(i).c_str());
-        }
-        placeHolderFont.fontFamilies = const_cast<const char**>(families.get());
-        placeHolderFont.length = fontFamilies.size();
-    }
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderFont(
-        node->uiNodeHandle, &placeHolderFont);
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderFontEnum(
+        node->uiNodeHandle, &size, weight, item->string, style);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6289,9 +6279,9 @@ int32_t SetBackgroundImageSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         LessNotEqual(item->value[BACKGROUND_IMAGE_HEIGHT_INDEX].f32, 0.0f)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageSizeWidthUnit(node->uiNodeHandle,
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImageSizeWithUnit(node->uiNodeHandle,
         item->value[BACKGROUND_IMAGE_WIDTH_INDEX].f32, item->value[BACKGROUND_IMAGE_HEIGHT_INDEX].f32,
-        IMAGE_SIZE_TYPE_LENGTH_INDEX, IMAGE_SIZE_TYPE_LENGTH_INDEX, GetDefaultUnit(node, UNIT_VP));
+        GetDefaultUnit(node, UNIT_VP));
     return ERROR_CODE_NO_ERROR;
 }
 

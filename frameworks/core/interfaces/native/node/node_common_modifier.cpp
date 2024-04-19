@@ -4759,17 +4759,17 @@ ArkUI_Float32 GetLayoutWeight(ArkUINodeHandle node)
     return ViewAbstract::GetLayoutWeight(frameNode);
 }
 
-void SetBackgroundImageSizeWithUnit(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
-    ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight, ArkUI_Int32 unit)
+void SetBackgroundImageSizeWithUnit(
+    ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BackgroundImageSize bgImgSize;
     CalcDimension width(valueWidth, static_cast<DimensionUnit>(unit));
     CalcDimension height(valueHeight, static_cast<DimensionUnit>(unit));
-    bgImgSize.SetSizeTypeX(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeWidth));
+    bgImgSize.SetSizeTypeX(OHOS::Ace::BackgroundImageSizeType::LENGTH);
     bgImgSize.SetSizeValueX(width.GetNativeValue(DimensionUnit::PX));
-    bgImgSize.SetSizeTypeY(static_cast<OHOS::Ace::BackgroundImageSizeType>(typeHeight));
+    bgImgSize.SetSizeTypeY(OHOS::Ace::BackgroundImageSizeType::LENGTH);
     bgImgSize.SetSizeValueY(height.GetNativeValue(DimensionUnit::PX));
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
