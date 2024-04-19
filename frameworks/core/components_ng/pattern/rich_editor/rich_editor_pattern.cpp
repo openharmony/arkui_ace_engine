@@ -1587,9 +1587,8 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     }
 
     HandleUserClickEvent(info);
-    if (info.IsPreventDefault()) {
-        return;
-    }
+    CHECK_NULL_VOID(!info.IsPreventDefault());
+
     if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
         ResetSelection();
@@ -1601,6 +1600,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
     OffsetF caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
     RectF lastCaretRect = RectF{ caretOffset.GetX() - caretHeight / 2, caretOffset.GetY(), caretHeight, caretHeight };
+    bool isCaretTwinkling = caretTwinkling_;
     auto position = paragraphs_.GetIndex(textOffset);
     AdjustCursorPosition(position);
     auto focusHub = GetHost()->GetOrCreateFocusHub();
@@ -1614,7 +1614,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     }
     UseHostToUpdateTextFieldManager();
     CalcCaretInfoByClick(info.GetLocalLocation());
-    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretPosition, lastCaretRect)) {
+    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretPosition, lastCaretRect) && isCaretTwinkling) {
         CreateAndShowSingleHandle(info);
     }
 }
@@ -2135,8 +2135,8 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
             ? REQUEST_RECREATE : 0;
         selectOverlay_->ProcessOverlay({.animation = true, .requestCode = requestCode});
         FireOnSelectionChange(selectStart, selectEnd);
-        if (!selectOverlay_->IsSingleHandle()) {
-            StopTwinkling();
+        if (selectOverlay_->IsSingleHandle()) {
+            StartTwinkling();
         }
     } else if (selectStart == selectEnd) {
         StartTwinkling();
