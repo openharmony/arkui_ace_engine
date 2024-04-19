@@ -395,9 +395,8 @@ void SwiperModelNG::SetDuration(FrameNode* frameNode, uint32_t duration)
 
 void SwiperModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCachedCount(cachedCount);
 

@@ -5257,7 +5257,8 @@ int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
     if (item->size != 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperCachedCount(
+        node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5266,7 +5267,7 @@ void ResetSwiperCachedCount(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getSwiperModifier()->resetCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperCachedCount(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetSwiperCachedCount(ArkUI_NodeHandle node)
@@ -8764,7 +8765,7 @@ void ResetWaterFlowCachedCount(ArkUI_NodeHandle node)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getSwiperModifier()->resetCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetCachedCount(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
@@ -9941,7 +9942,7 @@ void ResetRefreshAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
-        SetWaterFlowRowsGap, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount };
+        SetWaterFlowRowsGap, nullptr, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -9952,7 +9953,8 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
-        ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowNodeAdapter, ResetWaterFlowCachedCount };
+        ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, nullptr, ResetWaterFlowNodeAdapter,
+        ResetWaterFlowCachedCount };
     if (subTypeId >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -9963,7 +9965,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
-        GetWaterFlowRowsGap, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount };
+        GetWaterFlowRowsGap, nullptr, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
