@@ -3637,7 +3637,6 @@ void JsAccessibilityManager::ExecuteAction(const int64_t elementId, const Action
 void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int64_t elementId,
     const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "JsAccessibilityManager::JsInteractionOperation::GetCursorPosition");
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -3649,9 +3648,7 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto callNumber = accessibilityProperty->ActActionGetIndex();
-    callNumber = 123;
     callback.SetCursorPositionResult(callNumber, requestId);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "JsAccessibilityManager::JsInteractionOperation::GetCursorPosition callback.SetCursorPositionResult");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
