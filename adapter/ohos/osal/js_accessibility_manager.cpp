@@ -2240,7 +2240,9 @@ void JsAccessibilityManager::ProcessParameters(
         if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER + 1) {
             paramsMap[ACTION_ARGU_SELECT_TEXT_END] = params[EVENT_DUMP_ACTION_PARAM_INDEX + 1];
         }
+        // 2 means params number Offset
         if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER + 2) {
+            // 2 means params number Offset
             paramsMap[ACTION_ARGU_SELECT_TEXT_INFORWARD] = params[EVENT_DUMP_ACTION_PARAM_INDEX + 2];
         }
     }
@@ -3414,7 +3416,7 @@ void JsAccessibilityManager::SendActionEvent(const Accessibility::ActionType& ac
 
 void stringToLower(std::string &str)
 {
-    std::transform(str.begin(),str.end(),str.begin(),[](char &c){
+    std::transform(str.begin(), str.end(), str.begin(), [](char &c) {
         return std::tolower(c);
     });
 }
@@ -3422,7 +3424,7 @@ void stringToLower(std::string &str)
 bool conversionDirection(std::string dir)
 {
     stringToLower(dir);
-    if (dir.compare(STRING_DIR_FORWARD) == 0 ) {
+    if (dir.compare(STRING_DIR_FORWARD) == 0) {
         return true;
     }
 
@@ -3633,8 +3635,9 @@ void JsAccessibilityManager::ExecuteAction(const int64_t elementId, const Action
 }
 
 void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int64_t elementId,
-         const int32_t requestId, AccessibilityElementOperatorCallback &callback)
+    const int32_t requestId, AccessibilityElementOperatorCallback &callback)
 {
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "JsAccessibilityManager::JsInteractionOperation::GetCursorPosition");
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -3646,7 +3649,9 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto callNumber = accessibilityProperty->ActActionGetIndex();
+    callNumber = 123;
     callback.SetCursorPositionResult(callNumber, requestId);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "JsAccessibilityManager::JsInteractionOperation::GetCursorPosition callback.SetCursorPositionResult");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
