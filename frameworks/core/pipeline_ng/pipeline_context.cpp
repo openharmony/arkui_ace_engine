@@ -2522,8 +2522,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
 {
-    CHECK_NULL_RETURN(rootNode_, false);
-    auto focusHub = rootNode_->GetFocusHub();
+    auto rootNode = GetFocusedWindowSceneNode();
+    if (!rootNode) {
+        rootNode = rootNode_;
+    }
+    CHECK_NULL_RETURN(rootNode, false);
+    auto focusHub = rootNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId, isSyncRequest);
     if (!isSubPipeline_ || currentFocusChecked) {
