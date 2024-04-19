@@ -3168,6 +3168,14 @@ void TextPattern::ProcessSpanString()
         } else {
             dataDetectorAdapter_->textForAI_ += span->content;
         }
+        if (span->onClick) {
+            auto gestureEventHub = host->GetOrCreateGestureEventHub();
+            InitClickEvent(gestureEventHub);
+        }
+        if (span->onLongPress) {
+            auto gestureEventHub = host->GetOrCreateGestureEventHub();
+            InitLongPressEvent(gestureEventHub);
+        }
         textForDisplay_ += span->content;
     }
     if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
