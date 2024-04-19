@@ -25,13 +25,6 @@
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
-
-typedef enum {
-    DIR_NULL = -1,
-    DIR_DOWN = 0,
-    DIR_UP = 1,
-} SelectionDirection;
-
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
