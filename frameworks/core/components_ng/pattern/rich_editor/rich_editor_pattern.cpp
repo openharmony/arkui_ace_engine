@@ -2754,8 +2754,8 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
     RichEditorChangeValue changeValue;
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::INSERT));
     ClearRedoOperationRecords();
-    record.afterCaretPosition = caretPosition_ + moveLength_ + StringUtils::ToWstring(insertValue).length();
     InsertValueOperation(insertValue, &record, isIME);
+    record.afterCaretPosition = caretPosition_;
     if (isDragSponsor_) {
         record.deleteCaretPostion = dragRange_.first;
     }
@@ -6561,12 +6561,19 @@ void RichEditorPattern::GetDeletedSpan(
     RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length, RichEditorDeleteDirection direction)
 {
     RichEditorDeleteValue info;
-    if (textSelector_.IsValid()) {
+    if (!textSelector_.SelectNothing()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         innerPosition = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
-    } else if (direction == RichEditorDeleteDirection::BACKWARD) {
-        innerPosition -= 1;
+    } else {
+        bool isSpanSelected = false;
+        int32_t emojiLength =
+            CalculateDeleteLength(length, (direction == RichEditorDeleteDirection::BACKWARD), isSpanSelected);
+        if (direction == RichEditorDeleteDirection::BACKWARD) {
+            innerPosition -= emojiLength;
+        }
+        length = emojiLength;
     }
+
     info.SetOffset(innerPosition);
     info.SetRichEditorDeleteDirection(direction);
     info.SetLength(length);
@@ -6690,13 +6697,13 @@ void RichEditorPattern::BeforeUndo(
         GetReplacedSpan(changeValue, innerPosition, record.addText.value(), innerPosition, std::nullopt);
     } else if (record.addText.has_value() && record.deleteText.has_value()) {
         GetDeletedSpan(changeValue, innerPosition, StringUtils::ToWstring(record.addText.value_or("")).length(),
-            RichEditorDeleteDirection::FORWARD);
+            RichEditorDeleteDirection::BACKWARD);
         GetReplacedSpan(changeValue, innerPosition, record.deleteText.value(), innerPosition, std::nullopt);
     } else if (record.deleteText.has_value()) {
         GetReplacedSpan(changeValue, innerPosition, record.deleteText.value(), innerPosition, std::nullopt);
     } else if (record.addText.has_value()) {
         GetDeletedSpan(changeValue, innerPosition, StringUtils::ToWstring(record.addText.value_or("")).length(),
-            RichEditorDeleteDirection::FORWARD);
+            RichEditorDeleteDirection::BACKWARD);
     }
 }
 
