@@ -3423,7 +3423,7 @@ bool conversionDirection(std::string dir)
 {
     stringToLower(dir);
     if (dir.compare(STRING_DIR_FORWARD) == 0 ) {
-            return true;
+        return true;
     }
 
     return false;
