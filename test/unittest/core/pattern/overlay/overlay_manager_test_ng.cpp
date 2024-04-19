@@ -2098,6 +2098,54 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern11, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SheetPresentationPattern12
+ * @tc.desc: Test SheetPresentationPattern::GetSheetType().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern12, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(topSheetPattern, nullptr);
+
+     /**
+     * @tc.steps: step3. create sheetNode, set width and mode floating.
+     */
+    MockPipelineContext::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    MockPipelineContext::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    MockPipelineContext::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
+        []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
+
+    RefPtr<PipelineBase> pipelineContext = NG::MockPipelineContext::pipeline_;
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    windowGlobalRect.SetSize(Size(200, 300));
+    auto mode = topSheetPattern->GetSheetType();
+    EXPECT_EQ(mode, SheetType::SHEET_BOTTOM);
+}
+
+/**
  * @tc.name: TestSheetPage001
  * @tc.desc: Test CreateSheetPage.
  * @tc.type: FUNC
