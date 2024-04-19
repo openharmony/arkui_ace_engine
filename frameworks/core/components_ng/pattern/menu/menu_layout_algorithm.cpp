@@ -578,8 +578,24 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     float idealHeight = 0.0f;
     float idealWidth = 0.0f;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::list<RefPtr<LayoutWrapper>> builderChildList;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(childConstraint);
+        if (pattern->UseContentModifier()) {
+            if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                builderChildList.push_back(child);
+            }
+            BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
+        } else {
+            child->Measure(childConstraint);
+        }
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         idealHeight += childSize.Height();
         idealWidth = std::max(idealWidth, childSize.Width());
