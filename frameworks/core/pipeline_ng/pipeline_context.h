@@ -689,6 +689,16 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
+    void SetIsWebSurfaceReady(bool isWebSurfaceReady)
+    {
+        isWebSurfaceReady_ = isWebSurfaceReady;
+    }
+
+    bool GetIsWebSurfaceReady() const
+    {
+        return isWebSurfaceReady_;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -870,7 +880,8 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
-
+    bool isWebSurfaceReady_ = true;
+    
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
     std::function<void()> dragWindowVisibleCallback_;

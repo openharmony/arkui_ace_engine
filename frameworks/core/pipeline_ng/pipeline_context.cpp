@@ -762,6 +762,10 @@ void PipelineContext::FlushModifier()
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
+    if (!GetIsWebSurfaceReady()) {
+        SetIsWebSurfaceReady(true);
+        return;
+    }
     window_->FlushTasks();
 }
 
