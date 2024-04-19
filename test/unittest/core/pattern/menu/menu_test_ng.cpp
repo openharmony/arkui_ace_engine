@@ -5260,6 +5260,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
      * @tc.steps: step1. create menuLayoutAlgorithm
      * @tc.expected: menuLayoutAlgorithm is not null
      */
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU);
+    auto menu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* layoutWrapper = new LayoutWrapperNode(menu, geometryNode, layoutProp);
+
     auto menuAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, TEXT_TAG);
     ASSERT_TRUE(menuAlgorithm);
     const SizeF menuSize = SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
@@ -5272,25 +5279,21 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
     std::unordered_set<Placement> positionCondition3 = { Placement::LEFT, Placement::LEFT_TOP, Placement::LEFT_BOTTOM };
     std::unordered_set<Placement> positionCondition4 = { Placement::RIGHT, Placement::RIGHT_TOP,
         Placement::RIGHT_BOTTOM };
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    auto radius = selectTheme->GetMenuBorderRadius().ConvertToPx();
+    auto arrowMinLimit = radius + ARROW_WIDTH.ConvertToPx() / 2.0;
     /**
      * @tc.steps: step2. execute GetArrowPositionWithPlacement
      * @tc.expected: arrowPosition is as expected.
      */
-    float arrowOffsetMax = 0.0f;
     for (Placement placementValue : placements) {
-        if (menuAlgorithm->setHorizontal_.find(placementValue) != menuAlgorithm->setHorizontal_.end()) {
-            arrowOffsetMax = menuSize.Height() - menuAlgorithm->menuRadius_ * 2 - menuAlgorithm->arrowWidth_;
-        }
-        if (menuAlgorithm->setVertical_.find(placementValue) != menuAlgorithm->setVertical_.end()) {
-            arrowOffsetMax = menuSize.Width() - menuAlgorithm->menuRadius_ * 2 - menuAlgorithm->arrowWidth_;
-        }
-
         menuAlgorithm->propArrowOffset_ = Dimension(0.5, DimensionUnit::PX);
         menuAlgorithm->arrowPlacement_ = placementValue;
-        auto result = menuAlgorithm->GetArrowPositionWithPlacement(menuSize);
+        auto result = menuAlgorithm->GetArrowPositionWithPlacement(menuSize, layoutWrapper);
         EXPECT_EQ(menuAlgorithm->propArrowOffset_, Dimension(0.5, DimensionUnit::PX));
         auto arrowOffsetValue = (menuAlgorithm->propArrowOffset_).ConvertToPx();
         EXPECT_EQ(menuAlgorithm->arrowOffset_, arrowOffsetValue);
+        arrowOffsetValue  = arrowMinLimit + arrowOffsetValue;
         if (positionCondition1.find(placementValue) != positionCondition1.end()) {
             EXPECT_EQ(result, OffsetF(arrowOffsetValue, menuSize.Height() + ARROW_HIGHT.ConvertToPx()));
         }

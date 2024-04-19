@@ -19,6 +19,7 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
@@ -28,6 +29,7 @@
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
@@ -408,6 +410,8 @@ public:
 
     void FireBuilder();
 
+    BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -417,6 +421,7 @@ protected:
         type_ = value;
     }
     virtual void InitTheme(const RefPtr<FrameNode>& host);
+    virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
 
 private:
     void OnAttachToFrameNode() override;
@@ -491,6 +496,7 @@ public:
 
 private:
     void InitTheme(const RefPtr<FrameNode>& host) override;
+    void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius) override;
     uint32_t FindSiblingMenuCount();
     void ApplyDesktopMenuTheme();
     void ApplyMultiMenuTheme();
