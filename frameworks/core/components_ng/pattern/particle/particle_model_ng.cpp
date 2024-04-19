@@ -32,6 +32,7 @@ void ParticleModelNG::Create(std::list<ParticleOption>& arrayValue)
 void ParticleModelNG::DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray, FrameNode* frameNode)
 {
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
     pattern->UpdateDisturbance(disturbanceArray);
 }
 
@@ -40,6 +41,7 @@ void ParticleModelNG::DisturbanceField(const std::vector<ParticleDisturbance>& d
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
     pattern->UpdateDisturbance(disturbanceArray);
 }
 } // namespace OHOS::Ace::NG

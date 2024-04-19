@@ -2639,7 +2639,7 @@ var DisturbanceFieldsShape;
 (function (DisturbanceFieldsShape) {
   DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
   DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 2] = "CIRCLE";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
 })(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
 
 var SwiperNestedScrollMode;

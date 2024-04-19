@@ -25,11 +25,11 @@
 #include "core/components_ng/property/particle_property.h"
 namespace OHOS::Ace {
 
-enum class ParticleDisturbanceShapeType :uint32_t { REACT, CIRCLE, ELLIPSE };
+enum class ParticleDisturbanceShapeType :uint32_t { RECT, CIRCLE, ELLIPSE };
 
 struct ParticleDisturbance {
     float strength = 0.0f;
-    ParticleDisturbanceShapeType shape = ParticleDisturbanceShapeType::REACT;
+    ParticleDisturbanceShapeType shape = ParticleDisturbanceShapeType::RECT;
     int  size[2] = {0, 0};
     int  position[2] = {0, 0};
     int feather = 0;
@@ -39,10 +39,10 @@ struct ParticleDisturbance {
 
     bool operator!=(const ParticleDisturbance& data) const
     {
-        return !(NearEqual(strength, data.strength) && shape == data.shape&& size[0] == data.size[0] &&
-               size[1] == data.size[1] && position[0] == data.position[0] && position[1] == data.position[1] &&
-               feather == data.feather && NearEqual(noiseScale, data.noiseScale) &&
-               NearEqual(noiseFrequency, data.noiseFrequency) && NearEqual(noiseAmplitude, data.noiseAmplitude));
+        return !(NearEqual(strength, data.strength) && shape == data.shape && size[0] == data.size[0] &&
+                 size[1] == data.size[1] && position[0] == data.position[0] && position[1] == data.position[1] &&
+                 feather == data.feather && NearEqual(noiseScale, data.noiseScale) &&
+                 NearEqual(noiseFrequency, data.noiseFrequency) && NearEqual(noiseAmplitude, data.noiseAmplitude));
     }
 };
 

@@ -1540,9 +1540,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);
-    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetDisturbanceField"),
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDisturbanceField"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::SetDisturbanceField));
-    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetDisturbanceField"),
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisturbanceField"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::ResetDisturbanceField));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "particle"), particle);
 

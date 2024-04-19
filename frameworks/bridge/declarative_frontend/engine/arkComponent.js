@@ -2543,6 +2543,12 @@ function checkJsCallbackInfo(value, checklist) {
   });
   return typeVerified || checklist.length === 0;
 }
+function parseWithDefaultNumber(val, defaultValue) {
+  if (isNumber(val)) {
+    return val;
+  }
+  else { return defaultValue; }
+}
 function modifier(modifiers, modifierClass, value) {
   const identity = modifierClass['identity'];
   const item = modifiers.get(identity);
@@ -21698,10 +21704,39 @@ class ParticleDisturbanceFieldModifier extends ModifierWithKey {
 
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().particle.ResetDisturbanceField(node);
+      getUINativeModule().particle.resetDisturbanceField(node);
     }
     else {
-      getUINativeModule().particle.SetDisturbanceField(node, this.value);
+      let dataArray = [];
+      if (Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let data = this.value[i];
+        dataArray.push(parseWithDefaultNumber(data.strength, 0));
+        dataArray.push(parseWithDefaultNumber(data.shape, 0));
+        if (isObject(data.size)) {
+          dataArray.push(parseWithDefaultNumber(data.size.width, 0));
+          dataArray.push(parseWithDefaultNumber(data.size.height, 0));
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(0);
+        }
+        if (isObject(data.position)) {
+          dataArray.push(parseWithDefaultNumber(data.position.x, 0));
+          dataArray.push(parseWithDefaultNumber(data.position.y, 0));
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(0);
+        }
+        dataArray.push(parseWithDefaultNumber(data.feather, 0));
+        dataArray.push(parseWithDefaultNumber(data.noiseScale, 1));
+        dataArray.push(parseWithDefaultNumber(data.noiseFrequency, 1));
+        dataArray.push(parseWithDefaultNumber(data.noiseAmplitude, 1));
+      }
+      getUINativeModule().particle.setDisturbanceField(node, dataArray);
     }
   }
   checkObjectDiff() {
@@ -21733,4 +21768,3 @@ if (globalThis.Particle !== undefined) {
     });
   };
 }
-

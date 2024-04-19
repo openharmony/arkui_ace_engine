@@ -42,7 +42,7 @@ public:
         haveUnVisibleParent_ = haveUnVisibleParent;
     }
 
-    const std::vector<ParticleDisturbance>& GetPDisturbance() const
+    const std::vector<ParticleDisturbance>& GetDisturbance() const
     {
         return disturbance_;
     }
