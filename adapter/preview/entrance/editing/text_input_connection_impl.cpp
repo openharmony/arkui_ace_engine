@@ -31,7 +31,7 @@ void TextInputConnectionImpl::SetEditingState(
             [value, instanceId, needFireChangeEvent] {
                 TextInputClientMgr::GetInstance().SetTextEditingValue(value);
             },
-            TaskExecutor::TaskType::PLATFORM);
+            TaskExecutor::TaskType::PLATFORM, "ArkUITextEditingSetValue");
     }
 }
 

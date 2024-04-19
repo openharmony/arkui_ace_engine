@@ -1668,7 +1668,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     std::function<void()> task;
-    pickerPattern->PostTaskToUI(task);
+    pickerPattern->PostTaskToUI(task, "ArkUITask");
 }
 
 /**
