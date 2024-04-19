@@ -405,6 +405,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
         symbolTextStyle.SetEffectStrategy(
             symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
+        symbolTextStyle.SetFontFamilies({"HM Symbol"});
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
