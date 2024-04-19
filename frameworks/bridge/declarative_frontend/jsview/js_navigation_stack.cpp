@@ -62,6 +62,7 @@ void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
     UpdateCheckNavDestinationExistsFunc(dataSourceObj_, nullptr);
     dataSourceObj_ = dataSourceObj;
     // add callback to new JSNavPathStack
+    RemoveStack();
     UpdateOnStateChangedCallback(dataSourceObj_, onStateChangedCallback_);
     auto checkNavDestinationExistsFunc = [weakStack = WeakClaim(this)](const JSRef<JSObject>& info) -> int32_t {
         auto stack = weakStack.Upgrade();
@@ -539,6 +540,7 @@ void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::f
     CHECK_NULL_VOID(stack);
     stack->SetOnStateChangedCallback(callback);
     // When switching the navigation stack, it is necessary to immediately trigger a refresh
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation necessary to immediately trigger a refresh");
     stack->OnStateChanged();
 }
 
