@@ -3788,7 +3788,7 @@ void JSViewAbstract::ParseBorderImageLengthMetrics(
                     localizedCalcDimension.top = calcDimension;
                     break;
                 case BorderImageDirection::BOTTOM:
-                    localizedCalcDimension.end = calcDimension;
+                    localizedCalcDimension.bottom = calcDimension;
                     break;
                 default:
                     break;
