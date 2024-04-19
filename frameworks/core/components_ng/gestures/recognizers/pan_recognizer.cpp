@@ -296,7 +296,8 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         UpdateTouchPointInVelocityTracker(event, true);
     }
 
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if ((currentFingers_ <= fingers_) &&
+        (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
@@ -310,16 +311,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             SendCallbackMsg(onActionEnd_);
             ReportSlideOff();
             averageDistance_.Reset();
-            int64_t overTime = GetSysTimestamp();
-            int64_t inputTime = overTime;
-            if (firstInputTime_.has_value()) {
-                inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-            }
-            if (SystemProperties::GetTraceInputEventEnabled()) {
-                ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
-                    static_cast<long long>(inputTime), static_cast<long long>(overTime));
-            }
-            firstInputTime_.reset();
+            AddOverTimeTrace();
             refereeState_ = RefereeState::READY;
         }
     }
@@ -356,16 +348,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         // AxisEvent is single one.
         SendCallbackMsg(onActionEnd_);
         ReportSlideOff();
-        int64_t overTime = GetSysTimestamp();
-        int64_t inputTime = overTime;
-        if (firstInputTime_.has_value()) {
-            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-        }
-        if (SystemProperties::GetTraceInputEventEnabled()) {
-            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
-                static_cast<long long>(inputTime), static_cast<long long>(overTime));
-        }
-        firstInputTime_.reset();
+        AddOverTimeTrace();
     }
 }
 
@@ -882,5 +865,19 @@ bool PanRecognizer::AboutToAddCurrentFingers(int32_t touchId)
     }
     currentFingers_++;
     return true;
+}
+
+void PanRecognizer::AddOverTimeTrace()
+{
+    int64_t overTime = GetSysTimestamp();
+    int64_t inputTime = overTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(overTime));
+    }
+    firstInputTime_.reset();
 }
 } // namespace OHOS::Ace::NG
