@@ -660,6 +660,13 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     return nullptr;
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+    {
+        return AceType::MakeRefPtr<UIExtensionManager>();
+    }
+#endif
+
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
 {

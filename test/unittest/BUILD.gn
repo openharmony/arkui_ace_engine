@@ -54,6 +54,7 @@ config("ace_unittest_config") {
     "$hilog_root/interfaces/native/innerkits/include",
     "$root_out_dir/arkui/framework",
     "//third_party/icu/icu4c/source/common",
+    "//foundation/window/window_manager/interfaces/innerkits",
   ]
 
   cflags_cc = [
