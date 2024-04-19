@@ -2377,6 +2377,15 @@ void UIContentImpl::SetFontScaleFollowSystem(const bool fontScaleFollowSystem)
     fontScaleFollowSystem_ = fontScaleFollowSystem;
 }
 
+void UIContentImpl::SetFormRenderingMode(int8_t renderMode)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFormRenderingMode(renderMode);
+}
+
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
     std::vector<std::string>& assetBasePaths, std::string& resFolderName)
 {
