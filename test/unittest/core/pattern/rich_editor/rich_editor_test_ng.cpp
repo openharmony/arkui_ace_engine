@@ -5966,6 +5966,58 @@ HWTEST_F(RichEditorTestNg, SingleHandle003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsSelectAreaVisible001
+ * @tc.desc: test selectArea inVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, IsSelectAreaVisible001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add text and paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 6;
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
+    /**
+     * @tc.steps: step2. test IsSelectAreaVisible
+     */
+    auto res = richEditorPattern->IsSelectAreaVisible();
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: IsSelectAreaVisible002
+ * @tc.desc: test selectArea Visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, IsSelectAreaVisible002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add text and paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 6;
+    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
+    /**
+     * @tc.steps: step2. test IsSelectAreaVisible
+     */
+    auto res = richEditorPattern->IsSelectAreaVisible();
+    EXPECT_TRUE(res);
+}
+
+/**
  * @tc.name: RichEditorKeyBoardShortCuts001 about cursor move
  * @tc.desc: test the cursor move line start
  * @tc.type: FUNC
