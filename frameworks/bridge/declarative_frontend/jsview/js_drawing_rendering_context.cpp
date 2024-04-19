@@ -78,9 +78,10 @@ void JSDrawingRenderingContext::JsSetSize(const JSCallbackInfo& info)
 
 void JSDrawingRenderingContext::JsGetSize(const JSCallbackInfo& info)
 {
-    auto returnValue = JSVal(ToJSValue(size_));
-    auto returnPtr = JSRef<JSVal>::Make(returnValue);
-    info.SetReturnValue(returnPtr);
+    auto retObj = JSRef<JSObject>::New();
+    retObj->SetProperty("width", size_.Width().value_or(0.0));
+    retObj->SetProperty("height", size_.Height().value_or(0.0));
+    info.SetReturnValue(retObj);
 }
 
 void JSDrawingRenderingContext::SetRSCanvasCallback(RefPtr<AceType>& canvasPattern)
