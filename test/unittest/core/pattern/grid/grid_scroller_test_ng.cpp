@@ -498,8 +498,7 @@ HWTEST_F(GridScrollerTestNg, AnimateTo001, TestSize.Level1)
     });
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
     float endValue = pattern_->GetFinalPosition();
-    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-        SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 }
 
@@ -521,8 +520,7 @@ HWTEST_F(GridScrollerTestNg, AnimateTo002, TestSize.Level1)
     });
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
     float endValue = pattern_->GetFinalPosition();
-    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-        SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -ITEM_HEIGHT);
 }
 
@@ -544,8 +542,7 @@ HWTEST_F(GridScrollerTestNg, AnimateTo003, TestSize.Level1)
     });
     pattern_->AnimateTo(ITEM_HEIGHT * 9, 200.f, Curves::LINEAR, true);
     float endValue = pattern_->GetFinalPosition();
-    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-        SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -ITEM_HEIGHT * 9);
 }
 
@@ -572,15 +569,14 @@ HWTEST_F(GridScrollerTestNg, AnimateTo004, TestSize.Level1)
     EXPECT_TRUE(isTrigger);
 
     float endValue = pattern_->GetFinalPosition();
-    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-        SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -ITEM_HEIGHT);
 
     /**
      * @tc.steps: step2. When Animation is running, call AnimateTo
      * @tc.expected: onScrollStart event will not be triggered
      */
-    isTrigger = false; // reset val
+    isTrigger = false;             // reset val
     pattern_->scrollAbort_ = true; // set running
     pattern_->AnimateTo(ITEM_HEIGHT * 2, 200.f, Curves::LINEAR, true);
     EXPECT_FALSE(isTrigger);
@@ -606,8 +602,7 @@ HWTEST_F(GridScrollerTestNg, AnimateTo005, TestSize.Level1)
 
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
     float endValue = pattern_->GetFinalPosition();
-    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-        SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
@@ -622,9 +617,7 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step1. Unscrollable
      * @tc.expected: jumpIndex_ not change
      */
-    Create([](GridModelNG model) {
-        CreateFixedItem(14);
-    });
+    Create([](GridModelNG model) { CreateFixedItem(14); });
     EXPECT_FALSE(pattern_->isConfigScrollable_);
     auto controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
@@ -1095,7 +1088,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset002, TestSize.Level1)
 
     pattern_->gridLayoutInfo_.currentOffset_ = -ITEM_HEIGHT * 3;
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2);
-    expectOffset = { 0, ITEM_HEIGHT  * 2 };
+    expectOffset = { 0, ITEM_HEIGHT * 2 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
     offset = pattern_->GetOverScrollOffset(0.f);
     expectOffset = { 0, 0 };
@@ -1397,5 +1390,95 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+}
+
+namespace {
+const decltype(GridLayoutInfo::lineHeightMap_) cmp = { { 0, ITEM_HEIGHT }, { 1, ITEM_HEIGHT }, { 2, ITEM_HEIGHT },
+    { 3, ITEM_HEIGHT }, { 6, ITEM_HEIGHT }, { 7, ITEM_HEIGHT }, { 8, ITEM_HEIGHT }, { 9, ITEM_HEIGHT } };
+}
+/**
+ * @tc.name: GetEndOffset000
+ * @tc.desc: Test scrolling past limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetEndOffset000, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions({});
+        CreateFixedItem(20, GridItemStyle::NONE);
+    });
+
+    int32_t targetIndex = 19;
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->ScrollToIndex(targetIndex, false, align);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startMainLineIndex_, 6);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    for (int i = 0; i < 500; ++i) {
+        UpdateCurrentOffset(-200.0f);
+    }
+    if (SystemProperties::GetGridIrregularLayoutEnabled()) {
+        EXPECT_EQ(info.startMainLineIndex_, 9);
+    } else {
+        EXPECT_EQ(info.startMainLineIndex_, 10);
+    }
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+
+    EXPECT_LT(info.currentOffset_, -150.0f);
+
+    pattern_->ScrollToIndex(targetIndex, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 10; ++i) {
+        info.currentOffset_ -= 150.0f;
+        frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        FlushLayoutTask(frameNode_);
+    }
+    if (SystemProperties::GetGridIrregularLayoutEnabled()) {
+        EXPECT_EQ(info.startMainLineIndex_, 9);
+    } else {
+        EXPECT_EQ(info.startMainLineIndex_, 10);
+    }
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+
+    EXPECT_LT(info.currentOffset_, -150.0f);
+}
+
+/**
+ * @tc.name: GetEndOffset001
+ * @tc.desc: Test GetEndOffset with updated offset on old layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateFixedItem(20, GridItemStyle::NONE);
+    });
+
+    int32_t targetIndex = 19;
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->ScrollToIndex(targetIndex, false, align);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startMainLineIndex_, 6);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+    info.currentOffset_ -= 1000.0f;
+    info.synced_ = false;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    pattern_->GetScrollEdgeEffect()->ProcessScrollOver(-2000.0f);
+    EXPECT_TRUE(info.synced_);
+    // overScroll disabled to avoid layout bug
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.startIndex_, 12);
+    EXPECT_EQ(info.endIndex_, 19);
+    EXPECT_EQ(info.startMainLineIndex_, 8);
+    EXPECT_EQ(info.endMainLineIndex_, 11);
+    EXPECT_EQ(pattern_->GetEndOffset(), 0.0f);
 }
 } // namespace OHOS::Ace::NG
