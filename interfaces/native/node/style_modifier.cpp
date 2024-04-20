@@ -101,6 +101,7 @@ constexpr int32_t COLOR_MODE_INDEX = 1;
 constexpr int32_t ADAPTIVE_COLOR_INDEX = 2;
 constexpr int32_t SCALE_INDEX = 3;
 constexpr int32_t DECORATION_COLOR_INDEX = 1;
+constexpr int32_t DECORATION_STYLE_INDEX = 2;
 constexpr int32_t PROGRESS_TYPE_LINEAR = 1;
 constexpr int32_t PROGRESS_TYPE_RING = 2;
 constexpr int32_t PROGRESS_TYPE_SCALE = 3;
@@ -6699,14 +6700,19 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (DECORATION_COLOR_INDEX < actualSize) {
         decorationColor = item->value[DECORATION_COLOR_INDEX].u32;
     }
+    if (item->value[DECORATION_STYLE_INDEX].i32 < 0 ||
+        item->value[DECORATION_STYLE_INDEX].i32 > static_cast<int32_t>(ARKUI_TEXT_DECORATION_STYLE_WAVY)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t decorationStyle = item->value[DECORATION_STYLE_INDEX].i32;
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
-                node->uiNodeHandle, decoration, decorationColor, 0);
+                node->uiNodeHandle, decoration, decorationColor, decorationStyle);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
-                node->uiNodeHandle, decoration, decorationColor, 0);
+                node->uiNodeHandle, decoration, decorationColor, decorationStyle);
         default:
             break;
     }

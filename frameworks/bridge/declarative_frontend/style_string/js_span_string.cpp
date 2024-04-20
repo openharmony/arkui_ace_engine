@@ -309,7 +309,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t leng
     auto* decorationSpan = AceType::DynamicCast<JSDecorationSpan>(base);
     if (decorationSpan && decorationSpan->GetDecorationSpan()) {
         return AceType::MakeRefPtr<DecorationSpan>(decorationSpan->GetDecorationSpan()->GetTextDecorationType(),
-            decorationSpan->GetDecorationSpan()->GetColor(), start, start + length);
+            decorationSpan->GetDecorationSpan()->GetColor(),
+            decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(), start, start + length);
     }
     return nullptr;
 }

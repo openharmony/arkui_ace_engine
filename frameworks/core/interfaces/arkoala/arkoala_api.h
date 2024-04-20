@@ -474,6 +474,7 @@ struct ArkUIBlurStyleOptionType {
 struct ArkUITextDecorationType {
     ArkUI_Int32 decorationType;
     ArkUI_Uint32 color;
+    ArkUI_Int32 style;
 };
 
 struct ArkUIFilterColorType {
@@ -2845,7 +2846,7 @@ struct ArkUISpanModifier {
     void (*setSpanFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
     void (*resetSpanFontFamily)(ArkUINodeHandle node);
     void (*setSpanDecoration)(
-        ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, const ArkUI_Uint32 style);
+        ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, const ArkUI_Int32 style);
     void (*resetSpanDecoration)(ArkUINodeHandle node);
     void (*setSpanFontColor)(ArkUINodeHandle node, ArkUI_Uint32 textColor);
     void (*resetSpanFontColor)(ArkUINodeHandle node);

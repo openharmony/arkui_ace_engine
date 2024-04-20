@@ -324,6 +324,13 @@ Color SpanModelNG::GetTextDecorationColor(UINode* uiNode)
     return spanNode->GetTextDecorationColor().value_or(Color::BLACK);
 }
 
+Ace::TextDecorationStyle SpanModelNG::GetTextDecorationStyle(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, TextDecorationStyle::SOLID);
+    return spanNode->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
+}
+
 TextStyle SpanModelNG::GetDefaultTextStyle()
 {
     TextStyle textStyle;

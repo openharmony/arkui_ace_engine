@@ -242,8 +242,8 @@ class SpanFontModifier extends ModifierWithKey<Font> {
     }
   }
 }
-class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType, color?: ResourceColor }) {
+class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity = Symbol('spanDecoration');
@@ -251,12 +251,12 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
     if (reset) {
       getUINativeModule().span.resetDecoration(node);
     } else {
-      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -865,7 +865,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
-  decoration(value: { type: TextDecorationType, color?: ResourceColor }): SpanAttribute {
+  decoration(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
