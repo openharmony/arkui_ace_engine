@@ -153,6 +153,11 @@ public:
         syncLoad_ = value;
     }
 
+    bool GetSyncLoad() const
+    {
+        return syncLoad_;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;

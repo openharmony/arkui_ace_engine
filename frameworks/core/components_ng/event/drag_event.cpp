@@ -521,6 +521,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(PIXEL_MAP_SUPPORTED)
+                bool hasImageNode = false;
+                std::list<RefPtr<FrameNode>> imageNodes;
+                gestureHub->PrintBuilderNode(dragPreviewInfo.customNode, hasImageNode, imageNodes);
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
                     (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
                     ContainerScope scope(id);
@@ -538,6 +541,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 
                 OHOS::Ace::NG::ComponentSnapshot::Create(
                     dragPreviewInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+                gestureHub->CheckImageDecode(imageNodes);
+                imageNodes.clear();
 #endif
             } else {
                 auto context = frameNode->GetRenderContext();
