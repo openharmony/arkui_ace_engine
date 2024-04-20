@@ -76,6 +76,8 @@ protected:
     void UpdateSpanMapWithOffset(int32_t start, int32_t offset);
     void UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start, int32_t offset);
     void RemoveImageSpan(int32_t start, int32_t end);
+    // For the scene after image remove
+    bool CheckRange(const RefPtr<SpanBase>& spanBase) const;
 
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
