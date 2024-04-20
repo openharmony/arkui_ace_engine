@@ -280,7 +280,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
     void OnWindowHide() override;
