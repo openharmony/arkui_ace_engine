@@ -536,8 +536,16 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f", info.width.Value(), info.height.Value());
+    TAG_LOGI(AceLogTag::ACE_FORM, "info.shape %{public}d ", info.shape);
     cardInfo_ = info;
     if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
+        BorderRadiusProperty borderRadius;
+        Dimension diameter = std::min(info.width, info.height);
+        borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
+        host->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    }
+
+    if (info.shape == 2) {
         BorderRadiusProperty borderRadius;
         Dimension diameter = std::min(info.width, info.height);
         borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
