@@ -308,6 +308,7 @@ public:
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     RefPtr<GestureEventHub> GetGestureEventHub();
+    float GetSelectedMaxWidth();
 
     bool IsUsingMouse() const
     {
@@ -343,6 +344,16 @@ public:
     const std::list<ParagraphManager::ParagraphInfo>& GetParagraphs() const
     {
         return paragraphs_.GetParagraphs();
+    }
+
+    std::optional<SelectHandleInfo> GetFirstHandleInfo() const
+    {
+        return selectOverlay_->GetFirstHandleInfo();
+    }
+
+    std::optional<SelectHandleInfo> GetSecondHandleInfo() const
+    {
+        return selectOverlay_->GetSecondHandleInfo();
     }
 
     RectF GetCaretRect() const override;
