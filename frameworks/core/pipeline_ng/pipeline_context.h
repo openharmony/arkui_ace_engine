@@ -689,6 +689,9 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
+    void CheckNeedUpdateBackgroundColor(Color& color);
+    bool CheckNeedDisableUpdateBackgroundImage();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

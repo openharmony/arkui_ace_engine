@@ -227,6 +227,10 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushRequestFocus() {}
 
+void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
+
+bool PipelineContext::CheckNeedDisableUpdateBackgroundImage() { return false; }
+
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
 {}
