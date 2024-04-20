@@ -63,6 +63,7 @@ private:
     static int32_t GetEmojiLengthForward(std::u32string& u32Content, int32_t& startIndex, std::u16string u16Content);
     static int32_t GetEmojiLengthAtEnd(std::u32string u32Content, bool isCountNonEmoji);
     static int32_t GetEmojiLengthAtFront(std::u32string u32Content, bool isCountNonEmoji);
+    static std::u16string U32ToU16string(const std::u32string& u32str);
 };
 
 } // namespace OHOS::Ace

@@ -622,8 +622,8 @@ void RichEditorPattern::SpanNodeFission(RefPtr<SpanNode>& spanNode)
 void RichEditorPattern::DeleteSpans(const RangeOptions& options)
 {
     auto length = GetTextContentLength();
-    int32_t start = (!options.start.has_value()) ? 0 : options.start.value();
-    int32_t end = (!options.end.has_value()) ? length : options.end.value();
+    int32_t start = options.start.value_or(0);
+    int32_t end = options.end.value_or(length);
     if (start > end) {
         std::swap(start, end);
     }

@@ -110,18 +110,17 @@ bool TextEmojiProcessor::IsIndexInEmoji(int32_t index, std::string content, int3
         return false;
     }
     int32_t u32Length = u32Content.length();
-    int32_t emojiBackwardLengthU16 = StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32Content
-        .substr(u32Length - backwardLen, u32Length))).length();
+    int32_t emojiBackwardLengthU16 = U32ToU16string(u32Content.substr(u32Length - backwardLen, u32Length)).length();
     index -= emojiBackwardLengthU16;
     emojiBackwardLengthU16 = endIndex - index; // calculate length of the part of emoji
+
     // get the whole emoji from the new start
     int32_t forwardLen = GetEmojiLengthForward(u32Content, index, u16Content);
     if (forwardLen == 0) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "IsIndexInEmoji forwardLen is 0");
         return false;
     }
-    int32_t emojiForwardLengthU16 = StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32Content
-        .substr(0, forwardLen))).length();
+    int32_t emojiForwardLengthU16 = U32ToU16string(u32Content.substr(0, forwardLen)).length();
     if (emojiForwardLengthU16 > emojiBackwardLengthU16) {
         // forward length is larget than backward one, which means the startIndex is in the middle of one emoji
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "IsIndexInEmoji index=%{public}d emojiBackwardLengthU16=%{public}d"
@@ -132,6 +131,13 @@ bool TextEmojiProcessor::IsIndexInEmoji(int32_t index, std::string content, int3
         return true;
     }
     return false;
+}
+
+std::u16string TextEmojiProcessor::U32ToU16string(const std::u32string& u32str)
+{
+    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> u8ToU16converter;
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> u32ToU8converter;
+    return u8ToU16converter.from_bytes(u32ToU8converter.to_bytes(u32str));
 }
 
 int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
