@@ -426,6 +426,8 @@ public:
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
+    static void ResetPosition(FrameNode* frameNode);
     static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
@@ -482,6 +484,7 @@ public:
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
     static void SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value);
     static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);

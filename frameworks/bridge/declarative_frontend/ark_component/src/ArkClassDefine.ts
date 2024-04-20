@@ -1206,3 +1206,44 @@ class ArkWaterFlowEdgeEffect {
       (this.options === another.options);
   }
 }
+
+class ArkPositionType {
+  useEdges: boolean;
+  x: Length | undefined;
+  y: Length | undefined;
+  top: Dimension | undefined;
+  left: Dimension | undefined;
+  bottom: Dimension | undefined;
+  right: Dimension | undefined;
+
+  constructor() {
+    this.useEdges = false;
+    this.x = undefined;
+    this.y = undefined;
+    this.top = undefined;
+    this.left = undefined;
+    this.right = undefined;
+    this.bottom = undefined;
+  }
+
+  parsePositionType(value: Position | Edges) {
+    if (isUndefined(value)) {
+      return false;
+    }
+    if (('x' in value) || ('y' in value)) {
+      this.useEdges = false;
+      this.x = value.x;
+      this.y = value.y;
+      return true;
+    } else if (('top' in value) || ('left' in value) || ('bottom' in value) || ('right' in value)) {
+      this.useEdges = true;
+      this.top = value.top;
+      this.left = value.left;
+      this.bottom = value.bottom;
+      this.right = value.right;
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
