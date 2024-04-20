@@ -202,6 +202,10 @@ public:
     static ArkUINativeModuleValue ResetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackgroundBrightnessInternal(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackgroundBrightnessInternal(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetForegroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetForegroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);

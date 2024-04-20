@@ -61,6 +61,8 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this;
     backgroundEffect(options: BackgroundEffectOptions): this;
     backgroundBrightness(params: BackgroundBrightnessOptions): this;
+    backgroundBrightnessInternal(params: BrightnessOptions): this;
+    foregroundBrightness(params: BrightnessOptions): this;
     dragPreviewOptions(value: DragPreviewOptions): this;
     responseRegion(value: Array<Rectangle> | Rectangle): this;
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this;

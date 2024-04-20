@@ -1095,6 +1095,16 @@ struct ArkUICommonModifier {
     void (*resetBackgroundEffect)(ArkUINodeHandle node);
     void (*setBackgroundBrightness)(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree);
     void (*resetBackgroundBrightness)(ArkUINodeHandle node);
+    void (*setBackgroundBrightnessInternal)(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
+        ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+        const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
+        const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction);
+    void (*resetBackgroundBrightnessInternal)(ArkUINodeHandle node);
+    void (*setForegroundBrightness)(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
+        ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+        const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
+        const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction);
+    void (*resetForegroundBrightness)(ArkUINodeHandle node);
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode);
     void (*resetDragPreviewOptions)(ArkUINodeHandle node);
     void (*setMouseResponseRegion)(

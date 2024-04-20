@@ -183,6 +183,8 @@ public:
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetBgDynamicBrightness(const BrightnessOption& brightnessOption);
+    static void SetFgDynamicBrightness(const BrightnessOption& brightnessOption);
     static void SetDynamicDim(float DimDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
@@ -512,6 +514,8 @@ public:
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
+    static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
+    static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);

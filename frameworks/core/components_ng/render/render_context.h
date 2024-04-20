@@ -508,6 +508,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BgDynamicBrightnessOption, BrightnessOption);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FgDynamicBrightnessOption, BrightnessOption);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
@@ -692,6 +694,8 @@ protected:
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
+    virtual void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
+    virtual void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
     virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
     virtual void OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType) {}

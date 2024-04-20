@@ -141,6 +141,8 @@ public:
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
     void SetDynamicDim(float DimDegree) override {};
     void SetDynamicLightUp(float rate, float lightUpDegree) override {};
+    void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override {};
+    void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override {};
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetBlendMode(BlendMode blendMode) override;

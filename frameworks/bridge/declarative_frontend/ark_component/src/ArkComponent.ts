@@ -2210,6 +2210,50 @@ class BackgroundBrightnessModifier extends ModifierWithKey<BackgroundBrightnessO
   }
 }
 
+class BackgroundBrightnessInternalModifier extends ModifierWithKey<BrightnessOptions> {
+  constructor(params: BrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('backgroundBrightnessInternal');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundBrightnessInternal(node);
+    } else {
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
+    }
+  }                       
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
+      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+  }
+}
+
+class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
+  constructor(params: BrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('foregroundBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundBrightness(node);
+    } else {
+      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
+      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+  }
+}
+
 class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
   constructor(value: DragPreviewOptions) {
     super(value);
@@ -2787,6 +2831,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   backgroundBrightness(params: BackgroundBrightnessOptions): this {
     modifierWithKey(this._modifiersWithKeys, BackgroundBrightnessModifier.identity,
       BackgroundBrightnessModifier, params);
+    return this;
+  }
+
+  backgroundBrightnessInternal(params: BrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundBrightnessInternalModifier.identity,
+      BackgroundBrightnessInternalModifier, params);
+    return this;
+  }
+
+  foregroundBrightness(params: BrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundBrightnessModifier.identity,
+      ForegroundBrightnessModifier, params);
     return this;
   }
 

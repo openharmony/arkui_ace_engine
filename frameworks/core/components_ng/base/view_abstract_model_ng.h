@@ -674,6 +674,16 @@ public:
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
+    
+    void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override
+    {
+        ViewAbstract::SetBgDynamicBrightness(brightnessOption);
+    }
+
+    void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override
+     {
+        ViewAbstract::SetFgDynamicBrightness(brightnessOption);
+     }
 
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
