@@ -1666,8 +1666,6 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
-    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
-    void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
