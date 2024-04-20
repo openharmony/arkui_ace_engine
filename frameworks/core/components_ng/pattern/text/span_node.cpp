@@ -300,6 +300,7 @@ void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, con
         if (symbolUnicode != 0) {
             UpdateSymbolSpanColor(frameNode, themeTextStyle);
         }
+        themeTextStyle.SetFontFamilies({"HM Symbol"});
         builder->PushStyle(themeTextStyle);
     }
     textStyle_ = textStyle;
