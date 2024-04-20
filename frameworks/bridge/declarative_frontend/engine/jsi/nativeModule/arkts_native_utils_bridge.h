@@ -46,7 +46,7 @@ struct NativeStrongRef {
 };
 
 template<typename T>
-void DestructorInterceptor(void* nativePtr, void* data)
+void DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
     delete typePtr;

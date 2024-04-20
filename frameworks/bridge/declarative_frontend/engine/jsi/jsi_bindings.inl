@@ -629,7 +629,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::Jsi
 }
 
 template<typename C>
-void JsiClass<C>::DestructorInterceptor(void* nativePtr, void* data)
+void JsiClass<C>::DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     if (jsDestructor_) {
         jsDestructor_(reinterpret_cast<C*>(nativePtr));
