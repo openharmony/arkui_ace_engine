@@ -15464,6 +15464,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PopupTitleBackgroundModifier.identity, PopupTitleBackgroundModifier, value);
     return this;
   }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, AdaptiveWidthModifier.identity, AdaptiveWidthModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.AlphabetIndexer !== undefined) {
@@ -15829,6 +15833,19 @@ class PopupTitleBackgroundModifier extends ModifierWithKey {
   }
 }
 PopupTitleBackgroundModifier.identity = Symbol('popupTitleBackground');
+class AdaptiveWidthModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+        getUINativeModule().alphabetIndexer.resetAdaptiveWidth(node);
+    } else {
+        getUINativeModule().alphabetIndexer.setAdaptiveWidth(node, this.value);
+    }
+  }
+}
+AdaptiveWidthModifier.identity = Symbol('adaptiveWidth');
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {

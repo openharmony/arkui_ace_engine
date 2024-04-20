@@ -2567,6 +2567,8 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetPopupBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setPopupTitleBackground)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetPopupTitleBackground)(ArkUINodeHandle node);
+    void (*setAdaptiveWidth)(ArkUINodeHandle node);
+    void (*resetAdaptiveWidth)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {
