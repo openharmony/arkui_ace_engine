@@ -1609,6 +1609,8 @@ struct ArkUIListItemGroupModifier {
 struct ArkUIParticleModifier {
     void (*SetDisturbanceField)(ArkUINodeHandle node, const ArkUIInt32orFloat32* valuesArray, ArkUI_Int32 length);
     void (*ResetDisturbanceField)(ArkUINodeHandle node);
+    void (*SetEmitter)(ArkUINodeHandle node, const ArkUIInt32orFloat32* valuesArray, ArkUI_Int32 length);
+    void (*ResetEmitter)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperModifier {

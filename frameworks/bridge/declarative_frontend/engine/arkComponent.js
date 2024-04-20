@@ -21765,12 +21765,33 @@ class ParticleDisturbanceFieldModifier extends ModifierWithKey {
 
 ParticleDisturbanceFieldModifier.identity = Symbol('disturbanceFields');
 
+class ParticleEmitterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().particle.resetEmitter(node);
+    }
+    else {
+      getUINativeModule().particle.setEmitter(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+ParticleEmitterModifier.identity = Symbol('emitter');
+
 /// <reference path='./import.ts' />
 class ArkParticleComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   disturbanceFields(value) {
+     modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
      modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
     return this;
   }

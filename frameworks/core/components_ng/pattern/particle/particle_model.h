@@ -20,6 +20,7 @@
 #include <memory>
 #include <mutex>
 
+#include "base/geometry/ng/vector.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/particle_property.h"
@@ -46,12 +47,20 @@ struct ParticleDisturbance {
     }
 };
 
+struct EmitterProps {
+    uint32_t index = 0;
+    std::optional<NG::VectorF> position;
+    std::optional<NG::VectorF> size;
+    std::optional<uint32_t> emitRate;
+};
+
 class ACE_EXPORT ParticleModel {
 public:
     static ParticleModel* GetInstance();
     virtual ~ParticleModel() = default;
     virtual void Create(std::list<NG::ParticleOption>& arrayValue) = 0;
     virtual void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray) = 0;
+    virtual void updateEmitter(const std::vector<EmitterProps>& emitterProps) = 0;
 
 private:
     static std::unique_ptr<ParticleModel> instance_;

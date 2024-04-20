@@ -1932,3 +1932,8 @@ declare class ArkParticleComponent extends ArkComponent implements ParticleAttri
 declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
 declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}
+
+declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    emitter(fields: Array<EmitterProps>): ParticleAttribute;
+}
