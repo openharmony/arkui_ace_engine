@@ -23,9 +23,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr int32_t POINT_HOVER_ANIMATION_DURATION = 100;
 constexpr int32_t COMPONENT_DILATE_ANIMATION_DURATION = 250;
 constexpr int32_t COMPONENT_SHRINK_ANIMATION_DURATION = 300;
@@ -322,8 +319,10 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set(margin);
-    indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
-
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    indicatorPadding_->Set(static_cast<float>(paddingSide.ConvertToPx()));
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
         longPointLeftCenterX_->Set(longPointCenterX.first);
@@ -343,8 +342,10 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
     const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set({ 0, 0 });
-    indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()));
-
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    indicatorPadding_->Set(static_cast<float>(paddingSide.ConvertToPx()));
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftCenterX_->Set(longPointCenterX.first);
@@ -482,7 +483,10 @@ void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [&]() { normalToHoverPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE); });
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    float scaleIndicator = swiperTheme->GetScaleSwiper();
+    AnimationUtils::Animate(option, [&]() { normalToHoverPointDilateRatio_->Set(scaleIndicator); });
 }
 
 void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
@@ -499,8 +503,11 @@ void DotIndicatorModifier::UpdateLongPointDilateRatio()
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    float scaleIndicator = swiperTheme->GetScaleSwiper();
     if (longPointIsHover_) {
-        AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE); });
+        AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(scaleIndicator); });
     } else {
         AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(1.0f); });
     }

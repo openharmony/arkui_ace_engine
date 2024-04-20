@@ -26,10 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
@@ -109,7 +106,45 @@ void SwiperIndicatorPattern::OnModifyDone()
         InitHoverMouseEvent();
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
+        InitFocusEvent();
     }
+}
+
+void SwiperIndicatorPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void SwiperIndicatorPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    dotIndicatorModifier_->SetIsFocused(true);
+}
+
+void SwiperIndicatorPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(dotIndicatorModifier_);
+    dotIndicatorModifier_->SetIsFocused(false);
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -188,10 +223,10 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-
     auto currentIndex = swiperPattern->GetCurrentIndex();
     auto margin = HandleTouchClickMargin();
-    auto lengthBeforeCurrentIndex = margin + INDICATOR_PADDING_DEFAULT.ConvertToPx() +
+    Dimension paddingSide = theme->GetIndicatorPaddingDot();
+    auto lengthBeforeCurrentIndex = margin + paddingSide.ConvertToPx() +
                                     (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = swiperPattern->GetDirection();
@@ -370,10 +405,12 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
         selectedItemWidthValue *= 0.5f;
     }
     // diameter calculation
-    float itemWidth = itemWidthValue * INDICATOR_ZOOM_IN_SCALE;
-    float itemHeight = itemHeightValue * INDICATOR_ZOOM_IN_SCALE;
-    float selectedItemWidth = selectedItemWidthValue * INDICATOR_ZOOM_IN_SCALE;
-    float padding = static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx());
+    double scaleIndicator = swiperTheme->GetScaleSwiper();
+    float itemWidth = itemWidthValue * scaleIndicator;
+    float itemHeight = itemHeightValue * scaleIndicator;
+    float selectedItemWidth = selectedItemWidthValue * scaleIndicator;
+    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    float padding = static_cast<float>(paddingSide.ConvertToPx());
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     int32_t currentIndex = swiperPattern->GetCurrentShownIndex();
     int32_t itemCount = swiperPattern->RealTotalCount();
@@ -710,7 +747,8 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     int32_t itemCount = swiperPattern->RealTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
-    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    Dimension paddingSide = theme->GetIndicatorPaddingDot();
+    auto indicatorPadding = static_cast<float>(paddingSide.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
