@@ -233,6 +233,76 @@ void MenuPattern::OnModifyDone()
     }
 }
 
+RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
+{
+    auto scroll = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    CHECK_NULL_RETURN(scroll, nullptr);
+    auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+    props->UpdateAxis(Axis::VERTICAL);
+    props->UpdateAlignment(Alignment::CENTER_LEFT);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    PaddingProperty padding;
+    padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
+    props->UpdatePadding(padding);
+    if (node) {
+        node->MountToParent(scroll);
+    }
+    auto renderContext = scroll->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetMenuBorderRadius());
+    renderContext->UpdateBorderRadius(borderRadius);
+    return scroll;
+}
+
+void MenuPattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(builderNode_.Upgrade());
+    CHECK_NULL_VOID(makeFunc_.has_value());
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto scroll = CreateMenuScroll(column);
+    CHECK_NULL_VOID(scroll);
+    builderNode_ = scroll;
+    for (size_t i = 0; i < selectProperties_.size(); i++) {
+        contentModifierNode_ = BuildContentModifierNode(i);
+        CHECK_NULL_VOID(contentModifierNode_);
+        AddOptionNode(contentModifierNode_);
+        contentModifierNode_->MarkModifyDone();
+        contentModifierNode_->MountToParent(column);
+    }
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->SetIsSelectScroll(true);
+    scroll->MountToParent(host);
+    scroll->MarkModifyDone();
+    host->MarkModifyDone();
+    SetIsSelectMenu(true);
+}
+
+RefPtr<FrameNode> MenuPattern::BuildContentModifierNode(int index)
+{
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto value = pattern->GetItemValue(index);
+    auto icon = pattern->GetIcon(index);
+    bool selectEnable = true;
+    bool selected = true;
+
+    MenuItemConfiguration menuItemConfiguration(value, icon, index, selected, selectEnable);
+    return (makeFunc_.value())(menuItemConfiguration);
+}
+
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
 {
     RecordItemsAndGroups();

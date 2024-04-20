@@ -52,6 +52,12 @@ enum class MenuType {
     SELECT_OVERLAY_RIGHT_CLICK_MENU, // menu type used for select overlay menu triggered by right-click
 };
 
+struct SelectProperties {
+    std::string value;
+    std::string icon;
+    int index;
+};
+
 class MenuPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(MenuPattern, Pattern, FocusView);
 
@@ -233,6 +239,13 @@ public:
         options_.emplace_back(option);
     }
 
+    int32_t GetBuilderId()
+    {
+        auto node = builderNode_.Upgrade();
+        CHECK_NULL_RETURN(node, -1);
+        return node->GetId();
+    }
+
     void PopOptionNode()
     {
         if (options_.empty()) {
@@ -356,6 +369,41 @@ public:
         return expandDisplay_;
     }
 
+    void SetBuilderFunc(SelectMakeCallback&& makeFunc)
+    {
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    void SetSelectProperties(const std::vector<SelectParam>& params)
+    {
+        selectProperties_.clear();
+        for (size_t i = 0; i < params.size(); i++) {
+            SelectProperties selectProperty;
+            selectProperty.value = params[i].first;
+            selectProperty.icon = params[i].second;
+            selectProperty.index = i;
+            selectProperties_.push_back(selectProperty);
+        }
+    }
+
+    std::string GetItemValue(int index)
+    {
+        return selectProperties_[index].value;
+    }
+
+    std::string GetIcon(int index)
+    {
+        return selectProperties_[index].icon;
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    RefPtr<FrameNode> BuildContentModifierNode(int index);
+    void FireBuilder();
+
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -396,6 +444,9 @@ private:
     const int32_t targetId_ = -1;
     const std::string targetTag_;
     MenuType type_ = MenuType::MENU;
+    std::vector<SelectProperties> selectProperties_;
+    std::optional<SelectMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;
@@ -408,7 +459,7 @@ private:
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
-	
+    WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;
     bool isHeightModifiedBySelect_ = false;
     bool hasLaid_ = false;

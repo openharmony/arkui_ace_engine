@@ -12425,6 +12425,22 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().select.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, menuItemConfiguration) {
+    menuItemConfiguration.contentModifier = this.modifier;
+    const index = menuItemConfiguration.index;
+    const xNode = globalThis.requireNapi('arkui.node');
+    this.menuItemNodes = new xNode.BuilderNode(context);
+    this.menuItemNodes.build(this.builder, menuItemConfiguration);
+    return this.menuItemNodes.getFrameNode();
+  }
 }
 class FontModifier extends ModifierWithKey {
   constructor(value) {
@@ -12782,6 +12798,15 @@ if (globalThis.Select !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SelectModifier(nativePtr, classType);
     });
+  };
+
+  globalThis.Select.menuItemContentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkSelectComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 
