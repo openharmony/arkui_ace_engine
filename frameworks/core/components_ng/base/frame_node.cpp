@@ -3111,6 +3111,15 @@ bool FrameNode::ParentExpansive()
     return parentOpts && parentOpts->Expansive();
 }
 
+void FrameNode::UpdateFocusState()
+{
+    auto focusHub = GetFocusHub();
+    if (focusHub && focusHub->IsCurrentFocus()) {
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
+    }
+}
+
 bool FrameNode::SelfOrParentExpansive()
 {
     return SelfExpansive() || ParentExpansive();
@@ -3182,8 +3191,11 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 
 void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
-    ACE_LAYOUT_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+            GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+    }
+
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (!renderContext_->HasBorderColor()) {
@@ -3227,11 +3239,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     }
 
     // update focus state
-    auto focusHub = GetFocusHub();
-    if (focusHub && focusHub->IsCurrentFocus()) {
-        focusHub->ClearFocusState(false);
-        focusHub->PaintFocusState(false);
-    }
+    UpdateFocusState();
 
     // rebuild child render node.
     RebuildRenderContextTree();

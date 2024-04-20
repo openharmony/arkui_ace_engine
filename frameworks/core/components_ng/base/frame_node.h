@@ -670,6 +670,7 @@ public:
         return GetTag();
     }
 
+    void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
     bool ParentExpansive();

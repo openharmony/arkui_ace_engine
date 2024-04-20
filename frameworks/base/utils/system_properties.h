@@ -277,6 +277,11 @@ public:
         return layoutTraceEnable_;
     }
 
+    static bool GetSyncDebugTraceEnabled()
+    {
+        return syncDebugTraceEnable_;
+    }
+
     static bool GetTraceInputEventEnabled()
     {
         return traceInputEventEnable_;
@@ -501,6 +506,7 @@ private:
     static bool layoutTraceEnable_;
     static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool syncDebugTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
