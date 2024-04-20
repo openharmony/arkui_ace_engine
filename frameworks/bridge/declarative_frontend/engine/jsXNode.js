@@ -49,7 +49,7 @@ class BaseNode extends __JSBaseNode__ {
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 class BuilderNode {
     constructor(uiContext, options) {
         let jsBuilderNode = new JSBuilderNode(uiContext, options);
@@ -158,7 +158,7 @@ class JSBuilderNode extends BaseNode {
     }
     purgeDeletedElmtIds() {
         UINodeRegisterProxy.obtainDeletedElmtIds();
-        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+        UINodeRegisterProxy.unregisterElmtIdsFromIViews();
     }
     purgeDeleteElmtId(rmElmtId) {
         const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -1475,7 +1475,6 @@ class XComponentNode extends FrameNode {
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
 class ComponentContent {
     constructor(uiContext, builder, params) {
         let builderNode = new BuilderNode(uiContext, {});
