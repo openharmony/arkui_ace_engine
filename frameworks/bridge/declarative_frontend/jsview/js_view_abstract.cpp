@@ -4534,6 +4534,42 @@ bool JSViewAbstract::ParseJsDimensionNG(
     return false;
 }
 
+bool JSViewAbstract::ParseJsLengthNG(
+    const JSRef<JSVal>& jsValue, NG::CalcLength& result, DimensionUnit defaultUnit, bool isSupportPercent)
+{
+    if (jsValue->IsNumber()) {
+        if (std::isnan(jsValue->ToNumber<double>())) {
+            return false;
+        }
+        result = NG::CalcLength(jsValue->ToNumber<double>(), defaultUnit);
+        return true;
+    } else if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> value = jsObj->GetProperty("value");
+        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>()))) {
+            return false;
+        }
+        DimensionUnit unit = defaultUnit;
+        JSRef<JSVal> jsUnit = jsObj->GetProperty("unit");
+        if (jsUnit->IsNumber()) {
+            if (!isSupportPercent && jsUnit->ToNumber<int32_t>() == static_cast<int32_t>(DimensionUnit::PERCENT)) {
+                return false;
+            }
+            unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+        }
+        result = NG::CalcLength(value->ToNumber<double>(), unit);
+        return true;
+    }
+
+    return false;
+}
+
+bool JSViewAbstract::ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
+}
+
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
 {
     if (jsValue->IsNumber()) {

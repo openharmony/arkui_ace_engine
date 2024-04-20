@@ -119,6 +119,11 @@ public:
         return dimension_;
     }
 
+    Dimension GetDimensionContainsNegative() const
+    {
+        return dimension_;
+    }
+
 private:
     std::string calcValue_;
     Dimension dimension_;

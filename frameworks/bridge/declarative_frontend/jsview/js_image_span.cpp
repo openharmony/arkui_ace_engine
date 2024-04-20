@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
 namespace OHOS::Ace::Framework {
@@ -116,6 +117,21 @@ void JSImageSpan::OnError(const JSCallbackInfo& args)
     }
 }
 
+void JSImageSpan::SetBaselineOffset(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    NG::CalcLength value;
+    if (ConvertFromJSValueNG(info[0], value) &&
+        value.GetDimensionContainsNegative().Unit() != DimensionUnit::PERCENT) {
+        NG::ImageSpanView::SetBaselineOffset(value.GetDimensionContainsNegative());
+        return;
+    }
+    value.Reset();
+    NG::ImageSpanView::SetBaselineOffset(value.GetDimensionContainsNegative());
+}
+
 void JSImageSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImageSpan>::Declare("ImageSpan");
@@ -129,6 +145,7 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::StaticMethod("onError", &JSImageSpan::OnError);
     JSClass<JSImageSpan>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImageSpan>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImageSpan>::StaticMethod("baselineOffset", &JSImageSpan::SetBaselineOffset);
     JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework
