@@ -117,19 +117,18 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
-    } else {
+    } else if (context && pipelineContext->IsFormRender()) {
         // form of same <bundle, module> reuse created resource adapter
-        if (pipelineContext->IsFormRender()) {
-            auto bundleName = context->GetBundleName();
-            auto moduleName = context->GetHapModuleInfo()->name;
-            if (!bundleName.empty() && !moduleName.empty()) {
-                resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
-            }
+        auto bundleName = context->GetBundleName();
+        auto moduleName = context->GetHapModuleInfo()->name;
+        if (!bundleName.empty() && !moduleName.empty()) {
+            resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
         }
-        if (resourceAdapter == nullptr) {
-            resourceAdapter = ResourceAdapter::CreateV2();
-            resourceAdapter->Init(resourceInfo);
-        }
+    }
+
+    if (resourceAdapter == nullptr) {
+        resourceAdapter = ResourceAdapter::CreateV2();
+        resourceAdapter->Init(resourceInfo);
     }
 
     ThemeConstants::InitDeviceType();
