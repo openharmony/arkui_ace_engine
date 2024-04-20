@@ -3349,5 +3349,41 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     pipeline->RemoveFormVisibleChangeNode(frameNode->GetId());
     EXPECT_EQ(pipeline->onFormVisibleChangeNodeIds_.size(), 0);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg074
+ * @tc.desc: Test the function SetFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg079, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    float fontScale = 1.2f;
+    context_->SetFontScale(fontScale);
+    ASSERT_EQ(context_->fontScale_, fontScale);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg075
+ * @tc.desc: Test the function SetFontWeightScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg080, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    float fontWeightScale = 1.2f;
+    context_->SetFontWeightScale(fontWeightScale);
+    ASSERT_EQ(context_->fontWeightScale_, fontWeightScale);
+}
 } // namespace NG
 } // namespace OHOS::Ace
