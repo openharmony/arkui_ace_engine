@@ -270,13 +270,6 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     switch (id) {
         case OptionMenuActionId::COPY:
             pattern->HandleOnCopy();
-            CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
-            if (!usingMouse) {
-                if (!pattern->textDetectEnable_) {
-                    pattern->StartTwinkling();
-                }
-                pattern->ResetSelection();
-            }
             break;
         case OptionMenuActionId::CUT:
             pattern->HandleOnCut();
