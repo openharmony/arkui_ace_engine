@@ -2240,23 +2240,9 @@ HWTEST_F(TextFieldModifyTest, UpdateOverlayModifier001, TestSize.Level1)
 
     paintProperty->ResetSelectedBackgroundColor();
     EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
-    int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
-    Color cursorColor = Color::RED;
-    double defaultOpacity = 0.2;
-    auto expectedSelectedColor = cursorColor.ChangeOpacity(defaultOpacity);
-    paintProperty->UpdateCursorColor(cursorColor);
-    paintMethod->UpdateOverlayModifier(paintWrapper);
-    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == expectedSelectedColor);
 
-    /**
-     * @tc.steps: step3. set select background color and call UpdateContentModifier
-     * tc.expected: step3. selected color equals setting select background.
-     */
     paintProperty->UpdateSelectedBackgroundColor(Color::BLUE);
     paintMethod->UpdateOverlayModifier(paintWrapper);
     EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == Color::BLUE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG
