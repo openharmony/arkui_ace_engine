@@ -191,8 +191,8 @@ export struct IconGroupSuffix {
 @Component
 export struct ChipGroup {
   @Prop items: ChipGroupItemOptions[] = [];
-  @Prop @Watch('itemStyleOnChange')itemStyle: ChipItemStyle = defaultTheme.itemStyle;
-  @Provide chipSize: ChipSize | SizeOptions = this.itemStyle.size ?? defaultTheme.itemStyle.size;
+  @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
+  @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
   @Prop selectedIndexes: Array<number> = [0];
   @Prop multiple: boolean = false;
   @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
@@ -206,40 +206,40 @@ export struct ChipGroup {
     this.chipSize = this.getChipSize();
   }
 
+  aboutToAppear() {
+    this.itemStyleOnChange();
+  }
+
   private getChipSize(): ChipSize | SizeOptions {
-    if(this.itemStyle && this.itemStyle.size)
-    {
+    if (this.itemStyle && this.itemStyle.size) {
       return this.itemStyle.size
     }
     return defaultTheme.itemStyle.size;
   }
-  private getFontColor():ResourceColor{
-    if(this.itemStyle && this.itemStyle.fontColor)
-    {
+
+  private getFontColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.fontColor) {
       return this.itemStyle.fontColor
     }
     return defaultTheme.itemStyle.fontColor;
   }
 
-  private getSelectedFontColor():ResourceColor{
-    if(this.itemStyle && this.itemStyle.selectedFontColor)
-    {
+  private getSelectedFontColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedFontColor) {
       return this.itemStyle.selectedFontColor
     }
     return defaultTheme.itemStyle.selectedFontColor;
   }
 
-  private getBackgroundColor():ResourceColor{
-    if(this.itemStyle && this.itemStyle.backgroundColor)
-    {
+  private getBackgroundColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.backgroundColor) {
       return this.itemStyle.backgroundColor
     }
     return defaultTheme.itemStyle.backgroundColor;
   }
 
-  private getSelectedBackgroundColor():ResourceColor{
-    if(this.itemStyle && this.itemStyle.selectedBackgroundColor)
-    {
+  private getSelectedBackgroundColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
       return this.itemStyle.selectedBackgroundColor
     }
     return defaultTheme.itemStyle.selectedBackgroundColor;
@@ -284,7 +284,7 @@ export struct ChipGroup {
     if (!this.isMultiple()) {
       return itemIndex == this.getSelectedIndexes()[0];
     } else {
-      console.log("zjw itemIndex = "+itemIndex)
+      console.log("zjw itemIndex = " + itemIndex)
       return this.getSelectedIndexes().some((element, index, array) => {
         return (element == itemIndex);
       })
