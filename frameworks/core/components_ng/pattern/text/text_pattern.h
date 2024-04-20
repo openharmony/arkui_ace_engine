@@ -690,6 +690,7 @@ private:
 
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void ProcessOverlayAfterLayout();
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
