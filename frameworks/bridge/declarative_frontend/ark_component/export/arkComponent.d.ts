@@ -1925,7 +1925,10 @@ declare class ArkEffectComponentComponent extends ArkComponent implements Effect
 }
 declare class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
 }
-
+declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    disturbanceFields(fields: Array<DisturbanceFieldsOptions>): ParticleAttribute;
+}
 declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
 declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}

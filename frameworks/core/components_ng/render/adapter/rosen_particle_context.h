@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,16 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_PARTICLE_CONTEXT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_PARTICLE_CONTEXT_H
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARTICLE_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARTICLE_MODEL_H
+#include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/particle/particle_model.h"
+
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ParticleModelNG : public OHOS::Ace::ParticleModel {
+class RosenRenderParticle : public AceType {
 public:
-    void Create(std::list<ParticleOption>& arrayValue) override;
-    void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray) override;
-    static void DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray, NG::FrameNode* frameNode);
+    static void UpdateDisturbance(
+        const RefPtr<FrameNode>& frameNode, const std::vector<ParticleDisturbance>& disturbanceArray);
 };
+
 } // namespace OHOS::Ace::NG
-#endif
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_PARTICLE_CONTEXT_H

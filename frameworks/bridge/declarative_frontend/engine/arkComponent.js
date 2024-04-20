@@ -2543,6 +2543,12 @@ function checkJsCallbackInfo(value, checklist) {
   });
   return typeVerified || checklist.length === 0;
 }
+function parseWithDefaultNumber(val, defaultValue) {
+  if (isNumber(val)) {
+    return val;
+  }
+  else { return defaultValue; }
+}
 function modifier(modifiers, modifierClass, value) {
   const identity = modifierClass['identity'];
   const item = modifiers.get(identity);
@@ -21710,3 +21716,74 @@ if (globalThis.RemoteWindow !== undefined) {
   };
 }
 
+class ParticleDisturbanceFieldModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().particle.resetDisturbanceField(node);
+    }
+    else {
+      let dataArray = [];
+      if (Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let data = this.value[i];
+        dataArray.push(parseWithDefaultNumber(data.strength, 0));
+        dataArray.push(parseWithDefaultNumber(data.shape, 0));
+        if (isObject(data.size)) {
+          dataArray.push(parseWithDefaultNumber(data.size.width, 0));
+          dataArray.push(parseWithDefaultNumber(data.size.height, 0));
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(0);
+        }
+        if (isObject(data.position)) {
+          dataArray.push(parseWithDefaultNumber(data.position.x, 0));
+          dataArray.push(parseWithDefaultNumber(data.position.y, 0));
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(0);
+        }
+        dataArray.push(parseWithDefaultNumber(data.feather, 0));
+        dataArray.push(parseWithDefaultNumber(data.noiseScale, 1));
+        dataArray.push(parseWithDefaultNumber(data.noiseFrequency, 1));
+        dataArray.push(parseWithDefaultNumber(data.noiseAmplitude, 1));
+      }
+      getUINativeModule().particle.setDisturbanceField(node, dataArray);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+ParticleDisturbanceFieldModifier.identity = Symbol('disturbanceFields');
+
+/// <reference path='./import.ts' />
+class ArkParticleComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  disturbanceFields(value) {
+     modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.Particle !== undefined) {
+
+  // @ts-ignore
+  globalThis.Particle.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkParticleComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ParticleModifier(nativePtr, classType);
+    });
+  };
+}
