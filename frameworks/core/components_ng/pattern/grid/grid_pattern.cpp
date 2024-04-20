@@ -75,10 +75,9 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
-    bool canOverScroll = !disableOverScroll_ && CanOverScroll(GetScrollSource());
     bool disableSkip = IsOutOfBoundary() || ScrollablePattern::AnimateRunning();
     if (UseIrregularLayout()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, canOverScroll);
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
         algo->SetEnableSkip(!disableSkip);
         return algo;
     }
@@ -88,7 +87,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
-    result->SetCanOverScroll(canOverScroll);
+    result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     result->SetScrollSource(GetScrollSource());
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
@@ -1573,15 +1572,17 @@ void GridPattern::SyncLayoutBeforeSpring()
     if (!UseIrregularLayout()) {
         float delta = info.currentOffset_ - info.prevOffset_;
         if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lineHeightMap_.rbegin()->second)) {
-            // old layout can't handle large overScroll offset. Avoid by disabling overScroll
-            disableOverScroll_ = true;
+            // old layout can't handle large overScroll offset. Avoid by skipping this layout.
+            // Spring animation plays immediately afterwards, so losing this frame's offset is fine
+            info.currentOffset_ = info.prevOffset_;
+            info.synced_ = true;
+            return;
         }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetActive();
     host->CreateLayoutTask();
-    disableOverScroll_ = false;
 }
 
 bool GridPattern::OutBoundaryCallback()

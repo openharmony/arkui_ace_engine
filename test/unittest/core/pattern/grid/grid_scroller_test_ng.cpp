@@ -1464,8 +1464,7 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
     pattern_->ScrollToIndex(targetIndex, false, align);
     FlushLayoutTask(frameNode_);
     auto& info = pattern_->gridLayoutInfo_;
-    EXPECT_EQ(info.startMainLineIndex_, 6);
-    EXPECT_EQ(info.endMainLineIndex_, 9);
+    info.prevOffset_ = info.currentOffset_;
     info.currentOffset_ -= 1000.0f;
     info.synced_ = false;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1474,11 +1473,11 @@ HWTEST_F(GridScrollerTestNg, GetEndOffset001, TestSize.Level1)
     pattern_->GetScrollEdgeEffect()->ProcessScrollOver(-2000.0f);
     EXPECT_TRUE(info.synced_);
     // overScroll disabled to avoid layout bug
-    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.currentOffset_, info.prevOffset_);
     EXPECT_EQ(info.startIndex_, 12);
     EXPECT_EQ(info.endIndex_, 19);
-    EXPECT_EQ(info.startMainLineIndex_, 8);
-    EXPECT_EQ(info.endMainLineIndex_, 11);
+    EXPECT_EQ(info.startMainLineIndex_, 6);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
     EXPECT_EQ(pattern_->GetEndOffset(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

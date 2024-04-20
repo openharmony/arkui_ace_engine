@@ -285,7 +285,6 @@ private:
     bool isConfigScrollable_ = false;
 
     bool scrollable_ = true;
-    bool disableOverScroll_ = false;
 
     float endHeight_ = 0.0f;
     bool isLeftStep_ = false;
