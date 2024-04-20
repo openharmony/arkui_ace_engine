@@ -12402,6 +12402,7 @@ class ArkSelectComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().select.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
     this.builder = modifier.applyContent();
