@@ -510,7 +510,7 @@ bool PipelineContext::NeedSoftKeyboard()
 
 void PipelineContext::SetCursor(int32_t cursorValue) {}
 
-void PipelineContext::RestoreDefault() {}
+void PipelineContext::RestoreDefault(int32_t windowId) {}
 
 void PipelineContext::HandleSubwindow(bool isShow) {}
 

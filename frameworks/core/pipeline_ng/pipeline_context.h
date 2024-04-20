@@ -605,7 +605,7 @@ public:
 
     void SetCursor(int32_t cursorValue) override;
 
-    void RestoreDefault() override;
+    void RestoreDefault(int32_t windowId = 0) override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
