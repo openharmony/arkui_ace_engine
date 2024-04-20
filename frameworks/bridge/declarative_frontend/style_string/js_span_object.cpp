@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
@@ -260,6 +261,8 @@ void JSDecorationSpan::JSBind(BindingTarget globalObj)
         "type", &JSDecorationSpan::GetTextDecorationType, &JSDecorationSpan::SetTextDecorationType);
     JSClass<JSDecorationSpan>::CustomProperty(
         "color", &JSDecorationSpan::GetTextDecorationColor, &JSDecorationSpan::SetTextDecorationColor);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "style", &JSDecorationSpan::GetTextDecorationStyle, &JSDecorationSpan::SetTextDecorationStyle);
     JSClass<JSDecorationSpan>::Bind(globalObj, JSDecorationSpan::Constructor, JSDecorationSpan::Destructor);
 }
 
@@ -293,12 +296,17 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObj
     if (!colorObj->IsNull() && JSViewAbstract::ParseJsColor(colorObj, color)) {
         colorOption = color;
     }
+    std::optional<TextDecorationStyle> styleOption;
+    JSRef<JSVal> styleObj = JSRef<JSVal>::Cast(obj->GetProperty("style"));
+    if (!styleObj->IsNull() && styleObj->IsNumber()) {
+        styleOption = static_cast<TextDecorationStyle>(styleObj->ToNumber<int32_t>());
+    }
     TextDecoration type = TextDecoration::NONE;
     JSRef<JSVal> typeObj = JSRef<JSVal>::Cast(obj->GetProperty("type"));
     if (!typeObj->IsNull() && typeObj->IsNumber()) {
         type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
     }
-    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption);
+    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption);
 }
 
 void JSDecorationSpan::GetTextDecorationType(const JSCallbackInfo& info)
@@ -321,6 +329,19 @@ void JSDecorationSpan::GetTextDecorationColor(const JSCallbackInfo& info)
 }
 
 void JSDecorationSpan::SetTextDecorationColor(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetTextDecorationStyle(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetTextDecorationStyle().has_value()) {
+        return;
+    }
+    auto ret =
+        JSRef<JSVal>::Make(JSVal(ToJSValue(static_cast<int32_t>(decorationSpan_->GetTextDecorationStyle().value()))));
+    info.SetReturnValue(ret);
+}
+
+void JSDecorationSpan::SetTextDecorationStyle(const JSCallbackInfo& info) {}
 
 RefPtr<DecorationSpan>& JSDecorationSpan::GetDecorationSpan()
 {

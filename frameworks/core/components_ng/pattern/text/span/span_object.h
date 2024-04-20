@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -98,10 +99,12 @@ class DecorationSpan : public SpanBase {
 
 public:
     DecorationSpan() = default;
-    explicit DecorationSpan(TextDecoration type, std::optional<Color> color);
-    DecorationSpan(TextDecoration type, std::optional<Color> color, int32_t start, int32_t end);
+    explicit DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style);
+    DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style,
+        int32_t start, int32_t end);
     TextDecoration GetTextDecorationType() const;
     std::optional<Color> GetColor() const;
+    std::optional<TextDecorationStyle> GetTextDecorationStyle() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
@@ -114,6 +117,7 @@ private:
 
     TextDecoration type_;
     std::optional<Color> color_;
+    std::optional<TextDecorationStyle> style_;
 };
 
 class BaselineOffsetSpan : public SpanBase {

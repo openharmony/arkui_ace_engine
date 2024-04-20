@@ -116,6 +116,7 @@ public:
     static float GetLineHeight(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
     static Color GetTextDecorationColor(FrameNode* frameNode);
+    static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);
     static TextCase GetTextCase(FrameNode* frameNode);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);

@@ -7114,11 +7114,11 @@ class SpanDecorationModifier extends ModifierWithKey {
       getUINativeModule().span.resetDecoration(node);
     }
     else {
-      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
   }
   checkObjectDiff() {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -8410,11 +8410,11 @@ class TextDecorationModifier extends ModifierWithKey {
       getUINativeModule().text.resetDecoration(node);
     }
     else {
-      getUINativeModule().text.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().text.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
   }
   checkObjectDiff() {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
