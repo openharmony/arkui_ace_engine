@@ -4164,12 +4164,16 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
     auto initialBackgroundColor = DEFAULT_MASK_COLOR;
     auto backgroundColor = DEFAULT_MASK_COLOR;
     RectF pageTransitionRectF;
+    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width(),
+        REMOVE_CLIP_SIZE);
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
         case PageTransitionType::EXIT_POP:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
             pageTransitionRectF = RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF,
+                REMOVE_CLIP_SIZE);
+            defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE,
                 REMOVE_CLIP_SIZE);
             translate.x = Dimension(rect.Width() * HALF);
             break;
@@ -4193,6 +4197,7 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(1);
     resultEffect->SetPageTransitionRectF(pageTransitionRectF);
+    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     resultEffect->SetInitialBackgroundColor(initialBackgroundColor);
     resultEffect->SetBackgroundColor(backgroundColor);
     return resultEffect;
@@ -4206,6 +4211,8 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
         transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
     TranslateOptions translate;
     auto rect = GetPaintRectWithoutTransform();
+    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE,
+        REMOVE_CLIP_SIZE);
     // slide and translate, only one can be effective
     if (transition->GetSlideEffect().has_value()) {
         switch (transition->GetSlideEffect().value()) {
@@ -4232,7 +4239,8 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
-    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE));
+    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE));
+    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
     resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     return resultEffect;
@@ -4256,7 +4264,6 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     auto transition = pattern->FindPageTransitionEffect(type);
     RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
-    auto rect = GetPaintRectWithoutTransform();
     if (transition) {
         effect = GetPageTransitionEffect(transition);
         option.SetCurve(transition->GetCurve());
@@ -4298,7 +4305,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         UpdateTransformScale(VectorF(1.0f, 1.0f));
         UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
-        ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
+        ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(),
             RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::CloseImplicitAnimation();
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
@@ -4307,7 +4314,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
-    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
+    ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(),
         RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
