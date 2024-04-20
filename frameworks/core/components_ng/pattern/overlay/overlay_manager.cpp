@@ -313,7 +313,7 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
             node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
             overlayManager->OnDialogCloseEvent(node);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
@@ -714,7 +714,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     CHECK_NULL_VOID(overlayManager);
                     overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation");
         }
         return;
     }
@@ -852,7 +852,8 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
+        taskExecutor->PostDelayedTask(
+            continuousTask, TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousPopToast");
     });
     auto ctx = toastNode->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -1034,7 +1035,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->MountPopup(targetId, popupInfo, std::move(callback), interactiveDismiss);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIOverlayShowPopup");
     } else {
         MountPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     }
@@ -3590,7 +3591,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         root->RemoveChild(sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
-                    TaskExecutor::TaskType::UI);
+                    TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation");
             });
     }
 }
