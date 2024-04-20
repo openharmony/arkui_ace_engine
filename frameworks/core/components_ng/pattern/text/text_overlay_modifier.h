@@ -51,6 +51,8 @@ public:
     }
 
     void SetShowSelect(bool value);
+
+    std::vector<RectF> GetSelectedRects() const;
 protected:
     std::optional<RectF> contentRect_;
     RefPtr<PropertyBool> showSelect_;

@@ -65,6 +65,7 @@
 #include "core/interfaces/native/node/navigator_modifier.h"
 #include "core/interfaces/native/node/panel_modifier.h"
 #include "core/interfaces/native/node/navigation_modifier.h"
+#include "core/interfaces/native/node/particle_modifier.h"
 #include "core/interfaces/native/node/path_modifier.h"
 #include "core/interfaces/native/node/pattern_lock_modifier.h"
 #include "core/interfaces/native/node/polygon_modifier.h"
@@ -218,6 +219,7 @@ const ArkUINodeModifiers impl = {
     nullptr, // TextClockControllerModifier
     nullptr, // RichEditorControllerModifier
     nullptr, // TextAreaControllerModifier
+    NodeModifier::GetParticleModifier
 };
 
 } // namespace

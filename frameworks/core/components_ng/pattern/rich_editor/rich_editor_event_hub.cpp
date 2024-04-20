@@ -113,12 +113,12 @@ void RichEditorAbstractSpanResult::SetFontColor(const std::string& fontColor)
     fontColor_ = fontColor;
 }
 
-void RichEditorAbstractSpanResult::SetFontFeature(const FONT_FEATURES_MAP& fontFeature)
+void RichEditorAbstractSpanResult::SetFontFeature(const FONT_FEATURES_LIST& fontFeature)
 {
     fontFeature_ = fontFeature;
 }
 
-const FONT_FEATURES_MAP& RichEditorAbstractSpanResult::GetFontFeatures() const
+const FONT_FEATURES_LIST& RichEditorAbstractSpanResult::GetFontFeatures() const
 {
     return fontFeature_;
 }

@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
+#include <unordered_set>
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
@@ -26,8 +27,8 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 namespace OHOS::Ace::Framework {
-const std::vector<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset, SpanType::Decoration,
-    SpanType::LetterSpacing, SpanType::TextShadow };
+const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
+    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::Image };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
@@ -372,8 +373,7 @@ RefPtr<SpanBase> JSSpanString::GetImageAttachment(int32_t start, int32_t length,
 
 bool JSSpanString::CheckSpanType(int32_t spanType)
 {
-    auto type = std::find(types.begin(), types.end(), static_cast<SpanType>(spanType)) - types.begin();
-    if (type < 0 || type >= static_cast<int32_t>(types.size())) {
+    if (types.find(static_cast<SpanType>(spanType)) == types.end()) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input span type check failed.");
         return false;
     }

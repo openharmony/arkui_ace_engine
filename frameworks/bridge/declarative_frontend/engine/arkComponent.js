@@ -2543,6 +2543,12 @@ function checkJsCallbackInfo(value, checklist) {
   });
   return typeVerified || checklist.length === 0;
 }
+function parseWithDefaultNumber(val, defaultValue) {
+  if (isNumber(val)) {
+    return val;
+  }
+  else { return defaultValue; }
+}
 function modifier(modifiers, modifierClass, value) {
   const identity = modifierClass['identity'];
   const item = modifiers.get(identity);
@@ -7053,6 +7059,20 @@ class SpanLetterSpacingModifier extends ModifierWithKey {
   }
 }
 SpanLetterSpacingModifier.identity = Symbol('spanLetterSpacing');
+class SpanBaselineOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetBaselineOffset(node);
+    }
+    else {
+      getUINativeModule().span.setBaselineOffset(node, this.value);
+    }
+  }
+}
+SpanBaselineOffsetModifier.identity = Symbol('spanBaselineOffset');
 class SpanFontModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7600,6 +7620,10 @@ class ArkSpanComponent {
   }
   letterSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
+    return this;
+  }
+  baselineOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }
   textCase(value) {
@@ -11153,6 +11177,7 @@ class ArkButtonComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().button.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
     this.builder = modifier.applyContent();
@@ -12400,6 +12425,22 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ControlSizeModifier.identity, ControlSizeModifier, controlSize);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().select.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, menuItemConfiguration) {
+    menuItemConfiguration.contentModifier = this.modifier;
+    const index = menuItemConfiguration.index;
+    const xNode = globalThis.requireNapi('arkui.node');
+    this.menuItemNodes = new xNode.BuilderNode(context);
+    this.menuItemNodes.build(this.builder, menuItemConfiguration);
+    return this.menuItemNodes.getFrameNode();
+  }
 }
 class FontModifier extends ModifierWithKey {
   constructor(value) {
@@ -12757,6 +12798,15 @@ if (globalThis.Select !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SelectModifier(nativePtr, classType);
     });
+  };
+
+  globalThis.Select.menuItemContentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkSelectComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 
@@ -15414,6 +15464,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PopupTitleBackgroundModifier.identity, PopupTitleBackgroundModifier, value);
     return this;
   }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, AdaptiveWidthModifier.identity, AdaptiveWidthModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.AlphabetIndexer !== undefined) {
@@ -15779,6 +15833,19 @@ class PopupTitleBackgroundModifier extends ModifierWithKey {
   }
 }
 PopupTitleBackgroundModifier.identity = Symbol('popupTitleBackground');
+class AdaptiveWidthModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+        getUINativeModule().alphabetIndexer.resetAdaptiveWidth(node);
+    } else {
+        getUINativeModule().alphabetIndexer.setAdaptiveWidth(node, this.value);
+    }
+  }
+}
+AdaptiveWidthModifier.identity = Symbol('adaptiveWidth');
 
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {
@@ -21691,3 +21758,74 @@ if (globalThis.RemoteWindow !== undefined) {
   };
 }
 
+class ParticleDisturbanceFieldModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().particle.resetDisturbanceField(node);
+    }
+    else {
+      let dataArray = [];
+      if (Array.isArray(this.value)) {
+        return;
+      }
+      for (let i = 0; i < this.value.length; i++) {
+        let data = this.value[i];
+        dataArray.push(parseWithDefaultNumber(data.strength, 0));
+        dataArray.push(parseWithDefaultNumber(data.shape, 0));
+        if (isObject(data.size)) {
+          dataArray.push(parseWithDefaultNumber(data.size.width, 0));
+          dataArray.push(parseWithDefaultNumber(data.size.height, 0));
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(0);
+        }
+        if (isObject(data.position)) {
+          dataArray.push(parseWithDefaultNumber(data.position.x, 0));
+          dataArray.push(parseWithDefaultNumber(data.position.y, 0));
+        }
+        else {
+          dataArray.push(0);
+          dataArray.push(0);
+        }
+        dataArray.push(parseWithDefaultNumber(data.feather, 0));
+        dataArray.push(parseWithDefaultNumber(data.noiseScale, 1));
+        dataArray.push(parseWithDefaultNumber(data.noiseFrequency, 1));
+        dataArray.push(parseWithDefaultNumber(data.noiseAmplitude, 1));
+      }
+      getUINativeModule().particle.setDisturbanceField(node, dataArray);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+ParticleDisturbanceFieldModifier.identity = Symbol('disturbanceFields');
+
+/// <reference path='./import.ts' />
+class ArkParticleComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  disturbanceFields(value) {
+     modifierWithKey(this._modifiersWithKeys, ParticleDisturbanceFieldModifier.identity, ParticleDisturbanceFieldModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.Particle !== undefined) {
+
+  // @ts-ignore
+  globalThis.Particle.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkParticleComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.ParticleModifier(nativePtr, classType);
+    });
+  };
+}

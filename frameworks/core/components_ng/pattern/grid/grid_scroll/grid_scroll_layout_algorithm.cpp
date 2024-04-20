@@ -199,6 +199,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childFrameOffset_ = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     childFrameOffset_ += gridLayoutProperty->IsVertical() ? OffsetF(0.0f, gridLayoutInfo_.currentOffset_)
                                                           : OffsetF(gridLayoutInfo_.currentOffset_, 0.0f);
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    bool isRtl = axis_ == Axis::VERTICAL && layoutDirection == TextDirection::RTL;
+    bool isReverse = gridLayoutProperty->IsReverse();
     float prevLineHeight = 0.0f;
     int32_t startIndex = -1;
     int32_t endIndex = -1;
@@ -252,6 +255,16 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = OffsetF(0.0f, 0.0f);
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
+
+            if (isRtl) {
+                offset.SetX(size.CrossSize(axis_) - offset.GetX() -
+                            wrapper->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_));
+            }
+
+            if (isReverse) {
+                offset.SetX(size.MainSize(axis_) - offset.GetX() -
+                            wrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis_));
+            }
 
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
             if (gridLayoutInfo_.hasMultiLineItem_ || expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {

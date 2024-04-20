@@ -108,6 +108,12 @@ public:
         endPos_ = endPos;
         referencePos_ = referencePos;
         forwardLayout_ = forwardLayout;
+        refPos_ = referencePos;
+    }
+
+    float GetRefPos() const
+    {
+        return refPos_;
     }
 
     void SetContentOffset(float contentStartOffset, float contentEndOffset)
@@ -317,6 +323,7 @@ private:
     float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
+    float refPos_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     bool forwardLayout_ = true;

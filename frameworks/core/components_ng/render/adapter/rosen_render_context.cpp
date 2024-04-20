@@ -487,9 +487,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     if (isDisappearing_ && !paintRect.IsValid()) {
         return;
     }
-    auto host = GetHost();
-    ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(), host->GetId(),
-        paintRect.ToString().c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        auto host = GetHost();
+        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s",
+            host->GetTag().c_str(), host->GetId(), paintRect.ToString().c_str());
+    }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(paintRect);
@@ -1261,12 +1263,14 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
     const ParticleColorPropertyOption& colorOption)
 {
     auto initRange = colorOption.GetRange();
+    auto colorDist = colorOption.GetDistribution();
     auto updaterOpt = colorOption.GetUpdater();
     OHOS::Rosen::Range<OHOS::Rosen::RSColor> rsInitRange(
         OHOS::Rosen::RSColor(initRange.first.GetRed(), initRange.first.GetGreen(), initRange.first.GetBlue(),
             initRange.first.GetAlpha()),
         OHOS::Rosen::RSColor(initRange.second.GetRed(), initRange.second.GetGreen(), initRange.second.GetBlue(),
             initRange.second.GetAlpha()));
+    auto colorDistInt = static_cast<int32_t>(colorDist.value_or(DistributionType::UNIFORM));
     if (updaterOpt.has_value()) {
         auto updater = updaterOpt.value();
         auto updateType = updater.GetUpdateType();
@@ -1282,9 +1286,9 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
             OHOS::Rosen::Range<float> rsBlueRandom(blueRandom.first, blueRandom.second);
             OHOS::Rosen::Range<float> rsAlphaRandom(alphaRandom.first, alphaRandom.second);
             std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> invalidCurve;
-            return OHOS::Rosen::ParticleColorParaType(rsInitRange, OHOS::Rosen::DistributionType::UNIFORM,
-                OHOS::Rosen::ParticleUpdator::RANDOM, rsRedRandom, rsGreenRandom, rsBlueRandom, rsAlphaRandom,
-                invalidCurve);
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange,
+                static_cast<OHOS::Rosen::DistributionType>(colorDistInt), OHOS::Rosen::ParticleUpdator::RANDOM,
+                rsRedRandom, rsGreenRandom, rsBlueRandom, rsAlphaRandom, invalidCurve);
         } else if (updateType == UpdaterType::CURVE) {
             auto& curveConfig = config.GetAnimationArray();
             std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> valChangeOverLife;
@@ -1301,9 +1305,10 @@ Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
                     OHOS::Rosen::RSColor(toColor.GetRed(), toColor.GetGreen(), toColor.GetBlue(), toColor.GetAlpha()),
                     startMills, endMills, rsCurve));
             }
-            return OHOS::Rosen::ParticleColorParaType(rsInitRange, OHOS::Rosen::DistributionType::UNIFORM,
-                ParticleUpdator::CURVE, OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
-                OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), valChangeOverLife);
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange,
+                static_cast<OHOS::Rosen::DistributionType>(colorDistInt), ParticleUpdator::CURVE,
+                OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
+                OHOS::Rosen::Range<float>(), valChangeOverLife);
         }
     }
     return ConvertParticleDefaultColorOption(rsInitRange);
@@ -4161,12 +4166,16 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
     auto initialBackgroundColor = DEFAULT_MASK_COLOR;
     auto backgroundColor = DEFAULT_MASK_COLOR;
     RectF pageTransitionRectF;
+    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width(),
+        REMOVE_CLIP_SIZE);
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
         case PageTransitionType::EXIT_POP:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
             pageTransitionRectF = RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF,
+                REMOVE_CLIP_SIZE);
+            defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE,
                 REMOVE_CLIP_SIZE);
             translate.x = Dimension(rect.Width() * HALF);
             break;
@@ -4190,6 +4199,7 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(1);
     resultEffect->SetPageTransitionRectF(pageTransitionRectF);
+    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     resultEffect->SetInitialBackgroundColor(initialBackgroundColor);
     resultEffect->SetBackgroundColor(backgroundColor);
     return resultEffect;
@@ -4203,6 +4213,8 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
         transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
     TranslateOptions translate;
     auto rect = GetPaintRectWithoutTransform();
+    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE,
+        REMOVE_CLIP_SIZE);
     // slide and translate, only one can be effective
     if (transition->GetSlideEffect().has_value()) {
         switch (transition->GetSlideEffect().value()) {
@@ -4229,7 +4241,8 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
-    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE));
+    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE));
+    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
     resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     return resultEffect;
@@ -4253,7 +4266,6 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     auto transition = pattern->FindPageTransitionEffect(type);
     RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
-    auto rect = GetPaintRectWithoutTransform();
     if (transition) {
         effect = GetPageTransitionEffect(transition);
         option.SetCurve(transition->GetCurve());
@@ -4295,7 +4307,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         UpdateTransformScale(VectorF(1.0f, 1.0f));
         UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
-        ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
+        ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(),
             RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::CloseImplicitAnimation();
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
@@ -4304,7 +4316,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
-    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
+    ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(),
         RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
@@ -5591,8 +5603,10 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
         }
     }
     paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
-    ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s", host->GetTag().c_str(), host->GetId(),
-        paintRect_.ToString().c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s",
+            host->GetTag().c_str(), host->GetId(), paintRect_.ToString().c_str());
+    }
 }
 
 void RosenRenderContext::SyncPartialRsProperties()

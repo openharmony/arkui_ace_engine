@@ -166,8 +166,8 @@ const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = { 0,
         \"location\":[{\"option\":\"导航至该位置\"},{\"option\":\"在地图中打开\"},\
         {\"option\":\"复制\"},{\"option\":\"选择文本\"}]}",
     "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}" };
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 
@@ -1217,7 +1217,7 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, Build).Times(1);
+    EXPECT_CALL(*paragraph, Build).Times(4);
     /**
      * @tc.steps: step1. create textFrameNode.
      */

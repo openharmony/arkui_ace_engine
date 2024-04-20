@@ -231,10 +231,12 @@ void NavigationGroupNode::RemoveRedundantNavDestination(
             auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
             if (navDestinationPattern->GetIsOnShow()) {
+                pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
                 pattern->NotifyDestinationLifecycle(navDestination,
                     NavDestinationLifecycle::ON_HIDE, true);
                 navDestinationPattern->SetIsOnShow(false);
             }
+            pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
             auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
             if (shallowBuilder) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
@@ -577,53 +579,55 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             auto preNode = weakPreNode.Upgrade();
-            CHECK_NULL_VOID(preNode);
-            auto preTitle = weakPreTitle.Upgrade();
-            if (preTitle) {
-                preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-            }
-            preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-            preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
-            bool needSetInvisible = false;
-            if (isNavBar) {
-                needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
-                    PageTransitionType::EXIT_PUSH;
-                // store this flag for navBar layout only
-                navigation->SetNeedSetInvisible(needSetInvisible);
-            } else {
-                needSetInvisible = AceType::DynamicCast<NavDestinationGroupNode>(preNode)->GetTransitionType() ==
-                                    PageTransitionType::EXIT_PUSH;
-            }
-            // for the case, the navBar form EXIT_PUSH to push during animation
-            if (needSetInvisible) {
-                if (!isNavBar) {
-                    preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                    preNode->SetJSViewActive(false);
+            if (preNode) {
+                auto preTitle = weakPreTitle.Upgrade();
+                if (preTitle) {
+                    preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                }
+                preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+                bool needSetInvisible = false;
+                if (isNavBar) {
+                    needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
+                        PageTransitionType::EXIT_PUSH;
+                    // store this flag for navBar layout only
+                    navigation->SetNeedSetInvisible(needSetInvisible);
                 } else {
-                    // navigation mode could be transformed to split mode in the process of animation and
-                    // navBar will be invisible only under the stack mode
-                    if (navigation->GetNavigationMode() == NavigationMode::STACK) {
+                    needSetInvisible = AceType::DynamicCast<NavDestinationGroupNode>(preNode)->GetTransitionType() ==
+                                        PageTransitionType::EXIT_PUSH;
+                }
+                // for the case, the navBar form EXIT_PUSH to push during animation
+                if (needSetInvisible) {
+                    if (!isNavBar) {
                         preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                         preNode->SetJSViewActive(false);
-                        navigation->NotifyPageHide();
+                    } else {
+                        // navigation mode could be transformed to split mode in the process of animation and
+                        // navBar will be invisible only under the stack mode
+                        if (navigation->GetNavigationMode() == NavigationMode::STACK) {
+                            preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                            preNode->SetJSViewActive(false);
+                            navigation->NotifyPageHide();
+                        }
                     }
                 }
             }
 
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             auto curNode = weakCurNode.Upgrade();
-            CHECK_NULL_VOID(curNode);
-            auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            CHECK_NULL_VOID(curNavDestination);
-            curNavDestination->SetIsOnAnimation(false);
-            if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
-                PageTransitionType::ENTER_PUSH) {
-                return;
+            if (curNode) {
+                auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+                CHECK_NULL_VOID(curNavDestination);
+                curNavDestination->SetIsOnAnimation(false);
+                if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
+                    PageTransitionType::ENTER_PUSH) {
+                    return;
+                }
+                curNode->GetRenderContext()->ClipWithRRect(
+                    RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
             }
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
-            curNode->GetRenderContext()->ClipWithRRect(
-                RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         };
 
     /* set initial status of animation */
@@ -1010,13 +1014,19 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
         }
         NavigationPattern::FireNavigationStateChange(navDestination, lifecycle);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-        eventHub->FireOnHiddenEvent(pattern->GetName());
-        auto navigationPattern = GetPattern<NavigationPattern>();
-        navigationPattern->NotifyPageHide(pattern->GetName());
-        pattern->SetIsOnShow(false);
-        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-        navDestination->SetJSViewActive(false);
+        if (lifecycle == NavDestinationLifecycle::ON_HIDE) {
+            eventHub->FireOnHiddenEvent(pattern->GetName());
+            auto navigationPattern = GetPattern<NavigationPattern>();
+            navigationPattern->NotifyPageHide(pattern->GetName());
+            pattern->SetIsOnShow(false);
+            navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            navDestination->SetJSViewActive(false);
+        } else {
+            eventHub->FireOnWillHide();
+        }
     }
-    hideNodes_.clear();
+    if (lifecycle == NavDestinationLifecycle::ON_HIDE) {
+        hideNodes_.clear();
+    }
 }
 } // namespace OHOS::Ace::NG

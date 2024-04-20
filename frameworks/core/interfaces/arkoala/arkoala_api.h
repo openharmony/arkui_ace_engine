@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 91
+#define ARKUI_FULL_API_VERSION 92
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 91
+#define ARKUI_NODE_API_VERSION 92
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -592,6 +592,7 @@ enum ArkUIEventSubKind {
     ON_TOUCH_INTERCEPT = 12,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
+    ON_IMAGE_SVG_PLAY_FINISH,
     // components events
     ON_LIST_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_LIST,
     ON_LIST_SCROLL_INDEX,
@@ -649,6 +650,7 @@ enum ArkUIEventSubKind {
     ON_REFRESH_REFRESHING,
     ON_DATE_PICKER_DATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_DATE_PICKER,
     ON_TIME_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TIME_PICKER,
+    ON_TEXT_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_PICKER,
     ON_CALENDAR_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CALENDAR_PICKER,
     ON_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
     ON_REACH_END,
@@ -1604,6 +1606,11 @@ struct ArkUIListItemGroupModifier {
     void (*listItemGroupSetFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
 };
 
+struct ArkUIParticleModifier {
+    void (*SetDisturbanceField)(ArkUINodeHandle node, const ArkUIInt32orFloat32* valuesArray, ArkUI_Int32 length);
+    void (*ResetDisturbanceField)(ArkUINodeHandle node);
+};
+
 struct ArkUISwiperModifier {
     void (*setSwiperNextMargin)(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue, ArkUI_Int32 nextMarginUnit);
     void (*resetSwiperNextMargin)(ArkUINodeHandle node);
@@ -1659,8 +1666,6 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle node);
-    void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
-    void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
 };
 
@@ -2562,6 +2567,8 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetPopupBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setPopupTitleBackground)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetPopupTitleBackground)(ArkUINodeHandle node);
+    void (*setAdaptiveWidth)(ArkUINodeHandle node);
+    void (*resetAdaptiveWidth)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {
@@ -2846,6 +2853,8 @@ struct ArkUISpanModifier {
     void (*resetSpanFontColor)(ArkUINodeHandle node);
     void (*setSpanLetterSpacing)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue);
     void (*resetSpanLetterSpacing)(ArkUINodeHandle node);
+    void (*setSpanBaselineOffset)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue);
+    void (*resetSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setSpanFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetSpanFont)(ArkUINodeHandle node);
     void (*setSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr value);
@@ -2858,6 +2867,7 @@ struct ArkUISpanModifier {
     ArkUI_Float32 (*getSpanLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSpanTextCase)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSpanLetterSpacing)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetSpanTextBackgroundStyle)(ArkUINodeHandle node);
@@ -3386,6 +3396,7 @@ struct ArkUINodeModifiers {
     const ArkUITextClockControllerModifier* (*getTextClockControllerModifier)();
     const ArkUIRichEditorControllerModifier* (*getRichEditorControllerModifier)();
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
+    const ArkUIParticleModifier* (*getParticleModifier)();
 };
 
 // same as inner defines in property.h

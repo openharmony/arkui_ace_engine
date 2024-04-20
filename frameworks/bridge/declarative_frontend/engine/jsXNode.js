@@ -49,7 +49,7 @@ class BaseNode extends __JSBaseNode__ {
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 class BuilderNode {
     constructor(uiContext, options) {
         let jsBuilderNode = new JSBuilderNode(uiContext, options);
@@ -158,7 +158,7 @@ class JSBuilderNode extends BaseNode {
     }
     purgeDeletedElmtIds() {
         UINodeRegisterProxy.obtainDeletedElmtIds();
-        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+        UINodeRegisterProxy.unregisterElmtIdsFromIViews();
     }
     purgeDeleteElmtId(rmElmtId) {
         const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -911,33 +911,7 @@ var LengthUnit;
     LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
     LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
 })(LengthUnit || (LengthUnit = {}));
-class LengthMetric {
-    constructor(value, unit) {
-        if (unit in LengthUnit) {
-            this.unit = unit;
-            this.value = value;
-        }
-        else {
-            this.unit = LengthUnit.VP;
-            this.value = unit === undefined? value : 0;
-        }
-    }
-    static px(value) {
-        return new LengthMetric(value, LengthUnit.PX);
-    }
-    static vp(value) {
-        return new LengthMetric(value, LengthUnit.VP);
-    }
-    static fp(value) {
-        return new LengthMetric(value, LengthUnit.FP);
-    }
-    static percent(value) {
-        return new LengthMetric(value, LengthUnit.PERCENT);
-    }
-    static lpx(value) {
-        return new LengthMetric(value, LengthUnit.LPX);
-    }
-}
+
 class LengthMetrics {
     constructor(value, unit) {
         if (unit in LengthUnit) {
@@ -1501,7 +1475,6 @@ class XComponentNode extends FrameNode {
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
 class ComponentContent {
     constructor(uiContext, builder, params) {
         let builderNode = new BuilderNode(uiContext, {});
@@ -1518,6 +1491,6 @@ class ComponentContent {
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetric, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent
 };

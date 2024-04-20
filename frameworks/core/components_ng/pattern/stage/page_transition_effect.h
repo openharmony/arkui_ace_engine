@@ -94,6 +94,16 @@ public:
         return pageTransitionRectF_;
     }
 
+    void SetDefaultPageTransitionRectF(const RectF& defaultPageTransitionRectF)
+    {
+        defaultPageTransitionRectF_ = defaultPageTransitionRectF;
+    }
+
+    const std::optional<RectF>& GetDefaultPageTransitionRectF() const
+    {
+        return defaultPageTransitionRectF_;
+    }
+
     void SetInitialBackgroundColor(const Color& initialBackgroundColor)
     {
         initialBackgroundColor_ = initialBackgroundColor;
@@ -167,6 +177,7 @@ private:
     std::optional<SlideEffect> slide_;
     std::optional<float> opacity_;
     std::optional<RectF> pageTransitionRectF_;
+    std::optional<RectF> defaultPageTransitionRectF_;
     std::optional<Color> initialBackgroundColor_;
     std::optional<Color> backgroundColor_;
     PageTransitionOption animationOption_;

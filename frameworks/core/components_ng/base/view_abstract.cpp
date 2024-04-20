@@ -270,7 +270,14 @@ void ViewAbstract::SetBackgroundColor(const Color &color)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
+
+    Color updateColor = color;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline != nullptr) {
+        pipeline->CheckNeedUpdateBackgroundColor(updateColor);
+    }
+
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
 void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const Color &color)
@@ -282,6 +289,13 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo &src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline != nullptr) {
+        bool disableSetImage = pipeline->CheckNeedDisableUpdateBackgroundImage();
+        if (disableSetImage) {
+            return;
+        }
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }

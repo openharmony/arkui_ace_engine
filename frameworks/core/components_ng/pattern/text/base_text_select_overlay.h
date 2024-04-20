@@ -151,6 +151,32 @@ public:
         return (sourceType == SourceType::MOUSE || sourceType == SourceType::TOUCH) && touchType == TouchType::DOWN;
     }
 
+    bool HasRenderTransform()
+    {
+        UpdateTransformFlag();
+        return hasTransform_;
+    }
+    // transformed global point to original local point.
+    void RevertLocalPointWithTransform(OffsetF& point);
+    // original local point to transformed global point.
+    void GetGlobalPointsWithTransform(std::vector<OffsetF>& points);
+    // original local rect to transformd global rect.
+    void GetGlobalRectWithTransform(RectF& rect);
+    std::vector<OffsetF> GetGlobalRectVertexWithTransform(const RectF& rect, float extendValue = 0.0f);
+    // original local point to transformed local point.
+    void GetLocalPointsWithTransform(std::vector<OffsetF>& localPoints);
+    void GetLocalPointWithTransform(OffsetF& localPoint);
+    // original local rect to transformed local rect.
+    void GetLocalRectWithTransform(RectF& localRect);
+
+    OffsetF GetPaintOffsetWithoutTransform();
+    RectF GetPaintRectWithTransform();
+    OffsetF GetPaintRectOffsetWithTransform();
+    RectF GetVisibleContentRectWithTransform(float epsilon);
+    bool CheckHandleIsVisibleWithTransform(const OffsetF& startPoint, const OffsetF& endPoint, float epsilon);
+    bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
+        const OffsetF& rightTop, const OffsetF& leftTop);
+
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);
@@ -164,9 +190,13 @@ protected:
         return (sourceType == SourceType::TOUCH || sourceType == SourceType::TOUCH_PAD) && touchType == TouchType::UP;
     }
 
+    RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
+    void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
     std::optional<OverlayRequest> latestReqeust_;
+    bool hasTransform_ = false;
 
 private:
+    void UpdateTransformFlag();
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;

@@ -230,6 +230,8 @@ public:
 
     bool IsPredictOutOfRange(int32_t index) const;
 
+    bool IsReverse() const override;
+
 private:
     float GetEndOffset();
     float GetMainGap() const;

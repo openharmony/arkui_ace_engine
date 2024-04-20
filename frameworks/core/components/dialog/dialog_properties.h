@@ -26,6 +26,7 @@
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/component.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
 
@@ -158,14 +159,24 @@ struct ActionSheetInfo {
 
 // Information of Button.
 struct ButtonInfo {
-    std::string text;              // text of button.
-    std::string textColor;         // style of text in button.
+    std::string text;      // text of button.
+    std::string textColor; // style of text in button.
     bool isBgColorSetted = false;
-    Color bgColor;                 // background color of button.
-    RefPtr<NG::ClickEvent> action; // NG button click action
+    Color bgColor;                                   // background color of button.
+    RefPtr<NG::ClickEvent> action;                   // NG button click action
     bool enabled = true;                             // status of enabled in button.
     bool defaultFocus = false;                       // status of defaultFocus in button.
     std::optional<DialogButtonStyle> dlgButtonStyle; // DialogButtonStyle of dialog.
+    std::optional<ButtonType> type;
+    std::optional<ButtonStyleMode> buttonStyle;
+    std::optional<ButtonRole> role;
+    std::optional<Color> fontColor;
+    std::optional<CalcDimension> fontSize;
+    std::optional<FontWeight> fontWeight;
+    std::optional<FontStyle> fontStyle;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<Color> backgroundColor;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
 
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const

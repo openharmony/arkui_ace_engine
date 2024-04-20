@@ -77,6 +77,9 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     visibleContentRect = GetVisibleContentRect();
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    if (IsSingleHandle()) {
+        return visibleContentRect.IsInRegion(bottomPoint);
+    }
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 

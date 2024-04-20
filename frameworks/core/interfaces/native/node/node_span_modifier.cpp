@@ -35,6 +35,7 @@ constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr Dimension DEFAULT_LETTER_SPACING_VALUE { 0.0, DimensionUnit::FP };
+constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
@@ -283,6 +284,33 @@ void ResetSpanLetterSpacing(ArkUINodeHandle node)
     SpanModelNG::SetLetterSpacing(uiNode, DEFAULT_LETTER_SPACING_VALUE);
 }
 
+void SetSpanBaselineOffset(ArkUINodeHandle node, const struct ArkUIStringAndFloat* baselineOffsetValue)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    Dimension result;
+    if (baselineOffsetValue->valueStr != nullptr) {
+        result = StringUtils::StringToDimensionWithUnit(std::string(baselineOffsetValue->valueStr), DimensionUnit::FP);
+    } else {
+        result = Dimension(baselineOffsetValue->value, DimensionUnit::FP);
+    }
+    SpanModelNG::SetBaselineOffset(uiNode, result);
+}
+
+float GetSpanBaselineOffset(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, 0.0f);
+    return SpanModelNG::GetBaselineOffset(uiNode).ConvertToVp();
+}
+
+void ResetSpanBaselineOffset(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    SpanModelNG::SetBaselineOffset(uiNode, DEFAULT_BASELINE_OFFSET);
+}
+
 void SetSpanFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
 {
     CHECK_NULL_VOID(fontInfo);
@@ -421,10 +449,12 @@ const ArkUISpanModifier* GetSpanModifier()
         ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle, ResetSpanFontStyle,
         SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily, SetSpanDecoration,
         ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing, ResetSpanLetterSpacing,
-        SetSpanFont, ResetSpanFont, SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor,
-        GetSpanFontSize, GetSpanFontStyle, GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing,
-        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
-        ResetTextTextShadow, GetTextShadow };
+        SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont, SetSpanFontWeightStr,
+        GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle, GetSpanFontWeight,
+        GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset, SetSpanTextBackgroundStyle,
+        ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow, ResetTextTextShadow,
+        GetTextShadow
+        };
     return &modifier;
 }
 } // namespace NodeModifier

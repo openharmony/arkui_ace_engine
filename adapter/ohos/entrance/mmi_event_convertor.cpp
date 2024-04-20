@@ -78,6 +78,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.tiltX = pointerItem.GetTiltX();
     touchPoint.tiltY = pointerItem.GetTiltY();
     touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
+    touchPoint.originalId = pointerItem.GetOriginPointerId();
     return touchPoint;
 }
 
@@ -142,7 +143,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
         .SetSourceType(SourceType::NONE)
         .SetSourceTool(touchPoint.sourceTool)
-        .SetTouchEventId(pointerEvent->GetId());
+        .SetTouchEventId(pointerEvent->GetId())
+        .SetOriginalId(touchPoint.originalId);
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
@@ -296,6 +298,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
+    events.originalId = item.GetOriginPointerId();
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;
@@ -322,6 +325,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         events.y = item.GetWindowYPos();
         events.screenX = item.GetDisplayXPos();
         events.screenY = item.GetDisplayYPos();
+        events.originalId = events.id;
     }
     events.touchEventId = pointerEvent->GetId();
 }
@@ -374,6 +378,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     GetEventDevice(orgDevice, event);
     event.sourceTool = GetSourceTool(item.GetToolType());
     event.pointerEvent = pointerEvent;
+    event.originalId = item.GetOriginPointerId();
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);

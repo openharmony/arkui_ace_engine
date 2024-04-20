@@ -1206,13 +1206,15 @@ void DialogPattern::DumpInfo()
     if (!dialogProperties_.content.empty()) {
         DumpLog::GetInstance().AddDesc("Content: " + dialogProperties_.content);
     }
-    if (!dialogProperties_.checkboxContent.empty()) {
-        DumpLog::GetInstance().AddDesc("CheckboxContent: " + dialogProperties_.checkboxContent);
-    }
     DumpLog::GetInstance().AddDesc(
         "DialogButtonDirection: " +
         DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(dialogProperties_.buttonDirection));
-
+    if (dialogProperties_.width.has_value()) {
+        DumpLog::GetInstance().AddDesc("Width: " + dialogProperties_.width.value().ToString());
+    }
+    if (dialogProperties_.height.has_value()) {
+        DumpLog::GetInstance().AddDesc("Height: " + dialogProperties_.height.value().ToString());
+    }
     if (dialogProperties_.backgroundBlurStyle.has_value()) {
         DumpLog::GetInstance().AddDesc(
             "BackgroundBlurStyle: " + std::to_string(dialogProperties_.backgroundBlurStyle.value()));
@@ -1238,7 +1240,6 @@ void DialogPattern::DumpBoolProperty()
     DumpLog::GetInstance().AddDesc("AutoCancel: " + GetBoolStr(dialogProperties_.autoCancel));
     DumpLog::GetInstance().AddDesc("CustomStyle: " + GetBoolStr(dialogProperties_.customStyle));
     DumpLog::GetInstance().AddDesc("IsMenu: " + GetBoolStr(dialogProperties_.isMenu));
-    DumpLog::GetInstance().AddDesc("IsSelect: " + GetBoolStr(dialogProperties_.isSelect));
     DumpLog::GetInstance().AddDesc("IsMask: " + GetBoolStr(dialogProperties_.isMask));
     DumpLog::GetInstance().AddDesc("IsModal: " + GetBoolStr(dialogProperties_.isModal));
     DumpLog::GetInstance().AddDesc("IsScenceBoardDialog: " + GetBoolStr(dialogProperties_.isScenceBoardDialog));
