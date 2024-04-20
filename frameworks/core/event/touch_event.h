@@ -67,6 +67,7 @@ struct TouchPoint final {
     std::optional<float> tiltY;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
+    int32_t originalId = 0;
 };
 
 /**
@@ -106,6 +107,7 @@ struct TouchEvent final : public UIInputEvent {
     // Coordinates relative to the upper-left corner of the current component
     float localX = 0.0f;
     float localY = 0.0f;
+    int32_t originalId = 0;
 
     TouchEvent() {}
 
@@ -229,6 +231,12 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetOriginalId(int32_t originalId)
+    {
+        this->originalId = originalId;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -256,7 +264,8 @@ struct TouchEvent final : public UIInputEvent {
             .SetTouchEventId(touchEventId)
             .SetIsInterpolated(isInterpolated)
             .SetPointers(pointers)
-            .SetPointerEvent(pointerEvent);
+            .SetPointerEvent(pointerEvent)
+            .SetOriginalId(originalId);
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -324,7 +333,8 @@ struct TouchEvent final : public UIInputEvent {
     void CovertId()
     {
         if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
-            id = TOUCH_TOOL_BASE_ID + (int32_t)sourceTool;
+            id = id + TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+            originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
         }
     }
 
@@ -390,7 +400,8 @@ struct TouchEvent final : public UIInputEvent {
             .SetTargetDisplayId(targetDisplayId)
             .SetSourceType(sourceType)
             .SetIsInterpolated(isInterpolated)
-            .SetPointerEvent(pointerEvent);
+            .SetPointerEvent(pointerEvent)
+            .SetOriginalId(originalId);
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -573,6 +584,16 @@ public:
         touchType_ = type;
     }
 
+    void SetOriginalId(int32_t originalId)
+    {
+        originalId_ = originalId;
+    }
+
+    int32_t GetOriginalId() const
+    {
+        return originalId_;
+    }
+
 private:
     // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
@@ -594,6 +615,10 @@ private:
 
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
+
+    // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
+    // different ids.
+    int32_t originalId_ = 0;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
