@@ -2542,4 +2542,137 @@ HWTEST_F(ListScrollerTestNg, OnScrollVisibleContentChange002, TestSize.Level1)
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 }
+
+/**
+ * @tc.name: ChildrenMainSize001
+ * @tc.desc: Test childrenMainSize layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ChildrenMainSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollable list, change some items height
+     * @tc.expected: Items height are unequal
+     */
+    Create([](ListModelNG model) {
+        auto childrenSize = model.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
+        childrenSize->ChangeData(2, 3, { 50.f, 100.f, 200.f });
+        childrenSize->ChangeData(15, 3, { 50.f, 100.f, 200.f });
+        CreateItem(2); // ITEM_HEIGHT
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(100.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateItem(10);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(100.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateItem(3);
+    });
+    EXPECT_EQ(pattern_->childrenSize_->GetChildSize(2), 50.f);
+    EXPECT_EQ(pattern_->childrenSize_->GetChildSize(17), 200.f);
+
+    /**
+     * @tc.steps: step2. ScrollToIndex, index:3 is in the view
+     */
+    int32_t index = 3;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0.f));
+
+    /**
+     * @tc.steps: step3. ScrollToIndex, index:17 is out of the view, and will scroll beyond one screen
+     */
+    index = 17;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 1100.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 1100.f));
+
+    /**
+     * @tc.steps: step4. ScrollTo, 400.f is in the view
+     */
+    pattern_->ScrollTo(400.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 400.f);
+
+    /**
+     * @tc.steps: step5. ScrollTo, 1400.f is out of the view
+     */
+    pattern_->ScrollTo(1400.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 1300.f);
+}
+
+/**
+ * @tc.name: ChildrenMainSize002
+ * @tc.desc: Test childrenMainSize layout with itemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ChildrenMainSize002, TestSize.Level1)
+{
+    Create([](ListModelNG model) {
+        auto childrenSize = model.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(400.f);
+        childrenSize->ChangeData(1, 2, { 450.f, 450.f });
+        childrenSize->ChangeData(4, 1, { 450.f });
+        CreateGroup(1);
+        CreateGroupChildrenMainSize(2);
+        CreateGroup(1);
+        CreateGroupChildrenMainSize(1);
+    });
+
+    /**
+     * @tc.steps: step2. ScrollToIndex, index:1 is in the view
+     */
+    int32_t index = 1;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 225.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 50.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 50.f));
+
+    /**
+     * @tc.steps: step3. ScrollToIndex, index:4 is out of the view, and will scroll beyond one screen
+     */
+    index = 4;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 1350.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 1350.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 1350.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 1350.f));
+
+    /**
+     * @tc.steps: step4. ScrollToItemInGroup, index:1 is in the view
+     */
+    index = 1;
+    int32_t indexInGroup = 2;
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 150.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 250.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
+
+    /**
+     * @tc.steps: step5. ScrollToItemInGroup, index:4 is out of the view
+     */
+    index = 4;
+    indexInGroup = 3;
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 1350.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 1350.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 1350.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 1350.f));
+
+    /**
+     * @tc.steps: step4. ScrollTo, 400.f is in the view
+     */
+    pattern_->ScrollTo(400.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 400.f);
+
+    /**
+     * @tc.steps: step5. ScrollTo, 1400.f is out of the view
+     */
+    pattern_->ScrollTo(1400.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 1350.f);
+}
 } // namespace OHOS::Ace::NG

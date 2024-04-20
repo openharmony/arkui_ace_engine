@@ -205,6 +205,23 @@ void ListTestNg::CreateGroup(int32_t groupNumber, Axis axis)
     }
 }
 
+
+void ListTestNg::CreateGroupChildrenMainSize(int32_t groupNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel;
+        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
+        childrenSize->ChangeData(1, 2, { 50.f, 200.f });
+        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+}
+
 void ListTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
