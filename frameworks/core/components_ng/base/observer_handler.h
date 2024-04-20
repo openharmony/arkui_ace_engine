@@ -34,6 +34,10 @@ enum class NavDestinationState {
     ON_HIDDEN = 1,
     ON_APPEAR = 2,
     ON_DISAPPEAR = 3,
+    ON_WILL_SHOW = 4,
+    ON_WILL_HIDE = 5,
+    ON_WILL_APPEAR = 6,
+    ON_WILL_DISAPPEAR = 7,
     ON_BACKPRESS = 100,
 };
 

@@ -94,6 +94,8 @@ constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
+constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
+constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -2526,8 +2528,12 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 bool PipelineContext::RequestFocus(const std::string& targetNodeId, bool isSyncRequest)
 {
-    CHECK_NULL_RETURN(rootNode_, false);
-    auto focusHub = rootNode_->GetFocusHub();
+    auto rootNode = GetFocusedWindowSceneNode();
+    if (!rootNode) {
+        rootNode = rootNode_;
+    }
+    CHECK_NULL_RETURN(rootNode, false);
+    auto focusHub = rootNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId, isSyncRequest);
     if (!isSubPipeline_ || currentFocusChecked) {
@@ -3589,4 +3595,22 @@ void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace:
         overlayNodePositionUpdateCallback_(rects);
     }
 }
+
+void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color)
+{
+    if (!isFormRender_ || (renderingMode_ != RENDERING_SINGLE_COLOR)) {
+        return;
+    }
+    Color replaceColor = color.ChangeAlpha(SINGLECOLOR_UPDATE_ALPHA);
+    color = replaceColor;
+}
+
+bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
+{
+    if (!isFormRender_ || (renderingMode_ != RENDERING_SINGLE_COLOR)) {
+        return false;
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

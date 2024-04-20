@@ -198,6 +198,19 @@ class SpanLetterSpacingModifier extends ModifierWithKey<string> {
     }
   }
 }
+class SpanBaselineOffsetModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity = Symbol('spanBaselineOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetBaselineOffset(node);
+    } else {
+      getUINativeModule().span.setBaselineOffset(node, this.value!);
+    }
+  }
+}
 class SpanFontModifier extends ModifierWithKey<Font> {
   constructor(value: Font) {
     super(value);
@@ -889,6 +902,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
   letterSpacing(value: number | string): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
+    return this;
+  }
+  baselineOffset(value: number | string): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }
   textCase(value: TextCase): SpanAttribute {

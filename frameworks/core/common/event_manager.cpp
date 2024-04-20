@@ -932,7 +932,7 @@ void EventManager::MouseTest(
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
     }
-    frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetId());
+    frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetPointerId(event.id));
 
     currMouseTestResults_.clear();
     HoverTestResult hoverTestResult;

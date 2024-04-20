@@ -17,7 +17,7 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TEXT_PICKER_MODIFIER_H
 
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITextPickerModifier* GetTextPickerModifier();
@@ -32,6 +32,7 @@ void SetSelectedInternal(
     uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues);
 void ProcessCascadeSelected(
     const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues);
+void SetTextPickerOnChange(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TEXT_PICKER_MODIFIER_H

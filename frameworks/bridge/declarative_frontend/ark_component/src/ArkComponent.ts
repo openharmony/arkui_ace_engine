@@ -2601,7 +2601,12 @@ const isUndefined = (val: basicType): boolean => typeof val === 'undefined';
 const isObject = (val: basicType): boolean => typeof val === 'object';
 const isFunction = (val: basicType): boolean => typeof val === 'function';
 const isLengthType = (val: any): boolean => typeof val === 'string' || typeof val === 'number';
-
+function parseWithDefaultNumber(val, defaultValue) {
+  if (isNumber(val)) {
+    return val;
+  }
+  else { return defaultValue; }
+}
 function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(
   modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>,
   modifierClass: new (value: T) => M,

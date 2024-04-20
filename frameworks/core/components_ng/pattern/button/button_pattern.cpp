@@ -302,9 +302,6 @@ void ButtonPattern::OnModifyDone()
 
 void ButtonPattern::HandleBackgroundColor()
 {
-    if (UseContentModifier()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -317,6 +314,13 @@ void ButtonPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(buttonTheme);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    if (UseContentModifier()) {
+        if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            renderContext->ResetBackgroundColor();
+        }
+        return;
+    }
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
@@ -580,22 +584,27 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
 
 void ButtonPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    if (!makeFunc_) {
+    if (!makeFunc_.has_value()) {
         gestureEventHub->SetRedirectClick(false);
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+                break;
+            }
+        }
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     } else {
         gestureEventHub->SetRedirectClick(true);
     }
-    host->RemoveChildAtIndex(0);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
     clickEventFunc_ = gestureEventHub->GetClickEvent();
@@ -603,10 +612,6 @@ void ButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value()) {
-        return nullptr;
-    }
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();

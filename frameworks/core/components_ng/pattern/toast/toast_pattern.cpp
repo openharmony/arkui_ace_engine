@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine.h"
@@ -29,8 +30,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
-constexpr int32_t COLUMN_4 = 4;
-constexpr double MAX_WIDTH = 400.0;
+constexpr Dimension MAX_WIDTH = 400.0_vp;
+constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
 
 float GetTextHeight(const RefPtr<FrameNode>& textNode)
 {
@@ -122,6 +123,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto safeAreaOffset = safeArea ? safeArea->bottom_.Length() : 0.0f;
     if (!toastProp->HasToastAlignment()) {
         auto toastBottom = GetBottomValue(layoutWrapper);
+        toastBottom_ = toastBottom;
         if (context->GetMinPlatformVersion() > API_VERSION_9) {
             offsetY = Dimension(rootHeight - toastBottom - textHeight - safeAreaOffset);
         } else {
@@ -215,27 +217,33 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
     auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
     auto textLayoutProperty = text->GetLayoutProperty();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto limitHeight = GetTextMaxHeight();
-        textLayoutProperty->UpdateCalcMaxSize(
-            CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(Dimension(limitHeight))));
-
-        auto textLineHeight = GetTextLineHeight(text);
-        if (textLineHeight > 0) {
-            auto maxLines = static_cast<int32_t>(limitHeight / textLineHeight);
-            auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(textProperty);
-            textProperty->UpdateMaxLines(maxLines);
-        }
-    } else {
-        textLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
-    }
 
     auto toastTheme = context->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
     auto minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
     textLayoutProperty->UpdateCalcMinSize(CalcSize(NG::CalcLength(minWidth), NG::CalcLength(minHeight)));
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto limitHeight = GetTextMaxHeight();
+        textLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(Dimension(limitHeight))));
+
+        auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textProperty);
+        auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
+        textProperty->UpdateAdaptMaxFontSize(toastMaxFontSize);
+        textProperty->UpdateAdaptMinFontSize(ADAPT_TOAST_MIN_FONT_SIZE);
+        textProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+
+        auto textLineHeight = GetTextLineHeight(text);
+        if (textLineHeight > 0) {
+            auto maxLines = static_cast<int32_t>(limitHeight / textLineHeight);
+            textProperty->UpdateMaxLines(maxLines);
+        }
+    } else {
+        textLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    }
 }
 
 void ToastPattern::OnColorConfigurationUpdate()
@@ -288,30 +296,48 @@ double ToastPattern::GetTextMaxHeight()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto containerId = Container::CurrentId();
+    double deviceHeight = 0.0f;
+    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    } else {
+        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+        deviceHeight = windowGlobalRect.Height();
+    }
+
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, 0.0);
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
-    auto maxHeight = windowGlobalRect.Height();
-    auto popupMaxHeight = (maxHeight - bottom - top) * 0.9;
-    return popupMaxHeight;
+    auto maxHeight = deviceHeight - bottom - top - toastBottom_;
+    auto limitHeight = (deviceHeight - bottom - top) * 0.65;
+    if (maxHeight > limitHeight) {
+        maxHeight = limitHeight;
+    }
+    return maxHeight;
 }
 
 double ToastPattern::GetTextMaxWidth()
 {
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    auto screenWidth = windowGlobalRect.Width();
+    auto containerId = Container::CurrentId();
+    double deviceWidth = 0.0f;
+    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
+        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+    } else {
+        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+        deviceWidth = windowGlobalRect.Width();
+    }
+
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
     auto marging = toastTheme->GetMarging();
-    if (GridSystemManager::GetInstance().GetCurrentGridInfo().columns == COLUMN_4) {
-        return screenWidth - marging.Left().Value() - marging.Right().Value();
-    } else {
-        return Dimension(MAX_WIDTH).ConvertToPx();
+    auto maxWidth = deviceWidth - marging.Left().ConvertToPx() - marging.Right().ConvertToPx();
+    if (maxWidth > MAX_WIDTH.ConvertToPx()) {
+        maxWidth = MAX_WIDTH.ConvertToPx();
     }
+    return maxWidth;
 }
 
 int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)

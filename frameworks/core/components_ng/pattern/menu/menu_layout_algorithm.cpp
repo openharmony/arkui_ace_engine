@@ -337,8 +337,17 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    float scale = menuPattern->GetPreviewAfterAnimationScale();
-    previewScale_ = LessOrEqual(scale, 0.0f) ? previewScale_ : scale;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto beforeAnimationScale = menuPattern->GetPreviewBeforeAnimationScale();
+    auto afterAnimationScale = menuPattern->GetPreviewAfterAnimationScale();
+    dumpInfo_.previewBeginScale =
+        LessOrEqual(beforeAnimationScale, 0.0f) ? menuTheme->GetPreviewBeforeAnimationScale() : beforeAnimationScale;
+    dumpInfo_.previewEndScale =
+        LessOrEqual(afterAnimationScale, 0.0f) ? menuTheme->GetPreviewAfterAnimationScale() : afterAnimationScale;
+    previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     dumpInfo_.globalLocation = position_;
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -1305,8 +1314,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(menuTheme);
         auto beforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
         auto afterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
-        dumpInfo_.previewBeginScale = beforeAnimationScale;
-        dumpInfo_.previewEndScale = afterAnimationScale;
         auto menuOriginOffset = menuPosition - (previewOffset_ - previewOriginOffset_) +
                                 FixMenuOriginOffset(beforeAnimationScale, afterAnimationScale);
         menuPattern->SetOriginOffset(menuOriginOffset);
@@ -1373,6 +1380,7 @@ void MenuLayoutAlgorithm::LayoutArrow(const LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateArrowPosition(arrowPosition_);
     paintProperty->UpdateArrowPlacement(arrowPlacement_);
+    dumpInfo_.enableArrow = true;
 }
 
 RefPtr<MenuPaintProperty> MenuLayoutAlgorithm::GetPaintProperty(const LayoutWrapper* layoutWrapper)
@@ -1396,7 +1404,6 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
     auto paintProperty = GetPaintProperty(layoutWrapper);
     CHECK_NULL_RETURN(paintProperty, false);
     propNeedArrow_ = paintProperty->GetEnableArrow().value_or(false);
-    dumpInfo_.enableArrow = propNeedArrow_;
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1874,7 +1881,8 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& c
         afterOffsetPosition = AddOffset(originPosition);
     }
 
-    if (!CheckPosition(afterOffsetPosition, childSize)) {
+    if (!CheckPosition(afterOffsetPosition, childSize) || flag_) {
+        flag_ = false;
         return OffsetF(0.0f, 0.0f);
     }
 
@@ -2083,11 +2091,73 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
+    OffsetF tempPos = position;
+    if (state_ != prevState_) {
+        if (prevState_ == -1) {
+            prevState_ = state_;
+            preOffset_ = position;
+            preOffset_.SetX(x);
+            preOffset_.SetY(y);
+            preRect_.SetOffset(rect.GetOffset());
+            preRect_.SetSize(rect.GetSize());
+            if (!(x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
+                    (y + childSize.Height()) > rect.Bottom())) {
+                preOffset_ = position;
+                preOffset_.SetX(x);
+                preOffset_.SetY(y);
+                preRect_.SetOffset(rect.GetOffset());
+                preRect_.SetSize(rect.GetSize());
+                return true;
+            }
+            flag_ = true;
+            positionOffset_ = { 0.0f, 0.0f };
+            return false;
+        }
+        return CheckPlacement(childSize);
+    }
+    x = tempPos.GetX();
+    y = tempPos.GetY();
     if (x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
         (y + childSize.Height()) > rect.Bottom()) {
+        preOffset_ = position;
+        preOffset_.SetX(x);
+        preOffset_.SetY(y);
+        preRect_.SetOffset(rect.GetOffset());
+        preRect_.SetSize(rect.GetSize());
         return false;
     }
     return true;
+}
+
+bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
+{
+    auto x = preOffset_.GetX();
+    auto y = preOffset_.GetY();
+
+    switch (prevState_) {
+        case static_cast<int>(DirectionState::Bottom_Direction):
+        case static_cast<int>(DirectionState::Top_Direction): {
+            if ((x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right()) &&
+                !(y < preRect_.Top() || (y + childSize.Height()) > preRect_.Bottom())) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        case static_cast<int>(DirectionState::Right_Direction):
+        case static_cast<int>(DirectionState::Left_Direction): {
+            if ((y < preRect_.Top() || (y + childSize.Height()) > preRect_.Bottom()) &&
+                !((x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right()))) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        default:
+            return false;
+    }
+
+    return false;
 }
 
 bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& childSize)
@@ -2100,6 +2170,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
         case Placement::BOTTOM: {
+            state_ = static_cast<int>(DirectionState::Bottom_Direction);
             auto y = std::max(targetOffsetY + targetSize_.Height(), yAvoid);
             auto height = std::min(
                 static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_ - targetOffsetY - targetSize_.Height(),
@@ -2111,6 +2182,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
         case Placement::TOP: {
+            state_ = static_cast<int>(DirectionState::Top_Direction);
             auto height = std::min(targetOffsetY - yAvoid, wrapperSize_.Height() - paddingTop_ - paddingBottom_);
             rect.SetRect(paddingStart_, yAvoid, wrapperSize_.Width() - paddingEnd_ - paddingStart_, height);
             break;
@@ -2118,6 +2190,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
         case Placement::RIGHT: {
+            state_ = static_cast<int>(DirectionState::Right_Direction);
             auto x = std::max(targetOffsetX + targetSize_.Width(), paddingStart_);
             auto width = std::min(wrapperSize_.Width() - targetOffsetX - targetSize_.Width() - paddingEnd_,
                 wrapperSize_.Width() - paddingStart_ - paddingEnd_);
@@ -2127,12 +2200,14 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
         case Placement::LEFT: {
+            state_ = static_cast<int>(DirectionState::Left_Direction);
             auto width = std::min(
                 targetOffsetX - paddingStart_, wrapperSize_.Width() - paddingEnd_ - paddingStart_);
             rect.SetRect(paddingStart_, yAvoid, width, wrapperSize_.Height() - paddingBottom_ - paddingTop_);
             break;
         }
         default:
+            state_ = static_cast<int>(DirectionState::None_Direction);
             return false;
     }
     return CheckPositionInPlacementRect(rect, position, childSize);

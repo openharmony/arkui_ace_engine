@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -44,9 +43,12 @@ constexpr int32_t SWIPER_MONTHS_COUNT = 3;
 constexpr int32_t CURRENT_MONTH_INDEX = 1;
 constexpr Dimension DIALOG_WIDTH = 336.0_vp;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
+constexpr size_t ACCEPT_BUTTON_INDEX = 0;
+constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
-    const CalendarSettingData& settingData, const std::map<std::string, NG::DialogEvent>& dialogEvent,
+    const CalendarSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
+    const std::map<std::string, NG::DialogEvent>& dialogEvent,
     const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -55,6 +57,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetEntryNode(settingData.entryNode);
     pattern->SetDialogOffset(OffsetF(dialogProperties.offset.GetX().Value(), dialogProperties.offset.GetY().Value()));
+    DisableResetOptionButtonColor(pattern, buttonInfos);
     auto layoutProperty = contentColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -90,7 +93,8 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
     UpdateBackgroundStyle(renderContext, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
-        auto contentRow = CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent));
+        auto contentRow =
+            CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent), buttonInfos);
         contentRow->MountToParent(contentColumn);
     }
 
@@ -98,6 +102,18 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     calendarNode->MarkModifyDone();
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void CalendarDialogView::DisableResetOptionButtonColor(
+    const RefPtr<CalendarDialogPattern>& calendarDialogPattern, const std::vector<ButtonInfo>& buttonInfos)
+{
+    CHECK_NULL_VOID(calendarDialogPattern);
+    for (size_t index = 0; index < buttonInfos.size(); index++) {
+        if (buttonInfos[index].role.has_value() || buttonInfos[index].buttonStyle.has_value() ||
+            buttonInfos[index].backgroundColor.has_value() || buttonInfos[index].fontColor.has_value()) {
+            calendarDialogPattern->SetUpdateOptionsButtonColor(false);
+        }
+    }
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
@@ -356,7 +372,7 @@ void CalendarDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode
     eventHub->SetDialogAcceptEvent(std::move(onAccept));
 }
 
-RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm)
+RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -376,9 +392,19 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm)
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    textNode->MountToParent(buttonNode);
 
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
+    if (index < buttonInfos.size() &&
+        (buttonInfos[index].role.has_value() || buttonInfos[index].buttonStyle.has_value() ||
+            buttonInfos[index].fontSize.has_value() || buttonInfos[index].fontColor.has_value() ||
+            buttonInfos[index].fontWeight.has_value() || buttonInfos[index].fontStyle.has_value() ||
+            buttonInfos[index].fontFamily.has_value())) {
+        buttonLayoutProperty->UpdateLabel(
+            Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
+    }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonLayoutProperty->UpdateFlexShrink(1.0);
@@ -389,15 +415,87 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm)
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     buttonEventHub->SetStateEffect(true);
 
-    textNode->MountToParent(buttonNode);
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
     buttonNode->MarkModifyDone();
     return buttonNode;
 }
 
-RefPtr<FrameNode> CalendarDialogView::CreateConfirmNode(const RefPtr<FrameNode>& calendarNode, DialogEvent& acceptEvent)
+void CalendarDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
+{
+    if (index >= buttonInfos.size()) {
+        return;
+    }
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    CHECK_NULL_VOID(buttonRenderContext);
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (buttonInfos[index].type.has_value()) {
+        buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
+    }
+    UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
+    if (buttonInfos[index].fontSize.has_value()) {
+        buttonLayoutProperty->UpdateFontSize(buttonInfos[index].fontSize.value());
+    }
+    if (buttonInfos[index].fontColor.has_value()) {
+        buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
+    }
+    if (buttonInfos[index].fontWeight.has_value()) {
+        buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
+    }
+    if (buttonInfos[index].fontStyle.has_value()) {
+        buttonLayoutProperty->UpdateFontStyle(buttonInfos[index].fontStyle.value());
+    }
+    if (buttonInfos[index].fontFamily.has_value()) {
+        buttonLayoutProperty->UpdateFontFamily(buttonInfos[index].fontFamily.value());
+    }
+    if (buttonInfos[index].borderRadius.has_value()) {
+        buttonLayoutProperty->UpdateBorderRadius(buttonInfos[index].borderRadius.value());
+    }
+    if (buttonInfos[index].backgroundColor.has_value()) {
+        buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
+    }
+}
+
+void CalendarDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+    const RefPtr<ButtonTheme>& buttonTheme)
+{
+    if (index >= buttonInfos.size()) {
+        return;
+    }
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    CHECK_NULL_VOID(buttonRenderContext);
+    CHECK_NULL_VOID(buttonTheme);
+    if (buttonInfos[index].role.has_value()) {
+        buttonLayoutProperty->UpdateButtonRole(buttonInfos[index].role.value());
+        ButtonStyleMode buttonStyleMode;
+        if (buttonInfos[index].buttonStyle.has_value()) {
+            buttonStyleMode = buttonInfos[index].buttonStyle.value();
+        } else {
+            buttonStyleMode = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        }
+        auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonInfos[index].role.value());
+        auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonInfos[index].role.value());
+        buttonRenderContext->UpdateBackgroundColor(bgColor);
+        buttonLayoutProperty->UpdateFontColor(textColor);
+    }
+    if (buttonInfos[index].buttonStyle.has_value()) {
+        buttonLayoutProperty->UpdateButtonStyle(buttonInfos[index].buttonStyle.value());
+        ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        auto bgColor = buttonTheme->GetBgColor(buttonInfos[index].buttonStyle.value(), buttonRole);
+        auto textColor = buttonTheme->GetTextColor(buttonInfos[index].buttonStyle.value(), buttonRole);
+        buttonRenderContext->UpdateBackgroundColor(bgColor);
+        buttonLayoutProperty->UpdateFontColor(textColor);
+    }
+}
+
+RefPtr<FrameNode> CalendarDialogView::CreateConfirmNode(
+    const RefPtr<FrameNode>& calendarNode, DialogEvent& acceptEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     CHECK_NULL_RETURN(calendarNode, nullptr);
-    auto buttonConfirmNode = CreateButtonNode(true);
+    auto buttonConfirmNode = CreateButtonNode(true, buttonInfos);
 
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
@@ -413,16 +511,19 @@ RefPtr<FrameNode> CalendarDialogView::CreateConfirmNode(const RefPtr<FrameNode>&
         calendarEventHub->FireDialogAcceptEvent(str);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(clickCallback)));
+
     return buttonConfirmNode;
 }
 
-RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(const NG::DialogGestureEvent& cancelEvent)
+RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(
+    const NG::DialogGestureEvent& cancelEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto buttonCancelNode = CreateButtonNode(false);
+    auto buttonCancelNode = CreateButtonNode(false, buttonInfos);
 
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
+
     return buttonCancelNode;
 }
 
@@ -456,7 +557,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
 RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     const RefPtr<FrameNode>& dialogNode, const RefPtr<FrameNode>& dateNode,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
-    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -482,13 +583,13 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     if (cancelIter != dialogCancelEvent.end()) {
         cancelEvent = cancelIter->second;
     }
-    auto buttonCancelNode = CreateCancelNode(cancelEvent);
+    auto buttonCancelNode = CreateCancelNode(cancelEvent, buttonInfos);
     auto acceptIter = dialogEvent.find("acceptId");
     DialogEvent acceptEvent = nullptr;
     if (acceptIter != dialogEvent.end()) {
         acceptEvent = acceptIter->second;
     }
-    auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent);
+    auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent, buttonInfos);
 
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);

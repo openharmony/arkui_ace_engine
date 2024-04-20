@@ -68,7 +68,7 @@ public:
     void SetMaxLength(uint32_t value) override {};
     void ResetMaxLength() override {};
     void SetType(TextInputType type) override {};
-    void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
+    void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

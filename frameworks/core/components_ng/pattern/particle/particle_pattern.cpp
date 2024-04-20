@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 
-namespace OHOS::Ace::NG {
+#include "core/components_ng/render/adapter/rosen_particle_context.h"
 
+namespace OHOS::Ace::NG {
+class RosenRenderParticle;
 void ParticlePattern::OnVisibleChange(bool isVisible)
 {
     if (HaveUnVisibleParent() == !isVisible) {
@@ -44,5 +46,34 @@ void ParticlePattern::OnAttachToMainTree()
         }
         parent = parent->GetParent();
     }
+}
+
+void ParticlePattern::UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbanceArray)
+{
+    if (disturbanceArray.size() == 0) {
+        return;
+    }
+    const std::vector<ParticleDisturbance>& disturbance = GetDisturbance();
+    if (disturbance.size() != disturbanceArray.size()) {
+        SetDisturbance(disturbanceArray);
+        auto frameNode = GetHost();
+        RosenRenderParticle::UpdateDisturbance(frameNode, disturbanceArray);
+        return;
+    }
+    bool equal = true;
+    for (size_t i = 0; i < disturbance.size(); i++) {
+        ParticleDisturbance src = disturbance[i];
+        ParticleDisturbance dst = disturbanceArray[i];
+        if (src != dst) {
+            equal = false;
+            break;
+        }
+    }
+    if (equal) {
+        return;
+    }
+    SetDisturbance(disturbanceArray);
+    auto frameNode = GetHost();
+    RosenRenderParticle::UpdateDisturbance(frameNode, disturbanceArray);
 }
 } // namespace OHOS::Ace::NG

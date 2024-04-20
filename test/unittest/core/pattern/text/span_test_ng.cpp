@@ -516,11 +516,19 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
     EXPECT_CALL(*paragraph, AddPlaceholder).Times(5);
     EXPECT_CALL(*paragraph, PopStyle).Times(5);
 
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::TOP);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::CENTER);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::NONE);
+    PlaceholderStyle placeholderStyle;
+    placeholderStyle.width = 9.0;
+    placeholderStyle.height = 10.0;
+    placeholderStyle.verticalAlign = VerticalAlign::TOP;
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::CENTER;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::BOTTOM;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::NONE;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
 
     MockParagraph::TearDown();
 }

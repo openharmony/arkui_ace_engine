@@ -380,6 +380,37 @@ ArkUINativeModuleValue SpanBridge::ResetLetterSpacing(ArkUIRuntimeCallInfo *runt
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SpanBridge::SetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    struct ArkUIStringAndFloat baselineOffsetValue = { 0.0, nullptr };
+    if (secondArg->IsNumber()) {
+        baselineOffsetValue.value = secondArg->ToNumber(vm)->Value();
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(nativeNode, &baselineOffsetValue);
+    } else if (secondArg->IsString()) {
+        std::string tempValueStr = secondArg->ToString(vm)->ToString();
+        baselineOffsetValue.valueStr = tempValueStr.c_str();
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(nativeNode, &baselineOffsetValue);
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanBaselineOffset(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::ResetBaselineOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSpanModifier()->resetSpanBaselineOffset(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();

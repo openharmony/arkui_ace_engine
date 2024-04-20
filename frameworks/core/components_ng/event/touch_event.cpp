@@ -118,6 +118,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             info.SetTiltY(item.tiltY.value());
         }
         info.SetSourceTool(item.sourceTool);
+        info.SetOriginalId(item.originalId);
         event.AddTouchLocationInfo(std::move(info));
     }
     event.SetSourceDevice(lastPoint.sourceType);
@@ -145,6 +146,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             historyInfo.SetTiltY(item.tiltY.value());
         }
         historyInfo.SetSourceTool(item.sourceTool);
+        historyInfo.SetOriginalId(item.originalId);
         event.AddHistoryLocationInfo(std::move(historyInfo));
         event.AddHistoryPointerEvent(item.pointerEvent);
     }

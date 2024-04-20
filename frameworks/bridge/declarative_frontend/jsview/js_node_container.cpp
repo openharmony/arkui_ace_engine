@@ -83,7 +83,8 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     // check if it's the same object, and if it is, return it;
     auto internalField = firstArg->GetProperty(NODE_CONTAINER_ID);
     if (internalField->IsObject()) {
-        auto insideId = firstArg->GetProperty(INTERNAL_FIELD_VALUE);
+        auto obj = JSRef<JSObject>::Cast(internalField);
+        auto insideId = obj->GetProperty(INTERNAL_FIELD_VALUE);
         if (insideId->IsNumber()) {
             auto id = insideId->ToNumber<int32_t>();
             if (id == nodeContainerId) {

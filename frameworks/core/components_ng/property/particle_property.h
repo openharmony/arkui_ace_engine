@@ -35,6 +35,8 @@ enum ACE_EXPORT ParticleType { POINT = 0, IMAGE };
 
 enum ACE_EXPORT ParticleEmitterShape { RECTANGLE = 0, CIRCLE, ELLIPSE };
 
+enum ACE_EXPORT DistributionType { UNIFORM = 0, GAUSSIAN };
+
 struct PointParticleParameter {
 public:
     void SetRadius(float radius)
@@ -672,6 +674,14 @@ public:
     {
         range_ = range;
     }
+    const std::optional<DistributionType>& GetDistribution() const
+    {
+        return distribution_;
+    }
+    void SetDistribution(DistributionType& distribution)
+    {
+        distribution_ = distribution;
+    }
     const std::optional<ParticleColorPropertyUpdater>& GetUpdater() const
     {
         return updater_;
@@ -700,6 +710,7 @@ public:
 
 private:
     std::pair<Color, Color> range_;
+    std::optional<DistributionType> distribution_;
     std::optional<ParticleColorPropertyUpdater> updater_;
 };
 

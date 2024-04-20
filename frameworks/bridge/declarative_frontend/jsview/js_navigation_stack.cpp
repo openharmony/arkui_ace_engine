@@ -285,6 +285,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     if (GetNavDestinationNodeInUINode(node, desNode)) {
         auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
         if (pattern) {
+            pattern->SetName(name);
             auto onPop = GetOnPopByIndex(index);
             auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
             pattern->SetNavPathInfo(pathInfo);

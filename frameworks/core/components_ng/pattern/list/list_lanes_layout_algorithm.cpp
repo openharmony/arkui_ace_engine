@@ -92,6 +92,16 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
     bool isGroup = false;
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
+    if (firstItemInfo_ && firstItemInfo_.value().first == currentIndex + 1) {
+        ++currentIndex;
+        endPos = firstItemInfo_.value().second.endPos;
+        SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
+        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
+        firstItemInfo_.reset();
+        return 1;
+    } else if (firstItemInfo_) {
+        firstItemInfo_.reset();
+    }
     for (int32_t i = 0; i < lanes && currentIndex + 1 <= GetMaxListItemIndex(); i++) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
@@ -147,6 +157,16 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
     bool isGroup = false;
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
+    if (firstItemInfo_ && firstItemInfo_.value().first == currentIndex - 1) {
+        --currentIndex;
+        startPos = firstItemInfo_.value().second.startPos;
+        SetItemInfo(currentIndex, std::move(firstItemInfo_.value().second));
+        OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
+        firstItemInfo_.reset();
+        return 1;
+    } else if (firstItemInfo_) {
+        firstItemInfo_.reset();
+    }
     for (int32_t i = 0; i < lanes && currentIndex - 1 >= 0; i++) {
         if (currentIndex > GetMaxListItemIndex() + 1) {
             --currentIndex;

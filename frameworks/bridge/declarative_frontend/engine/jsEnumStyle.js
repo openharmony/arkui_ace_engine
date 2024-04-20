@@ -2635,12 +2635,25 @@ var ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape["ELLIPSE"] = 2] = "ELLIPSE";
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
+var DistributionType;
+(function (DistributionType) {
+  DistributionType[DistributionType["UNIFORM"] = 0] = "UNIFORM";
+  DistributionType[DistributionType["GAUSSIAN"] = 1] = "GAUSSIAN";
+})(DistributionType || (DistributionType = {}));
+
 var ParticleUpdater;
 (function (ParticleUpdater) {
   ParticleUpdater[ParticleUpdater["NONE"] = 0] = "NONE";
   ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
+
+var DisturbanceFieldsShape;
+(function (DisturbanceFieldsShape) {
+  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {

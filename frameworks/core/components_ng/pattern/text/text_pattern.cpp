@@ -2625,7 +2625,8 @@ void TextPattern::SetAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
-    textAccessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
+    textAccessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start,
+                                                                                 int32_t end, bool isForward) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
@@ -2733,11 +2734,12 @@ void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
     }
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
+    auto contentSize = geometryNode->GetContentSize();
     CHECK_NULL_VOID(paragraph_);
-    if (paragraph_->GetTextWidth() < frameSize.Width()) {
+    if (paragraph_->GetTextWidth() < contentSize.Width()) {
         return;
     }
+    auto frameSize = geometryNode->GetFrameSize();
     auto relativeSelfLeftOffsetX =
         std::max(-1 * host->GetOffsetRelativeToWindow().GetX(), rect.GetOffset().GetX() - paragraph_->GetTextWidth());
     rect.SetLeft(relativeSelfLeftOffsetX);

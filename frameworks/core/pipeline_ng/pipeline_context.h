@@ -689,6 +689,9 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
+    void CheckNeedUpdateBackgroundColor(Color& color);
+    bool CheckNeedDisableUpdateBackgroundImage();
+
     void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
     {
         isFreezeFlushMessage_ = isFreezeFlushMessage;
