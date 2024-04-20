@@ -18,6 +18,7 @@
 
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
@@ -136,6 +137,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
 };
 
 struct TextLineStyle {
@@ -199,6 +201,7 @@ std::string GetFontWeightInJson(const std::optional<FontWeight>& value);
 std::string GetFontSizeInJson(const std::optional<Dimension>& value);
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value);
+std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

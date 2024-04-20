@@ -14,6 +14,7 @@
  */
 #include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
 
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -41,6 +42,16 @@ SymbolModel* SymbolModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+const std::map<std::string, Ace::SymbolEffectType> SYMBOL_EFFECT_TYPE_MAP = {
+    { "ScaleSymbolEffect", SymbolEffectType::SCALE },
+    { "HierarchicalSymbolEffect", SymbolEffectType::HIERARCHICAL },
+    { "AppearSymbolEffect", SymbolEffectType::APPEAR },
+    { "DisappearSymbolEffect", SymbolEffectType::DISAPPEAR },
+    { "BounceSymbolEffect", SymbolEffectType::BOUNCE },
+    { "ReplaceSymbolEffect", SymbolEffectType::REPLACE },
+    { "PulseSymbolEffect", SymbolEffectType::PULSE },
+};
+
 void JSSymbol::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSymbol>::Declare("SymbolGlyph");
@@ -56,6 +67,7 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSymbol>::StaticMethod("clip", &JSSymbol::JsClip);
+    JSClass<JSSymbol>::StaticMethod("symbolEffect", &JSSymbol::SetSymbolEffectOptions, opt);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -124,6 +136,88 @@ void JSSymbol::JsClip(const JSCallbackInfo& info)
     JSViewAbstract::JsClip(info);
     if (info[0]->IsBoolean()) {
         SymbolModel::GetInstance()->SetClipEdge();
+    }
+}
+
+void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+
+    auto symbolEffectObj = JSRef<JSObject>::Cast(info[0]);
+    NG::SymbolEffectOptions symbolEffectOptions;
+    parseSymbolEffect(symbolEffectObj, symbolEffectOptions);
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto effectionsObj = JSRef<JSObject>::Cast(info[1]);
+        parseEffectOptions(effectionsObj, symbolEffectOptions);
+    }
+
+    setDefaultOptions(symbolEffectOptions);
+    SymbolModel::GetInstance()->SetSymbolEffectOptions(symbolEffectOptions);
+}
+
+void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions)
+{
+    auto typeParam = symbolEffectObj->GetProperty("type");
+    if (typeParam->IsString()) {
+        auto type = typeParam->ToString();
+        auto iter = SYMBOL_EFFECT_TYPE_MAP.find(type);
+        if (iter != SYMBOL_EFFECT_TYPE_MAP.end()) {
+            symbolEffectOptions.SetEffectType(iter->second);
+        }
+    }
+
+    auto scopeTypeProperty = symbolEffectObj->GetProperty("scope");
+    if (scopeTypeProperty->IsNumber()) {
+        auto scopeTypeNum = scopeTypeProperty->ToNumber<uint32_t>();
+        if (scopeTypeNum >= static_cast<int>(ScopeType::LAYER) && scopeTypeNum <= static_cast<int>(ScopeType::WHOLE)) {
+            symbolEffectOptions.SetScopeType(static_cast<ScopeType>(scopeTypeNum));
+        }
+    }
+
+    auto commonSubTypeProperty = symbolEffectObj->GetProperty("direction");
+    if (commonSubTypeProperty->IsNumber()) {
+        auto commonSubTypeNum = commonSubTypeProperty->ToNumber<uint32_t>();
+        if (commonSubTypeNum >= static_cast<int>(CommonSubType::DOWN) &&
+            commonSubTypeNum <= static_cast<int>(CommonSubType::UP)) {
+            symbolEffectOptions.SetCommonSubType(static_cast<CommonSubType>(commonSubTypeNum));
+        }
+    }
+
+    auto fillStyleProperty = symbolEffectObj->GetProperty("fillStyle");
+    if (fillStyleProperty->IsNumber()) {
+        auto fillStyleNum = fillStyleProperty->ToNumber<uint32_t>();
+        if (fillStyleNum >= static_cast<int>(FillStyle::CUMULATIVE) &&
+            fillStyleNum <= static_cast<int>(FillStyle::ITERATIVE)) {
+            symbolEffectOptions.SetFillStyle(static_cast<FillStyle>(fillStyleNum));
+        }
+    }
+}
+
+void JSSymbol::parseEffectOptions(const JSRef<JSObject> effectionsObj, NG::SymbolEffectOptions& symbolEffectOptions)
+{
+    auto repeatCountProperty = effectionsObj->GetProperty("repeat");
+    if (repeatCountProperty->IsNumber()) {
+        symbolEffectOptions.SetRepeatCount(repeatCountProperty->ToNumber<int32_t>());
+    }
+
+    auto isActiveProperty = effectionsObj->GetProperty("isActive");
+    if (isActiveProperty->IsBoolean()) {
+        symbolEffectOptions.SetIsActive(isActiveProperty->ToBoolean());
+    }
+}
+
+// 5.0默认属性:可变颜色迭代/脉冲默认循环播放,其他播1次
+void JSSymbol::setDefaultOptions(NG::SymbolEffectOptions& symbolEffectOptions)
+{
+    if ((symbolEffectOptions.GetEffectType() == SymbolEffectType::HIERARCHICAL &&
+            symbolEffectOptions.GetFillStyle().value_or(FillStyle::CUMULATIVE) == FillStyle::ITERATIVE) ||
+        symbolEffectOptions.GetEffectType() == SymbolEffectType::PULSE) {
+        symbolEffectOptions.SetRepeatCount(-1);
+    } else {
+        symbolEffectOptions.SetRepeatCount(1);
     }
 }
 } // namespace OHOS::Ace::Framework

@@ -27,6 +27,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -44,6 +45,7 @@ public:
     virtual void SetFontColor(std::vector<Color>& symbolColor) = 0;
     virtual void SetSymbolEffect(const std::uint32_t effectStrategy) = 0;
     virtual void SetClipEdge() = 0;
+    virtual void SetSymbolEffectOptions(const NG::SymbolEffectOptions& symbolEffectOptions) = 0;
 
 private:
     static std::unique_ptr<SymbolModel> instance_;

@@ -29,6 +29,7 @@
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
@@ -536,12 +537,35 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
         }
         txtStyle.symbol.SetRenderColor(symbolColors);
         txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
-        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
+        if (textStyle.GetSymbolEffectOptions().has_value()) {
+            auto options = textStyle.GetSymbolEffectOptions().value();
+            auto effectType = options.GetEffectType();
+            txtStyle.symbol.SetSymbolEffect(static_cast<uint32_t>(effectType));
+            if (effectType == SymbolEffectType::HIERARCHICAL && options.GetFillStyle().has_value()) {
+                txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetFillStyle().value()));
+            } else {
+                if (options.GetScopeType().has_value()) {
+                    txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetScopeType().value()));
+                }
+            }
+            if (options.GetCommonSubType().has_value()) {
+                auto commonType = static_cast<uint16_t>(options.GetCommonSubType().value());
+                txtStyle.symbol.SetCommonSubType(commonType == 1 ? Rosen::Drawing::DrawingCommonSubType::UP
+                                                                 : Rosen::Drawing::DrawingCommonSubType::DOWN);
+            }
+            txtStyle.symbol.SetAnimationStart(options.GetIsActive());
+            txtStyle.symbol.SetRepeatCount(options.GetRepeatCount());
+        } else {
+            txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
+        }
     }
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    if(textStyle.isSymbolGlyph_) {
+        txtStyle.fontFamilies.push_back("HM Symbol");
+    }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
 
@@ -642,17 +666,40 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.isSymbolGlyph = true;
         const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
         std::vector<Rosen::Drawing::Color> symbolColors;
-        for (int i = 0; i < symbolColor.size(); i++) {
+        for (size_t i = 0; i < symbolColor.size(); i++) {
             symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
         }
         txtStyle.symbol.SetRenderColor(symbolColors);
         txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
-        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
+        if (textStyle.GetSymbolEffectOptions().has_value()) {
+            auto options = textStyle.GetSymbolEffectOptions().value();
+            auto effectType = options.GetEffectType();
+            txtStyle.symbol.SetSymbolEffect(static_cast<uint32_t>(effectType));
+            if (effectType == SymbolEffectType::HIERARCHICAL && options.GetFillStyle().has_value()) {
+                txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetFillStyle().value()));
+            } else {
+                if (options.GetScopeType().has_value()) {
+                    txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetScopeType().value()));
+                }
+            }
+            if (options.GetCommonSubType().has_value()) {
+                auto commonType = static_cast<uint16_t>(options.GetCommonSubType().value());
+                txtStyle.symbol.SetCommonSubType(commonType == 1 ? Rosen::Drawing::DrawingCommonSubType::UP
+                                                                 : Rosen::Drawing::DrawingCommonSubType::DOWN);
+            }
+            txtStyle.symbol.SetAnimationStart(options.GetIsActive());
+            txtStyle.symbol.SetRepeatCount(options.GetRepeatCount());
+        } else {
+            txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
+        }
     }
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    if(textStyle.isSymbolGlyph_) {
+        txtStyle.fontFamilies.push_back("HM Symbol");
+    }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
 

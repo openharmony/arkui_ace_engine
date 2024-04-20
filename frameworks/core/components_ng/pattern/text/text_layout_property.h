@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
@@ -133,6 +134,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolColorList, std::vector<Color>, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolRenderingStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectOptions, SymbolEffectOptions, PROPERTY_UPDATE_MEASURE_SELF);
 
     // for XTS inspector
     std::string InspectorGetTextFont() const

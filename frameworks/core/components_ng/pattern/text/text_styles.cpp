@@ -16,12 +16,11 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace {
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
-constexpr uint32_t EFFECTSTRATEGY_SCALE = 1;
-constexpr uint32_t EFFECTSTRATEGY_HIERARCHICAL = 2;
 };
 
 namespace OHOS::Ace::NG {
@@ -54,6 +53,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, SymbolColorList, SetSymbolColorList);
         UPDATE_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, SetRenderStrategy);
         UPDATE_TEXT_STYLE(fontStyle, SymbolEffectStrategy, SetEffectStrategy);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
@@ -91,6 +91,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, SymbolColorList, SetSymbolColorList);
         UPDATE_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, SetRenderStrategy);
         UPDATE_TEXT_STYLE(fontStyle, SymbolEffectStrategy, SetEffectStrategy);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
@@ -155,12 +156,22 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    if (value == EFFECTSTRATEGY_SCALE) {
+    SymbolEffectType type = static_cast<SymbolEffectType>(value.value_or(0));
+    if (type == SymbolEffectType::SCALE) {
         text = "SymbolEffectStrategy.SCALE";
-    } else if (value == EFFECTSTRATEGY_HIERARCHICAL) {
+    } else if (type == SymbolEffectType::HIERARCHICAL) {
         text = "SymbolEffectStrategy.HIERARCHICAL";
     } else {
         text = "SymbolEffectStrategy.NONE";
+    }
+    return text;
+}
+
+std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value)
+{
+    std::string text = "";
+    if (value.has_value()) {
+        text = value.value().ToString();
     }
     return text;
 }

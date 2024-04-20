@@ -64,4 +64,9 @@ void SymbolModelNG::SetClipEdge()
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
+
+void SymbolModelNG::SetSymbolEffectOptions(const SymbolEffectOptions& symbolEffectOptions)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
+}
 } // namespace OHOS::Ace::NG

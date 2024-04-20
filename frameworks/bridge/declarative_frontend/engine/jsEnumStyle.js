@@ -1199,6 +1199,120 @@ var SymbolEffectStrategy;
   SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
 })(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
 
+var DirectionType;
+(function (DirectionType) {
+  DirectionType[DirectionType["DOWN"] = 0] = "DOWN";
+  DirectionType[DirectionType["UP"] = 1] = "UP";
+})(DirectionType || (DirectionType = {}));
+
+var ScopeType;
+(function (ScopeType) {
+  ScopeType[ScopeType["LAYER"] = 0] = "LAYER";
+  ScopeType[ScopeType["WHOLE"] = 1] = "WHOLE";
+})(ScopeType || (ScopeType = {}));
+
+var FillStyle;
+(function (FillStyle) {
+  FillStyle[FillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
+  FillStyle[FillStyle["ITERATIVE"] = 1] = "ITERATIVE";
+})(FillStyle || (FillStyle = {}));
+
+class SymbolEffect {
+}
+
+class ScaleSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "ScaleSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class HierarchicalSymbolEffect extends SymbolEffect {
+  constructor(fillStyle) {
+    super();
+    this.type = "HierarchicalSymbolEffect";
+    this.fillStyle = fillStyle;
+  }
+}
+
+class AppearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "AppearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+class DisappearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = 'DisappearSymbolEffect';
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class BounceSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "BounceSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class ReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "ReplaceSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class PulseSymbolEffect extends SymbolEffect {
+  constructor() {
+    super();
+    this.type = "PulseSymbolEffect";
+  }
+}
+
+class EffectOptions {
+  constructor() {
+  }
+  isActive(value) {
+    this.isActive = value;
+    return this;
+  }
+}
+
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
   RichEditorSpanType[RichEditorSpanType["TEXT"] = 0] = "TEXT";

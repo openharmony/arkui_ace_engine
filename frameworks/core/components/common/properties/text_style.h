@@ -28,6 +28,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 namespace OHOS::Ace {
 // The normal weight is W400, the larger the number after W, the thicker the font will be.
@@ -606,6 +607,11 @@ public:
         renderColors_ = renderColors;
     }
 
+    void SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions)
+    {
+        symbolEffectOptions_ = symbolEffectOptions;
+    }
+
     std::vector<Color> GetRenderColors()
     {
         return renderColors_;
@@ -646,6 +652,11 @@ public:
         lineBreakStrategy_ = breakStrategy;
     }
 
+    const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
+    {
+        return symbolEffectOptions_;
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -675,6 +686,8 @@ public:
         jsonValue->Put("renderColors", ss.str().c_str());
         JSON_STRING_PUT_INT(jsonValue, renderStrategy_);
         JSON_STRING_PUT_INT(jsonValue, effectStrategy_);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, symbolEffectOptions_);
+
         return jsonValue->ToString();
     }
 
@@ -720,6 +733,7 @@ private:
     std::vector<Color> renderColors_;
     int32_t renderStrategy_ = 0;
     int32_t effectStrategy_ = 0;
+    std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
 
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
 };

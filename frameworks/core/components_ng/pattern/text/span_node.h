@@ -34,6 +34,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -272,6 +273,7 @@ enum class PropertyInfo {
     WORD_BREAK,
     LINE_BREAK_STRATEGY,
     FONTFEATURE,
+    SYMBOL_EFFECT_OPTIONS,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -380,6 +382,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
