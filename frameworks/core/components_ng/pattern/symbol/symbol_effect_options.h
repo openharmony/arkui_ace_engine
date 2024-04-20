@@ -26,9 +26,17 @@ namespace OHOS::Ace::NG {
 class SymbolEffectOptions {
 public:
     explicit SymbolEffectOptions(SymbolEffectType effectType);
-    SymbolEffectOptions(SymbolEffectType effectType, ScopeType scopeType = ScopeType::LAYER,
-        CommonSubType commonSubType = CommonSubType::DOWN, FillStyle fillStyle = FillStyle::CUMULATIVE)
-        : effectType_(effectType), scopeType_(scopeType), commonSubType_(commonSubType), fillStyle_(fillStyle)
+
+    SymbolEffectOptions(SymbolEffectType effectType, ScopeType scopeType)
+        : effectType_(effectType), scopeType_(scopeType)
+    {}
+
+    SymbolEffectOptions(SymbolEffectType effectType, ScopeType scopeType, CommonSubType commonSubType)
+        : effectType_(effectType), scopeType_(scopeType), commonSubType_(commonSubType)
+    {}
+
+    SymbolEffectOptions(SymbolEffectType effectType, FillStyle fillStyle)
+        : effectType_(effectType), fillStyle_(fillStyle)
     {}
 
     SymbolEffectOptions() = default;

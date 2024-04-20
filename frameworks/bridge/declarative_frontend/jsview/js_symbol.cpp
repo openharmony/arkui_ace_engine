@@ -172,7 +172,8 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     auto scopeTypeProperty = symbolEffectObj->GetProperty("scope");
     if (scopeTypeProperty->IsNumber()) {
         auto scopeTypeNum = scopeTypeProperty->ToNumber<uint32_t>();
-        if (scopeTypeNum >= static_cast<int>(ScopeType::LAYER) && scopeTypeNum <= static_cast<int>(ScopeType::WHOLE)) {
+        if (scopeTypeNum >= static_cast<int>(ScopeType::LAYER) && 
+            scopeTypeNum <= static_cast<int>(ScopeType::WHOLE)) {
             symbolEffectOptions.SetScopeType(static_cast<ScopeType>(scopeTypeNum));
         }
     }
