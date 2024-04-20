@@ -113,6 +113,8 @@ const std::wstring lineSeparator = L"\n";
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 constexpr static int32_t NONE_SELECT_TYPE = -1;
+constexpr static int32_t FIRST_LINE = 1;
+constexpr static int32_t SECOND_LINE = 2;
 } // namespace
 
 RichEditorPattern::RichEditorPattern()
@@ -4675,11 +4677,18 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
             }
         }
         RichEditorDragInfo info;
+        info.selectedWidth = pattern->GetSelectedMaxWidth();
         info.handleColor = pattern->GetCaretColor();
         info.selectedBackgroundColor = pattern->GetSelectedBackgroundColor();
         pattern->CalculateHandleOffsetAndShowOverlay();
-        info.firstHandle = pattern->textSelector_.firstHandle;
-        info.secondHandle = pattern->textSelector_.secondHandle;
+        auto firstHandleInfo = pattern->GetFirstHandleInfo();
+        if (firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
+            info.firstHandle = pattern->textSelector_.firstHandle;
+        }
+        auto secondHandleInfo = pattern->GetSecondHandleInfo();
+        if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
+            info.secondHandle = pattern->textSelector_.secondHandle;
+        }
         pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
         FrameNode::ProcessOffscreenNode(pattern->dragNode_);
     };
@@ -4755,6 +4764,7 @@ void RichEditorPattern::CloseSelectOverlay()
 void RichEditorPattern::CloseHandleAndSelect()
 {
     selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    showSelect_ = false;
 }
 
 void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -7041,5 +7051,48 @@ bool RichEditorPattern::HandleOnDeleteComb(bool backward)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
+}
+
+float RichEditorPattern::GetSelectedMaxWidth()
+{
+    std::vector<RectF> selecedRect;
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(overlayMod, 0.0f);
+    auto selectedRects = overlayMod->GetSelectedRects();
+    auto tempWidth = 0.0f;
+    auto top = 0.0f;
+    auto firstLineLeft = 0.0f;
+    auto secondLineLeft = 0.0f;
+    auto firstLineWidth = 0.0f;
+    auto index = 0;
+    bool isCalculate = false;
+    auto left = 0.0f;
+    for (const auto& rect : selectedRects) {
+        if (NearZero(tempWidth) || !NearEqual(top, rect.GetY())) {
+            if (index > SECOND_LINE) {
+                secondLineLeft = left;
+                break;
+            }
+            if (isCalculate && NearZero(firstLineWidth)) {
+                firstLineWidth = tempWidth;
+                firstLineLeft = left;
+            }
+            top = rect.GetY();
+            left = rect.GetX();
+            tempWidth = 0.0f;
+            index++;
+            isCalculate = true;
+        }
+        if (NearEqual(top, rect.GetY())) {
+            tempWidth += rect.Width();
+        }
+    }
+    if (index == FIRST_LINE) {
+        return tempWidth;
+    } else if (index == SECOND_LINE) {
+        return firstLineLeft - left + firstLineWidth;
+    } else {
+        return firstLineLeft - secondLineLeft + firstLineWidth;
+    }
 }
 } // namespace OHOS::Ace::NG
