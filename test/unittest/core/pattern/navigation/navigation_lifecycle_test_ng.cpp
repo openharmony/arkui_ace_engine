@@ -90,7 +90,7 @@ public:
     void MockPipelineContextGetTheme();
     static void RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
     static RefPtr<NavDestinationGroupNode> CreateDestination(const std::string name);
-    static void SetEvent(std::string type, int8_t expectValue,
+    static void SetEvent(NavDestinationLifecycle lifecycle, int8_t expectValue,
         const RefPtr<FrameNode>& destinationNode, const RefPtr<MockNavigationStack>& stack);
 };
 
@@ -127,25 +127,52 @@ void NavigationLifecycleTestNg::MockPipelineContextGetTheme()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
-void NavigationLifecycleTestNg::SetEvent(std::string type, int8_t expectValue,
+void NavigationLifecycleTestNg::SetEvent(NavDestinationLifecycle lifecycle, int8_t expectValue,
     const RefPtr<FrameNode>& destinationNode, const RefPtr<MockNavigationStack>& stack)
 {
     auto eventHub = destinationNode->GetEventHub<NavDestinationEventHub>();
     EXPECT_NE(eventHub, nullptr);
-    auto callback = [stack = stack, expectValue = expectValue]() {
+    std::function<void()>&& callback = [stack = stack, expectValue = expectValue]() {
         auto lifecycleIndex = stack->GetLifecycleIndex();
         EXPECT_EQ(lifecycleIndex, expectValue);
         lifecycleIndex++;
         stack->SetLifecycleIndex(lifecycleIndex);
     };
-    if (type == "onAppear") {
-        eventHub->SetOnAppear(callback);
-    } else if (type == "onShown") {
-        eventHub->SetOnShown(callback);
-    } else if (type == "onHidden") {
-        eventHub->SetOnHidden(callback);
-    } else if (type == "onDisAppear") {
-        eventHub->SetOnDisappear(callback);
+    switch (lifecycle) {
+        case NavDestinationLifecycle::ON_WILL_APPEAR: {
+            eventHub->SetOnWillAppear(callback);
+            break;
+        }
+        case NavDestinationLifecycle::ON_APPEAR: {
+            eventHub->SetOnAppear(std::move(callback));
+            break;
+        }
+        case NavDestinationLifecycle::ON_WILL_SHOW: {
+            eventHub->SetOnWillShow(callback);
+            break;
+        }
+        case NavDestinationLifecycle::ON_SHOW: {
+            eventHub->SetOnShown(std::move(callback));
+            break;
+        }
+        case NavDestinationLifecycle::ON_WILL_HIDE: {
+            eventHub->SetOnWillHide(callback);
+            break;
+        }
+        case NavDestinationLifecycle::ON_HIDE: {
+            eventHub->SetOnHidden(std::move(callback));
+            break;
+        }
+        case NavDestinationLifecycle::ON_WILL_DISAPPEAR: {
+            eventHub->SetOnWillDisAppear(callback);
+            break;
+        }
+        case NavDestinationLifecycle::ON_DISAPPEAR: {
+            eventHub->SetOnDisappear(std::move(callback));
+            break;
+        }
+        default:
+            break;
     }
 }
 
@@ -198,8 +225,9 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Lev
     EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
     EXPECT_NE(eventHub, nullptr);
-    SetEvent("onAppear", 0, frameNode, stack);
-    SetEvent("onShown", 1, frameNode, stack);
+    stack->SetLifecycleIndex(0);
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, 0, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 1, frameNode, stack);
 
     /**
      * @tc.steps: step2. push destinationA and sync navigation stack
@@ -220,9 +248,9 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest001, TestSize.Lev
      * @tc.steps: step3. push destinationB and set lifecycle
      */
     auto frameNodeB = CreateDestination("B");
-    SetEvent("onAppear", 0, frameNodeB, stack);
-    SetEvent("onShown", lifecycleIndex, frameNodeB, stack);
-    SetEvent("onHidden", 1, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, 0, frameNodeB, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, lifecycleIndex, frameNodeB, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 1, frameNode, stack);
     stack->Add("pageB", frameNodeB);
     stack->UpdateAnimatedValue(false);
     navigationPattern->MarkNeedSyncWithJsStack();
@@ -274,10 +302,10 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest002, TestSize.Leve
      * @tc.steps: step4. pop pageB,and sync stack
      */
     stack->Pop();
-    SetEvent("onHidden", 0, frameNodeB, stack);
-    SetEvent("onShown", 1, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 0, frameNodeB, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, 1, frameNode, stack);
     const int8_t disAppearIndex = 2;
-    SetEvent("onDisAppear", disAppearIndex, frameNodeB, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNodeB, stack);
     stack->UpdateAnimatedValue(false);
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
@@ -322,13 +350,354 @@ HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest003, TestSize.Leve
     stack->Add("pageB", frameNodeB);
     stack->UpdateReplaceValue(1);
     stack->UpdateAnimatedValue(false);
-    SetEvent("onAppear", 0, frameNodeB, stack);
-    SetEvent("onHidden", 1, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, 0, frameNodeB, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 1, frameNode, stack);
     const int8_t showIndex = 2;
-    SetEvent("onShown", showIndex, frameNodeB, stack);
+    SetEvent(NavDestinationLifecycle::ON_SHOW, showIndex, frameNodeB, stack);
     const int8_t disAppearIndex = 3;
-    SetEvent("onDisAppear", disAppearIndex, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNode, stack);
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    pipelineContext->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationLifecyclePushTest004
+ * @tc.desc: Test push lifecycle is correct with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1.create navDestination
+     */
+    MockPipelineContextGetTheme();
+
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(stack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> navigationNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    navigationNode->AttachToMainTree();
+
+    /**
+     * @tc.step2. push and create destination A, and set destination event.
+     */
+    auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
+    EXPECT_NE(frameNode, nullptr);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, 1, frameNode, stack);
+    const int8_t willShowIndex = 2;
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, frameNode, stack);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->FireOnWillAppear();
+    stack->Add("pageA", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    pipelineContext->FlushBuildFinishCallbacks();
+    auto lifecycleIndex = stack->GetLifecycleIndex();
+    const int8_t targetIndex = 3;
+    EXPECT_EQ(lifecycleIndex, targetIndex);
+}
+
+/**
+ * @tc.name: NavigationLifecyclePopTest005
+ * @tc.desc: Test push lifecycle is correct with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1.create navDestination
+     */
+    MockPipelineContextGetTheme();
+
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(stack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->Finish());
+    navigationNode->AttachToMainTree();
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps:step2. create destination A and push it to stack.
+     */
+    auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
+    stack->Add("pageA", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    pipelineContext->FlushBuildFinishCallbacks();
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+
+    /**
+     * @tc.steps:step3. set event in destination A
+     */
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 0, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 1, frameNode, stack);
+    const int8_t willDisappearIndex = 2;
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, willDisappearIndex, frameNode, stack);
+    const int8_t disAppearIndex = 3;
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNode, stack);
+
+    /**
+     * @tc.steps: step4. sync stack
+     */
+    stack->Remove();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    pipelineContext->FlushBuildFinishCallbacks();
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+    auto contentNode = navigationNode->GetContentNode();
+    EXPECT_NE(contentNode, nullptr);
+    contentNode->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: NavigationLifecycleReplaceTest006
+ * @tc.desc: Test replace lifecycle is correct with animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1.create navDestination
+     */
+    MockPipelineContextGetTheme();
+
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(stack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->Finish());
+    navigationNode->AttachToMainTree();
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps:step2. create destination A and push it to stack.
+     */
+    auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
+    stack->Add("pageA", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    pipelineContext->FlushBuildFinishCallbacks();
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+
+    /**
+     * @tc.steps: step3. create destination B and set lifecycle
+     */
+    auto destinationB = NavigationLifecycleTestNg::CreateDestination("B");
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 1, frameNode, stack);
+    const int8_t onAppearIndex = 2;
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, onAppearIndex, destinationB, stack);
+    const int8_t willShowIndex = 3;
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, destinationB, stack);
+    const int8_t hideIndex = 4;
+    SetEvent(NavDestinationLifecycle::ON_HIDE, hideIndex, frameNode, stack);
+    const int8_t willDisappearIndex = 5;
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, willDisappearIndex, frameNode, stack);
+    const int8_t showIndex = 6;
+    SetEvent(NavDestinationLifecycle::ON_SHOW, showIndex, destinationB, stack);
+    const int8_t disAppearIndex = 7;
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNode, stack);
+
+    /**
+     * @tc.steps: step4. sync navigation stack
+     */
+    stack->Remove();
+    stack->Add("B", destinationB);
+    auto eventHub = destinationB->GetEventHub<NavDestinationEventHub>();
+    eventHub->FireOnWillAppear();
+    stack->UpdateReplaceValue(true);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    pipelineContext->FlushBuildFinishCallbacks();
+    navigationPattern->FireShowAndHideLifecycle(frameNode, destinationB, false);
+    auto contentNode = navigationNode->GetContentNode();
+    EXPECT_NE(contentNode, nullptr);
+    contentNode->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: NavigationLifecyclePushTest007
+ * @tc.desc: Test push lifecycle is correct without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePushTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1.create navDestination
+     */
+    MockPipelineContextGetTheme();
+
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(stack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> navigationNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    navigationNode->AttachToMainTree();
+
+    /**
+     * @tc.step2. push and create destination A, and set destination event.
+     */
+    auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
+    EXPECT_NE(frameNode, nullptr);
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, 1, frameNode, stack);
+    const int8_t willShowIndex = 2;
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, frameNode, stack);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->FireOnWillAppear();
+    stack->Add("pageA", frameNode);
+    stack->UpdateAnimatedValue(false);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    pipelineContext->FlushBuildFinishCallbacks();
+    auto lifecycleIndex = stack->GetLifecycleIndex();
+    const int8_t targetIndex = 3;
+    EXPECT_EQ(lifecycleIndex, targetIndex);
+}
+
+/**
+ * @tc.name: NavigationLifecyclePopTest008
+ * @tc.desc: Test pop lifecycle is correct without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationLifecyclePopTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1.create navDestination
+     */
+    MockPipelineContextGetTheme();
+
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(stack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->Finish());
+    navigationNode->AttachToMainTree();
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps:step2. create destination A and push it to stack.
+     */
+    auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
+    stack->Add("pageA", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    pipelineContext->FlushBuildFinishCallbacks();
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+
+    /**
+     * @tc.steps:step3. set event in destination A
+     */
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 0, frameNode, stack);
+    SetEvent(NavDestinationLifecycle::ON_HIDE, 1, frameNode, stack);
+    const int8_t willDisappearIndex = 2;
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, willDisappearIndex, frameNode, stack);
+    const int8_t disAppearIndex = 3;
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNode, stack);
+
+    /**
+     * @tc.steps: step4. sync stack
+     */
+    stack->Remove();
+    stack->UpdateAnimatedValue(false);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    pipelineContext->FlushBuildFinishCallbacks();
+}
+
+/**
+ * @tc.name: NavigationLifecycleReplaceTest009
+ * @tc.desc: Test push lifecycle is correct without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationLifecycleTestNg, NavigationLifecycleReplaceTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1.create navDestination
+     */
+    MockPipelineContextGetTheme();
+
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(stack);
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<NavigationGroupNode> navigationNode = AceType::DynamicCast<NavigationGroupNode>(
+        ViewStackProcessor::GetInstance()->Finish());
+    navigationNode->AttachToMainTree();
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps:step2. create destination A and push it to stack.
+     */
+    auto frameNode = NavigationLifecycleTestNg::CreateDestination("A");
+    stack->Add("pageA", frameNode);
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext, nullptr);
+    pipelineContext->FlushBuildFinishCallbacks();
+    navigationPattern->FireShowAndHideLifecycle(nullptr, frameNode, false);
+
+    /**
+     * @tc.steps: step3. create destination B and set lifecycle
+     */
+    auto destinationB = NavigationLifecycleTestNg::CreateDestination("B");
+    SetEvent(NavDestinationLifecycle::ON_WILL_APPEAR, 0, destinationB, stack);
+    SetEvent(NavDestinationLifecycle::ON_WILL_HIDE, 1, frameNode, stack);
+    const int8_t onAppearIndex = 2;
+    SetEvent(NavDestinationLifecycle::ON_APPEAR, onAppearIndex, destinationB, stack);
+    const int8_t willShowIndex = 3;
+    SetEvent(NavDestinationLifecycle::ON_WILL_SHOW, willShowIndex, destinationB, stack);
+    const int8_t hideIndex = 4;
+    SetEvent(NavDestinationLifecycle::ON_HIDE, hideIndex, frameNode, stack);
+    const int8_t willDisappearIndex = 5;
+    SetEvent(NavDestinationLifecycle::ON_WILL_DISAPPEAR, willDisappearIndex, frameNode, stack);
+    const int8_t showIndex = 6;
+    SetEvent(NavDestinationLifecycle::ON_SHOW, showIndex, destinationB, stack);
+    const int8_t disAppearIndex = 7;
+    SetEvent(NavDestinationLifecycle::ON_DISAPPEAR, disAppearIndex, frameNode, stack);
+
+    /**
+     * @tc.steps: step4. sync navigation stack
+     */
+    stack->Remove();
+    stack->Add("B", destinationB);
+    auto eventHub = destinationB->GetEventHub<NavDestinationEventHub>();
+    eventHub->FireOnWillAppear();
+    stack->UpdateReplaceValue(true);
+    stack->UpdateAnimatedValue(false);
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
     pipelineContext->FlushBuildFinishCallbacks();
