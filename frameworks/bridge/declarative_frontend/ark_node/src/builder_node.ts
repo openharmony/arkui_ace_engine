@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
@@ -136,7 +136,7 @@ class JSBuilderNode extends BaseNode {
 
   protected purgeDeletedElmtIds(): void {
     UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
   }
   public purgeDeleteElmtId(rmElmtId: number): boolean {
     const result = this.updateFuncByElmtId.delete(rmElmtId);
