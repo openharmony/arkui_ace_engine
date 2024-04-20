@@ -194,7 +194,7 @@ public:
             }
         }
         imagesChangedFlag_ = true;
-        isAnimation_ = true;
+        RegisterVisibleAreaChange();
     }
 
     void StartAnimation() {

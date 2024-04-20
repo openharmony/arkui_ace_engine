@@ -875,6 +875,14 @@ void ImagePattern::OnVisibleChange(bool visible)
     if (!visible) {
         CloseSelectOverlay();
     }
+    // control pixelMap List
+    if (isAnimation_) {
+        if (visible) {
+            animator_->Forward();
+        } else {
+            animator_->Pause();
+        }
+    }
     // control svg / gif animation
     if (image_) {
         image_->ControlAnimation(visible);
