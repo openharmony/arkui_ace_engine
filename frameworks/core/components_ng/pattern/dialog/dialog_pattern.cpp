@@ -115,6 +115,23 @@ void DialogPattern::OnModifyDone()
     InitFocusEvent(focusHub);
 }
 
+void DialogPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    InitHostWindowRect();
+}
+
+void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+}
+
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     GestureEventFunc task = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -1289,6 +1306,41 @@ void DialogPattern::DumpObjectProperty()
     }
     if (dialogProperties_.maskRect.has_value()) {
         DumpLog::GetInstance().AddDesc("MaskRect: " + dialogProperties_.maskRect.value().ToString());
+    }
+}
+void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        InitHostWindowRect();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void DialogPattern::InitHostWindowRect()
+{
+    if (!dialogProperties_.isShowInSubWindow) {
+        isUIExtensionSubWindow_ = false;
+        hostWindowRect_.Reset();
+        return;
+    }
+
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
+    }
+
+    if (container->IsUIExtensionWindow()) {
+        isUIExtensionSubWindow_ = true;
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentId);
+        CHECK_NULL_VOID(subwindow);
+        auto rect = subwindow->GetUIExtensionHostWindowRect();
+        hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     }
 }
 } // namespace OHOS::Ace::NG

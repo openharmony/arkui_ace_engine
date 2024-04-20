@@ -1584,13 +1584,20 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
                 TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
         };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
-            CHECK_NULL_VOID(overlayManager);
-            RefPtr<NG::FrameNode> dialog;
             LOGI("Begin to show dialog ");
+            CHECK_NULL_VOID(overlayManager);
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            if (container->IsSubContainer()) {
+                auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+                container = AceEngine::Get().GetContainer(currentId);
+                CHECK_NULL_VOID(container);
+            }
+            RefPtr<NG::FrameNode> dialog;
             if (dialogProperties.isShowInSubWindow) {
                 dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
                 CHECK_NULL_VOID(dialog);
-                if (dialogProperties.isModal) {
+                if (dialogProperties.isModal && !container->IsUIExtensionWindow()) {
                     DialogProperties Maskarg;
                     Maskarg.isMask = true;
                     Maskarg.autoCancel = dialogProperties.autoCancel;
