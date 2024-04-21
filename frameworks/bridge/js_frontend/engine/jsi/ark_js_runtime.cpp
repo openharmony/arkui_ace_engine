@@ -45,7 +45,7 @@ Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
     return package->Callback(info);
 }
 
-void FunctionDeleter(void *nativePointer, void *data)
+void FunctionDeleter(void *env, void *nativePointer, void *data)
 {
     auto info = reinterpret_cast<PandaFunctionData*>(data);
     if (info != nullptr) {
