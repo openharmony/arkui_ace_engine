@@ -79,6 +79,7 @@ public:
     void SetSelectedBackgroundColor(const Color& value) override;
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
@@ -108,6 +109,7 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);

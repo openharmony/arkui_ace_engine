@@ -6902,6 +6902,38 @@ class SearchMaxFontSizeModifier extends ModifierWithKey {
     }
 }
 SearchMaxFontSizeModifier.identity = Symbol('searchMaxFontSize');
+class SearchSelectedBackgroundColorModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().search.resetSelectedBackgroundColor(node);
+        } else {
+            getUINativeModule().search.setSelectedBackgroundColor(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+SearchSelectedBackgroundColorModifier.identity = Symbol('searchSelectedBackgroundColor');
+class SearchTextIndentModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {  
+            getUINativeModule().search.resetTextIndent(node);
+        } else {
+            getUINativeModule().search.setTextIndent(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+SearchTextIndentModifier.identity = Symbol('searchTextIndent');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7038,6 +7070,14 @@ class ArkSearchComponent extends ArkComponent {
   }
   maxFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
+    return this;
+  }
+  selectedBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchSelectedBackgroundColorModifier.identity, SearchSelectedBackgroundColorModifier, value);
+    return this;
+  }
+  textIndent(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
     return this;
   }
 }
@@ -8929,6 +8969,70 @@ class TextAreaWordBreakModifier extends ModifierWithKey {
     }
 }
 TextAreaWordBreakModifier.identity = Symbol('textAreaWordBreak');
+class TextAreaSelectedBackgroundColorModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().textArea.resetSelectedBackgroundColor(node);
+        } else {
+            getUINativeModule().textArea.setSelectedBackgroundColor(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+TextAreaSelectedBackgroundColorModifier.identity = Symbol('textAreaSelectedBackgroundColor');
+class TextAreaCaretStyleModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().textArea.resetCaretStyle(node);
+        } else {
+            getUINativeModule().textArea.setCaretStyle(node, this.value.width);
+        }
+    }
+    checkObjectDiff() {
+        return this.stageValue !== this.value;
+    }
+}
+TextAreaCaretStyleModifier.identity = Symbol('textAreaCaretStyle');
+class TextAreaTextOverflowModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().textArea.resetTextOverflow(node);
+        } else {
+            getUINativeModule().textArea.setTextOverflow(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return this.stageValue !== this.value;
+    }
+}
+TextAreaTextOverflowModifier.identity = Symbol('textAreaTextOverflow');
+class TextAreaTextIndentModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().textArea.resetTextIndent(node);
+        } else {
+            getUINativeModule().textArea.setTextIndent(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+TextAreaTextIndentModifier.identity = Symbol('textAreaTextIndent');
 class TextAreaCopyOptionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -9413,6 +9517,22 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaHeightAdaptivePolicyModifier.identity, TextAreaHeightAdaptivePolicyModifier, value);
     return this;
   }
+  SelectedBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectedBackgroundColorModifier.identity, TextAreaSelectedBackgroundColorModifier, value);
+    return this;
+  }
+  caretStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaCaretStyleModifier.identity, TextAreaCaretStyleModifier, value);
+    return this;
+  }
+  textOverflow(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextOverflowModifier.identity, TextAreaTextOverflowModifier, value);
+    return this;
+  }
+  textIndent(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextIndentModifier.identity, TextAreaTextIndentModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.TextArea !== undefined) {
@@ -9590,7 +9710,6 @@ class TextInputWordBreakModifier extends ModifierWithKey {
     }
 }
 TextInputWordBreakModifier.identity = Symbol('textInputWordBreak');
-TextInputWordBreakModifier.identity = Symbol('textInputWordBreak');
 class TextInputMinFontSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -9642,6 +9761,39 @@ class TextInputHeightAdaptivePolicyModifier extends ModifierWithKey {
     }
 }
 TextInputHeightAdaptivePolicyModifier.identity = Symbol('textInputHeightAdaptivePolicy');
+class TextInputTextOverflowModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().textInput.resetTextOverflow(node);
+        } else {
+            getUINativeModule().textInput.setTextOverflow(node, this.value);
+        }
+    }
+    checkObjectDiff() {
+        return this.stageValue !== this.value;
+    }
+}
+TextInputTextOverflowModifier.identity = Symbol('textInputTextOverflow');
+class TextInputTextIndentModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().textInput.resetTextIndent(node);
+        } else {
+            getUINativeModule().textInput.setTextIndent(node, this.value);
+        }
+    }
+    
+    checkObjectDiff() {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+}
+TextInputTextIndentModifier.identity = Symbol('textInputTextIndent');
 class TextInputShowPasswordIconModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10279,6 +10431,14 @@ class ArkTextInputComponent extends ArkComponent {
   }
   heightAdaptivePolicy(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputHeightAdaptivePolicyModifier.identity, TextInputHeightAdaptivePolicyModifier, value);
+    return this;
+  }
+  textOverflow(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextOverflowModifier.identity, TextInputTextOverflowModifier, value);
+    return this;
+  }
+  textIndent(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextIndentModifier.identity, TextInputTextIndentModifier, value);
     return this;
   }
 }

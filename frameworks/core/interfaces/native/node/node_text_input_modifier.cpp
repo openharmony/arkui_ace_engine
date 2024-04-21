@@ -1064,6 +1064,34 @@ void SetTextInputPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIRes
     TextFieldModelNG::SetPlaceholderFont(frameNode, font);
 }
 
+void SetTextInputTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextOverflow valueTextOverflow = static_cast<TextOverflow>(value);
+    TextFieldModelNG::SetTextOverflow(frameNode, valueTextOverflow);
+}
+
+void ResetTextInputTextOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
+}
+
+void SetTextInputTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetTextInputTextIndent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1098,7 +1126,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPasswordRules, ResetTextInputPasswordRules,
         SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill, ResetTextInputPadding, SetTextInputAdaptMinFontSize,
         ResetTextInputAdaptMinFontSize, SetTextInputAdaptMaxFontSize, ResetTextInputAdaptMaxFontSize,
-        SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy, SetTextInputPlaceholderFontEnum };
+        SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy, SetTextInputPlaceholderFontEnum,
+        SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent, ResetTextInputTextIndent };
     return &modifier;
 }
 

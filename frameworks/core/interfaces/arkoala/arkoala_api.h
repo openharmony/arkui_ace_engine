@@ -2137,6 +2137,14 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaAdaptMaxFontSize)(ArkUINodeHandle node);
     void (*setTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node);
+    void (*setTextAreaSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetTextAreaSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setTextAreaCaretStyle)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaCaretStyle)(ArkUINodeHandle node);
+    void (*setTextAreaTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextAreaTextOverflow)(ArkUINodeHandle node);
+    void (*setTextAreaTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaTextIndent)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2251,6 +2259,10 @@ struct ArkUITextInputModifier {
     void (*resetTextInputHeightAdaptivePolicy)(ArkUINodeHandle node);
     void (*setTextInputPlaceholderFontEnum)(ArkUINodeHandle node, const struct ArkUIResourceLength* size,
         ArkUI_Int32 weight, ArkUI_CharPtr family, ArkUI_Int32 style);
+    void (*setTextInputTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextInputTextOverflow)(ArkUINodeHandle node);
+    void (*setTextInputTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextInputTextIndent)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2721,6 +2733,10 @@ struct ArkUISearchModifier {
     void (*resetSearchAdaptMinFontSize)(ArkUINodeHandle node);
     void (*setSearchAdaptMaxFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSearchAdaptMaxFontSize)(ArkUINodeHandle node);
+    void (*setSearchSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetSearchSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setSearchTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetSearchTextIndent)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
