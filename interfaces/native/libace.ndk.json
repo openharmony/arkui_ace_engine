@@ -638,5 +638,29 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_SetInterceptHitTestMode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_AddNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_InsertNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_RemoveNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_RegisterCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContentEvent_GetEventType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNodeContentFromNapiValue"
     }
 ]

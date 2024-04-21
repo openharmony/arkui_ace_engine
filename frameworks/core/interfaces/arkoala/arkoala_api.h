@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 92
+#define ARKUI_FULL_API_VERSION 93
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 92
+#define ARKUI_NODE_API_VERSION 93
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -62,6 +62,7 @@ struct _ArkUIPaint;
 struct _ArkUIFont;
 struct _ArkUIXComponentController;
 struct _ArkUINodeAdapter;
+struct _ArkUINodeContent;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -71,6 +72,7 @@ typedef _ArkUIPaint* ArkUIPaintHandle;
 typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
+typedef _ArkUINodeContent* ArkUINodeContentHandle;
 
 struct ArkUICanvasArcOptions {
     ArkUI_Float32 x;
@@ -96,7 +98,6 @@ struct ArkUICornerRadius {
 };
 
 typedef struct _ArkUIDialog* ArkUIDialogHandle;
-
 
 struct ArkUITouchPoint {
     ArkUI_Int32 id;
@@ -3244,6 +3245,19 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getLast)(ArkUINodeHandle node);
 };
 
+struct ArkUINodeContentEvent {
+    ArkUI_Int32 type;
+    void* userData;
+};
+
+struct ArkUINodeContentModifier {
+    ArkUI_Int32 (*addChild)(ArkUINodeContentHandle content, ArkUINodeHandle child);
+    ArkUI_Int32 (*insertChild)(ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position);
+    ArkUI_Int32 (*removeChild)(ArkUINodeContentHandle content, ArkUINodeHandle child);
+    ArkUI_Int32 (*registerEvent)(
+        ArkUINodeContentHandle content, void* userData, void (*receiver)(ArkUINodeContentEvent* event));
+};
+
 struct ArkUIAnimation {
     ArkUI_Int32 (*startAnimation)(const ArkUIAPIAnimationSpec* spec, ArkUI_Int32 callbackId);
     void (*openImplicitAnimation)(
@@ -3413,6 +3427,7 @@ struct ArkUINodeModifiers {
     const ArkUIRichEditorControllerModifier* (*getRichEditorControllerModifier)();
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
     const ArkUIParticleModifier* (*getParticleModifier)();
+    const ArkUINodeContentModifier* (*getNodeContentModifier)();
 };
 
 // same as inner defines in property.h

@@ -5178,6 +5178,85 @@ ArkUI_NodeHandle OH_ArkUI_NodeCustomEvent_GetNodeHandle(ArkUI_NodeCustomEvent* e
 */
 ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustomEvent* event);
 
+/**
+ * @brief Adds a component to a node content.
+ *
+ * @param handle Indicates the pointer to the node content instance.
+ * @param node Indicates the pointer to the node.
+ * @return Returns 0 if success.
+ *         Returns 401 if a parameter exception occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+
+/**
+ * @brief Adds a component to a node content.
+ *
+ * @param handle Indicates the pointer to the node content instance.
+ * @param node Indicates the pointer to the node.
+ * @return Returns 0 if success.
+ *         Returns 401 if a parameter exception occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node, int32_t position);
+
+/**
+ * @brief Removes a component from a node content.
+ *
+ * @param handle Indicates the pointer to the node content.
+ * @param node Indicates the pointer to the node.
+ * @return Returns 0 if success.
+ *         Returns 401 if a parameter exception occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+
+/**
+ * @brief Defines the node content event type.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Defines the mount event. */
+    NODE_CONTENT_EVENT_ON_ATTACH_TO_WINDOW = 0,
+    /** Defines the unmount event. */
+    NODE_CONTENT_EVENT_ON_DETACH_FROM_WINDOW = 1,
+} ArkUI_NodeContentEventType;
+
+/**
+ * @brief Defines the general structure of a node content event.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_NodeContentEvent ArkUI_NodeContentEvent;
+
+/**
+  * @brief Defines the node content event callback function.
+  *
+  * @since 12
+  */
+typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
+
+/**
+ * @brief Register a callback for this <b>ArkUI_NodeContentHandle</b> instance.
+ *
+ * @param handle Indicates the <b>ArkUI_NodeContentHandle</b> instance.
+ * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b> 
+ * @return Returns the status code 
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_RegisterCallback(
+    ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
+
+/**
+ * @brief Obtains the type of a node content.
+ *
+ * @param event Indicates the pointer to the node content.
+ * @return Returns the type of the node content.
+ * @since 12
+ */
+ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event);
+
 #ifdef __cplusplus
 };
 #endif
