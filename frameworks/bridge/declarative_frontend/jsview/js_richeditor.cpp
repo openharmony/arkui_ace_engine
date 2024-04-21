@@ -1973,7 +1973,7 @@ void JSRichEditorController::ParseTextAlignParagraphStyle(const JSRef<JSObject>&
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
-    ParseLineBreakStrategyParagraphStyle(styleObject, style);
+    ParseTextAlignParagraphStyle(styleObject, style);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ParseLineBreakStrategyParagraphStyle(styleObject, style);
         ParseWordBreakParagraphStyle(styleObject, style);
