@@ -8895,7 +8895,7 @@ if (globalThis.Text !== undefined) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
       return new ArkTextComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.TextModifier(nativePtr, classType);
+      return new modifierJS.TextModifier(undefined, nativePtr, classType);
     });
   };
 }

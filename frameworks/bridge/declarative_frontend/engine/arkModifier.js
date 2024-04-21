@@ -200,6 +200,9 @@ class AttributeUpdater {
     this._state = value;
   }
   initializeModifier(instance) {}
+  updateConstructorParams(...args) {
+    this._attribute.initialize(args);
+  }
 }
 AttributeUpdater.StateEnum = {
   INIT: 0,
@@ -886,9 +889,12 @@ class TextAreaModifier extends ArkTextAreaComponent {
   }
 }
 class TextModifier extends ArkTextComponent {
-  constructor(nativePtr, classType) {
+  constructor(content, nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    if (content !== undefined) {
+      this.initialize([content]);
+    }
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
