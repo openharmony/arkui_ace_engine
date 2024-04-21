@@ -70,6 +70,8 @@ private:
         const RefPtr<ButtonTheme>& buttonTheme);
     static void DisableResetOptionButtonColor(
         const RefPtr<CalendarDialogPattern>& calendarDialogPattern, const std::vector<ButtonInfo>& buttonInfos);
+    static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+        const RefPtr<FrameNode>& buttonNode, bool isConfirm);
 };
 } // namespace OHOS::Ace::NG
 

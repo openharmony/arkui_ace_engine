@@ -114,6 +114,8 @@ private:
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
     static void UpdateContentPadding(const RefPtr<FrameNode>& contentColumn);
+    static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+        const RefPtr<FrameNode>& buttonNode, bool isConfirm);
 };
 } // namespace OHOS::Ace::NG
 

@@ -328,6 +328,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
@@ -417,6 +418,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
     return buttonCancelNode;
 }
@@ -577,5 +579,30 @@ void TimePickerDialogView::SetTextProperties(
         properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontStyle,
         properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
+}
+
+void TimePickerDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+    const RefPtr<FrameNode>& buttonNode, bool isConfirm)
+{
+    bool setDefaultFocus = false;
+    if (buttonInfos.size > CANCEL_BUTTON_INDEX) {
+        if (buttonInfos[ACCEPT_BUTTON_INDEX].isPrimary && buttonInfos[CANCEL_BUTTON_INDEX].isPrimary) {
+            return;
+        }
+        auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
+        if (buttonInfos[index].isPrimary) {
+            setDefaultFocus = true;
+        }
+    } else if (buttonInfos.size == CANCEL_BUTTON_INDEX) {
+        if (buttonInfos[0].isAcceptButton == isConfirm && buttonInfos[0].isPrimary) {
+            setDefaultFocus = true;
+        }
+    }
+    if (setDefaultFocus && buttonNode) {
+        auto focusHub = buttonNode->GetOrCreateFocusHub();
+        if (focusHub) {
+            focusHub->SetIsDefaultFocus(true);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
