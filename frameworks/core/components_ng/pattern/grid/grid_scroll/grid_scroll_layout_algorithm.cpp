@@ -1045,7 +1045,8 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
     /* targetIndex is in the matrix */
     if (IsIndexInMatrix(gridLayoutInfo_.jumpIndex_, startLine)) {
         // scroll to end of the screen
-        gridLayoutInfo_.currentOffset_ = mainSize - gridLayoutInfo_.lineHeightMap_[startLine];
+        gridLayoutInfo_.currentOffset_ =
+            mainSize - gridLayoutInfo_.lineHeightMap_[startLine] - gridLayoutInfo_.contentEndPadding_;
         // scroll to center of the screen
         if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
             gridLayoutInfo_.currentOffset_ /= 2;
