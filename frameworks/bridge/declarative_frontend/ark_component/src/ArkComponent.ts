@@ -1732,6 +1732,20 @@ class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   }
 }
 
+class MotionBlurModifier extends ModifierWithKey<MotionBlurOptions> {
+  constructor(value: MotionBlurOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('motionBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMotionBlur(node);
+    } else {
+      getUINativeModule().common.setMotionBlur(node, this.value.radius, this.value.anchor.x, this.value.anchor.y);
+    }
+  }
+}
+
 class GroupDefaultFocusModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -3606,6 +3620,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   motionPath(value: MotionPathOptions): this {
     modifierWithKey(this._modifiersWithKeys, MotionPathModifier.identity, MotionPathModifier, value);
+    return this;
+  }
+
+  motionPath(value: MotionBlurOptions): this {
+    modifierWithKey(this._modifiersWithKeys, MotionBlurModifier.identity, MotionBlurModifier, value);
     return this;
   }
 

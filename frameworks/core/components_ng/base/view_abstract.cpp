@@ -376,6 +376,14 @@ void ViewAbstract::SetForegroundEffect(float radius)
     }
 }
 
+void ViewAbstract::SetMotionBlur(const MotionBlurOption &motionBlurOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(MotionBlur, motionBlurOption);
+}
+
 void ViewAbstract::SetBackgroundEffect(const EffectOption &effectOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3005,6 +3013,11 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Obscured, reasons, frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
 }
 
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)

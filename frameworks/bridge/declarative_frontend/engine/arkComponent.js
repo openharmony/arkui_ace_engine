@@ -1645,6 +1645,20 @@ class MotionPathModifier extends ModifierWithKey {
   }
 }
 MotionPathModifier.identity = Symbol('motionPath');
+class MotionBlurModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetMotionBlur(node);
+    }
+    else {
+      getUINativeModule().common.setMotionBlur(node, this.value.radius, this.value.anchor.x, this.value.anchor.y);
+    }
+  }
+}
+MotionBlurModifier.identity = Symbol('motionBlur');
 class GroupDefaultFocusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3430,6 +3444,10 @@ class ArkComponent {
   }
   motionPath(value) {
     modifierWithKey(this._modifiersWithKeys, MotionPathModifier.identity, MotionPathModifier, value);
+    return this;
+  }
+  motionBlur(value) {
+    modifierWithKey(this._modifiersWithKeys, MotionBlurModifier.identity, MotionBlurModifier, value);
     return this;
   }
   shadow(value) {
@@ -7496,6 +7514,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   motionPath(value) {
+    throw new Error('Method not implemented.');
+  }
+  motionBlur(value) {
     throw new Error('Method not implemented.');
   }
   shadow(value) {
@@ -18408,6 +18429,9 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
   motionPath(value) {
+    throw new Error('Method not implemented.');
+  }
+  motionBlur(value) {
     throw new Error('Method not implemented.');
   }
   shadow(value) {

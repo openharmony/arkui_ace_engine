@@ -203,6 +203,7 @@ public:
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;

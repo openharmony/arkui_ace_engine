@@ -121,6 +121,32 @@ struct BlurOption {
     std::vector<float> grayscale;
 };
 
+struct MotionBlurAnchor {
+    float x = 0.0f;
+    float y = 0.0f;
+    bool operator==(const MotionBlurAnchor& other) const
+    {
+        return NearEqual(x, other.x) && NearEqual(y, other.y);
+    }
+    bool operator!=(const MotionBlurAnchor& other) const
+    {
+        return !operator==(other);
+    }
+};
+
+struct MotionBlurOption {
+    Dimension radius;
+    MotionBlurAnchor anchor;
+    bool operator==(const MotionBlurOption& other) const
+    {
+        return radius == other.radius && anchor == other.anchor;
+    }
+    bool operator!=(const MotionBlurOption& other) const
+    {
+        return !operator==(other);
+    }
+};
+
 struct BlurStyleOption {
     BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
     ThemeColorMode colorMode = ThemeColorMode::SYSTEM;

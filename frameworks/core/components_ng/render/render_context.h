@@ -259,6 +259,7 @@ public:
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
     virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}

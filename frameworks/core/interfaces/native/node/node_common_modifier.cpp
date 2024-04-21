@@ -2347,6 +2347,31 @@ void ResetMotionPath(ArkUINodeHandle node)
     ViewAbstract::SetMotionPath(frameNode, motionPathOption);
 }
 
+
+void SetMotionBlur(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 anchorX, ArkUI_Float32 anchorY)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MotionBlurOption motionBlurOption;
+    CalcDimension radiusDim;
+    radiusDim.SetValue(radius);
+    motionBlurOption.radius = radiusDim;
+    motionBlurOption.anchor.x = anchorX;
+    motionBlurOption.anchor.y = anchorY;
+    ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);
+}
+
+void ResetMotionBlur(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MotionBlurOption motionBlurOption;
+    motionBlurOption.radius = CalcDimension(0);
+    motionBlurOption.anchor.x = 0.0;
+    motionBlurOption.anchor.y = 0.0;
+    ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);
+}
+
 void SetGroupDefaultFocus(ArkUINodeHandle node, ArkUI_Bool groupDefaultFocus)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4800,7 +4825,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetRotate, SetRotateWithoutTransformCenter, ResetRotate, SetGeometryTransition, ResetGeometryTransition,
         SetPixelStretchEffect, ResetPixelStretchEffect, SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect,
         ResetSphericalEffect, SetRenderGroup, ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect,
-        ResetUseEffect, SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath, SetGroupDefaultFocus,
+        ResetUseEffect, SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
+        SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
         ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
         ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
         ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor, SetVisibility,
