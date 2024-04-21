@@ -297,11 +297,22 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
     ContainerScope scope(instanceId_);
-    auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
         return;
     }
-    delegate->OnHttpErrorReceive(request, response);
+    std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
+    task->PostTask([webClient = webClientWeak, request, response] {
+        auto webClientUpgrade = webClient.lock();
+        if (webClientUpgrade == nullptr) {
+            return;
+        }
+        auto delegate = webClientUpgrade->GetWebDelegate();
+        if (delegate) {
+            delegate->OnHttpErrorReceive(request, response);
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
