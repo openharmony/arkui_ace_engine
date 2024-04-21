@@ -156,6 +156,7 @@ private:
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
     static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
     static void ParseWordBreakParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    static void ParseTextAlignParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool CheckImageSource(std::string assetSrc);
 
     WeakPtr<RichEditorControllerBase> controllerWeak_;
