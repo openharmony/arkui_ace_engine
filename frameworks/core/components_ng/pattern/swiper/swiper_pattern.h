@@ -910,6 +910,10 @@ private:
     }
 
     bool NeedStartNewAnimation(const OffsetF& offset) const;
+    void ResetOnForceMeasure();
+    void UpdateTabBarIndicatorCurve();
+    bool CheckDragOutOfBoundary(double dragVelocity);
+    void UpdateCurrentFocus();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
