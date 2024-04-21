@@ -28,7 +28,7 @@ declare class DrawContext { }
 declare type NodePtr = Object | null;
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
-  create(builder: (...args: Object[]) => void, params: Object): NodePtr;
+  create(builder: (...args: Object[]) => void, params: Object, needPrxoy: boolean): NodePtr;
   finishUpdateFunc(): void;
   postTouchEvent(touchEvent: TouchEvent): boolean;
   disposeNode(): void;

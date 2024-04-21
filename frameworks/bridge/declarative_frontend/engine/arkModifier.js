@@ -889,12 +889,9 @@ class TextAreaModifier extends ArkTextAreaComponent {
   }
 }
 class TextModifier extends ArkTextComponent {
-  constructor(content, nativePtr, classType) {
+  constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
-    if (content !== undefined) {
-      this.initialize([content]);
-    }
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
