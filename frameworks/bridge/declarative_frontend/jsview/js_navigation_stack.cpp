@@ -285,6 +285,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     if (GetNavDestinationNodeInUINode(node, desNode)) {
         auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
         if (pattern) {
+            pattern->SetName(name);
             auto onPop = GetOnPopByIndex(index);
             auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
             pattern->SetNavPathInfo(pathInfo);
@@ -375,6 +376,9 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "render current custom node: %{public}s",
                 customNode->GetCustomTag().c_str());
+            // record parent navigationNode before customNode is rendered in case of navDestinationNode
+            auto navigationNode = GetNavigationNode();
+            customNode->SetNavigationNode(navigationNode);
             // render, and find deep further
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {

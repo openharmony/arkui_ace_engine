@@ -35,7 +35,7 @@ public:
     PostEventManager() = default;
     ~PostEventManager() override = default;
 
-    bool PostEvent(const RefPtr<NG::UINode>& uiNode, const TouchEvent& touchEvent);
+    bool PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& touchEvent);
 
 private:
     bool CheckPointValidity(const TouchEvent& touchEvent);

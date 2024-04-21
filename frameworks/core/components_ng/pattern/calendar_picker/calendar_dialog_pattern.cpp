@@ -108,6 +108,9 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
 
 void CalendarDialogPattern::UpdateOptionsButtonColor()
 {
+    if (!isUpdateOptionsButtonColor_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);

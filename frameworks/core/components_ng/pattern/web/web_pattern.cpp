@@ -30,6 +30,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -202,15 +203,18 @@ WebPattern::WebPattern(const std::string& webSrc,
 
 WebPattern::~WebPattern()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "Web pattern destory");
+    TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
     if (delegate_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
     }
 
     if (observer_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern observer_ start NotifyDestory");
         observer_->NotifyDestory();
     }
     if (isActive_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
         OnInActive();
     }
 }
@@ -1297,14 +1301,16 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
         height, keyboard, GetCoordinatePoint()->GetY(), oldWebHeight);
 
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-        if (GreatOrEqual(newHeight, oldWebHeight)) {
-            newHeight = oldWebHeight;
+        if (!CheckSafeAreaIsExpand()) {
+            double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
+            if (GreatOrEqual(newHeight, oldWebHeight)) {
+                newHeight = oldWebHeight;
+            }
+            if (NearEqual(newHeight, oldWebHeight)) {
+                return;
+            }
+            drawSize_.SetHeight(newHeight);
         }
-        if (NearEqual(newHeight, oldWebHeight)) {
-            return;
-        }
-        drawSize_.SetHeight(newHeight);
         UpdateWebLayoutSize(width, height, true);
     }
 }
@@ -1312,6 +1318,15 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
 void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+    if (CheckSafeAreaIsExpand()) {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto geometryNode = frameNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+        delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
+    }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         if (webOffset_ == offset) {
             return;
@@ -1321,7 +1336,6 @@ void WebPattern::OnAreaChangedInner()
     UpdateTouchHandleForOverlay();
     if (isInWindowDrag_)
         return;
-    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     if (isNeedReDrawRect_) {
         UpdateSlideOffset(true);
@@ -1858,8 +1872,10 @@ void WebPattern::OnModifyDone()
 
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
-        auto task = [this]() {
-            InitSlideUpdateListener();
+        auto task = [weak = AceType::WeakClaim(this)]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->InitSlideUpdateListener();
         };
         PostTaskToUI(std::move(task));
     }
@@ -2832,14 +2848,11 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
     OHOS::NWeb::DateTime minimum = chooser->GetMinimum();
     OHOS::NWeb::DateTime maximum = chooser->GetMaximum();
     OHOS::NWeb::DateTime dialogValue = chooser->GetDialogValue();
-    settingData.datePickerProperty["start"] = PickerDate(
-        minimum.year, minimum.month + 1, minimum.day);
-    settingData.datePickerProperty["end"] = PickerDate(
-        maximum.year, maximum.month + 1, maximum.day);
+    settingData.datePickerProperty["start"] = PickerDate(minimum.year, minimum.month + 1, minimum.day);
+    settingData.datePickerProperty["end"] = PickerDate(maximum.year, maximum.month + 1, maximum.day);
     if (chooser->GetHasSelected()) {
         int32_t day = (dialogValue.day == 0) ? 1 : dialogValue.day;
-        settingData.datePickerProperty["selected"] =
-            PickerDate(dialogValue.year, dialogValue.month + 1, day);
+        settingData.datePickerProperty["selected"] = PickerDate(dialogValue.year, dialogValue.month + 1, day);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -2851,11 +2864,13 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
     return true;
@@ -2886,8 +2901,7 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     timePickerProperty["start"] = PickerTime(minimum.hour, minimum.minute, minimum.second);
     timePickerProperty["selected"] = PickerTime(maximum.hour, maximum.minute, maximum.second);
     if (chooser->GetHasSelected()) {
-        timePickerProperty["selected"] =
-            PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
+        timePickerProperty["selected"] = PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -2899,12 +2913,14 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(
+                properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
     return true;
@@ -2951,11 +2967,13 @@ bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDa
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTextDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
     return true;
@@ -3804,5 +3822,24 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
     };
     std::vector<double> ratioList = {0.0, 1.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+bool WebPattern::CheckSafeAreaIsExpand()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto && opts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(opts, false);
+    if ((opts->type & SAFE_AREA_TYPE_SYSTEM) || (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
+
+std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
+{
+    return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace::NG

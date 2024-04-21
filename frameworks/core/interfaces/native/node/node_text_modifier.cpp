@@ -275,6 +275,7 @@ void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration
     CHECK_NULL_VOID(frameNode);
     decoration->decorationType = static_cast<int32_t>(TextModelNG::GetDecoration(frameNode));
     decoration->color = TextModelNG::GetTextDecorationColor(frameNode).GetValue();
+    decoration->style = static_cast<int32_t>(TextModelNG::GetTextDecorationStyle(frameNode));
 }
 
 void ResetTextDecoration(ArkUINodeHandle node)
@@ -681,7 +682,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     CHECK_NULL_VOID(frameNode);
     Font value = TextModelNG::GetFont(frameNode);
     if (value.fontSize.has_value()) {
-        font->fontSize = value.fontSize.value().Value();
+        font->fontSize = value.fontSize.value().GetNativeValue(static_cast<DimensionUnit>(font->fontSizeUnit));
     }
     if (value.fontWeight.has_value()) {
         font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
@@ -705,11 +706,12 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
 }
 
-ArkUI_Float32 GetFontSize(ArkUINodeHandle node)
+ArkUI_Float32 GetFontSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return static_cast<ArkUI_Float32>(TextModelNG::GetFontSize(frameNode).Value());
+    return static_cast<ArkUI_Float32>(
+        TextModelNG::GetFontSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit)));
 }
 
 ArkUI_Int32 GetFontWeight(ArkUINodeHandle node)

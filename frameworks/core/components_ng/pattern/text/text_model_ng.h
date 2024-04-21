@@ -71,8 +71,8 @@ public:
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
-    void SetClipEdge(bool clip) override;
-    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    virtual void SetClipEdge(bool clip) = 0;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
 
@@ -104,9 +104,10 @@ public:
     static void SetWordBreak(FrameNode* frameNode, WordBreak value);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
-    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
     static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
@@ -115,6 +116,7 @@ public:
     static float GetLineHeight(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
     static Color GetTextDecorationColor(FrameNode* frameNode);
+    static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);
     static TextCase GetTextCase(FrameNode* frameNode);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);

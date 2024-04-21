@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/marquee_option.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -54,9 +55,10 @@ public:
 
     void ModifyTextStyle(TextStyle& textStyle);
 
-    void StartTextRace(const double& step, const int32_t& loop,
-        const MarqueeDirection& direction, const int32_t& delay, const bool& isBounce = false);
+    void StartTextRace(const MarqueeOption& option);
     void StopTextRace();
+    void SetIsFocused(const bool& isFocused);
+    void SetIsHovered(const bool& isHovered);
 
     void SetParagraph(RefPtr<Paragraph> paragraph)
     {
@@ -94,11 +96,13 @@ public:
     {
         imageNodeList_ = imageNodeList;
     }
+
 protected:
     OffsetF GetPaintOffset() const
     {
         return paintOffset_;
     }
+
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
@@ -112,8 +116,12 @@ private:
     void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
-    bool SetTextRace(const double& step, const int32_t& loop,
-        const MarqueeDirection& direction, const int32_t& delay);
+    bool SetTextRace(const MarqueeOption& option);
+    void ResumeTextRace(bool bounce);
+    void SetTextRaceAnimation(const AnimationOption& option);
+    void PauseTextRace();
+    bool AllowTextRace();
+    void DetermineTextRace();
     float GetTextRacePercent();
 
     void ModifyFontSizeInTextStyle(TextStyle& textStyle);
@@ -135,9 +143,12 @@ private:
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
 
     void DrawObscuration(DrawingContext& drawingContext);
+    void UpdateFadeout(const DrawingContext& drawingContext);
+
     void ResetImageNodeList();
-    void DrawImageNodeList(const float drawingContextWidth,
-        const float paragraph1Offset, const float paragraph2Offset);
+    void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
+    void UpdateImageNodeVisible(const VisibleType visible);
+    void PaintImage(RSCanvas& canvas, float x, float y);
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
@@ -175,15 +186,16 @@ private:
     RefPtr<AnimatablePropertyFloat> baselineOffsetFloat_;
 
     bool textRacing_ = false;
+    bool marqueeSet_ = false;
+    MarqueeOption marqueeOption_;
     int32_t marqueeCount_ = 0;
-    WeakPtr<Pattern> pattern_;
-    double marqueeStep_ = 1;
-    int32_t marqueeLoop_ = -1;
-    MarqueeDirection marqueeDirection_ = MarqueeDirection::LEFT;
-    int32_t marqueeDelay_ = 0;
-    int32_t marqueeDuration_ = 0;
     int32_t marqueeAnimationId_ = 0;
-    
+    bool marqueeFocused_ = false;
+    bool marqueeHovered_ = false;
+    int32_t marqueeDuration_ = 0;
+    float marqueeGradientPercent_ = 0.0;
+    WeakPtr<Pattern> pattern_;
+
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 

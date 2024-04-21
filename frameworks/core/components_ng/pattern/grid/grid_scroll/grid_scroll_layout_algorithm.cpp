@@ -88,7 +88,6 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridLayoutInfo_.offsetEnd_ = moveToEndLineIndex_ > 0
                                      ? (gridLayoutInfo_.endIndex_ + 1 >= gridLayoutInfo_.childrenCount_)
                                      : gridLayoutInfo_.offsetEnd_;
-    gridLayoutInfo_.offsetUpdated_ = false;
 
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
@@ -199,6 +198,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childFrameOffset_ = OffsetF(padding.left.value_or(0.0f), padding.top.value_or(0.0f));
     childFrameOffset_ += gridLayoutProperty->IsVertical() ? OffsetF(0.0f, gridLayoutInfo_.currentOffset_)
                                                           : OffsetF(gridLayoutInfo_.currentOffset_, 0.0f);
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    bool isRtl = axis_ == Axis::VERTICAL && layoutDirection == TextDirection::RTL;
+    bool isReverse = gridLayoutProperty->IsReverse();
     float prevLineHeight = 0.0f;
     int32_t startIndex = -1;
     int32_t endIndex = -1;
@@ -252,6 +254,16 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             SizeF blockSize = gridLayoutProperty->IsVertical() ? SizeF(frSize, lineHeight) : SizeF(lineHeight, frSize);
             auto translate = OffsetF(0.0f, 0.0f);
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
+
+            if (isRtl) {
+                offset.SetX(size.CrossSize(axis_) - offset.GetX() -
+                            wrapper->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_));
+            }
+
+            if (isReverse) {
+                offset.SetX(size.MainSize(axis_) - offset.GetX() -
+                            wrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis_));
+            }
 
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
             if (gridLayoutInfo_.hasMultiLineItem_ || expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
@@ -726,11 +738,11 @@ OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
 {
     OffsetF offset = currOffset;
     for (int32_t lastCrossIndex = currLineIndex - 1; lastCrossIndex >= 0; lastCrossIndex--) {
-        auto LastGridMatrixIter = gridLayoutInfo_.gridMatrix_.find(lastCrossIndex);
-        if (LastGridMatrixIter == gridLayoutInfo_.gridMatrix_.end()) {
+        auto lastGridMatrixIter = gridLayoutInfo_.gridMatrix_.find(lastCrossIndex);
+        if (lastGridMatrixIter == gridLayoutInfo_.gridMatrix_.end()) {
             continue;
         }
-        auto lastGridItemRecord = LastGridMatrixIter->second;
+        const auto& lastGridItemRecord = lastGridMatrixIter->second;
         auto lastLineCrossItem = lastGridItemRecord.find(currentCrossIndex);
         if (lastLineCrossItem == lastGridItemRecord.end()) {
             continue;

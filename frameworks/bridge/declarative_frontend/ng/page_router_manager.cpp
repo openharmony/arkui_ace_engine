@@ -1463,7 +1463,7 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
                 MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             }
         } else {
-            LoadPage(GenerateNextPageId(), info, false, false);
+            LoadPage(GenerateNextPageId(), info, true, false);
         }
         if (popNode == stageNode->GetChildren().back()) {
             return;

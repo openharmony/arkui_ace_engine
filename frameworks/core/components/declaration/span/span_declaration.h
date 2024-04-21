@@ -172,6 +172,15 @@ public:
         return isSetLetterSpacing_;
     }
 
+    void SetHasSetBaselineOffset(bool isSetBaselineOffset)
+    {
+        isBaselineOffset_ = isSetBaselineOffset;
+    }
+    bool HasSetBaselineOffset() const
+    {
+        return isBaselineOffset_;
+    }
+
     void SetHasSetTextCase(bool isSetTextCase)
     {
         isSetTextCase_ = isSetTextCase;
@@ -201,6 +210,7 @@ protected:
     bool isSetAllowScale_ = false;
     bool isSetFontFeatures_ = false;
     bool isSetLetterSpacing_ = false;
+    bool isBaselineOffset_ = false;
     bool isSetTextCase_ = false;
 };
 

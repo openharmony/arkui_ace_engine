@@ -85,7 +85,8 @@ RefPtr<AceType> TextPickerDialogModelImpl::CreateObject()
 void TextPickerDialogModelImpl::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
     NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent)
+    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos)
 {
     auto pickerText = AceType::DynamicCast<PickerTextComponent>(PickerText);
     pickerText->SetIsDialog(true);

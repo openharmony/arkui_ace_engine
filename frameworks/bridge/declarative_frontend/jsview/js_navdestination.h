@@ -36,11 +36,12 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetMenus(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
+    static void SetWillAppear(const JSCallbackInfo& info);
+    static void SetWillShow(const JSCallbackInfo& info);
+    static void SetWillHide(const JSCallbackInfo& info);
+    static void SetWillDisAppear(const JSCallbackInfo& info);
 
 private:
-    JSWeak<JSFunc> jsShownFunc_;
-    JSWeak<JSFunc> jsHiddenFunc_;
-    JSWeak<JSFunc> jsBackPressedFunc_;
     static void CreateForPartialUpdate(const JSCallbackInfo& info);
 };
 

@@ -89,8 +89,12 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetIsHiddenHandle(isHiddenHandle_);
 
     selectOverlayContentModifier_->SetViewPort(viewPort);
+    selectOverlayContentModifier_->SetPaintHandleUsePoints(
+        info_.firstHandle.isPaintHandleWithPoints || info_.secondHandle.isPaintHandleWithPoints);
     selectOverlayContentModifier_->SetFirstHandle(info_.firstHandle.paintRect - offset);
+    selectOverlayContentModifier_->SetFirstHandlePaintInfo(info_.firstHandle.paintInfo - offset);
     selectOverlayContentModifier_->SetSecondHandle(info_.secondHandle.paintRect - offset);
+    selectOverlayContentModifier_->SetSecondHandlePaintInfo(info_.secondHandle.paintInfo - offset);
 }
 
 void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()

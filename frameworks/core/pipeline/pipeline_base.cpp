@@ -242,7 +242,7 @@ void PipelineBase::SetFontScale(float fontScale)
     const static float CARD_MAX_FONT_SCALE = 1.3f;
     if (!NearEqual(fontScale_, fontScale)) {
         fontScale_ = fontScale;
-        if (isJsCard_ && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
+        if ((isJsCard_ || isFormRender_) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
             fontScale_ = CARD_MAX_FONT_SCALE;
         }
         fontManager_->RebuildFontNode();
@@ -703,11 +703,13 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
+#ifdef OHOS_STANDARD_SYSTEM
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown()) {
             // subwindow is shown, main window no need to handle the keyboard event
             return;
         }
+#endif
     }
     double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
@@ -716,8 +718,8 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance);
 }
 
-void PipelineBase::OnVirtualKeyboardAreaChange(
-    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
@@ -731,7 +733,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
 }
 
 void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)

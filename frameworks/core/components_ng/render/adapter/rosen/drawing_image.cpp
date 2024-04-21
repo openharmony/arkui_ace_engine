@@ -224,7 +224,10 @@ RefPtr<PixelMap> DrawingImage::GetPixelMap() const
     auto rsImage = GetImage();
     RSBitmapFormat rsBitmapFormat = { RSColorType::COLORTYPE_BGRA_8888, rsImage->GetAlphaType() };
     RSBitmap rsBitmap;
-    rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat);
+    if (!rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat)) {
+        LOGW("rsBitmap build fail.");
+        return nullptr;
+    }
     CHECK_NULL_RETURN(rsImage->ReadPixels(rsBitmap, 0, 0), nullptr);
     const auto* addr = static_cast<uint32_t*>(rsBitmap.GetPixels());
     auto width = static_cast<int32_t>(rsBitmap.GetWidth());

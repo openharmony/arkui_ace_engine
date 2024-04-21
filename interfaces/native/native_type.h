@@ -368,6 +368,24 @@ typedef enum {
 } ArkUI_TextDecorationType;
 
 /**
+ * @brief Enumerates the text decoration line styles.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Solid line. */
+    ARKUI_TEXT_DECORATION_STYLE_SOLID = 0,
+    /** Double line. */
+    ARKUI_TEXT_DECORATION_STYLE_DOUBLE,
+    /** Dotted line. */
+    ARKUI_TEXT_DECORATION_STYLE_DOTTED,
+    /** Dashed line. */
+    ARKUI_TEXT_DECORATION_STYLE_DASHED,
+    /** Wavy line. */
+    ARKUI_TEXT_DECORATION_STYLE_WAVY,
+} ArkUiTextDecorationStyle;
+
+/**
  * @brief Enumerates the text cases.
  *
  * @since 12
@@ -1445,6 +1463,22 @@ typedef enum {
       * long tail state. */
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
+
+/**
+ * @brief Enumerates the component units.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Default, which is fp for fonts and vp for non-fonts. */
+    ARKUI_LENGTH_METRIC_UNIT_DEFAULT = -1,
+    /** px. */
+    ARKUI_LENGTH_METRIC_UNIT_PX = 0,
+    /** vp. */
+    ARKUI_LENGTH_METRIC_UNIT_VP,
+    /** fp. */
+    ARKUI_LENGTH_METRIC_UNIT_FP
+} ArkUI_LengthMetricUnit;
 
 /**
 * @brief Creates a size constraint.

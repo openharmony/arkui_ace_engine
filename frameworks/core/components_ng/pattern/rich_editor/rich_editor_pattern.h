@@ -302,10 +302,13 @@ public:
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
-    bool JudgeDraggable(GestureEvent& info);
+    void HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent);
+    bool JudgeContentDraggable();
     void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
+    RefPtr<GestureEventHub> GetGestureEventHub();
+    float GetSelectedMaxWidth();
 
     bool IsUsingMouse() const
     {
@@ -341,6 +344,16 @@ public:
     const std::list<ParagraphManager::ParagraphInfo>& GetParagraphs() const
     {
         return paragraphs_.GetParagraphs();
+    }
+
+    std::optional<SelectHandleInfo> GetFirstHandleInfo() const
+    {
+        return selectOverlay_->GetFirstHandleInfo();
+    }
+
+    std::optional<SelectHandleInfo> GetSecondHandleInfo() const
+    {
+        return selectOverlay_->GetSecondHandleInfo();
     }
 
     RectF GetCaretRect() const override;
@@ -567,6 +580,16 @@ public:
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<RichEditorAccessibilityProperty>();
+    }
+
+    void AdjustSelector(int32_t& index, bool isFirst);
+    void AdjustSelector(int32_t& start, int32_t& end);
+    void UpdateSelector(int32_t start, int32_t end);
+    std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+
+    void SetContentChange(bool onChange)
+    {
+        contentChange_ = onChange;
     }
 
 protected:
@@ -864,6 +887,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
     int32_t richEditorInstanceId_;
+    bool contentChange_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -516,6 +516,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
     { "GestureSpan", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
+    { "ImageAttachment", JSImageAttachment::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
@@ -599,6 +600,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
     { "GestureSpan", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
+    { "ImageAttachment", JSImageAttachment::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
@@ -1099,6 +1101,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj, nativeEngine);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -21,7 +21,6 @@
 #include <unistd.h>
 #include <vector>
 
-#include "interfaces/native/native_event.h"
 #include "interfaces/native/native_interface_xcomponent.h"
 #include "interfaces/native/ui_input_event.h"
 

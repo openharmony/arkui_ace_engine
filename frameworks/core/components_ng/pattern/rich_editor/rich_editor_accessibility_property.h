@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_ACCESSIBILITY_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_ACCESSIBILITY_PROPERTY_H
 
-#include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/pattern/text/text_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class RichEditorAccessibilityProperty : public AccessibilityProperty {
-    DECLARE_ACE_TYPE(RichEditorAccessibilityProperty, AccessibilityProperty);
+class RichEditorAccessibilityProperty : public TextAccessibilityProperty {
+    DECLARE_ACE_TYPE(RichEditorAccessibilityProperty, TextAccessibilityProperty);
 
 public:
     RichEditorAccessibilityProperty() = default;

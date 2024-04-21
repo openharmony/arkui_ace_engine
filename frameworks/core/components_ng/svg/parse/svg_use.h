@@ -29,6 +29,7 @@ public:
 
     static RefPtr<SvgNode> Create();
 
+    void OnInitStyle() override;
     RSRecordingPath AsPath(const Size& viewPort) const override;
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
 

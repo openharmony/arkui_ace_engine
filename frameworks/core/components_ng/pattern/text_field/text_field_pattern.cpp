@@ -736,16 +736,19 @@ void TextFieldPattern::HandleFocusEvent()
     if (isSelectAll && !contentController_->IsEmpty()) {
         needSelectAll_ = true;
     }
+    bool needTwinkling = true;
     if (IsNormalInlineState()) {
         ApplyInlineTheme();
         inlineFocusState_ = true;
-        if (contentController_->IsEmpty()) {
-            StartTwinkling();
-        } else {
+        if (!contentController_->IsEmpty()) {
             inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
+            if (inlineSelectAllFlag_) {
+                needTwinkling = false;
+            }
         }
         ProcessResponseArea();
-    } else {
+    }
+    if (needTwinkling) {
         StartTwinkling();
     }
     NotifyOnEditChanged(true);
@@ -1592,7 +1595,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         for (const auto& record : records) {
             str += record;
         }
-        pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
             return;
@@ -1615,6 +1617,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
+        pattern->needToRequestKeyboardInner_ = pattern->dragStatus_ == DragStatus::NONE;
     };
 }
 
@@ -1683,8 +1686,9 @@ void TextFieldPattern::InitDragDropCallBack()
         CHECK_NULL_VOID(theme);
         auto touchX = event->GetX();
         auto touchY = event->GetY();
+        auto textPaintOffset = pattern->GetPaintRectGlobalOffset();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
-                        Offset(pattern->GetTextPaintOffset().GetX(), pattern->GetTextPaintOffset().GetY()) -
+                        Offset(textPaintOffset.GetX(), textPaintOffset.GetY()) -
                         Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         pattern->SetCaretPosition(position);
@@ -2482,7 +2486,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
-    selectController_->UpdateSelectByOffset(info.GetLocalLocation());
+    selectController_->UpdateSelectByOffset(ConvertGlobalToLocalOffset(info.GetGlobalLocation()));
     if (IsSelected()) {
         StopTwinkling();
     }
@@ -2504,8 +2508,8 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
     CHECK_NULL_RETURN(unitArea, false);
     auto frameNode = unitArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion(
-        { globalOffset.GetX() - GetTextPaintOffset().GetX(), globalOffset.GetY() - GetTextPaintOffset().GetY() });
+    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
 bool TextFieldPattern::IsMouseOverScrollBar(const GestureEvent& info)
@@ -2519,6 +2523,15 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 {
     selectController_->UpdateCaretIndex(
         std::clamp(pos, 0, static_cast<int32_t>(contentController_->GetWideText().length())));
+}
+
+void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
+{
+    auto newRequest = request;
+    auto needAvoid = CaretAvoidSoftKeyboard();
+    // Avoid menu that appear and then close immediately.
+    newRequest.menuIsShow = newRequest.menuIsShow && !needAvoid;
+    selectOverlay_->ProcessOverlay(newRequest);
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
@@ -2652,6 +2665,21 @@ void TextFieldPattern::OnHover(bool isHover)
     isOnHover_ = isHover;
 }
 
+void TextFieldPattern::RestoreDefaultMouseState()
+{
+    int32_t windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = GetSCBSystemWindowId();
+#endif
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    pipeline->SetMouseStyleHoldNode(id);
+    pipeline->ChangeMouseStyle(id, MouseFormat::DEFAULT, windowId);
+}
+
 void TextFieldPattern::ChangeMouseState(
     const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId, bool isByPass)
 {
@@ -2666,15 +2694,13 @@ void TextFieldPattern::ChangeMouseState(
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
         LessNotEqual(y, frameRect_.Height())) {
         if (GreatNotEqual(location.GetX(), frameRect_.Width() - responseAreaWidth)) {
-            pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
+            RestoreDefaultMouseState();
         } else {
             pipeline->SetMouseStyleHoldNode(frameId);
             pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
         }
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
-        pipeline->FreeMouseStyleHoldNode(frameId);
+        RestoreDefaultMouseState();
     }
 }
 
@@ -2997,8 +3023,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     double height = frameRect_.Height();
     auto offset = AVOID_OFFSET.ConvertToPx();
+    auto textPaintOffset = GetPaintRectGlobalOffset();
     height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
-             GetTextPaintOffset().GetY() + offset - positionY;
+             textPaintOffset.GetY() + offset - positionY;
 
     if (IsNormalInlineState()) {
         auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
@@ -3007,8 +3034,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     }
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
-                                                  GetTextPaintOffset().GetX(),
-        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + GetTextPaintOffset().GetY(),
+                                                  textPaintOffset.GetX(),
+        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + textPaintOffset.GetY(),
         .width = theme->GetCursorWidth().ConvertToPx(),
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
@@ -4047,7 +4074,7 @@ void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSel
 
 void TextFieldPattern::OnAreaChangedInner()
 {
-    auto parentGlobalOffset = GetTextPaintOffset();
+    auto parentGlobalOffset = GetPaintRectGlobalOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
@@ -5392,7 +5419,12 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
         { "CopyOptions.Distributed", CopyOptions::Distributed },
     };
     auto copyOption = json->GetString("copyOption");
-    layoutProperty->UpdateCopyOptions(uMap.count(copyOption) ? uMap.at(copyOption) : CopyOptions::None);
+    CopyOptions copyOptionsEnum = CopyOptions::None;
+    auto iter = uMap.find(copyOption);
+    if (iter != uMap.end()) {
+        copyOptionsEnum = iter->second;
+    }
+    layoutProperty->UpdateCopyOptions(copyOptionsEnum);
     Pattern::FromJson(json);
 }
 
@@ -5408,7 +5440,8 @@ void TextFieldPattern::SetAccessibilityAction()
         pattern->InsertValue(value);
     });
 
-    accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
+    accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start,
+                                                                             int32_t end, bool isForward) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetSelectionFlag(start, end, std::nullopt);
@@ -5744,7 +5777,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
     if (startOffset.GetX() < contentRect_.GetX()) {
         startOffset.SetX(contentRect_.GetX());
     }
-    return startOffset + GetTextPaintOffset();
+    return startOffset + GetPaintRectGlobalOffset();
 }
 
 void TextFieldPattern::OnColorConfigurationUpdate()
@@ -5780,6 +5813,14 @@ bool TextFieldPattern::IsReachedBoundary(float offset)
 }
 
 OffsetF TextFieldPattern::GetTextPaintOffset() const
+{
+    if (selectOverlay_->HasRenderTransform()) {
+        return selectOverlay_->GetPaintRectOffsetWithTransform();
+    }
+    return GetPaintRectGlobalOffset();
+}
+
+OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
@@ -6208,7 +6249,7 @@ void TextFieldPattern::OnVirtualKeyboardAreaChanged()
 {
     CHECK_NULL_VOID(SelectOverlayIsOn());
     selectController_->CalculateHandleOffset();
-    ProcessOverlay({ .menuIsShow = false });
+    selectOverlay_->ProcessOverlayOnAreaChanged({ .menuIsShow = false });
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
@@ -6411,7 +6452,7 @@ void TextFieldPattern::SetThemeBorderAttr()
     CHECK_NULL_VOID(theme);
     if (!paintProperty->HasBorderColorFlagByUser()) {
         BorderColorProperty borderColor;
-        borderColor.SetColor(Color::BLACK);
+        borderColor.SetColor(theme->GetTextInputColor());
         renderContext->UpdateBorderColor(borderColor);
     } else {
         renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
@@ -6428,7 +6469,7 @@ void TextFieldPattern::SetThemeBorderAttr()
 
     if (!paintProperty->HasBorderWidthFlagByUser()) {
         BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+        borderWidth.SetBorderWidth(theme->GetTextInputWidth());
         renderContext->UpdateBorderWidth(borderWidth);
         layoutProperty->UpdateBorderWidth(borderWidth);
     } else {
@@ -6482,5 +6523,26 @@ void TextFieldPattern::SetThemeAttr()
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }
+}
+
+const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
+{
+    auto textfieldTheme = GetTheme();
+    if (!textfieldTheme) {
+        return TextBase::GetAvoidSoftKeyboardOffset();
+    }
+    return textfieldTheme->GetAvoidKeyboardOffset();
+}
+
+Offset TextFieldPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
+{
+    auto localOffset = globalOffset - Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+    if (selectOverlay_->HasRenderTransform()) {
+        auto localOffsetF = OffsetF(globalOffset.GetX(), globalOffset.GetY());
+        selectOverlay_->RevertLocalPointWithTransform(localOffsetF);
+        localOffset.SetX(localOffsetF.GetX());
+        localOffset.SetY(localOffsetF.GetY());
+    }
+    return localOffset;
 }
 } // namespace OHOS::Ace::NG

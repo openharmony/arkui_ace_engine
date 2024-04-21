@@ -133,7 +133,7 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    focusManager_ = MakeRefPtr<FocusManager>();
+    focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
@@ -227,12 +227,16 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushRequestFocus() {}
 
+void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
+
+bool PipelineContext::CheckNeedDisableUpdateBackgroundImage() { return false; }
+
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
 {}
 
-void PipelineContext::OnVirtualKeyboardHeightChange(
-    float keyboardHeight, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
 void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction,
@@ -297,7 +301,7 @@ const RefPtr<FocusManager>& PipelineContext::GetFocusManager() const
 const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 {
     if (!focusManager_) {
-        focusManager_ = MakeRefPtr<FocusManager>();
+        focusManager_ = MakeRefPtr<FocusManager>(AceType::WeakClaim(this));
     }
     return focusManager_;
 }
@@ -506,7 +510,7 @@ bool PipelineContext::NeedSoftKeyboard()
 
 void PipelineContext::SetCursor(int32_t cursorValue) {}
 
-void PipelineContext::RestoreDefault() {}
+void PipelineContext::RestoreDefault(int32_t windowId) {}
 
 void PipelineContext::HandleSubwindow(bool isShow) {}
 
@@ -555,6 +559,15 @@ void PipelineContext::FlushFocusView()
     }
 }
 
+void PipelineContext::SetOverlayNodePositions(std::vector<Ace::RectF> rects) {}
+
+std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions() { return {}; }
+
+void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
+    const std::function<void(std::vector<Ace::RectF>)>&& callback) {}
+
+void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -591,8 +604,8 @@ RefPtr<ImageCache> PipelineBase::GetImageCache() const
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
 {}
-void PipelineBase::OnVirtualKeyboardAreaChange(
-    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
@@ -660,6 +673,13 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     return nullptr;
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+    {
+        return AceType::MakeRefPtr<UIExtensionManager>();
+    }
+#endif
+
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
 {
@@ -699,6 +719,11 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 bool PipelineBase::HasFloatTitle() const
 {
     return true;
+}
+
+Dimension NG::PipelineContext::GetCustomTitleHeight()
+{
+    return Dimension();
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

@@ -23,6 +23,10 @@ overrideMap.set('ArkCheckboxComponent', new Map([
   ['Symbol(height)', CheckboxHeightModifier]
 ]));
 
+overrideMap.set('ArkTextComponent', new Map([
+  ['Symbol(foregroundColor)', TextForegroundColorModifier]
+]));
+
 function applyAndMergeModifier<T, M extends ArkComponent, C extends ArkComponent>(instance: T, modifier: M): void {
   let myMap = modifier._modifiersWithKeys as ModifierMap;
   myMap.setOnChange((value: AttributeModifierWithKey) => {
@@ -99,7 +103,7 @@ class ModifierUtils {
       newMap.forEach((value, key) => {
         if (componentOverrideMap.has(key.toString())) {
           //@ts-ignore
-          const newValue = new (componentOverrideMap.get(key.toString()))(value.value);
+          const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
           stageMap.set(key, newValue);
         } else {
           stageMap.set(key, this.copyModifierWithKey(value));

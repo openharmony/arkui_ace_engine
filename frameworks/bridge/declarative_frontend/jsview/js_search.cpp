@@ -63,8 +63,6 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
-const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE };
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -454,9 +452,10 @@ void JSSearch::SetInputFilter(const JSCallbackInfo& info)
         return;
     }
     auto tmpInfo = info[0];
+    auto errInfo = info[1];
     std::string inputFilter;
     if (tmpInfo->IsUndefined()) {
-        TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
+        SearchModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
         return;
     }
     if (!ParseJsString(tmpInfo, inputFilter)) {
@@ -465,8 +464,8 @@ void JSSearch::SetInputFilter(const JSCallbackInfo& info)
     if (!CheckRegexValid(inputFilter)) {
         inputFilter = "";
     }
-    if (info.Length() > 1 && tmpInfo->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(tmpInfo));
+    if (info.Length() > 1 && errInfo->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(errInfo));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                             const std::string& info) {
@@ -567,7 +566,9 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     auto themeFontWeight = theme->GetFontWeight();
     Font font {.fontSize = themeFontSize, .fontWeight = themeFontWeight, .fontStyle = Ace::FontStyle::NORMAL};
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        SearchModel::GetInstance()->SetTextFont(font);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            SearchModel::GetInstance()->SetTextFont(font);
+        }
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);

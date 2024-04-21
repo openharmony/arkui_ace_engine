@@ -1690,7 +1690,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow001, TestSize.Level1)
     DialogProperties dialogProperties;
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1729,7 +1731,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow002, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1755,7 +1759,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow003, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1781,7 +1787,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow004, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1807,7 +1815,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow005, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1833,7 +1843,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow006, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1872,7 +1884,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow007, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     SystemProperties::SetDeviceOrientation(0);
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1913,7 +1927,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow008, TestSize.Level1)
      * @tc.step: step2. call Show of TextPickerDialogView
      * @tc.expected: the function of show can generate framenode.
      */
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1963,7 +1979,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow009, TestSize.Level1)
      * @tc.step: step2. call Show of TextPickerDialogView
      * @tc.expected: the function of show can generate framenode.
      */
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -2016,7 +2034,9 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow010, TestSize.Level1)
      * @tc.step: step2. call Show of TextPickerDialogView
      * @tc.expected: the function of show can generate framenode.
      */
-    auto frameNode = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -2036,12 +2056,15 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level1)
 
     DialogProperties dialogProperties;
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
-    auto frameNode1 = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto frameNode1 =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(frameNode1, nullptr);
 
     // when one of rangeVector and multi selection is valid, dialog will display
     settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
-    auto frameNode2 = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    auto frameNode2 =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_NE(frameNode2, nullptr);
     TextPickerDialogView::dialogNode_ = nullptr;
     settingData.rangeVector = {};
@@ -2060,7 +2083,8 @@ HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow011, TestSize.Level1)
     options2.rangeResult = { "2" };
     options2.children.emplace_back(options2Child);
     settingData.options.emplace_back(options2);
-    auto frameNode3 = TextPickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    auto frameNode3 =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_NE(frameNode3, nullptr);
 }
 

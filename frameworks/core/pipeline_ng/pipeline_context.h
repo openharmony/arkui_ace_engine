@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <utility>
 
+#include "interfaces/inner_api/ace/arkui_rect.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
@@ -603,7 +605,7 @@ public:
 
     void SetCursor(int32_t cursorValue) override;
 
-    void RestoreDefault() override;
+    void RestoreDefault(int32_t windowId = 0) override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
@@ -676,6 +678,20 @@ public:
 
     void FlushRequestFocus();
 
+    Dimension GetCustomTitleHeight();
+
+    void SetOverlayNodePositions(std::vector<Ace::RectF> rects);
+
+    std::vector<Ace::RectF> GetOverlayNodePositions();
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>&& callback);
+
+    void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
+
+    void CheckNeedUpdateBackgroundColor(Color& color);
+    bool CheckNeedDisableUpdateBackgroundImage();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -695,7 +711,7 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
         const bool supportAvoidance = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
 
     void SetIsLayouting(bool layouting)
     {
@@ -706,6 +722,7 @@ protected:
         const float safeHeight = 0.0f, const bool supportAvoidance = false);
     void OriginalAvoidanceLogic(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    RefPtr<FrameNode> GetContainerModalNode();
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -884,6 +901,8 @@ private:
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+    std::vector<Ace::RectF> overlayNodePositions_;
+    std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;

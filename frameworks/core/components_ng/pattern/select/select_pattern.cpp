@@ -122,6 +122,11 @@ void SelectPattern::OnModifyDone()
     if (!eventHub->IsEnabled()) {
         SetDisabledStyle();
     }
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->FireBuilder();
 }
 
 void SelectPattern::OnAfterModifyDone()
@@ -133,6 +138,34 @@ void SelectPattern::OnAfterModifyDone()
         return;
     }
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, selectValue_, selected_);
+}
+
+void SelectPattern::SetItemSelected(int index, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    isSelected_ = true;
+    CHECK_NULL_VOID(text_);
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProps);
+    textProps->UpdateContent(value);
+    text_->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    menuPattern->HideMenu();
+    auto hub = host->GetEventHub<SelectEventHub>();
+    CHECK_NULL_VOID(hub);
+
+    auto onSelect = hub->GetSelectEvent();
+    TAG_LOGD(
+        AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d value %{public}s", index, value.c_str());
+    if (onSelect) {
+        onSelect(index, value);
+    }
+    RecordChange(host, index, value);
 }
 
 void SelectPattern::ShowSelectMenu()

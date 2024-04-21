@@ -438,6 +438,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSLetterSpacingSpan::JSBind(globalObj);
     JSGestureSpan::JSBind(globalObj);
     JSTextShadowSpan::JSBind(globalObj);
+    JSImageAttachment::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
@@ -640,6 +641,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj, nativeEngine);
 }
 
 } // namespace OHOS::Ace::Framework

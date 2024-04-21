@@ -533,12 +533,12 @@ void TextModelNG::SetClipEdge(bool clip)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+void TextModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value);
 }
 
-void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value)
+void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
@@ -576,6 +576,18 @@ void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
             TextLayoutProperty, TextMarqueeDelay, options.GetTextMarqueeDelayValue(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, frameNode);
+    }
+    if (options.HasTextMarqueeFadeout()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeFadeout, options.GetTextMarqueeFadeoutValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeFadeout, frameNode);
+    }
+    if (options.HasTextMarqueeStartPolicy()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStartPolicy, options.GetTextMarqueeStartPolicyValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStartPolicy, frameNode);
     }
 }
 
@@ -618,6 +630,14 @@ Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
     return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
+TextDecorationStyle TextModelNG::GetTextDecorationStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecorationStyle::SOLID);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecorationStyle::SOLID);
+    return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
 }
 
 TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
@@ -683,6 +703,38 @@ CopyOptions TextModelNG::GetCopyOption(FrameNode* frameNode)
     CopyOptions value = CopyOptions::None;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CopyOption, value, frameNode, value);
     return value;
+}
+
+TextMarqueeOptions TextModelNG::GetMarqueeOptions(FrameNode* frameNode)
+{
+    TextMarqueeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, options);
+
+    if (layoutProperty->HasTextMarqueeStart()) {
+        options.UpdateTextMarqueeStart(layoutProperty->GetTextMarqueeStart().value());
+    }
+    if (layoutProperty->HasTextMarqueeStep()) {
+        options.UpdateTextMarqueeStep(layoutProperty->GetTextMarqueeStep().value());
+    }
+    if (layoutProperty->HasTextMarqueeLoop()) {
+        options.UpdateTextMarqueeLoop(layoutProperty->GetTextMarqueeLoop().value());
+    }
+    if (layoutProperty->HasTextMarqueeDirection()) {
+        options.UpdateTextMarqueeDirection(layoutProperty->GetTextMarqueeDirection().value());
+    }
+    if (layoutProperty->HasTextMarqueeDelay()) {
+        options.UpdateTextMarqueeDelay(layoutProperty->GetTextMarqueeDelay().value());
+    }
+    if (layoutProperty->HasTextMarqueeFadeout()) {
+        options.UpdateTextMarqueeFadeout(layoutProperty->GetTextMarqueeFadeout().value());
+    }
+    if (layoutProperty->HasTextMarqueeStartPolicy()) {
+        options.UpdateTextMarqueeStartPolicy(layoutProperty->GetTextMarqueeStartPolicy().value());
+    }
+
+    return options;
 }
 
 TextHeightAdaptivePolicy TextModelNG::GetHeightAdaptivePolicy(FrameNode* frameNode)

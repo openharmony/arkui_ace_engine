@@ -48,6 +48,8 @@ public:
 
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static int32_t GetAlwaysEnabled(FrameNode* frameNode);
+
+    static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

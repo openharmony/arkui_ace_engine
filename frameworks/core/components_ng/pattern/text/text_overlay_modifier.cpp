@@ -107,4 +107,9 @@ void TextOverlayModifier::SetShowSelect(bool value)
 {
     showSelect_->Set(value);
 }
+
+std::vector<RectF> TextOverlayModifier::GetSelectedRects() const
+{
+    return selectedRects_;
+}
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,16 @@ void InitFilterColor(const RefPtr<SvgFeDeclaration>& fe, ColorInterpolationType&
     }
 }
 
+void SvgFe::OnInitStyle()
+{
+    auto declaration = Ace::AceType::DynamicCast<SvgFeDeclaration>(declaration_);
+    CHECK_NULL_VOID(declaration);
+    x_ = declaration->GetX();
+    y_ = declaration->GetY();
+    height_ = declaration->GetHeight();
+    width_ = declaration->GetWidth();
+}
+
 void SvgFe::RegisterResult(const std::string& id, std::shared_ptr<RSImageFilter>& imageFilter,
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
@@ -48,11 +58,22 @@ SvgFe::SvgFe() : SvgNode()
 }
 
 void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash)
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash,
+    const Rect& effectFilterArea)
 {
     ColorInterpolationType srcColor = currentColor;
     OnInitStyle();
     InitFilterColor(AceType::DynamicCast<SvgFeDeclaration>(declaration_), currentColor);
+    Rect effectFeArea = effectFilterArea;
+    if (x_.Unit() != DimensionUnit::PERCENT) {
+        effectFeArea.SetLeft(x_.Value());
+    }
+    if (y_.Unit() != DimensionUnit::PERCENT) {
+        effectFeArea.SetTop(x_.Value());
+    }
+    effectFeArea.SetWidth(width_.ConvertToPxWithSize(effectFilterArea.Width()));
+    effectFeArea.SetHeight(height_.ConvertToPxWithSize(effectFilterArea.Height()));
+    effectFilterArea_ = effectFilterArea.IntersectRect(effectFeArea);
     OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
     currentColor = srcColor;
 }

@@ -73,10 +73,25 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
-namespace {
-
-std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
+CalcDimension JSRichEditor::ParseLengthMetrics(const JSRef<JSObject>& obj)
+{
+    CalcDimension size;
+    auto value = 0.0;
+    auto valueObj = obj->GetProperty("value");
+    if (!valueObj->IsNull() && valueObj->IsNumber()) {
+        value = valueObj->ToNumber<float>();
+    }
+    auto unit = DimensionUnit::VP;
+    auto unitObj = obj->GetProperty("unit");
+    if (!unitObj->IsNull() && unitObj->IsNumber()) {
+        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
+    }
+    if (value >= 0 && unit != DimensionUnit::PERCENT) {
+        size = CalcDimension(value, unit);
+    }
+    return size;
+}
+std::optional<NG::MarginProperty> JSRichEditor::ParseMarginAttr(JsiRef<JSVal> marginAttr)
 {
     std::optional<NG::MarginProperty> marginProp = std::nullopt;
     CalcDimension length;
@@ -89,6 +104,11 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
         marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     } else if (marginAttr->IsObject()) {
         auto marginObj = JSRef<JSObject>::Cast(marginAttr);
+        if (marginObj->HasProperty("value")) {
+            length = ParseLengthMetrics(marginObj);
+            marginProp = NG::ConvertToCalcPaddingProperty(length, length, length, length);
+            return marginProp;
+        }
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
         std::optional<CalcDimension> top;
@@ -99,7 +119,7 @@ std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr)
     return marginProp;
 }
 
-std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
+std::optional<NG::BorderRadiusProperty> JSRichEditor::ParseBorderRadiusAttr(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
     CalcDimension radiusDim;
@@ -121,6 +141,13 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
         prop = borderRadius;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (object->HasProperty("value")) {
+            NG::BorderRadiusProperty borderRadius;
+            borderRadius.SetRadius(ParseLengthMetrics(object));
+            borderRadius.multiValued = false;
+            prop = borderRadius;
+            return prop;
+        }
         CalcDimension topLeft;
         CalcDimension topRight;
         CalcDimension bottomLeft;
@@ -136,8 +163,6 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
     }
     return prop;
 }
-
-} // namespace
 
 void JSRichEditor::Create(const JSCallbackInfo& info)
 {
@@ -199,6 +224,7 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
     leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
     paragraphStyleObj->SetPropertyObject("leadingMargin", leadingMarginArray);
     paragraphStyleObj->SetProperty<int32_t>("wordBreak", textStyleResult.wordBreak);
+    paragraphStyleObj->SetProperty<int32_t>("lineBreakStrategy", textStyleResult.lineBreakStrategy);
     return paragraphStyleObj;
 }
 
@@ -206,7 +232,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
 {
     JSRef<JSObject> symbolSpanStyleObj = JSRef<JSObject>::New();
     symbolSpanStyleObj->SetProperty<std::string>("fontColor", symbolSpanStyle.symbolColor);
-    symbolSpanStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", symbolSpanStyle.fontFeature);
+    symbolSpanStyleObj->SetProperty<NG::FONT_FEATURES_LIST>("fontFeature", symbolSpanStyle.fontFeature);
     symbolSpanStyleObj->SetProperty<double>("fontSize", symbolSpanStyle.fontSize);
     symbolSpanStyleObj->SetProperty<double>("lineHeight", symbolSpanStyle.lineHeight);
     symbolSpanStyleObj->SetProperty<double>("letterSpacing", symbolSpanStyle.letterSpacing);
@@ -259,6 +285,7 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     auto obj = JSRef<JSObject>::New();
     obj->SetProperty<int32_t>("textAlign", info.textAlign);
     obj->SetProperty<int32_t>("wordBreak", info.wordBreak);
+    obj->SetProperty<int32_t>("lineBreakStrategy", info.lineBreakStrategy);
 
     auto lmObj = JSRef<JSObject>::New();
     auto size = JSRef<JSArray>::New();
@@ -1115,10 +1142,10 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
     if (!layoutStyleObject->IsUndefined()) {
         auto marginAttr = layoutStyleObject->GetProperty("margin");
-        imageStyle.marginProp = ParseMarginAttr(marginAttr);
+        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
         updateSpanStyle_.marginProp = imageStyle.marginProp;
         auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
-        imageStyle.borderRadius = ParseBorderRadiusAttr(borderRadiusAttr);
+        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
         updateSpanStyle_.borderRadius = imageStyle.borderRadius;
     }
     return imageStyle;
@@ -1139,6 +1166,12 @@ void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef
         height = theme->GetTextStyle().GetLineHeight();
         updateSpanStyle.updateLineHeight = height;
         style.SetLineHeight(height);
+    } else {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        height = theme->GetTextStyle().GetLineHeight();
+        updateSpanStyle.updateLineHeight = height;
+        style.SetLineHeight(height);
     }
     JSRef<JSVal> letterSpacing = styleObject->GetProperty("letterSpacing");
     CalcDimension letters;
@@ -1147,6 +1180,12 @@ void JSRichEditorController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef
         updateSpanStyle.updateLetterSpacing = letters;
         style.SetLetterSpacing(letters);
     } else if (letters.Unit() == DimensionUnit::PERCENT) {
+        auto theme = JSContainerBase::GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        letters = theme->GetTextStyle().GetLetterSpacing();
+        updateSpanStyle.updateLetterSpacing = letters;
+        style.SetLetterSpacing(letters);
+    } else {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         letters = theme->GetTextStyle().GetLetterSpacing();
@@ -1161,7 +1200,7 @@ void JSRichEditorController::ParseJsFontFeatureTextStyle(const JSRef<JSObject>& 
     JSRef<JSVal> fontFeature = styleObject->GetProperty("fontFeature");
     std::string feature;
     if (!fontFeature->IsNull() && JSContainerBase::ParseJsString(fontFeature, feature)) {
-        NG::FONT_FEATURES_MAP fontFeatures = ParseFontFeatureSettings(feature);
+        NG::FONT_FEATURES_LIST fontFeatures = ParseFontFeatureSettings(feature);
         updateSpanStyle.updateFontFeature = fontFeatures;
         style.SetFontFeatures(fontFeatures);
     } else {
@@ -1190,7 +1229,7 @@ void JSRichEditorController::ParseJsTextStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
@@ -1900,6 +1939,19 @@ void JSRichEditorController::ParseWordBreakParagraphStyle(const JSRef<JSObject>&
     style.wordBreak = WORD_BREAK_TYPES[index];
 }
 
+void JSRichEditorController::ParseLineBreakStrategyParagraphStyle(
+    const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
+{
+    auto breakStrategyObj = styleObject->GetProperty("lineBreakStrategy");
+    if (!breakStrategyObj->IsNull() && breakStrategyObj->IsNumber()) {
+        auto breakStrategy = static_cast<LineBreakStrategy>(breakStrategyObj->ToNumber<int32_t>());
+        if (breakStrategy < LineBreakStrategy::GREEDY || breakStrategy > LineBreakStrategy::BALANCED) {
+            breakStrategy = LineBreakStrategy::GREEDY;
+        }
+        style.lineBreakStrategy = breakStrategy;
+    }
+}
+
 bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -1912,6 +1964,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         style.textAlign = align;
     }
 
+    ParseLineBreakStrategyParagraphStyle(styleObject, style);
     ParseWordBreakParagraphStyle(styleObject, style);
 
     auto lm = styleObject->GetProperty("leadingMargin");
@@ -2059,7 +2112,8 @@ JSRef<JSObject> JSRichEditorController::CreateTypingStyleResult(const struct Upd
         tyingStyleObj->SetProperty<std::string>("fontColor", typingStyle.updateTextColor.value().ColorToString());
     }
     if (typingStyle.updateFontFeature.has_value()) {
-        tyingStyleObj->SetProperty<NG::FONT_FEATURES_MAP>("fontFeature", typingStyle.updateFontFeature.value());
+        tyingStyleObj->SetProperty<std::string>(
+            "fontFeature", UnParseFontFeatureSetting(typingStyle.updateFontFeature.value()));
     }
     if (typingStyle.updateItalicFontStyle.has_value()) {
         tyingStyleObj->SetProperty<int32_t>(

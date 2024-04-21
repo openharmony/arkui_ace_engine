@@ -197,11 +197,29 @@ public:
         isAnimation_ = true;
     }
 
-    void StartAnimation() {
+    void ResetImages()
+    {
+        images_.clear();
+    }
+
+    void ResetImageProperties();
+
+    void ResetImageAndAlt();
+
+    void ResetPictureSize();
+
+    bool GetHasSizeChanged()
+    {
+        return hasSizeChanged;
+    }
+
+    void StartAnimation()
+    {
         status_ = Animator::Status::RUNNING;
     }
 
-    void StopAnimation() {
+    void StopAnimation()
+    {
         status_ = Animator::Status::STOPPED;
         OnAnimatedModifyDone();
     }
@@ -237,6 +255,11 @@ public:
 
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
+
+    void SetImageAnimator(bool isImageAnimator)
+    {
+        isImageAnimator_ = isImageAnimator;
+    }
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -277,7 +300,7 @@ private:
      * @param dstSize The size of the image to be decoded.
      */
     void StartDecoding(const SizeF& dstSize);
-    bool CheckIfNeeedLayout();
+    bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
@@ -392,6 +415,8 @@ private:
     int32_t formAnimationRemainder_ = 0;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
+    bool isImageAnimator_ = false;
+    bool hasSizeChanged = false;
 };
 
 } // namespace OHOS::Ace::NG

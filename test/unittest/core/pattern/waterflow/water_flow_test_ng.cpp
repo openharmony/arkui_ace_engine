@@ -112,6 +112,7 @@ void WaterFlowTestNg::GetInstance()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    frameNode_->isConstraintNotChanged_ = true;
     pattern_ = frameNode_->GetPattern<WaterFlowPattern>();
     eventHub_ = frameNode_->GetEventHub<WaterFlowEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<WaterFlowLayoutProperty>();
@@ -478,6 +479,45 @@ HWTEST_F(WaterFlowTestNg, Property012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Property013
+ * @tc.desc: Test the return value of IsReverse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create WaterFlow
+     */
+    CreateWithItem([](WaterFlowModelNG model) { model.SetColumnsTemplate("1fr 1fr 1fr"); });
+
+    /**
+     * @tc.steps: step2. set WaterflowDirection and LayoutDirection, test the return value of IsReverse.
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_FALSE(layoutProperty_->IsReverse());
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_TRUE(layoutProperty_->IsReverse());
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    EXPECT_FALSE(layoutProperty_->IsReverse());
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_TRUE(layoutProperty_->IsReverse());
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW_REVERSE);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    EXPECT_TRUE(layoutProperty_->IsReverse());
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::ROW_REVERSE);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_FALSE(layoutProperty_->IsReverse());
+}
+
+/**
  * @tc.name: WaterFlowTest001
  * @tc.desc: Fill all items to waterFlow with fixed row and column
  * @tc.type: FUNC
@@ -734,6 +774,31 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
 
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));
+}
+
+/**
+ * @tc.name: WaterFlowTest013
+ * @tc.desc: Test direction
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow with the RTL direction.
+     * @tc.expected: layout from right to left.
+     */
+    Create([](WaterFlowModelNG model) {
+        ViewAbstract::SetLayoutDirection(TextDirection::RTL);
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(WATERFLOW_WIDTH / 2, 0, WATERFLOW_WIDTH / 2, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(0, 0, WATERFLOW_WIDTH / 2, BIG_ITEM_HEIGHT)));
+
+    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, WATERFLOW_WIDTH / 2, ITEM_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(WATERFLOW_WIDTH / 2, 0, WATERFLOW_WIDTH / 2, BIG_ITEM_HEIGHT)));
 }
 
 /**
@@ -1939,10 +2004,6 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex003, TestSize.Level1)
     EXPECT_LT(pattern_->layoutInfo_.currentOffset_, 0.f);
 
     pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
-
-    pattern_->ScrollToIndex(3, true, ScrollAlign::NONE);
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
 

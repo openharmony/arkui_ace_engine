@@ -187,16 +187,21 @@ void ButtonPattern::HandleFocusEvent(RefPtr<ButtonLayoutProperty> layoutProperty
 
     if (buttonStyle != ButtonStyleMode::TEXT) {
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme->GetShadowNormal()));
-        shadowModify_ = (graphics->GetBackShadowValue() == shadow);
+        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
+            shadowModify_ = true;
+        }
         if (shadowModify_) {
             ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowFocus());
             buttonRenderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
         }
     }
-    VectorF scale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
-    scaleModify_ = transform->GetTransformScale() == scale;
+    float scaleFocus = buttonTheme->GetScaleFocus();
+    VectorF scale(scaleFocus, scaleFocus);
+    if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+        scaleModify_ = true;
+    }
     if (scaleModify_) {
-        buttonRenderContext->SetScale(buttonTheme->GetScaleFocus(), buttonTheme->GetScaleFocus());
+        buttonRenderContext->SetScale(scaleFocus, scaleFocus);
     }
     if (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) {
         bgColorModify_ = buttonRenderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
@@ -226,14 +231,18 @@ void ButtonPattern::HandleBlurEvent(RefPtr<ButtonLayoutProperty> layoutProperty,
         ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
         Shadow shadow = Shadow::CreateShadow(shadowStyle);
         buttonRenderContext->UpdateBackShadow(shadow);
+        shadowModify_ = false;
     }
     if (scaleModify_) {
+        scaleModify_ = false;
         buttonRenderContext->SetScale(1.0f, 1.0f);
     }
     if (bgColorModify_) {
+        bgColorModify_ = false;
         buttonRenderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
     if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
+        focusTextColorModify_ = false;
         textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode();
     }
@@ -293,9 +302,6 @@ void ButtonPattern::OnModifyDone()
 
 void ButtonPattern::HandleBackgroundColor()
 {
-    if (UseContentModifier()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -308,6 +314,13 @@ void ButtonPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(buttonTheme);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    if (UseContentModifier()) {
+        if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            renderContext->ResetBackgroundColor();
+        }
+        return;
+    }
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
@@ -571,22 +584,27 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
 
 void ButtonPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    if (!makeFunc_) {
+    if (!makeFunc_.has_value()) {
         gestureEventHub->SetRedirectClick(false);
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+                break;
+            }
+        }
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     } else {
         gestureEventHub->SetRedirectClick(true);
     }
-    host->RemoveChildAtIndex(0);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
     clickEventFunc_ = gestureEventHub->GetClickEvent();
@@ -594,10 +612,6 @@ void ButtonPattern::FireBuilder()
 
 RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value()) {
-        return nullptr;
-    }
-    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();

@@ -215,10 +215,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     return;
                 }
                 if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
-                    gestureHub->SetIsTextDraggable(true);
                     if (textDragCallback_) {
                         textDragCallback_(info.GetGlobalLocation());
                     }
+                } else if (!gestureHub->GetIsTextDraggable()) {
+                    gestureHub->SetPixelMap(nullptr);
                 }
             }
         }
@@ -681,7 +682,7 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     if (pipelineContext->HasFloatTitle()) {
         offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
-        offsetY -= static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx());
+        offsetY -= static_cast<float>((pipelineContext->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx());
     }
     return OffsetF(offsetX, offsetY);
 }
@@ -1178,11 +1179,6 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
             weakEvent = gestureEventHub_, weakModifier = WeakPtr<TextDragOverlayModifier>(modifier)] {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->RemovePixelMap();
         if (!startDrag) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1192,6 +1188,11 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
                 pattern->ShowHandles();
             }
         }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemovePixelMap();
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -1418,7 +1419,7 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {imageNode, offset, width, height};
+    gatherNodeChildInfo = {imageNode, offset, width, height, width / 2.0f, height / 2.0f};
     return imageNode;
 }
 
@@ -1625,7 +1626,7 @@ void DragEventActuator::HandleTouchMoveEvent()
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
-        manager->RemoveGatherNodeWithAnimation();
+        manager->RemoveGatherNode();
         isOnBeforeLiftingAnimation = false;
     }
 }

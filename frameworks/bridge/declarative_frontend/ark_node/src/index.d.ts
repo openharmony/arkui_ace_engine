@@ -79,9 +79,9 @@ declare class UINodeRegisterProxy {
   public static instance_: UINodeRegisterProxy;
   public removeElementsInfo_: Array<RemovedElementInfo>;
   public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
-  public unregisterElmtIdsFromViewPUs(): void;
+  public unregisterElmtIdsFromIViews(): void;
   private obtainDeletedElmtIds(): void;
-  public static unregisterElmtIdsFromViewPUs(): void;
+  public static unregisterElmtIdsFromIViews(): void;
   public static obtainDeletedElmtIds(): void;
 }
 

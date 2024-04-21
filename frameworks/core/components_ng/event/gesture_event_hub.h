@@ -325,6 +325,9 @@ public:
 
     GestureEventFunc GetClickEvent()
     {
+        if (!IsClickable()) {
+            return nullptr;
+        }
         return clickEventActuator_->GetClickEvent();
     }
 

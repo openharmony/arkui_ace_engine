@@ -367,6 +367,12 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     uiStatus_ = check ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (UseContentModifier()) {
+        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdateCheckBoxSelect(check);
+        FireBuilder();
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -924,9 +930,6 @@ void CheckBoxPattern::FireBuilder()
 
 RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
 {
-    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
-        return nullptr;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();

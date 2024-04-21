@@ -482,9 +482,8 @@ public:
     
     void SetAnimateCanOverScroll(bool animateCanOverScroll)
     {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto canScroll = scrollableEvent_->GetEnable();
-        animateCanOverScroll_ = canScroll && animateCanOverScroll;
+        bool isScrollable = !(IsAtBottom() && IsAtTop() && !GetAlwaysEnabled());
+        animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
     virtual void InitScrollBarClickEvent();
     void HandleClickEvent(GestureEvent& info);

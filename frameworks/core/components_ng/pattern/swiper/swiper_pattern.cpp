@@ -849,7 +849,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateCurrentIndex(swiperLayoutAlgorithm->GetCurrentIndex());
         AdjustCurrentFocusIndex();
         auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentFocusIndex_));
-        if (curChild) {
+        if (curChild && IsContentFocused()) {
             auto curChildFrame = curChild->GetHostNode();
             CHECK_NULL_RETURN(curChildFrame, false);
             FlushFocus(curChildFrame);
@@ -883,9 +883,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                                           : targetIndexValue + TotalCount();
                 isNeedBackwardTranslate = itemPosition_.find(firstItemIndex) != itemPosition_.end();
             }
-            bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ ||
-                                                itemPosition_.find(lastItemIndex) == itemPosition_.end() ||
-                                                isNeedBackwardTranslate;
+            bool isNeedPlayTranslateAnimation =
+                translateAnimationIsRunning_ ||
+                (IsLoop() && itemPosition_.find(lastItemIndex) == itemPosition_.end()) || isNeedBackwardTranslate;
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -2604,8 +2604,9 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         nextIndex = direction ? firstIndex + 1 : firstItemInfoInVisibleArea.first;
     }
 
-    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    if (swiperLayoutProperty && SwiperUtils::IsStretch(swiperLayoutProperty) && GetDisplayCount() == 1) {
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    // don't run this in nested scroll. Parallel nested scroll can deviate > 1 page from currentIndex_
+    if (!childScrolling_ && SwiperUtils::IsStretch(props) && GetDisplayCount() == 1) {
         nextIndex = ComputeNextIndexInSinglePage(velocity, onlyDistance);
     }
 
@@ -3116,7 +3117,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
-            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "Swiper");
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = true;

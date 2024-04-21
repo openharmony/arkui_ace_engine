@@ -196,17 +196,16 @@ void JSScroller::Fling(const JSCallbackInfo& args)
         return;
     }
     double flingVelocity = 0.0;
-    if (args[0]->IsNumber()) {
-        flingVelocity = args[0]->ToNumber<double>();
-        if (NearZero(flingVelocity)) {
-            return;
-        }
-        flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
-    } else {
+    if (!args[0]->IsNumber()) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "The parameter check failed.");
         return;
     }
+    flingVelocity = args[0]->ToNumber<double>();
+    if (NearZero(flingVelocity)) {
+        return;
+    }
     ContainerScope scope(instanceId_);
+    flingVelocity = Dimension(flingVelocity, DimensionUnit::VP).ConvertToPx();
     scrollController->Fling(flingVelocity);
 }
 
@@ -284,7 +283,12 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
         !ConvertFromJSValue(args[1], yOffset)) {
         return;
     }
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        return;
+    }
 
+    ContainerScope scope(instanceId_);
     auto deltaX = xOffset.Value();
     auto deltaY = yOffset.Value();
     auto container = Container::Current();
@@ -303,11 +307,7 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
             }
         }
     }
-    auto scrollController = controllerWeak_.Upgrade();
-    if (scrollController) {
-        ContainerScope scope(instanceId_);
-        scrollController->ScrollBy(deltaX, deltaY, false);
-    }
+    scrollController->ScrollBy(deltaX, deltaY, false);
 }
 
 void JSScroller::IsAtEnd(const JSCallbackInfo& args)

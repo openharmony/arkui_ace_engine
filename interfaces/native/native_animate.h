@@ -83,13 +83,6 @@ typedef struct {
 } ArkUI_NativeAnimateAPI_1;
 
 /**
-* @brief Defines the animation configuration.
-*
-* @since 12
-*/
-typedef struct ArkUI_AnimateOption ArkUI_AnimateOption;
-
-/**
 * @brief Creates an animation configuration.
 *
 * @return Returns the pointer to the created animation configuration.

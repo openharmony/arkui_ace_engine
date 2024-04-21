@@ -173,7 +173,7 @@ public:
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfield_show_handle);
 
             theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
-            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_fp);
+            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
             theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);
             theme->textInputAndErrTipsSpacing_ =
                 pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
@@ -528,6 +528,11 @@ public:
         return errorTextInputBorderWidth_;
     }
 
+    const Dimension& GetAvoidKeyboardOffset() const
+    {
+        return avoidKeyboardOffset_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -603,13 +608,15 @@ private:
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
 
+    Dimension avoidKeyboardOffset_ = 24.0_vp;
+
     bool showEllipsis_ = true;
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;;
 
-    Dimension textInputBorderWidth_ = 0.5_vp;
+    Dimension textInputBorderWidth_ = 0.0_vp;
     Dimension textInputAndErrTipsSpacing_ = 4.0_vp;
     Dimension errorTextInputBorderWidth_ = 1.0_vp;
     Color textInputBorderColor_;

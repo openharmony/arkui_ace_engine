@@ -795,7 +795,8 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
     GridLayoutInfo oldInfo;
     oldInfo.crossCount_ = 2;
     oldInfo.childrenCount_ = 12;
-    oldInfo.gridMatrix_ = MATRIX_DEMO_6;
+    // simulate reset after template change
+    oldInfo.gridMatrix_.clear();
     oldInfo.currentOffset_ = -10.0f;
     oldInfo.startMainLineIndex_ = 2;
     oldInfo.startIndex_ = 3;
@@ -1552,6 +1553,7 @@ HWTEST_F(GridIrregularLayoutTest, Integrated001, TestSize.Level1)
     EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 5);
     EXPECT_TRUE(info.offsetEnd_);
+    EXPECT_TRUE(info.hasBigItem_);
 }
 
 /**
@@ -1807,5 +1809,72 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll003, TestSize.Level1)
         EXPECT_EQ(info.endMainLineIndex_, 10);
         EXPECT_EQ(info.endIndex_, 8);
     }
+}
+
+namespace {
+const decltype(GridLayoutInfo::lineHeightMap_) cmp = { { 0, ITEM_HEIGHT }, { 1, ITEM_HEIGHT }, { 2, ITEM_HEIGHT },
+    { 3, ITEM_HEIGHT }, { 6, ITEM_HEIGHT }, { 7, ITEM_HEIGHT }, { 8, ITEM_HEIGHT }, { 9, ITEM_HEIGHT } };
+}
+/**
+ * @tc.name: GetEndOffset000
+ * @tc.desc: Test scrolling past limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions({});
+        CreateFixedItem(20, GridItemStyle::NONE);
+    });
+
+    int32_t targetIndex = 19;
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    pattern_->ScrollToIndex(targetIndex, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    for (int i = 0; i < 10; ++i) {
+        UpdateCurrentOffset(-10000.0f);
+    }
+    EXPECT_EQ(info.lineHeightMap_, cmp);
+    EXPECT_EQ(info.startMainLineIndex_, 9);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+    EXPECT_LT(info.currentOffset_, -15000.0f);
+}
+
+/**
+ * @tc.name: GetEndOffset001
+ * @tc.desc: Test GetEndOffset with updated offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, GetEndOffset001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetLayoutOptions({});
+        CreateFixedItem(20, GridItemStyle::NONE);
+    });
+
+    int32_t targetIndex = 19;
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->ScrollToIndex(targetIndex, false, align);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startMainLineIndex_, 6);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+    info.currentOffset_ -= 1000.0f;
+    info.synced_ = false;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    pattern_->GetScrollEdgeEffect()->ProcessScrollOver(-2000.0f);
+    EXPECT_TRUE(info.synced_);
+    EXPECT_EQ(info.lineHeightMap_, cmp);
+    EXPECT_EQ(info.currentOffset_, -400.0f);
+    EXPECT_EQ(info.startMainLineIndex_, 9);
+    EXPECT_EQ(info.endMainLineIndex_, 9);
+    // last item should match up with the bottom again
+    EXPECT_EQ(pattern_->GetEndOffset(), GRID_HEIGHT - ITEM_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

@@ -1568,12 +1568,12 @@ void SearchModelNG::SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecora
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+void SearchModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, FontFeature, value);
 }
 
-void SearchModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value)
+void SearchModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, FontFeature, value, frameNode);
 }

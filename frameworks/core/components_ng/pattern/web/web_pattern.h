@@ -478,6 +478,7 @@ public:
     void SetAccessibilityState(bool state);
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -668,6 +669,7 @@ private:
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
+    bool CheckSafeAreaIsExpand();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

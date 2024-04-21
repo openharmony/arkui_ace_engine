@@ -77,6 +77,9 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     visibleContentRect = GetVisibleContentRect();
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    if (IsSingleHandle()) {
+        return visibleContentRect.IsInRegion(bottomPoint);
+    }
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
@@ -105,9 +108,11 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->HasFocus());
     CHECK_NULL_VOID(SelectOverlayIsOn());
+    CHECK_NULL_VOID(!pattern->spans_.empty());
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
+    pattern->magnifierController_->SetLocalOffset(localOffset);
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
         .handleRect = handleRect,
         .isFirstHandle = isFirst,
@@ -154,6 +159,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
+    pattern->magnifierController_->UpdateShowMagnifier();
     if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
@@ -290,6 +296,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
                 pattern->ResetSelection();
             }
+            break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
             break;
@@ -298,10 +305,15 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason)
 {
+    TAG_LOGD(AceLogTag::ACE_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
         pattern->ResetSelection();
+    }
+    if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
+        pattern->ResetSelection();
+        pattern->StartTwinkling();
     }
 }
 

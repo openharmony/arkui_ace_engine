@@ -164,6 +164,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_IMAGE_COMPLETE;
         case NODE_IMAGE_ON_ERROR:
             return ON_IMAGE_ERROR;
+        case NODE_IMAGE_ON_SVG_PLAY_FINISH:
+            return ON_IMAGE_SVG_PLAY_FINISH;
+        case NODE_TEXT_PICKER_EVENT_ON_CHANGE:
+            return ON_TEXT_PICKER_CHANGE;
         case NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE:
             return ON_DATE_PICKER_DATE_CHANGE;
         case NODE_TIME_PICKER_EVENT_ON_CHANGE:
@@ -198,6 +202,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_SWIPER_GESTURE_SWIPE;
         case NODE_ON_WILL_SCROLL:
             return ON_WILL_SCROLL;
+        case NODE_ON_TOUCH_INTERCEPT:
+            return ON_TOUCH_INTERCEPT;
+        case NODE_ON_REACH_END:
+            return ON_REACH_END;
         default:
             return -1;
     }
@@ -242,6 +250,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_IMAGE_ON_COMPLETE;
         case ON_IMAGE_ERROR:
             return NODE_IMAGE_ON_ERROR;
+        case ON_IMAGE_SVG_PLAY_FINISH:
+            return NODE_IMAGE_ON_SVG_PLAY_FINISH;
+        case ON_TEXT_PICKER_CHANGE:
+            return NODE_TEXT_PICKER_EVENT_ON_CHANGE;
         case ON_DATE_PICKER_DATE_CHANGE:
             return NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE;
         case ON_TIME_PICKER_CHANGE:
@@ -284,6 +296,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
         case ON_WILL_SCROLL:
             return NODE_ON_WILL_SCROLL;
+        case ON_TOUCH_INTERCEPT:
+            return NODE_ON_TOUCH_INTERCEPT;
+        case ON_REACH_END:
+            return NODE_ON_REACH_END;
         default:
             return -1;
     }
@@ -307,6 +323,7 @@ bool IsTouchEvent(ArkUI_Int32 type)
 {
     switch (type) {
         case NODE_TOUCH_EVENT:
+        case NODE_ON_TOUCH_INTERCEPT:
             return true;
         default:
             return false;
@@ -331,7 +348,8 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         }
         case TOUCH_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
-            event->kind = ConvertToNodeEventType(ON_TOUCH);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchEvent.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
         default:
