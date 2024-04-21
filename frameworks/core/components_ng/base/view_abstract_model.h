@@ -201,6 +201,8 @@ public:
 
     virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
+    virtual void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
+    virtual void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetMotionBlur(const MotionBlurOption& motionBlurOption) {}

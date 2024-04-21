@@ -576,6 +576,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundBrightness));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundBrightness"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBackgroundBrightness));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundBrightnessInternal"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundBrightnessInternal));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundBrightnessInternal"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBackgroundBrightnessInternal));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundBrightness"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetForegroundBrightness));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundBrightness"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetForegroundBrightness));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDragPreviewOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDragPreviewOptions));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragPreviewOptions"),

@@ -3177,6 +3177,72 @@ void ResetBackgroundBrightness(ArkUINodeHandle node)
     ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
 }
 
+void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+    const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
+    const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize , ArkUI_Float32 fraction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::vector<float> posRGB;
+    posRGB.assign(posRGBValues, posRGBValues + posRGBValuesSize);
+    std::vector<float> negRGB;
+    negRGB.assign(negRGBValues, negRGBValues + negRGBValuesSize);
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
+}
+
+void ResetBackgroundBrightnessInternal(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float rate = 1.0f;
+    float lightUpDegree = 0.0f;
+    float cubicCoeff = 0.0f;
+    float quadCoeff = 0.0f;
+    float saturation = 1.0f;
+    std::vector<float> posRGB(3, 0.0);
+    std::vector<float> negRGB(3, 0.0);
+    float fraction = 1.0;
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
+}
+ 
+void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+    const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
+    const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::vector<float> posRGB;
+    posRGB.assign(posRGBValues, posRGBValues + posRGBValuesSize);
+    std::vector<float> negRGB;
+    negRGB.assign(negRGBValues, negRGBValues + negRGBValuesSize);
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFgDynamicBrightness(frameNode, brightnessOption);
+}
+
+void ResetForegroundBrightness(ArkUINodeHandle node)
+ {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float rate = 1.0f;
+    float lightUpDegree = 0.0f;
+    float cubicCoeff = 0.0f;
+    float quadCoeff = 0.0f;
+    float saturation = 1.0f;
+    std::vector<float> posRGB(3, 0.0);
+    std::vector<float> negRGB(3, 0.0);
+    float fraction = 1.0;
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    ViewAbstract::SetFgDynamicBrightness(frameNode, brightnessOption);
+}
+
 void SetDragPreviewOptions(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4839,7 +4905,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
         SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
         ResetObscured, SetResponseRegion, ResetResponseRegion, SetBackgroundEffect, ResetBackgroundEffect,
-        SetBackgroundBrightness, ResetBackgroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions,
+        SetBackgroundBrightness, ResetBackgroundBrightness, SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, 
+        SetForegroundBrightness, ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions,
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching,
         ResetUseShadowBatching, SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
         SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
