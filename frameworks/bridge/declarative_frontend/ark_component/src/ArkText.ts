@@ -330,6 +330,26 @@ class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class TextLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetLineSpacing(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().text.resetLineSpacing(node);
+    } else {
+      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -630,6 +650,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   letterSpacing(value: number | string): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
+    return this;
+  }
+  lineSpacing(value: LengthMetrics): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {

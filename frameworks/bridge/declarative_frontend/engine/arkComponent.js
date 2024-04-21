@@ -8516,6 +8516,26 @@ class TextLetterSpacingModifier extends ModifierWithKey {
   }
 }
 TextLetterSpacingModifier.identity = Symbol('textLetterSpacing');
+class TextLineSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetLineSpacing(node);
+    }
+    else if (!isObject(this.value)) {
+      getUINativeModule().text.resetLineSpacing(node);
+    }
+    else {
+      getUINativeModule().text.setLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextLineSpacingModifier.identity = Symbol('textLineSpacing');
 class TextTextOverflowModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8805,6 +8825,10 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
     return this;
   }
+  lineSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, value);
+    return this;
+  }
   textCase(value) {
     modifierWithKey(this._modifiersWithKeys, TextTextCaseModifier.identity, TextTextCaseModifier, value);
     return this;
@@ -8935,6 +8959,26 @@ class TextAreaLetterSpacingModifier extends ModifierWithKey {
     }
 }
 TextAreaLetterSpacingModifier.identity = Symbol('textAreaLetterSpacing');
+class TextAreaLineSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    }
+    else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    }
+    else {
+      getUINativeModule().textArea.setLineSpacing(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaLineSpacingModifier.identity = Symbol('textAreaLineSpacing');
 class TextAreaLineHeightModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -9495,6 +9539,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   letterSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaLetterSpacingModifier.identity, TextAreaLetterSpacingModifier, value);
+    return this;
+  }
+  lineSpacing(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier, value);
     return this;
   }
   lineHeight(value) {

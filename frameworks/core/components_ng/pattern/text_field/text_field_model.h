@@ -328,6 +328,7 @@ public:
 
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetLineSpacing(const Dimension& value) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
     virtual void SetAdaptMaxFontSize(const Dimension& value) {};
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {};
