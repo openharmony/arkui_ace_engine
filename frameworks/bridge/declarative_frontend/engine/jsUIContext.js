@@ -582,14 +582,14 @@ class Router {
 
     getStateByIndex(index) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let state = this.ohos_router.getState(index);
+        let state = this.ohos_router.getStateByIndex(index);
         __JSScopeUtil__.restoreInstanceId();
         return state;
     }
 
     getStateByUrl(url) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let state = this.ohos_router.getState(url);
+        let state = this.ohos_router.getStateByUrl(url);
         __JSScopeUtil__.restoreInstanceId();
         return state;
     }
