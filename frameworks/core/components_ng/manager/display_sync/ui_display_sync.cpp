@@ -276,6 +276,9 @@ int32_t UIDisplaySync::FindMatchedRefreshRate(int32_t vsyncRate, int32_t targetR
     }
 
     std::vector<int32_t> refreshRateFactors = refreshRateToFactorsMap_[vsyncRate];
+    if (refreshRateFactors.empty()) {
+        return 0;
+    }
     auto it = std::lower_bound(refreshRateFactors.begin(), refreshRateFactors.end(), targetRate);
     if (it == refreshRateFactors.begin()) {
         return *it;
