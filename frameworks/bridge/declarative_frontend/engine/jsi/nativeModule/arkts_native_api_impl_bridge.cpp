@@ -1570,6 +1570,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::SetDisturbanceField));
     particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisturbanceField"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::ResetDisturbanceField));
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEmitter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::SetEmitter));
+    particle->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEmitter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ParticleBridge::ResetEmitter));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "particle"), particle);
 
     RegisterButtonAttributes(object, vm);
