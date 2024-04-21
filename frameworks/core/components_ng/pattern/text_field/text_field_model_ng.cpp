@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -325,6 +326,11 @@ void TextFieldModelNG::SetTextAlign(TextAlign value)
         layoutProperty->UpdateTextAlignChanged(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue);
+}
+
+void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineBreakStrategy, value);
 }
 
 void TextFieldModelNG::SetMaxLength(uint32_t value)

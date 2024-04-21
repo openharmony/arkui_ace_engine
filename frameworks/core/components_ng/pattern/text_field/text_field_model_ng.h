@@ -40,6 +40,7 @@ public:
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
     void SetTextAlign(TextAlign value) override;
+    void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;

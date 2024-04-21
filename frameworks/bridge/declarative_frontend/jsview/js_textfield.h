@@ -38,6 +38,7 @@ public:
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
+    static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetCaretColor(const JSCallbackInfo& info);
     static void SetCaretStyle(const JSCallbackInfo& info);
     static void SetCaretPosition(const JSCallbackInfo& info);

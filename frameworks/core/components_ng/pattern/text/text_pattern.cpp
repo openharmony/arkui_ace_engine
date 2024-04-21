@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
 
@@ -2557,6 +2558,8 @@ void TextPattern::DumpInfo()
             .append(
                 (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
     DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const

@@ -107,6 +107,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("enableAutoFill", &JSTextField::SetEnableAutoFill);
     JSClass<JSTextInput>::StaticMethod("cancelButton", &JSTextField::SetCancelButton);
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
+    JSClass<JSTextInput>::StaticMethod("lineBreakStrategy", &JSTextField::SetLineBreakStrategy);
     JSClass<JSTextInput>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
     JSClass<JSTextInput>::StaticMethod("decoration", &JSTextField::SetDecoration);
     JSClass<JSTextInput>::StaticMethod("minFontSize", &JSTextField::SetMinFontSize);

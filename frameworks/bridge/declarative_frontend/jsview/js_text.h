@@ -50,6 +50,7 @@ public:
     static void SetMaxFontSize(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetWordBreak(const JSCallbackInfo& info);
+    static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelection(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);

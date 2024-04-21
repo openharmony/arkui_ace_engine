@@ -60,6 +60,7 @@ public:
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetWordBreak(WordBreak wordBreak) = 0;
+    virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetTextOverflow(TextOverflow value) = 0;
     virtual void SetMaxLines(uint32_t value) = 0;

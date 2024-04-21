@@ -185,6 +185,11 @@ void TextModelNG::SetWordBreak(Ace::WordBreak value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value);
 }
 
+void TextModelNG::SetLineBreakStrategy(Ace::LineBreakStrategy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value);
+}
+
 void TextModelNG::SetEllipsisMode(EllipsisMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value);

@@ -20,10 +20,12 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
@@ -474,6 +476,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     }
     textStyle.SetFontSize(fontSize);
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
+    textStyle.SetLineBreakStrategy(layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
@@ -628,6 +631,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& text
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = textStyle.GetFontSize().ConvertToPx() };
 }
@@ -666,6 +670,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
         .fontSize = style->GetFontSize().ConvertToPx() };
     if (!disableTextAlign) {
