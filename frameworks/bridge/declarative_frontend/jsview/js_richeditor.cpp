@@ -1277,10 +1277,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
-        !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
+        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
@@ -1564,13 +1564,14 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         }
         auto styleObj = spanObject->GetProperty("style");
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
+        updateSpanStyle_.ResetStyle();
         if (!styleObject->IsUndefined()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
             if (!pipelineContext) {
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto theme = pipelineContext->GetTheme<TextTheme>();
+            auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
@@ -1629,7 +1630,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
                 TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
                 return;
             }
-            auto theme = pipelineContext->GetTheme<TextTheme>();
+            auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
             ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
@@ -2023,7 +2024,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
         return;
     }
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     ImageSpanAttribute imageStyle;
     auto richEditorTextStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("textStyle"));
@@ -2158,10 +2159,11 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
         return;
     }
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = pipelineContext->GetThemeManager()->GetTheme<NG::RichEditorTheme>();
     TextStyle textStyle = theme ? theme->GetTextStyle() : TextStyle();
     JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
     typingStyle_.ResetStyle();
+    typingStyle_.updateTextColor = theme->GetTextStyle().GetTextColor();
     if (!richEditorTextStyle->IsUndefined()) {
         ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
     }

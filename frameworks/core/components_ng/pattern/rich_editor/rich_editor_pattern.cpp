@@ -528,6 +528,9 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     spanItem->hasResourceFontColor = options.hasResourceFontColor;
     spanItem->hasResourceDecorationColor = options.hasResourceDecorationColor;
     AddSpanItem(spanItem, offset);
+    if (!options.style.has_value()) {
+        SetDefaultColor(spanNode);
+    }
     if (options.paraStyle) {
         UpdateParagraphStyle(spanNode, *options.paraStyle);
     }
@@ -3012,8 +3015,22 @@ void RichEditorPattern::CreateTextSpanNode(
     } else {
         spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
+        SetDefaultColor(spanNode);
     }
     AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
+}
+
+void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
+    spanNode->UpdateTextColor(textColor);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
+    spanNode->UpdateTextDecorationColor(textColor);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
@@ -3199,6 +3216,7 @@ void RichEditorPattern::DeleteBackward(int32_t length, bool isExternalkeyboard)
 std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isExternalkeyboard)
 {
     bool isSpanSelected = false;
+    int32_t caretPositionBefore = caretPosition_;
     length = CalculateDeleteLength(length, true, isSpanSelected);
     std::wstring deleteText = GetBackwardDeleteText(length);
     RichEditorDeleteValue info;
@@ -3225,6 +3243,9 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isE
     }
     if (!caretVisible_) {
         StartTwinkling();
+    }
+    if (caretPositionBefore == caretPosition_) {
+        return L"";
     }
     return deleteText;
 }
