@@ -7140,17 +7140,17 @@ float RichEditorPattern::GetSelectedMaxWidth()
     auto tempWidth = 0.0f;
     auto top = 0.0f;
     auto firstLineLeft = 0.0f;
-    auto secondLineLeft = 0.0f;
     auto firstLineWidth = 0.0f;
+    auto selectedWidth = 0.0f;
     auto index = 0;
     bool isCalculate = false;
     auto left = 0.0f;
     for (const auto& rect : selectedRects) {
         if (NearZero(tempWidth) || !NearEqual(top, rect.GetY())) {
-            if (index > SECOND_LINE) {
-                secondLineLeft = left;
-                break;
+            if (index == FIRST_LINE) {
+                selectedWidth = firstLineLeft - left + firstLineWidth;
             }
+            selectedWidth = std::max(selectedWidth, tempWidth);
             if (isCalculate && NearZero(firstLineWidth)) {
                 firstLineWidth = tempWidth;
                 firstLineLeft = left;
@@ -7168,9 +7168,9 @@ float RichEditorPattern::GetSelectedMaxWidth()
     if (index == FIRST_LINE) {
         return tempWidth;
     } else if (index == SECOND_LINE) {
-        return firstLineLeft - left + firstLineWidth;
+        return std::max(firstLineWidth + firstLineLeft - left, tempWidth);
     } else {
-        return firstLineLeft - secondLineLeft + firstLineWidth;
+        return std::max(selectedWidth, tempWidth);
     }
 }
 } // namespace OHOS::Ace::NG
