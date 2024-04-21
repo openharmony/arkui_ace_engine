@@ -186,6 +186,17 @@ bool ArkJSRuntime::StartDebugger()
     return ret;
 }
 
+bool ArkJSRuntime::IsExecuteModuleInAbcFile(
+    const std::string &bundleName, const std::string &moduleName, const std::string &ohmurl)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    bool ret = JSNApi::IsExecuteModuleInAbcFile(vm_, bundleName, moduleName, ohmurl);
+    HandleUncaughtException(trycatch);
+    return ret;
+}
+
 bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename, bool needUpdate)
 {
     JSExecutionScope executionScope(vm_);
