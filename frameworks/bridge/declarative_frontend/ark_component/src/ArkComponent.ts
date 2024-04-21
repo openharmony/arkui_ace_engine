@@ -24,10 +24,68 @@ function getUINativeModule(): any {
 
 enum ModifierType {
   ORIGIN = 0,
-  STATE = 1
+  STATE = 1,
+  FRAME_NODE = 2
 }
 
 type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
+
+class ObservedMap {
+  private map_: Map<Symbol, AttributeModifierWithKey>;
+  private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
+
+  constructor() {
+    this.map_ = new Map();
+  }
+
+  public clear(): void {
+    this.map_.clear();
+  }
+
+  public delete(key: Symbol): boolean {
+    return this.map_.delete(key);
+  }
+
+  public forEach(callbackfn: (value: AttributeModifierWithKey, key: Symbol,
+    map: Map<Symbol, AttributeModifierWithKey>) => void, thisArg?: any): void {
+    this.map_.forEach(callbackfn, thisArg);
+  }
+  public get(key: Symbol): AttributeModifierWithKey | undefined {
+    return this.map_.get(key);
+  }
+  public has(key: Symbol): boolean {
+    return this.map_.has(key);
+  }
+  public set(key: Symbol, value: AttributeModifierWithKey): this {
+    const _a = this.changeCallback;
+    this.map_.set(key, value);
+    _a === null || _a === void 0 ? void 0 : _a(key, value);
+    return this;
+  }
+  public get size(): number {
+    return this.map_.size;
+  }
+  public entries(): IterableIterator<[Symbol, AttributeModifierWithKey]> {
+    return this.map_.entries();
+  }
+  public keys(): IterableIterator<Symbol> {
+    return this.map_.keys();
+  }
+  public values(): IterableIterator<AttributeModifierWithKey> {
+    return this.map_.values();
+  }
+  public [Symbol.iterator](): IterableIterator<[Symbol, AttributeModifierWithKey]> {
+    return this.map_.entries();
+  }
+  public get [Symbol.toStringTag](): string {
+    return 'ObservedMapTag';
+  }
+  public setOnChange(callback: (key: Symbol, value: AttributeModifierWithKey) => void): void {
+    if (this.changeCallback === undefined) {
+      this.changeCallback = callback;
+    }
+  }
+}
 
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
@@ -2662,14 +2720,29 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiers = new Map();
-    this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    if (classType === ModifierType.FRAME_NODE) {
+      this._modifiersWithKeys = new ObservedMap();
+      (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
+        if (this.nativePtr === undefined) {
+          return;
+        }
+        value.applyStage(this.nativePtr);
+        getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+      })
+    } else {
+      this._modifiersWithKeys = new Map();
+    }
     if (classType === ModifierType.STATE) {
       this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
     this._nativePtrChanged = false;
+  }
+
+  setNodePtr(nodePtr: KNode) {
+    this.nativePtr = nodePtr;
   }
 
   getOrCreateGestureEvent() {
