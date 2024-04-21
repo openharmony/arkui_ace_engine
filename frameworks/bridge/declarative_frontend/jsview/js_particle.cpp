@@ -843,17 +843,15 @@ void JSParticle::ParseEmitterProps(std::vector<OHOS::Ace::EmitterProps>& data, c
         auto positionValue = Framework::JSRef<Framework::JSObject>::Cast(positionProperty);
         auto positionXValue = positionValue->GetProperty("x")->ToNumber<float>();
         auto positonYValue = positionValue->GetProperty("y")->ToNumber<float>();
-        emitterProperty.position->x = positionXValue;
-        emitterProperty.position->y = positonYValue;
+        emitterProperty.position = { positionXValue, positonYValue };
     }
     auto sizeProperty = paramObj->GetProperty("size");
     if (sizeProperty->IsObject()) {
         auto sizeValue = Framework::JSRef<Framework::JSObject>::Cast(sizeProperty);
-        auto sizeXvalue = sizeValue->GetProperty("width")->ToNumber<float>();
-        auto sizeYvalue = sizeValue->GetProperty("height")->ToNumber<float>();
-        if (sizeXvalue >= 0 && sizeYvalue >= 0) {
-            emitterProperty.size->x = sizeXvalue;
-            emitterProperty.size->y = sizeXvalue;
+        auto sizeXValue = sizeValue->GetProperty("width")->ToNumber<float>();
+        auto sizeYValue = sizeValue->GetProperty("height")->ToNumber<float>();
+        if (sizeXValue >= 0 && sizeYValue >= 0) {
+            emitterProperty.size = { sizeXValue, sizeYValue };
         }
     }
     data.push_back(emitterProperty);
