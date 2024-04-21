@@ -272,11 +272,9 @@ void MenuPattern::FireBuilder()
     CHECK_NULL_VOID(scroll);
     builderNode_ = scroll;
     for (size_t i = 0; i < selectProperties_.size(); i++) {
-        contentModifierNode_ = BuildContentModifierNode(i);
-        CHECK_NULL_VOID(contentModifierNode_);
-        AddOptionNode(contentModifierNode_);
-        contentModifierNode_->MarkModifyDone();
-        contentModifierNode_->MountToParent(column);
+        auto contentModifierNode = BuildContentModifierNode(i);
+        contentModifierNode->MarkModifyDone();
+        contentModifierNode->MountToParent(column);
     }
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(scrollPattern);

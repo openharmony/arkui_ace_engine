@@ -373,6 +373,11 @@ public:
     {
         makeFunc_ = std::move(makeFunc);
     }
+    
+    void ResetBuilderFunc()
+    {
+        makeFunc_ = std::nullopt;
+    }
 
     void SetSelectProperties(const std::vector<SelectParam>& params)
     {
@@ -398,10 +403,9 @@ public:
 
     bool UseContentModifier()
     {
-        return contentModifierNode_ != nullptr;
+        return builderNode_.Upgrade() != nullptr;
     }
 
-    RefPtr<FrameNode> BuildContentModifierNode(int index);
     void FireBuilder();
 
 protected:
@@ -438,6 +442,7 @@ private:
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
 
+    RefPtr<FrameNode> BuildContentModifierNode(int index);
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
@@ -446,7 +451,6 @@ private:
     MenuType type_ = MenuType::MENU;
     std::vector<SelectProperties> selectProperties_;
     std::optional<SelectMakeCallback> makeFunc_;
-    RefPtr<FrameNode> contentModifierNode_;
 
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;

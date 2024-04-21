@@ -122,6 +122,7 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
   }
   setContentModifier(modifier: ContentModifier<MenuItemConfiguration>): this {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().select.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
     this.builder = modifier.applyContent();
@@ -517,7 +518,7 @@ globalThis.Select.attributeModifier = function (modifier: ArkComponent): void {
 };
 
 // @ts-ignore
-globalThis.Select.menuItemContentModifier = function (modifier) {
+globalThis.Select.menuItemContentModifier = function (modifier): void {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
