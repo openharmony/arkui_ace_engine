@@ -92,6 +92,11 @@ public:
         return preNavPathList_.back();
     }
 
+    void RemoveStack()
+    {
+        navPathList_.clear();
+    }
+
     NavPathList GetAllCacheNodes();
     void AddCacheNode(const std::string& name, const RefPtr<UINode>& uiNode);
     RefPtr<UINode> GetFromCacheNode(NavPathList& cacheNodes, const std::string& name);
