@@ -3071,6 +3071,15 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
     return params;
 }
 
+void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto borderRadiusValue = menuOptions->GetProperty("borderRadius");
+    NG::BorderRadiusProperty radius;
+    if (JSViewAbstract::ParseBorderRadius(borderRadiusValue, radius)) {
+        menuParam.borderRadius = radius;
+    }
+}
+
 void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto enableArrowValue = menuOptions->GetProperty("enableArrow");
@@ -3211,6 +3220,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         }
     }
     ParseMenuArrowParam(menuOptions, menuParam);
+    ParseMenuBorderRadius(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)

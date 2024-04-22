@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
@@ -194,13 +195,6 @@ void MountScrollToMenu(
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
         customMenuNode->SetDraggable(false);
-        auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
-        auto renderContext = scroll->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        if (menuLayoutProperty && menuLayoutProperty->HasBorderRadius()) {
-            BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
-            renderContext->UpdateBorderRadius(borderRadius);
-        }
     }
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
@@ -444,9 +438,26 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         }
     }
 }
+
+void SetHasCustomRadius(
+    const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    CHECK_NULL_VOID(menuNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuParam.borderRadius.has_value()) {
+        menuWrapperPattern->SetHasCustomRadius(true);
+        auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
+        menuProperty->UpdateBorderRadius(menuParam.borderRadius.value());
+    } else {
+        menuWrapperPattern->SetHasCustomRadius(false);
+    }
+}
 } // namespace
 
-// create menu with menuItems
+// create menu with MenuElement array
 RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, const std::string& targetTag,
     MenuType type, const MenuParam& menuParam)
 {
@@ -457,6 +468,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
+    SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     bool optionsHasIcon = GetHasIcon(params);
@@ -524,6 +536,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         previewCustomNode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
+    SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     auto pattern = menuNode->GetPattern<MenuPattern>();
     if (pattern) {
         pattern->SetPreviewMode(menuParam.previewMode);
