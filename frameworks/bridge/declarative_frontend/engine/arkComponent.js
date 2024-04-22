@@ -16468,7 +16468,36 @@ class ArkGaugeComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, gaugeConfiguration) {
+    gaugeConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.gaugeNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.gaugeNode = new xNode.BuilderNode(context);
+      this.gaugeNode.build(this.builder, gaugeConfiguration);
+    } else {
+      this.gaugeNode.update(gaugeConfiguration);
+    }
+    return this.gaugeNode.getFrameNode();
+  }
 }
+// @ts-ignore
+globalThis.Gauge.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkGaugeComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
+};
 class GaugeIndicatorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {

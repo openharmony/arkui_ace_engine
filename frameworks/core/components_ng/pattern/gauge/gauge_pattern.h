@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_property.h"
 #include "core/components_ng/pattern/gauge/gauge_modifier.h"
+#include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -44,6 +45,7 @@ public:
         if (!gaugeModifier_) {
             gaugeModifier_ = AceType::MakeRefPtr<GaugeModifier>(WeakClaim(this));
         }
+        gaugeModifier_->SetUseContentModifier(UseContentModifier());
         return MakeRefPtr<GaugePaintMethod>(WeakClaim(this), gaugeModifier_);
     }
 
@@ -144,6 +146,23 @@ public:
 
     void OnModifyDone() override;
 
+    void SetBuilderFunc(GaugeMakeCallback&& makeFunc)
+    {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void InitDescriptionNode();
@@ -151,6 +170,10 @@ private:
     void HideLimitValueText(int32_t valueTextId, bool isMin);
     void InitIndicatorImage();
     void InitTitleContent();
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
+    std::optional<GaugeMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
 
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     DataReadyNotifyTask CreateDataReadyCallback();
