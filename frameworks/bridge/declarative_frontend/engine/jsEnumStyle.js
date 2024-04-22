@@ -1259,7 +1259,7 @@ class AppearSymbolEffect extends SymbolEffect {
 class DisappearSymbolEffect extends SymbolEffect {
   constructor(scope) {
     super();
-    this.type = 'DisappearSymbolEffect';
+    this.type = "DisappearSymbolEffect";
     this.scope = scope;
   }
   scope(value) {
