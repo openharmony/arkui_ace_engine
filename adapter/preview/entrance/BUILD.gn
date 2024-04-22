@@ -54,6 +54,7 @@ ohos_source_set("preview_entrance_source") {
       "foldable_window_preview.cpp",
       "msdp/interaction_impl.cpp",
       "subwindow_preview.cpp",
+      "touch_event_convertor.cpp",
       "udmf/udmf_impl.cpp",
       "ui_content_impl.cpp",
       "xcollie/xcollieInterface_impl.cpp",

@@ -113,6 +113,10 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_GestureEvent_GetRawInputEvent"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_LongPress_GetRepeatCount"
     },
     {
