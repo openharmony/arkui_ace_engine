@@ -742,6 +742,20 @@ const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
     return paragraph_;
 }
 
+void TextFieldLayoutAlgorithm::GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
+    if (pattern->HasFocus() && pattern->IsInlineMode()) {
+        maxSize.SetWidth(maxSize.Width() - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
+    }
+}
+
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -848,6 +862,7 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
     int32_t right = length - 1;
     float fontSize = 0.0f;
     auto maxSize = GetMaxMeasureSize(contentConstraint);
+    GetSuitableSize(maxSize, layoutWrapper);
     while (left <= right) {
         int32_t mid = left + (right - left) / 2;
         fontSize = static_cast<float>((mid == length - 1) ? (maxFontSize) : (minFontSize + stepSize * mid));

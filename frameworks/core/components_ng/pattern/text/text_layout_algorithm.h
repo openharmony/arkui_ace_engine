@@ -64,6 +64,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     const RefPtr<Paragraph>& GetParagraph() const override;
+    void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override {};
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
