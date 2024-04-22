@@ -56,6 +56,7 @@ constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
 constexpr int32_t MAX_CLICK_DURATION = 500000000; // ns
 constexpr int32_t DOUBLE = 2;
+constexpr char FORM_DIMENSION_SPLITTER = '*';
 constexpr int32_t FORM_SHAPE_CIRCLE = 2;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
@@ -539,15 +540,11 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     TAG_LOGI(AceLogTag::ACE_FORM, "width: %{public}f   height: %{public}f", info.width.Value(), info.height.Value());
     TAG_LOGI(AceLogTag::ACE_FORM, "info.shape %{public}d ", info.shape);
     cardInfo_ = info;
-    if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
+    if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)
+        || info.shape == FORM_SHAPE_CIRCLE) {
         BorderRadiusProperty borderRadius;
         Dimension diameter = std::min(info.width, info.height);
         borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
-        host->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    } else if (info.shape == FORM_SHAPE_CIRCLE) {
-        BorderRadiusProperty borderRadius;
-        Dimension diameter = std::min(info.width, info.height);
-        borderRadius.SetRadius(diameter);
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
