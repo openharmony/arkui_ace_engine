@@ -17,6 +17,8 @@
 
 #include <algorithm>
 
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -24,6 +26,16 @@
 constexpr float HALF = 0.5f;
 
 namespace OHOS::Ace::NG {
+RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
+{
+    switch (mode) {
+        case WaterFlowLayoutMode::SLIDING_WINDOW:
+            return MakeRefPtr<WaterFlowLayoutInfoSW>();
+        default:
+            return MakeRefPtr<WaterFlowLayoutInfo>();
+    }
+}
+
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
     if (static_cast<size_t>(itemIndex) < itemInfos_.size()) {

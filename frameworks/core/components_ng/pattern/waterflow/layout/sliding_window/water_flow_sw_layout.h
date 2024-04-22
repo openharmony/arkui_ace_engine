@@ -18,7 +18,7 @@
 
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/waterflow/sliding_window/water_flow_layout_info_sw.h"
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {

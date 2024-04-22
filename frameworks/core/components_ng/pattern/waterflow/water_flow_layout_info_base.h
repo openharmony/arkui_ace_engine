@@ -25,6 +25,8 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
 
+enum class WaterFlowLayoutMode;
+
 class WaterFlowLayoutInfoBase : public AceType {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoBase, AceType);
 
@@ -32,7 +34,11 @@ public:
     WaterFlowLayoutInfoBase() = default;
     ~WaterFlowLayoutInfoBase() override = default;
 
+    /* Factory method */
+    static RefPtr<WaterFlowLayoutInfoBase> Create(WaterFlowLayoutMode mode);
+
     /* PURE GETTERs */
+    virtual WaterFlowLayoutMode mode() const = 0;
     virtual float offset() const = 0;
     virtual int32_t firstIdx() const = 0; // for compatibility
 

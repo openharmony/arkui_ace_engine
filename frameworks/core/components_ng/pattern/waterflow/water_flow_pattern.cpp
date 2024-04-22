@@ -17,9 +17,10 @@
 
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/waterflow/sliding_window/water_flow_sw_layout.h"
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_sw_layout.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
@@ -563,5 +564,14 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     }
     footer_ = footer;
     footer->SetActive(false);
+}
+
+void WaterFlowPattern::SetLayoutMode(WaterFlowLayoutMode mode)
+{
+    layoutMode_ = mode;
+
+    if (!layoutInfo_ || mode != layoutInfo_->mode()) {
+        layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -147,6 +147,18 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
+    // Set layout mode first because SetFooter is dependent to it
+    using LayoutMode = NG::WaterFlowLayoutMode;
+    auto mode = LayoutMode::SLIDING_WINDOW;
+    auto jsMode = obj->GetProperty("layoutMode");
+    if (jsMode->IsNumber()) {
+        mode = static_cast<LayoutMode>(jsMode->ToNumber<int32_t>());
+        if (mode < LayoutMode::TOP_DOWN || mode > LayoutMode::SLIDING_WINDOW) {
+            mode = LayoutMode::TOP_DOWN;
+        }
+    }
+    WaterFlowModel::GetInstance()->SetLayoutMode(mode);
+
     auto scroller = obj->GetProperty("scroller");
     if (scroller->IsObject()) {
         auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();

@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/property/measure_property.h"
@@ -44,6 +45,10 @@ public:
     WaterFlowLayoutInfo() = default;
     ~WaterFlowLayoutInfo() override = default;
 
+    WaterFlowLayoutMode mode() const override
+    {
+        return WaterFlowLayoutMode::TOP_DOWN;
+    }
     float offset() const override
     {
         return currentOffset_;

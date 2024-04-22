@@ -42,10 +42,7 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
-    void SetLayoutMode(WaterFlowLayoutMode mode)
-    {
-        layoutMode_ = mode;
-    }
+    void SetLayoutMode(WaterFlowLayoutMode mode);
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 

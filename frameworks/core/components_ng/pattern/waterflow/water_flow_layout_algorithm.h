@@ -16,20 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class WaterFlowLayoutBase : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(WaterFlowLayoutBase, LayoutAlgorithm);
-
-public:
-    virtual void SetCanOverScroll(bool canOverScroll) = 0;
-};
-
-enum class WaterFlowLayoutMode { TOP_DOWN = 0, SLIDING_WINDOW = 1 };
-
 class ACE_EXPORT WaterFlowLayoutAlgorithm : public WaterFlowLayoutBase {
     DECLARE_ACE_TYPE(WaterFlowLayoutAlgorithm, WaterFlowLayoutBase);
 

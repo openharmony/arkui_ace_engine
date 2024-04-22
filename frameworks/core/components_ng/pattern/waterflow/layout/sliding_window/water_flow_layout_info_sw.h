@@ -19,6 +19,7 @@
 #include <deque>
 #include <vector>
 
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 
 namespace OHOS::Ace::NG {
@@ -30,6 +31,11 @@ class WaterFlowLayoutInfoSW : public WaterFlowLayoutInfoBase {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoSW, WaterFlowLayoutInfoBase);
 
 public:
+    WaterFlowLayoutMode mode() const override
+    {
+        return WaterFlowLayoutMode::SLIDING_WINDOW;
+    }
+
     float offset() const override;
     int32_t firstIdx() const override
     {

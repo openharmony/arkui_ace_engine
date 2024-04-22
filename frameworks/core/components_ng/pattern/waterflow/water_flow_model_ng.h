@@ -28,6 +28,7 @@ public:
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
+    void SetLayoutMode(WaterFlowLayoutMode mode) override;
 
     void SetColumnsTemplate(const std::string& value) override;
     void SetRowsTemplate(const std::string& value) override;
