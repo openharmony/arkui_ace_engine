@@ -91,6 +91,7 @@
 #include "core/interfaces/native/node/flex_modifier.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/plugin_modifier.h"
@@ -179,6 +180,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetLoadingProgressModifier,
     NodeModifier::GetTextClockModifier,
     NodeModifier::GetTextTimerModifier,
+    NodeModifier::GetSymbolGlyphModifier,
     NodeModifier::GetRenderNodeModifier,
     NodeModifier::GetFrameNodeModifier,
 

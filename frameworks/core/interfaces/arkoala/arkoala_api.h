@@ -2815,6 +2815,20 @@ struct ArkUITextTimerModifier {
     void (*resetFormat)(ArkUINodeHandle node);
 };
 
+struct ArkUISymbolGlyphModifier {
+    void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size);
+    void (*resetFontColor)(ArkUINodeHandle node);
+    void (*setFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetFontSize)(ArkUINodeHandle node);
+    void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
+    void (*setFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
+    void (*resetFontWeight)(ArkUINodeHandle node);
+    void (*setRenderingStrategy)(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy);
+    void (*resetRenderingStrategy)(ArkUINodeHandle node);
+    void (*setEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
+    void (*resetEffectStrategy)(ArkUINodeHandle node);
+};
+
 struct ArkUITextTimerControllerModifier {
     ArkUINodeHandle (*getTextTimerController)(ArkUINodeHandle node);
     void (*setTextTimerStart)(ArkUINodeHandle node);
@@ -3416,6 +3430,7 @@ struct ArkUINodeModifiers {
     const ArkUITabContentModifier* (*getTabContentModifier)();
     const ArkUITabsControllerModifier* (*getTabsControllerModifier)();
     const ArkUISwiperControllerModifier* (*getSwiperControllerModifier)();
+    const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
     const ArkUIGestureModifier* (*getGestureModifier)();
     const ArkUIBadgeModifier* (*getBadgeModifier)();
     const ArkUIWebModifier* (*getWebModifier)();
