@@ -567,6 +567,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
         resultObject.valueString = content;
+        resultObject.isInit = true;
     }
     return resultObject;
 }
@@ -786,6 +787,7 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
         if (options.imagePixelMap.has_value()) {
             resultObject.valuePixelMap = options.imagePixelMap.value();
         }
+        resultObject.isInit = true;
     }
     return resultObject;
 }

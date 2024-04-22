@@ -105,6 +105,7 @@ struct ResultObject {
     SymbolSpanStyle symbolSpanStyle;
     RefPtr<ResourceObject> valueResource;
     bool isDraggable = true;
+    bool isInit = false;
 };
 
 struct Selection {
