@@ -56,6 +56,7 @@ constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
 constexpr int32_t MAX_CLICK_DURATION = 500000000; // ns
 constexpr int32_t DOUBLE = 2;
+constexpr int32_t FORM_SHAPE_CIRCLE = 2;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -543,12 +544,10 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         Dimension diameter = std::min(info.width, info.height);
         borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    }
-
-    if (info.shape == 2) {
+    } else if (info.shape == FORM_SHAPE_CIRCLE) {
         BorderRadiusProperty borderRadius;
         Dimension diameter = std::min(info.width, info.height);
-        borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
+        borderRadius.SetRadius(diameter);
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
