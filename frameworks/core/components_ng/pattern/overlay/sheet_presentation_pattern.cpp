@@ -370,7 +370,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         (!NearEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight)))) {
         if (GreatNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
             if (NearZero(downHeight)) {
-                SheetInteractiveDismiss(true, std::abs(dragVelocity));
+                SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
@@ -384,7 +384,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     } else {
         if (GreatOrEqual(dragVelocity, 0.0f)) {
             if (NearZero(downHeight)) {
-                SheetInteractiveDismiss(true, std::abs(dragVelocity));
+                SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
@@ -685,17 +685,22 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
 }
 
-void SheetPresentationPattern::SheetInteractiveDismiss(bool isDragClose, float dragVelocity)
+void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity)
 {
-    if (hasShouldDismiss()) {
+    if (HasShouldDismiss() || HasOnWillDismiss()) {
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->SetDismissTargetId(targetId_);
-        if (isDragClose) {
+        if (dismissReason == BindSheetDismissReason::SLIDE_DOWN) {
             ProcessColumnRect(height_);
-            SheetTransition(true);
+            if (HasSheetSpringBack()) {
+                CallSheetSpringBack();
+            } else {
+                SheetTransition(true);
+            }
         }
         CallShouldDismiss();
+        CallOnWillDismiss(static_cast<int32_t>(dismissReason));
     } else {
         DismissTransition(false, dragVelocity);
     }
