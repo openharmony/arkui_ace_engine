@@ -1008,13 +1008,14 @@ bool RelativeContainerLayoutAlgorithm::IsAlignRuleInChain(const AlignDirection& 
 
 void RelativeContainerLayoutAlgorithm::InsertToReliedOnMap(const std::string& anchorName, const std::string& nodeName)
 {
-    if (reliedOnMap_.count(anchorName) == 0) {
+    auto iter = reliedOnMap_.find(anchorName);
+    if (iter == reliedOnMap_.end()) {
         std::set<std::string> reliedList;
         reliedList.insert(nodeName);
         reliedOnMap_[anchorName] = reliedList;
         return;
     }
-    reliedOnMap_[anchorName].insert(nodeName);
+    iter->second.insert(nodeName);
 }
 
 void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()

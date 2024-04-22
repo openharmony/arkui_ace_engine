@@ -171,6 +171,7 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
     void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
@@ -281,6 +282,7 @@ public:
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnPositionEdgesUpdate(const EdgesParam& value) override;
+    void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
@@ -418,6 +420,8 @@ private:
     void OnDynamicLightUpRateUpdate(const float rate) override;
     void OnDynamicDimDegreeUpdate(const float degree) override;
     void OnDynamicLightUpDegreeUpdate(const float degree) override;
+    void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
+    void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;

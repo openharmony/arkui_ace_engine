@@ -23,6 +23,16 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
+class NavigationStack;
+struct NavigationInfo {
+    std::string navigationId;
+    WeakPtr<NavigationStack> pathStack;
+
+    NavigationInfo() = default;
+    NavigationInfo(const std::string& id, const WeakPtr<NavigationStack>& navigationStack)
+        : navigationId(std::move(id)), pathStack(navigationStack)
+    {}
+};
 class NavigationManager : public virtual AceType {
     DECLARE_ACE_TYPE(NavigationManager, AceType);
 public:
@@ -42,6 +52,7 @@ public:
     }
 
     void FireNavigationUpdateCallback();
+    std::shared_ptr<NavigationInfo> GetNavigationInfo(const RefPtr<AceType>& node);
 
 private:
     struct DumpMapKey {

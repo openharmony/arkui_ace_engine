@@ -151,6 +151,11 @@ public:
     static float GetFontWeightScale();
 
     /*
+     * Get size scale of device.
+     */
+    static float GetFontScale();
+
+    /*
      * Get density of default display.
      */
     static double GetResolution()
@@ -272,6 +277,11 @@ public:
         return layoutTraceEnable_;
     }
 
+    static bool GetSyncDebugTraceEnabled()
+    {
+        return syncDebugTraceEnable_;
+    }
+
     static bool GetTraceInputEventEnabled()
     {
         return traceInputEventEnable_;
@@ -285,6 +295,16 @@ public:
     static void SetStateManagerEnabled(bool stateManagerEnable)
     {
         stateManagerEnable_ = stateManagerEnable;
+    }
+
+    static void SetFaultInjectEnabled(bool faultInjectEnable)
+    {
+        faultInjectEnabled_ = faultInjectEnable;
+    }
+
+    static bool GetFaultInjectEnabled()
+    {
+        return faultInjectEnabled_;
     }
 
     static bool GetBuildTraceEnabled()
@@ -401,6 +421,11 @@ public:
         return imageFileCacheConvertAstc_;
     }
 
+    static int32_t GetImageFileCacheConvertAstcThreshold()
+    {
+        return imageFileCacheConvertAstcThreshold_;
+    }
+
     static void SetExtSurfaceEnabled(bool extSurfaceEnabled)
     {
         extSurfaceEnabled_ = extSurfaceEnabled;
@@ -481,6 +506,7 @@ private:
     static bool layoutTraceEnable_;
     static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool syncDebugTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
@@ -517,6 +543,7 @@ private:
     static int32_t astcMax_;
     static int32_t astcPsnr_;
     static bool imageFileCacheConvertAstc_;
+    static int32_t imageFileCacheConvertAstcThreshold_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
@@ -526,6 +553,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
+    static bool faultInjectEnabled_;
 };
 
 } // namespace OHOS::Ace

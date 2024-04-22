@@ -89,7 +89,11 @@ void NodeRemoveExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventT
 void UnregisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType);
 void RegisterNodeCustomReceiver(void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
 void UnregisterNodeCustomEventReceiver();
-
+void HandleInnerCustomEvent(ArkUICustomNodeEvent* origin);
+void HandleCustomEvent(ArkUI_NodeCustomEvent* event);
+int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
+int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
+    void (*eventReceiver)(ArkUI_NodeCustomEvent* event));
 int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height);
 int32_t SetLayoutPosition(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY);
 int32_t GetLayoutConstraint(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* layoutConstraint);

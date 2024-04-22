@@ -186,7 +186,10 @@ Dimension Dimension::FromString(const std::string& str)
         if (str[i] >= '0' && str[i] <= '9') {
             value = StringUtils::StringToDouble(str.substr(0, i + 1));
             auto subStr = str.substr(i + 1);
-            unit = uMap.count(subStr) ? uMap.at(subStr) : unit;
+            auto iter = uMap.find(subStr);
+            if (iter != uMap.end()) {
+                unit = iter->second;
+            }
             value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
             break;
         }

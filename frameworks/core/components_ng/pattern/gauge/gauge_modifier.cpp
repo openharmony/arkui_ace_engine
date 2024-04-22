@@ -103,6 +103,7 @@ void GaugeModifier::InitProperty()
     GaugeType gaugeType = paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
     gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
+    indicatorChange_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIndicatorChangeValue(false));
 
     if (paintProperty->HasShadowOptions()) {
         GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
@@ -169,6 +170,11 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
         for (int i = 0; i < colors.size() && i < gradientColors_.size(); i++) {
             gradientColors_[i]->Set(LinearColor(colors[i].first));
         }
+    }
+
+    if (paintProperty->GetIsShowIndicatorValue(false)) {
+        auto indicatorChange = indicatorChange_->Get();
+        indicatorChange_->Set(!indicatorChange);
     }
 }
 

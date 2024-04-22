@@ -53,7 +53,7 @@ void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextShadow, value);
 }
 
-void TextClockModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+void TextClockModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFeature, value);
 }

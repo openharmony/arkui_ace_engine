@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
@@ -194,13 +195,6 @@ void MountScrollToMenu(
     auto customMenuNode = AceType::DynamicCast<FrameNode>(customNode);
     if (customMenuNode) {
         customMenuNode->SetDraggable(false);
-        auto menuLayoutProperty = customMenuNode->GetLayoutProperty<MenuLayoutProperty>();
-        auto renderContext = scroll->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        if (menuLayoutProperty && menuLayoutProperty->HasBorderRadius()) {
-            BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
-            renderContext->UpdateBorderRadius(borderRadius);
-        }
     }
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
@@ -278,29 +272,36 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<Fram
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuWrapperPattern->HasPreviewTransitionEffect()) {
+        auto layoutProperty = imageNode->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    } else {
+        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
+        auto previewBeforeAnimationScale =
+            LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+        auto previewAfterAnimationScale =
+            LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
 
-    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
-    auto previewBeforeAnimationScale =
-        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
-    auto previewAfterAnimationScale =
-        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+        imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
 
-    imageContext->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
+        AnimationOption scaleOption = AnimationOption();
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
+            menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
+        scaleOption.SetCurve(motion);
+        scaleOption.SetOnFinishEvent(
+            []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
+        AnimationUtils::Animate(
+            scaleOption,
+            [imageContext, previewAfterAnimationScale]() {
+                if (imageContext) {
+                    imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+                }
+            },
+            scaleOption.GetOnFinishEvent());
+    }
 
-    AnimationOption scaleOption = AnimationOption();
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(
-        menuTheme->GetSpringMotionResponse(), menuTheme->GetSpringMotionDampingFraction());
-    scaleOption.SetCurve(motion);
-    scaleOption.SetOnFinishEvent(
-        []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
-    AnimationUtils::Animate(
-        scaleOption,
-        [imageContext, previewAfterAnimationScale]() {
-            if (imageContext) {
-                imageContext->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
-            }
-        },
-        scaleOption.GetOnFinishEvent());
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
 }
 
@@ -390,18 +391,8 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     imageNode->MountToParent(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuWrapperPattern->HasPreviewTransitionEffect()) {
-        auto layoutProperty = imageNode->GetLayoutProperty();
-        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
-        ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext);
-    } else {
-        ShowPixelMapAnimation(imageNode, menuNode);
-        ShowGatherAnimation(imageNode, menuNode);
-    }
+    ShowPixelMapAnimation(imageNode, menuNode);
+    ShowGatherAnimation(imageNode, menuNode);
 }
 
 void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
@@ -447,9 +438,26 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         }
     }
 }
+
+void SetHasCustomRadius(
+    const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    CHECK_NULL_VOID(menuNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuParam.borderRadius.has_value()) {
+        menuWrapperPattern->SetHasCustomRadius(true);
+        auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
+        menuProperty->UpdateBorderRadius(menuParam.borderRadius.value());
+    } else {
+        menuWrapperPattern->SetHasCustomRadius(false);
+    }
+}
 } // namespace
 
-// create menu with menuItems
+// create menu with MenuElement array
 RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, const std::string& targetTag,
     MenuType type, const MenuParam& menuParam)
 {
@@ -460,6 +468,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     if (!menuParam.title.empty()) {
         CreateTitleNode(menuParam.title, column);
     }
+    SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
     bool optionsHasIcon = GetHasIcon(params);
@@ -527,6 +536,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         previewCustomNode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
+    SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     auto pattern = menuNode->GetPattern<MenuPattern>();
     if (pattern) {
         pattern->SetPreviewMode(menuParam.previewMode);
@@ -610,6 +620,9 @@ RefPtr<FrameNode> MenuView::Create(
         if (i == 0) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
+            auto focusHub = optionNode->GetOrCreateFocusHub();
+            CHECK_NULL_RETURN(focusHub, nullptr);
+            focusHub->SetIsDefaultFocus(true);
         }
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);

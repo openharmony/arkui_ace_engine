@@ -27,6 +27,14 @@ SvgUse::SvgUse() : SvgGraphic()
     declaration_->InitializeStyle();
 }
 
+void SvgUse::OnInitStyle()
+{
+    auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
+    CHECK_NULL_VOID(declaration);
+    useOffsetX_ = declaration->GetX().Value();
+    useOffsetY_ = declaration->GetY().Value();
+}
+
 RefPtr<SvgNode> SvgUse::Create()
 {
     return AceType::MakeRefPtr<SvgUse>();

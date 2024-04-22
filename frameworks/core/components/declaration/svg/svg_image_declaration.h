@@ -23,8 +23,8 @@ namespace OHOS::Ace {
 struct SvgImageAttribute : SvgBaseAttribute {
     Dimension x = Dimension(0, DimensionUnit::PX); // x-axis default value
     Dimension y = Dimension(0, DimensionUnit::PX); // y-axis default value
-    Dimension width = Dimension(1.0, DimensionUnit::PERCENT); // masking area width default value
-    Dimension height = Dimension(1.0, DimensionUnit::PERCENT); // masking area height default value
+    Dimension width = Dimension(0.0, DimensionUnit::PX); // image width default value
+    Dimension height = Dimension(0.0, DimensionUnit::PX); // image height default value
     std::string href = "";
 };
 

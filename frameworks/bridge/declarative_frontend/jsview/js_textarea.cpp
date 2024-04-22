@@ -93,8 +93,11 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
     JSClass<JSTextArea>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextArea>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
+    JSClass<JSTextArea>::StaticMethod("lineSpacing", &JSTextField::SetLineSpacing);
     JSClass<JSTextArea>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
     JSClass<JSTextArea>::StaticMethod("fontFeature", &JSTextField::SetFontFeature);
+    JSClass<JSTextArea>::StaticMethod("contentType", &JSTextField::SetContentType);
+    JSClass<JSTextArea>::StaticMethod("enableAutoFill", &JSTextField::SetEnableAutoFill);
     JSClass<JSTextArea>::StaticMethod("selectedBackgroundColor", &JSTextField::SetSelectedBackgroundColor);
     JSClass<JSTextArea>::StaticMethod("caretStyle", &JSTextField::SetCaretStyle);
     JSClass<JSTextArea>::StaticMethod("textIndent", &JSTextField::SetTextIndent);

@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -91,6 +92,11 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
+
+std::string GetBoolStr(bool isTure)
+{
+    return isTure ? "True" : "False";
+}
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -1185,6 +1191,95 @@ void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, 
     }
     if (colRenderContext->GetBackBlurStyle().has_value()) {
         colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());
+    }
+}
+
+void DialogPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Type: " + DialogTypeUtils::ConvertDialogTypeToString(dialogProperties_.type));
+    if (!dialogProperties_.title.empty()) {
+        DumpLog::GetInstance().AddDesc("Title: " + dialogProperties_.title);
+    }
+    if (!dialogProperties_.subtitle.empty()) {
+        DumpLog::GetInstance().AddDesc("Subtitle: " + dialogProperties_.subtitle);
+    }
+    if (!dialogProperties_.content.empty()) {
+        DumpLog::GetInstance().AddDesc("Content: " + dialogProperties_.content);
+    }
+    DumpLog::GetInstance().AddDesc(
+        "DialogButtonDirection: " +
+        DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(dialogProperties_.buttonDirection));
+    if (dialogProperties_.width.has_value()) {
+        DumpLog::GetInstance().AddDesc("Width: " + dialogProperties_.width.value().ToString());
+    }
+    if (dialogProperties_.height.has_value()) {
+        DumpLog::GetInstance().AddDesc("Height: " + dialogProperties_.height.value().ToString());
+    }
+    if (dialogProperties_.backgroundBlurStyle.has_value()) {
+        DumpLog::GetInstance().AddDesc(
+            "BackgroundBlurStyle: " + std::to_string(dialogProperties_.backgroundBlurStyle.value()));
+    }
+    if (dialogProperties_.borderWidth.has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderWidth: " + dialogProperties_.borderWidth.value().ToString());
+    }
+    if (dialogProperties_.borderColor.has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderColor: " + dialogProperties_.borderColor.value().ToString());
+    }
+    if (dialogProperties_.backgroundColor.has_value()) {
+        DumpLog::GetInstance().AddDesc("BackgroundColor: " + dialogProperties_.backgroundColor.value().ToString());
+    }
+    if (dialogProperties_.borderRadius.has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderRadius: " + dialogProperties_.borderRadius.value().ToString());
+    }
+    DumpBoolProperty();
+    DumpObjectProperty();
+}
+
+void DialogPattern::DumpBoolProperty()
+{
+    DumpLog::GetInstance().AddDesc("AutoCancel: " + GetBoolStr(dialogProperties_.autoCancel));
+    DumpLog::GetInstance().AddDesc("CustomStyle: " + GetBoolStr(dialogProperties_.customStyle));
+    DumpLog::GetInstance().AddDesc("IsMenu: " + GetBoolStr(dialogProperties_.isMenu));
+    DumpLog::GetInstance().AddDesc("IsMask: " + GetBoolStr(dialogProperties_.isMask));
+    DumpLog::GetInstance().AddDesc("IsModal: " + GetBoolStr(dialogProperties_.isModal));
+    DumpLog::GetInstance().AddDesc("IsScenceBoardDialog: " + GetBoolStr(dialogProperties_.isScenceBoardDialog));
+    DumpLog::GetInstance().AddDesc("IsSysBlurStyle: " + GetBoolStr(dialogProperties_.isSysBlurStyle));
+    DumpLog::GetInstance().AddDesc("IsShowInSubWindow: " + GetBoolStr(dialogProperties_.isShowInSubWindow));
+}
+
+void DialogPattern::DumpObjectProperty()
+{
+    DumpLog::GetInstance().AddDesc(
+        "Alignment: " + DialogAlignmentUtils::ConvertDialogAlignmentToString(dialogProperties_.alignment));
+    DumpLog::GetInstance().AddDesc("Offset: { dx: " + dialogProperties_.offset.GetX().ToString() +
+                                   " dy: " + dialogProperties_.offset.GetY().ToString() + " }");
+    if (dialogProperties_.buttons.size() > 0) {
+        std::stringstream butonInfoSteam;
+        butonInfoSteam << "Buttons: [";
+        for (auto buttonInfo : dialogProperties_.buttons) {
+            butonInfoSteam << "{ text: " << buttonInfo.text << " , color: " << buttonInfo.textColor << " }, ";
+        }
+        butonInfoSteam << "]";
+        DumpLog::GetInstance().AddDesc(butonInfoSteam.str());
+    }
+    if (dialogProperties_.shadow.has_value()) {
+        auto shadow = dialogProperties_.shadow.value();
+        std::stringstream butonInfoSteam;
+        static const int32_t precision = 2;
+        butonInfoSteam << "Shadow: {";
+        butonInfoSteam << " radius:" << std::fixed << std::setprecision(precision) << shadow.GetBlurRadius();
+        butonInfoSteam << " style:" << std::to_string(static_cast<int32_t>(shadow.GetStyle()));
+        butonInfoSteam << " type:" << std::to_string(static_cast<int32_t>(shadow.GetShadowType()));
+        butonInfoSteam << " fill:" << GetBoolStr(shadow.GetIsFilled());
+        butonInfoSteam << " offset:" << shadow.GetOffset().ToString();
+        butonInfoSteam << " }";
+        DumpLog::GetInstance().AddDesc(butonInfoSteam.str());
+    }
+    if (dialogProperties_.maskColor.has_value()) {
+        DumpLog::GetInstance().AddDesc("MaskColor: " + dialogProperties_.maskColor.value().ToString());
+    }
+    if (dialogProperties_.maskRect.has_value()) {
+        DumpLog::GetInstance().AddDesc("MaskRect: " + dialogProperties_.maskRect.value().ToString());
     }
 }
 } // namespace OHOS::Ace::NG

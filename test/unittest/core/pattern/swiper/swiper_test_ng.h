@@ -74,6 +74,7 @@ const SwiperArrowParameters ARROW_PARAMETERS = {
 const Color HOVER_ARROW_COLOR = Color::GRAY;
 const Color CLICK_ARROW_COLOR = Color::FromString("#19182431");
 constexpr double ARROW_DISABLED_ALPHA = 0.5;
+constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 const Color INDICATOR_TEXT_FONT_COLOR = Color::FromString("#ff182431");
 const Dimension INDICATOR_TEXT_FONT_SIZE = Dimension(14.f);
 const FontWeight INDICATOR_TEXT_FONT_WEIGHT = FontWeight::W800;

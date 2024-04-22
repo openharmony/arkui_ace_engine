@@ -244,6 +244,8 @@ public:
         return webDelegate_.Upgrade();
     }
 
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

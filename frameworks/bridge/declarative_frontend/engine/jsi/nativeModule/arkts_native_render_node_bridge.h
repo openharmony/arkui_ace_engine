@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,15 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_RENDER_NODE_BRIDGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_RENDER_NODE_BRIDGE_H
 
-#include <cstdint>
-#include <type_traits>
-
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 
 namespace OHOS::Ace::NG {
 class RenderNodeBridge {
 public:
     static ArkUINativeModuleValue CreateRenderNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static void FireDrawCallback(EcmaVM* vm, Framework::JsiWeak<Framework::JsiObject> obj, NG::DrawingContext& context,
-        Local<panda::StringRef> funcName);
+    static void FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal<panda::ObjectRef>> obj,
+        NG::DrawingContext& context, Local<panda::StringRef> funcName);
     static void SetOnDraw(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AppendChild(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue InsertChildAfter(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -56,8 +54,9 @@ public:
     static ArkUINativeModuleValue SetOvalMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCommandPathMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
 private:
-    template <typename T>
+    template<typename T>
     static T GetNumber(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int index, T defaultValue)
     {
         Local<JSValueRef> jsValueRef = runtimeCallInfo->GetCallArgRef(index);

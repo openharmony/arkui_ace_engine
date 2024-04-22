@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
@@ -26,6 +27,8 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -194,6 +197,92 @@ public:
     void StartLongPressEventTimer();
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
+    void SetScrollBar(DisplayMode displayMode);
+    void SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
+    void UpdateScrollBarOffset();
+    void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
+    void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+    void RegisterScrollBarEventTask();
+    bool UpdateScrollBarDisplay();
+
+    RefPtr<GestureEventHub> GetGestureHub()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(hub, nullptr);
+        return hub->GetOrCreateGestureEventHub();
+    }
+
+    RefPtr<InputEventHub> GetInputHub()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(hub, nullptr);
+        return hub->GetOrCreateInputEventHub();
+    }
+
+    void CreateScrollBarOverlayModifier()
+    {
+        CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
+        CHECK_NULL_VOID(!scrollBarOverlayModifier_);
+        scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+        scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
+        scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto paint = MakeRefPtr<ScrollBarPaintMethod>(hasChild_);
+            paint->SetScrollBar(scrollBar_);
+            if (!HasChild()) {
+                auto activeRect = scrollBar_->GetActiveRect();
+                auto offset = activeRect.GetOffset();
+                auto offsetF = OffsetF(offset.GetX(), offset.GetY());
+                auto size = activeRect.GetSize();
+                auto sizeF = SizeF(size.Width(), size.Height());
+                childRect_ = RectF(offsetF, sizeF);
+            }
+            CreateScrollBarOverlayModifier();
+            paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier_);
+            return paint;
+        } else {
+            return Pattern::CreateNodePaintMethod();
+        }
+    }
+
+    void SetChild(bool hasChild)
+    {
+        hasChild_ = hasChild;
+    }
+
+    void SetPreFrameChildState(bool preFrameChildState)
+    {
+        preFrameChildState_ = preFrameChildState;
+    }
+
+    bool GetPreFrameChildState()
+    {
+        return preFrameChildState_;
+    }
+
+    bool HasChild()
+    {
+        return hasChild_;
+    }
+
+    bool CheckChildState()
+    {
+        auto currentChildState = HasChild();
+        auto preChildState = GetPreFrameChildState();
+        if (preChildState != currentChildState) {
+            SetPreFrameChildState(currentChildState);
+            return true;
+        }
+        return false;
+    }
 
 private:
     void OnModifyDone() override;
@@ -217,11 +306,17 @@ private:
     float scrollableDistance_ = 0.0f;
     float controlDistance_ = 0.0f;
     bool  controlDistanceChanged_ = false;
+    bool hasChild_ = false;
+    bool preFrameChildState_ = false;
     float scrollOffset_ = 0.0f;
     float friction_ = BAR_FRICTION;
     float frictionPosition_ = 0.0;
     float dragStartPosition_ = 0.0f;
     float dragEndPosition_ = 0.0f;
+
+    double scrollBarOutBoundaryExtent_ = 0.0;
+    RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
+    RefPtr<ScrollBar> scrollBar_;
 
     float childOffset_ = 0.0f;
     RefPtr<PanRecognizer> panRecognizer_;

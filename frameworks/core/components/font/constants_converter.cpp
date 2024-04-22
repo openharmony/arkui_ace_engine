@@ -31,6 +31,10 @@
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::Constants {
+namespace {
+const std::string FONTWEIGHT = "wght";
+constexpr float DEFAULT_MULTIPLE = 100.0f;
+} // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight)
@@ -409,8 +413,14 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.font_weight = ConvertTxtFontWeight(textStyle.GetFontWeight());
-    // Font size must be px when transferring to txt::TextStyle
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    // Font size must be px when transferring to txt::TextStyle
     if (pipelineContext) {
         txtStyle.font_size = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
@@ -531,6 +541,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
+    txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
@@ -595,8 +606,14 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
-    // Font size must be px when transferring to Rosen::TextStyle
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    // Font size must be px when transferring to Rosen::TextStyle
     if (pipelineContext) {
         txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
@@ -636,6 +653,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
+    txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     txtStyle.halfLeading = textStyle.GetHalfLeading();
@@ -649,26 +667,60 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.shadows.emplace_back(txtShadow);
     }
 
+    double lineHeightScale = 0.0;
+    double lineSpacingScale = 0.0;
+    bool lineHeightOnly = false;
+    bool lineSpacingOnly = false;
     if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
-        txtStyle.heightOnly = true;
-        txtStyle.heightScale = textStyle.GetLineHeight().Value();
+        lineHeightOnly = true;
+        lineHeightScale = textStyle.GetLineHeight().Value();
     } else {
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
             lineHeight = pipelineContext->NormalizeToPx(textStyle.GetLineHeight());
         }
-        txtStyle.heightOnly = textStyle.HasHeightOverride();
+        lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
-            txtStyle.heightScale = lineHeight / fontSize;
+            lineHeightScale = lineHeight / fontSize;
         } else {
-            txtStyle.heightScale = 1;
+            lineHeightScale = 1;
             static const int32_t BEGIN_VERSION = 6;
             auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
             if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
-                txtStyle.heightOnly = false;
+                lineHeightOnly = false;
             }
         }
+    }
+    if (textStyle.GetLineSpacing().Unit() == DimensionUnit::PERCENT) {
+        lineSpacingOnly = true;
+        lineSpacingScale = textStyle.GetLineSpacing().Value();
+    } else {
+        double fontSize = txtStyle.fontSize;
+        double lineSpacing = textStyle.GetLineSpacing().Value();
+        if (pipelineContext) {
+            lineSpacing = pipelineContext->NormalizeToPx(textStyle.GetLineSpacing());
+        }
+        lineSpacingOnly = true;
+        if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
+            lineSpacingScale = lineSpacing / fontSize;
+        } else {
+            lineSpacingScale = 1;
+            if (NearZero(lineSpacing) || NearEqual(lineSpacing, fontSize)) {
+                lineSpacingOnly = false;
+            }
+        }
+    }
+
+    txtStyle.heightOnly = lineHeightOnly || lineSpacingOnly;
+    if (lineHeightOnly && lineSpacingOnly) {
+        txtStyle.heightScale = lineHeightScale + lineSpacingScale;
+    } else if (lineHeightOnly && !lineSpacingOnly) {
+        txtStyle.heightScale = lineHeightScale;
+    } else if (!lineHeightOnly && lineSpacingOnly) {
+        txtStyle.heightScale = 1 + lineSpacingScale;
+    } else {
+        txtStyle.heightScale = 1;
     }
 
     // set font variant

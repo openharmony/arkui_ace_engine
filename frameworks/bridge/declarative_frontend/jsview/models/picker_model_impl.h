@@ -47,7 +47,7 @@ public:
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
         std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType,
-        PickerDialogEvent& pickerDialogEvent) override;
+        PickerDialogEvent& pickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PICKER_MODEL_IMPL_H

@@ -46,6 +46,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/gestures/pinch_gesture.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -477,6 +478,7 @@ public:
     void SetAccessibilityState(bool state);
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -581,6 +583,8 @@ private:
     void InitSlideUpdateListener();
     void CalculateHorizontalDrawRect(bool isNeedReset);
     void CalculateVerticalDrawRect(bool isNeedReset);
+    void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleScaleGestureChange(const GestureEvent& event);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -590,9 +594,14 @@ private:
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
+    void DragDropSelectionMenu();
+    void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
     int32_t dropX_ = 0;
     int32_t dropY_ = 0;
     int onDragMoveCnt = 0;
+    bool isDragEndMenuShow_ = false;
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> dropParams_ = nullptr;
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> menuCallback_ = nullptr;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> curMoveInTime;
@@ -660,6 +669,7 @@ private:
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback();
+    bool CheckSafeAreaIsExpand();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -709,6 +719,7 @@ private:
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
     bool isCurrentStartHandleDragging_ = false;
+    std::list<TouchInfo> touchOverlayInfo_;
     bool isPopup_ = false;
     int32_t tooltipTextId_ = -1;
     int32_t tooltipId_ = -1;
@@ -749,6 +760,8 @@ private:
     std::vector<TouchEventInfo> touchEventInfoList_ {};
     bool isParentReachEdge_ = false;
     ReachEdge isFlingReachEdge_ = { false, false };
+    RefPtr<PinchGesture> pinchGesture_ = nullptr;
+    double pinchValue_ = 1.0;
     std::queue<TouchEventInfo> touchEventQueue_;
 };
 } // namespace OHOS::Ace::NG

@@ -1013,7 +1013,9 @@ void ScrollablePattern::AnimateTo(
     if (NearEqual(position, GetTotalOffset())) {
         return;
     }
+#ifdef OHOS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     finalPosition_ = position;
     if (smooth) {
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
@@ -1089,7 +1091,9 @@ void ScrollablePattern::PlayCurveAnimation(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
+#ifdef OHOS_PLATFORM
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
@@ -2002,7 +2006,11 @@ void ScrollablePattern::Fling(double flingVelocity)
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     CHECK_NULL_VOID(scrollable);
-    scrollable->StartScrollAnimation(0.0, flingVelocity);
+    if (IsOutOfBoundary()) {
+        scrollable->HandleOverScroll(flingVelocity);
+    } else {
+        scrollable->StartScrollAnimation(0.0f, flingVelocity);
+    }
 }
 
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)
@@ -2503,6 +2511,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->IsReverse()) {
+                offset = -offset;
+            }
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
         });
         fixedVelocityMotion_->SetVelocity(velocity);

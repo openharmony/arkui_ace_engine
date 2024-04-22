@@ -64,6 +64,7 @@ public:
         AttachProperty(endAngle_);
         AttachProperty(strokeWidth_);
         AttachProperty(indicatorSpace_);
+        AttachProperty(indicatorChange_);
         AttachProperty(gaugeTypeValue_);
         AttachProperty(isShowIndicator_);
 
@@ -147,6 +148,7 @@ private:
 
     RefPtr<PropertyBool> isShowIndicator_;
     RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> indicatorChange_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GaugeModifier);
 };

@@ -52,6 +52,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (!GetHost() || !GetHost()->IsActive()) {
+            return nullptr;
+        }
         if (UseContentModifier()) {
             return nullptr;
         }
@@ -195,6 +198,9 @@ private:
     void ImageNodeCreate();
     void startEnterAnimation();
     void startExitAnimation();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     RefPtr<FrameNode> BuildContentModifierNode();
@@ -230,7 +236,7 @@ private:
     bool showHoverEffect_ = true;
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
-
+    bool focusEventInitialized_ = false;
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

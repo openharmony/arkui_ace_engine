@@ -197,6 +197,13 @@ public:
         return hasTransition_;
     }
 
+    void ResetFocusState()
+    {
+        SetIsDefaultHasBeFocused(false);
+        SetIsViewRootScopeFocused(true);
+        SetIsViewHasFocused(false);
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 

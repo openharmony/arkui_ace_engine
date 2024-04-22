@@ -112,6 +112,8 @@ public:
     void UpdateFillRuleForPath2D(const CanvasFillRule rule);
     double GetWidth();
     double GetHeight();
+    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
+    void SetInvalidate();
 
     LineDashParam GetLineDash() const;
     void UpdateLineDash(const std::vector<double>& segments);
@@ -173,7 +175,8 @@ private:
     void ReleaseImageAnalyzer();
     bool IsSupportImageAnalyzerFeature();
     void OnLanguageConfigurationUpdate() override;
-    void UpdateTextDirection(TextDirection direction);
+    void OnModifyDone() override;
+    void UpdateTextDefaultDirection();
 
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
@@ -183,7 +186,7 @@ private:
     DirtySwapConfig recordConfig_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
-    bool isSetTextDirection_ = false;
+    TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
 

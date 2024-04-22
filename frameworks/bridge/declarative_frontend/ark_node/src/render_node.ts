@@ -125,35 +125,6 @@ interface CommandPath {
   commands: string
 }
 
-class LengthMetric {
-  public unit: LengthUnit;
-  public value: number;
-  constructor(value: number, unit?: LengthUnit) {
-    if (unit in LengthUnit) {
-      this.unit = unit;
-      this.value = value;
-    } else {
-      this.unit = LengthUnit.VP;
-      this.value = 0;
-    }
-  }
-  static px(value: number) {
-    return new LengthMetric(value, LengthUnit.PX);
-  }
-  static vp(value: number) {
-    return new LengthMetric(value, LengthUnit.VP);
-  }
-  static fp(value: number) {
-    return new LengthMetric(value, LengthUnit.FP);
-  }
-  static percent(value: number) {
-    return new LengthMetric(value, LengthUnit.PERCENT);
-  }
-  static lpx(value: number) {
-    return new LengthMetric(value, LengthUnit.LPX);
-  }
-}
-
 class LengthMetrics {
   public unit: LengthUnit;
   public value: number;
@@ -163,7 +134,7 @@ class LengthMetrics {
           this.value = value;
       } else {
           this.unit = LengthUnit.VP;
-          this.value = 0;
+          this.value = unit === undefined? value : 0;
       }
   }
   static px(value: number) {

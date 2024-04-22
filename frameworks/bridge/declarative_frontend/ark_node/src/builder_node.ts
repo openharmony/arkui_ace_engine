@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 
 class BuilderNode {
   private _JSBuilderNode: JSBuilderNode;
@@ -136,7 +136,7 @@ class JSBuilderNode extends BaseNode {
 
   protected purgeDeletedElmtIds(): void {
     UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
   }
   public purgeDeleteElmtId(rmElmtId: number): boolean {
     const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -173,7 +173,7 @@ class JSBuilderNode extends BaseNode {
     const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
       classObject && "pop" in classObject ? classObject.pop! : () => { };
-    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+    const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
@@ -232,7 +232,7 @@ class JSBuilderNode extends BaseNode {
     if (idGenFunc === undefined) {
       idGenFuncUsesIndex = true;
       // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
-      idGenFunc = (item: any, index: number) => {
+      idGenFunc = (item: any, index: number): string => {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {

@@ -65,6 +65,7 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 class FrameProxy;
+struct DirtySwapConfig;
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
@@ -421,6 +422,16 @@ public:
 
     void MarkNeedRenderOnly();
 
+    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
+    {
+        attachFunc_ = std::move(attachFunc);
+    }
+
+    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
+    {
+        detachFunc_ = std::move(detachFunc);
+    }
+
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
@@ -669,6 +680,7 @@ public:
         return GetTag();
     }
 
+    void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
     bool ParentExpansive();
@@ -703,7 +715,7 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode(bool needSyncRsNode);
+    void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
@@ -806,6 +818,7 @@ public:
 
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
+    bool CheckAncestorPageShow();
 
 protected:
     void DumpInfo() override;
@@ -859,7 +872,7 @@ private:
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     bool GetTouchable() const;
-    bool OnLayoutFinish(bool& needSyncRsNode);
+    bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
@@ -928,6 +941,9 @@ private:
     std::optional<bool> skipMeasureContent_;
     std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
+
+    std::function<void(int32_t)> attachFunc_;
+    std::function<void(int32_t)> detachFunc_;
 
     bool needSyncRenderTree_ = false;
 

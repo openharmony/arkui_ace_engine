@@ -49,6 +49,10 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = textPattern->GetTextSelector().firstHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -59,6 +63,10 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = textPattern->GetTextSelector().secondHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -70,7 +78,11 @@ bool TextSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!renderContext->GetClipEdge().value_or(false)) {
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (!renderContext->GetClipEdge().value_or(clip)) {
         return true;
     }
     auto contentRect = textPattern->GetTextContentRect();
@@ -112,7 +124,14 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
-    if (renderContext->GetClipEdge().value_or(false)) {
+    bool isUseHandleTop = (isFirst != IsHandleReverse());
+    handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
+    
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (renderContext->GetClipEdge().value_or(clip)) {
         handleOffset.SetX(
             std::clamp(handleOffset.GetX(), contentOffset.GetX(), contentOffset.GetX() + contentRect.Width()));
         handleOffset.SetY(
@@ -121,26 +140,22 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto textPaintOffset = contentOffset - OffsetF(0.0f, std::min(textPattern->GetBaselineOffset(), 0.0f));
     handleOffset -= textPaintOffset;
     // the handle position is calculated based on the middle of the handle height.
-    UpdateSelectorOnHandleMove(handleOffset, handleRect.Height(), isFirst);
+    UpdateSelectorOnHandleMove(handleOffset, isFirst);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
 }
 
-void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, float handleHeight, bool isFirstHandle)
+void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle)
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
+    auto currentHandleIndex = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirstHandle) {
-        auto deltaY = handleOffset.GetY() + (IsHandleReverse() ? handleHeight : 0);
-        auto start = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), deltaY));
-        textPattern->HandleSelectionChange(start, textPattern->GetTextSelector().destinationOffset);
+        textPattern->HandleSelectionChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
     } else {
-        auto deltaY =
-            handleOffset.GetY() + (IsHandleReverse() || NearEqual(handleOffset.GetY(), 0) ? 0 : handleHeight);
-        auto end = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), deltaY));
-        textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, end);
+        textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, currentHandleIndex);
     }
 }
 
@@ -182,7 +197,7 @@ RectF TextSelectOverlay::GetSelectArea()
     CHECK_NULL_RETURN(pattern, res);
     CHECK_NULL_RETURN(pattern->GetParagraph(), res);
     auto selectRects = pattern->GetTextBoxes();
-    auto textPaintOffset = pattern->GetTextPaintOffset();
+    auto textPaintOffset = GetPaintOffsetWithoutTransform();
     if (selectRects.empty()) {
         res.SetOffset(res.GetOffset() + textPaintOffset);
         GetSelectAreaFromHandle(res);
@@ -193,19 +208,34 @@ RectF TextSelectOverlay::GetSelectArea()
     res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     RectF visibleContentRect(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
     visibleContentRect = GetVisibleRect(pattern->GetHost(), visibleContentRect);
-    return res.IntersectRectT(visibleContentRect);
+    auto intersectRect = res.IntersectRectT(visibleContentRect);
+    if (hasTransform_) {
+        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
+        GetGlobalRectWithTransform(intersectRect);
+    }
+    return intersectRect;
 }
 
 void TextSelectOverlay::GetSelectAreaFromHandle(RectF& rect)
 {
     auto firstHandle = GetFirstHandleInfo();
     if (firstHandle) {
-        rect = firstHandle->paintRect;
+        auto firstRect = firstHandle->paintRect;
+        if (hasTransform_) {
+            firstRect.SetOffset(firstRect.GetOffset() - GetPaintOffsetWithoutTransform());
+            GetGlobalRectWithTransform(firstRect);
+        }
+        rect = firstRect;
         return;
     }
     auto secondHandle = GetSecondHandleInfo();
     if (secondHandle) {
-        rect = secondHandle->paintRect;
+        auto secondRect = secondHandle->paintRect;
+        if (hasTransform_) {
+            secondRect.SetOffset(secondRect.GetOffset() - GetPaintOffsetWithoutTransform());
+            GetGlobalRectWithTransform(secondRect);
+        }
+        rect = secondRect;
     }
 }
 

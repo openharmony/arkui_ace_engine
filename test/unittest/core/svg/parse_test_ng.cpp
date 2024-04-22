@@ -38,6 +38,7 @@
 #include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
 #include "core/components/declaration/svg/svg_filter_declaration.h"
 #include "core/components/declaration/svg/svg_gradient_declaration.h"
+#include "core/components/declaration/svg/svg_image_declaration.h"
 #include "core/components/declaration/svg/svg_line_declaration.h"
 #include "core/components/declaration/svg/svg_mask_declaration.h"
 #include "core/components/declaration/svg/svg_path_declaration.h"
@@ -59,6 +60,7 @@
 #include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_g.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
+#include "core/components_ng/svg/parse/svg_image.h"
 #include "core/components_ng/svg/parse/svg_line.h"
 #include "core/components_ng/svg/parse/svg_mask.h"
 #include "core/components_ng/svg/parse/svg_path.h"
@@ -307,17 +309,13 @@ constexpr uint32_t RED_COLOR = 0xffff0000;
 constexpr uint32_t GREEN_COLOR = 0xff00ff00;
 
 const std::string FE_FLOOD_AND_COMPOSITE =
-    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" >"
     "<filter id=\"colorMatrix\">"
-        "<feFlood flood-color=\"red\" flood-opacity=\"0\" result=\"flood\" />"
-        "<feFlood flood-color=\"green\" flood-opacity=\"1\" result=\"flood1\" />"
-        "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\""
-            "operator=\"xor\" result=\"composite\" k1=\"1\" k2=\"0\"/>"
-    "</filter>"
-    "<g>"
-        "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
-    "</g>"
-"</svg>";
+    "<feFlood flood-color=\"red\" flood-opacity=\"0\" result=\"flood\" /><feFlood flood-color=\"green\" "
+    "flood-opacity=\"1\" result=\"flood1\" />"
+    "<feComposite in=\"SourceAlpha\" in2=\"SourceGraphic\" operator=\"xor\" result=\"composite\" k1=\"1\" "
+    "k2=\"0\"/></filter>"
+    "<g><rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" /></g></svg>";
 
 const std::string FE_BLEND =
     "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
@@ -327,6 +325,12 @@ const std::string FE_BLEND =
     "<g>"
         "<rect width=\"90\" height=\"90\" fill=\"#0099cc\" filter=\"url(#blurFilter)\" />"
     "</g>"
+"</svg>";
+
+const std::string IMAGE_HREF = "test.png";
+const std::string IMAGE_LABEL =
+    "<svg width=\"900\" height=\"900\" viewBox=\"0 0 150 120\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<image id=\"image001\" x=\"150\" y=\"20\" width=\"100\" height=\"100\" href=\"test.png\" />"
 "</svg>";
 
 constexpr float IMAGE_COMPONENT_WIDTH = 100.0f;
@@ -1307,7 +1311,6 @@ HWTEST_F(ParseTestNg, ParseFeFloodAndCompositeTest001, TestSize.Level1)
     src.SetFillColor(Color::BLACK);
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
     EXPECT_NE(svgDom, nullptr);
-    CHECK_NULL_VOID(svgDom);
     auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
     EXPECT_GT(svg->children_.size(), 0);
     // filter is first child in svg
@@ -2147,5 +2150,33 @@ HWTEST_F(ParseTestNg, ParseUseTest002, TestSize.Level1)
     svgUse->declaration_->SetHref("");
     svgUse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_TRUE(svgUse->declaration_->GetHref().empty());
+}
+
+/**
+ * @tc.name: ParseImageTest001
+ * @tc.desc: parse image label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseImageTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(IMAGE_LABEL.c_str(), IMAGE_LABEL.length());
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    /* *
+     * @tc.steps: step1. call AsPath
+     * @tc.expected: Execute function return value is true
+     */
+    auto svgImage = AceType::DynamicCast<SvgImage>(svg->children_.at(0));
+    auto imageDeclaration = AceType::DynamicCast<SvgImageDeclaration>(svgImage->declaration_);
+    EXPECT_NE(imageDeclaration, nullptr);
+    EXPECT_FLOAT_EQ(imageDeclaration->GetX().ConvertToPx(), X);
+    EXPECT_FLOAT_EQ(imageDeclaration->GetY().ConvertToPx(), Y);
+    EXPECT_FLOAT_EQ(imageDeclaration->GetWidth().ConvertToPx(), RECT_WIDTH);
+    EXPECT_FLOAT_EQ(imageDeclaration->GetHeight().ConvertToPx(), RECT_HEIGHT);
+    EXPECT_STREQ(imageDeclaration->GetHref().c_str(), IMAGE_HREF.c_str());
 }
 } // namespace OHOS::Ace::NG

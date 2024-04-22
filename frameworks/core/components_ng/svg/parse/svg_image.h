@@ -32,6 +32,7 @@ public:
     std::shared_ptr<RSData> LoadLocalImage(const std::string& uri);
     std::shared_ptr<RSData> LoadBase64Image(const std::string& uri);
     SrcType ParseHrefAttr(const std::string& uri);
+    RSRect CalcDstRect(const Size& realSize, const Rect& viewBox);
 };
 
 } // namespace OHOS::Ace::NG

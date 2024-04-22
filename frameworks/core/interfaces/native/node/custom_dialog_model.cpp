@@ -103,9 +103,12 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         Dimension(controllerHandler->offsetY));
     dialogProperties.maskColor = Color(controllerHandler->maskColor);
     if (controllerHandler->maskRect) {
-        dialogProperties.maskRect = DimensionRect(Dimension(controllerHandler->maskRect->width),
-        Dimension(controllerHandler->maskRect->height),
-        DimensionOffset(Dimension(controllerHandler->maskRect->x), Dimension(controllerHandler->maskRect->y)));
+        DimensionRect maskRect;
+        maskRect.SetOffset(DimensionOffset(Dimension(controllerHandler->maskRect->x, DimensionUnit::VP),
+            Dimension(controllerHandler->maskRect->y, DimensionUnit::VP)));
+        maskRect.SetSize(DimensionSize(Dimension(controllerHandler->maskRect->width, DimensionUnit::VP),
+            Dimension(controllerHandler->maskRect->height, DimensionUnit::VP)));
+        dialogProperties.maskRect = maskRect;
     }
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.isModal = controllerHandler->isModal;

@@ -37,6 +37,7 @@ public:
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);
     static void SetDecoration(const JSCallbackInfo& info);
+    static void SetBaselineOffset(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);

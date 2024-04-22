@@ -32,6 +32,7 @@ struct MeasureContext {
     std::optional<Dimension> lineHeight = std::nullopt;
     std::optional<Dimension> baselineOffset = std::nullopt;
     std::optional<Dimension> letterSpacing = std::nullopt;
+    std::optional<Dimension> lineSpacing = std::nullopt;
     std::optional<Dimension> textIndent = std::nullopt;
     int32_t maxlines = 0;
     TextAlign textAlign = TextAlign::START;

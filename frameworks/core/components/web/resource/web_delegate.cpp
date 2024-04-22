@@ -27,6 +27,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/memory/referenced.h"
+#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -60,8 +61,6 @@
 #include "core/components_ng/base/ui_node.h"
 #include "frameworks/base/utils/system_properties.h"
 #endif
-
-#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 
 namespace OHOS::Ace {
 
@@ -100,6 +99,8 @@ const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
+
+static bool g_isNativeType = false;
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -663,30 +664,47 @@ WebDelegateObserver::~WebDelegateObserver() {}
 
 void WebDelegateObserver::NotifyDestory()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory start");
     if (delegate_) {
         delegate_->UnRegisterScreenLockFunction();
     }
     auto context = context_.Upgrade();
     if (!context) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory context is null, enter EventHandler to destroy");
         auto currentHandler = OHOS::AppExecFwk::EventHandler::Current();
+        if (!currentHandler) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler currentHandler is null");
+            return;
+        }
         currentHandler->PostTask(
             [weak = WeakClaim(this)]() {
                 auto observer = weak.Upgrade();
-                CHECK_NULL_VOID(observer);
+                if (!observer) {
+                    TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler observer is null");
+                    return;
+                }
                 if (observer->delegate_) {
+                    TAG_LOGD(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler start destroy");
                     observer->delegate_.Reset();
                 }
             },
             DESTRUCT_DELAY_MILLISECONDS);
+        return;
     }
-    CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
+    if (!taskExecutor) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory taskExecutor is null");
+        return;
+    }
     taskExecutor->PostDelayedTask(
         [weak = WeakClaim(this), taskExecutor = taskExecutor]() {
             auto observer = weak.Upgrade();
-            CHECK_NULL_VOID(observer);
+            if (!observer) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory observer is null");
+                return;
+            }
             if (observer->delegate_) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "NWEB webdelegateObserver NotifyDestory start destroy");
                 observer->delegate_.Reset();
             }
         },
@@ -5275,6 +5293,7 @@ void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const doub
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
+        IsNativeType(x, y);
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchPress(id, x, y, from_overlay);
     }
@@ -5339,6 +5358,9 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
 void WebDelegate::OnFocus()
 {
     ACE_DCHECK(nweb_ != nullptr);
+    if (g_isNativeType) {
+        return;
+    }
     if (nweb_) {
         nweb_->OnFocus(OHOS::NWeb::FocusReason::EVENT_REQUEST);
     }
@@ -5355,8 +5377,39 @@ bool WebDelegate::NeedSoftKeyboard()
 void WebDelegate::OnBlur()
 {
     ACE_DCHECK(nweb_ != nullptr);
+    if (g_isNativeType) {
+        return;
+    }
     if (nweb_) {
         nweb_->OnBlur(blurReason_);
+    }
+}
+
+void WebDelegate::IsNativeType(const double& x, const double& y)
+{
+    g_isNativeType = false;
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+    auto iter = embedDataInfo_.begin();
+    for (; iter != embedDataInfo_.end(); iter++) {
+        EmbedInfo info;
+        std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo  = iter->second;
+        if (dataInfo == nullptr) {
+            continue;
+        }
+
+        auto embedInfo = dataInfo->GetNativeEmbedInfo();
+        if (embedInfo) {
+            double width = embedInfo->GetWidth();
+            double height = embedInfo->GetHeight();
+            double embedX = embedInfo->GetX();
+            double embedY = embedInfo->GetY();
+            if (embedX <= x && x <= (embedX + width) && embedY <= y && y <= (embedY + height)) {
+                g_isNativeType = true;
+                break;
+            }
+        }
     }
 }
 
@@ -6302,5 +6355,23 @@ void WebDelegate::UpdateMetaViewport(bool isMetaViewportEnabled)
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ScaleGestureChange(double scale, double centerX, double centerY)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->ScaleGestureChange(scale, centerX, centerY);
+    }
+#endif
+}
+
+std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_t offset)
+{
+    auto webPattern = webPattern_.Upgrade();
+    std::vector<int8_t> vec = { -1, -1 };
+    CHECK_NULL_RETURN(webPattern, vec);
+    return webPattern->GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace

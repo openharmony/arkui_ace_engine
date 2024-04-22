@@ -122,7 +122,7 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitInputEvent();
     void InitCurrentInputEvent();
-    void InitChildInputEvent();
+    void InitChildInputEvent(RefPtr<FrameNode>& itemNode, int32_t childIndex);
     void InitPopupInputEvent();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);

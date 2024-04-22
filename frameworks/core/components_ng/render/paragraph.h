@@ -54,6 +54,7 @@ struct ParagraphStyle {
     std::string fontLocale;
     WordBreak wordBreak = WordBreak::NORMAL;
     EllipsisMode ellipsisMode = EllipsisMode::TAIL;
+    LineBreakStrategy lineBreakStrategy = LineBreakStrategy::GREEDY;
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
@@ -136,6 +137,7 @@ public:
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
+    virtual void SetParagraphId(uint32_t id) = 0;
 };
 } // namespace OHOS::Ace::NG
 

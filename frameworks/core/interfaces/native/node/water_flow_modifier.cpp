@@ -378,5 +378,19 @@ void SetOnWillScroll(ArkUINodeHandle node, void* extraParam)
     };
     ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
 }
+
+void SetOnReachEnd(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onReachEnd = [node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_REACH_END;
+        SendArkUIAsyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

@@ -129,6 +129,9 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
 
 std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t line)
 {
+    if (Negative(targetLen)) {
+        return { -1, -1 };
+    }
     float len = 0.0f;
     auto it = info_->lineHeightMap_.find(line);
     if (it == info_->lineHeightMap_.end()) {

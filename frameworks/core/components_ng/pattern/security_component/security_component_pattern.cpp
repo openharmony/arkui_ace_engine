@@ -65,7 +65,9 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
         int32_t res = 1;
 #ifdef SECURITY_COMPONENT_ENABLE
         res = ReportSecurityComponentClickEvent(event);
-        if (res != 0) {
+        if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
+            res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
+        } else if (res != 0) {
             LOGE("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
             res = 1;
         }
@@ -134,6 +136,10 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     gestureInfo.SetDisplayY(item.GetDisplayY());
     gestureInfo.SetPointerEvent(info.GetPointerEvent());
     int res = ReportSecurityComponentClickEvent(gestureInfo);
+    if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
+        LOGI("wait for dialog, drop current click");
+        return;
+    }
     if (res != 0) {
         LOGW("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
         res = 1;
@@ -493,31 +499,6 @@ void SecurityComponentPattern::RegisterSecurityComponentRetry()
     LOGW("Register security component failed, retry %{public}d", MAX_RETRY_TIMES);
 }
 
-void SecurityComponentPattern::RegisterSecurityComponentAsync(int32_t instanceID)
-{
-    ContainerScope scope(instanceID);
-    if (!SecurityComponentHandler::LoadSecurityComponentService()) {
-        LOGW("load security component service failed.");
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    SingleTaskExecutor::Make(context->GetTaskExecutor(),
-        TaskExecutor::TaskType::UI).PostTask([weak = WeakClaim(this), instanceID] {
-        ContainerScope scope(instanceID);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->regStatus_ != SecurityComponentRegisterStatus::REGISTERING) {
-            LOGI("Register security component ASync droped.");
-            return;
-        }
-
-        pattern->RegisterSecurityComponentRetry();
-    });
-}
-
 void SecurityComponentPattern::RegisterSecurityComponent()
 {
     if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED ||
@@ -531,16 +512,33 @@ void SecurityComponentPattern::RegisterSecurityComponent()
         return;
     }
     regStatus_ = SecurityComponentRegisterStatus::REGISTERING;
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    int32_t instanceID = context->GetInstanceId();
-    auto scTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    taskExecutor->PostTask([weak = WeakClaim(this), weakContext = WeakPtr(pipeline)] {
+        if (!SecurityComponentHandler::LoadSecurityComponentService()) {
+            LOGW("load security component service failed.");
+            return;
+        }
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([weak, instanceID = context->GetInstanceId()] {
+            ContainerScope scope(instanceID);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->regStatus_ != SecurityComponentRegisterStatus::REGISTERING) {
+                LOGI("Register security component ASync droped.");
+                return;
+            }
+
+            pattern->RegisterSecurityComponentRetry();
+        },
+            TaskExecutor::TaskType::UI);
+    },
         TaskExecutor::TaskType::BACKGROUND);
-    scTaskExecutor.PostTask([weak = WeakClaim(this), instanceID] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->RegisterSecurityComponentAsync(instanceID);
-    });
 }
 
 void SecurityComponentPattern::UnregisterSecurityComponent()
@@ -571,25 +569,6 @@ void SecurityComponentPattern::DoTriggerOnclick(int32_t result)
     gestureEventHub->ActClick(jsonShrd);
 }
 
-void SecurityComponentPattern::TriggerOnclick(int32_t instanceId, int32_t result)
-{
-    ContainerScope scope(instanceId);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-
-    auto scTaskExecutor =
-        SingleTaskExecutor::Make(context->GetTaskExecutor(),
-        TaskExecutor::TaskType::UI);
-    scTaskExecutor.PostTask([weak = WeakClaim(this), instanceId, result] {
-        ContainerScope scope(instanceId);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->DoTriggerOnclick(result);
-    });
-}
-
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
@@ -607,13 +586,21 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
         return -1;
     }
 
-    auto currentContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(currentContext, -1);
-    int32_t instanceID = currentContext->GetInstanceId();
-    auto OnClickAfterFirstUseDialog = [weak = WeakClaim(this), instanceID](int32_t result) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->TriggerOnclick(instanceID, result);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline)](int32_t result) {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_RETURN(context, -1);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, -1);
+        taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DoTriggerOnclick(result);
+        },
+            TaskExecutor::TaskType::UI);
+        return 0;
     };
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
@@ -638,12 +625,22 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
     }
     auto currentContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(currentContext, -1);
-    int32_t instanceID = currentContext->GetInstanceId();
 
-    auto OnClickAfterFirstUseDialog = [weak = WeakClaim(this), instanceID](int32_t result) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->TriggerOnclick(instanceID, result);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto OnClickAfterFirstUseDialog = [weak = WeakClaim(this), weakContext = WeakPtr(pipeline)](int32_t result) {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_RETURN(context, -1);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, -1);
+        taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DoTriggerOnclick(result);
+        },
+            TaskExecutor::TaskType::UI);
+        return 0;
     };
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,

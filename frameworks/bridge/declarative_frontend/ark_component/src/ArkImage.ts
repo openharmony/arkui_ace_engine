@@ -14,7 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
-class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
+class ImageColorFilterModifier extends ModifierWithKey<ColorFilter | DrawingColorFilter> {
   constructor(value: ColorFilter) {
     super(value);
   }
@@ -534,7 +534,7 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     return this;
   }
 
-  colorFilter(value: ColorFilter): this {
+  colorFilter(value: ColorFilter | DrawingColorFilter): this {
     modifierWithKey(this._modifiersWithKeys, ImageColorFilterModifier.identity,
       ImageColorFilterModifier, value);
     return this;

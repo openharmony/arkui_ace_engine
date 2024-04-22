@@ -113,12 +113,12 @@ void RichEditorAbstractSpanResult::SetFontColor(const std::string& fontColor)
     fontColor_ = fontColor;
 }
 
-void RichEditorAbstractSpanResult::SetFontFeature(const FONT_FEATURES_MAP& fontFeature)
+void RichEditorAbstractSpanResult::SetFontFeature(const FONT_FEATURES_LIST& fontFeature)
 {
     fontFeature_ = fontFeature;
 }
 
-const FONT_FEATURES_MAP& RichEditorAbstractSpanResult::GetFontFeatures() const
+const FONT_FEATURES_LIST& RichEditorAbstractSpanResult::GetFontFeatures() const
 {
     return fontFeature_;
 }
@@ -453,6 +453,11 @@ void RichEditorEventHub::FireOnDidChange(const std::list<RichEditorAbstractSpanR
 
 bool RichEditorEventHub::HasOnDidChange() const
 {
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->SetContentChange(true);
     return static_cast<bool>(onDidChange_);
 }
 

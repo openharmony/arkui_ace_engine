@@ -38,6 +38,7 @@ public:
     void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
     void SetOnOffsetChange(OffsetChangeEvent&& dragOffset) override;
     void ResetOnOffsetChange() override;
+    void SetPullDownRatio(const std::optional<float>& pullDownRatio) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     void SetLoadingText(const std::string& loadingText) override;
     void SetRefreshOffset(const Dimension& offset) override;

@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/event/ui_input_event_impl.h"
-#include "interfaces/native/native_event.h"
+#include "interfaces/native/ui_input_event.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -433,23 +433,25 @@ void XComponentPattern::BeforeCreateLayoutWrapper()
     renderSurface_->SetTransformHint(dmRotation);
 }
 
-bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
-    if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE
-        || config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
+    if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE || config.skipMeasure) {
+        return;
     }
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     drawSize_ = geometryNode->GetContentSize();
     if (!drawSize_.IsPositive()) {
-        return false;
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", id_.c_str());
+        return;
     }
     globalPosition_ = geometryNode->GetFrameOffset();
     localPosition_ = geometryNode->GetContentOffset();
 
     if (IsSupportImageAnalyzerFeature()) {
-        UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
+        UpdateAnalyzerUIConfig(geometryNode);
     }
 
     if (!hasXComponentInit_) {
@@ -463,8 +465,6 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
 #ifndef RENDER_EXTRACT_SUPPORTED
     if (SystemProperties::GetExtSurfaceEnabled()) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
         renderSurface_->SetExtSurfaceBounds(
             static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
@@ -481,10 +481,7 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
-    return false;
 }
 
 void XComponentPattern::DumpInfo()
@@ -498,6 +495,9 @@ void XComponentPattern::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("surfaceRect: ").append(RectF { localPosition_, surfaceSize_ }.ToString()));
+    if (renderSurface_) {
+        renderSurface_->DumpInfo();
+    }
 }
 
 void XComponentPattern::NativeXComponentChange(float width, float height)
@@ -586,6 +586,8 @@ void XComponentPattern::XComponentSizeInit()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
+    TAG_LOGI(
+        AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback", id_.c_str());
     eventHub->FireSurfaceInitEvent(id_, host->GetId());
     eventHub->FireLoadEvent(id_);
     eventHub->FireControllerCreatedEvent(surfaceId_);
@@ -603,6 +605,8 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
             static_cast<uint32_t>(surfaceRect.Height() * viewScale));
         NativeXComponentChange(surfaceRect.Width(), surfaceRect.Height());
     }
+    renderSurface_->UpdateSurfaceSizeInUserData(
+        static_cast<uint32_t>(surfaceRect.Width()), static_cast<uint32_t>(surfaceRect.Height()));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();

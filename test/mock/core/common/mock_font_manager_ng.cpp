@@ -49,4 +49,6 @@ void FontManager::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node)
 void FontManager::AddVariationNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void FontManager::RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node) {}
+
+void FontManager::RebuildFontNode() {}
 } // namespace OHOS::Ace

@@ -2243,8 +2243,9 @@ std::shared_ptr<JsValue> AppClearData(const shared_ptr<JsRuntime>& runtime, cons
             return runtime->NewBoolean(true);
         }
     }
-    if (JsiEngineInstance::dataMap_.count(argv[0]->ToString(runtime)) == 1) {
-        JsiEngineInstance::dataMap_.erase(argv[0]->ToString(runtime));
+    auto iter = JsiEngineInstance::dataMap_.find(argv[0]->ToString(runtime));
+    if (iter != JsiEngineInstance::dataMap_.end()) {
+        JsiEngineInstance::dataMap_.erase(iter);
         std::string strResult;
         strResult.append("{");
         std::map<const std::string, std::string>::iterator iter = JsiEngineInstance::dataMap_.begin();

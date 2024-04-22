@@ -277,6 +277,11 @@ public:
         appBgColor_ = color;
     }
 
+    void SetFormRenderingMode(int8_t renderMode)
+    {
+        renderingMode_ = renderMode;
+    }
+
     const Color& GetAppBgColor() const
     {
         return appBgColor_;
@@ -650,6 +655,12 @@ public:
     }
     void SetFontScale(float fontScale);
 
+    float GetFontWeightScale() const
+    {
+        return fontWeightScale_;
+    }
+    void SetFontWeightScale(float fontWeightScale);
+
     uint32_t GetWindowId() const
     {
         return windowId_;
@@ -785,7 +796,7 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
         bool supportAvoidance = false);
     void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
 
     void OnFoldStatusChanged(FoldStatus foldStatus);
 
@@ -1080,7 +1091,7 @@ public:
 
     virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault() {}
+    virtual void RestoreDefault(int32_t windowId = 0) {}
 
     void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {
@@ -1150,9 +1161,8 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
         const bool supportAvoidance = false)
     {}
-    virtual void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, double positionY, double height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false)
     {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
@@ -1189,6 +1199,7 @@ protected:
 
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
+    float fontWeightScale_ = 1.0f;
     float designWidthScale_ = 1.0f;
     float viewScale_ = 1.0f;
     double density_ = 1.0;
@@ -1201,6 +1212,7 @@ protected:
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
+    int8_t renderingMode_ = 0;
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;

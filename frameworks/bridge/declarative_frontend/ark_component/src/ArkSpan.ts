@@ -198,6 +198,19 @@ class SpanLetterSpacingModifier extends ModifierWithKey<string> {
     }
   }
 }
+class SpanBaselineOffsetModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity = Symbol('spanBaselineOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().span.resetBaselineOffset(node);
+    } else {
+      getUINativeModule().span.setBaselineOffset(node, this.value!);
+    }
+  }
+}
 class SpanFontModifier extends ModifierWithKey<Font> {
   constructor(value: Font) {
     super(value);
@@ -229,8 +242,8 @@ class SpanFontModifier extends ModifierWithKey<Font> {
     }
   }
 }
-class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType, color?: ResourceColor }) {
+class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity = Symbol('spanDecoration');
@@ -238,12 +251,12 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
     if (reset) {
       getUINativeModule().span.resetDecoration(node);
     } else {
-      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -852,12 +865,15 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
-  decoration(value: { type: TextDecorationType, color?: ResourceColor }): SpanAttribute {
+  decoration(value: { type: TextDecorationType, color?: ResourceColor; style?: TextDecorationStyle }): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
   font(value: Font): SpanAttribute {
-    modifierWithKey(this._modifiersWithKeys, SpanFontModifier.identity, SpanFontModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier, value?.size);
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value?.weight);
+    modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value?.family);
+    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value?.style);
     return this;
   }
   lineHeight(value: Length): SpanAttribute {
@@ -886,6 +902,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
   letterSpacing(value: number | string): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
+    return this;
+  }
+  baselineOffset(value: number | string): SpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }
   textCase(value: TextCase): SpanAttribute {

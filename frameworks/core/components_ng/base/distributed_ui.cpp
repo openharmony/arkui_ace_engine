@@ -383,15 +383,15 @@ bool DistributedUI::ReadyToDumpUpdate()
 
 void DistributedUI::SetIdMapping(int32_t srcNodeId, int32_t sinkNodeId)
 {
-    nodeIdMapping_.count(srcNodeId);
     nodeIdMapping_[srcNodeId] = sinkNodeId;
 }
 
 int32_t DistributedUI::GetIdMapping(int32_t srcNodeId)
 {
     int32_t sinkNodeId = ElementRegister::UndefinedElementId;
-    if (nodeIdMapping_.count(srcNodeId)) {
-        sinkNodeId = nodeIdMapping_[srcNodeId];
+    auto iter = nodeIdMapping_.find(srcNodeId);
+    if (iter != nodeIdMapping_.end()) {
+        sinkNodeId = iter->second;
     }
     return sinkNodeId;
 }
@@ -403,14 +403,16 @@ void DistributedUI::AddNodeHash(int32_t nodeId, std::size_t hashValue)
 
 void DistributedUI::DelNodeHash(int32_t nodeId)
 {
-    if (nodeHashs_.count(nodeId)) {
-        nodeHashs_.erase(nodeId);
+    auto iter = nodeHashs_.find(nodeId);
+    if (iter != nodeHashs_.end()) {
+        nodeHashs_.erase(iter);
     }
 }
 
 bool DistributedUI::IsRecordHash(int32_t nodeId, std::size_t hashValue)
 {
-    if (nodeHashs_.count(nodeId) && nodeHashs_.at(nodeId) == hashValue) {
+    auto iter = nodeHashs_.find(nodeId);
+    if (iter != nodeHashs_.end() && iter->second == hashValue) {
         return false;
     }
     AddNodeHash(nodeId, hashValue);

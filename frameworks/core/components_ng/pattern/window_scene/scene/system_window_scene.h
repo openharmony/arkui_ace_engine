@@ -55,7 +55,7 @@ private:
     void RegisterEventCallback();
     void RegisterResponseRegionCallback();
     void PostCheckContextTransparentTask();
-
+    void PostFaultInjectTask();
     int32_t instanceId_ = Container::CurrentId();
     sptr<Rosen::Session> session_;
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;

@@ -156,6 +156,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
         wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
     }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
 
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);

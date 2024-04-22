@@ -61,6 +61,7 @@ struct Index {
         .focusable(false)
         .margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL })
         .opacity(this.iconOpacity)
+        .draggable(false)
 
       Text(this.appTitle ? this.appTitle : this.appLabel)
         .id("enhanceAppLabel")

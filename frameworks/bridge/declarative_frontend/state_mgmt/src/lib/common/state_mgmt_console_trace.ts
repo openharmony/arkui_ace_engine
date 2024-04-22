@@ -73,7 +73,7 @@ class errorReport {
       msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
     } catch (e) { }
 
-    msg += "!";
+    msg += '!';
     stateMgmtConsole.applicationError(msg);
     throw new TypeError(msg);
   }
@@ -87,7 +87,7 @@ class errorReport {
       msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
     } catch (e) { }
 
-    msg += "!";
+    msg += '!';
 
     throw new TypeError(msg);
   }

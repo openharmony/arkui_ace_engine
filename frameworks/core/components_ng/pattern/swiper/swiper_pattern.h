@@ -543,6 +543,7 @@ public:
     void OnCustomContentTransition(int32_t toIndex);
     void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
     void OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemInfo> item);
+    float IgnoreBlankOffset(bool isJump);
 
     void SetCustomAnimationToIndex(int32_t toIndex)
     {
@@ -629,6 +630,16 @@ public:
     void SetIndicatorInteractive(bool isInteractive)
     {
         isIndicatorInteractive_ = isInteractive;
+    }
+
+    void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
+    {
+        nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
+    }
+
+    void SetPrevMarginIgnoreBlank(bool prevMarginIgnoreBlank)
+    {
+        prevMarginIgnoreBlank_ = prevMarginIgnoreBlank;
     }
 
 private:
@@ -909,6 +920,12 @@ private:
             !hasCachedCapture_ && SwiperUtils::IsStretch(swiperLayoutProperty);
     }
 
+    bool NeedStartNewAnimation(const OffsetF& offset) const;
+    void ResetOnForceMeasure();
+    void UpdateTabBarIndicatorCurve();
+    bool CheckDragOutOfBoundary(double dragVelocity);
+    void UpdateCurrentFocus();
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -1035,6 +1052,8 @@ private:
     bool needAdjustIndex_ = false;
     bool hasTabsAncestor_ = false;
     bool isIndicatorInteractive_ = true;
+    bool nextMarginIgnoreBlank_ = false;
+    bool prevMarginIgnoreBlank_ = false;
 
     std::optional<int32_t> cachedCount_;
 

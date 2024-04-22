@@ -22,6 +22,8 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/common/form_manager.h"
 #include "core/common/frontend.h"
@@ -33,6 +35,8 @@
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -56,6 +60,7 @@ constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
 constexpr int32_t MAX_CLICK_DURATION = 500000000; // ns
 constexpr int32_t DOUBLE = 2;
+constexpr char FORM_DIMENSION_SPLITTER = '*';
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -556,6 +561,11 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     if (host->IsDraggable()) {
         EnableDrag();
     }
+
+    if (!isJsCard_) {
+        LoadFormSkeleton();
+    }
+
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
         formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
@@ -639,6 +649,175 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
         subContainer_->UpdateRootElementSize();
         subContainer_->UpdateSurfaceSizeWithAnimathion();
     }
+}
+
+void FormPattern::LoadFormSkeleton()
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "LoadFormSkeleton");
+    int32_t dimension = cardInfo_.dimension;
+    int32_t dimensionHeight = GetFormDimensionHeight(dimension);
+    if (dimensionHeight <= 0) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "LoadFormSkeleton failed, invalid dimensionHeight!");
+        return;
+    }
+
+    RemoveFormSkeleton();
+
+    auto columnNode = CreateColumnNode();
+    CHECK_NULL_VOID(columnNode);
+
+    double cardWidth = cardInfo_.width.Value();
+    double cardHeight = cardInfo_.height.Value();
+    auto colorMode = SystemProperties::GetColorMode();
+    bool isDarkMode = colorMode == ColorMode::DARK;
+    std::shared_ptr<FormSkeletonParams> params = std::make_shared<FormSkeletonParams>(cardWidth,
+        cardHeight, dimension, dimensionHeight, isDarkMode);
+    CreateSkeletonView(columnNode, params, dimensionHeight);
+    
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext != nullptr) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+        renderContext->UpdateBackBlurStyle(styleOption);
+        renderContext->UpdateBackgroundColor(isDarkMode ?
+            Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT));
+        renderContext->UpdateOpacity(CONTENT_BG_OPACITY);
+    }
+    columnNode->MarkModifyDone();
+    columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    layoutProperty->UpdateVisibility(visible);
+}
+
+int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
+{
+    auto iter = OHOS::AppExecFwk::Constants::DIMENSION_MAP.
+        find(static_cast<OHOS::AppExecFwk::Constants::Dimension>(dimension));
+    if (iter == OHOS::AppExecFwk::Constants::DIMENSION_MAP.end()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "GetFormDimensionHeight failed, invalid dimension: %{public}d",
+            dimension);
+        return 0;
+    }
+    std::string formDimensionStr = iter->second;
+    std::stringstream streamDimension(formDimensionStr);
+    std::string dimensionHeightStr;
+    if (!std::getline(streamDimension, dimensionHeightStr, FORM_DIMENSION_SPLITTER)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "GetFormDimensionHeight failed!");
+        return 0;
+    }
+    return StringUtils::StringToInt(dimensionHeightStr);
+}
+
+void FormPattern::CreateSkeletonView(const RefPtr<FrameNode>& parent,
+    const std::shared_ptr<FormSkeletonParams>& params, int32_t dimensionHeight)
+{
+    float lineHeight = params->GetLineHeight();
+    uint32_t fillColor = params->GetFillColor();
+    float lineMarginLeft = params->GetLineMarginLeft();
+
+    // 1. Set title line
+    MarginProperty titleMargin;
+    titleMargin.top = CalcLength(params->GetTitleMarginTop());
+    titleMargin.left = CalcLength(lineMarginLeft);
+    CalcSize titleIdealSize = { CalcLength(params->GetTitleLineWidth()), CalcLength(lineHeight) };
+    auto titleLineNode = CreateRectNode(parent, titleIdealSize, titleMargin,
+        fillColor, params->GetTitleOpacity());
+    CHECK_NULL_VOID(titleLineNode);
+
+    // 2. Set content lines
+    for (int32_t i = 0; i < params->GetContentLineNum(); i++) {
+        MarginProperty contentMargin;
+        contentMargin.top = CalcLength(i == 0 ? params->GetTitleContentMargins() :
+            params->GetContentMargins());
+        contentMargin.left = CalcLength(lineMarginLeft);
+        CalcSize contentIdealSize = { CalcLength(params->GetLineWidth()), CalcLength(lineHeight) };
+        auto contentLineNode = CreateRectNode(parent, contentIdealSize, contentMargin,
+            fillColor, params->GetContentOpacity());
+        CHECK_NULL_VOID(contentLineNode);
+    }
+    
+    // 3. Set ending line if form dimension height greater than 1
+    if (dimensionHeight > 1) {
+        MarginProperty endingMargin;
+        endingMargin.top = CalcLength(params->GetEndingLineMarginTop());
+        endingMargin.left = CalcLength(lineMarginLeft);
+        CalcSize endingIdealSize = { CalcLength(params->GetEndingLineWidth()), CalcLength(lineHeight) };
+        auto endingLineNode = CreateRectNode(parent, endingIdealSize, endingMargin,
+            fillColor, params->GetContentOpacity());
+        CHECK_NULL_VOID(endingLineNode);
+    }
+}
+
+void FormPattern::RemoveFormSkeleton()
+{
+    ContainerScope scope(scopeId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = host->GetLastChild();
+    CHECK_NULL_VOID(child);
+
+    std::list<RefPtr<UINode>> children = host->GetChildren();
+    if (children.size() > 0 && child->GetTag() == V2::COLUMN_ETS_TAG) {
+        host->RemoveChildAtIndex(children.size() - 1);
+    }
+}
+
+RefPtr<FrameNode> FormPattern::CreateColumnNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_RETURN(columnNode, nullptr);
+
+    auto width = static_cast<float>(cardInfo_.width.Value());
+    auto height = static_cast<float>(cardInfo_.height.Value());
+    CalcSize idealSize = { CalcLength(width), CalcLength(height) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    columnNode->UpdateLayoutConstraint(layoutConstraint);
+
+    auto layoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+
+    host->AddChild(columnNode);
+    return columnNode;
+}
+
+RefPtr<FrameNode> FormPattern::CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
+    const MarginProperty& margin, uint32_t fillColor, double opacity)
+{
+    auto rectNode = FrameNode::CreateFrameNode(V2::RECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RectPattern>());
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    rectNode->UpdateLayoutConstraint(layoutConstraint);
+
+    rectNode->GetLayoutProperty()->UpdateMargin(margin);
+
+    auto paintProperty = rectNode->GetPaintProperty<RectPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    paintProperty->UpdateFill(Color(fillColor));
+    paintProperty->UpdateFillOpacity(opacity);
+
+    paintProperty->UpdateTopLeftRadius(NG::Radius(RECT_RADIUS));
+    paintProperty->UpdateTopRightRadius(NG::Radius(RECT_RADIUS));
+    paintProperty->UpdateBottomLeftRadius(NG::Radius(RECT_RADIUS));
+    paintProperty->UpdateBottomRightRadius(NG::Radius(RECT_RADIUS));
+
+    rectNode->MountToParent(parent);
+    rectNode->MarkDirtyNode();
+
+    return rectNode;
 }
 
 void FormPattern::InitFormManagerDelegate()
@@ -824,6 +1003,8 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    RemoveFormSkeleton();
 
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);

@@ -43,6 +43,8 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+constexpr int16_t DEFAULT_ALPHA = 255;
+constexpr double DEFAULT_OPACITY = 0.2;
 std::string g_strValue;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
@@ -194,7 +196,7 @@ void SetTextAreaPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIReso
             font.fontSize = CalcDimension(size->value, unitEnum);
         }
     } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -485,7 +487,7 @@ void GetTextAreaPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     CHECK_NULL_VOID(frameNode);
     Font value = TextFieldModelNG::GetPlaceholderFont(frameNode);
     if (value.fontSize.has_value()) {
-        font->fontSize = value.fontSize.value().Value();
+        font->fontSize = value.fontSize.value().GetNativeValue(static_cast<DimensionUnit>(font->fontSizeUnit));
     }
     if (value.fontWeight.has_value()) {
         font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
@@ -718,6 +720,101 @@ void SetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetTextAreaHeightAdaptivePolicy(ArkUINodeHandle node) {}
 
+void SetTextAreaSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color selectedColor = Color(color);
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+}
+
+void ResetTextAreaSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color selectedColor;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    selectedColor = theme->GetSelectedColor();
+    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
+}
+
+void SetTextAreaCaretStyle(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = CalcDimension(value, (DimensionUnit)unit);
+    TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+}
+
+void ResetTextAreaCaretStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = theme->GetCursorWidth();
+    TextFieldModelNG::SetCaretStyle(frameNode, caretStyle);
+}
+
+
+void SetTextAreaTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextOverflow valueTextOverflow = static_cast<TextOverflow>(value);
+    TextFieldModelNG::SetTextOverflow(frameNode, valueTextOverflow);
+}
+
+void ResetTextAreaTextOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
+}
+
+void SetTextAreaTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetTextAreaTextIndent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
+}
+
+void SetTextAreaLineSpacing(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetLineSpacing(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextAreaLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value;
+    value.Reset();
+    TextFieldModelNG::SetLineSpacing(frameNode, value);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -742,7 +839,9 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak,
         ResetTextAreaWordBreak, SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize,
         SetTextAreaAdaptMaxFontSize, ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy,
-        ResetTextAreaHeightAdaptivePolicy };
+        ResetTextAreaHeightAdaptivePolicy, SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor,
+        SetTextAreaCaretStyle, ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow,
+        SetTextAreaTextIndent, ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing };
     return &modifier;
 }
 

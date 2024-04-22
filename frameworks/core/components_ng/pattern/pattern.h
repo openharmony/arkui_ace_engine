@@ -270,7 +270,7 @@ public:
         return false;
     }
 
-    virtual void BeforeSyncGeometryProperties() {}
+    virtual void BeforeSyncGeometryProperties(const DirtySwapConfig& config) {}
 
     // Called on main thread to check if need rerender of the content.
     virtual bool OnDirtyLayoutWrapperSwap(

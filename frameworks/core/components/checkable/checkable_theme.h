@@ -181,6 +181,16 @@ public:
         return dotResourceId_;
     }
 
+    const Color& GetFocusedBgColor() const
+    {
+        return focusedBgColor_;
+    }
+
+    const Dimension& GetSizeFocusBg() const
+    {
+        return sizeFocusBg_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -195,6 +205,8 @@ protected:
     Color focusBoardColor_;
     Color borderFocusedColor_;
     Color focusedBGColorUnselected_;
+    Color focusedBgColor_;
+    Dimension sizeFocusBg_;
     Dimension width_;
     Dimension height_;
     Dimension hotZoneHorizontalPadding_;
@@ -435,6 +447,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            ParseNewPattern(themeConstants, theme);
             ParsePattern(themeConstants, theme);
             return theme;
         }
@@ -500,6 +513,17 @@ public:
                     radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
                 theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             }
+        }
+
+        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+            if (!radioPattern) {
+                LOGW("find pattern of radio fail");
+                return;
+            }
+            theme->focusedBgColor_ = radioPattern->GetAttr<Color>("color_focused_bg", Color::RED);
+            theme->sizeFocusBg_ = radioPattern->GetAttr<Dimension>("size_focused_bg", 0.0_vp);
         }
     };
 };

@@ -77,43 +77,77 @@ void UObject::AddItemToObject(const std::string& key, const std::shared_ptr<UObj
 
 std::string UObject::GetString(const std::string& key) const
 {
-    return stringItems_.count(key) ? stringItems_.at(key) : "";
+    auto iter = stringItems_.find(key);
+    if (iter != stringItems_.end()) {
+        return iter->second;
+    }
+    return "";
 }
 
 size_t UObject::GetSizeT(const std::string& key) const
 {
-    return sizetItems_.count(key)    ? sizetItems_.at(key)
-           : doubleItems_.count(key) ? static_cast<size_t>(doubleItems_.at(key))
-                                     : 0;
+    auto sizetIter = sizetItems_.find(key);
+    if (sizetIter != sizetItems_.end()) {
+        return sizetIter->second;
+    }
+    auto doubleIter = doubleItems_.find(key);
+    if (doubleIter != doubleItems_.end()) {
+        return static_cast<size_t>(doubleIter->second);
+    }
+    return 0;
 }
 
 int32_t UObject::GetInt32(const std::string& key) const
 {
-    return int32Items_.count(key)    ? int32Items_.at(key)
-           : doubleItems_.count(key) ? static_cast<int32_t>(doubleItems_.at(key))
-                                     : 0;
+    auto int32Iter = int32Items_.find(key);
+    if (int32Iter != int32Items_.end()) {
+        return int32Iter->second;
+    }
+    auto doubleIter = doubleItems_.find(key);
+    if (doubleIter != doubleItems_.end()) {
+        return static_cast<int32_t>(doubleIter->second);
+    }
+    return 0;
 }
 
 int64_t UObject::GetInt64(const std::string& key) const
 {
-    return int64Items_.count(key)    ? int64Items_.at(key)
-           : doubleItems_.count(key) ? static_cast<int64_t>(doubleItems_.at(key))
-                                     : 0;
+    auto int64Iter = int64Items_.find(key);
+    if (int64Iter != int64Items_.end()) {
+        return int64Iter->second;
+    }
+    auto doubleIter = doubleItems_.find(key);
+    if (doubleIter != doubleItems_.end()) {
+        return static_cast<int64_t>(doubleIter->second);
+    }
+    return 0;
 }
 
 double UObject::GetDouble(const std::string& key) const
 {
-    return doubleItems_.count(key) ? doubleItems_.at(key) : 0;
+    auto iter = doubleItems_.find(key);
+    if (iter != doubleItems_.end()) {
+        return iter->second;
+    }
+    return 0;
 }
 
 bool UObject::GetBool(const std::string& key) const
 {
-    return boolItems_.count(key) ? boolItems_.at(key) : false;
+    auto iter = boolItems_.find(key);
+    if (iter != boolItems_.end()) {
+        return iter->second;
+    }
+    return false;
 }
 
 std::shared_ptr<UObject> UObject::GetObject(const std::string& key) const
 {
-    return children_.count(key) ? children_.at(key) : std::make_shared<UObject>();
+    auto iter = children_.find(key);
+    if (iter != children_.end()) {
+        return iter->second;
+    }
+    return std::make_shared<UObject>();
 }
 
 bool UObject::Contains(const std::string& key) const

@@ -30,6 +30,9 @@
 #include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Ace::Napi {
+using ListenerPtr = std::shared_ptr<UIObserverListener>;
+using NavListenerMap = std::unordered_map<int32_t, std::list<ListenerPtr>>;
+using SpecNavListenerMap = std::unordered_map<int32_t, std::unordered_map<std::string, std::list<ListenerPtr>>>;
 class UIObserver {
 public:
     static void RegisterNavigationCallback(const std::shared_ptr<UIObserverListener>& listener);
@@ -113,9 +116,8 @@ private:
     static void GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info);
     static napi_env GetCurrentNapiEnv();
 
-    static std::list<std::shared_ptr<UIObserverListener>> unspecifiedNavigationListeners_;
-    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
-        specifiedCNavigationListeners_;
+    static NavListenerMap unspecifiedNavigationListeners_;
+    static SpecNavListenerMap specifiedCNavigationListeners_;
     static std::list<std::shared_ptr<UIObserverListener>> scrollEventListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedScrollEventListeners_;

@@ -30,6 +30,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/data_detector_mgr.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -180,6 +181,9 @@ constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
+constexpr int32_t DEFAULT_PINCH_FINGER = 2;
+constexpr double DEFAULT_PINCH_DISTANCE = 4.0;
+
 WebPattern::WebPattern() = default;
 
 WebPattern::WebPattern(const std::string& webSrc,
@@ -199,15 +203,18 @@ WebPattern::WebPattern(const std::string& webSrc,
 
 WebPattern::~WebPattern()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "Web pattern destory");
+    TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
     if (delegate_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
     }
 
     if (observer_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern observer_ start NotifyDestory");
         observer_->NotifyDestory();
     }
     if (isActive_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
         OnInActive();
     }
 }
@@ -260,6 +267,7 @@ void WebPattern::InitEvent()
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
     InitPanEvent(gestureHub);
+    InitPinchEvent(gestureHub);
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -351,6 +359,47 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
     }
 }
 
+void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (pinchGesture_) {
+        return;
+    }
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleScaleGestureChange(event);
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->pinchValue_ = pattern->pinchValue_ * event.GetScale();
+        return;
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
+
+    pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
+    pinchGesture_->SetPriority(GesturePriority::Parallel);
+    pinchGesture_->SetOnActionStartId(actionStartTask);
+    pinchGesture_->SetOnActionUpdateId(actionUpdateTask);
+    pinchGesture_->SetOnActionEndId(actionEndTask);
+    pinchGesture_->SetOnActionCancelId(actionCancelTask);
+    gestureHub->AddGesture(pinchGesture_);
+}
+
+void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale =  pinchValue_ * event.GetScale();
+    double centerX =  event.GetPinchCenter().GetX();
+    double centerY =  event.GetPinchCenter().GetY();
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HandleScaleGestureChange scale: %{public}lf centerX: %{public}lf centerY: %{public}lf",
+        scale, centerX, centerY);
+    delegate_->ScaleGestureChange(scale, centerX, centerY);
+}
+
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (touchEvent_) {
@@ -428,6 +477,8 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
         if (!isHover) {
             OHOS::NWeb::NWebCursorInfo cursorInfo;
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "Set cursor to pointer when mouse pointer is leave.");
             pattern->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, cursorInfo);
         }
         pattern->WebOnMouseEvent(info);
@@ -584,30 +635,21 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         std::string linkUrl = delegate_->dragData_->GetLinkURL();
         std::string linkTitle = delegate_->dragData_->GetLinkTitle();
         if (!plainContent.empty()) {
+            isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddPlainTextRecord(aceUnifiedData, plainContent);
         }
         if (!htmlContent.empty()) {
+            isDragEndMenuShow_ = true;
             UdmfClient::GetInstance()->AddHtmlRecord(aceUnifiedData, htmlContent, "");
         }
         if (!linkUrl.empty()) {
+            isDragEndMenuShow_ = false;
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
         }
         std::string fileName = delegate_->dragData_->GetImageFileName();
         if (!fileName.empty()) {
-            std::string fullName;
-            if (delegate_->tempDir_.empty()) {
-                fullName = "/data/storage/el2/base/haps/entry/temp/dragdrop/" + fileName;
-            } else {
-                fullName = delegate_->tempDir_ + "/dragdrop/" + fileName;
-            }
-            AppFileService::ModuleFileUri::FileUri fileUri(fullName);
-            TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, FileUri:%{public}s, image path:%{public}s",
-                fileUri.ToString().c_str(), fullName.c_str());
-            std::vector<std::string> urlVec;
-            std::string udmfUri = fileUri.ToString();
-            urlVec.emplace_back(udmfUri);
-            UdmfClient::GetInstance()->AddFileUriRecord(aceUnifiedData, urlVec);
+            OnDragFileNameStart(aceUnifiedData, fileName);
         } else {
             TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop event start, dragdata has no image file uri, just pass");
         }
@@ -616,6 +658,24 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         return dragDropInfo;
     }
     return dragDropInfo;
+}
+
+void WebPattern::OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName)
+{
+    isDragEndMenuShow_ = false;
+    std::string fullName;
+    if (delegate_->tempDir_.empty()) {
+        fullName = "/data/storage/el2/base/haps/entry/temp/dragdrop/" + fileName;
+    } else {
+        fullName = delegate_->tempDir_ + "/dragdrop/" + fileName;
+    }
+    AppFileService::ModuleFileUri::FileUri fileUri(fullName);
+    TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, FileUri:%{public}s, image path:%{public}s",
+        fileUri.ToString().c_str(), fullName.c_str());
+    std::vector<std::string> urlVec;
+    std::string udmfUri = fileUri.ToString();
+    urlVec.emplace_back(udmfUri);
+    UdmfClient::GetInstance()->AddFileUriRecord(aceUnifiedData, urlVec);
 }
 
 void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
@@ -757,6 +817,7 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             " x:%{public}lf, y:%{public}lf", info->GetX(), info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isDragEndMenuShow_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB,
             "DragDrop event WebEventHub onDragLeaveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
@@ -772,6 +833,7 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             "DragDrop event WebEventHub onDragEndId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
             info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->HandleDragEnd(pattern->dropX_, pattern->dropY_);
+        pattern->DragDropSelectionMenu();
     };
     // set custom OnDragStart function
     eventHub->SetOnDragEnd(std::move(onDragEndId));
@@ -1239,14 +1301,16 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
         height, keyboard, GetCoordinatePoint()->GetY(), oldWebHeight);
 
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
-        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-        if (GreatOrEqual(newHeight, oldWebHeight)) {
-            newHeight = oldWebHeight;
+        if (!CheckSafeAreaIsExpand()) {
+            double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
+            if (GreatOrEqual(newHeight, oldWebHeight)) {
+                newHeight = oldWebHeight;
+            }
+            if (NearEqual(newHeight, oldWebHeight)) {
+                return;
+            }
+            drawSize_.SetHeight(newHeight);
         }
-        if (NearEqual(newHeight, oldWebHeight)) {
-            return;
-        }
-        drawSize_.SetHeight(newHeight);
         UpdateWebLayoutSize(width, height, true);
     }
 }
@@ -1254,6 +1318,15 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
 void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
+    if (CheckSafeAreaIsExpand()) {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto geometryNode = frameNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        drawSize_ = Size(geometryNode->GetFrameRect().Width(), geometryNode->GetFrameRect().Height());
+        delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
+    }
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
         if (webOffset_ == offset) {
             return;
@@ -1263,7 +1336,6 @@ void WebPattern::OnAreaChangedInner()
     UpdateTouchHandleForOverlay();
     if (isInWindowDrag_)
         return;
-    auto resizeOffset = Offset(offset.GetX(), offset.GetY());
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     if (isNeedReDrawRect_) {
         UpdateSlideOffset(true);
@@ -1674,8 +1746,10 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     RegistVirtualKeyBoardListener();
+    bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
+        isFirstCreate = true;
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
         CHECK_NULL_VOID(delegate_);
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
@@ -1800,8 +1874,10 @@ void WebPattern::OnModifyDone()
 
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
-        auto task = [this]() {
-            InitSlideUpdateListener();
+        auto task = [weak = AceType::WeakClaim(this)]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->InitSlideUpdateListener();
         };
         PostTaskToUI(std::move(task));
     }
@@ -1820,7 +1896,7 @@ void WebPattern::OnModifyDone()
     pipelineContext->AddOnAreaChangeNode(host->GetId());
 
     // offline mode
-    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
+    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE && isFirstCreate) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
@@ -1943,6 +2019,9 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "SelectOverlay touch down add id:%{public}d.", touchPoint.id);
+            touchOverlayInfo_.push_back(touchPoint);
         }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
@@ -2131,6 +2210,14 @@ void WebPattern::CloseSelectOverlay()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (selectOverlayProxy_) {
+        if (IsSelectOverlayDragging()) {
+            for (auto& touchOverlayInfo : touchOverlayInfo_) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
+                delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
+            }
+        }
+        touchOverlayInfo_.clear();
         selectOverlayProxy_->Close();
         pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
         selectOverlayProxy_ = nullptr;
@@ -2260,11 +2347,52 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     if (selectInfo.isNewAvoid && selectOverlayProxy_) {
         selectOverlayProxy_->ShowOrHiddenMenu(false);
     }
+    dropParams_ = params;
+    menuCallback_ = callback;
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
     return selectOverlayProxy_ ? true : false;
+}
+
+void WebPattern::DragDropSelectionMenu()
+{
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    if (overlayType == INVALID_OVERLAY) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event Web pages do not require restoring menu handles");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event Web show menu. isDragEndMenuShow_：%{publc}d", isDragEndMenuShow_);
+    if (!isDragEndMenuShow_ || IsImageDrag()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsCurrentFocus()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop event web page has lost focus, no need to draw menu handles");
+        return;
+    }
+    SelectOverlayInfo selectInfo;
+    selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+    selectInfo.firstHandle.isShow = IsTouchHandleShow(startSelectionHandle_);
+    selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(startSelectionHandle_);
+    selectInfo.secondHandle.isShow = IsTouchHandleShow(endSelectionHandle_);
+    selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
+    QuickMenuIsNeedNewAvoid(selectInfo, dropParams_, startSelectionHandle_, endSelectionHandle_);
+    selectInfo.menuInfo.menuIsShow = true;
+    RegisterSelectOverlayCallback(selectInfo, dropParams_, menuCallback_);
+    RegisterSelectOverlayEvent(selectInfo);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!selectOverlayProxy_) {
+        selectOverlayProxy_ =
+            pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
+    }
 }
 
 RectF WebPattern::ComputeClippedSelectionBounds(
@@ -2722,14 +2850,11 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
     OHOS::NWeb::DateTime minimum = chooser->GetMinimum();
     OHOS::NWeb::DateTime maximum = chooser->GetMaximum();
     OHOS::NWeb::DateTime dialogValue = chooser->GetDialogValue();
-    settingData.datePickerProperty["start"] = PickerDate(
-        minimum.year, minimum.month + 1, minimum.day);
-    settingData.datePickerProperty["end"] = PickerDate(
-        maximum.year, maximum.month + 1, maximum.day);
+    settingData.datePickerProperty["start"] = PickerDate(minimum.year, minimum.month + 1, minimum.day);
+    settingData.datePickerProperty["end"] = PickerDate(maximum.year, maximum.month + 1, maximum.day);
     if (chooser->GetHasSelected()) {
         int32_t day = (dialogValue.day == 0) ? 1 : dialogValue.day;
-        settingData.datePickerProperty["selected"] =
-            PickerDate(dialogValue.year, dialogValue.month + 1, day);
+        settingData.datePickerProperty["selected"] = PickerDate(dialogValue.year, dialogValue.month + 1, day);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -2741,11 +2866,13 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
     return true;
@@ -2776,8 +2903,7 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     timePickerProperty["start"] = PickerTime(minimum.hour, minimum.minute, minimum.second);
     timePickerProperty["selected"] = PickerTime(maximum.hour, maximum.minute, maximum.second);
     if (chooser->GetHasSelected()) {
-        timePickerProperty["selected"] =
-            PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
+        timePickerProperty["selected"] = PickerTime(dialogValue.hour, dialogValue.minute, dialogValue.second);
     }
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -2789,12 +2915,14 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
+        [properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTimeDialog(
+                properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
     return true;
@@ -2841,11 +2969,13 @@ bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDa
     dialogCancelEvent["cancelId"] =
         [callback](const GestureEvent&) { callback->Continue(false, OHOS::NWeb::DateTime()); };
     overlayManager->RegisterOnHideDialog([callback] { callback->Continue(false, OHOS::NWeb::DateTime()); });
+    std::vector<ButtonInfo> buttonInfos;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent,
+            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTextDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
     return true;
@@ -3694,5 +3824,24 @@ void WebPattern::RegisterVisibleAreaChangeCallback()
     };
     std::vector<double> ratioList = {0.0, 1.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+bool WebPattern::CheckSafeAreaIsExpand()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto && opts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(opts, false);
+    if ((opts->type & SAFE_AREA_TYPE_SYSTEM) || (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        return true;
+    }
+    return false;
+}
+
+std::vector<int8_t> WebPattern::GetWordSelection(const std::string& text, int8_t offset)
+{
+    return DataDetectorMgr::GetInstance().GetWordSelection(text, offset);
 }
 } // namespace OHOS::Ace::NG

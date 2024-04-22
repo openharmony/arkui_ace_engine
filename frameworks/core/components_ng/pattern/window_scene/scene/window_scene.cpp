@@ -19,7 +19,6 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
-#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,6 +46,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     };
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
+    initWindowMode_ = session_->GetWindowMode();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -84,7 +84,7 @@ void WindowScene::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
-    session_->SetAttachState(true);
+    session_->SetAttachState(true, initWindowMode_);
     session_->SetUINodeId(host->GetAccessibilityId());
     auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
         const std::vector<DimensionRect>& responseRegion) {
@@ -117,7 +117,7 @@ void WindowScene::OnAttachToFrameNode()
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
-            session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
+            session_->GetPersistentId(), session_->GetWindowType(), session_->GetWindowName().c_str());
         return;
     }
 
@@ -137,9 +137,24 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
-    session_->SetAttachState(false);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain][WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
-        session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
+    session_->SetAttachState(false, initWindowMode_);
+    if (IsMainWindow()) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, name: %{public}s",
+            session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
+            session_->GetPersistentId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+    }
+}
+
+void WindowScene::OnMountToParentDone()
+{
+    if (snapshotNode_) {
+        snapshotNode_->MovePosition(-1);
+    }
+    if (startingNode_) {
+        startingNode_->MovePosition(-1);
+    }
 }
 
 void WindowScene::RegisterFocusCallback()
@@ -231,8 +246,11 @@ void WindowScene::BufferAvailableCallback()
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             Rosen::RSAnimationTimingProtocol protocol;
             protocol.SetDuration(config.duration_);
-            auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
-                Rosen::RSAnimationTimingCurve::DEFAULT;
+            auto curve = Rosen::RSAnimationTimingCurve::DEFAULT;
+            auto iter = curveMap.find(config.curve_);
+            if (iter != curveMap.end()) {
+                curve = iter->second;
+            }
             Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
                 AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
                 rsNode->NotifyTransition(effect, false);
@@ -324,6 +342,7 @@ void WindowScene::OnConnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->AddChild(self->contentNode_, 0);
+        self->contentNode_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] Add app window finished, id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
