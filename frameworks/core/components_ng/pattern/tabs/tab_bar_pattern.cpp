@@ -1100,6 +1100,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
         auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
         maskGeometryNode->SetMarginFrameOffset(maskOffset + tabBarOffset);
         maskGeometryNode->SetFrameSize(SizeF(imageSize * radiusRatio * 2.0f, imageSize * radiusRatio * 2.0f));
+        maskRenderContext->SavePaintRect();
         maskRenderContext->SyncGeometryProperties(nullptr);
         BorderRadiusProperty borderRadiusProperty;
         borderRadiusProperty.SetRadius(Dimension(imageSize * radiusRatio));
@@ -1114,6 +1115,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
         maskImageProperty->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(Dimension(imageSize)), NG::CalcLength(Dimension(imageSize))));
         maskImageRenderContext->SetVisible(false);
+        maskImageRenderContext->SavePaintRect();
         maskImageRenderContext->SyncGeometryProperties(nullptr);
     }
     maskImageRenderContext->UpdateOpacity(opacity);
