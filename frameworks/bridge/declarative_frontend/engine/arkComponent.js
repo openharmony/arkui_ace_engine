@@ -12803,6 +12803,7 @@ class ArkRadioComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
     this.builder = modifier.applyContent();
