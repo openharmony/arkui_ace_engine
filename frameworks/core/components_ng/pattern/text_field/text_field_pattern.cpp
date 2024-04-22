@@ -5855,6 +5855,13 @@ void TextFieldPattern::OnAttachToFrameNode()
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        auto host = GetHost();
+        fontManager->AddFontNodeNG(host);
+    }
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

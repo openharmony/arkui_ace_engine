@@ -423,7 +423,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     // Font size must be px when transferring to txt::TextStyle
     if (pipelineContext) {
         txtStyle.font_size = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             txtStyle.font_size =
                 pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }
@@ -616,7 +616,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     // Font size must be px when transferring to Rosen::TextStyle
     if (pipelineContext) {
         txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             txtStyle.fontSize =
                 pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }

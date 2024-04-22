@@ -111,7 +111,7 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }
     }
@@ -126,7 +126,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() || textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
         }
     }
@@ -141,7 +141,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() || textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
         }
     }

@@ -774,6 +774,7 @@ public:
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
+    virtual void RebuildFontNode() {}
     FrontendType GetFrontendType() const
     {
         return frontendType_;

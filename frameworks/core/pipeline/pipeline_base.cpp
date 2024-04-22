@@ -245,19 +245,23 @@ void PipelineBase::SetFontScale(float fontScale)
         if ((isJsCard_ || isFormRender_) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
             fontScale_ = CARD_MAX_FONT_SCALE;
         }
-        fontManager_->RebuildFontNode();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->RebuildFontNode();
     }
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
 {
-    const static float CARD_MAX_FONT_WEIGHT_SCALE = 1.3f;
+    const static float CARD_MAX_FONT_WEIGHT_SCALE = 1.25f;
     if (!NearEqual(fontWeightScale_, fontWeightScale)) {
         fontWeightScale_ = fontWeightScale;
         if (isJsCard_ && GreatOrEqual(fontWeightScale_, CARD_MAX_FONT_WEIGHT_SCALE)) {
             fontWeightScale_ = CARD_MAX_FONT_WEIGHT_SCALE;
         }
-        fontManager_->RebuildFontNode();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->RebuildFontNode();
     }
 }
 
