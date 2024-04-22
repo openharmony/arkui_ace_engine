@@ -2199,7 +2199,6 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
         y = y - edgeHeight;
     }
 
-    x = x - SelectHandleInfo::GetDefaultLineWidth().ConvertToPx() / 2;
     paintRect.SetOffset({ x, y });
     paintRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), edgeHeight });
     return paintRect;
@@ -2526,6 +2525,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+            selectInfo.isHandleLineShow = false;
             RegisterSelectOverlayEvent(selectInfo);
             selectOverlayProxy_ =
                 pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
