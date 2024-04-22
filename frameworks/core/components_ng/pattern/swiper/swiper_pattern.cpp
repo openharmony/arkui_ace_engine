@@ -899,6 +899,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             bool isNeedPlayTranslateAnimation =
                 translateAnimationIsRunning_ ||
                 (IsLoop() && itemPosition_.find(lastItemIndex) == itemPosition_.end()) || isNeedBackwardTranslate;
+            targetPos += IgnoreBlankOffset(false);
             if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
                 // displayCount is auto, loop is false, if the content width less than windows size
                 // need offset to keep right aligned
@@ -959,6 +960,36 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
+}
+
+float SwiperPattern::IgnoreBlankOffset(bool isJump)
+{
+    float result = 0.0f;
+    if (!isJump && targetIndex_) {
+        auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
+        if (!IsLoop()) {
+            if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
+                result += GetPrevMargin();
+            }
+            if (targetIndexValue == (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
+                result -= GetNextMargin();
+            }
+        }
+    }
+
+    if (jumpIndex_) {
+        auto targetIndexValue = IsLoop() ? jumpIndex_.value() : GetLoopIndex(jumpIndex_.value());
+        if (!IsLoop()) {
+            if (targetIndexValue == 0 && prevMarginIgnoreBlank_) {
+                result += GetPrevMargin();
+            }
+            if (targetIndexValue == (TotalCount() - GetDisplayCount()) && nextMarginIgnoreBlank_) {
+                result -= GetNextMargin();
+            }
+        }
+    }
+
+    return result;
 }
 
 bool SwiperPattern::IsAutoLinear() const
