@@ -125,6 +125,8 @@ protected:
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
@@ -154,6 +156,7 @@ private:
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     void ApplyIndent(double width);
+    bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
