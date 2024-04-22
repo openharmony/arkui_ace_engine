@@ -2371,7 +2371,10 @@ class ChildrenMainSize {
       this.sizeArray.splice(startValue, deleteCountValue);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
     } else if (paramCount === 3) {
-      let childrenSizeLength = childrenSize.length;
+      let childrenSizeLength = childrenSize ? childrenSize.length : 0;
+      if (childrenSizeLength === 0) {
+        childrenSize = [];
+      }
       for (let i = 0; i < childrenSizeLength; i++) {
         if (this.isInvalid(childrenSize[i])) {
           // -1: represent default size.
