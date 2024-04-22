@@ -300,11 +300,9 @@ public:
     void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
 
-<<<<<<< HEAD
-    void SetNodeGrayScale(float grayscale) override;
-=======
     void SetFormRenderingMode(int8_t renderMode) override;
->>>>>>> d1781b3f1fdc405fd7d6b8adcfa6b8a8a85154ba
+
+    void SetNodeGrayScale(float grayscale) override;
 
 private:
     UIContentErrorCode InitializeInner(
