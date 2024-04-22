@@ -63,6 +63,7 @@ DataPanelModifier::DataPanelModifier()
     trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(theme->GetBackgroundColor()));
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetThickness().ConvertToPx());
     isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(date_);
     AttachProperty(max_);
     AttachProperty(trackBackgroundColor_);
@@ -99,6 +100,9 @@ DataPanelModifier::DataPanelModifier()
 
 void DataPanelModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     if (dataPanelType_ == 0) {
         PaintCircle(context, offset_);
     } else {

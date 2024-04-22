@@ -15952,6 +15952,26 @@ class ArkDataPanelComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, dataPanelConfig) {
+    dataPanelConfig.contentModifier = this.modifier;
+    if (isUndefined(this.dataPanelNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.dataPanelNode = new xNode.BuilderNode(context);
+      this.dataPanelNode.build(this.builder, dataPanelConfig);
+    } else {
+      this.dataPanelNode.update(dataPanelConfig);
+    }
+    return this.dataPanelNode.getFrameNode();
+  }
 }
 class DataPanelStrokeWidthModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -18368,6 +18388,14 @@ if (globalThis.XComponent !== undefined) {
     });
     applyUIAttributes(modifier, nativeNode, component);
     component.applyModifierPatch();
+  };
+  globalThis.DataPanel.contentModifier = function (style) {
+      const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+      let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+      let component = this.createOrGetNode(elmtId, () => {
+        return new ArkDataPanelComponent(nativeNode);
+      });
+    component.setContentModifier(style);
   };
 }
 
