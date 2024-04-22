@@ -343,6 +343,7 @@ public:
     void FlushBuild() override;
 
     void FlushPipelineImmediately() override;
+    void RebuildFontNode() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 

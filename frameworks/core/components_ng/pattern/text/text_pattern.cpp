@@ -83,9 +83,14 @@ GradientColor CreateTextGradientColor(float percent, Color color)
 
 void TextPattern::OnAttachToFrameNode()
 {
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        auto host = GetHost();
+        fontManager->AddFontNodeNG(host);
+    }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {

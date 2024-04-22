@@ -399,6 +399,8 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 
 void PipelineContext::FlushPipelineImmediately() {}
 
+void PipelineContext::RebuildFontNode() {}
+
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_t /* timeStamp */)
 {
     return nullptr;

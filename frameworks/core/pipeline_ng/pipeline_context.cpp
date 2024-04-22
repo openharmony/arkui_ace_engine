@@ -875,6 +875,13 @@ void PipelineContext::FlushPipelineImmediately()
     FlushPipelineWithoutAnimation();
 }
 
+void PipelineContext::RebuildFontNode()
+{
+    if (fontManager_) {
+        fontManager_->RebuildFontNodeNG();
+    }
+}
+
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     ACE_FUNCTION_TRACE();
