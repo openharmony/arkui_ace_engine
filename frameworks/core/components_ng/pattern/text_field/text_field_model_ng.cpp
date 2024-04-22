@@ -1394,6 +1394,44 @@ void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace:
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
 }
 
+void TextFieldModelNG::SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue, frameNode);
+}
+
+void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditChanged(std::move(func));
+}
+
+void TextFieldModelNG::SetInputFilter(FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, InputFilter, value, frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInputFilterError(onError);
+}
+
+void TextFieldModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
 void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);

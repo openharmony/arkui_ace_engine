@@ -23,12 +23,6 @@
 
 namespace OHOS::Ace {
 
-enum class CancelButtonStyle {
-    CONSTANT,
-    INVISIBLE,
-    INPUT,
-};
-
 class SearchModel {
 public:
     static SearchModel* GetInstance();

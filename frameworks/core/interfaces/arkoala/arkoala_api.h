@@ -2162,6 +2162,29 @@ struct ArkUITextInputModifier {
     void (*setTextInputEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextInputEnableAutoFill)(ArkUINodeHandle node);
     void (*resetTextInputPadding)(ArkUINodeHandle node);
+    void (*setTextInputSelectAll)(ArkUINodeHandle node, ArkUI_Uint32 enableSelectAll);
+    void (*resetTextInputSelectAll)(ArkUINodeHandle node);
+    void (*setTextInputShowCounter)(
+        ArkUINodeHandle node, ArkUI_Uint32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Uint32 highlightBorder);
+    void (*resetTextInputShowCounter)(ArkUINodeHandle node);
+    void (*setTextInputOnEditChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnEditChange)(ArkUINodeHandle node);
+    void (*setTextInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);
+    void (*resetTextInputFilter)(ArkUINodeHandle node);
+    void (*setTextInputOnSubmitWithEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnSubmitWithEvent)(ArkUINodeHandle node);
+    void (*setTextInputOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnChange)(ArkUINodeHandle node);
+    void (*setTextInputOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setTextInputOnContentScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnContentScroll)(ArkUINodeHandle node);
+    void (*setTextInputOnCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnCopy)(ArkUINodeHandle node);
+    void (*setTextInputOnCut)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnCut)(ArkUINodeHandle node);
+    void (*setTextInputOnPaste)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnPaste)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

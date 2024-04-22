@@ -196,6 +196,11 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void ResetTextInputPadding(FrameNode* frameNode);
+    static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
+    static void SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static void SetInputFilter(FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);
+    static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;
