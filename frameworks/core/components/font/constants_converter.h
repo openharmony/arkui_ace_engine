@@ -123,6 +123,8 @@ void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderS
 
 SkColor ConvertSkColor(Color color);
 
+void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle);
+
 } // namespace Constants
 
 } // namespace OHOS::Ace
