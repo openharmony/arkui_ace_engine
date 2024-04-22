@@ -600,8 +600,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 child->GetGeometryNode()->Reset();
                 child->GetGeometryNode()->SetContentSize(SizeF());
             } else {
-                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-                child->Measure(layoutConstraint);
+                child->Measure(childConstraint);
                 builderChildList.push_back(child);
             }
             BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
