@@ -367,6 +367,8 @@ private:
     void ResetFormAnimationFlag();
     void OnAnimatedModifyDone();
     void OnImageModifyDone();
+    void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
+    void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
