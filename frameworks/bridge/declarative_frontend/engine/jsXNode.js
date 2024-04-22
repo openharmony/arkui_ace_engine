@@ -49,7 +49,7 @@ class BaseNode extends __JSBaseNode__ {
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
 class BuilderNode {
     constructor(uiContext, options) {
         let jsBuilderNode = new JSBuilderNode(uiContext, options);
@@ -158,7 +158,7 @@ class JSBuilderNode extends BaseNode {
     }
     purgeDeletedElmtIds() {
         UINodeRegisterProxy.obtainDeletedElmtIds();
-        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+        UINodeRegisterProxy.unregisterElmtIdsFromIViews();
     }
     purgeDeleteElmtId(rmElmtId) {
         const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -390,7 +390,7 @@ class NodeController {
     }
 }
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -403,74 +403,9 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class FrameNodeAttributeMap {
-    constructor() {
-        this.map_ = new Map();
-    }
-    clear() {
-        this.map_.clear();
-    }
-    delete(key) {
-        return this.map_.delete(key);
-    }
-    forEach(callbackfn, thisArg) {
-        this.map_.forEach(callbackfn, thisArg);
-    }
-    get(key) {
-        return this.map_.get(key);
-    }
-    has(key) {
-        return this.map_.has(key);
-    }
-    set(key, value) {
-        const _a = this.changeCallback;
-        this.map_.set(key, value);
-        _a === null || _a === void 0 ? void 0 : _a(key, value);
-        return this;
-    }
-    get size() {
-        return this.map_.size;
-    }
-    entries() {
-        return this.map_.entries();
-    }
-    keys() {
-        return this.map_.keys();
-    }
-    values() {
-        return this.map_.values();
-    }
-    [Symbol.iterator]() {
-        return this.map_.entries();
-    }
-    get [Symbol.toStringTag]() {
-        return 'FrameNodeAttributeMapTag';
-    }
-    setOnChange(callback) {
-        if (this.changeCallback === undefined) {
-            this.changeCallback = callback;
-        }
-    }
-}
-class FrameNodeModifier extends ArkComponent {
-    constructor(nodePtr) {
-        super(nodePtr);
-        this._modifiersWithKeys = new FrameNodeAttributeMap();
-        this._modifiersWithKeys.setOnChange((key, value) => {
-            if (this.nativePtr === undefined) {
-                return;
-            }
-            value.applyStage(this.nativePtr);
-            getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
-        });
-    }
-    setNodePtr(nodePtr) {
-        this.nativePtr = nodePtr;
-    }
-}
 class FrameNode {
     constructor(uiContext, type) {
-        var _b;
+        var _a, _b, _c;
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -491,15 +426,21 @@ class FrameNode {
         if (type === 'ProxyFrameNode') {
             return;
         }
-        this.renderNode_ = new RenderNode('CustomFrameNode');
+        let result;
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let result = getUINativeModule().frameNode.createFrameNode(this);
+        if (type === undefined || type === "CustomFrameNode") {
+            this.renderNode_ = new RenderNode('CustomFrameNode');
+            result = getUINativeModule().frameNode.createFrameNode(this);
+        }
+        else {
+            result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+        }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result === null || result === void 0 ? void 0 : result.nativeStrongRef;
         this._nodeId = result === null || result === void 0 ? void 0 : result.nodeId;
-        this.nodePtr_ = (_b = this._nativeRef) === null || _b === void 0 ? void 0 : _b.getNativeHandle();
-        this.renderNode_.setNodePtr(result === null || result === void 0 ? void 0 : result.nativeStrongRef);
-        this.renderNode_.setFrameNode(new WeakRef(this));
+        this.nodePtr_ = (_a = this._nativeRef) === null || _a === void 0 ? void 0 : _a.getNativeHandle();
+        (_b = this.renderNode_) === null || _b === void 0 ? void 0 : _b.setNodePtr(result === null || result === void 0 ? void 0 : result.nativeStrongRef);
+        (_c = this.renderNode_) === null || _c === void 0 ? void 0 : _c.setFrameNode(new WeakRef(this));
         if (result === undefined || this._nodeId === -1) {
             return;
         }
@@ -516,8 +457,8 @@ class FrameNode {
         return 'CustomFrameNode';
     }
     setRenderNode(nativeRef) {
-        var _b;
-        (_b = this.renderNode_) === null || _b === void 0 ? void 0 : _b.setNodePtr(nativeRef);
+        var _a;
+        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.setNodePtr(nativeRef);
     }
     getRenderNode() {
         if (this.renderNode_ !== undefined &&
@@ -542,24 +483,24 @@ class FrameNode {
         FrameNodeFinalizationRegisterProxy.register(this, this._nodeId);
     }
     resetNodePtr() {
-        var _b;
+        var _a;
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = null;
         this.nodePtr_ = null;
-        (_b = this.renderNode_) === null || _b === void 0 ? void 0 : _b.resetNodePtr();
+        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.resetNodePtr();
     }
     setBaseNode(baseNode) {
-        var _b;
+        var _a;
         this.baseNode_ = baseNode;
-        (_b = this.renderNode_) === null || _b === void 0 ? void 0 : _b.setBaseNode(baseNode);
+        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.setBaseNode(baseNode);
     }
     getNodePtr() {
         return this.nodePtr_;
     }
     dispose() {
-        var _b;
-        (_b = this.renderNode_) === null || _b === void 0 ? void 0 : _b.dispose();
+        var _a;
+        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = null;
@@ -777,7 +718,7 @@ class FrameNode {
     }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
-            this._commonAttribute = new FrameNodeModifier(this.nodePtr_);
+            this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this._commonAttribute.setNodePtr(this.nodePtr_);
         return this._commonAttribute;
@@ -813,7 +754,7 @@ class ImmutableFrameNode extends FrameNode {
     }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
-            this._commonAttribute = new FrameNodeModifier(undefined);
+            this._commonAttribute = new ArkComponent(undefined, ModifierType.FRAME_NODE);
         }
         this._commonAttribute.setNodePtr(undefined);
         return this._commonAttribute;
@@ -848,8 +789,8 @@ class ProxyFrameNode extends ImmutableFrameNode {
         return this.nodePtr_;
     }
     dispose() {
-        var _b;
-        (_b = this.renderNode_) === null || _b === void 0 ? void 0 : _b.dispose();
+        var _a;
+        (_a = this.renderNode_) === null || _a === void 0 ? void 0 : _a.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
         this._nativeRef = undefined;
@@ -880,6 +821,53 @@ class FrameNodeUtils {
             return frameNode;
         }
         return null;
+    }
+}
+class TypedFrameNode extends FrameNode {
+    constructor(uiContext, type, attrCreator) {
+        super(uiContext, type);
+        this.attrCreator_ = attrCreator;
+    }
+    initialize(...args) {
+        return this.attribute.initialize(args);
+    }
+    get attribute() {
+        if (this.attribute_ === undefined) {
+            this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
+        }
+        this.attribute_.setNodePtr(this.nodePtr_);
+        return this.attribute_;
+    }
+}
+const __creatorMap__ = new Map([
+    ["Text", (context) => {
+            return new TypedFrameNode(context, "Text", (node, type) => {
+                return new ArkTextComponent(node, type);
+            });
+        }],
+    ["Column", (context) => {
+            return new TypedFrameNode(context, "Column", (node, type) => {
+                return new ArkColumnComponent(node, type);
+            });
+        }],
+    ["Row", (context) => {
+            return new TypedFrameNode(context, "Row", (node, type) => {
+                return new ArkRowComponent(node, type);
+            });
+        }],
+    ["Stack", (context) => {
+            return new TypedFrameNode(context, "Stack", (node, type) => {
+                return new ArkStackComponent(node, type);
+            });
+        }],
+]);
+class TypedNode {
+    static createNode(context, type) {
+        let creator = __creatorMap__.get(type);
+        if (creator === undefined) {
+            return undefined;
+        }
+        return creator(context);
     }
 }
 /*
@@ -1475,7 +1463,6 @@ class XComponentNode extends FrameNode {
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
 class ComponentContent {
     constructor(uiContext, builder, params) {
         let builderNode = new BuilderNode(uiContext, {});
@@ -1493,5 +1480,5 @@ class ComponentContent {
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, ShapeMask,
-    edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent
+    edgeColors, edgeWidths, borderStyles, borderRadiuses, ComponentContent, TypedNode
 };

@@ -557,6 +557,65 @@ HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpanSetBaselineOffsetTest001
+ * @tc.desc: Test baseline offset of span.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanSetBaselineOffsetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create span node
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test baseline offset
+     */
+    Dimension offset = Dimension(10.0, DimensionUnit::PX);
+    spanModelNG.SetBaselineOffset(offset);
+    EXPECT_EQ(spanNode->GetBaselineOffset(), Dimension(10.0, DimensionUnit::PX));
+
+    offset = Dimension(-5.0, DimensionUnit::VP);
+    spanModelNG.SetBaselineOffset(offset);
+    EXPECT_EQ(spanNode->GetBaselineOffset(), Dimension(-5.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ImageSpanSetBaselineOffset001
+ * @tc.desc: Test ImageSpanView set baseline offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset001, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    std::string bundleName;
+    std::string moduleName;
+    std::string src;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(src, pixMap, bundleName, moduleName);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension offset = Dimension(10.0, DimensionUnit::VP);
+    layoutProperty->UpdateBaselineOffset(offset);
+    EXPECT_TRUE(layoutProperty->HasBaselineOffset());
+    EXPECT_EQ(layoutProperty->GetBaselineOffset(), Dimension(10.0, DimensionUnit::VP));
+
+    offset = Dimension(-5.0, DimensionUnit::VP);
+    layoutProperty->UpdateBaselineOffset(offset);
+    EXPECT_EQ(layoutProperty->GetBaselineOffset(), Dimension(-5.0, DimensionUnit::VP));
+}
+
+/**
  * @tc.name: SpanModelSetFont001
  * @tc.desc: Test if SetFont is successful
  * @tc.type: FUNC

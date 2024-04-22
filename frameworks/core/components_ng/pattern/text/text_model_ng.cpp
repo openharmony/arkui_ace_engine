@@ -631,6 +631,14 @@ Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)
     return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
 }
 
+TextDecorationStyle TextModelNG::GetTextDecorationStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecorationStyle::SOLID);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecorationStyle::SOLID);
+    return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
+}
+
 TextCase TextModelNG::GetTextCase(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, TextCase::NORMAL);

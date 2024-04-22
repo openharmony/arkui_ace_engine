@@ -1102,10 +1102,21 @@ SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
 {
     auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
-    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL) {
+    if (layoutProperty->GetLayoutDirection() == TextDirection::RTL ||
+        AceApplicationInfo::GetInstance().IsRightToLeft()) {
         sideBarPosition = (sideBarPosition == SideBarPosition::START) ? SideBarPosition::END : SideBarPosition::START;
     }
     return sideBarPosition;
+}
+
+void SideBarContainerPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isRightToLeft_ != AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
 RefPtr<NodePaintMethod> SideBarContainerPattern::CreateNodePaintMethod()

@@ -1667,39 +1667,20 @@ void ImagePattern::AdaptSelfSize()
         layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->IsValid()) {
         return;
     }
-    Dimension maxWidth;
-    Dimension maxHeight;
-    double maxWidthPx = 0.0;
-    double maxHeightPx = 0.0;
-    for (const auto& image : images_) {
-        if (image.width.Unit() != DimensionUnit::PERCENT) {
-            auto widthPx = image.width.ConvertToPx();
-            if (widthPx > maxWidthPx) {
-                maxWidthPx = widthPx;
-                maxWidth = image.width;
-            }
-        }
-        if (image.height.Unit() != DimensionUnit::PERCENT) {
-            auto heightPx = image.height.ConvertToPx();
-            if (heightPx > maxHeightPx) {
-                maxHeightPx = heightPx;
-                maxHeight = image.height;
-            }
-        }
-    }
-    if (!maxWidth.IsValid() || !maxHeight.IsValid()) {
-        return;
-    }
+    hasSizeChanged = true;
+    CalcSize realSize = {
+        CalcLength(images_[0].pixelMap->GetWidth()), CalcLength(images_[0].pixelMap->GetHeight()) };
+
     const auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), CalcLength(maxHeight)));
+        layoutProperty->UpdateUserDefinedIdealSize(realSize);
         return;
     }
     if (!layoutConstraint->selfIdealSize->Width()) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(maxWidth), std::nullopt));
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(images_[0].pixelMap->GetWidth()), std::nullopt));
         return;
     }
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(maxHeight)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(images_[0].pixelMap->GetHeight())));
 }
 
 int32_t ImagePattern::GetNextIndex(int32_t preIndex)
@@ -1832,5 +1813,39 @@ void ImagePattern::SetDuration(int32_t duration)
         CHECK_NULL_VOID(imageAnimator);
         imageAnimator->animator_->SetDuration(finalDuration);
     });
+}
+
+void ImagePattern::ResetImageProperties()
+{
+    SetCopyOption(CopyOptions::None);
+    OnImageModifyDone();
+}
+
+void ImagePattern::ResetImageAndAlt()
+{
+    image_ = nullptr;
+    loadingCtx_ = nullptr;
+    srcRect_.Reset();
+    dstRect_.Reset();
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    altDstRect_.reset();
+    altSrcRect_.reset();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->ClearDrawCommands();
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImagePattern::ResetPictureSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ClearUserDefinedIdealSize(true, true);
+    hasSizeChanged = false;
 }
 } // namespace OHOS::Ace::NG

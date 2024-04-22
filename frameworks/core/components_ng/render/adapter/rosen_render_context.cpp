@@ -487,9 +487,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     if (isDisappearing_ && !paintRect.IsValid()) {
         return;
     }
-    auto host = GetHost();
-    ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(), host->GetId(),
-        paintRect.ToString().c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        auto host = GetHost();
+        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s",
+            host->GetTag().c_str(), host->GetId(), paintRect.ToString().c_str());
+    }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(paintRect);
@@ -3531,6 +3533,23 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     SetBackBlurFilter();
 }
 
+void RosenRenderContext::UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    const auto& groupProperty = GetOrCreateForeground();
+    groupProperty->propMotionBlur = motionBlurOption;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    float radiusPx = context->NormalizeToPx(motionBlurOption.radius);
+#ifndef USE_ROSEN_DRAWING
+    float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    Rosen::Vector2f anchor(motionBlurOption.anchor.x, motionBlurOption.anchor.y);
+    rsNode_->SetMotionBlurPara(backblurRadius, anchor);
+}
+
 void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3836,6 +3855,42 @@ void RosenRenderContext::OnDynamicLightUpDegreeUpdate(const float degree)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetDynamicLightUpDegree(degree);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBgBrightnessParams(
+        {
+            brightnessOption.rate, 
+            brightnessOption.lightUpDegree,
+            brightnessOption.cubicCoeff, 
+            brightnessOption.quadCoeff, 
+            brightnessOption.saturation,
+            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
+            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+        }
+    );
+    rsNode_->SetBgBrightnessFract(brightnessOption.fraction);
+    RequestNextFrame();
+}
+ 
+void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFgBrightnessParams(
+        {
+            brightnessOption.rate, 
+            brightnessOption.lightUpDegree,
+            brightnessOption.cubicCoeff, 
+            brightnessOption.quadCoeff, 
+            brightnessOption.saturation,
+            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
+            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+        }
+    );
+    rsNode_->SetFgBrightnessFract(brightnessOption.fraction);
     RequestNextFrame();
 }
 
@@ -5601,8 +5656,10 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
         }
     }
     paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
-    ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s", host->GetTag().c_str(), host->GetId(),
-        paintRect_.ToString().c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s",
+            host->GetTag().c_str(), host->GetId(), paintRect_.ToString().c_str());
+    }
 }
 
 void RosenRenderContext::SyncPartialRsProperties()

@@ -31,6 +31,7 @@ public:
     void OnVisibleChange(bool isVisible) override;
     void OnAttachToMainTree() override;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
+    void updateEmitterPosition(const std::vector<EmitterProps>& emitterProps);
 
     bool HaveUnVisibleParent() const
     {

@@ -1409,6 +1409,78 @@ HWTEST_F(OverlayTestNg, ToastTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToastTest005
+ * @tc.desc: Test Toast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest005, TestSize.Level1)
+{
+    // create mock theme manager
+    auto backupThemeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toastTheme));
+
+    auto offset = DimensionOffset(MENU_OFFSET);
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto toastContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(toastContext);
+    auto theme = toastContext->GetTheme<ToastTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    auto textNode = AceType::DynamicCast<FrameNode>(toastNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+
+    auto fontSize = Dimension(10.0);
+    theme->textStyle_.fontSize_ = fontSize;
+    toastPattern->UpdateTextSizeConstraint(textNode);
+    EXPECT_EQ(textLayoutProperty->GetAdaptMaxFontSize().value().value_, fontSize.value_);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+
+    // restore mock theme manager
+    MockPipelineContext::GetCurrent()->SetThemeManager(backupThemeManager);
+}
+
+/**
+ * @tc.name: ToastTest006
+ * @tc.desc: Test OverlayManager::ToastView.UpdateTextLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, ToastTest006, TestSize.Level1)
+{
+    auto offset = DimensionOffset(MENU_OFFSET);
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0, offset };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    auto textNode = AceType::DynamicCast<FrameNode>(toastNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false);
+    EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: DialogTest001
  * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
  * @tc.type: FUNC

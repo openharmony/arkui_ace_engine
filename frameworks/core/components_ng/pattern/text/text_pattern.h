@@ -700,6 +700,7 @@ private:
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
     bool isSpanStringMode_ = false;
+    bool showSelected_ = false;
     int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
     bool leftFadeout_ = false;

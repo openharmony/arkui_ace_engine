@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,83 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class FrameNodeAttributeMap {
-  private map_: Map<Symbol, ModifierWithKey<number | string | boolean | object>>;
-  private changeCallback: ((key: Symbol, value: ModifierWithKey<number | string | boolean | object>) => void) | undefined;
-
-  constructor() {
-    this.map_ = new Map();
-  }
-
-  public clear(): void {
-    this.map_.clear();
-  }
-
-  public delete(key: Symbol): boolean {
-    return this.map_.delete(key);
-  }
-
-  public forEach(callbackfn: (value: ModifierWithKey<number | string | boolean | object>, key: Symbol,
-    map: Map<Symbol, ModifierWithKey<number | string | boolean | object>>) => void, thisArg?: any): void {
-    this.map_.forEach(callbackfn, thisArg);
-  }
-  public get(key: Symbol): ModifierWithKey<number | string | boolean | object> | undefined {
-    return this.map_.get(key);
-  }
-  public has(key: Symbol): boolean {
-    return this.map_.has(key);
-  }
-  public set(key: Symbol, value: ModifierWithKey<number | string | boolean | object>): this {
-    const _a = this.changeCallback;
-    this.map_.set(key, value);
-    _a === null || _a === void 0 ? void 0 : _a(key, value);
-    return this;
-  }
-  public get size(): number {
-    return this.map_.size;
-  }
-  public entries(): IterableIterator<[Symbol, ModifierWithKey<number | string | boolean | object>]> {
-    return this.map_.entries();
-  }
-  public keys(): IterableIterator<Symbol> {
-    return this.map_.keys();
-  }
-  public values(): IterableIterator<ModifierWithKey<number | string | boolean | object>> {
-    return this.map_.values();
-  }
-  public [Symbol.iterator](): IterableIterator<[Symbol, ModifierWithKey<number | string | boolean | object>]> {
-    return this.map_.entries();
-  }
-  public get [Symbol.toStringTag](): string {
-    return 'FrameNodeAttributeMapTag';
-  }
-  public setOnChange(callback: (key: Symbol, value: ModifierWithKey<number | string | boolean | object>) => void): void {
-    if (this.changeCallback === undefined) {
-      this.changeCallback = callback;
-    }
-  }
-}
-
-class FrameNodeModifier extends ArkComponent {
-  constructor(nodePtr: NodePtr) {
-    super(nodePtr);
-    this._modifiersWithKeys = new FrameNodeAttributeMap();
-    this._modifiersWithKeys.setOnChange((key, value) => {
-      if (this.nativePtr === undefined) {
-        return;
-      }
-      value.applyStage(this.nativePtr);
-      getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
-    })
-  }
-  setNodePtr(nodePtr: NodePtr): void {
-    this.nativePtr = nodePtr;
-  }
-}
 
 class FrameNode {
   public _nodeId: number;
-  protected _commonAttribute: FrameNodeModifier;
+  protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
@@ -119,15 +46,20 @@ class FrameNode {
     if (type === 'ProxyFrameNode') {
       return;
     }
-    this.renderNode_ = new RenderNode('CustomFrameNode');
+    let result;
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let result = getUINativeModule().frameNode.createFrameNode(this);
+    if (type === undefined || type === "CustomFrameNode") {
+      this.renderNode_ = new RenderNode('CustomFrameNode');
+      result = getUINativeModule().frameNode.createFrameNode(this);
+    } else {
+      result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+    }
     __JSScopeUtil__.restoreInstanceId();
     this._nativeRef = result?.nativeStrongRef;
     this._nodeId = result?.nodeId;
     this.nodePtr_ = this._nativeRef?.getNativeHandle();
-    this.renderNode_.setNodePtr(result?.nativeStrongRef);
-    this.renderNode_.setFrameNode(new WeakRef(this));
+    this.renderNode_?.setNodePtr(result?.nativeStrongRef);
+    this.renderNode_?.setFrameNode(new WeakRef(this));
     if (result === undefined || this._nodeId === -1) {
       return;
     }
@@ -390,35 +322,35 @@ class FrameNode {
   }
 
   getUserConfigSize(): SizeT<LengthMetrics> {
-      const size = getUINativeModule().frameNode.getConfigSize(this.getNodePtr());
-      return {
-        width: new LengthMetrics(size[0], size[1]),
-        height: new LengthMetrics(size[2], size[3])
+    const size = getUINativeModule().frameNode.getConfigSize(this.getNodePtr());
+    return {
+      width: new LengthMetrics(size[0], size[1]),
+      height: new LengthMetrics(size[2], size[3])
     };
   }
 
   getId(): string {
-      return getUINativeModule().frameNode.getId(this.getNodePtr());
+    return getUINativeModule().frameNode.getId(this.getNodePtr());
   }
 
   getNodeType(): string {
-      return getUINativeModule().frameNode.getNodeType(this.getNodePtr());
+    return getUINativeModule().frameNode.getNodeType(this.getNodePtr());
   }
 
   getOpacity(): number {
-      return getUINativeModule().frameNode.getOpacity(this.getNodePtr());
+    return getUINativeModule().frameNode.getOpacity(this.getNodePtr());
   }
 
   isVisible(): boolean {
-      return getUINativeModule().frameNode.isVisible(this.getNodePtr());
+    return getUINativeModule().frameNode.isVisible(this.getNodePtr());
   }
 
   isClipToFrame(): boolean {
-      return getUINativeModule().frameNode.isClipToFrame(this.getNodePtr());
+    return getUINativeModule().frameNode.isClipToFrame(this.getNodePtr());
   }
 
   isAttached(): boolean {
-      return getUINativeModule().frameNode.isAttached(this.getNodePtr());
+    return getUINativeModule().frameNode.isAttached(this.getNodePtr());
   }
 
   getInspectorInfo(): Object {
@@ -429,7 +361,7 @@ class FrameNode {
 
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
-      this._commonAttribute = new FrameNodeModifier(this.nodePtr_);
+      this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
     return this._commonAttribute;
@@ -467,7 +399,7 @@ class ImmutableFrameNode extends FrameNode {
   }
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
-      this._commonAttribute = new FrameNodeModifier(undefined);
+      this._commonAttribute = new ArkComponent(undefined, ModifierType.FRAME_NODE);
     }
     this._commonAttribute.setNodePtr(undefined);
     return this._commonAttribute;
@@ -540,5 +472,62 @@ class FrameNodeUtils {
       return frameNode;
     }
     return null;
+  }
+}
+
+class TypedFrameNode<T extends ArkComponent> extends FrameNode {
+  attribute_: T;
+  attrCreator_: (node: NodePtr, type: ModifierType) => T
+
+  constructor(uiContext: UIContext, type: string, attrCreator: (node: NodePtr, type: ModifierType) => T) {
+    super(uiContext, type)
+    this.attrCreator_ = attrCreator;
+  }
+
+  initialize(...args: Object[]): T {
+    return this.attribute.initialize(args);
+  }
+
+  get attribute(): T {
+    if (this.attribute_ === undefined) {
+      this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
+    }
+    this.attribute_.setNodePtr(this.nodePtr_);
+    return this.attribute_;
+  }
+}
+
+const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
+  [
+    ["Text", (context: UIContext) => {
+      return new TypedFrameNode(context, "Text", (node: NodePtr, type: ModifierType) => {
+        return new ArkTextComponent(node, type);
+      })
+    }],
+    ["Column", (context: UIContext) => {
+      return new TypedFrameNode(context, "Column", (node: NodePtr, type: ModifierType) => {
+        return new ArkColumnComponent(node, type);
+      })
+    }],
+    ["Row", (context: UIContext) => {
+      return new TypedFrameNode(context, "Row", (node: NodePtr, type: ModifierType) => {
+        return new ArkRowComponent(node, type);
+      })
+    }],
+    ["Stack", (context: UIContext) => {
+      return new TypedFrameNode(context, "Stack", (node: NodePtr, type: ModifierType) => {
+        return new ArkStackComponent(node, type);
+      })
+    }],
+  ]
+)
+
+class TypedNode {
+  static createNode(context: UIContext, type: string): FrameNode {
+    let creator = __creatorMap__.get(type)
+    if (creator === undefined) {
+      return undefined
+    }
+    return creator(context);
   }
 }

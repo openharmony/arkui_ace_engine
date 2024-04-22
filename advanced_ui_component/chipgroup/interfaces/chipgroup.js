@@ -190,7 +190,7 @@ export class ChipGroup extends ViewPU {
         }
         this.__items = new SynchedPropertyObjectOneWayPU(h2.items, this, "items");
         this.__itemStyle = new SynchedPropertyObjectOneWayPU(h2.itemStyle, this, "itemStyle");
-        this.__chipSize = new ObservedPropertyObjectPU(this.itemStyle.size ?? defaultTheme.itemStyle.size, this, "chipSize");
+        this.__chipSize = new ObservedPropertyObjectPU(defaultTheme.itemStyle.size, this, "chipSize");
         this.addProvidedVar("chipSize", this.__chipSize, false);
         this.__selectedIndexes = new SynchedPropertyObjectOneWayPU(h2.selectedIndexes, this, "selectedIndexes");
         this.__multiple = new SynchedPropertySimpleOneWayPU(h2.multiple, this, "multiple");
@@ -310,6 +310,9 @@ export class ChipGroup extends ViewPU {
     }
     itemStyleOnChange() {
         this.chipSize = this.getChipSize();
+    }
+    aboutToAppear() {
+        this.itemStyleOnChange();
     }
     getChipSize() {
         if (this.itemStyle && this.itemStyle.size) {
@@ -484,6 +487,8 @@ export class ChipGroup extends ViewPU {
         this.updateDirtyElements();
     }
 }
+
+
 
 
 export default {

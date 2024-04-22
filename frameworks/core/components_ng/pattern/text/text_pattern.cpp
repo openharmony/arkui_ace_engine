@@ -2043,11 +2043,13 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     HandleSelectionChange(start, end);
     parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
-    if (textSelector_.firstHandle == textSelector_.secondHandle) {
+    showSelected_ = true;
+    if (textSelector_.firstHandle == textSelector_.secondHandle && paragraph_) {
         ResetSelection();
         CloseSelectOverlay();
         return;
     }
+    showSelected_ = false;
     ShowSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2122,7 +2124,8 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void TextPattern::ProcessOverlayAfterLayout()
 {
-    if (selectOverlay_->SelectOverlayIsOn()) {
+    if (selectOverlay_->SelectOverlayIsOn() || showSelected_) {
+        showSelected_ = false;
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
     }

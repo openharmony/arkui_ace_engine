@@ -62,6 +62,7 @@ public:
     static std::string GetContent(UINode* uiNode);
     static Ace::TextDecoration GetTextDecoration(UINode* uiNode);
     static Color GetTextDecorationColor(UINode* uiNode);
+    static Ace::TextDecorationStyle GetTextDecorationStyle(UINode* uiNode);
     static Color GetFontColor(UINode* uiNode);
     static Dimension GetFontSize(UINode* uiNode);
     static Ace::FontStyle GetFontStyle(UINode* uiNode);

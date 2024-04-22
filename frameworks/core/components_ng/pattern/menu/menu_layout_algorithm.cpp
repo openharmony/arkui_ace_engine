@@ -595,6 +595,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (pattern->UseContentModifier()) {
             if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->Reset();
                 child->GetGeometryNode()->SetContentSize(SizeF());
             } else {
                 auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();

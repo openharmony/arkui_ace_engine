@@ -295,18 +295,21 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t textDecoration = static_cast<int32_t>(TextDecoration::NONE);
     Color color = DEFAULT_DECORATION_COLOR;
-    uint32_t style = static_cast<uint32_t>(DEFAULT_DECORATION_STYLE);
+    int32_t style = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
     if (secondArg->IsInt()) {
         textDecoration = secondArg->Int32Value(vm);
     }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color)) {
         color = DEFAULT_DECORATION_COLOR;
     }
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanDecoration(
-        nativeNode, textDecoration, color.GetValue(), style);
+    if (fourthArg->IsInt()) {
+        style = fourthArg->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanDecoration(nativeNode, textDecoration, color.GetValue(), style);
     return panda::JSValueRef::Undefined(vm);
 }
 

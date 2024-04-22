@@ -253,7 +253,8 @@ HWTEST_F(SpanStringTestNg, SpanString004, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
-    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, 0, 1));
+    spanString3->AddSpan(
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3));
     Shadow textShadow;
@@ -293,7 +294,8 @@ HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
-    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, 0, 1));
+    spanString3->AddSpan(
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     Shadow textShadow;

@@ -35,4 +35,22 @@ void RosenRenderParticle::UpdateDisturbance(
     }
     rsNode->SetParticleNoiseFields(fields);
 }
+
+void RosenRenderParticle::updateEmitterPosition(
+    const RefPtr<FrameNode>& frameNode, const std::vector<EmitterProps>& props)
+{
+    if (props.size() == 0) {
+        return;
+    }
+    auto renderContext = frameNode->GetRenderContext();
+    auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    for (const auto& prop : props) {
+        std::shared_ptr<Rosen::EmitterUpdater> updater = std::make_shared<Rosen::EmitterUpdater>(prop.index,
+            prop.position ? std::optional<Rosen::Vector2f>({ prop.position->x, prop.position->y }) : std::nullopt,
+            prop.size ? std::optional<Rosen::Vector2f>({ prop.size->x, prop.size->y }) : std::nullopt,
+            prop.emitRate ? prop.emitRate : std::nullopt);
+        rsNode->SetEmitterUpdater(updater);
+    }
+}
 } // namespace OHOS::Ace::NG

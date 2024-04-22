@@ -107,12 +107,11 @@ public:
     void RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
+        auto mapKey = std::make_pair(bundleName, moduleName);
+        if (resourceAdapters_.find(mapKey) != resourceAdapters_.end()) {
+            resourceAdapters_.erase(mapKey);
+        }
         if (!bundleName.empty() && !moduleName.empty()) {
-            auto mapKey = std::make_pair(bundleName, moduleName);
-            if (resourceAdapters_.find(mapKey) != resourceAdapters_.end()) {
-                resourceAdapters_.erase(mapKey);
-            }
-
             std::string key = MakeCacheKey(bundleName, moduleName);
             CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
         }

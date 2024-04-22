@@ -132,6 +132,7 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
+    static void SetMotionBlur(const MotionBlurOption &motionBlurOption);
     static void SetBackgroundEffect(const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
     static void SetForegroundEffect(float radius);
@@ -183,6 +184,8 @@ public:
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetBgDynamicBrightness(const BrightnessOption& brightnessOption);
+    static void SetFgDynamicBrightness(const BrightnessOption& brightnessOption);
     static void SetDynamicDim(float DimDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
@@ -509,9 +512,12 @@ public:
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
+    static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
+    static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
+    static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);

@@ -245,10 +245,13 @@ void JSCanvasPath::SetPathSize(const JSCallbackInfo& info)
     if (pathSize - lastPathSize_ > GCTHRESHOLD) {
         EcmaVM* vm = info.GetVm();
         CHECK_NULL_VOID(vm);
-        panda::CopyableGlobal<ObjectRef>(thisObj_)->SetNativePointerField(
-            vm, 0, this, &JSCanvasPath::DestructorInterceptor, nullptr,
-            (pathSize - lastPathSize_) * sizeof(std::pair<PathCmd, PathArgs>));
-        lastPathSize_ = pathSize;
+        panda::CopyableGlobal<ObjectRef> pathCmdObj = panda::CopyableGlobal<ObjectRef>(pathCmdObj_);
+        if (!pathCmdObj.IsEmpty()) {
+            pathCmdObj->SetNativePointerField(
+                vm, 0, nullptr, &JSCanvasPath::DestructorInterceptor, nullptr,
+                (pathSize - lastPathSize_) * sizeof(std::pair<PathCmd, PathArgs>));
+            lastPathSize_ = pathSize;
+        }
     }
 }
 } // namespace OHOS::Ace::Framework

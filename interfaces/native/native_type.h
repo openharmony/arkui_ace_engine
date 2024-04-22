@@ -368,6 +368,24 @@ typedef enum {
 } ArkUI_TextDecorationType;
 
 /**
+ * @brief Enumerates the text decoration line styles.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Solid line. */
+    ARKUI_TEXT_DECORATION_STYLE_SOLID = 0,
+    /** Double line. */
+    ARKUI_TEXT_DECORATION_STYLE_DOUBLE,
+    /** Dotted line. */
+    ARKUI_TEXT_DECORATION_STYLE_DOTTED,
+    /** Dashed line. */
+    ARKUI_TEXT_DECORATION_STYLE_DASHED,
+    /** Wavy line. */
+    ARKUI_TEXT_DECORATION_STYLE_WAVY,
+} ArkUiTextDecorationStyle;
+
+/**
  * @brief Enumerates the text cases.
  *
  * @since 12
