@@ -1738,6 +1738,10 @@ class PersistentStorage {
                 returnValue = this.readFromPersistentStorage(propName);
             }
             link = AppStorage.setAndLink(propName, returnValue, this);
+            if (link === undefined) {
+                
+                return false;
+            }
             this.links_.set(propName, link);
             
         }
