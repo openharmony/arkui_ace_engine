@@ -11482,6 +11482,17 @@ class ArkGridEdgeEffect {
       (this.options === another.options);
   }
 }
+
+class ArkWaterFlowEdgeEffect {
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
 class ArkMesh {
   constructor() {
     this.value = undefined;
@@ -21294,6 +21305,28 @@ class FrictionModifier extends ModifierWithKey {
   }
 }
 FrictionModifier.identity = Symbol('friction');
+
+class WaterFlowEdgeEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b;
+    if (reset) {
+      getUINativeModule().waterFlow.resetEdgeEffect(node);
+    }
+    else {
+      getUINativeModule().waterFlow.setEdgeEffect(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
+      _b === void 0 ? void 0 : _b.alwaysEnabled);
+    }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+WaterFlowEdgeEffectModifier.identity = Symbol('waterFlowEdgeEffect');
 class ArkWaterFlowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -21368,7 +21401,15 @@ class ArkWaterFlowComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
     return this;
   }
+  edgeEffect(value, options) {
+    let effect = new ArkWaterFlowEdgeEffect();
+    effect.value = value;
+    effect.options = options;
+    modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
+    return this;
+  }
 }
+
 // @ts-ignore
 if (globalThis.WaterFlow !== undefined) {
   globalThis.WaterFlow.attributeModifier = function (modifier) {

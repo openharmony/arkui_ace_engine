@@ -1181,3 +1181,16 @@ class ArkTextBackGroundStyle {
     return true;
   }
 }
+
+class ArkWaterFlowEdgeEffect {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkWaterFlowEdgeEffect): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
