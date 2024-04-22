@@ -401,6 +401,8 @@ public:
 
     virtual void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
+
+    virtual void SetNodeGrayScale(float grayscale) = 0;
 };
 
 } // namespace OHOS::Ace

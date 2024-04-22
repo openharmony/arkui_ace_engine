@@ -689,16 +689,6 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
-    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
-    {
-        isFreezeFlushMessage_ = isFreezeFlushMessage;
-    }
-
-    bool IsFreezeFlushMessage() const
-    {
-        return isFreezeFlushMessage_;
-    }
-
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -880,7 +870,6 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
-    bool isFreezeFlushMessage_ = false;
     
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
