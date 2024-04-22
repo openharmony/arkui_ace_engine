@@ -230,6 +230,16 @@ void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
 }
 
+void TextModelNG::SetLineSpacing(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value);
+}
+
+void TextModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value, frameNode);
+}
+
 void TextModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value);
@@ -612,6 +622,16 @@ float TextModelNG::GetLineHeight(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
     Dimension defaultLineHeight(0);
     auto value = layoutProperty->GetLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
+}
+
+float TextModelNG::GetLineSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineSpacing(0);
+    auto value = layoutProperty->GetLineSpacing().value_or(defaultLineSpacing);
     return static_cast<float>(value.Value());
 }
 

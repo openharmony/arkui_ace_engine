@@ -667,26 +667,60 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.shadows.emplace_back(txtShadow);
     }
 
+    double lineHeightScale = 0.0;
+    double lineSpacingScale = 0.0;
+    bool lineHeightOnly = false;
+    bool lineSpacingOnly = false;
     if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
-        txtStyle.heightOnly = true;
-        txtStyle.heightScale = textStyle.GetLineHeight().Value();
+        lineHeightOnly = true;
+        lineHeightScale = textStyle.GetLineHeight().Value();
     } else {
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
             lineHeight = pipelineContext->NormalizeToPx(textStyle.GetLineHeight());
         }
-        txtStyle.heightOnly = textStyle.HasHeightOverride();
+        lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
-            txtStyle.heightScale = lineHeight / fontSize;
+            lineHeightScale = lineHeight / fontSize;
         } else {
-            txtStyle.heightScale = 1;
+            lineHeightScale = 1;
             static const int32_t BEGIN_VERSION = 6;
             auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
             if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, fontSize))) {
-                txtStyle.heightOnly = false;
+                lineHeightOnly = false;
             }
         }
+    }
+    if (textStyle.GetLineSpacing().Unit() == DimensionUnit::PERCENT) {
+        lineSpacingOnly = true;
+        lineSpacingScale = textStyle.GetLineSpacing().Value();
+    } else {
+        double fontSize = txtStyle.fontSize;
+        double lineSpacing = textStyle.GetLineSpacing().Value();
+        if (pipelineContext) {
+            lineSpacing = pipelineContext->NormalizeToPx(textStyle.GetLineSpacing());
+        }
+        lineSpacingOnly = true;
+        if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
+            lineSpacingScale = lineSpacing / fontSize;
+        } else {
+            lineSpacingScale = 1;
+            if (NearZero(lineSpacing) || NearEqual(lineSpacing, fontSize)) {
+                lineSpacingOnly = false;
+            }
+        }
+    }
+
+    txtStyle.heightOnly = lineHeightOnly || lineSpacingOnly;
+    if (lineHeightOnly && lineSpacingOnly) {
+        txtStyle.heightScale = lineHeightScale + lineSpacingScale;
+    } else if (lineHeightOnly && !lineSpacingOnly) {
+        txtStyle.heightScale = lineHeightScale;
+    } else if (!lineHeightOnly && lineSpacingOnly) {
+        txtStyle.heightScale = 1 + lineSpacingScale;
+    } else {
+        txtStyle.heightScale = 1;
     }
 
     // set font variant
