@@ -4029,11 +4029,15 @@ function attributeModifierFuncWithoutStateStyles(modifier, componentBuilder, mod
     } else {
       modifier.attribute.applyStateUpdatePtr(component);
       modifier.attribute.applyNormalAttribute(component);
-      modifier.applyNormalAttribute(component);
+      if (modifier.applyNormalAttribute) {
+        modifier.applyNormalAttribute(component);
+      }
       component.applyModifierPatch();
     }
   } else {
-    modifier.applyNormalAttribute(component);
+    if (modifier.applyNormalAttribute) {
+      modifier.applyNormalAttribute(component);
+    }
     component.applyModifierPatch();
   }
 }
