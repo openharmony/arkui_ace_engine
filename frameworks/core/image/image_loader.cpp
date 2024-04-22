@@ -647,7 +647,8 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
         themeConstants = themeManager->GetThemeConstants();
         CHECK_NULL_RETURN(themeConstants, nullptr);
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    auto resourceWrapper =
+        AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter, imageSourceInfo.GetLocalColorMode());
 
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
