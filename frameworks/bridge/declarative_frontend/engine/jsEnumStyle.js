@@ -989,6 +989,7 @@ let DismissReason;
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
+  DismissReason[DismissReason.SLIDE_DOWN = 3] = "SLIDE_DOWN";
 })(DismissReason || (DismissReason = {}));
 
 var HoverEffect;

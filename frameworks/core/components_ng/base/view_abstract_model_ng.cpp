@@ -458,9 +458,10 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
-    std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange)
+    std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
@@ -502,9 +503,10 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
-        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
-        std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange),
-        std::move(onWidthDidChange), std::move(onTypeDidChange), targetNode);
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), targetNode);
 }
 
 void ViewAbstractModelNG::DismissSheet()
@@ -523,6 +525,15 @@ void ViewAbstractModelNG::DismissContentCover()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DismissContentCover();
+}
+
+void ViewAbstractModelNG::SheetSpringBack()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SheetSpringBack();
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)

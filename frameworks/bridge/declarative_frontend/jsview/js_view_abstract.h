@@ -162,15 +162,21 @@ public:
     static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const float)>& callbackDidChange, const char* prop);
+    static void ParseLifeCycleCallback(const JSRef<JSObject>& paramObj, std::function<void()>& lifeCycleCallBack,
+        const char* prop);
+    static void ParseSpringBackCallback(const JSRef<JSObject>& paramObj,
+        std::function<void()>& sheetSpringBack, const char* prop);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
+        std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
         std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
         std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
-        std::function<void(const float)>& onTypeDidChange);
+        std::function<void(const float)>& onTypeDidChange, std::function<void()>& sheetSpringBack);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static panda::Local<panda::JSValueRef> JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> JsSheetSpringBack(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static void ParseModalTransitonEffect(
         const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context);
     static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
@@ -286,7 +292,6 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
     static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
-
     static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
         DimensionUnit defaultUnit, bool checkIllegal = false);
     static bool ParseJsonDimensionVp(
@@ -309,7 +314,6 @@ public:
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
         std::function<void(const std::string&)>& onResult);
     static bool ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant& invert);
-
     static std::pair<CalcDimension, CalcDimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
     static void JsZIndex(const JSCallbackInfo& info);
@@ -412,14 +416,11 @@ public:
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
     static void JSRenderGroup(const JSCallbackInfo& info);
     static void JSRenderFit(const JSCallbackInfo& info);
-
     static void JsExpandSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);
-
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
-
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
 
 #ifndef WEARABLE_PRODUCT
