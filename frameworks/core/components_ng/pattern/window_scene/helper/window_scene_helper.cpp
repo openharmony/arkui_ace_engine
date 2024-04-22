@@ -117,6 +117,23 @@ int32_t WindowSceneHelper::GetFocusSystemWindowId(RefPtr<FrameNode> focusedFrame
     return focusSystemWindowId;
 }
 
+int32_t WindowSceneHelper::GetWindowIdForWindowScene(RefPtr<FrameNode> windowSceneNode)
+{
+    int32_t windowId = 0;
+    CHECK_NULL_RETURN(windowSceneNode, windowId);
+    if (windowSceneNode->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        return windowId;
+    }
+    auto windowScenePattern = windowSceneNode->GetPattern<SystemWindowScene>();
+    CHECK_NULL_RETURN(windowScenePattern, windowId);
+
+    auto window2patternSession = windowScenePattern->GetSession();
+    CHECK_NULL_RETURN(window2patternSession, windowId);
+
+    windowId = static_cast<int32_t>(window2patternSession->GetPersistentId());
+    return windowId;
+}
+
 bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focusedFrameNode)
 {
     bool isWindowSceneSaveKeyboardFlag = false;
