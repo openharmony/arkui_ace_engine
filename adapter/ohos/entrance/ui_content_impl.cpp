@@ -2896,10 +2896,8 @@ void UIContentImpl::UpdateCustomPopupUIExtension(const CustomPopupUIExtensionCon
                 auto createConfig = popupConfig->second;
                 popupParam->SetShowInSubWindow(createConfig.isShowInSubWindow);
                 popupParam->SetOnStateChange(
-                    [createConfig, targetId, weak = weak_from_this()](const std::string& event) {
-                        auto self = weak.lock();
-                        CHECK_NULL_VOID(self);
-                        self->OnPopupStateChange(event, createConfig, targetId);
+                    [createConfig, targetId, this](const std::string& event) {
+                        this->OnPopupStateChange(event, createConfig, targetId);
                     });
             }
             auto targetNode =
