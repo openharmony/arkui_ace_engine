@@ -93,4 +93,9 @@ void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::uint32_t ef
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy, frameNode);
 }
+
+void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
+{    
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
+}
 } // namespace OHOS::Ace::NG

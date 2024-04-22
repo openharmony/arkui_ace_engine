@@ -130,6 +130,13 @@ void ResetEffectStrategy(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SymbolModelNG::SetSymbolEffect(frameNode, 0);
 }
+
+void SetSymbolId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::InitialSymbol(frameNode, symbolId);
+}
 }
 
 namespace NodeModifier {
@@ -147,6 +154,7 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         ResetRenderingStrategy,
         SetEffectStrategy,
         ResetEffectStrategy,
+        SetSymbolId,
     };
 
     return &modifier;

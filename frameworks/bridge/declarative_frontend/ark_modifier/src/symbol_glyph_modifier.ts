@@ -15,9 +15,10 @@
 
 /// <reference path='./import.ts' />
 class SymbolGlyphModifier extends ArkSymbolGlyphComponent implements AttributeModifier<SymbolGlyphAttribute> {
-    constructor(nativePtr: KNode, classType: ModifierType) {
+    constructor(src: Resource, nativePtr: KNode, classType: ModifierType) {
       super(nativePtr, classType);
       this._modifiersWithKeys = new ModifierMap();
+      this.initialize(src);
     }
       
     applyNormalAttribute(instance: SymbolGlyphAttribute): void {
@@ -25,4 +26,3 @@ class SymbolGlyphModifier extends ArkSymbolGlyphComponent implements AttributeMo
       ModifierUtils.applyAndMergeModifier<SymbolGlyphAttribute, ArkSymbolGlyphComponent, ArkComponent>(instance, this);
     }
   }
-  

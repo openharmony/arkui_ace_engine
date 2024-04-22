@@ -32,6 +32,20 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 } // namespace
 
+ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::uint32_t content;
+    if (ArkTSUtils::ParseJsSymbolId(vm, secondArg, content)) {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolId(nativeNode, content);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

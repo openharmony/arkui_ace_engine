@@ -124,10 +124,29 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
       }
     }
   }
+
+  class SymbolContentModifier extends ModifierWithKey<Resource> {
+    constructor(value: Resource) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolContent');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.setSymbolId(node, "");
+      }
+      else {
+        getUINativeModule().symbolGlyph.setSymbolId(node, this.value);
+      }
+    }
+  }
     
   class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyphAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType) {
       super(nativePtr, classType);
+    }
+    initialize(value: Object): SymbolGlyphAttribute {
+        modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value);
+        return this;
     }
     fontColor(value: object): SymbolGlyphAttribute {
       modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);

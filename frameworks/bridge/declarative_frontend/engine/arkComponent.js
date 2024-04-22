@@ -22310,10 +22310,29 @@ class EffectStrategyModifier extends ModifierWithKey {
 }
 EffectStrategyModifier.identity = Symbol('symbolGlyphEffectStrategy');
 
+class SymbolContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.setSymbolId(node, "");
+    }
+    else {
+      getUINativeModule().symbolGlyph.setSymbolId(node, this.value);
+    }
+  }
+}
+SymbolContentModifier.identity = Symbol('symbolContent');
+
 /// <reference path='./import.ts' />
 class ArkSymbolGlyphComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+    initialize(value) {
+      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value);
+      return this;
+    }
   }
   fontColor(value) {
     modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
