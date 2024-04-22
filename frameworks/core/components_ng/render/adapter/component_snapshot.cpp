@@ -153,7 +153,7 @@ void ComponentSnapshot::Create(
             rsInterface.TakeSurfaceCaptureForUI(
                 rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
         },
-        TaskExecutor::TaskType::UI, delayTime);
+        TaskExecutor::TaskType::UI, delayTime, "ArkUIComponentSnapshotCreateCapture");
 }
 
 void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback)
