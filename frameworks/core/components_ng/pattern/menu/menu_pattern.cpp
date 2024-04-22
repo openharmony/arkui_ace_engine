@@ -306,17 +306,18 @@ void MenuPattern::FireBuilder()
 RefPtr<FrameNode> MenuPattern::BuildContentModifierNode(int index)
 {
     CHECK_NULL_RETURN(makeFunc_, nullptr);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto pattern = host->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto value = pattern->GetItemValue(index);
-    auto icon = pattern->GetIcon(index);
-    bool selectEnable = true;
-    bool selected = true;
-
-    MenuItemConfiguration menuItemConfiguration(value, icon, index, selected, selectEnable);
+    auto property = selectProperties_[index];
+    MenuItemConfiguration menuItemConfiguration(property.value, property.icon,
+        index, property.selected, property.selectEnable);
     return (makeFunc_.value())(menuItemConfiguration);
+}
+
+void MenuPattern::UpdateSelectIndex(int32_t index)
+{
+    for (size_t i = 0; i < selectParams_.size(); i++) {
+        selectProperties_[i].selected = index == static_cast<int32_t>(i);
+    }
+    FireBuilder();
 }
 
 void InnerMenuPattern::BeforeCreateLayoutWrapper()
