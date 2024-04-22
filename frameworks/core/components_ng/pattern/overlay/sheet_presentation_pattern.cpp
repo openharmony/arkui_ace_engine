@@ -1177,13 +1177,13 @@ RefPtr<RenderContext> SheetPresentationPattern::GetRenderContext()
     return frameNode->GetRenderContext();
 }
 
-bool SheetPresentationPattern::PostTask(const TaskExecutor::Task& task)
+bool SheetPresentationPattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void SheetPresentationPattern::ResetToInvisible()

@@ -374,7 +374,7 @@ bool EventDispatcher::DispatchBackPressedEvent()
             }
             backPromise.set_value(canBack);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUICallRouterBackToPopPage");
     return backFuture.get();
 }
 

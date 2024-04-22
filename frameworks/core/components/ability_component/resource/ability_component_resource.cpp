@@ -55,7 +55,7 @@ void AbilityComponentResource::Release(const std::function<void(bool)>& onReleas
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIAbilityComponentRelease");
     }
 }
 
@@ -115,7 +115,7 @@ std::string AbilityComponentResource::CallResRegisterMethod(
             if (resRegister != nullptr) {
                 resRegister->OnMethodCall(method, param, result);
             }
-        });
+        }, "ArkUIAbilityComponentCallResRegister");
         return result;
     } else {
         platformTaskExecutor.PostTask([method, param, weakRes] {
@@ -124,7 +124,7 @@ std::string AbilityComponentResource::CallResRegisterMethod(
                 std::string result;
                 resRegister->OnMethodCall(method, param, result);
             }
-        });
+        }, "ArkUIAbilityComponentCallResRegister");
     }
     return "";
 }

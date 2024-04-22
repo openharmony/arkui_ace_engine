@@ -337,7 +337,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
                     renderImage->failedCallback_(sourceInfo,
                         "Fail to get thumbnail data of dataability or datashare, please check the validation of src.");
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIImageThumbnailLoadFailed");
             return;
         }
         taskExecutor->PostTask(
@@ -348,7 +348,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
                 }
                 renderImage->UpdatePixmap(pixmapOhos);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIImageThumbnailLoad");
 #endif
     };
 }

@@ -305,7 +305,8 @@ void TextClockPattern::RequestUpdateForNextSecond()
         }
         textClock->UpdateTimeText();
     });
-    context->GetTaskExecutor()->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delayTime);
+    context->GetTaskExecutor()->PostDelayedTask(
+        delayTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUITextClockUpdateTimeText");
 }
 
 std::string TextClockPattern::GetCurrentFormatDateTime()

@@ -157,7 +157,7 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
                 if (plugin) {
                     plugin->HandleOnCompleteEvent();
                 }
-            });
+            }, "ArkUIPluginCompleteCallback");
         });
         pluginManagerBridge_->AddPluginUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data) {
             auto element = weak.Upgrade();
@@ -168,7 +168,7 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
                 if (plugin) {
                     plugin->GetPluginSubContainer()->UpdatePlugin(data);
                 }
-            });
+            }, "ArkUIPluginUpdateCallback");
         });
         pluginManagerBridge_->AddPluginErrorCallback([weak = WeakClaim(this)](std::string code, std::string msg) {
             auto element = weak.Upgrade();
@@ -188,7 +188,7 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
                 if (renderPlugin) {
                     renderPlugin->RemoveChildren();
                 }
-            });
+            }, "ArkUIPluginErrorCallback");
         });
     }
 }
@@ -258,7 +258,7 @@ void PluginElement::RunPluginContainer()
     CHECK_NULL_VOID(pluginNode);
     pluginNode->SetPluginSubContainer(pluginSubContainer_);
 
-    uiTaskExecutor.PostTask([this, weak, plugin] { RunPluginTask(weak, plugin); });
+    uiTaskExecutor.PostTask([this, weak, plugin] { RunPluginTask(weak, plugin); }, "ArkUIPluginRun");
 }
 
 RefPtr<RenderNode> PluginElement::CreateRenderNode()

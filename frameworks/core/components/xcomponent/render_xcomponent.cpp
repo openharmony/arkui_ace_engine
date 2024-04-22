@@ -342,7 +342,7 @@ void RenderXComponent::NativeXComponentInit(
                 LOGE("Native XComponent nullptr");
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentInit");
 }
 
 void RenderXComponent::NativeXComponentChange()
@@ -369,7 +369,7 @@ void RenderXComponent::NativeXComponentChange()
                 LOGE("Native XComponent nullptr");
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentChange");
 }
 
 void RenderXComponent::NativeXComponentDestroy()
@@ -398,7 +398,7 @@ void RenderXComponent::NativeXComponentDestroy()
                 LOGE("Native XComponent nullptr");
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentDestroy");
 }
 
 void RenderXComponent::NativeXComponentDispatchTouchEvent(
@@ -424,7 +424,7 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(
                 LOGE("Native XComponent nullptr");
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentDispatchTouchEvent");
 }
 
 void RenderXComponent::HandleMouseHoverEvent(MouseState mouseState)
@@ -447,7 +447,7 @@ void RenderXComponent::HandleMouseHoverEvent(MouseState mouseState)
                 LOGE("Native XComponent nullptr");
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentMouseHoverEvent");
 }
 
 bool RenderXComponent::HandleMouseEvent(const MouseEvent& event)
@@ -516,7 +516,7 @@ bool RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXCompon
                 LOGE("Native XComponent nullptr");
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentDispatchMouseEvent");
     return true;
 }
 
@@ -536,6 +536,6 @@ void RenderXComponent::NativeXComponentOffset(double x, double y)
                 nXCompImpl->SetXComponentOffsetY(y * scale);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentOffset");
 }
 } // namespace OHOS::Ace

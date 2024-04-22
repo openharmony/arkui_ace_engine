@@ -1507,7 +1507,8 @@ void RichEditorPattern::ScheduleCaretTwinkling()
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(caretTwinklingTask_, TaskExecutor::TaskType::UI, RICH_EDITOR_TWINKLING_INTERVAL_MS);
+    taskExecutor->PostDelayedTask(caretTwinklingTask_, TaskExecutor::TaskType::UI, RICH_EDITOR_TWINKLING_INTERVAL_MS,
+        "ArkUIRichEditorScheduleCaretTwinkling");
 }
 
 void RichEditorPattern::StartTwinkling()
@@ -5006,7 +5007,7 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
             CHECK_NULL_VOID(pattern);
             pattern->ScrollToSafeArea();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorScrollToSafeArea");
 }
 
 bool RichEditorPattern::IsDisabled() const
@@ -5651,7 +5652,8 @@ void RichEditorPattern::ScheduleAutoScroll(AutoScrollParam param)
         }
     });
     isAutoScrollRunning_ = true;
-    taskExecutor->PostDelayedTask(autoScrollTask_, TaskExecutor::TaskType::UI, AUTO_SCROLL_INTERVAL);
+    taskExecutor->PostDelayedTask(autoScrollTask_, TaskExecutor::TaskType::UI, AUTO_SCROLL_INTERVAL,
+        "ArkUIRichEditorScheduleAutoScroll");
 }
 
 void RichEditorPattern::OnAutoScroll(AutoScrollParam param)

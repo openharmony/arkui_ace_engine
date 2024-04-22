@@ -764,11 +764,14 @@ public:
 
     RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
 
-    void PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostSyncEvent(const TaskExecutor::Task& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload(const ConfigurationChange& configurationChange) {}
     virtual void FlushBuild() {}

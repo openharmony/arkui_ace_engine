@@ -306,7 +306,8 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
         };
         sContextTimer_.Reset(callback);
         ACE_SCOPED_TRACE("ContainerModalEnhance::PendingMaxMenu");
-        pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI, MENU_TASK_DELAY_TIME);
+        pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI, MENU_TASK_DELAY_TIME,
+            "ArkUIContainerModalShowMaxMenu");
         sIsMenuPending_ = true;
     };
     hub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));

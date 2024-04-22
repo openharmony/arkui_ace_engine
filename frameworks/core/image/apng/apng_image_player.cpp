@@ -265,9 +265,9 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
 
                 taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                                source = player->imageSource_] { callback(source, canvasImage); },
-                                       TaskExecutor::TaskType::UI);
+                                       TaskExecutor::TaskType::UI, "ArkUIImageAPngRenderSuccess");
             },
-            TaskExecutor::TaskType::IO);
+        TaskExecutor::TaskType::IO, "ArkUIImageAPngRenderFrame");
 }
 
 /**

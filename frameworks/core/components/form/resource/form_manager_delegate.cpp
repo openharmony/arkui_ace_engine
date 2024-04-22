@@ -89,7 +89,7 @@ void FormManagerDelegate::Stop()
             if (delegate) {
                 delegate->UnregisterEvent();
             }
-        });
+        }, "ArkUIFormUnregisterEvent");
     }
 }
 
@@ -310,7 +310,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         delegate->state_ = State::CREATED;
         delegate->hash_ = delegate->MakeResourceHash();
         delegate->RegisterEvent();
-    });
+    }, "ArkUIFormCreatePlatformResource");
 }
 
 void FormManagerDelegate::RegisterEvent()

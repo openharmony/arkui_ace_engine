@@ -177,7 +177,7 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
                 frontend->pageLoaded_ = true;
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendPageLoaded");
 }
 
 void CardFrontendDeclarative::UpdateData(const std::string& dataList)
@@ -189,7 +189,7 @@ void CardFrontendDeclarative::UpdateData(const std::string& dataList)
                 frontend->UpdatePageData(dataList);
             }
         },
-        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendUpdatePageData"); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 void CardFrontendDeclarative::UpdatePageData(const std::string& dataList)
@@ -214,7 +214,7 @@ void CardFrontendDeclarative::SetColorMode(ColorMode colorMode)
                 frontend->OnMediaFeatureUpdate();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUICardFrontendSetColorMode");
 }
 
 void CardFrontendDeclarative::RebuildAllPages()
@@ -230,7 +230,7 @@ void CardFrontendDeclarative::OnSurfaceChanged(int32_t width, int32_t height)
                 frontend->HandleSurfaceChanged(width, height);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUICardFrontendSurfaceChanged");
 }
 
 void CardFrontendDeclarative::HandleSurfaceChanged(int32_t width, int32_t height)

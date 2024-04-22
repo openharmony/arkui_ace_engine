@@ -38,11 +38,11 @@ static RefPtr<NG::AppBarView> ObtainAppBar()
     return container->GetAppBar();
 }
 
-static void SetBarInUIThread(TaskExecutor::Task&& task)
+static void SetBarInUIThread(TaskExecutor::Task&& task, const std::string& name)
 {
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, name);
 }
 
 static napi_value JSSetVisible(napi_env env, napi_callback_info info)
@@ -57,7 +57,7 @@ static napi_value JSSetVisible(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, argv[0], &visible);
     auto appBar = ObtainAppBar();
     CHECK_NULL_RETURN(appBar, nullptr);
-    SetBarInUIThread([visible, appBar]() { appBar->SetVisible(visible); });
+    SetBarInUIThread([visible, appBar]() { appBar->SetVisible(visible); }, "ArkUIAppBarSetVisible");
     return nullptr;
 }
 
@@ -74,7 +74,7 @@ static napi_value JSSetBackgroundColor(napi_env env, napi_callback_info info)
     }
     auto appBar = ObtainAppBar();
     CHECK_NULL_RETURN(appBar, nullptr);
-    SetBarInUIThread([color, appBar]() { appBar->SetRowColor(color); });
+    SetBarInUIThread([color, appBar]() { appBar->SetRowColor(color); }, "ArkUIAppBarSetRowColor");
     return nullptr;
 }
 
@@ -93,7 +93,7 @@ static napi_value JSSetTitleContent(napi_env env, napi_callback_info info)
     }
     auto appBar = ObtainAppBar();
     CHECK_NULL_RETURN(appBar, nullptr);
-    SetBarInUIThread([str, appBar]() { appBar->SetContent(str); });
+    SetBarInUIThread([str, appBar]() { appBar->SetContent(str); }, "ArkUIAppBarSetContent");
     return nullptr;
 }
 
@@ -110,7 +110,8 @@ static napi_value JSSetTitleFontStyle(napi_env env, napi_callback_info info)
     auto appBar = ObtainAppBar();
     CHECK_NULL_RETURN(appBar, nullptr);
     SetBarInUIThread(
-        [num, appBar]() { appBar->SetFontStyle(num == 0 ? Ace::FontStyle::NORMAL : Ace::FontStyle::ITALIC); });
+        [num, appBar]() { appBar->SetFontStyle(num == 0 ? Ace::FontStyle::NORMAL : Ace::FontStyle::ITALIC); },
+        "ArkUIAppBarSetFontStyle");
     return nullptr;
 }
 
@@ -127,7 +128,7 @@ static napi_value JSSetIconColor(napi_env env, napi_callback_info info)
     }
     auto appBar = ObtainAppBar();
     CHECK_NULL_RETURN(appBar, nullptr);
-    SetBarInUIThread([color, appBar]() { appBar->SetIconColor(color); });
+    SetBarInUIThread([color, appBar]() { appBar->SetIconColor(color); }, "ArkUIAppBarSetIconColor");
     return nullptr;
 }
 

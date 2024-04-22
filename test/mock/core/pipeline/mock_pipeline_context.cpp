@@ -662,11 +662,13 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostSyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {

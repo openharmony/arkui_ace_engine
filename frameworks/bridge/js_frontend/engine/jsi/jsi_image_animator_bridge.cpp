@@ -53,7 +53,7 @@ shared_ptr<JsValue> JsiImageAnimatorBridge::JsGetState(const shared_ptr<JsRuntim
         LOGE("JsGetCurrentOffset failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUIImageAnimatorGetState");
     return runtime->NewString(state);
 }
 

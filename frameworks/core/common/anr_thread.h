@@ -26,7 +26,7 @@ public:
     static void Start();
     static void Stop();
     using Task = std::function<void()>;
-    static bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime);
+    static bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string name);
 };
 } // namespace OHOS::Ace
 #endif

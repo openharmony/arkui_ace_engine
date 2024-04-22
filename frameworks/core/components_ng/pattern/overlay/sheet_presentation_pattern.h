@@ -523,7 +523,7 @@ private:
     void UpdateSheetTitle();
     void UpdateInteractive();
     RefPtr<RenderContext> GetRenderContext();
-    bool PostTask(const TaskExecutor::Task& task);
+    bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
     void InitSheetDetents();
     void HandleFitContontChange(float height);

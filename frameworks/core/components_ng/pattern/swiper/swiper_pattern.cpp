@@ -494,7 +494,7 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostDelayedTask(
             [targetNode, callback]() { ComponentSnapshot::GetNormalCapture(targetNode, std::move(callback)); },
-            TaskExecutor::TaskType::UI, FIRST_CAPTURE_DELAY_TIME);
+            TaskExecutor::TaskType::UI, FIRST_CAPTURE_DELAY_TIME, "ArkUISwiperGetNormalCapture");
     } else {
         ComponentSnapshot::GetNormalCapture(targetNode, std::move(callback));
     }
@@ -531,7 +531,7 @@ void SwiperPattern::UpdateCaptureSource(
             captureNode->MarkModifyDone();
             captureNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISwiperUpdateCaptureSource");
 }
 
 void SwiperPattern::InitSurfaceChangedCallback()
@@ -1271,7 +1271,8 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(std::pair<int32_t, SwiperItemI
     if (onSwiperCustomContentTransition_ && !item.second.isFinishAnimation) {
         timeout = onSwiperCustomContentTransition_->timeout;
     }
-    taskExecutor->PostDelayedTask(item.second.task, TaskExecutor::TaskType::UI, timeout);
+    taskExecutor->PostDelayedTask(
+        item.second.task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
 void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
@@ -1620,7 +1621,7 @@ void SwiperPattern::DoPreloadItems(const std::set<int32_t>& indexSet, int32_t er
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI, "ArkUISwiperFirePreloadFinish");
 }
 
 void SwiperPattern::OnTranslateAnimationFinish()
@@ -3779,7 +3780,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
         }
     });
 
-    taskExecutor->PostDelayedTask(translateTask_, TaskExecutor::TaskType::UI, delayTime);
+    taskExecutor->PostDelayedTask(translateTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUISwiperTranslate");
 }
 
 void SwiperPattern::RegisterVisibleAreaChange()
@@ -3983,7 +3984,7 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad) const
                         childNode->Build(nullptr);
                     }
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUISwiperSetLazyLoadFeature");
         }
     }
 }
@@ -4928,7 +4929,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
         transitionProxy->FinishTransition();
     };
 
-    taskExecutor->PostDelayedTask(timeoutTask, TaskExecutor::TaskType::UI, timeout);
+    taskExecutor->PostDelayedTask(timeoutTask, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperFinishTransition");
 }
 
 void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged)

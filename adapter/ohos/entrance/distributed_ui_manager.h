@@ -34,7 +34,7 @@ public:
     {
         SerializeableObjectArray ret;
         auto task = [this, &ret]() { ret = distributedUI_->DumpUITree(); };
-        PostSyncTaskToUI(task);
+        PostSyncTaskToUI(task, "ArkUIDistributedDumpUITree");
         return ret;
     }
 
@@ -51,19 +51,19 @@ public:
     void ProcessSerializeableInputEvent(const SerializeableObjectArray& event)
     {
         auto task = [this, &event]() { distributedUI_->ProcessSerializeableInputEvent(event); };
-        PostSyncTaskToUI(task);
+        PostSyncTaskToUI(task, "ArkUIDistributedProcessSerializeableInput");
     }
 
     void RestoreUITree(const SerializeableObjectArray& uiTree)
     {
         auto task = [this, &uiTree]() { distributedUI_->RestoreUITree(uiTree); };
-        PostSyncTaskToUI(task);
+        PostSyncTaskToUI(task, "ArkUIDistributedRestoreUITree");
     }
 
     void UpdateUITree(const SerializeableObjectArray& update)
     {
         auto task = [this, &update]() { distributedUI_->UpdateUITree(update); };
-        PostSyncTaskToUI(task);
+        PostSyncTaskToUI(task, "ArkUIDistributedUpdateUITree");
     }
 
     void SubscribeInputEventProcess(const std::function<void(SerializeableObjectArray&)>& onEvent)
@@ -77,14 +77,14 @@ public:
     }
 
 private:
-    void PostSyncTaskToUI(const std::function<void()>& task)
+    void PostSyncTaskToUI(const std::function<void()>& task, const std::string& name)
     {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
-        taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
+        taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
     }
 
     int32_t instanceId_ = -1;

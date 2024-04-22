@@ -143,7 +143,7 @@ void PluginPattern::InitPluginManagerDelegate()
             auto plugin = weak.Upgrade();
             CHECK_NULL_VOID(plugin);
             plugin->FireOnCompleteEvent();
-        });
+        }, "ArkUIPluginCompleteEvent");
     });
     pluginManagerBridge_->AddPluginUpdateCallback([weak = WeakClaim(this), instanceID](int64_t id, std::string data) {
         ContainerScope scope(instanceID);
@@ -157,7 +157,7 @@ void PluginPattern::InitPluginManagerDelegate()
             auto plugin = weak.Upgrade();
             CHECK_NULL_VOID(plugin);
             plugin->GetPluginSubContainer()->UpdatePlugin(data);
-        });
+        }, "ArkUIPluginUpdate");
     });
     pluginManagerBridge_->AddPluginErrorCallback(
         [weak = WeakClaim(this), instanceID](std::string code, std::string msg) {
@@ -173,7 +173,7 @@ void PluginPattern::InitPluginManagerDelegate()
                 auto plugin = weak.Upgrade();
                 CHECK_NULL_VOID(plugin);
                 plugin->FireOnErrorEvent(code, msg);
-            });
+            }, "ArkUIPluginErrorEvent");
         });
 }
 
@@ -241,7 +241,7 @@ void PluginPattern::CreatePluginSubContainer()
             pluginPattern->pluginSubContainer_->RunPlugin(
                 packagePathStr, info.abilityName, info.source, info.moduleResPath, pluginPattern->GetData());
         }
-    });
+    }, "ArkUIPluginRun");
 }
 
 void PluginPattern::ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern)
