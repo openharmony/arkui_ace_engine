@@ -539,7 +539,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle)
     } else {
         txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
     }
-    txtStyle.symbol.fontFamilies.push_back("HM Symbol");
+    txtStyle.fontFamilies.push_back("HM Symbol");
 }
 #else
 double NormalizeToPx(const Dimension& dimension)
@@ -772,7 +772,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
     } else {
         txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
     }
-    txtStyle.symbol.fontFamilies.push_back("HM Symbol");
+    txtStyle.fontFamilies.push_back("HM Symbol");
 }
 #endif
 
