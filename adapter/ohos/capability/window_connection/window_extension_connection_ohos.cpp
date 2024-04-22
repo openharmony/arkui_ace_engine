@@ -68,7 +68,7 @@ public:
                 ability->FireConnect();
             }
         };
-        PostTaskToUI(std::move(task));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionConnect");
     }
 
     void OnExtensionDisconnected() override
@@ -89,7 +89,7 @@ public:
                 ability->FireDisconnect();
             }
         };
-        PostTaskToUI(std::move(task));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionDisconnect");
     }
 
     void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) override {}

@@ -340,7 +340,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             CHECK_NULL_VOID(newComponent);
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup");
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -373,7 +373,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             }
             subwindow->ShowMenu(menu);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu");
 }
 
 void SubwindowManager::CloseMenu()
@@ -601,7 +601,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
                 subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
             },
-            TaskExecutor::TaskType::PLATFORM);
+            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
     }
 }
 
