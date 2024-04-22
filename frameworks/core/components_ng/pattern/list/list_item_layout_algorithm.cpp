@@ -57,6 +57,7 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (NearZero(startNodeSize_) || curOffset_ < endNodeSize_) {
             startNodeSize_ = startNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
+        curOffset_ = NearZero(startNodeSize_) && !hasStartDeleteArea_ ? 0.0f : curOffset_;
     } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
         auto endLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(endNodeSize_) && -curOffset_ > endNodeSize_) {
@@ -71,6 +72,7 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (NearZero(endNodeSize_) || -curOffset_ < endNodeSize_) {
             endNodeSize_ = endNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
+        curOffset_ = NearZero(endNodeSize_) && !hasEndDeleteArea_ ? 0.0f : curOffset_;
     }
 }
 

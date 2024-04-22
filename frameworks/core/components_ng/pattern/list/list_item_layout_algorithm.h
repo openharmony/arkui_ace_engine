@@ -86,6 +86,16 @@ public:
 
     void Initialize(LayoutWrapper* layoutWrapper);
 
+    void SetHasStartDeleteArea(bool hasStartDeleteArea)
+    {
+        hasStartDeleteArea_ = hasStartDeleteArea;
+    }
+
+    void SetHasEndDeleteArea(bool hasEndDeleteArea)
+    {
+        hasEndDeleteArea_ = hasEndDeleteArea;
+    }
+
 private:
     int32_t startNodeIndex_;
     int32_t endNodeIndex_;
@@ -97,6 +107,8 @@ private:
     float curOffset_ = 0.0f;
     float startNodeSize_ = 0.0f;
     float endNodeSize_ = 0.0f;
+    bool hasStartDeleteArea_ = false;
+    bool hasEndDeleteArea_ = false;
 
     Axis axis_ = Axis::VERTICAL;
 };

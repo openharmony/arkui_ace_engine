@@ -80,6 +80,8 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
     layoutAlgorithm->SetEndNodeSize(endNodeSize_);
     layoutAlgorithm->SetCurOffset(curOffset_);
+    layoutAlgorithm->SetHasStartDeleteArea(hasStartDeleteArea_);
+    layoutAlgorithm->SetHasEndDeleteArea(hasEndDeleteArea_);
     return layoutAlgorithm;
 }
 
