@@ -5009,9 +5009,11 @@ void RichEditorPattern::InitSelection(const Offset& pos)
 {
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
+    if (IsTouchBeforeCaret(currentPosition, pos)) {
+        currentPosition = std::max(0, currentPosition - 1);
+    }
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
-    AdjustPlaceholderSelection(currentPosition, nextPosition, pos);
     adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
@@ -5704,7 +5706,7 @@ bool RichEditorPattern::NeedAiAnalysis(
     const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content)
 {
     if (spanStart < 0) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis -spanStart%{public}d,return!", spanStart);
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis -spanStart:%{public}d, return!", spanStart);
         return false;
     }
 
@@ -5713,7 +5715,7 @@ bool RichEditorPattern::NeedAiAnalysis(
     }
 
     if (IsClickBoundary(pos) && targeType == CaretUpdateType::PRESSED) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary,return!");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NeedAiAnalysis IsClickBoundary, return!");
         return false;
     }
     return true;
@@ -5753,7 +5755,7 @@ bool RichEditorPattern::AdjustWordSelection(int32_t& start, int32_t& end)
 
         start = std::min(aiPosStart + spanStart, GetTextContentLength());
         end = std::min(aiPosEnd + spanStart, GetTextContentLength());
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get ai selector [%{public}d--%{public}d", start, end);
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get ai selector [%{public}d--%{public}d]", start, end);
         return true;
     }
     return false;
@@ -5762,10 +5764,7 @@ bool RichEditorPattern::AdjustWordSelection(int32_t& start, int32_t& end)
 void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& touchPos)
 {
     CHECK_NULL_VOID(!spans_.empty());
-    float selectLineHeight = 0.0f;
-    OffsetF caretOffsetUp = paragraphs_.ComputeCursorOffset(start, selectLineHeight);
-    auto needAdjustRect = RectF{ 0, caretOffsetUp.GetY(), caretOffsetUp.GetX(), selectLineHeight };
-    if (!needAdjustRect.IsInRegion(PointF{ touchPos.GetX(), touchPos.GetY() })) {
+    if (!IsTouchBeforeCaret(start, touchPos)) {
         return;
     }
     auto it = std::find_if(spans_.begin(), spans_.end(), [start](const RefPtr<SpanItem>& spanItem) {
@@ -5779,9 +5778,17 @@ void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end,
             spanNodeBefore->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG)) {
             end = start;
             --start;
-            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "get placeholder selector [%{public}d--%{public}d", start, end);
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "get placeholder selector [%{public}d--%{public}d]", start, end);
         }
     }
+}
+
+bool RichEditorPattern::IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos) {
+    CHECK_NULL_RETURN(!spans_.empty(), false);
+    float selectLineHeight = 0.0f;
+    OffsetF caretOffsetUp = paragraphs_.ComputeCursorOffset(caretPos, selectLineHeight);
+    auto needAdjustRect = RectF{ 0, caretOffsetUp.GetY(), caretOffsetUp.GetX(), selectLineHeight };
+    return needAdjustRect.IsInRegion(PointF{ touchPos.GetX(), touchPos.GetY() });
 }
 
 bool RichEditorPattern::IsClickBoundary(const int32_t position)
