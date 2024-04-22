@@ -104,6 +104,8 @@ const std::string ACCESS_TAG("-accessibility");
 const std::string TEST_FORM_INFO("test_info");
 const int64_t RENDER_EVENT_ID = 10;
 constexpr int32_t EXCEPTIONAL_CURSOR = 99;
+constexpr int8_t RENDERINGMODE_FULL_COLOR = 0;
+constexpr int8_t RENDERINGMODE_SINGLE_COLOR = 1;
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -3384,6 +3386,114 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg080, TestSize.Level1)
     float fontWeightScale = 1.2f;
     context_->SetFontWeightScale(fontWeightScale);
     ASSERT_EQ(context_->fontWeightScale_, fontWeightScale);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg081
+ * @tc.desc: Test the function CheckNeedUpdateBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg081, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Set pipelineContext attribute isFormRender_ and renderingMode_.
+     * @tc.expected: Render alphaValue is not equal to 75.
+     */
+    context_->isFormRender_ = false;
+    context_->renderingMode_ = RENDERINGMODE_SINGLE_COLOR;
+    Color color;
+    context_->CheckNeedUpdateBackgroundColor(color);
+    uint32_t alphaValue = color.GetAlpha();
+    ASSERT_NE(alphaValue, 75);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg082
+ * @tc.desc: Test the function CheckNeedUpdateBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg082, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Set pipelineContext attribute isFormRender_ and renderingMode_.
+     * @tc.expected: Render alphaValue is not equal to 75.
+     */
+    context_->isFormRender_ = true;
+    context_->renderingMode_ = RENDERINGMODE_FULL_COLOR;
+    Color color;
+    context_->CheckNeedUpdateBackgroundColor(color);
+    uint32_t alphaValue = color.GetAlpha();
+    ASSERT_NE(alphaValue, 75);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg083
+ * @tc.desc: Test the function CheckNeedUpdateBackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg083, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Set pipelineContext attribute isFormRender_ and renderingMode_.
+     * @tc.expected: Render alphaValue is equal to 75.
+     */
+    context_->isFormRender_ = true;
+    context_->renderingMode_ = RENDERINGMODE_SINGLE_COLOR;
+    Color color;
+    context_->CheckNeedUpdateBackgroundColor(color);
+    uint32_t alphaValue = color.GetAlpha();
+    ASSERT_EQ(alphaValue, 75);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg084
+ * @tc.desc: Test the function CheckNeedDisableUpdateBackgroundImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg084, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Set pipelineContext attribute isFormRender_ and renderingMode_.
+     * @tc.expected: No update background image.
+     */
+    context_->isFormRender_ = false;
+    context_->renderingMode_ = RENDERINGMODE_SINGLE_COLOR;
+    bool isUpdateBGIamge = context_->CheckNeedDisableUpdateBackgroundImage();
+    ASSERT_NE(isUpdateBGIamge, true);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg085
+ * @tc.desc: Test the function CheckNeedDisableUpdateBackgroundImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg085, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Set pipelineContext attribute isFormRender_ and renderingMode_.
+     * @tc.expected: No update background image.
+     */
+    context_->isFormRender_ = true;
+    context_->renderingMode_ = RENDERINGMODE_FULL_COLOR;
+    bool isUpdateBGIamge = context_->CheckNeedDisableUpdateBackgroundImage();
+    ASSERT_NE(isUpdateBGIamge, true);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg086
+ * @tc.desc: Test the function CheckNeedDisableUpdateBackgroundImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg086, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Set pipelineContext attribute isFormRender_ and renderingMode_.
+     * @tc.expected: Update background image.
+     */
+    context_->isFormRender_ = true;
+    context_->renderingMode_ = RENDERINGMODE_SINGLE_COLOR;
+    bool isUpdateBGIamge = context_->CheckNeedDisableUpdateBackgroundImage();
+    ASSERT_EQ(isUpdateBGIamge, true);
 }
 } // namespace NG
 } // namespace OHOS::Ace
