@@ -2071,7 +2071,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     
     FireOnSelect(selectStart, selectEnd);
     SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
-    MoveCaretToContentRect();
+    MoveCaretToContentRect(false);
     CalculateHandleOffsetAndShowOverlay();
     if (IsShowSelectMenuUsingMouse()) {
         CloseSelectOverlay();
@@ -5318,10 +5318,10 @@ void RichEditorPattern::MoveSecondHandle(float offset)
     }
 }
 
-void RichEditorPattern::MoveCaretToContentRect()
+void RichEditorPattern::MoveCaretToContentRect(bool downStreamFirst)
 {
     float caretHeight = 0.0f;
-    auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, true);
+    auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, downStreamFirst);
     MoveCaretToContentRect(caretOffset, caretHeight);
 }
 
