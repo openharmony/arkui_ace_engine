@@ -2305,6 +2305,30 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     };
 }
 
+RectF WebPattern::ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h)
+{
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    float selectX = offset.GetX() + x;
+    float selectY = offset.GetY();
+    float selectWidth = w;
+    float selectHeight = h;
+    if (LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), y)) {
+        selectY += GetHostFrameSize().value_or(SizeF()).Height();
+    } else if (y + h <= 0) {
+        selectY -= h;
+    } else {
+        selectY += y;
+    }
+    return RectF(selectX, selectY, selectWidth, selectHeight);
+}
+
+void WebPattern::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h)
+{
+    if (selectOverlayProxy_ && isQuickMenuMouseTrigger_) {
+        selectOverlayProxy_->UpdateSelectArea(ComputeMouseClippedSelectionBounds(x, y, w, h));
+    }
+}
+
 bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
@@ -2329,6 +2353,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     SelectOverlayInfo selectInfo;
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
     selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+    isQuickMenuMouseTrigger_ = false;
     if (selectInfo.isSingleHandle) {
         selectInfo.firstHandle.isShow = IsTouchHandleShow(insertTouchHandle);
         selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertTouchHandle);
@@ -2433,7 +2458,7 @@ RectF WebPattern::ComputeClippedSelectionBounds(
     selectX = selectX + offset.GetX() + params->GetSelectX();
     selectY += offset.GetY();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "SelectionBounds selectX:%{publc}f, selectY:%{publc}f, selectWidth:%{publc}f, selectHeight:%{publc}f",
+        "SelectionBounds selectX:%{public}f, selectY:%{public}f, selectWidth:%{public}f, selectHeight:%{public}f",
         selectX, selectY, selectWidth, selectHeight);
     return RectF(selectX, selectY, selectWidth, selectHeight);
 }
@@ -2444,10 +2469,21 @@ void WebPattern::QuickMenuIsNeedNewAvoid(
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle)
 {
+    isQuickMenuMouseTrigger_ = false;
     if (!selectInfo.firstHandle.isShow && !selectInfo.secondHandle.isShow) {
         selectInfo.isNewAvoid = true;
-        selectInfo.selectArea =
-            ComputeClippedSelectionBounds(params, startHandle, endHandle);
+        if ((startHandle->GetEdgeHeight() == 0 && startHandle->GetTouchHandleId() == -1) &&
+            (endHandle->GetEdgeHeight() == 0 && endHandle->GetTouchHandleId() == -1)) {
+            isQuickMenuMouseTrigger_ = true;
+            selectInfo.selectArea =
+                ComputeMouseClippedSelectionBounds(params->GetSelectX(),
+                                                   params->GetSelectY(),
+                                                   params->GetSelectWidth(),
+                                                   params->GetSelectXHeight());
+        } else {
+            selectInfo.selectArea =
+                ComputeClippedSelectionBounds(params, startHandle, endHandle);
+        }
     }
 }
 

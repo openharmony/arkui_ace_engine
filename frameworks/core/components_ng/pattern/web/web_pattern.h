@@ -389,6 +389,7 @@ public:
     {
         return isFullScreen_;
     }
+    void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void QuickMenuIsNeedNewAvoid(
@@ -481,6 +482,7 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
 
 private:
+    RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
@@ -692,6 +694,7 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
+    bool isQuickMenuMouseTrigger_ = false;
     float selectHotZone_ = 10.0f;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
