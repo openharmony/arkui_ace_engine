@@ -68,6 +68,7 @@ CheckBoxModifier::CheckBoxModifier(
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     checkBoxShape_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(CheckBoxStyle::CIRCULAR_STYLE));
 
     AttachProperty(animatableBoardColor_);

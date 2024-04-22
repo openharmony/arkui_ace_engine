@@ -40,6 +40,9 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
+        if (useContentModifier_->Get()) {
+            return;
+        }
         RSCanvas& canvas = context.canvas;
         PaintSwitch(canvas, offset_->Get(), size_->Get());
     }
@@ -183,6 +186,13 @@ public:
         }
     }
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
     void SetSize(SizeF& size)
     {
         actualSize_ = size;
@@ -292,6 +302,7 @@ private:
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;
 

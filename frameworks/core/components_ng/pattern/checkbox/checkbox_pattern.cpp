@@ -916,11 +916,13 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
 
 void CheckBoxPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
+        host->RemoveChildAtIndex(0);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
     host->RemoveChildAtIndex(0);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
