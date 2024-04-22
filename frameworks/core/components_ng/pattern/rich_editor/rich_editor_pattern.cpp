@@ -5011,7 +5011,6 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     }
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
-    AdjustPlaceholderSelection(currentPosition, nextPosition, pos);
     adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
