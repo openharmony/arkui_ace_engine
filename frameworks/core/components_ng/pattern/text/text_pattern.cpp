@@ -216,7 +216,10 @@ std::list<ResultObject> TextPattern::GetSpansInfoInStyledString(int32_t start, i
 {
     std::list<ResultObject> resultObjects;
     for (const auto& item : spans_) {
-        resultObjects.emplace_back(item->GetSpanResultObject(start, end));
+        auto obj = item->GetSpanResultObject(start, end);
+        if (obj.isInit) {
+            resultObjects.emplace_back(obj);
+        }
     }
     return resultObjects;
 }
