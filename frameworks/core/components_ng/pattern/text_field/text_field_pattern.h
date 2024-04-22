@@ -789,6 +789,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
@@ -1459,6 +1461,8 @@ private:
     bool hasMousePressed_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
+
+    bool isFocusTextColorSet_ = false;
 };
 } // namespace OHOS::Ace::NG
 
