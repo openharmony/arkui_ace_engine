@@ -1746,8 +1746,10 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     RegistVirtualKeyBoardListener();
+    bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
+        isFirstCreate = true;
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
         CHECK_NULL_VOID(delegate_);
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
@@ -1894,7 +1896,7 @@ void WebPattern::OnModifyDone()
     pipelineContext->AddOnAreaChangeNode(host->GetId());
 
     // offline mode
-    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
+    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE && isFirstCreate) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
