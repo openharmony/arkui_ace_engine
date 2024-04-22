@@ -107,7 +107,7 @@ void MenuWrapperPattern::HideSubMenu()
             menuPattern->FocusViewShow();
         }
     }
-    host->RemoveChild(subMenu);
+
     auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
     if (menuPattern) {
         menuPattern->RemoveParentHoverStyle();
@@ -118,7 +118,52 @@ void MenuWrapperPattern::HideSubMenu()
             menuItem->SetIsSubMenuShowed(false);
         }
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    auto scroll = focusMenu->GetFirstChild();
+    CHECK_NULL_VOID(scroll);
+    auto innerMenu = AceType::DynamicCast<FrameNode>(scroll->GetFirstChild());
+    CHECK_NULL_VOID(innerMenu);
+    auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(innerMenuPattern);
+    auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto expandingMode = layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    if (!(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && menuPattern->IsSubMenu()) ||
+        menuPattern->IsSelectOverlaySubMenu()) {
+        host->RemoveChild(subMenu);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } else if (expandingMode == SubMenuExpandingMode::STACK && menuPattern->IsSubMenu()) {
+        HideStackExpandMenu(subMenu);
+    }
+}
+
+void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuNode = host->GetFirstChild();
+    CHECK_NULL_VOID(menuNode);
+    AnimationOption option;
+    option.SetOnFinishEvent(
+        [weak = WeakClaim(RawPtr(host)), subMenuWk = WeakClaim(RawPtr(subMenu))] {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto taskExecutor = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, subMenuWk]() {
+                    auto subMenuNode = subMenuWk.Upgrade();
+                    CHECK_NULL_VOID(subMenuNode);
+                    auto menuWrapper = weak.Upgrade();
+                    CHECK_NULL_VOID(menuWrapper);
+                    menuWrapper->RemoveChild(subMenuNode);
+                    menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+                },
+                TaskExecutor::TaskType::UI, "HideStackExpandMenu");
+    });
+    auto menuNodePattern = DynamicCast<FrameNode>(menuNode)->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuNodePattern);
+    menuNodePattern->ShowStackExpandDisappearAnimation(DynamicCast<FrameNode>(menuNode),
+        DynamicCast<FrameNode>(subMenu), option);
 }
 
 void MenuWrapperPattern::RegisterOnTouch()

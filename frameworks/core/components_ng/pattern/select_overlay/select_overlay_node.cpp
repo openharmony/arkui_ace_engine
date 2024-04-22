@@ -657,7 +657,6 @@ void SelectOverlayNode::MoreAnimation()
     AnimationUtils::Animate(
         extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId(), shadowTheme]() {
         ContainerScope scope(id);
-        extensionContext->UpdateOpacity(1.0);
         extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         auto colorMode = SystemProperties::GetColorMode();
         extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
@@ -666,6 +665,9 @@ void SelectOverlayNode::MoreAnimation()
     modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f);
     modifier->SetHeadPointRadius(MIN_ARROWHEAD_DIAMETER / 2.0f);
     modifier->SetLineEndOffset(true);
+    auto menuPattern = extensionMenu_->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetMenuShow();
 
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
@@ -724,6 +726,10 @@ void SelectOverlayNode::BackAnimation()
     auto meanuWidth = pattern->GetMenuWidth();
 
     selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
+
+    auto menuPattern = extensionMenu_->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->ShowMenuDisappearAnimation();
     AnimationOption extensionOption;
     extensionOption.SetDuration(ANIMATION_DURATION2);
     extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -731,7 +737,6 @@ void SelectOverlayNode::BackAnimation()
     AnimationUtils::Animate(
         extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        extensionContext->UpdateOpacity(0.0);
         extensionContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
         selectMenuInnerContext->UpdateOpacity(1.0);
     });
@@ -876,6 +881,7 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
         extensionMenu_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         extensionMenu_->MarkModifyDone();
+        menuPattern->SetSelectOverlayExtensionMenuShow();
     }
 }
 

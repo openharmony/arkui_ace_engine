@@ -268,7 +268,11 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
-    void HideMenu(bool isMenuOnTouch = false) const;
+    void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
+
+    bool HideStackExpandMenu(const OffsetF& position) const;
+
+    void HideStackMenu() const;
 
     void MountOption(const RefPtr<FrameNode>& option);
 
@@ -284,7 +288,7 @@ public:
     {
         return showedSubMenu_;
     }
-    
+
     void SetIsWidthModifiedBySelect(bool isModified)
     {
         isWidthModifiedBySelect_ = isModified;
@@ -328,6 +332,21 @@ public:
         return endOffset_;
     }
 
+    void SetSelectOverlayExtensionMenuShow()
+    {
+        isExtensionMenuShow_ = true;
+    }
+
+    void SetSubMenuShow()
+    {
+        isSubMenuShow_ = true;
+    }
+
+    void SetMenuShow()
+    {
+        isMenuShow_ = true;
+    }
+
     void SetPreviewOriginOffset(const OffsetF& offset)
     {
         previewOriginOffset_ = offset;
@@ -357,7 +376,7 @@ public:
     {
         return targetSize_;
     }
-	
+
     void SetIsHeightModifiedBySelect(bool isModified)
     {
         isHeightModifiedBySelect_ = isModified;
@@ -372,6 +391,10 @@ public:
     {
         return expandDisplay_;
     }
+
+    void ShowMenuDisappearAnimation();
+    void ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
 
     void SetBuilderFunc(SelectMakeCallback&& makeFunc)
     {
@@ -442,6 +465,10 @@ private:
 
     Offset GetTransformCenter() const;
     void ShowPreviewMenuAnimation();
+    void ShowMenuAppearAnimation();
+    void ShowStackExpandMenu();
+    void ShowArrowRotateAnimation() const;
+    RefPtr<FrameNode> GetImageNode(const RefPtr<FrameNode>& host) const;
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
@@ -466,9 +493,14 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isFirstShow_ = false;
+    bool isExtensionMenuShow_ = false;
+    bool isSubMenuShow_ = false;
+    bool isMenuShow_ = false;
+
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;
     bool isHeightModifiedBySelect_ = false;

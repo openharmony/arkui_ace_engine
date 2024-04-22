@@ -111,6 +111,11 @@ const RefPtr<Curve> SHOW_CUSTOM_KEYBOARD_ANIMATION_CURVE =
 const RefPtr<Curve> HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(4.0f, 1.0f, 342.0f, 37.0f);
 
+const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 22.0f);
+constexpr Dimension ORIGINAL_BLUR_RADIUS = 20.0_px;
+constexpr double MENU_ORIGINAL_SCALE = 0.6f;
+
 RefPtr<FrameNode> GetLastPage()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -274,6 +279,28 @@ void ShowContextMenuDisappearAnimation(
             }
         },
         option.GetOnFinishEvent());
+}
+
+void ShowMenuDisappearAnimation(AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+{
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuNode = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuPosition = menuPattern->GetEndOffset();
+    option.SetCurve(MENU_ANIMATION_CURVE);
+    AnimationUtils::Animate(option, [menuRenderContext, menuPosition]() {
+        if (menuRenderContext) {
+            menuRenderContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            menuRenderContext->UpdateTransformScale(VectorF(MENU_ORIGINAL_SCALE, MENU_ORIGINAL_SCALE));
+            menuRenderContext->UpdateFrontBlurRadius(ORIGINAL_BLUR_RADIUS);
+            menuRenderContext->UpdateOpacity(0.0f);
+        }
+    }, option.GetOnFinishEvent());
 }
 } // namespace
 
@@ -618,12 +645,20 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         }
     }
     wrapperPattern->SetAniamtinOption(option);
+    SetPatternFirstShow(menu);
+}
+
+void OverlayManager::SetPatternFirstShow(const RefPtr<FrameNode>& menu)
+{
+    auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->SetFirstShow();
     auto menuChild = wrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuChild);
     auto menuPattern = AceType::DynamicCast<MenuPattern>(menuChild->GetPattern());
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetFirstShow();
+    menuPattern->SetMenuShow();
 }
 
 void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
@@ -793,6 +828,8 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
             ShowPreviewDisappearAnimation(menuWrapperPattern);
         }
         ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        ShowMenuDisappearAnimation(option, menuWrapperPattern);
     } else {
         AnimationUtils::Animate(
             option,
