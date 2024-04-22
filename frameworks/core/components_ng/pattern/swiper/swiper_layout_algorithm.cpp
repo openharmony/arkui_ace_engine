@@ -136,6 +136,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (totalItemCount_ > 0) {
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
+        ACE_SCOPED_TRACE("measure swiper startMainPos_:%f", startMainPos_);
         if ((Positive(prevMargin_) && NonPositive(swiperLayoutProperty->GetPrevMarginValue(0.0_px).ConvertToPx())) ||
             (Positive(nextMargin_) && NonPositive(swiperLayoutProperty->GetNextMarginValue(0.0_px).ConvertToPx()))) {
             prevMargin_ = 0.0f;
@@ -533,9 +534,9 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     ++currentIndex;
     {
         if (wrapper->GetHostNode()) {
-            ACE_SCOPED_TRACE("[MeasureSwiperForwardItem:%d][self:%d][parent:%d]", currentIndex,
+            ACE_SCOPED_TRACE("[MeasureSwiperForwardItem:%d][self:%d][parent:%d][start:%f]", currentIndex,
                 wrapper->GetHostNode()->GetId(),
-                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0);
+                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, startPos);
         }
         wrapper->Measure(layoutConstraint);
     }
@@ -595,9 +596,9 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     --currentIndex;
     {
         if (wrapper->GetHostNode()) {
-            ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d]", currentIndex,
+            ACE_SCOPED_TRACE("[MeasureSwiperBackwardItem:%d][self:%d][parent:%d][startPos:%f]", currentIndex,
                 wrapper->GetHostNode()->GetId(),
-                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0);
+                wrapper->GetHostNode()->GetParent() ? wrapper->GetHostNode()->GetParent()->GetId() : 0, startPos);
         }
         wrapper->Measure(layoutConstraint);
     }

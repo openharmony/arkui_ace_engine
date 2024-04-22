@@ -1705,7 +1705,7 @@ void SwiperPattern::InitSwiperController()
         if (swiper) {
             auto swiperNode = swiper->GetHost();
             CHECK_NULL_VOID(swiperNode);
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper SetShowPrevImpl, id:%{public}d", swiperNode->GetId());
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowPrevious, id:%{public}d", swiperNode->GetId());
             swiper->ShowPrevious();
         }
     });
@@ -2749,6 +2749,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, false);
         }
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish property translate animation");
         swiper->targetIndex_.reset();
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
@@ -2775,6 +2776,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
         }
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
+            offset.GetY());
         for (auto& item : swiperPattern->itemPosition_) {
             auto frameNode = item.second.node;
             if (frameNode) {
@@ -3140,10 +3144,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     CHECK_NULL_VOID(host);
 
     auto mainSize = CalculateVisibleSize();
-    if (LessOrEqual(mainSize, 0)) {
-        return;
-    }
-    if (itemPosition_.empty()) {
+    if (LessOrEqual(mainSize, 0) || itemPosition_.empty()) {
         return;
     }
     childScrolling_ = false;
@@ -3176,6 +3177,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation delta:%{public}f", delta);
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = true;
@@ -3184,6 +3186,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         },
         [weak = AceType::WeakClaim(this)]() {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation");
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             swiperPattern->springAnimationIsRunning_ = false;
