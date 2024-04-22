@@ -9811,6 +9811,23 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey {
   }
 }
 TextInputShowPasswordIconModifier.identity = Symbol('textInputShowPasswordIcon');
+class TextInputShowPasswordModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetShowPassword(node);
+    }
+    else {
+      getUINativeModule().textInput.setShowPassword(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputShowPasswordModifier.identity = Symbol('textInputShowPassword');
 class TextInputTextAlignModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10341,6 +10358,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   showPasswordIcon(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordIconModifier.identity, TextInputShowPasswordIconModifier, value);
+    return this;
+  }
+  showPassword(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordModifier.identity, TextInputShowPasswordModifier, value);
     return this;
   }
   textAlign(value) {

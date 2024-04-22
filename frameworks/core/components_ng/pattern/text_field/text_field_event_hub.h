@@ -77,6 +77,19 @@ public:
         onEditChanged_ = std::move(func);
     }
 
+    void SetOnSecurityStateChange(std::function<void(bool)>&& func)
+    {
+        onSecurityStateChanged_ = std::move(func);
+    }
+
+    void FireOnSecurityStateChanged(bool value)
+    {
+        if (onSecurityStateChanged_) {
+            LOGI("FireOnSecurityStateChanged %{public}d", value);
+            onSecurityStateChanged_(value);
+        }
+    }
+
     void FireOnEditChanged(bool value)
     {
         if (onEditChanged_) {
@@ -278,6 +291,7 @@ private:
 
     std::function<void(const std::string&)> onInputFilterError_;
     std::function<void(bool)> onEditChanged_;
+    std::function<void(bool)> onSecurityStateChanged_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
     std::function<void(const std::string&)> onChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;

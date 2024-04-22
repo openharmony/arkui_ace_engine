@@ -392,13 +392,24 @@ void TextFieldModelNG::SetInputStyle(InputStyle value)
 
 void TextFieldModelNG::SetShowPasswordIcon(bool value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value);
+}
+
+void TextFieldModelNG::SetShowPasswordText(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordText, value);
 }
 
 void TextFieldModelNG::SetOnEditChanged(std::function<void(bool)>&& func)
@@ -435,6 +446,13 @@ void TextFieldModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::funct
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void TextFieldModelNG::SetOnSecurityStateChange(std::function<void(bool)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSecurityStateChange(std::move(func));
 }
 
 void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& func)
@@ -954,6 +972,16 @@ void TextFieldModelNG::SetShowPasswordIcon(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode);
 }
 
+void TextFieldModelNG::SetShowPassword(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordText, value, frameNode);
+}
+
 void TextFieldModelNG::SetTextAlign(FrameNode* frameNode, TextAlign value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1315,6 +1343,13 @@ bool TextFieldModelNG::GetShowPasswordIcon(FrameNode* frameNode)
 {
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ShowPasswordIcon, value, frameNode, value);
+    return value;
+}
+
+bool TextFieldModelNG::GetShowPassword(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, ShowPasswordText, value, frameNode, value);
     return value;
 }
 

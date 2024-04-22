@@ -82,6 +82,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
+    JSClass<JSTextInput>::StaticMethod("onSecurityStateChange", &JSTextField::SetOnSecurityStateChange);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
@@ -109,6 +110,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("selectAll", &JSTextField::SetSelectAllValue);
     JSClass<JSTextInput>::StaticMethod("showCounter", &JSTextField::SetShowCounter);
     JSClass<JSTextInput>::StaticMethod("decoration", &JSTextField::SetDecoration);
+    JSClass<JSTextInput>::StaticMethod("showPassword", &JSTextField::ShowPasswordText);
     JSClass<JSTextInput>::StaticMethod("minFontSize", &JSTextField::SetMinFontSize);
     JSClass<JSTextInput>::StaticMethod("maxFontSize", &JSTextField::SetMaxFontSize);
     JSClass<JSTextInput>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
