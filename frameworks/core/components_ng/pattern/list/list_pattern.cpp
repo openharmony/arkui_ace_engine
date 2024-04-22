@@ -1566,26 +1566,10 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
     }
     auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
     float paddingBeforeContent = padding ? padding.value() : 0.0f;
-    if (align == ScrollAlign::START || align == ScrollAlign::NONE) {
-        targetPos = paddingBeforeContent + startPos + it->second.startPos;
-        if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
-            targetPos -= groupPattern->GetHeaderMainSize();
-        }
-        if (!IsScrollSnapAlignCenter() || childrenSize_) {
-            targetPos -= contentStartOffset_;
-        }
-    } else if (align == ScrollAlign::CENTER) {
+    if (align == ScrollAlign::CENTER) {
         targetPos = paddingBeforeContent + startPos +
             (it->second.startPos + it->second.endPos) / 2.0f - contentMainSize_ / 2.0f;
-    } else if (align == ScrollAlign::END) {
-        targetPos = paddingBeforeContent + startPos + it->second.endPos - contentMainSize_;
-        if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
-            targetPos += groupPattern->GetFooterMainSize();
-        }
-        if (!IsScrollSnapAlignCenter() || childrenSize_) {
-            targetPos += contentEndOffset_;
-        }
-    } else if (align == ScrollAlign::AUTO) {
+    } else {
         float itemStartPos = paddingBeforeContent + startPos + it->second.startPos;
         float itemEndPos = paddingBeforeContent + startPos + it->second.endPos;
         if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
@@ -1594,7 +1578,15 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
         if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
             itemEndPos += groupPattern->GetFooterMainSize();
         }
-        targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
+        if (!IsScrollSnapAlignCenter() || childrenSize_) {
+            itemStartPos -= contentStartOffset_;
+            itemEndPos += contentEndOffset_;
+        }
+        if (align == ScrollAlign::AUTO) {
+            targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
+        } else {
+            targetPos = align == ScrollAlign::END ? itemEndPos - contentMainSize_ : itemStartPos;
+        }
     }
     return true;
 }
