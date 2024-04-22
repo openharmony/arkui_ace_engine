@@ -87,7 +87,6 @@ private:
     void UpdateSafeArea();
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    double GetRealSize(Dimension dialogFrame, double size);
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
