@@ -105,6 +105,7 @@ constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t TABBAR_DEFAULT_WIDTH = 56.f;
 constexpr int32_t TABBAR_DEFAULT_HEIGHT = 56.f;
 constexpr Dimension BAR_SATURATE = 1.3_vp;
+const InspectorFilter filter;
 
 class TabsTestNg : public TestNG {
 public:
