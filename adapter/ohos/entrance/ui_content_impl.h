@@ -41,7 +41,7 @@ class AccessibilityElementInfo;
 }
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT UIContentImpl : public UIContent, public std::enable_shared_from_this<UIContentImpl> {
+class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
