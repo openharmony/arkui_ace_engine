@@ -870,7 +870,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
-    
+
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
     std::function<void()> dragWindowVisibleCallback_;
