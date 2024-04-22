@@ -159,10 +159,10 @@ private:
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
     std::optional<int32_t> targetIndex_;
-    RefPtr<WaterFlowLayoutInfoBase> layoutInfo_;
+    WaterFlowLayoutMode layoutMode_ = WaterFlowLayoutMode::TOP_DOWN;
+    RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(layoutMode_);
     RefPtr<WaterFlowSections> sections_;
 
-    WaterFlowLayoutMode layoutMode_ = WaterFlowLayoutMode::TOP_DOWN;
     float prevOffset_ = 0.0f;
     SizeF lastSize_;
     std::pair<int32_t, int32_t> itemRange_ = { -1, -1 };

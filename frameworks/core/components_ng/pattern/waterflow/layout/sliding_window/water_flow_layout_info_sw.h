@@ -71,7 +71,7 @@ public:
 
     float GetDelta(float prevPos) const override
     {
-        return delta_;
+        return offset() - prevPos;
     }
 
     int32_t GetMainCount() const override;
@@ -80,14 +80,9 @@ public:
         return lanes_.size();
     }
 
-    void Reset() override
-    {
-        lanes_.clear();
-        idxToLane_.clear();
-        delta_ = 0.0f;
-    }
+    void Reset() override;
 
-    void SyncRange();
+    void Sync(float mainSize, float mainGap);
 
     /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
@@ -104,7 +99,7 @@ public:
      * @param item idx
      * @param mainSize of the viewport
      * @param mainGap 
-     * @return positive result when it's bottom edge is above viewport.
+     * @return positive result when item's bottom edge is above viewport.
      */
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
 

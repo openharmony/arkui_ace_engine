@@ -76,7 +76,7 @@ private:
 
     void AdjustOverScroll(float mainSize);
 
-    RefPtr<LayoutWrapper> MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx);
+    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
 
     void CheckReset();
 

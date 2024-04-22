@@ -20,7 +20,7 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-void WaterFlowLayoutInfoSW::SyncRange()
+void WaterFlowLayoutInfoSW::Sync(float mainSize, float mainGap)
 {
     for (const auto& lane : lanes_) {
         if (lane.items_.empty()) {
@@ -29,6 +29,13 @@ void WaterFlowLayoutInfoSW::SyncRange()
         startIndex_ = std::min(startIndex_, lane.items_.front().idx);
         endIndex_ = std::max(endIndex_, lane.items_.back().idx);
     }
+    delta_ = 0.0f;
+    lastMainSize_ = mainSize;
+    mainGap_ = mainGap;
+
+    itemStart_ = startIndex_ == 0 && NonNegative(DistanceToTop(0, mainGap_));
+    itemEnd_ = endIndex_ == childrenCount_ - 1;
+    offsetEnd_ = itemEnd_ && NonNegative(DistanceToBottom(endIndex_, mainSize, mainGap));
 }
 
 float WaterFlowLayoutInfoSW::DistanceToTop(int32_t itemIdx, float mainGap) const
@@ -222,5 +229,13 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
         default:
             return 0.0f;
     }
+}
+
+void WaterFlowLayoutInfoSW::Reset()
+{
+    jumpIndex_ = startIndex_;
+    delta_ = DistanceToTop(startIndex_, mainGap_);
+    lanes_.clear();
+    idxToLane_.clear();
 }
 } // namespace OHOS::Ace::NG

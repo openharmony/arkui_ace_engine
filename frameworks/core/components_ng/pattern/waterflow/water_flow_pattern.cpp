@@ -19,12 +19,15 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_sw_layout.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_segmented_layout.h"
 
 namespace OHOS::Ace::NG {
+using LayoutMode = WaterFlowLayoutMode;
+
 SizeF WaterFlowPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -62,7 +65,8 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         if (layoutInfo_->offsetEnd_ && delta < 0) {
             return false;
         }
-        if (layoutMode_ == WaterFlowLayoutMode::TOP_DOWN && GreatNotEqual(delta, 0.0f)) {
+        if (layoutMode_ == LayoutMode::TOP_DOWN && GreatNotEqual(delta, 0.0f)) {
+            // adjust top overScroll
             delta = std::min(delta, -layoutInfo_->offset());
         }
     }
@@ -99,6 +103,9 @@ OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
 
 void WaterFlowPattern::UpdateScrollBarOffset()
 {
+    if (layoutMode_ == LayoutMode::SLIDING_WINDOW) {
+        return;
+    }
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -127,7 +134,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     RefPtr<WaterFlowLayoutBase> algorithm;
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
-    } else if (layoutMode_ == WaterFlowLayoutMode::SLIDING_WINDOW) {
+    } else if (layoutMode_ == LayoutMode::SLIDING_WINDOW) {
         algorithm = MakeRefPtr<WaterFlowSWLayout>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
     } else {
         int32_t footerIndex = -1;
@@ -177,7 +184,7 @@ void WaterFlowPattern::OnModifyDone()
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (layoutMode_ != WaterFlowLayoutMode::SLIDING_WINDOW && paintProperty->GetScrollBarProperty()) {
+    if (layoutMode_ != LayoutMode::SLIDING_WINDOW && paintProperty->GetScrollBarProperty()) {
         SetScrollBar(paintProperty->GetScrollBarProperty());
     }
     SetAccessibilityAction();
@@ -385,7 +392,7 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
 
 RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 {
-    if (layoutMode_ == WaterFlowLayoutMode::SLIDING_WINDOW) {
+    if (layoutMode_ == LayoutMode::SLIDING_WINDOW) {
         return nullptr;
     }
     if (sections_) {
@@ -566,7 +573,7 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     footer->SetActive(false);
 }
 
-void WaterFlowPattern::SetLayoutMode(WaterFlowLayoutMode mode)
+void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
     layoutMode_ = mode;
 

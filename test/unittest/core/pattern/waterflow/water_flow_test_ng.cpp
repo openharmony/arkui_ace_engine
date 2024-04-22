@@ -120,10 +120,10 @@ void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callba
     if (callback) {
         callback(model);
     }
-    GetInstance();
 #ifdef TEST_WATER_FLOW_SW
-    pattern_->layoutMode_ = WaterFlowLayoutMode::SLIDING_WINDOW;
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
 #endif
+    GetInstance();
     if (flushLayout) {
         FlushLayoutTask(frameNode_);
     }
@@ -774,8 +774,8 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest012, TestSize.Level1)
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     if (info) {
         EXPECT_EQ(info->maxHeight_, 500);
-        EXPECT_EQ(info->lastMainSize_, 800);
     }
+    EXPECT_EQ(pattern_->layoutInfo_->lastMainSize_, 800);
 
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 100, 100 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(3 * ITEM_HEIGHT), { 300, 300 }));

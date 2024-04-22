@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
 {
+    LOGI("ZTE sw");
     wrapper_ = wrapper;
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
     axis_ = axis_ = props->GetAxis();
@@ -38,23 +39,27 @@ void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
     Init(idealSize);
     CheckReset();
 
-    float mainSize = idealSize.MainSize(axis_);
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
-        MeasureOnJump(info_->jumpIndex_, info_->align_, mainSize);
+        MeasureOnJump(info_->jumpIndex_, info_->align_, mainSize_);
+        overScroll_ = false;
     } else if (info_->targetIndex_) {
         MeasureToTarget(*info_->targetIndex_);
-    } else {
-        ApplyOffset(mainSize, info_->delta_);
-        if (!overScroll_) {
-            AdjustOverScroll(mainSize);
-        }
     }
+    LOGI("ZTE delta = %f", info_->delta_);
+    ApplyOffset(mainSize_, info_->delta_);
+    if (!overScroll_) {
+        AdjustOverScroll(mainSize_);
+    }
+    // if (matchChildren) {
+    //     PostMeasureSelf();
+    // }
+
+    info_->Sync(mainSize_, mainGap_);
     wrapper->SetCacheCount(props->GetCachedCountValue(1));
 }
 
 void WaterFlowSWLayout::Layout(LayoutWrapper* wrapper)
 {
-    wrapper->RemoveAllChildInRenderTree();
     if (info_->lanes_.empty()) {
         return;
     }
@@ -80,6 +85,7 @@ void WaterFlowSWLayout::Layout(LayoutWrapper* wrapper)
         }
         crossPos += itemCrossSize_[i] + crossGap_;
     }
+    wrapper->SetActiveChildRange(info_->startIndex_, info_->endIndex_);
 }
 
 void WaterFlowSWLayout::Init(const SizeF& frameSize)
@@ -105,6 +111,10 @@ void WaterFlowSWLayout::Init(const SizeF& frameSize)
     }
     if (cross.second) {
         crossGap_ = 0.0f;
+    }
+
+    if (info_->lanes_.empty()) {
+        info_->lanes_.resize(cross.first.size());
     }
 
     for (const auto& len : cross.first) {
@@ -142,8 +152,6 @@ void WaterFlowSWLayout::ApplyOffset(float mainSize, float offset)
         ClearFront();
         FillBack(mainSize, info_->childrenCount_ - 1);
     }
-
-    info_->SyncRange();
 }
 
 void WaterFlowSWLayout::MeasureToTarget(int32_t targetIdx)
@@ -155,7 +163,7 @@ void WaterFlowSWLayout::MeasureToTarget(int32_t targetIdx)
     }
 }
 
-using lanePos = std::pair<float, int32_t>;
+using lanePos = std::pair<float, size_t>;
 
 void WaterFlowSWLayout::FillBack(float viewportBound, int32_t maxChildIdx)
 {
@@ -173,19 +181,18 @@ void WaterFlowSWLayout::FillBack(float viewportBound, int32_t maxChildIdx)
     while (!q.empty() && idx <= maxChildIdx) {
         auto [endPos, laneIdx] = q.top();
         q.pop();
-        auto child = MeasureChild(props, idx);
-
-        float size = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
-        endPos += mainGap_ + size;
+        float mainLen = MeasureChild(props, idx, laneIdx);
+        endPos += mainGap_ + mainLen;
 
         auto& lane = info_->lanes_[laneIdx];
         lane.endPos = endPos;
         info_->idxToLane_[idx] = laneIdx;
-        lane.items_.push_back({ idx++, size });
+        lane.items_.push_back({ idx++, mainLen });
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, laneIdx });
         }
     }
+    LOGI("ZTE deque size = %d", info_->lanes_[0].items_.size());
 }
 
 void WaterFlowSWLayout::FillFront(float viewportBound, int32_t minChildIdx)
@@ -205,15 +212,13 @@ void WaterFlowSWLayout::FillFront(float viewportBound, int32_t minChildIdx)
     while (!q.empty() && idx >= minChildIdx) {
         auto [startPos, laneIdx] = q.top();
         q.pop();
-        auto child = MeasureChild(props, idx);
-
-        float size = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
-        startPos -= mainGap_ + size;
+        float mainLen = MeasureChild(props, idx, laneIdx);
+        startPos -= mainGap_ + mainLen;
 
         auto& lane = info_->lanes_[laneIdx];
         info_->idxToLane_[idx] = laneIdx;
         lane.startPos = startPos;
-        lane.items_.push_front({ idx--, size });
+        lane.items_.push_front({ idx--, mainLen });
         if (GreatNotEqual(startPos - mainGap_, viewportBound)) {
             q.push({ startPos, laneIdx });
         }
@@ -307,11 +312,15 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
             break;
         }
         case ScrollAlign::CENTER: {
-            auto child = MeasureChild(DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty()), jumpIdx);
-            float itemH = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+            auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
             if (inView || closeToView) {
+                std::cout << "jumpIdx = "
+                          << " map size = " << info_->idxToLane_.size() << " children size = " << info_->childrenCount_
+                          << std::endl;
+                float itemH = MeasureChild(props, jumpIdx, info_->idxToLane_.at(jumpIdx));
                 ApplyOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_) + (mainSize - itemH) / 2.0f);
             } else {
+                float itemH = MeasureChild(props, jumpIdx, 0);
                 std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize, itemH](auto& lane) {
                     lane.items_.clear();
                     lane.startPos = (mainSize - itemH) / 2.0f;
@@ -344,8 +353,6 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
         default:
             break;
     }
-    info_->SyncRange();
-    AdjustOverScroll(mainSize);
 }
 
 void WaterFlowSWLayout::AdjustOverScroll(float mainSize)
@@ -365,12 +372,12 @@ void WaterFlowSWLayout::AdjustOverScroll(float mainSize)
     }
 }
 
-RefPtr<LayoutWrapper> WaterFlowSWLayout::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx)
+float WaterFlowSWLayout::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(idx);
-    CHECK_NULL_RETURN(child, nullptr);
-    child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemCrossSize_[info_->idxToLane_.at(idx)], mainSize_, axis_ }, props, child));
-    return child;
+    CHECK_NULL_RETURN(child, 0.0f);
+    child->Measure(
+        WaterFlowLayoutUtils::CreateChildConstraint({ itemCrossSize_[lane], mainSize_, axis_ }, props, child));
+    return child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
 }
 } // namespace OHOS::Ace::NG
