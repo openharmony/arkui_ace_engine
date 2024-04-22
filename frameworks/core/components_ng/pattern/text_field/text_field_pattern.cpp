@@ -4522,6 +4522,7 @@ void TextFieldPattern::SetSelectionFlag(
     if (!HasFocus()) {
         return;
     }
+    bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
         StartTwinkling();
@@ -4540,12 +4541,17 @@ void TextFieldPattern::SetSelectionFlag(
     selectOverlay_->SetUsingMouse(false);
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
-    } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
-        ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
-    } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
-        ProcessOverlay({ .menuIsShow = false, .animation = true });
-    } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
-        ProcessOverlay({ .menuIsShow = true, .animation = true });
+    } else {
+        if (options.has_value()) {
+            if (options.value().menuPolicy == MenuPolicy::NEVER) {
+                isShowMenu = false;
+            } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+                isShowMenu = true;
+            }
+        } else {
+            isShowMenu = false;
+        }
+        ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
