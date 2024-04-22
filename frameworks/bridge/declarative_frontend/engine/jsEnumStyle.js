@@ -2407,7 +2407,7 @@ class ChildrenMainSize {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
