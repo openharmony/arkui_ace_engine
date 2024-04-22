@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/time/time_event_proxy.h"
 #include "core/pipeline/base/render_context.h"
@@ -142,6 +143,7 @@ void TextClockPattern::OnModifyDone()
     hourWest_ = GetHoursWest();
     delayTask_.Cancel();
     UpdateTimeText();
+    FireBuilder();
 }
 
 void TextClockPattern::InitTextClockController()
@@ -161,6 +163,7 @@ void TextClockPattern::InitTextClockController()
         auto textClock = wp.Upgrade();
         if (textClock) {
             textClock->isStart_ = false;
+            textClock->FireBuilder();
             textClock->delayTask_.Cancel();
         }
     });
@@ -245,6 +248,7 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
     if (!isStart_ || (!isTimeChange && (!isSetVisible_ || !isInVisibleArea_ || !isFormVisible_))) {
         return;
     }
+    FireBuilder();
     RequestUpdateForNextSecond();
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
@@ -723,5 +727,43 @@ void TextClockPattern::OnTimeChange()
 {
     is24H_ = SystemProperties::Is24HourClock();
     UpdateTimeText(ON_TIME_CHANGE);
+}
+
+void TextClockPattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        auto children = host->GetChildren();
+        for (const auto& child : children) {
+            if (child->GetId() == nodeId_) {
+                host->RemoveChildAndReturnIndex(child);
+            }
+        }
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    nodeId_ = contentModifierNode_->GetId();
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto timeZoneOffset = GetHoursWest();
+    auto started = isStart_;
+    auto timeValue = static_cast<int64_t>(GetMilliseconds() / MICROSECONDS_OF_MILLISECOND);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<TextClockEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    TextClockConfiguration textClockConfiguration(timeZoneOffset, started, timeValue, enabled);
+    return (makeFunc_.value())(textClockConfiguration);
 }
 } // namespace OHOS::Ace::NG
