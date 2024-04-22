@@ -15,6 +15,7 @@
 
 import { Chip, ChipSize } from '@ohos.arkui.advanced.Chip'
 
+
 interface ChipGroupTheme {
   itemStyle: ChipItemStyle;
   chipGroupSpace: ChipGroupSpaceOptions;
@@ -33,19 +34,21 @@ const defaultTheme: ChipGroupTheme = {
     selectedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     selectedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
   },
-  chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 0 },
-  leftPadding: 0,
+  chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
+  leftPadding: 16,
   rightPadding: 16,
 }
 
-const chipGroupSuffixTheme: BuilderTheme = {
+const iconGroupSuffixTheme: IconGroupSuffixTheme = {
   backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
   borderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
   smallIconSize: 16,
   normalIconSize: 24,
   smallBackgroundSize: 28,
-  normalbackgroundSize: 36,
+  normalBackgroundSize: 36,
   marginLeft: 8,
+  marginRight: 16,
+  fillColor: $r('sys.color.ohos_id_color_primary')
 }
 
 interface IconOptions {
@@ -74,7 +77,7 @@ interface ChipItemStyle {
 }
 
 interface ChipGroupSpaceOptions {
-  itemSpace?: string | number;
+  itemSpace?: number | string;
   startSpace?: Length;
   endSpace?: Length;
 }
@@ -85,57 +88,100 @@ export interface IconItemOptions {
   action: Callback<void>
 }
 
-interface BuilderTheme {
+interface IconGroupSuffixTheme {
   smallIconSize: number;
   normalIconSize: number;
   backgroundColor: ResourceColor;
   smallBackgroundSize: number;
-  normalbackgroundSize: number;
+  normalBackgroundSize: number;
   borderRadius: Dimension;
   marginLeft: number;
-
+  marginRight: number;
+  fillColor: ResourceColor;
 }
 
+function parseDimension<T>(uiContext: UIContext, value: Dimension | Length | undefined, defaultValue: T): T {
+  if (value === void (0) || value === null) {
+    return defaultValue;
+  }
+  const resourceManager = uiContext.getHostContext()?.resourceManager;
+  if (typeof value === "object") {
+    let temp: Resource = value as Resource;
+    if (temp.type === 10002) {
+      if (resourceManager.getNumber(temp.id) >= 0) {
+        return value as T;
+      }
+    } else if (temp.type === 10003) {
+      if (isValidDimensionString(resourceManager.getStringSync(temp.id))) {
+        return value as T;
+      }
+    }
+  } else if (typeof value === "number") {
+    if (value >= 0) {
+      return value as T;
+    }
+  } else if (typeof value === "string") {
+    if (isValidDimensionString(value)) {
+      return value as T;
+    }
+  }
+  return defaultValue;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  const regex = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
 
 @Component
 export struct IconGroupSuffix {
-  @Consume chipSize: ChipSize | SizeOptions | undefined
-  @Prop items: Array<IconItemOptions> = []
-
-  private getIconSize(): number {
-    if (this.chipSize === ChipSize.SMALL) {
-      return chipGroupSuffixTheme.smallIconSize
-    } else {
-      return chipGroupSuffixTheme.normalIconSize
-    }
-  }
+  @Consume chipSize: ChipSize | SizeOptions;
+  @Prop items: Array<IconItemOptions> = [];
 
   private getBackgroundSize(): number {
     if (this.chipSize === ChipSize.SMALL) {
-      return chipGroupSuffixTheme.smallBackgroundSize
+      return iconGroupSuffixTheme.smallBackgroundSize;
     } else {
-      return chipGroupSuffixTheme.normalbackgroundSize
+      return iconGroupSuffixTheme.normalBackgroundSize;
     }
+  }
+
+  private getIconSize(val: Length): Length {
+    if (this.chipSize === ChipSize.SMALL) {
+      return parseDimension(this.getUIContext(), val, iconGroupSuffixTheme.smallIconSize);
+    } else {
+      return parseDimension(this.getUIContext(), val, iconGroupSuffixTheme.normalIconSize);
+    }
+
   }
 
   build() {
     Row() {
-      ForEach(this.items, (suffixItem: IconItemOptions, index) => {
+      ForEach(this.items, (suffixItem: IconItemOptions) => {
         Button() {
           Image(suffixItem.icon.src)
-            .fillColor($r('sys.color.ohos_id_color_primary'))
-            .constraintSize({ maxWidth: this.getIconSize(), maxHeight: this.getIconSize() })
-            .size({ width: this.getBackgroundSize(), height: this.getBackgroundSize() })
+            .fillColor(iconGroupSuffixTheme.fillColor)
+            .size({
+              width: this.getIconSize(suffixItem.icon?.size?.width),
+              height: this.getIconSize(suffixItem.icon?.size?.height)
+            })
+            .focusable(true)
         }
-        .constraintSize({ maxWidth: this.getBackgroundSize(), maxHeight: this.getBackgroundSize() })
-        .size({ width: this.getBackgroundSize(), height: this.getBackgroundSize() })
-        .backgroundColor(chipGroupSuffixTheme.backgroundColor)
-        .borderRadius(chipGroupSuffixTheme.borderRadius)
-        .margin({ left: chipGroupSuffixTheme.marginLeft })
-        .onClick((event: ClickEvent) => {
-          suffixItem.action()
+        .size({
+          width: this.getBackgroundSize(),
+          height: this.getBackgroundSize()
         })
-        .borderRadius(chipGroupSuffixTheme.borderRadius)
+        .backgroundColor(iconGroupSuffixTheme.backgroundColor)
+        .borderRadius(iconGroupSuffixTheme.borderRadius)
+        .onClick(() => {
+          suffixItem.action();
+        })
+        .borderRadius(iconGroupSuffixTheme.borderRadius)
       })
     }
   }
@@ -144,66 +190,113 @@ export struct IconGroupSuffix {
 
 @Component
 export struct ChipGroup {
-  @Provide chipSize: ChipSize | SizeOptions | undefined = defaultTheme.itemStyle.size
-  @Prop items: ChipGroupItemOptions[] = []
-  @Prop itemStyle: ChipItemStyle = defaultTheme.itemStyle
-  @Prop selectedIndexes: Array<number> = [0]
-  @Prop multiple: boolean = false
-  @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace
-  @BuilderParam suffix?: Callback<void>
-  private scroller: Scroller = new Scroller()
-  public onChange: Callback<Array<number>> = noop
+  @Prop items: ChipGroupItemOptions[] = [];
+  @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
+  @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
+  @Prop selectedIndexes: Array<number> = [0];
+  @Prop multiple: boolean = false;
+  @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
+  @BuilderParam suffix?: Callback<void>;
+  public onChange: Callback<Array<number>> = noop;
+  private scroller: Scroller = new Scroller();
   @State isReachEnd: boolean = this.scroller.isAtEnd();
+  private chipCount: number = this.items.length;
 
-  private getChipSize(): ChipSize | SizeOptions | undefined {
-    this.chipSize = this.itemStyle.size
-    return this.itemStyle.size ?? defaultTheme.itemStyle.size
+  itemStyleOnChange() {
+    this.chipSize = this.getChipSize();
+  }
+
+  aboutToAppear() {
+    this.itemStyleOnChange();
+  }
+
+  private getChipSize(): ChipSize | SizeOptions {
+    if (this.itemStyle && this.itemStyle.size) {
+      return this.itemStyle.size
+    }
+    return defaultTheme.itemStyle.size;
+  }
+
+  private getFontColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.fontColor) {
+      return this.itemStyle.fontColor
+    }
+    return defaultTheme.itemStyle.fontColor;
+  }
+
+  private getSelectedFontColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedFontColor) {
+      return this.itemStyle.selectedFontColor
+    }
+    return defaultTheme.itemStyle.selectedFontColor;
+  }
+
+  private getBackgroundColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.backgroundColor) {
+      return this.itemStyle.backgroundColor
+    }
+    return defaultTheme.itemStyle.backgroundColor;
+  }
+
+  private getSelectedBackgroundColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
+      return this.itemStyle.selectedBackgroundColor
+    }
+    return defaultTheme.itemStyle.selectedBackgroundColor;
   }
 
   private getItemStyle(): ChipItemStyle {
-    return this.itemStyle ?? defaultTheme.itemStyle
+    return this.itemStyle ?? defaultTheme.itemStyle;
   }
 
+  // private getBackGroundColor()
+
   private getSelectedIndexes(): Array<number> {
-    this.selectedIndexes.forEach((val, idx, array) => {
-      if (val >= 0) {
-      }
-      else {
-        this.selectedIndexes.splice(idx, 1)
-      }
-    })
-    return this.selectedIndexes ?? [0]
+    let temp: number[] = [];
+    temp = (this.selectedIndexes ?? [0]).filter(
+      (element, index, array) => {
+        return (element >= 0 && element % 1 == 0 && element <= this.chipCount);
+      });
+    return temp;
   }
 
   private isMultiple(): boolean {
-    return this.multiple ?? true
+    return this.multiple ?? false;
   }
 
-  private getChipGroupSpaceSize(): ChipGroupSpaceOptions {
-    return this.chipGroupSpace ?? defaultTheme.chipGroupSpace
+  private getChipGroupItemSpace(): string | number {
+    return parseDimension(this.getUIContext(), this.chipGroupSpace.itemSpace, defaultTheme.chipGroupSpace.itemSpace);
+  }
+
+  private getChipGroupStartSpace() {
+    return parseDimension(this.getUIContext(), this.chipGroupSpace.startSpace, defaultTheme.chipGroupSpace.startSpace);
+  }
+
+  private getChipGroupEndSpace() {
+    return parseDimension(this.getUIContext(), this.chipGroupSpace.endSpace, defaultTheme.chipGroupSpace.endSpace);
   }
 
   private getOnChange(): (selectedIndexes: Array<number>) => void {
-    return this.onChange ?? noop
+    return this.onChange ?? noop;
   }
 
   private isSelected(itemIndex: number): boolean {
-    let val =this.getSelectedIndexes()[0]
     if (!this.isMultiple()) {
-      return itemIndex == val
+      return itemIndex == this.getSelectedIndexes()[0];
     } else {
-      return this.selectedIndexes.some((element, index, array) => {
+      console.log("zjw itemIndex = " + itemIndex)
+      return this.getSelectedIndexes().some((element, index, array) => {
         return (element == itemIndex);
       })
     }
   }
 
   build() {
-    Row() {
 
+    Row() {
       Stack() {
         Scroll(this.scroller) {
-          Row({ space: this.getChipGroupSpaceSize().itemSpace ?? defaultTheme.chipGroupSpace.itemSpace }) {
+          Row({ space: this.getChipGroupItemSpace() }) {
             ForEach(this.items, (chipItem: ChipGroupItemOptions, index) => {
               Chip({
                 prefixIcon: {
@@ -211,9 +304,9 @@ export struct ChipGroup {
                   size: chipItem.prefixIcon?.size ?? undefined,
                 },
                 label: {
-                  text: chipItem?.label?.text??" ",
-                  fontColor: this.getItemStyle().fontColor ?? defaultTheme.itemStyle.fontColor,
-                  activatedFontColor: this.getItemStyle().selectedFontColor ?? defaultTheme.itemStyle.selectedFontColor,
+                  text: chipItem?.label?.text ?? " ",
+                  fontColor: this.getFontColor(),
+                  activatedFontColor: this.getSelectedFontColor(),
                 },
                 suffixIcon: {
                   src: chipItem.suffixIcon?.src ?? "",
@@ -222,27 +315,25 @@ export struct ChipGroup {
                 allowClose: chipItem.allowClose ?? false,
                 enabled: true,
                 activated: this.isSelected(index),
-                backgroundColor: this.getItemStyle().backgroundColor ?? defaultTheme.itemStyle.backgroundColor,
+                backgroundColor: this.getBackgroundColor(),
                 size: this.getChipSize(),
-                activatedBackgroundColor: this.getItemStyle()
-                  .selectedBackgroundColor ?? defaultTheme.itemStyle.selectedBackgroundColor,
+                activatedBackgroundColor: this.getSelectedBackgroundColor(),
                 onClicked: () => {
                   if (this.isSelected(index)) {
-                    this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1)
+                    this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
                   } else {
                     if (!this.isMultiple()) {
                       this.selectedIndexes = [];
                     }
-                    this.selectedIndexes.push(index)
+                    this.selectedIndexes.push(index);
                   }
-                  this.selectedIndexes.sort()
-                  this.getOnChange()(this.selectedIndexes)
+                  this.getOnChange()(this.getSelectedIndexes());
                 }
               })
             });
           }
-          .padding({ left: this.getChipGroupSpaceSize().startSpace ?? defaultTheme.chipGroupSpace.startSpace,
-            right: this.getChipGroupSpaceSize().endSpace ?? defaultTheme.chipGroupSpace.endSpace })
+          .padding({ left: this.getChipGroupStartSpace(),
+            right: this.getChipGroupEndSpace() })
           .constraintSize({ minWidth: '100%' })
         }
         .scrollable(ScrollDirection.Horizontal)
@@ -250,19 +341,17 @@ export struct ChipGroup {
         .align(Alignment.Start)
         .width('100%')
         .onScroll(() => {
-          this.isReachEnd = this.scroller.isAtEnd()
+          this.isReachEnd = this.scroller.isAtEnd();
         })
 
-
-        if (this.suffix) {
+        if (this.suffix && !this.isReachEnd) {
           Stack()
-            .width(chipGroupSuffixTheme.normalbackgroundSize)
-            .height(this.chipSize === ChipSize.SMALL ? chipGroupSuffixTheme.smallBackgroundSize : chipGroupSuffixTheme.normalbackgroundSize)
+            .width(iconGroupSuffixTheme.normalBackgroundSize)
+            .height(this.getChipSize() === ChipSize.SMALL ? iconGroupSuffixTheme.smallBackgroundSize : iconGroupSuffixTheme.normalBackgroundSize)
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }
-
       }
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
@@ -270,19 +359,12 @@ export struct ChipGroup {
 
       if (this.suffix) {
         Row() {
-          this.suffix()
-        }
+          this.suffix();
+        }.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight, })
       }
     }
     .align(Alignment.End)
     .width("100%")
-    .padding({
-      left: defaultTheme.leftPadding,
-      right: this.suffix == null ? (this.getChipGroupSpaceSize()
-        .endSpace ?? defaultTheme.chipGroupSpace.endSpace) : defaultTheme.rightPadding
-    })
     .height(64)
   }
 }
-
-

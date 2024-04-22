@@ -274,13 +274,14 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
-    auto markProcess = [touchPoint, finallyCallback = callback]() {
+    auto markProcess = [touchPoint, finallyCallback = callback, enabled = pointerEvent->IsMarkEnabled()]() {
         if (touchPoint.type != TouchType::MOVE) {
             TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
                 touchPoint.touchEventId);
         }
         MMI::InputManager::GetInstance()->MarkProcessed(touchPoint.touchEventId,
-            std::chrono::duration_cast<std::chrono::microseconds>(touchPoint.time.time_since_epoch()).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(touchPoint.time.time_since_epoch()).count(),
+            enabled);
         if (finallyCallback) {
             finallyCallback();
         }
@@ -343,14 +344,17 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
     const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     MouseEvent event;
+    bool markEnabled = true;
     if (pointerEvent) {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         ConvertMouseEvent(pointerEvent, event, container->IsScenceBoardWindow());
+        markEnabled = pointerEvent->IsMarkEnabled();
     }
-    auto markProcess = [event]() {
+    auto markProcess = [event, markEnabled]() {
         MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
-            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
+            markEnabled);
     };
 
     CHECK_NULL_VOID(mouseEventCallback_);
@@ -368,9 +372,10 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     }
 
     ConvertAxisEvent(pointerEvent, event);
-    auto markProcess = [event]() {
+    auto markProcess = [event, enabled = pointerEvent->IsMarkEnabled()]() {
         MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
-            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count());
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
+            enabled);
     };
 
     /* The first step of axis event of mouse is equivalent to touch event START + UPDATE.

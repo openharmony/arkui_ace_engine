@@ -305,7 +305,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto tempOffset = currentOffset_;
     auto detentSize = sheetDetentHeight_.size();
-    if (detentSize <= 0) {
+    if (LessOrEqual(detentSize, 0)) {
         return;
     }
     auto height = height_ + sheetHeightUp_;
@@ -370,7 +370,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         (!NearEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight)))) {
         if (GreatNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
             if (NearZero(downHeight)) {
-                SheetInteractiveDismiss(true, std::abs(dragVelocity));
+                SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
@@ -384,7 +384,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     } else {
         if (GreatOrEqual(dragVelocity, 0.0f)) {
             if (NearZero(downHeight)) {
-                SheetInteractiveDismiss(true, std::abs(dragVelocity));
+                SheetInteractiveDismiss(BindSheetDismissReason::SLIDE_DOWN, std::abs(dragVelocity));
             } else {
                 ChangeSheetHeight(downHeight);
                 ChangeSheetPage(height);
@@ -439,7 +439,7 @@ bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
     currentOffset_ = currentOffset_ + scrollOffset;
     auto pageHeight = GetPageHeight();
     auto offset = pageHeight - height + currentOffset_;
-    if (offset <= (pageHeight - sheetMaxHeight_)) {
+    if (LessOrEqual(offset, pageHeight - sheetMaxHeight_)) {
         offset = pageHeight - sheetMaxHeight_;
         currentOffset_ = height - sheetMaxHeight_;
     }
@@ -685,17 +685,22 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
 }
 
-void SheetPresentationPattern::SheetInteractiveDismiss(bool isDragClose, float dragVelocity)
+void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity)
 {
-    if (hasShouldDismiss()) {
+    if (HasShouldDismiss() || HasOnWillDismiss()) {
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->SetDismissTargetId(targetId_);
-        if (isDragClose) {
+        if (dismissReason == BindSheetDismissReason::SLIDE_DOWN) {
             ProcessColumnRect(height_);
-            SheetTransition(true);
+            if (HasSheetSpringBack()) {
+                CallSheetSpringBack();
+            } else {
+                SheetTransition(true);
+            }
         }
         CallShouldDismiss();
+        CallOnWillDismiss(static_cast<int32_t>(dismissReason));
     } else {
         DismissTransition(false, dragVelocity);
     }
@@ -960,7 +965,7 @@ void SheetPresentationPattern::InitSheetDetents()
     switch (sheetType) {
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
-            if (sheetStyle.detents.size() <= 0) {
+            if (LessOrEqual(sheetStyle.detents.size(), 0)) {
                 height = InitialSingleGearHeight(sheetStyle);
                 sheetDetentHeight_.emplace_back(height);
                 break;
@@ -1026,7 +1031,6 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, sheetType);
     auto windowRect = pipelineContext->GetCurrentWindowRect();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
@@ -1037,7 +1041,9 @@ SheetType SheetPresentationPattern::GetSheetType()
     if (windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
         return SheetType::SHEET_BOTTOM;
     }
-
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
+        return SheetType::SHEET_BOTTOM;
+    }
     if (sheetThemeType_ == "auto") {
         if (IsFold()) {
             sheetType = SheetType::SHEET_CENTER;
@@ -1652,7 +1658,11 @@ void SheetPresentationPattern::FireOnHeightDidChange(float height)
 
 void SheetPresentationPattern::FireOnDetentsDidChange(float height)
 {
-    if (sheetType_ != SheetType::SHEET_BOTTOM || NearEqual(preDetentsHeight_, height)) {
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetType_ != SheetType::SHEET_BOTTOM || NearEqual(preDetentsHeight_, height) ||
+        LessOrEqual(sheetStyle.detents.size(), 0)) {
         return;
     }
     OnDetentsDidChange(height);

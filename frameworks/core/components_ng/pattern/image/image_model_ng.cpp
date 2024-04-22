@@ -64,9 +64,25 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
-    GetImagePattern()->SetIsAnimation(false);
     auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber(isUriPureNumber);
+
+    auto pattern = GetImagePattern();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetIsAnimation()) {
+        if (pattern->GetHasSizeChanged()) {
+            pattern->ResetPictureSize();
+        }
+        pattern->StopAnimation();
+        pattern->ResetImages();
+        if (!frameNode->GetChildren().empty()) {
+            auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+            ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageFrameNode);
+            frameNode->RemoveChild(imageFrameNode);
+        }
+    }
+    pattern->SetIsAnimation(false);
+
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
 
@@ -89,6 +105,18 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
     }
     stack->Push(frameNode);
 
+    auto pattern = GetImagePattern();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetIsAnimation()) {
+        auto castImageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
+        CHECK_NULL_VOID(castImageLayoutProperty);
+        castImageLayoutProperty->Reset();
+        auto castImageRenderProperty = frameNode->GetPaintPropertyPtr<ImageRenderProperty>();
+        CHECK_NULL_VOID(castImageRenderProperty);
+        castImageRenderProperty->Reset();
+        pattern->ResetImageAndAlt();
+        pattern->ResetImageProperties();
+    }
     // set draggable for framenode
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -99,7 +127,6 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
-    auto pattern = GetImagePattern();
     pattern->StopAnimation();
     pattern->SetIsAnimation(true);
     std::vector<ImageProperties> images = imageList;
@@ -327,6 +354,7 @@ void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
 void ImageModelNG::SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
 }
 
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
@@ -413,6 +441,7 @@ void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolatio
 void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, frameNode);
 }
 
 void ImageModelNG::SetDraggable(FrameNode *frameNode, bool draggable)
@@ -470,6 +499,14 @@ void ImageModelNG::SetOnError(FrameNode* frameNode, std::function<void(const Loa
     auto eventHub = frameNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
+}
+
+void ImageModelNG::SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFinish(std::move(callback));
 }
 
 ImageSourceInfo ImageModelNG::GetSrc(FrameNode* frameNode)

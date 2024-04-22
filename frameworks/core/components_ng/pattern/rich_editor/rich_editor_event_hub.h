@@ -91,8 +91,8 @@ public:
     const std::string& GetValue() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
-    void SetFontFeature(const FONT_FEATURES_MAP& fontFeature);
-    const FONT_FEATURES_MAP& GetFontFeatures() const;
+    void SetFontFeature(const FONT_FEATURES_LIST& fontFeature);
+    const FONT_FEATURES_LIST& GetFontFeatures() const;
     void SetFontSize(double fontSize);
     double GetFontSize() const;
     void SetLineHeight(double lineHeight);
@@ -160,7 +160,7 @@ private:
     int32_t eraseLength_ = 0;
     std::string value_;
     std::string fontColor_;
-    FONT_FEATURES_MAP fontFeature_;
+    FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
     OHOS::Ace::FontStyle fontStyle_;
     int32_t fontWeigth_ = 0;

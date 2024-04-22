@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
 CanvasModel* CanvasModel::GetInstanceNG()
@@ -46,11 +46,6 @@ RefPtr<AceType> CanvasModelNG::Create()
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomPaintPattern>(); });
     stack->Push(frameNode);
     return frameNode->GetPattern<CustomPaintPattern>();
-}
-
-RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
-{
-    return pattern;
 }
 
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
@@ -88,8 +83,7 @@ RefPtr<AceType> CanvasModelNG::GetCanvasPattern(FrameNode* node)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    RefPtr<AceType> pattern = frameNode->GetPattern<CustomPaintPattern>();
-    return CanvasModel::GetInstanceNG()->GetTaskPool(pattern);
+    return frameNode->GetPattern<CustomPaintPattern>();
 }
 
 RefPtr<FrameNode> CanvasModelNG::CreateFrameNode(int32_t nodeId)

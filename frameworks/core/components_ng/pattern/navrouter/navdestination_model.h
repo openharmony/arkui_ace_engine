@@ -39,6 +39,10 @@ public:
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
     virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
+    virtual void SetOnWillAppear(std::function<void()>&& willAppear) = 0;
+    virtual void SetOnWillShow(std::function<void()>&& willShow) = 0;
+    virtual void SetOnWillHide(std::function<void()>&& willHide) = 0;
+    virtual void SetOnWillDisAppear(std::function<void()>&& willDisAppear) = 0;
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
     virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);

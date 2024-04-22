@@ -732,7 +732,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::FIRST_MOVE, "");
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }

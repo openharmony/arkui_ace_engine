@@ -17,7 +17,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -705,4 +705,31 @@ ArkUINativeModuleValue AlphabetIndexerBridge::ResetPopupTitleBackground(ArkUIRun
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue AlphabetIndexerBridge::SetAdaptiveWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+
+    CalcDimension width;
+    ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width);
+    if (width.Unit() == DimensionUnit::AUTO) {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAdaptiveWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    } else {
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAdaptiveWidth(nativeNode);
+    }
+    CommonBridge::SetWidth(runtimeCallInfo);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue AlphabetIndexerBridge::ResetAdaptiveWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CommonBridge::ResetWidth(runtimeCallInfo);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

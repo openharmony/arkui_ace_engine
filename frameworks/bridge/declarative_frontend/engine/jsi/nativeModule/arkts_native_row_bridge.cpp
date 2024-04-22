@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
+
 #include "base/geometry/dimension.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue RowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -83,4 +85,32 @@ ArkUINativeModuleValue RowBridge::ResetJustifyContent(ArkUIRuntimeCallInfo* runt
     GetArkUINodeModifiers()->getRowModifier()->resetRowJustifyContent(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RowBridge::SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CalcDimension space;
+    ArkTSUtils::ParseJsDimensionVp(vm, secondArg, space, false);
+    if (LessNotEqual(space.Value(), 0.0)) {
+        GetArkUINodeModifiers()->getRowModifier()->resetRowSpace(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getRowModifier()->setRowSpace(nativeNode, space.Value(), static_cast<int>(space.Unit()));
+    return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RowBridge::ResetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRowModifier()->resetRowSpace(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+} // namespace OHOS::Ace::NG

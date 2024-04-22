@@ -444,4 +444,29 @@ HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
     touchEventActuator->isFlushTouchEventsEnd_ = true;
     EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent_2));
 }
+/**
+ * @tc.name: TouchEventTestAddClickEvent001
+ * @tc.desc: test AddClickAfterEvent and ClearClickAfterEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTestAddClickEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    EXPECT_NE(touchEventActuator, nullptr);
+    /**
+     * @tc.steps: step2. Replace ClickEvent when userCallback_ is not nullptr.
+     * @tc.expected: userCallback_ will be reset and Make an new instance.
+     */
+    std::string unknownType;
+    TouchEventFunc callback = [&unknownType](TouchEventInfo& info) { unknownType = info.GetType(); };
+    auto clickEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
+    touchEventActuator->AddTouchAfterEvent(clickEvent);
+    EXPECT_NE(touchEventActuator->touchAfterEvents_, nullptr);
+
+    touchEventActuator->ClearTouchAfterEvent();
+    EXPECT_EQ(touchEventActuator->touchAfterEvents_, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -1083,6 +1083,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     if (isFormRender_) {
         Platform::AceViewOhos::SurfaceChanged(aceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
+        SetFontScaleAndWeightScale(container, instanceId_);
         // Set sdk version in module json mode for form
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
@@ -2375,6 +2376,15 @@ void UIContentImpl::SetFontScaleFollowSystem(const bool fontScaleFollowSystem)
 {
     LOGI("UIContentImpl: SetFontScaleFollowSystem flag is %{public}s", fontScaleFollowSystem ? "true" : "false");
     fontScaleFollowSystem_ = fontScaleFollowSystem;
+}
+
+void UIContentImpl::SetFormRenderingMode(int8_t renderMode)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFormRenderingMode(renderMode);
 }
 
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,

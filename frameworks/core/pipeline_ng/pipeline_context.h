@@ -605,7 +605,7 @@ public:
 
     void SetCursor(int32_t cursorValue) override;
 
-    void RestoreDefault() override;
+    void RestoreDefault(int32_t windowId = 0) override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
@@ -688,6 +688,9 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>&& callback);
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
+
+    void CheckNeedUpdateBackgroundColor(Color& color);
+    bool CheckNeedDisableUpdateBackgroundImage();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

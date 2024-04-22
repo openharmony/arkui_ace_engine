@@ -227,6 +227,10 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushRequestFocus() {}
 
+void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
+
+bool PipelineContext::CheckNeedDisableUpdateBackgroundImage() { return false; }
+
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
 {}
@@ -506,7 +510,7 @@ bool PipelineContext::NeedSoftKeyboard()
 
 void PipelineContext::SetCursor(int32_t cursorValue) {}
 
-void PipelineContext::RestoreDefault() {}
+void PipelineContext::RestoreDefault(int32_t windowId) {}
 
 void PipelineContext::HandleSubwindow(bool isShow) {}
 
@@ -668,6 +672,13 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
 }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+    {
+        return AceType::MakeRefPtr<UIExtensionManager>();
+    }
+#endif
 
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)

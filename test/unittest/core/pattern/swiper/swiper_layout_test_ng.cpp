@@ -234,8 +234,8 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
         [](SwiperModelNG model) {
             model.SetDirection(Axis::HORIZONTAL);
             model.SetDisplayCount(3);
-            model.SetPreviousMargin(Dimension(20));
-            model.SetNextMargin(Dimension(20));
+            model.SetPreviousMargin(Dimension(20), false);
+            model.SetNextMargin(Dimension(20), false);
         },
         5);
     EXPECT_EQ(pattern_->itemPosition_.size(), 5);
@@ -264,8 +264,8 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
         [](SwiperModelNG model) {
             model.SetDirection(Axis::HORIZONTAL);
             model.SetDisplayCount(3);
-            model.SetPreviousMargin(Dimension(20));
-            model.SetNextMargin(Dimension(20));
+            model.SetPreviousMargin(Dimension(20), false);
+            model.SetNextMargin(Dimension(20), false);
         },
         5);
     layoutProperty_->ClearUserDefinedIdealSize(true, true);

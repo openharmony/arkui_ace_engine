@@ -401,7 +401,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
     }
-    isTouching_ = false;
     isDragUpdateStop_ = false;
     touchUp_ = false;
     scrollPause_ = false;
@@ -426,6 +425,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
                 currentPos_ = mainPosition;
                 ProcessScrollSnapSpringMotion(predictSnapOffset.value(), correctVelocity);
+                isTouching_ = false;
                 return;
             }
         }
@@ -447,6 +447,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         StartScrollAnimation(mainPosition, correctVelocity);
     }
     SetDelayedTask();
+    isTouching_ = false;
 }
 
 inline void ReportSlideOn()

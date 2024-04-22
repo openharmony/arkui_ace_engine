@@ -121,8 +121,8 @@ const float BUILDER_WIDTH = 150.0f;
 const float BUILDER_HEIGHT = 75.0f;
 const SizeF BUILDER_SIZE(BUILDER_WIDTH, BUILDER_HEIGHT);
 const uint32_t SYMBOL_ID = 1;
-std::unordered_map<std::string, int32_t> TEXT_FONTFEATURE = {{ "subs", 1 }};
-std::unordered_map<std::string, int32_t> TEXT_FONTFEATURE_2 = {{ "subs", 0 }};
+std::list<std::pair<std::string, int32_t>> TEXT_FONTFEATURE = {{ "subs", 1 }};
+std::list<std::pair<std::string, int32_t>> TEXT_FONTFEATURE_2 = {{ "subs", 0 }};
 std::vector<Color> SYMBOL_COLOR_LIST_1 = { Color::FromRGB(255, 100, 100) };
 std::vector<Color> SYMBOL_COLOR_LIST_2 = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
 const uint32_t RENDER_STRATEGY_SINGLE = 0;
@@ -5963,6 +5963,58 @@ HWTEST_F(RichEditorTestNg, SingleHandle003, TestSize.Level1)
     touchOffset = Offset(50, 0);
     richEditorPattern->HandleTouchMove(touchOffset);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+}
+
+/**
+ * @tc.name: IsSelectAreaVisible001
+ * @tc.desc: test selectArea inVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, IsSelectAreaVisible001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add text and paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 6;
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
+    /**
+     * @tc.steps: step2. test IsSelectAreaVisible
+     */
+    auto res = richEditorPattern->IsSelectAreaVisible();
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: IsSelectAreaVisible002
+ * @tc.desc: test selectArea Visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, IsSelectAreaVisible002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. add text and paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 6;
+    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
+    /**
+     * @tc.steps: step2. test IsSelectAreaVisible
+     */
+    auto res = richEditorPattern->IsSelectAreaVisible();
+    EXPECT_TRUE(res);
 }
 
 /**

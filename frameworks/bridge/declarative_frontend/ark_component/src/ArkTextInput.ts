@@ -226,6 +226,40 @@ class TextInputHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAd
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class TextInputTextOverflowModifier extends ModifierWithKey<TextOverflow> {
+  constructor(value: TextOverflow) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputTextOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetTextOverflow(node);
+    } else {
+      getUINativeModule().textInput.setTextOverflow(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class TextInputTextIndentModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputTextIndent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetTextIndent(node);
+    } else {
+      getUINativeModule().textInput.setTextIndent(node, this.value!);
+    }
+  }
+  
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
@@ -897,6 +931,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputHeightAdaptivePolicyModifier.identity, TextInputHeightAdaptivePolicyModifier, value);
+    return this;
+  }
+  textOverflow(value: TextOverflow): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextOverflowModifier.identity, TextInputTextOverflowModifier, value);
+    return this;
+  }
+  textIndent(value: Dimension): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextIndentModifier.identity, TextInputTextIndentModifier, value);
     return this;
   }
 }

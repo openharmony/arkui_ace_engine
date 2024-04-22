@@ -33,6 +33,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+enum class BindSheetDismissReason {
+    BACK_PRESSED = 0,
+    TOUCH_OUTSIDE,
+    CLOSE_BUTTON,
+    SLIDE_DOWN,
+};
 class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern, public PopupBasePattern, public FocusView {
     DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView);
 
@@ -90,12 +97,19 @@ public:
         shouldDismiss_ = std::move(shouldDismiss);
     }
 
-    bool hasShouldDismiss()
+    bool HasShouldDismiss()
     {
         if (shouldDismiss_) {
             return true;
         }
         return false;
+    }
+
+    void CallShouldDismiss()
+    {
+        if (shouldDismiss_) {
+            shouldDismiss_();
+        }
     }
 
     void UpdateOnDisappear(std::function<void()>&& onDisappear)
@@ -203,16 +217,54 @@ public:
 
     void FireOnTypeDidChange();
 
-    void CallShouldDismiss()
+    void UpdateOnWillDismiss(std::function<void(const int32_t)>&& onWillDismiss)
     {
-        if (shouldDismiss_) {
-            shouldDismiss_();
+        onWillDismiss_ = std::move(onWillDismiss);
+    }
+
+    bool HasOnWillDismiss() const
+    {
+        if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void CallOnWillDismiss(const int32_t reason)
+    {
+        if (onWillDismiss_) {
+            onWillDismiss_(reason);
+        }
+    }
+
+    void UpdateSheetSpringBack(std::function<void()>&& sheetSpringBack)
+    {
+        sheetSpringBack_ = std::move(sheetSpringBack);
+    }
+
+    bool HasSheetSpringBack() const
+    {
+        if (sheetSpringBack_) {
+            return true;
+        }
+        return false;
+    }
+
+    void CallSheetSpringBack()
+    {
+        if (sheetSpringBack_) {
+            sheetSpringBack_();
         }
     }
 
     void DismissSheet()
     {
         DismissTransition(false);
+    }
+
+    void SheetSpringBack()
+    {
+        SheetTransition(true);
     }
 
     void InitialLayoutProps();
@@ -246,7 +298,7 @@ public:
 
     void ModifyFireSheetTransition(float dragVelocity = 0.0f);
 
-    void SheetInteractiveDismiss(bool isDragClose, float dragVelocity = 0.0f);
+    void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
     void SetCurrentOffset(float currentOffset)
     {
@@ -496,6 +548,8 @@ private:
     std::function<void()> onDisappear_;
     std::function<void()> onWillDisappear_;
     std::function<void()> shouldDismiss_;
+    std::function<void(const int32_t info)> onWillDismiss_;
+    std::function<void()> sheetSpringBack_;
     std::function<void(const float)> onHeightDidChange_;
     std::function<void(const float)> onDetentsDidChange_;
     std::function<void(const float)> onWidthDidChange_;

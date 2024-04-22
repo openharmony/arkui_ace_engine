@@ -45,7 +45,7 @@ Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
     return package->Callback(info);
 }
 
-void FunctionDeleter(void *nativePointer, void *data)
+void FunctionDeleter(void *env, void *nativePointer, void *data)
 {
     auto info = reinterpret_cast<PandaFunctionData*>(data);
     if (info != nullptr) {
@@ -183,6 +183,17 @@ bool ArkJSRuntime::StartDebugger()
     ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif
 #endif
+    return ret;
+}
+
+bool ArkJSRuntime::IsExecuteModuleInAbcFile(
+    const std::string &bundleName, const std::string &moduleName, const std::string &ohmurl)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    bool ret = JSNApi::IsExecuteModuleInAbcFile(vm_, bundleName, moduleName, ohmurl);
+    HandleUncaughtException(trycatch);
     return ret;
 }
 

@@ -95,6 +95,7 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     auto menuPattern = menuContainer->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
+    menuPattern->SetSelectProperties(params);
     for (auto&& option : options) {
         pattern->AddOptionNode(option);
     }
@@ -696,5 +697,34 @@ void SelectModelNG::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuBackgroundBlurStyle(blurStyle);
+}
+
+void SelectModelNG::ResetBuilderFunc(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto menuNode = pattern->GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->ResetBuilderFunc();
+}
+
+void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto menuNode = pattern->GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::string& value)
+{
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetItemSelected(index, value);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/canvas_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/canvas/canvas_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/custom_paint/custom_paint_component.h"
@@ -23,20 +23,12 @@ namespace OHOS::Ace::Framework {
 RefPtr<AceType> CanvasModelImpl::Create()
 {
     auto paintChild = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
-    return paintChild;
-}
-
-RefPtr<AceType> CanvasModelImpl::GetTaskPool(RefPtr<AceType>& pattern)
-{
-    auto pool = AceType::DynamicCast<OHOS::Ace::CustomPaintComponent>(pattern)->GetTaskPool();
-    return pool;
-}
-
-void CanvasModelImpl::PushCanvasPattern(RefPtr<AceType>& canvasParrern)
-{
-    auto paintChild = AceType::DynamicCast<OHOS::Ace::CustomPaintComponent>(canvasParrern);
+    if (!paintChild) {
+        return nullptr;
+    }
     ViewStackProcessor::GetInstance()->ClaimElementId(paintChild);
     ViewStackProcessor::GetInstance()->Push(paintChild);
+    return AceType::DynamicCast<OHOS::Ace::CustomPaintComponent>(paintChild)->GetTaskPool();
 }
 
 void CanvasModelImpl::SetOnReady(std::function<void(uint32_t)>&& readyEvent)

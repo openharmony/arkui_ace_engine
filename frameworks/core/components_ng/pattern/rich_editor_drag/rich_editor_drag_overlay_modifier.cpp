@@ -33,7 +33,7 @@ constexpr int32_t FLOATING_ANIMATE_HANDLE_OPACITY_DURATION = 150;
 constexpr int32_t FLOATING_ANIMATE_BACKGROUND_CHANGE_DURATION = 250;
 constexpr int32_t FLOATING_CANCEL_ANIMATE_TEXT_RECOVERY_DELAY_DURATION = 100;
 constexpr int32_t FLOATING_CANCEL_ANIMATE_TEXT_RECOVERY_DURATION = 200;
-constexpr float HALF_OPACITY = 0.5;
+constexpr int32_t HANDLE_SHOW_MODIFICATION_TIME = 16;
 void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
 {
     auto pattern = DynamicCast<RichEditorDragPattern>(pattern_.Upgrade());
@@ -119,12 +119,12 @@ void RichEditorDragOverlayModifier::PaintBackground(RSCanvas& canvas, RefPtr<Tex
     RefPtr<RichEditorPattern> richEditorPattern)
 {
     std::shared_ptr<RSPath> path;
-    if (isAnimating_) {
+    if (isAnimating_ && type_!= DragAnimType::FLOATING_CANCEL) {
         path = textDragPattern->GenerateBackgroundPath(backgroundOffset_->Get());
     } else {
         path = textDragPattern->GetBackgroundPath();
     }
-    Color color(TEXT_DRAG_COLOR_BG);
+    Color color = Color::WHITE;
     if (richEditorPattern && type_ != DragAnimType::DEFAULT) {
         color = color.BlendOpacity(1 - selectedBackgroundOpacity_->Get());
     }
@@ -139,25 +139,23 @@ void RichEditorDragOverlayModifier::PaintSelBackground(RSCanvas& canvas, RefPtr<
     RefPtr<RichEditorPattern> richEditorPattern)
 {
     CHECK_NULL_VOID(richEditorPattern);
-    if (type_ == DragAnimType::DEFAULT || NearZero(selectedBackgroundOpacity_->Get())) {
+    if (type_ == DragAnimType::DEFAULT || NearZero(selectedBackgroundOpacity_->Get()) || !isAnimating_ ||
+        (!NearZero(backgroundOffset_->Get()) && type_ == DragAnimType::FLOATING_CANCEL)) {
         return;
     }
-    std::shared_ptr<RSPath> path;
-    if (isAnimating_) {
-        path = textDragPattern->GenerateSelBackgroundPath(backgroundOffset_->Get());
-    } else {
-        path = textDragPattern->GetSelBackgroundPath();
-    }
+    std::shared_ptr<RSPath> path = textDragPattern->GetSelBackgroundPath();
     RSBrush selBrush;
     Color selColor = Color::WHITE;
-    if (GreatNotEqual(selectedBackgroundOpacity_->Get(), HALF_OPACITY)) {
-        selBrush.SetColor(ToRSColor(selColor));
-        selBrush.SetAntiAlias(true);
-        canvas.AttachBrush(selBrush);
-        canvas.DrawPath(*path);
-        canvas.DetachBrush();
-    }
+    selBrush.SetColor(ToRSColor(selColor));
+    selBrush.SetAntiAlias(true);
+    canvas.AttachBrush(selBrush);
+    canvas.DrawPath(*path);
+    canvas.DetachBrush();
 
+    float offset = isAnimating_ && type_ == DragAnimType::FLOATING ? backgroundOffset_->Get() : 0.0;
+    if (!NearZero(offset)) {
+        path = textDragPattern->GenerateSelBackgroundPath(offset);
+    }
     selColor = Color(selectedColor_->Get());
     selColor = selColor.BlendOpacity(selectedBackgroundOpacity_->Get());
     selBrush.SetColor(ToRSColor(selColor));
@@ -329,18 +327,18 @@ void RichEditorDragOverlayModifier::StartSelBackgroundCancelAnimate()
     SetHandleOpacity(0.0);
     SetSelectedBackgroundOpacity(0.0);
     AnimationOption selOption;
-    selOption.SetDuration(FLOATING_CANCEL_ANIMATE_TEXT_RECOVERY_DURATION);
+    selOption.SetDuration(FLOATING_CANCEL_ANIMATE_TEXT_RECOVERY_DURATION - HANDLE_SHOW_MODIFICATION_TIME);
     selOption.SetCurve(Curves::LINEAR);
     selOption.SetDelay(FLOATING_CANCEL_ANIMATE_TEXT_RECOVERY_DELAY_DURATION);
     selOption.SetFillMode(FillMode::FORWARDS);
     auto selectAnimFinishFuc = [weakModifier = WeakClaim(this),
         weakPattern = WeakPtr<RichEditorPattern>(pattern)]() {
-        auto modifier = weakModifier.Upgrade();
-        CHECK_NULL_VOID(modifier);
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        modifier->SetAnimateFlag(false);
         pattern->ShowHandles();
+        auto modifier = weakModifier.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->SetAnimateFlag(false);
     };
     selOption.SetOnFinishEvent(selectAnimFinishFuc);
     auto selPropertyCallback = [weakModifier = WeakClaim(this)]() {

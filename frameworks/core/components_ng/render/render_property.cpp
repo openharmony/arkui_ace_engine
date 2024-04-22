@@ -196,6 +196,15 @@ void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     auto jsonOption = JsonUtil::Create(true);
     jsonOption->Put("radius", std::to_string(propForegroundEffect.value_or(0.0f)).c_str());
     json->PutExtAttr("foregroundEffect", jsonOption, filter);
+    if (propMotionBlur.has_value()) {
+        auto motionBlur = JsonUtil::Create(true);
+        motionBlur->Put("radius", propMotionBlur->radius.Value());
+        auto motionBlurAnchor = JsonUtil::Create(true);
+        motionBlurAnchor->Put("x", propMotionBlur->anchor.x);
+        motionBlurAnchor->Put("y", propMotionBlur->anchor.y);
+        motionBlur->Put("anchor", motionBlurAnchor);
+        json->Put("motionBlur", motionBlur);
+    }
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

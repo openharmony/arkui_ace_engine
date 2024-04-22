@@ -93,13 +93,13 @@ void SubwindowOhos::InitContainer()
         auto windowType = parentWindow->GetType();
         if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+        } else if (GetAboveApps()) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
             windowOption->SetExtensionTag(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
-        } else if (GetAboveApps()) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);

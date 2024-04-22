@@ -1977,38 +1977,39 @@ void RegisterDialogCallback(
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
     auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
+        dialogProps, std::move(settingData), buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
-    std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show time dialog enter");
-    auto dialogNode = TimePickerDialogView::Show(
-        dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto dialogNode = TimePickerDialogView::Show(dialogProps, settingData, buttonInfos, std::move(timePickerProperty),
+        std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
-    std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
-    auto dialogNode =
-        TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto dialogNode = TextPickerDialogView::Show(
+        dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
@@ -2020,12 +2021,13 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+    const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
-    auto dialogNode =
-        CalendarDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto dialogNode = CalendarDialogView::Show(
+        dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
@@ -2367,8 +2369,8 @@ bool OverlayManager::RemoveModalInOverlay()
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
-        if (sheetPattern->hasShouldDismiss()) {
-            sheetPattern->SheetInteractiveDismiss(false);
+        if (sheetPattern->HasShouldDismiss() || sheetPattern->HasOnWillDismiss()) {
+            sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
             return true;
         }
     } else if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
@@ -3057,10 +3059,12 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
 void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-    std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange,
     std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
-    std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode)
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+    const RefPtr<FrameNode>& targetNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -3068,18 +3072,21 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                              buildNodeFunc = std::move(buildNodeFunc),
                              buildtitleNodeFunc = std::move(buildtitleNodeFunc), sheetStyle,
                              onAppear = std::move(onAppear), onDisappear = std::move(onDisappear),
-                             shouldDismiss = std::move(shouldDismiss), onWillAppear = std::move(onWillAppear),
+                             shouldDismiss = std::move(shouldDismiss), onWillDismiss = std::move(onWillDismiss),
+                             onWillAppear = std::move(onWillAppear),
                              onWillDisappear = std::move(onWillDisappear),
                              onHeightDidChange = std::move(onHeightDidChange),
                              onDetentsDidChange  = std::move(onDetentsDidChange),
                              onWidthDidChange  = std::move(onWidthDidChange),
-                             onTypeDidChange  = std::move(onTypeDidChange), targetNode]() mutable {
+                             onTypeDidChange  = std::move(onTypeDidChange),
+                             sheetSpringBack  = std::move(sheetSpringBack), targetNode]() mutable {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildtitleNodeFunc),
-            sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
-            std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange),
-            std::move(onWidthDidChange), std::move(onTypeDidChange), targetNode);
+            sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+            std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+            std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+            std::move(sheetSpringBack), targetNode);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
@@ -3090,10 +3097,11 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
 void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-    std::function<void()>&& shouldDismiss, std::function<void()>&& onWillAppear,
-    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
-    std::function<void(const float)>&& onTypeDidChange, const RefPtr<FrameNode>& targetNode)
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode)
 {
     int32_t targetId = targetNode->GetId();
     auto rootNode = FindWindowScene(targetNode);
@@ -3147,11 +3155,13 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             topModalNodePattern->UpdateOnAppear(std::move(onAppear));
             topModalNodePattern->UpdateOnDisappear(std::move(onDisappear));
             topModalNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+            topModalNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
             topModalNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
             topModalNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
             topModalNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
             topModalNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
             topModalNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
+            topModalNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
             layoutProperty->UpdateSheetStyle(sheetStyle);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             pipeline->FlushUITasks();
@@ -3205,11 +3215,13 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     sheetNodePattern->UpdateOnAppear(std::move(onAppear));
     sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
     sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+    sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
     sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
     sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
     sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
     sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
     sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
+    sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
     sheetMap_[targetId] = WeakClaim(RawPtr(sheetNode));
     modalStack_.push(WeakClaim(RawPtr(sheetNode)));
     SaveLastModalNode();
@@ -3242,7 +3254,7 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
                 if (sheetPattern->IsDragging()) {
                     return;
                 }
-                sheetPattern->SheetInteractiveDismiss(false);
+                sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
             });
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
     }
@@ -3367,6 +3379,17 @@ void OverlayManager::DismissContentCover()
         }
         FireModalPageHide();
         SaveLastModalNode();
+    }
+}
+
+void OverlayManager::SheetSpringBack()
+{
+    auto sheetNode = sheetMap_[dismissTargetId_].Upgrade();
+    CHECK_NULL_VOID(sheetNode);
+    if (sheetNode->GetTag() == V2::SHEET_PAGE_TAG) {
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        sheetPattern->SheetSpringBack();
     }
 }
 

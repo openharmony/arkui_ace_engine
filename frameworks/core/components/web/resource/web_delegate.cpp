@@ -672,6 +672,10 @@ void WebDelegateObserver::NotifyDestory()
     if (!context) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory context is null, enter EventHandler to destroy");
         auto currentHandler = OHOS::AppExecFwk::EventHandler::Current();
+        if (!currentHandler) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "NWEB webdelegateObserver EventHandler currentHandler is null");
+            return;
+        }
         currentHandler->PostTask(
             [weak = WeakClaim(this)]() {
                 auto observer = weak.Upgrade();
@@ -685,6 +689,7 @@ void WebDelegateObserver::NotifyDestory()
                 }
             },
             DESTRUCT_DELAY_MILLISECONDS);
+        return;
     }
     auto taskExecutor = context->GetTaskExecutor();
     if (!taskExecutor) {

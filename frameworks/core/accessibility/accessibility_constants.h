@@ -25,6 +25,7 @@ enum class AccessibilityHoverEventType {
     Count
 };
 
+constexpr float DEFAULT_ACCESSIBILITY_SCROLL_OFFSET = -1.0f;
 } // namespace OHOS::Ace::NG
 
 #endif

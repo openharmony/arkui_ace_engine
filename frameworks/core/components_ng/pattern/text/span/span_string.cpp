@@ -235,7 +235,7 @@ void SpanString::AddImageSpan(const RefPtr<SpanBase>& span)
 
 void SpanString::AddSpan(const RefPtr<SpanBase>& span)
 {
-    if (!span || !CheckRange(span->GetStartIndex(), span->GetLength())) {
+    if (!span || !CheckRange(span)) {
         return;
     }
     if (span->GetSpanType() == SpanType::Image) {
@@ -308,6 +308,28 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
         default:
             return nullptr;
     }
+}
+
+bool SpanString::CheckRange(const RefPtr<SpanBase>& spanBase) const
+{
+    auto start = spanBase->GetStartIndex();
+    auto length = spanBase->GetLength();
+    if (length <= 0) {
+        return false;
+    }
+
+    auto len = spanBase->GetSpanType() == SpanType::Image ? GetLength() + 1 : GetLength();
+    auto end = start + length;
+
+    if (start > len || end > len) {
+        return false;
+    }
+
+    if (start < 0) {
+        return false;
+    }
+
+    return true;
 }
 
 bool SpanString::CheckRange(int32_t start, int32_t length, bool allowLengthZero) const
@@ -567,24 +589,33 @@ void SpanString::UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start,
 void SpanString::RemoveImageSpan(int32_t start, int32_t end)
 {
     auto spans = spansMap_[SpanType::Image];
-    int32_t offset = 0;
+    int32_t count = 0;
     for (auto iter = spans.begin(); iter != spans.end();) {
-        if ((*iter)->GetStartIndex() >= start + offset && (*iter)->GetStartIndex() < end + offset) {
+        if ((*iter)->GetStartIndex() >= start && (*iter)->GetStartIndex() < end - count) {
+            auto wStr = GetWideString();
+            wStr.erase((*iter)->GetStartIndex() - count, 1);
+            text_ = StringUtils::ToString(wStr);
             iter = spans.erase(iter);
-            UpdateSpanMapWithOffset(start, -1);
-            offset -= 1;
+            for (auto imageIter = iter; imageIter != spans.end(); ++imageIter) {
+                auto start = (*imageIter)->GetStartIndex();
+                auto end = (*imageIter)->GetEndIndex();
+                (*imageIter)->UpdateStartIndex(--start);
+                (*imageIter)->UpdateEndIndex(--end);
+            }
+            UpdateSpanMapWithOffset((*iter)->GetStartIndex(), -1);
+            ++count;
             continue;
         }
         ++iter;
     }
     spansMap_[SpanType::Image] = spans;
-    offset = 0;
+    count = 0;
     for (auto iter = spans_.begin(); iter != spans_.end();) {
-        if ((*iter)->interval.first >= start + offset && (*iter)->interval.first < end + offset
-            && (*iter)->spanItemType == NG::SpanItemType::IMAGE) {
+        if ((*iter)->interval.first >= start && (*iter)->interval.first < end - count &&
+            (*iter)->spanItemType == NG::SpanItemType::IMAGE) {
+            UpdateSpansWithOffset((*iter)->interval.first, -1);
             iter = spans_.erase(iter);
-            UpdateSpansWithOffset(start, -1);
-            offset -= 1;
+            ++count;
             continue;
         }
         ++iter;

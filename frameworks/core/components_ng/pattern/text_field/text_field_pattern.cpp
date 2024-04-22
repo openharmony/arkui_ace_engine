@@ -1686,8 +1686,9 @@ void TextFieldPattern::InitDragDropCallBack()
         CHECK_NULL_VOID(theme);
         auto touchX = event->GetX();
         auto touchY = event->GetY();
+        auto textPaintOffset = pattern->GetPaintRectGlobalOffset();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
-                        Offset(pattern->GetTextPaintOffset().GetX(), pattern->GetTextPaintOffset().GetY()) -
+                        Offset(textPaintOffset.GetX(), textPaintOffset.GetY()) -
                         Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         pattern->SetCaretPosition(position);
@@ -2485,7 +2486,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
-    selectController_->UpdateSelectByOffset(info.GetLocalLocation());
+    selectController_->UpdateSelectByOffset(ConvertGlobalToLocalOffset(info.GetGlobalLocation()));
     if (IsSelected()) {
         StopTwinkling();
     }
@@ -2507,8 +2508,8 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
     CHECK_NULL_RETURN(unitArea, false);
     auto frameNode = unitArea->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion(
-        { globalOffset.GetX() - GetTextPaintOffset().GetX(), globalOffset.GetY() - GetTextPaintOffset().GetY() });
+    auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
 bool TextFieldPattern::IsMouseOverScrollBar(const GestureEvent& info)
@@ -3022,8 +3023,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     double height = frameRect_.Height();
     auto offset = AVOID_OFFSET.ConvertToPx();
+    auto textPaintOffset = GetPaintRectGlobalOffset();
     height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
-             GetTextPaintOffset().GetY() + offset - positionY;
+             textPaintOffset.GetY() + offset - positionY;
 
     if (IsNormalInlineState()) {
         auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
@@ -3032,8 +3034,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     }
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
-                                                  GetTextPaintOffset().GetX(),
-        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + GetTextPaintOffset().GetY(),
+                                                  textPaintOffset.GetX(),
+        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + textPaintOffset.GetY(),
         .width = theme->GetCursorWidth().ConvertToPx(),
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
@@ -4072,7 +4074,7 @@ void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSel
 
 void TextFieldPattern::OnAreaChangedInner()
 {
-    auto parentGlobalOffset = GetTextPaintOffset();
+    auto parentGlobalOffset = GetPaintRectGlobalOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
@@ -5438,7 +5440,8 @@ void TextFieldPattern::SetAccessibilityAction()
         pattern->InsertValue(value);
     });
 
-    accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start, int32_t end) {
+    accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start,
+                                                                             int32_t end, bool isForward) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetSelectionFlag(start, end, std::nullopt);
@@ -5774,7 +5777,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
     if (startOffset.GetX() < contentRect_.GetX()) {
         startOffset.SetX(contentRect_.GetX());
     }
-    return startOffset + GetTextPaintOffset();
+    return startOffset + GetPaintRectGlobalOffset();
 }
 
 void TextFieldPattern::OnColorConfigurationUpdate()
@@ -5810,6 +5813,14 @@ bool TextFieldPattern::IsReachedBoundary(float offset)
 }
 
 OffsetF TextFieldPattern::GetTextPaintOffset() const
+{
+    if (selectOverlay_->HasRenderTransform()) {
+        return selectOverlay_->GetPaintRectOffsetWithTransform();
+    }
+    return GetPaintRectGlobalOffset();
+}
+
+OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF(0.0f, 0.0f));
@@ -6521,5 +6532,17 @@ const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
         return TextBase::GetAvoidSoftKeyboardOffset();
     }
     return textfieldTheme->GetAvoidKeyboardOffset();
+}
+
+Offset TextFieldPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
+{
+    auto localOffset = globalOffset - Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+    if (selectOverlay_->HasRenderTransform()) {
+        auto localOffsetF = OffsetF(globalOffset.GetX(), globalOffset.GetY());
+        selectOverlay_->RevertLocalPointWithTransform(localOffsetF);
+        localOffset.SetX(localOffsetF.GetX());
+        localOffset.SetY(localOffsetF.GetY());
+    }
+    return localOffset;
 }
 } // namespace OHOS::Ace::NG

@@ -69,6 +69,9 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
 
 void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
+        uiContent_->SetFormRenderingMode(static_cast<int8_t>(renderingMode_));
+    }
     uiContent_->RunFormPage();
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (!backgroundColor_.empty()) {
