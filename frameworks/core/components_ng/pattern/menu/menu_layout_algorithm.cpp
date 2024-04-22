@@ -587,8 +587,25 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     float idealHeight = 0.0f;
     float idealWidth = 0.0f;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::list<RefPtr<LayoutWrapper>> builderChildList;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(childConstraint);
+        if (pattern->UseContentModifier()) {
+            if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->Reset();
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                builderChildList.push_back(child);
+            }
+            BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
+        } else {
+            child->Measure(childConstraint);
+        }
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         idealHeight += childSize.Height();
         idealWidth = std::max(idealWidth, childSize.Width());
@@ -1881,7 +1898,8 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& c
         afterOffsetPosition = AddOffset(originPosition);
     }
 
-    if (!CheckPosition(afterOffsetPosition, childSize)) {
+    if (!CheckPosition(afterOffsetPosition, childSize) || flag_) {
+        flag_ = false;
         return OffsetF(0.0f, 0.0f);
     }
 
@@ -2090,11 +2108,73 @@ bool MenuLayoutAlgorithm::CheckPositionInPlacementRect(
 {
     auto x = position.GetX();
     auto y = position.GetY();
+    OffsetF tempPos = position;
+    if (state_ != prevState_) {
+        if (prevState_ == -1) {
+            prevState_ = state_;
+            preOffset_ = position;
+            preOffset_.SetX(x);
+            preOffset_.SetY(y);
+            preRect_.SetOffset(rect.GetOffset());
+            preRect_.SetSize(rect.GetSize());
+            if (!(x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
+                    (y + childSize.Height()) > rect.Bottom())) {
+                preOffset_ = position;
+                preOffset_.SetX(x);
+                preOffset_.SetY(y);
+                preRect_.SetOffset(rect.GetOffset());
+                preRect_.SetSize(rect.GetSize());
+                return true;
+            }
+            flag_ = true;
+            positionOffset_ = { 0.0f, 0.0f };
+            return false;
+        }
+        return CheckPlacement(childSize);
+    }
+    x = tempPos.GetX();
+    y = tempPos.GetY();
     if (x < rect.Left() || (x + childSize.Width()) > rect.Right() || y < rect.Top() ||
         (y + childSize.Height()) > rect.Bottom()) {
+        preOffset_ = position;
+        preOffset_.SetX(x);
+        preOffset_.SetY(y);
+        preRect_.SetOffset(rect.GetOffset());
+        preRect_.SetSize(rect.GetSize());
         return false;
     }
     return true;
+}
+
+bool MenuLayoutAlgorithm::CheckPlacement(const SizeF& childSize)
+{
+    auto x = preOffset_.GetX();
+    auto y = preOffset_.GetY();
+
+    switch (prevState_) {
+        case static_cast<int>(DirectionState::Bottom_Direction):
+        case static_cast<int>(DirectionState::Top_Direction): {
+            if ((x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right()) &&
+                !(y < preRect_.Top() || (y + childSize.Height()) > preRect_.Bottom())) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        case static_cast<int>(DirectionState::Right_Direction):
+        case static_cast<int>(DirectionState::Left_Direction): {
+            if ((y < preRect_.Top() || (y + childSize.Height()) > preRect_.Bottom()) &&
+                !((x < preRect_.Left() || (x + childSize.Width()) > preRect_.Right()))) {
+                placement_ = Placement::NONE;
+                return true;
+            }
+            break;
+        }
+        default:
+            return false;
+    }
+
+    return false;
 }
 
 bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& childSize)
@@ -2107,6 +2187,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
         case Placement::BOTTOM: {
+            state_ = static_cast<int>(DirectionState::Bottom_Direction);
             auto y = std::max(targetOffsetY + targetSize_.Height(), yAvoid);
             auto height = std::min(
                 static_cast<float>(wrapperRect_.Bottom()) - paddingBottom_ - targetOffsetY - targetSize_.Height(),
@@ -2118,6 +2199,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
         case Placement::TOP: {
+            state_ = static_cast<int>(DirectionState::Top_Direction);
             auto height = std::min(targetOffsetY - yAvoid, wrapperSize_.Height() - paddingTop_ - paddingBottom_);
             rect.SetRect(paddingStart_, yAvoid, wrapperSize_.Width() - paddingEnd_ - paddingStart_, height);
             break;
@@ -2125,6 +2207,7 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
         case Placement::RIGHT: {
+            state_ = static_cast<int>(DirectionState::Right_Direction);
             auto x = std::max(targetOffsetX + targetSize_.Width(), paddingStart_);
             auto width = std::min(wrapperSize_.Width() - targetOffsetX - targetSize_.Width() - paddingEnd_,
                 wrapperSize_.Width() - paddingStart_ - paddingEnd_);
@@ -2134,12 +2217,14 @@ bool MenuLayoutAlgorithm::CheckPosition(const OffsetF& position, const SizeF& ch
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
         case Placement::LEFT: {
+            state_ = static_cast<int>(DirectionState::Left_Direction);
             auto width = std::min(
                 targetOffsetX - paddingStart_, wrapperSize_.Width() - paddingEnd_ - paddingStart_);
             rect.SetRect(paddingStart_, yAvoid, width, wrapperSize_.Height() - paddingBottom_ - paddingTop_);
             break;
         }
         default:
+            state_ = static_cast<int>(DirectionState::None_Direction);
             return false;
     }
     return CheckPositionInPlacementRect(rect, position, childSize);

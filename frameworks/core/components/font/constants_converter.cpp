@@ -563,6 +563,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
+    txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
     if(textStyle.isSymbolGlyph_) {
         txtStyle.fontFamilies.push_back("HM Symbol");
@@ -697,6 +698,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
     txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
+    txtStyle.decorationStyle = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
     if(textStyle.isSymbolGlyph_) {
         txtStyle.fontFamilies.push_back("HM Symbol");

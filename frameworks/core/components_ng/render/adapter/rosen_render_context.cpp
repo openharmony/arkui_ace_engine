@@ -487,9 +487,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     if (isDisappearing_ && !paintRect.IsValid()) {
         return;
     }
-    auto host = GetHost();
-    ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(), host->GetId(),
-        paintRect.ToString().c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        auto host = GetHost();
+        ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s",
+            host->GetTag().c_str(), host->GetId(), paintRect.ToString().c_str());
+    }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(paintRect);
@@ -3531,6 +3533,23 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     SetBackBlurFilter();
 }
 
+void RosenRenderContext::UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    const auto& groupProperty = GetOrCreateForeground();
+    groupProperty->propMotionBlur = motionBlurOption;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    float radiusPx = context->NormalizeToPx(motionBlurOption.radius);
+#ifndef USE_ROSEN_DRAWING
+    float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#else
+    float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
+#endif
+    Rosen::Vector2f anchor(motionBlurOption.anchor.x, motionBlurOption.anchor.y);
+    rsNode_->SetMotionBlurPara(backblurRadius, anchor);
+}
+
 void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3836,6 +3855,42 @@ void RosenRenderContext::OnDynamicLightUpDegreeUpdate(const float degree)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetDynamicLightUpDegree(degree);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBgBrightnessParams(
+        {
+            brightnessOption.rate, 
+            brightnessOption.lightUpDegree,
+            brightnessOption.cubicCoeff, 
+            brightnessOption.quadCoeff, 
+            brightnessOption.saturation,
+            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
+            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+        }
+    );
+    rsNode_->SetBgBrightnessFract(brightnessOption.fraction);
+    RequestNextFrame();
+}
+ 
+void RosenRenderContext::OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFgBrightnessParams(
+        {
+            brightnessOption.rate, 
+            brightnessOption.lightUpDegree,
+            brightnessOption.cubicCoeff, 
+            brightnessOption.quadCoeff, 
+            brightnessOption.saturation,
+            { brightnessOption.posRGB[0], brightnessOption.posRGB[1], brightnessOption.posRGB[2] },
+            { brightnessOption.negRGB[0], brightnessOption.negRGB[1], brightnessOption.negRGB[2] }
+        }
+    );
+    rsNode_->SetFgBrightnessFract(brightnessOption.fraction);
     RequestNextFrame();
 }
 
@@ -4164,12 +4219,16 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
     auto initialBackgroundColor = DEFAULT_MASK_COLOR;
     auto backgroundColor = DEFAULT_MASK_COLOR;
     RectF pageTransitionRectF;
+    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), rect.Width(),
+        REMOVE_CLIP_SIZE);
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
         case PageTransitionType::EXIT_POP:
             initialBackgroundColor = DEFAULT_MASK_COLOR;
             backgroundColor = DEFAULT_MASK_COLOR;
             pageTransitionRectF = RectF(rect.Width() * HALF, -GetStatusBarHeight(), rect.Width() * HALF,
+                REMOVE_CLIP_SIZE);
+            defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE,
                 REMOVE_CLIP_SIZE);
             translate.x = Dimension(rect.Width() * HALF);
             break;
@@ -4193,6 +4252,7 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTr
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(1);
     resultEffect->SetPageTransitionRectF(pageTransitionRectF);
+    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     resultEffect->SetInitialBackgroundColor(initialBackgroundColor);
     resultEffect->SetBackgroundColor(backgroundColor);
     return resultEffect;
@@ -4206,6 +4266,8 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
         transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
     TranslateOptions translate;
     auto rect = GetPaintRectWithoutTransform();
+    RectF defaultPageTransitionRectF = RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE,
+        REMOVE_CLIP_SIZE);
     // slide and translate, only one can be effective
     if (transition->GetSlideEffect().has_value()) {
         switch (transition->GetSlideEffect().value()) {
@@ -4232,7 +4294,8 @@ RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const R
     }
     resultEffect->SetTranslateEffect(translate);
     resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
-    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE));
+    resultEffect->SetPageTransitionRectF(RectF(0.0f, -GetStatusBarHeight(), REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE));
+    resultEffect->SetDefaultPageTransitionRectF(defaultPageTransitionRectF);
     resultEffect->SetInitialBackgroundColor(DEFAULT_MASK_COLOR);
     resultEffect->SetBackgroundColor(DEFAULT_MASK_COLOR);
     return resultEffect;
@@ -4256,7 +4319,6 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     auto transition = pattern->FindPageTransitionEffect(type);
     RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
-    auto rect = GetPaintRectWithoutTransform();
     if (transition) {
         effect = GetPageTransitionEffect(transition);
         option.SetCurve(transition->GetCurve());
@@ -4298,7 +4360,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         UpdateTransformScale(VectorF(1.0f, 1.0f));
         UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
-        ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
+        ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(),
             RadiusF(EdgeF(0.0f, 0.0f)));
         AnimationUtils::CloseImplicitAnimation();
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
@@ -4307,7 +4369,7 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     UpdateTransformScale(VectorF(1.0f, 1.0f));
     UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
-    ClipWithRRect(RectF(0.0f, -GetStatusBarHeight(), rect.Width(), REMOVE_CLIP_SIZE),
+    ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(),
         RadiusF(EdgeF(0.0f, 0.0f)));
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
@@ -5594,8 +5656,10 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
         }
     }
     paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
-    ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s", host->GetTag().c_str(), host->GetId(),
-        paintRect_.ToString().c_str());
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE("SavePaintRect[%s][self:%d] rs SavePaintRect %s",
+            host->GetTag().c_str(), host->GetId(), paintRect_.ToString().c_str());
+    }
 }
 
 void RosenRenderContext::SyncPartialRsProperties()

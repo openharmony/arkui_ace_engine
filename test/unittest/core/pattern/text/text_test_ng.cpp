@@ -92,7 +92,6 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
-constexpr bool ADAPT_FILL_VALUE = true;
 const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
@@ -387,7 +386,6 @@ void TextTestNg::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textShadow.SetIsFilled(ADAPT_FILL_VALUE);
     textContentModifier.SetTextShadow({ textShadow });
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
@@ -2117,7 +2115,6 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textContentModifier.onDraw(context);
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
-    EXPECT_EQ(textContentModifier.shadows_[0].isFilled->Get(), ADAPT_FILL_VALUE);
     EXPECT_EQ(textContentModifier.paragraph_, paragraph);
 }
 

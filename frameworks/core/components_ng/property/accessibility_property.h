@@ -30,13 +30,15 @@ using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
 using ActionScrollBackwardImpl = ActionNoParam;
-using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end)>;
+using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end, bool isForward)>;
 using ActionCopyImpl = ActionNoParam;
 using ActionCutImpl = ActionNoParam;
 using ActionPasteImpl = ActionNoParam;
 using ActionSelectImpl = ActionNoParam;
 using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
+using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
+using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -224,13 +226,40 @@ public:
         actionSetSelectionImpl_ = actionSetSelection;
     }
 
-    bool ActActionSetSelection(int32_t start, int32_t end)
+    bool ActActionSetSelection(int32_t start, int32_t end, bool isForward = false)
     {
         if (actionSetSelectionImpl_) {
-            actionSetSelectionImpl_(start, end);
+            actionSetSelectionImpl_(start, end, isForward);
             return true;
         }
         return false;
+    }
+
+    void SetActionSetIndex(const ActionSetCursorIndexImpl& actionSetCursorIndexImpl)
+    {
+        actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
+    }
+    
+    bool ActActionSetIndex(int32_t index)
+    {
+        if (actionSetCursorIndexImpl_) {
+            actionSetCursorIndexImpl_(index);
+            return true;
+        }
+        return false;
+    }
+
+    void SetActionGetIndex(const ActionGetCursorIndexImpl& actionGetCursorIndexImpl)
+    {
+        actionGetCursorIndexImpl_ = actionGetCursorIndexImpl;
+    }
+
+    int32_t ActActionGetIndex()
+    {
+        if (actionGetCursorIndexImpl_) {
+            return actionGetCursorIndexImpl_();
+        }
+        return -1;
     }
 
     void SetActionMoveText(const ActionMoveTextImpl& actionMoveText)
@@ -492,6 +521,8 @@ protected:
     ActionPasteImpl actionPasteImpl_;
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
+    ActionSetCursorIndexImpl actionSetCursorIndexImpl_;
+    ActionGetCursorIndexImpl actionGetCursorIndexImpl_;
     bool accessibilityGroup_ = false;
     RefPtr<UINode> accessibilityVirtualNode_;
     std::optional<std::string> accessibilityText_;

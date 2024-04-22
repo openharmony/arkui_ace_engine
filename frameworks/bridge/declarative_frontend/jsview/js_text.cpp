@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -83,6 +84,7 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -469,6 +471,8 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);

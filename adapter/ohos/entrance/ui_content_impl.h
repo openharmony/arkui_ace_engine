@@ -300,6 +300,8 @@ public:
     void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
 
+    void SetFormRenderingMode(int8_t renderMode) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

@@ -113,6 +113,8 @@ const std::wstring lineSeparator = L"\n";
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 constexpr static int32_t NONE_SELECT_TYPE = -1;
+constexpr static int32_t FIRST_LINE = 1;
+constexpr static int32_t SECOND_LINE = 2;
 } // namespace
 
 RichEditorPattern::RichEditorPattern()
@@ -526,6 +528,9 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     spanItem->hasResourceFontColor = options.hasResourceFontColor;
     spanItem->hasResourceDecorationColor = options.hasResourceDecorationColor;
     AddSpanItem(spanItem, offset);
+    if (!options.style.has_value()) {
+        SetDefaultColor(spanNode);
+    }
     if (options.paraStyle) {
         UpdateParagraphStyle(spanNode, *options.paraStyle);
     }
@@ -3010,8 +3015,22 @@ void RichEditorPattern::CreateTextSpanNode(
     } else {
         spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
+        SetDefaultColor(spanNode);
     }
     AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
+}
+
+void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
+    spanNode->UpdateTextColor(textColor);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
+    spanNode->UpdateTextDecorationColor(textColor);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)
@@ -3197,6 +3216,7 @@ void RichEditorPattern::DeleteBackward(int32_t length, bool isExternalkeyboard)
 std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isExternalkeyboard)
 {
     bool isSpanSelected = false;
+    int32_t caretPositionBefore = caretPosition_;
     length = CalculateDeleteLength(length, true, isSpanSelected);
     std::wstring deleteText = GetBackwardDeleteText(length);
     RichEditorDeleteValue info;
@@ -3223,6 +3243,9 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length, bool isE
     }
     if (!caretVisible_) {
         StartTwinkling();
+    }
+    if (caretPositionBefore == caretPosition_) {
+        return L"";
     }
     return deleteText;
 }
@@ -4737,11 +4760,18 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
             }
         }
         RichEditorDragInfo info;
+        info.selectedWidth = pattern->GetSelectedMaxWidth();
         info.handleColor = pattern->GetCaretColor();
         info.selectedBackgroundColor = pattern->GetSelectedBackgroundColor();
         pattern->CalculateHandleOffsetAndShowOverlay();
-        info.firstHandle = pattern->textSelector_.firstHandle;
-        info.secondHandle = pattern->textSelector_.secondHandle;
+        auto firstHandleInfo = pattern->GetFirstHandleInfo();
+        if (firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
+            info.firstHandle = pattern->textSelector_.firstHandle;
+        }
+        auto secondHandleInfo = pattern->GetSecondHandleInfo();
+        if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
+            info.secondHandle = pattern->textSelector_.secondHandle;
+        }
         pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
         FrameNode::ProcessOffscreenNode(pattern->dragNode_);
     };
@@ -4801,6 +4831,7 @@ void RichEditorPattern::CloseSelectOverlay()
 void RichEditorPattern::CloseHandleAndSelect()
 {
     selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    showSelect_ = false;
 }
 
 void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -5977,6 +6008,7 @@ void RichEditorPattern::OnVirtualKeyboardAreaChanged()
     textSelector_.selectionDestinationOffset.SetX(
         CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
     CreateHandles();
+    selectOverlay_->HideMenu(true);
 }
 
 void RichEditorPattern::ResetDragOption()
@@ -7097,5 +7129,48 @@ bool RichEditorPattern::HandleOnDeleteComb(bool backward)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
+}
+
+float RichEditorPattern::GetSelectedMaxWidth()
+{
+    std::vector<RectF> selecedRect;
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(overlayMod, 0.0f);
+    auto selectedRects = overlayMod->GetSelectedRects();
+    auto tempWidth = 0.0f;
+    auto top = 0.0f;
+    auto firstLineLeft = 0.0f;
+    auto firstLineWidth = 0.0f;
+    auto selectedWidth = 0.0f;
+    auto index = 0;
+    bool isCalculate = false;
+    auto left = 0.0f;
+    for (const auto& rect : selectedRects) {
+        if (NearZero(tempWidth) || !NearEqual(top, rect.GetY())) {
+            if (index == FIRST_LINE) {
+                selectedWidth = firstLineLeft - left + firstLineWidth;
+            }
+            selectedWidth = std::max(selectedWidth, tempWidth);
+            if (isCalculate && NearZero(firstLineWidth)) {
+                firstLineWidth = tempWidth;
+                firstLineLeft = left;
+            }
+            top = rect.GetY();
+            left = rect.GetX();
+            tempWidth = 0.0f;
+            index++;
+            isCalculate = true;
+        }
+        if (NearEqual(top, rect.GetY())) {
+            tempWidth += rect.Width();
+        }
+    }
+    if (index == FIRST_LINE) {
+        return tempWidth;
+    } else if (index == SECOND_LINE) {
+        return std::max(firstLineWidth + firstLineLeft - left, tempWidth);
+    } else {
+        return std::max(selectedWidth, tempWidth);
+    }
 }
 } // namespace OHOS::Ace::NG

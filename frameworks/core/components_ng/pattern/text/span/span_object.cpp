@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
@@ -147,12 +148,14 @@ bool FontSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 }
 
 // DecorationSpan
-DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color)
-    : SpanBase(0, 0), type_(type), color_(color)
+DecorationSpan::DecorationSpan(
+    TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style)
+    : SpanBase(0, 0), type_(type), color_(color), style_(style)
 {}
 
-DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color, int32_t start, int32_t end)
-    : SpanBase(start, end), type_(type), color_(color)
+DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, int32_t start, int32_t end)
+    : SpanBase(start, end), type_(type), color_(color), style_(style)
 {}
 
 TextDecoration DecorationSpan::GetTextDecorationType() const
@@ -163,6 +166,11 @@ TextDecoration DecorationSpan::GetTextDecorationType() const
 std::optional<Color> DecorationSpan::GetColor() const
 {
     return color_;
+}
+
+std::optional<TextDecorationStyle> DecorationSpan::GetTextDecorationStyle() const
+{
+    return style_;
 }
 
 void DecorationSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
@@ -178,7 +186,7 @@ void DecorationSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanO
 
 RefPtr<SpanBase> DecorationSpan::GetSubSpan(int32_t start, int32_t end)
 {
-    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(type_, color_, start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(type_, color_, style_, start, end);
     return spanBase;
 }
 
@@ -188,12 +196,16 @@ void DecorationSpan::AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) co
     if (color_.has_value()) {
         spanItem->fontStyle->UpdateTextDecorationColor(color_.value());
     }
+    if (style_.has_value()) {
+        spanItem->fontStyle->UpdateTextDecorationStyle(style_.value());
+    }
 }
 
 void DecorationSpan::RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
     spanItem->fontStyle->ResetTextDecoration();
     spanItem->fontStyle->ResetTextDecorationColor();
+    spanItem->fontStyle->ResetTextDecorationStyle();
 }
 
 SpanType DecorationSpan::GetSpanType() const
@@ -220,8 +232,9 @@ bool DecorationSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
         return false;
     }
     std::optional<Color> color = decorationSpan->GetColor();
+    std::optional<TextDecorationStyle> style = decorationSpan->GetTextDecorationStyle();
     TextDecoration type = decorationSpan->GetTextDecorationType();
-    return color == color_ && type == type_;
+    return color == color_ && style == style_ && type == type_;
 }
 
 // BaselineOffsetSpan

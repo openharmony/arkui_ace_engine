@@ -446,8 +446,8 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
   }
 }
 
-class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity: Symbol = Symbol('textDecoration');
@@ -455,12 +455,12 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
     if (reset) {
       getUINativeModule().text.resetDecoration(node);
     } else {
-      getUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color);
+      getUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -540,9 +540,28 @@ class TextFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextContentModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textContent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.setContent(node, "");
+    }
+    else {
+      getUINativeModule().text.setContent(node, this.value);
+    }
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]) {
+    modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
+    return this;
   }
   enableDataDetector(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
@@ -605,7 +624,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxLinesModifier.identity, TextMaxLinesModifier, value);
     return this;
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor }): TextAttribute {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, value);
     return this;
   }

@@ -34,11 +34,38 @@ constexpr int32_t MENU_SHOW_ANIMATION_DURATION = 250;
 constexpr int32_t MENU_HIDE_ANIMATION_DURATION = 200;
 constexpr int32_t HANDLE_ANIMATION_DURATION = 150;
 
+struct SelectHandlePaintInfo {
+    OffsetF startPoint;
+    OffsetF endPoint;
+    float width = 0.0f;
+
+    SelectHandlePaintInfo operator-(const OffsetF& offset) const
+    {
+        return {
+            .startPoint = startPoint - offset,
+            .endPoint = endPoint - offset,
+            .width = width
+        };
+    }
+
+    SelectHandlePaintInfo operator+(const OffsetF& offset) const
+    {
+        return {
+            .startPoint = startPoint + offset,
+            .endPoint = endPoint + offset,
+            .width = width
+        };
+    }
+};
+
 struct SelectHandleInfo {
     bool isShow = true;
     bool needLayout = false;
+    bool isPaintHandleWithPoints = false;
     // in Global coordinates.
     RectF paintRect;
+    SelectHandlePaintInfo paintInfo;
+    std::function<RectF(const SelectHandlePaintInfo&)> paintInfoConverter;
 
     bool operator==(const SelectHandleInfo& info) const
     {
@@ -48,6 +75,17 @@ struct SelectHandleInfo {
     bool operator!=(const SelectHandleInfo& info) const
     {
         return !(*this == info);
+    }
+
+    const RectF GetPaintRect() const
+    {
+        if (isPaintHandleWithPoints) {
+            auto offsetX = std::max(paintInfo.startPoint.GetX(), paintInfo.endPoint.GetX());
+            auto offsetY = std::min(paintInfo.startPoint.GetY(), paintInfo.endPoint.GetY());
+            auto height = paintInfo.endPoint.GetY() - paintInfo.startPoint.GetY();
+            return RectF(OffsetF(offsetX, offsetY), SizeF(paintInfo.width, std::abs(height)));
+        }
+        return paintRect;
     }
 
     static Dimension GetDefaultLineWidth();
@@ -172,6 +210,11 @@ struct SelectedByMouseInfo {
     }
 };
 
+struct CallerFrameNodeInfo {
+    RectF paintFrameRect;
+    OffsetF paintOffset;
+};
+
 struct SelectOverlayInfo {
     bool isUsingMouse = false;
     bool isSingleHandle = false;
@@ -185,6 +228,7 @@ struct SelectOverlayInfo {
     bool isUseOverlayNG = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
+    std::function<bool(const RectF&, const RectF&)> checkHandleReverse;
     std::optional<Color> handlerColor;
     HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;
 
@@ -218,6 +262,7 @@ struct SelectOverlayInfo {
     std::function<bool(const PointF&)> checkIsTouchInHostArea;
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
+    std::optional<CallerFrameNodeInfo> callerNodeInfo;
 
     bool isHandleLineShow = true;
     std::string selectText;

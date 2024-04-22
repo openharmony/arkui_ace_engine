@@ -744,10 +744,10 @@ public:
         if (!IsSelected()) {
             return false;
         }
-        Offset offset = globalOffset -
-                        Offset(IsTextArea() ? contentRect_.GetX() : textRect_.GetX(),
-                            IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) -
-                        Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+        auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+        auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+        auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
+        Offset offset = localOffset - Offset(offsetX, offsetY);
         for (const auto& rect : selectController_->GetSelectedRects()) {
             bool isInRange = rect.IsInRegion({ offset.GetX(), offset.GetY() });
             if (isInRange) {
@@ -1092,6 +1092,8 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
+    OffsetF GetPaintRectGlobalOffset() const;
+
     void NeedRequestKeyboard()
     {
         needToRequestKeyboardInner_ = true;
@@ -1119,6 +1121,13 @@ public:
     }
 
     const Dimension& GetAvoidSoftKeyboardOffset() const override;
+
+    RectF GetPaintContentRect() override
+    {
+        auto transformContentRect = contentRect_;
+        selectOverlay_->GetLocalRectWithTransform(transformContentRect);
+        return transformContentRect;
+    }
 
 protected:
     virtual void InitDragEvent();
@@ -1293,6 +1302,7 @@ private:
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
 
     RectF frameRect_;
     RectF textRect_;

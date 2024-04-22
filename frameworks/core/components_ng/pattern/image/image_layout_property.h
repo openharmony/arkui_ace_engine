@@ -94,6 +94,7 @@ public:
         json->PutFixedAttr("src", src.c_str(), filter, FIXED_ATTR_SRC);
         json->PutExtAttr("rawSrc", propImageSourceInfo_->GetSrc().c_str(), filter);
         json->PutExtAttr("moduleName", propImageSourceInfo_->GetModuleName().c_str(), filter);
+        json->PutExtAttr("baselineOffset", GetBaselineOffsetValue(Dimension(0)).Value(), filter);
         ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
         if (GetHasPlaceHolderStyle().has_value()) {
             TextBackgroundStyle::ToJsonValue(json, GetPlaceHolderStyle(), filter);
@@ -124,6 +125,7 @@ public:
         }
         UpdateImageFit(imageFit);
         UpdateAutoResize(json->GetString("autoResize") == "true" ? true : false);
+        UpdateBaselineOffset(Dimension(json->GetDouble("baselineOffset")));
         /* register image frame node to pipeline context to receive memory level notification and window state change
          * notification */
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -146,6 +148,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlaceHolderStyle, TextBackgroundStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasPlaceHolderStyle, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

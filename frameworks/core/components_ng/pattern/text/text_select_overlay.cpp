@@ -49,6 +49,10 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = textPattern->GetTextSelector().firstHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -59,6 +63,10 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = textPattern->GetTextSelector().secondHandle;
     handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+
+    auto localPaintRect = handleInfo.paintRect;
+    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+    SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
 }
 
@@ -189,7 +197,7 @@ RectF TextSelectOverlay::GetSelectArea()
     CHECK_NULL_RETURN(pattern, res);
     CHECK_NULL_RETURN(pattern->GetParagraph(), res);
     auto selectRects = pattern->GetTextBoxes();
-    auto textPaintOffset = pattern->GetTextPaintOffset();
+    auto textPaintOffset = GetPaintOffsetWithoutTransform();
     if (selectRects.empty()) {
         res.SetOffset(res.GetOffset() + textPaintOffset);
         GetSelectAreaFromHandle(res);
@@ -200,19 +208,34 @@ RectF TextSelectOverlay::GetSelectArea()
     res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     RectF visibleContentRect(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
     visibleContentRect = GetVisibleRect(pattern->GetHost(), visibleContentRect);
-    return res.IntersectRectT(visibleContentRect);
+    auto intersectRect = res.IntersectRectT(visibleContentRect);
+    if (hasTransform_) {
+        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
+        GetGlobalRectWithTransform(intersectRect);
+    }
+    return intersectRect;
 }
 
 void TextSelectOverlay::GetSelectAreaFromHandle(RectF& rect)
 {
     auto firstHandle = GetFirstHandleInfo();
     if (firstHandle) {
-        rect = firstHandle->paintRect;
+        auto firstRect = firstHandle->paintRect;
+        if (hasTransform_) {
+            firstRect.SetOffset(firstRect.GetOffset() - GetPaintOffsetWithoutTransform());
+            GetGlobalRectWithTransform(firstRect);
+        }
+        rect = firstRect;
         return;
     }
     auto secondHandle = GetSecondHandleInfo();
     if (secondHandle) {
-        rect = secondHandle->paintRect;
+        auto secondRect = secondHandle->paintRect;
+        if (hasTransform_) {
+            secondRect.SetOffset(secondRect.GetOffset() - GetPaintOffsetWithoutTransform());
+            GetGlobalRectWithTransform(secondRect);
+        }
+        rect = secondRect;
     }
 }
 

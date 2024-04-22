@@ -116,7 +116,7 @@ void WindowScene::OnAttachToFrameNode()
         context->SetRSNode(surfaceNode);
         surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
-            session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
+            session_->GetPersistentId(), session_->GetWindowType(), session_->GetWindowName().c_str());
         return;
     }
 
@@ -137,8 +137,13 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
     session_->SetAttachState(false);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain][WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
-        session_->GetPersistentId(), session_->GetWindowType(), session_->GetSessionInfo().bundleName_.c_str());
+    if (IsMainWindow()) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, name: %{public}s",
+            session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSSystem] id: %{public}d, type: %{public}d, name: %{public}s",
+            session_->GetPersistentId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+    }
 }
 
 void WindowScene::OnMountToParentDone()
@@ -336,6 +341,7 @@ void WindowScene::OnConnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->AddChild(self->contentNode_, 0);
+        self->contentNode_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] Add app window finished, id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());

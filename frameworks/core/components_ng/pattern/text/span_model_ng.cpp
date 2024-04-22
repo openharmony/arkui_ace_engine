@@ -136,6 +136,11 @@ void SpanModelNG::SetLetterSpacing(const Dimension& value)
     ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value, PropertyInfo::LETTERSPACE);
 }
 
+void SpanModelNG::SetBaselineOffset(const Dimension& value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(BaselineOffset, value, PropertyInfo::BASELINE_OFFSET);
+}
+
 void SpanModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(LineHeight, value, PropertyInfo::LINEHEIGHT);
@@ -250,6 +255,14 @@ void SpanModelNG::SetLetterSpacing(UINode* uiNode, const Dimension& value)
     spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
 }
 
+void SpanModelNG::SetBaselineOffset(UINode* uiNode, const Dimension& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateBaselineOffset(value);
+    spanNode->AddPropertyInfo(PropertyInfo::BASELINE_OFFSET);
+}
+
 void SpanModelNG::SetFont(UINode* uiNode, const Font& value)
 {
     if (value.fontSize.has_value()) {
@@ -311,6 +324,13 @@ Color SpanModelNG::GetTextDecorationColor(UINode* uiNode)
     return spanNode->GetTextDecorationColor().value_or(Color::BLACK);
 }
 
+Ace::TextDecorationStyle SpanModelNG::GetTextDecorationStyle(UINode* uiNode)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, TextDecorationStyle::SOLID);
+    return spanNode->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
+}
+
 TextStyle SpanModelNG::GetDefaultTextStyle()
 {
     TextStyle textStyle;
@@ -370,6 +390,14 @@ Dimension SpanModelNG::GetLetterSpacing(UINode* uiNode)
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
     CHECK_NULL_RETURN(spanNode, defaultLetterSpacing);
     return spanNode->GetLetterSpacing().value_or(defaultLetterSpacing);
+}
+
+Dimension SpanModelNG::GetBaselineOffset(UINode* uiNode)
+{
+    Dimension defaultBaselineOffset(0);
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_RETURN(spanNode, defaultBaselineOffset);
+    return spanNode->GetBaselineOffset().value_or(defaultBaselineOffset);
 }
 
 TextBackgroundStyle SpanModelNG::GetSpanTextBackgroundStyle(UINode* uiNode)

@@ -61,6 +61,7 @@ private:
     void UpdateSpansAndSpanMapWithOffsetAfterInsert(int32_t start, int32_t offset, bool useFrontStyle);
     AroundImage IsInsertAroundImage(int32_t start);
     void InsertStringAroundImage(int32_t start, const std::string& str, AroundImage AroundMode);
+    void RemoveImageSpanText();
 };
 } // namespace OHOS::Ace
 

@@ -25,7 +25,7 @@ class JSCanvasPath : public Referenced {
 public:
     JSCanvasPath();
     ~JSCanvasPath() override = default;
-    static void DestructorInterceptor(void* controller, void* data) {}
+    static void DestructorInterceptor(void* env, void* controller, void* data) {}
     void JsPath2DSetTransform(const JSCallbackInfo& args);
     void JsPath2DMoveTo(const JSCallbackInfo& args);
     void JsPath2DLineTo(const JSCallbackInfo& args);

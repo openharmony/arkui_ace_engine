@@ -192,6 +192,7 @@ public:
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
+    void SetDefaultColor(RefPtr<SpanNode>& spanNode);
     void HandleOnDelete(bool backward) override;
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
     int32_t CalculateDeleteLength(int32_t length, bool isBackward, bool& isSpanSelected);
@@ -308,6 +309,7 @@ public:
     OffsetF CalculateEmptyValueCaretRect();
     void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
     RefPtr<GestureEventHub> GetGestureEventHub();
+    float GetSelectedMaxWidth();
 
     bool IsUsingMouse() const
     {
@@ -343,6 +345,16 @@ public:
     const std::list<ParagraphManager::ParagraphInfo>& GetParagraphs() const
     {
         return paragraphs_.GetParagraphs();
+    }
+
+    std::optional<SelectHandleInfo> GetFirstHandleInfo() const
+    {
+        return selectOverlay_->GetFirstHandleInfo();
+    }
+
+    std::optional<SelectHandleInfo> GetSecondHandleInfo() const
+    {
+        return selectOverlay_->GetSecondHandleInfo();
     }
 
     RectF GetCaretRect() const override;

@@ -319,6 +319,11 @@ void IndexerModelNG::SetAdaptiveWidth(bool state)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state);
 }
 
+void IndexerModelNG::SetAdaptiveWidth(FrameNode* frameNode, bool state)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state, frameNode);
+}
+
 void IndexerModelNG::SetPopupBorderRadius(FrameNode* frameNode, const Dimension& radius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupBorderRadius, radius, frameNode);

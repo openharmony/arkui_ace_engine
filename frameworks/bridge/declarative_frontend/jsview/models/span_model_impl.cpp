@@ -164,6 +164,8 @@ void SpanModelImpl::SetLetterSpacing(const Dimension& value)
     }
 }
 
+void SpanModelImpl::SetBaselineOffset(const Dimension& value) {}
+
 RefPtr<TextSpanComponent> SpanModelImpl::GetComponent()
 {
     auto* stack = ViewStackProcessor::GetInstance();

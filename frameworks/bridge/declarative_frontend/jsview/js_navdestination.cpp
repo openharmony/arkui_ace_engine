@@ -372,7 +372,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillAppear", &JSNavDestination::SetWillAppear);
     JSClass<JSNavDestination>::StaticMethod("onWillShow", &JSNavDestination::SetWillShow);
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
-    JSClass<JSNavDestination>::StaticMethod("onWillDisAppear", &JSNavDestination::SetWillDisAppear);
+    JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
