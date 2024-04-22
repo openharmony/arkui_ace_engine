@@ -769,7 +769,7 @@ void TextPickerDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo
     const RefPtr<FrameNode>& buttonNode, bool isConfirm)
 {
     bool setDefaultFocus = false;
-    if (buttonInfos.size > CANCEL_BUTTON_INDEX) {
+    if (buttonInfos.size() > CANCEL_BUTTON_INDEX) {
         if (buttonInfos[ACCEPT_BUTTON_INDEX].isPrimary && buttonInfos[CANCEL_BUTTON_INDEX].isPrimary) {
             return;
         }
@@ -777,7 +777,7 @@ void TextPickerDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo
         if (buttonInfos[index].isPrimary) {
             setDefaultFocus = true;
         }
-    } else if (buttonInfos.size == CANCEL_BUTTON_INDEX) {
+    } else if (buttonInfos.size() == CANCEL_BUTTON_INDEX) {
         if (buttonInfos[0].isAcceptButton == isConfirm && buttonInfos[0].isPrimary) {
             setDefaultFocus = true;
         }
