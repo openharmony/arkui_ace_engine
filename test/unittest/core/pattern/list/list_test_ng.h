@@ -120,9 +120,11 @@ public:
     static void CreateItemWithSize(
         int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
     static void CreateGroup(int32_t groupNumber, Axis axis = Axis::VERTICAL);
+    static void CreateGroupChildrenMainSize(int32_t groupNumber);
     static void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
     static void CreateGroupWithSetting(int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle,
         int32_t itemNumber = GROUP_LINE_NUMBER);
+    static void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
     static void CreateItemWithSwipe(
         std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect);
     static std::function<void()> GetDefaultSwiperBuilder(float crossSize);
