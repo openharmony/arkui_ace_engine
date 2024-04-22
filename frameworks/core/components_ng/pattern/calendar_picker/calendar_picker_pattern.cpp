@@ -297,10 +297,7 @@ CalendarPickerSelectedType CalendarPickerPattern::CheckRegion(const Offset& glob
 bool CalendarPickerPattern::IsInNodeRegion(const RefPtr<FrameNode>& node, const PointF& point)
 {
     CHECK_NULL_RETURN(node, false);
-    auto geometryNode = node->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto rect = geometryNode->GetFrameRect();
-    rect.SetOffset(node->GetPaintRectOffset());
+    auto rect = node->GetTransformRectRelativeToWindow();
     return rect.IsInRegion(point);
 }
 
