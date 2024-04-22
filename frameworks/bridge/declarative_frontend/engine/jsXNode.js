@@ -68,6 +68,9 @@ class BuilderNode {
     getFrameNode() {
         return this._JSBuilderNode.getFrameNode();
     }
+    getFrameNodeWithoutCheck() {
+        return this._JSBuilderNode.getFrameNodeWithoutCheck();
+    }
     postTouchEvent(touchEvent) {
         return this._JSBuilderNode.postTouchEvent(touchEvent);
     }
@@ -174,6 +177,9 @@ class JSBuilderNode extends BaseNode {
             return this.frameNode_;
         }
         return null;
+    }
+    getFrameNodeWithoutCheck() {
+        return this.frameNode_;
     }
     observeComponentCreation(func) {
         let elmId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -899,7 +905,6 @@ var LengthUnit;
     LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
     LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
 })(LengthUnit || (LengthUnit = {}));
-
 class LengthMetrics {
     constructor(value, unit) {
         if (unit in LengthUnit) {
@@ -908,7 +913,7 @@ class LengthMetrics {
         }
         else {
             this.unit = LengthUnit.VP;
-            this.value = unit === undefined? value : 0;
+            this.value = unit === undefined ? value : 0;
         }
     }
     static px(value) {
@@ -1473,7 +1478,7 @@ class ComponentContent {
         this.builderNode_.update(params);
     }
     getFrameNode() {
-        return this.builderNode_.getFrameNode();
+        return this.builderNode_.getFrameNodeWithoutCheck();
     }
 }
 
