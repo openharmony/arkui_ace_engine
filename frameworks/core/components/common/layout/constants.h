@@ -217,6 +217,7 @@ enum class TextDataDetectType {
     URL,
     EMAIL,
     ADDRESS,
+    DATETIME,
 };
 
 enum class LineBreakStrategy {
