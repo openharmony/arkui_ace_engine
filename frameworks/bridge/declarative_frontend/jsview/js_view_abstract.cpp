@@ -2414,7 +2414,8 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         visible = arg->ToNumber<int32_t>();
     }
 
-    if (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE))) {
         visible = 0;
     }
 
