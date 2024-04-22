@@ -203,7 +203,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(double width)
     } else {
         indentValue = width * textIndent_.Value();
     }
-    float indent_ = static_cast<float>(indentValue);
+    indent_ = static_cast<float>(indentValue);
     std::vector<float> indents;
     // only indent first line
     indents.emplace_back(indent_);
@@ -315,7 +315,7 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
             longestLine = longestLine + letterSpacing;
         }
     }
-    paragraph_->Layout(std::ceil(longestLine)); // paragraph_->GetLongestLine()));
+    paragraph_->Layout(std::ceil(longestLine) + indent_); // paragraph_->GetLongestLine()));
 
     auto contentWidth = contentConstraint.maxSize.Width() - imageWidth;
     CounterNodeMeasure(contentWidth, layoutWrapper);
@@ -339,7 +339,7 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
-    textRect_.SetSize(SizeF(std::max(0.0f, longestLine), paragraph_->GetHeight()));
+    textRect_.SetSize(SizeF(std::max(0.0f, longestLine) + indent_, paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
 }
 

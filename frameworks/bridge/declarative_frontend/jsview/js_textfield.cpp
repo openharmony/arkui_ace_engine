@@ -1530,12 +1530,18 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
         auto tmpInfo = info[0];
-        if (info.Length() < 1 || !tmpInfo->IsNumber() || tmpInfo->IsUndefined()) {
+        int32_t overflow = 0;
+        if (info.Length() < 1) {
             break;
         }
-        auto overflow = tmpInfo->ToNumber<int32_t>();
-        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        if (!tmpInfo->IsNumber() && !tmpInfo->IsUndefined()) {
             break;
+        }
+        if (!tmpInfo->IsUndefined()) {
+            overflow = tmpInfo->ToNumber<int32_t>();
+            if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+                break;
+            }
         }
         TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
     } while (false);

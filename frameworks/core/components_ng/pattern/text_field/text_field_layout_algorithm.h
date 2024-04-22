@@ -141,6 +141,7 @@ protected:
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
     Dimension textIndent_ = 0.0_px;
+    float indent_ = 0.0f;
 private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
