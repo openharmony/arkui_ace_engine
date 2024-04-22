@@ -859,14 +859,14 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
     }, TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task)
+void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
-void FrontendDelegateImpl::PostUITask(std::function<void()>&& task)
+void FrontendDelegateImpl::PostUITask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 const std::string& FrontendDelegateImpl::GetAppID() const
@@ -1164,11 +1164,11 @@ void FrontendDelegateImpl::ClearTimer(const std::string& callbackId)
     }
 }
 
-void FrontendDelegateImpl::PostSyncTaskToPage(std::function<void()>&& task)
+void FrontendDelegateImpl::PostSyncTaskToPage(std::function<void()>&& task, const std::string& name)
 {
     pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
     TriggerPageUpdate(GetRunningPageId(), true);
-    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void FrontendDelegateImpl::AddTaskObserver(std::function<void()>&& task)

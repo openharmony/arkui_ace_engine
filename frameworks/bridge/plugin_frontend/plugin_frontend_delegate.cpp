@@ -886,9 +886,9 @@ void PluginFrontendDelegate::TriggerPageUpdate(int32_t pageId, bool directExecut
         TaskExecutor::TaskType::UI);
 }
 
-void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task)
+void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
 const std::string& PluginFrontendDelegate::GetAppID() const
@@ -1042,10 +1042,10 @@ void PluginFrontendDelegate::ClearTimer(const std::string& callbackId)
     }
 }
 
-void PluginFrontendDelegate::PostSyncTaskToPage(std::function<void()>&& task)
+void PluginFrontendDelegate::PostSyncTaskToPage(std::function<void()>&& task, const std::string& name)
 {
     pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
-    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void PluginFrontendDelegate::AddTaskObserver(std::function<void()>&& task)

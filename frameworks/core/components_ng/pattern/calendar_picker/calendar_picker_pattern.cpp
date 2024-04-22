@@ -702,7 +702,7 @@ bool CalendarPickerPattern::HandleNumberKeyEvent(const KeyEvent& event)
     return false;
 }
 
-void CalendarPickerPattern::PostTaskToUI(const std::function<void()>& task)
+void CalendarPickerPattern::PostTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
     auto host = GetHost();
@@ -714,7 +714,7 @@ void CalendarPickerPattern::PostTaskToUI(const std::function<void()>& task)
     CHECK_NULL_VOID(taskExecutor);
 
     taskCount_++;
-    taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME);
+    taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME, name);
 }
 
 void CalendarPickerPattern::HandleTaskCallback()

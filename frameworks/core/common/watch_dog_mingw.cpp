@@ -48,16 +48,16 @@ enum class State { NORMAL, WARNING, FREEZE };
 using Task = std::function<void()>;
 RefPtr<TaskRunnerAdapter> g_anrThread;
 
-bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
+bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime, std::string& name)
 {
     if (!g_anrThread || !task) {
         return false;
     }
 
     if (delayTime > 0) {
-        g_anrThread->PostDelayedTask(std::move(task), delayTime, {});
+        g_anrThread->PostDelayedTask(std::move(task), delayTime, name);
     } else {
-        g_anrThread->PostTask(std::move(task), {});
+        g_anrThread->PostTask(std::move(task), name);
     }
     return true;
 }

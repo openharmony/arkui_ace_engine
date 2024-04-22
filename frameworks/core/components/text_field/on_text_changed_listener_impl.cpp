@@ -284,7 +284,7 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
     PostTaskToUI(task);
 }
 
-void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
+void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     if (!task) {
         LOGE("task is empty");
@@ -303,10 +303,10 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
         return;
     }
 
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
-void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task)
+void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     if (!task) {
         LOGE("task is empty");
@@ -325,6 +325,6 @@ void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& ta
         return;
     }
 
-    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 } // namespace OHOS::Ace

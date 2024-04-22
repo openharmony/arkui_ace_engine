@@ -434,24 +434,24 @@ RefPtr<OffscreenCanvas> PipelineBase::CreateOffscreenCanvas(int32_t width, int32
     return RenderOffscreenCanvas::Create(AceType::WeakClaim(this), width, height);
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type)
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(std::move(task), type);
+        taskExecutor_->PostTask(std::move(task), type, name);
     }
 }
 
-void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
+void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(task, type);
+        taskExecutor_->PostTask(task, type, name);
     }
 }
 
-void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostSyncTask(task, type);
+        taskExecutor_->PostSyncTask(task, type, name);
     }
 }
 

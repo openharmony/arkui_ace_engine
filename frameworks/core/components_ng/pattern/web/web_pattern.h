@@ -659,7 +659,7 @@ private:
     bool ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    void PostTaskToUI(const std::function<void()>&& task) const;
+    void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
     void OfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);

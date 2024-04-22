@@ -38,11 +38,11 @@ static RefPtr<NG::AppBarView> ObtainAppBar()
     return container->GetAppBar();
 }
 
-static void SetBarInUIThread(TaskExecutor::Task&& task)
+static void SetBarInUIThread(TaskExecutor::Task&& task, const std::string& name)
 {
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, name);
 }
 
 static napi_value JSSetVisible(napi_env env, napi_callback_info info)

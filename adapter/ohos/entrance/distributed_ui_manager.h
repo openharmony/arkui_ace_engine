@@ -77,14 +77,14 @@ public:
     }
 
 private:
-    void PostSyncTaskToUI(const std::function<void()>& task)
+    void PostSyncTaskToUI(const std::function<void()>& task, const std::string& name)
     {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
-        taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
+        taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
     }
 
     int32_t instanceId_ = -1;

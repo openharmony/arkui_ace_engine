@@ -847,7 +847,8 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
     return retVal;
 }
 
-void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
+void JsiDeclarativeEngineInstance::PostJsTask(
+    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name)
 {
     if (runtime == nullptr) {
         return;
@@ -856,7 +857,7 @@ void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runti
     if (engineInstance == nullptr) {
         return;
     }
-    engineInstance->GetDelegate()->PostJsTask(std::move(task));
+    engineInstance->GetDelegate()->PostJsTask(std::move(task), name);
 }
 
 void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>& runtime)

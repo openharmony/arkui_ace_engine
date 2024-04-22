@@ -46,7 +46,7 @@ constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
-void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
 {
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
@@ -58,7 +58,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, name);
 }
 } // namespace
 
@@ -512,9 +512,9 @@ void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget&
     }
 }
 
-void FrontendDelegateDeclarativeNG::PostJsTask(std::function<void()>&& task)
+void FrontendDelegateDeclarativeNG::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
 const std::string& FrontendDelegateDeclarativeNG::GetAppID() const
@@ -537,10 +537,10 @@ int32_t FrontendDelegateDeclarativeNG::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
-void FrontendDelegateDeclarativeNG::PostSyncTaskToPage(std::function<void()>&& task)
+void FrontendDelegateDeclarativeNG::PostSyncTaskToPage(std::function<void()>&& task, const std::string& name)
 {
     pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
-    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 bool FrontendDelegateDeclarativeNG::GetAssetContent(const std::string& url, std::string& content)

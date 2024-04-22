@@ -3609,7 +3609,7 @@ void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
     isNeedReDrawRect_ = true;
 }
 
-void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
+void WebPattern::PostTaskToUI(const std::function<void()>&& task, const std::string& name) const
 {
     CHECK_NULL_VOID(task);
     auto container = Container::Current();
@@ -3618,7 +3618,7 @@ void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset)

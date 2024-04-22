@@ -268,7 +268,7 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
     PostTaskToUI(task);
 }
 
-void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task)
+void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
     auto textFieldPattern = pattern_.Upgrade();
@@ -279,10 +279,10 @@ void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& ta
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 
-void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
+void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
     auto textFieldPattern = pattern_.Upgrade();
@@ -293,7 +293,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)

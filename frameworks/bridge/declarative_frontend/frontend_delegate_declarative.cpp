@@ -77,7 +77,7 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
-void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
 {
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
@@ -89,7 +89,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, name);
 }
 
 } // namespace
@@ -1503,9 +1503,9 @@ void FrontendDelegateDeclarative::TriggerPageUpdate(int32_t pageId, bool directE
         TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateDeclarative::PostJsTask(std::function<void()>&& task)
+void FrontendDelegateDeclarative::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
 const std::string& FrontendDelegateDeclarative::GetAppID() const
@@ -2128,10 +2128,10 @@ void FrontendDelegateDeclarative::ClearTimer(const std::string& callbackId)
     }
 }
 
-void FrontendDelegateDeclarative::PostSyncTaskToPage(std::function<void()>&& task)
+void FrontendDelegateDeclarative::PostSyncTaskToPage(std::function<void()>&& task, const std::string& name)
 {
     pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
-    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void FrontendDelegateDeclarative::AddTaskObserver(std::function<void()>&& task)
