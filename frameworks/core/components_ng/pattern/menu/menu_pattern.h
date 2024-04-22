@@ -58,6 +58,8 @@ struct SelectProperties {
     std::string value;
     std::string icon;
     int index;
+    bool selected = false;
+    bool selectEnable = true;
 };
 
 class MenuPattern : public Pattern, public FocusView {
@@ -381,26 +383,24 @@ public:
         makeFunc_ = std::nullopt;
     }
 
+    void UpdateSelectIndex(int32_t index);
+
     void SetSelectProperties(const std::vector<SelectParam>& params)
     {
+        auto list = selectProperties_;
+        selectParams_ = params;
         selectProperties_.clear();
         for (size_t i = 0; i < params.size(); i++) {
             SelectProperties selectProperty;
             selectProperty.value = params[i].first;
             selectProperty.icon = params[i].second;
             selectProperty.index = i;
+            if (i < list.size()) {
+                selectProperty.selected = list[i].selected;
+                selectProperty.selectEnable = list[i].selectEnable;
+            }
             selectProperties_.push_back(selectProperty);
         }
-    }
-
-    std::string GetItemValue(int index)
-    {
-        return selectProperties_[index].value;
-    }
-
-    std::string GetIcon(int index)
-    {
-        return selectProperties_[index].icon;
     }
 
     bool UseContentModifier()
@@ -455,6 +455,7 @@ private:
     const std::string targetTag_;
     MenuType type_ = MenuType::MENU;
     std::vector<SelectProperties> selectProperties_;
+    std::vector<SelectParam> selectParams_;
     std::optional<SelectMakeCallback> makeFunc_;
 
     RefPtr<FrameNode> parentMenuItem_;

@@ -140,7 +140,7 @@ void SelectPattern::OnAfterModifyDone()
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, selectValue_, selected_);
 }
 
-void SelectPattern::SetItemSelected(int index, const std::string& value)
+void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -149,6 +149,7 @@ void SelectPattern::SetItemSelected(int index, const std::string& value)
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     isSelected_ = true;
+    menuPattern->UpdateSelectIndex(index);
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
