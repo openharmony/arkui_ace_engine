@@ -2699,6 +2699,57 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
 
+void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, BrightnessOption& brightnessOption)
+{
+    double rate = 1.0f;
+    if (jsOption->GetProperty("rate")->IsNumber()) {
+        rate = jsOption->GetProperty("rate")->ToNumber<double>();
+    }
+    double lightUpDegree = 0.0f;
+    if (jsOption->GetProperty("lightUpDegree")->IsNumber()) {
+        lightUpDegree = jsOption->GetProperty("lightUpDegree")->ToNumber<double>();
+    }
+    double cubicCoeff = 0.0f;
+    if (jsOption->GetProperty("cubicCoeff")->IsNumber()) {
+        cubicCoeff = jsOption->GetProperty("cubicCoeff")->ToNumber<double>();
+    }
+    double quadCoeff = 0.0f;
+    if (jsOption->GetProperty("quadCoeff")->IsNumber()) {
+        quadCoeff = jsOption->GetProperty("quadCoeff")->ToNumber<double>();
+    }
+    double saturation = 1.0f;
+    if (jsOption->GetProperty("saturation")->IsNumber()) {
+        saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
+    }
+    std::vector<float> posRGB(3, 0.0);
+    if (jsOption->GetProperty("posRGB")->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsOption->GetProperty("posRGB"));
+        auto r = params->GetValueAt(0)->ToNumber<double>();
+        auto g = params->GetValueAt(1)->ToNumber<double>();
+        auto b = params->GetValueAt(2)->ToNumber<double>();
+        posRGB[0] = r;
+        posRGB[1] = g;
+        posRGB[2] = b;
+    }
+    std::vector<float> negRGB(3, 0.0);
+    if (jsOption->GetProperty("negRGB")->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsOption->GetProperty("negRGB"));
+        auto r = params->GetValueAt(0)->ToNumber<double>();
+        auto g = params->GetValueAt(1)->ToNumber<double>();
+        auto b = params->GetValueAt(2)->ToNumber<double>();
+        negRGB[0] = r;
+        negRGB[1] = g;
+        negRGB[2] = b;
+    }
+    double fraction = 1.0f;
+    if (jsOption->GetProperty("fraction")->IsNumber()) {
+        fraction = jsOption->GetProperty("fraction")->ToNumber<double>();
+        fraction = std::clamp(fraction, 0.0, 1.0);
+    }
+    brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction };
+}
+
+
 void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOption& effectOption)
 {
     CalcDimension radius;
@@ -3788,7 +3839,7 @@ void JSViewAbstract::ParseBorderImageLengthMetrics(
                     localizedCalcDimension.top = calcDimension;
                     break;
                 case BorderImageDirection::BOTTOM:
-                    localizedCalcDimension.end = calcDimension;
+                    localizedCalcDimension.bottom = calcDimension;
                     break;
                 default:
                     break;
@@ -4218,6 +4269,37 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JsMotionBlur(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    MotionBlurOption option;
+    double x = 0.0;
+    double y = 0.0;
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsAnchor = jsObj->GetProperty("anchor");
+    if (!jsAnchor->IsNull() && !jsAnchor->IsUndefined() && jsAnchor->IsObject()) {
+        JSRef<JSObject> jsAnchorObj = JSRef<JSObject>::Cast(jsAnchor);
+        ParseJsDouble(jsAnchorObj->GetProperty("x"), x);
+        ParseJsDouble(jsAnchorObj->GetProperty("y"), y);
+    }
+    CalcDimension radius;
+    if (!ParseJsDimensionVp(jsObj->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    if (LessNotEqual(x, 0.0)) {
+        x = 0.0;
+    }
+    if (LessNotEqual(y, 0.0)) {
+        y = 0.0;
+    }
+    option.radius = radius;
+    option.anchor.x = std::clamp(x, 0.0, 1.0);
+    option.anchor.y = std::clamp(y, 0.0, 1.0);
+    ViewAbstractModel::GetInstance()->SetMotionBlur(option);
+}
+
 void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 {
     Color colorBlend;
@@ -4355,6 +4437,26 @@ void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
         ParseJsDouble(jsObj->GetProperty("lightUpDegree"), lightUpDegree);
     }
     SetDynamicLightUp(rate, lightUpDegree);
+}
+
+void JSViewAbstract::JsBackgroundBrightnessInternal(const JSCallbackInfo& info)
+{
+    BrightnessOption option;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+        ParseBrightnessOption(jsOption, option);
+    }
+    SetBgDynamicBrightness(option);
+}
+
+void JSViewAbstract::JsForegroundBrightness(const JSCallbackInfo& info)
+{
+    BrightnessOption option;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
+        ParseBrightnessOption(jsOption, option);
+     }
+   SetFgDynamicBrightness(option);
 }
 
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
@@ -4532,6 +4634,42 @@ bool JSViewAbstract::ParseJsDimensionNG(
     }
 
     return false;
+}
+
+bool JSViewAbstract::ParseJsLengthNG(
+    const JSRef<JSVal>& jsValue, NG::CalcLength& result, DimensionUnit defaultUnit, bool isSupportPercent)
+{
+    if (jsValue->IsNumber()) {
+        if (std::isnan(jsValue->ToNumber<double>())) {
+            return false;
+        }
+        result = NG::CalcLength(jsValue->ToNumber<double>(), defaultUnit);
+        return true;
+    } else if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> value = jsObj->GetProperty("value");
+        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>()))) {
+            return false;
+        }
+        DimensionUnit unit = defaultUnit;
+        JSRef<JSVal> jsUnit = jsObj->GetProperty("unit");
+        if (jsUnit->IsNumber()) {
+            if (!isSupportPercent && jsUnit->ToNumber<int32_t>() == static_cast<int32_t>(DimensionUnit::PERCENT)) {
+                return false;
+            }
+            unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+        }
+        result = NG::CalcLength(value->ToNumber<double>(), unit);
+        return true;
+    }
+
+    return false;
+}
+
+bool JSViewAbstract::ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseJsLengthNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
 }
 
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
@@ -7532,12 +7670,15 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("overlay", &JSViewAbstract::JsOverlay);
 
     JSClass<JSViewAbstract>::StaticMethod("blur", &JSViewAbstract::JsBlur);
+    JSClass<JSViewAbstract>::StaticMethod("motionBlur", &JSViewAbstract::JsMotionBlur);
     JSClass<JSViewAbstract>::StaticMethod("useEffect", &JSViewAbstract::JsUseEffect);
     JSClass<JSViewAbstract>::StaticMethod("useShadowBatching", &JSViewAbstract::JsUseShadowBatching);
     JSClass<JSViewAbstract>::StaticMethod("colorBlend", &JSViewAbstract::JsColorBlend);
     JSClass<JSViewAbstract>::StaticMethod("backdropBlur", &JSViewAbstract::JsBackdropBlur);
     JSClass<JSViewAbstract>::StaticMethod("linearGradientBlur", &JSViewAbstract::JsLinearGradientBlur);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBrightness", &JSViewAbstract::JsBackgroundBrightness);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundBrightnessInternal", &JSViewAbstract::JsBackgroundBrightnessInternal);
+    JSClass<JSViewAbstract>::StaticMethod("foregroundBrightness", &JSViewAbstract::JsForegroundBrightness);
     JSClass<JSViewAbstract>::StaticMethod("windowBlur", &JSViewAbstract::JsWindowBlur);
     JSClass<JSViewAbstract>::StaticMethod("visibility", &JSViewAbstract::SetVisibility);
     JSClass<JSViewAbstract>::StaticMethod("flexBasis", &JSViewAbstract::JsFlexBasis);
@@ -7965,6 +8106,16 @@ void JSViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
 void JSViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
 {
     ViewAbstractModel::GetInstance()->SetDynamicLightUp(rate, lightUpDegree);
+}
+
+void JSViewAbstract::SetBgDynamicBrightness(BrightnessOption brightnessOption)
+{
+    ViewAbstractModel::GetInstance()->SetBgDynamicBrightness(brightnessOption);
+}
+
+void JSViewAbstract::SetFgDynamicBrightness(BrightnessOption brightnessOption)
+{
+    ViewAbstractModel::GetInstance()->SetFgDynamicBrightness(brightnessOption);
 }
 
 void JSViewAbstract::SetWindowBlur(float progress, WindowBlurStyle blurStyle)

@@ -84,11 +84,11 @@ void MagnifierPainter::PaintMagnifier(RSCanvas& canvas)
 
     auto cursorOffsetY = magnifierRect_.cursorOffset.GetY();
     auto localOffsetX = magnifierRect_.localOffset.GetX();
+    auto textPaintOffset = textBasePattern->GetTextPaintOffset();
     RectF dstRect;
-    dstRect.SetRect(
-        localOffsetX - localOffsetX * magnifierGain - textBasePattern->GetTextPaintOffset().GetX() * magnifierGain,
-        magnifierRect_.startY - textBasePattern->GetTextPaintOffset().GetY() * magnifierGain
-            - cursorOffsetY * magnifierGain + pixelMapImageOffset,
+    dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain - textPaintOffset.GetX() * magnifierGain,
+        magnifierRect_.startY - textPaintOffset.GetY() * magnifierGain - cursorOffsetY * magnifierGain +
+            pixelMapImageOffset,
         pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
     pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
 

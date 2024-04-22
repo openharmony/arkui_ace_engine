@@ -277,6 +277,11 @@ public:
         appBgColor_ = color;
     }
 
+    void SetFormRenderingMode(int8_t renderMode)
+    {
+        renderingMode_ = renderMode;
+    }
+
     const Color& GetAppBgColor() const
     {
         return appBgColor_;
@@ -1086,7 +1091,7 @@ public:
 
     virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault() {}
+    virtual void RestoreDefault(int32_t windowId = 0) {}
 
     void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {
@@ -1207,6 +1212,7 @@ protected:
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
+    int8_t renderingMode_ = 0;
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;

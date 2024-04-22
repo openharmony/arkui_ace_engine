@@ -61,6 +61,7 @@ public:
     void SetPopupTitleBackground(const std::optional<Color>& color) override;
     void SetAdaptiveWidth(bool state) override;
 
+    static void SetAdaptiveWidth(FrameNode* frameNode, bool state);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
     static void SetSelectedFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,

@@ -532,12 +532,12 @@ void TextModelNG::SetClipEdge()
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextModelNG::SetFontFeature(const FONT_FEATURES_MAP& value)
+void TextModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value);
 }
 
-void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value)
+void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
 }
@@ -629,6 +629,14 @@ Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
     return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
+TextDecorationStyle TextModelNG::GetTextDecorationStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecorationStyle::SOLID);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecorationStyle::SOLID);
+    return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
 }
 
 TextCase TextModelNG::GetTextCase(FrameNode* frameNode)

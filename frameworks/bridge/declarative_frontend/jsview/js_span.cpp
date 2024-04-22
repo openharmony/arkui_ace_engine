@@ -32,6 +32,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/span_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #ifndef NG_BUILD
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #endif
@@ -72,6 +73,7 @@ namespace {
 
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 
 } // namespace
 
@@ -153,6 +155,21 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetLetterSpacing(value);
 }
 
+void JSSpan::SetBaselineOffset(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    NG::CalcLength value;
+    if (ConvertFromJSValueNG(info[0], value) &&
+        value.GetDimensionContainsNegative().Unit() != DimensionUnit::PERCENT) {
+        SpanModel::GetInstance()->SetBaselineOffset(value.GetDimensionContainsNegative());
+        return;
+    }
+    value.Reset();
+    SpanModel::GetInstance()->SetBaselineOffset(value.GetDimensionContainsNegative());
+}
+
 void JSSpan::SetTextCase(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(TEXT_CASES.size())) {
@@ -182,6 +199,8 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
     std::optional<Color> colorVal;
     Color result;
@@ -293,6 +312,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("fontStyle", &JSSpan::SetFontStyle, opt);
     JSClass<JSSpan>::StaticMethod("fontFamily", &JSSpan::SetFontFamily, opt);
     JSClass<JSSpan>::StaticMethod("letterSpacing", &JSSpan::SetLetterSpacing, opt);
+    JSClass<JSSpan>::StaticMethod("baselineOffset", &JSSpan::SetBaselineOffset, opt);
     JSClass<JSSpan>::StaticMethod("textCase", &JSSpan::SetTextCase, opt);
     JSClass<JSSpan>::StaticMethod("textShadow", &JSSpan::SetTextShadow, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);

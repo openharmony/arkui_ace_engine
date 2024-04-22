@@ -106,7 +106,6 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureListItem(layoutWrapper, childLayoutConstraint_);
     AdjustItemPosition();
     AdjustByPosMap();
-    SetActiveChildRange(layoutWrapper);
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
@@ -132,6 +131,7 @@ float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
 
 void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    SetActiveChildRange(layoutWrapper);
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -712,7 +712,13 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
 void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos)
 {
-    float currentStartPos = endPos;
+    float currentStartPos = childrenSize_ ? posMap_->GetPos(endIndex) + posMap_->GetRowHeight(endIndex) : endPos;
+    if (childrenSize_) {
+        float offset = referencePos_ - posMap_->GetPrevTotalHeight() + endPos - (prevEndPos_ - prevStartPos_);
+        float newReferencePos = endPos_ - startPos_ + offset - currentStartPos + totalMainSize_;
+        refPos_ = refPos_ + newReferencePos - referencePos_;
+        referencePos_ = newReferencePos;
+    }
     float currentEndPos = 0.0f;
     auto currentIndex = endIndex + 1;
     while (GreatOrEqual(currentStartPos, startPos_ - (referencePos_ - totalMainSize_))) {
@@ -739,7 +745,11 @@ void ListItemGroupLayoutAlgorithm::AdjustByPosMap()
         return;
     }
     totalMainSize_ = posMap_->GetTotalHeight();
-    float offset = posMap_->GetGroupLayoutOffset(GetStartIndex(), itemPosition_.begin()->second.startPos);
+    float startPos = itemPosition_.begin()->second.startPos;
+    float offset = posMap_->GetGroupLayoutOffset(GetStartIndex(), startPos);
+    if (!itemPosition_.empty()) {
+        refPos_ -= offset;
+    }
     for (auto& pos : itemPosition_) {
         pos.second.startPos += offset;
         pos.second.endPos += offset;

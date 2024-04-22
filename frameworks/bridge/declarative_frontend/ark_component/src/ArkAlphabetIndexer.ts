@@ -117,6 +117,10 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     modifierWithKey(this._modifiersWithKeys, PopupTitleBackgroundModifier.identity, PopupTitleBackgroundModifier, value);
     return this;
   }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, AdaptiveWidthModifier.identity, AdaptiveWidthModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 globalThis.AlphabetIndexer.attributeModifier = function (modifier: ArkComponent): void {
@@ -493,6 +497,21 @@ class PopupTitleBackgroundModifier extends ModifierWithKey<ResourceColor> {
       getUINativeModule().alphabetIndexer.resetPopupTitleBackground(node);
     } else {
       getUINativeModule().alphabetIndexer.setPopupTitleBackground(node, this.value);
+    }
+  }
+}
+
+class AdaptiveWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('adaptiveWidth');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetAdaptiveWidth(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setAdaptiveWidth(node, this.value);
     }
   }
 }

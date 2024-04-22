@@ -302,21 +302,9 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     CHECK_NULL_VOID(host);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
     if (firstHandleDrag_) {
-        firstHandleRegion_ += offset;
-        info_->firstHandle.paintRect += offset;
-        CheckHandleReverse();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        if (info_->onHandleMove) {
-            info_->onHandleMove(info_->firstHandle.paintRect, true);
-        }
+        UpdateOffsetOnMove(firstHandleRegion_, info_->firstHandle, offset, true);
     } else if (secondHandleDrag_) {
-        secondHandleRegion_ += offset;
-        info_->secondHandle.paintRect += offset;
-        CheckHandleReverse();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        if (info_->onHandleMove) {
-            info_->onHandleMove(info_->secondHandle.paintRect, false);
-        }
+        UpdateOffsetOnMove(secondHandleRegion_, info_->secondHandle, offset, false);
     } else {
         LOGW("the move point is not in drag area");
     }
@@ -324,6 +312,25 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     CHECK_NULL_VOID(context);
     if (host->IsLayoutDirtyMarked()) {
         context->AddDirtyLayoutNode(host);
+    }
+}
+
+void SelectOverlayPattern::UpdateOffsetOnMove(
+    RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst)
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    region += offset;
+    handleInfo.paintRect += offset;
+    auto paintRect = handleInfo.paintRect;
+    handleInfo.paintInfo = handleInfo.paintInfo + offset;
+    if (handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
+        paintRect = handleInfo.paintInfoConverter(handleInfo.paintInfo);
+    }
+    CheckHandleReverse();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (info_->onHandleMove) {
+        info_->onHandleMove(paintRect, isFirst);
     }
 }
 
@@ -337,18 +344,29 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
     }
     if (firstHandleDrag_) {
         if (info_->onHandleMoveDone) {
-            info_->onHandleMoveDone(info_->firstHandle.paintRect, true);
+            auto paintRect = GetHandlePaintRect(info_->firstHandle);
+            info_->onHandleMoveDone(paintRect, true);
         }
         firstHandleDrag_ = false;
     } else if (secondHandleDrag_) {
         if (info_->onHandleMoveDone) {
-            info_->onHandleMoveDone(info_->secondHandle.paintRect, false);
+            auto paintRect = GetHandlePaintRect(info_->secondHandle);
+            info_->onHandleMoveDone(paintRect, false);
         }
         secondHandleDrag_ = false;
     }
     if (info_->isSingleHandle && !info_->isHandleLineShow) {
         StartHiddenHandleTask();
     }
+}
+
+RectF SelectOverlayPattern::GetHandlePaintRect(const SelectHandleInfo& handleInfo)
+{
+    auto paintRect = handleInfo.paintRect;
+    if (handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
+        paintRect = handleInfo.paintInfoConverter(handleInfo.paintInfo);
+    }
+    return paintRect;
 }
 
 void SelectOverlayPattern::HandlePanCancel()

@@ -824,20 +824,6 @@ ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle node)
     return NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(node);
 }
 
-void SetCachedCount(ArkUINodeHandle node, ArkUI_Int32 cachedCount)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetCachedCount(frameNode, cachedCount);
-}
-
-void ResetCachedCount(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetCachedCount(frameNode, 1);
-}
-
 ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -861,7 +847,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         GetSwiperVertical, GetSwiperDuration, GetSwiperDisplayCount, GetSwiperInterval, GetSwiperCurve,
         GetSwiperDisableSwipe, GetSwiperItemSpace, GetSwiperShowIndicator, GetSwiperShowDisplayArrow,
         GetSwiperEffectMode, SetIndicatorInteractive, ResetIndicatorInteractive, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, SetCachedCount, ResetCachedCount, GetCachedCount };
+        GetNodeAdapter, GetCachedCount };
     return &modifier;
 }
 

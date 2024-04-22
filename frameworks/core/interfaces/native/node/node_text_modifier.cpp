@@ -275,6 +275,7 @@ void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration
     CHECK_NULL_VOID(frameNode);
     decoration->decorationType = static_cast<int32_t>(TextModelNG::GetDecoration(frameNode));
     decoration->color = TextModelNG::GetTextDecorationColor(frameNode).GetValue();
+    decoration->style = static_cast<int32_t>(TextModelNG::GetTextDecorationStyle(frameNode));
 }
 
 void ResetTextDecoration(ArkUINodeHandle node)

@@ -29,9 +29,9 @@
 namespace OHOS::Ace::NG {
 
 struct MenuDumpInfo {
-    uint32_t menuPreviewMode;
-    uint32_t menuType;
-    bool enableArrow;
+    uint32_t menuPreviewMode = 0;
+    uint32_t menuType = 0;
+    bool enableArrow = false;
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
@@ -42,7 +42,7 @@ struct MenuDumpInfo {
     OffsetF globalLocation;
     std::string originPlacement;
     OffsetF finalPosition;
-    std::string finalPlacement;
+    std::string finalPlacement = "NONE";
 };
 class MenuLayoutProperty;
 class MenuPattern;
@@ -86,6 +86,13 @@ private:
         NORMAL = 0,
         TOP_LEFT_ERROR,
         BOTTOM_RIGHT_ERROR,
+    };
+    enum class DirectionState {
+        Bottom_Direction = 1,
+        Top_Direction,
+        Right_Direction,
+        Left_Direction,
+        None_Direction,
     };
     struct PreviewMenuParam {
         SizeF windowGlobalSizeF;
@@ -189,6 +196,7 @@ private:
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     OffsetF FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale);
+    bool CheckPlacement(const SizeF& childSize);
 
     OffsetF targetOffset_;
     SizeF targetSize_;
@@ -227,7 +235,11 @@ private:
     OffsetF previewOriginOffset_;
     OffsetF previewOffset_;
     SizeF previewSize_;
-
+    int32_t state_ = 0;
+    int32_t prevState_ = -1;
+    OffsetF preOffset_;
+    Rect preRect_;
+    bool flag_ = false;
     // previewSacle_ must be greater than 0
     float previewScale_ = 1.0f;
     MenuDumpInfo dumpInfo_;

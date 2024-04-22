@@ -29,6 +29,15 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+struct HandleDrawInfo {
+    OffsetF startPoint;
+    OffsetF endPoint;
+    OffsetF centerOffset;
+    float handleWidth = 0.0f;
+    bool isHandleLineShow = true;
+};
+
 class SelectOverlayContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(SelectOverlayContentModifier, ContentModifier)
 
@@ -134,8 +143,35 @@ public:
         isUsingMouse_ = value;
     }
 
+    void SetSecondHandlePaintInfo(const SelectHandlePaintInfo& paintInfo)
+    {
+        secondHandlePaintInfo_ = paintInfo;
+    }
+
+    void SetFirstHandlePaintInfo(const SelectHandlePaintInfo& paintInfo)
+    {
+        firstHandlePaintInfo_ = paintInfo;
+    }
+
+    void SetPaintHandleUsePoints(bool isPaintHandleUsePoints)
+    {
+        isPaintHandleUsePoints_ = isPaintHandleUsePoints;
+    }
+
+    static OffsetF CalculateCenterPoint(const OffsetF& start, const OffsetF& end, float radius, bool handleOnTop);
+
 private:
     void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true);
+    void PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo);
+
+    void PaintSingleHandle(RSCanvas& canvas);
+    bool PaintSingleHandleWithPoints(RSCanvas& canvas);
+    void PaintSingleHandleWithRect(RSCanvas& canvas);
+
+    bool PaintDoubleHandleWithPoint(RSCanvas& canvas);
+    void PaintDoubleHandleWithRect(RSCanvas& canvas);
+    void PaintDoubleHandle(RSCanvas& canvas);
+
     void ClipViewPort(RSCanvas& canvas);
 
     RefPtr<PropertyBool> inShowArea_;
@@ -154,6 +190,9 @@ private:
     RefPtr<PropertyFloat> innerHandleRadius_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;
     bool isUsingMouse_ = false;
+    bool isPaintHandleUsePoints_ = false;
+    SelectHandlePaintInfo firstHandlePaintInfo_;
+    SelectHandlePaintInfo secondHandlePaintInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayContentModifier);
 };

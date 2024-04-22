@@ -108,7 +108,7 @@ public:
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
-    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetBackBorder() override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
@@ -118,6 +118,8 @@ public:
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
+    static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);
+    static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
         const std::optional<std::string>& value, bool isTextArea);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
@@ -203,7 +205,7 @@ public:
     static bool GetShowCounterBorder(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
-    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void ResetTextInputPadding(FrameNode* frameNode);
 

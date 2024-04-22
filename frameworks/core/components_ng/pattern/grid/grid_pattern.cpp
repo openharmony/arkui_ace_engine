@@ -75,20 +75,22 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
+    bool disableSkip = IsOutOfBoundary() || ScrollablePattern::AnimateRunning();
+    if (UseIrregularLayout()) {
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
+        algo->SetEnableSkip(!disableSkip);
+        return algo;
+    }
     RefPtr<GridScrollLayoutAlgorithm> result;
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
         result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
-    } else if (SystemProperties::GetGridIrregularLayoutEnabled()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
-        algo->SetEnableSkip(!ScrollablePattern::AnimateRunning());
-        return algo;
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
     result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     result->SetScrollSource(GetScrollSource());
     if (ScrollablePattern::AnimateRunning()) {
-        result->SetLineSkipping(false);
+        result->SetLineSkipping(!disableSkip);
     }
     return result;
 }
@@ -314,8 +316,17 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (layoutProperty->IsReverse()) {
+        if (source != SCROLL_FROM_ANIMATION_SPRING && source != SCROLL_FROM_ANIMATION_CONTROLLER &&
+            source != SCROLL_FROM_JUMP) {
+            offset = -offset;
+        }
+    }
+
     // check edgeEffect is not springEffect
-    if (!HandleEdgeEffect(offset, source, GetContentSize())) {
+    if (!HandleEdgeEffect(offset, source, GetContentSize(), layoutProperty->IsReverse())) {
         if (IsOutOfBoundary()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -323,6 +334,10 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
     FireAndCleanScrollingListener();
+    if (gridLayoutInfo_.synced_) {
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        gridLayoutInfo_.synced_ = false;
+    }
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
     bool regular = !UseIrregularLayout();
@@ -339,7 +354,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
-        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.currentOffset_ += offset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -357,7 +371,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
                 ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             offset *= friction;
         }
-        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
         gridLayoutInfo_.currentOffset_ += offset;
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -367,11 +380,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         FireOnWillScroll(-offset);
         return true;
-    }
-    // maybe no measure after last update
-    if (!gridLayoutInfo_.offsetUpdated_) {
-        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-        gridLayoutInfo_.offsetUpdated_ = true;
     }
     FireOnWillScroll(-offset);
     gridLayoutInfo_.currentOffset_ += offset;
@@ -404,6 +412,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
+    gridLayoutInfo_.synced_ = true;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
     gridLayoutInfo_.reachStart_ =
@@ -1544,6 +1553,9 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
         CHECK_NULL_RETURN(grid, 0.0);
+        if (!grid->gridLayoutInfo_.synced_) {
+            grid->SyncLayoutBeforeSpring();
+        }
         return grid->gridLayoutInfo_.currentOffset_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
@@ -1558,6 +1570,28 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         return grid->GetEndOffset();
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
+}
+
+void GridPattern::SyncLayoutBeforeSpring()
+{
+    auto& info = gridLayoutInfo_;
+    if (info.synced_) {
+        return;
+    }
+    if (!UseIrregularLayout()) {
+        float delta = info.currentOffset_ - info.prevOffset_;
+        if (!info.lineHeightMap_.empty() && LessOrEqual(delta, -info.lineHeightMap_.rbegin()->second)) {
+            // old layout can't handle large overScroll offset. Avoid by skipping this layout.
+            // Spring animation plays immediately afterwards, so losing this frame's offset is fine
+            info.currentOffset_ = info.prevOffset_;
+            info.synced_ = true;
+            return;
+        }
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetActive();
+    host->CreateLayoutTask();
 }
 
 bool GridPattern::OutBoundaryCallback()
@@ -1664,8 +1698,8 @@ void GridPattern::DumpAdvanceInfo()
                                : DumpLog::GetInstance().AddDesc("offsetEnd:false");
     gridLayoutInfo_.hasBigItem_ ? DumpLog::GetInstance().AddDesc("hasBigItem:true")
                                 : DumpLog::GetInstance().AddDesc("hasBigItem:false");
-    gridLayoutInfo_.offsetUpdated_ ? DumpLog::GetInstance().AddDesc("offsetUpdated:true")
-                                   : DumpLog::GetInstance().AddDesc("offsetUpdated:false");
+    gridLayoutInfo_.synced_ ? DumpLog::GetInstance().AddDesc("synced:true")
+                            : DumpLog::GetInstance().AddDesc("synced:false");
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
     DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(prevHeight_));
     DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(currentHeight_));
@@ -1882,5 +1916,14 @@ inline bool GridPattern::UseIrregularLayout() const
 {
     return SystemProperties::GetGridIrregularLayoutEnabled() &&
            GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions();
+}
+
+bool GridPattern::IsReverse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, false);
+    return gridLayoutProperty->IsReverse();
 }
 } // namespace OHOS::Ace::NG

@@ -281,8 +281,21 @@ void MutableSpanString::RemoveString(int32_t start, int32_t length)
     ReplaceString(start, length, "");
 }
 
+void MutableSpanString::RemoveImageSpanText()
+{
+    auto spans = spansMap_[SpanType::Image];
+    int32_t count = 0;
+    for (const auto& span : spans) {
+        auto wStr = GetWideString();
+        wStr.erase(span->GetStartIndex() - count, 1);
+        text_ = StringUtils::ToString(wStr);
+        ++count;
+    }
+}
+
 void MutableSpanString::ClearAllSpans()
 {
+    RemoveImageSpanText();
     spansMap_.clear();
     spans_.clear();
     spans_.emplace_back(GetDefaultSpanItem(text_));

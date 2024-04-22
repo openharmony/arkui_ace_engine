@@ -77,7 +77,7 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
 constexpr int32_t DEFAULT_COMMON_LAYOUTWEIGHT = 0;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
-constexpr int32_t DEFAULT_GRIDSPAN = 1;
+constexpr int32_t DEFAULT_GRIDSPAN = 0;
 constexpr uint32_t DEFAULT_ALIGN_VALUE = 2;
 constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
 constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
@@ -2347,6 +2347,31 @@ void ResetMotionPath(ArkUINodeHandle node)
     ViewAbstract::SetMotionPath(frameNode, motionPathOption);
 }
 
+
+void SetMotionBlur(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 anchorX, ArkUI_Float32 anchorY)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MotionBlurOption motionBlurOption;
+    CalcDimension radiusDim;
+    radiusDim.SetValue(radius);
+    motionBlurOption.radius = radiusDim;
+    motionBlurOption.anchor.x = anchorX;
+    motionBlurOption.anchor.y = anchorY;
+    ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);
+}
+
+void ResetMotionBlur(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MotionBlurOption motionBlurOption;
+    motionBlurOption.radius = CalcDimension(0);
+    motionBlurOption.anchor.x = 0.0;
+    motionBlurOption.anchor.y = 0.0;
+    ViewAbstract::SetMotionBlur(frameNode, motionBlurOption);
+}
+
 void SetGroupDefaultFocus(ArkUINodeHandle node, ArkUI_Bool groupDefaultFocus)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3150,6 +3175,72 @@ void ResetBackgroundBrightness(ArkUINodeHandle node)
     double rate = 0.0;
     double lightUpDegree = 0.0;
     ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
+}
+
+void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+    const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
+    const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize , ArkUI_Float32 fraction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::vector<float> posRGB;
+    posRGB.assign(posRGBValues, posRGBValues + posRGBValuesSize);
+    std::vector<float> negRGB;
+    negRGB.assign(negRGBValues, negRGBValues + negRGBValuesSize);
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
+}
+
+void ResetBackgroundBrightnessInternal(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float rate = 1.0f;
+    float lightUpDegree = 0.0f;
+    float cubicCoeff = 0.0f;
+    float quadCoeff = 0.0f;
+    float saturation = 1.0f;
+    std::vector<float> posRGB(3, 0.0);
+    std::vector<float> negRGB(3, 0.0);
+    float fraction = 1.0;
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
+}
+ 
+void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+    const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
+    const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    std::vector<float> posRGB;
+    posRGB.assign(posRGBValues, posRGBValues + posRGBValuesSize);
+    std::vector<float> negRGB;
+    negRGB.assign(negRGBValues, negRGBValues + negRGBValuesSize);
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetFgDynamicBrightness(frameNode, brightnessOption);
+}
+
+void ResetForegroundBrightness(ArkUINodeHandle node)
+ {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float rate = 1.0f;
+    float lightUpDegree = 0.0f;
+    float cubicCoeff = 0.0f;
+    float quadCoeff = 0.0f;
+    float saturation = 1.0f;
+    std::vector<float> posRGB(3, 0.0);
+    std::vector<float> negRGB(3, 0.0);
+    float fraction = 1.0;
+    BrightnessOption brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff,
+        saturation, posRGB, negRGB, fraction };
+    ViewAbstract::SetFgDynamicBrightness(frameNode, brightnessOption);
 }
 
 void SetDragPreviewOptions(ArkUINodeHandle node, ArkUI_Int32 dragPreviewMode)
@@ -4651,7 +4742,8 @@ void GetBackgroundImage(ArkUINodeHandle node, ArkUIBackgroundImage* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    options->src = ViewAbstract::GetBackgroundImageSrc(frameNode).c_str();
+    g_strValue = ViewAbstract::GetBackgroundImageSrc(frameNode);
+    options->src = g_strValue.c_str();
     options->repeat = static_cast<int>(ViewAbstract::GetBackgroundImageRepeat(frameNode));
 }
 
@@ -4799,7 +4891,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetRotate, SetRotateWithoutTransformCenter, ResetRotate, SetGeometryTransition, ResetGeometryTransition,
         SetPixelStretchEffect, ResetPixelStretchEffect, SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect,
         ResetSphericalEffect, SetRenderGroup, ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect,
-        ResetUseEffect, SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath, SetGroupDefaultFocus,
+        ResetUseEffect, SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
+        SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
         ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
         ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
         ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor, SetVisibility,
@@ -4812,7 +4905,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
         SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
         ResetObscured, SetResponseRegion, ResetResponseRegion, SetBackgroundEffect, ResetBackgroundEffect,
-        SetBackgroundBrightness, ResetBackgroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions,
+        SetBackgroundBrightness, ResetBackgroundBrightness, SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, 
+        SetForegroundBrightness, ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions,
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching,
         ResetUseShadowBatching, SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
         SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,

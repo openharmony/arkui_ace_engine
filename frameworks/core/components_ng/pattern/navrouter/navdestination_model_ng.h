@@ -33,6 +33,10 @@ public:
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
+    void SetOnWillAppear(std::function<void()>&& willAppear) override;
+    void SetOnWillShow(std::function<void()>&& willShow) override;
+    void SetOnWillHide(std::function<void()>&& willHide) override;
+    void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;

@@ -29,6 +29,7 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "bridge/js_frontend/frontend_delegate.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/container.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
@@ -44,6 +45,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
 constexpr int32_t JS_FILE_EXTENSION_LENGTH = 3;
@@ -887,6 +889,12 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+        if (!CheckOhmUrlValid(target.url)) {
+            if (target.errorCallback != nullptr) {
+                target.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+            }
+            return;
+        }
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -1169,7 +1177,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!result) {
-        LOGE("Update RootComponent Failed or LoadNamedRouter Failed");
+        if (!target.isNamedRouterMode) {
+            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_LOAD_PAGE_ERROR);
+        }
         pageRouterStack_.pop_back();
         return;
     }
@@ -1190,8 +1200,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
         LOGE("LoadPage OnPageReady Failed");
         return;
     }
-    AccessibilityEventType type = AccessibilityEventType::CHANGE;
-    pageNode->OnAccessibilityEvent(type);
+    pageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     LOGI("LoadPage Success");
 }
 
@@ -1495,5 +1504,24 @@ bool PageRouterManager::CheckIndexValid(int32_t index) const
         return false;
     }
     return true;
+}
+
+bool PageRouterManager::CheckOhmUrlValid(const std::string& ohmUrl)
+{
+    size_t bundleEndPos = ohmUrl.find('/');
+    std::string bundleName = ohmUrl.substr(BUNDLE_START_POS, bundleEndPos - BUNDLE_START_POS);
+    size_t moduleStartPos = bundleEndPos + 1;
+    size_t moduleEndPos = ohmUrl.find('/', moduleStartPos);
+    std::string moduleName = ohmUrl.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+    auto runtime = std::static_pointer_cast<Framework::ArkJSRuntime>(
+        Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    return runtime->IsExecuteModuleInAbcFile(bundleName, moduleName, ohmUrl);
+}
+
+void PageRouterManager::ThrowError(const std::string& msg, int32_t code)
+{
+    auto runtime = std::static_pointer_cast<Framework::ArkJSRuntime>(
+        Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    runtime->ThrowError(msg, code);
 }
 } // namespace OHOS::Ace::NG

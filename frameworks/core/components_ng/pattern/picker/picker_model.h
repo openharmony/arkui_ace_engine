@@ -83,7 +83,7 @@ public:
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
         std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType,
-        PickerDialogEvent& dialogEvent) = 0;
+        PickerDialogEvent& dialogEvent, const std::vector<ButtonInfo>& buttonInfos) = 0;
 
 private:
     static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;

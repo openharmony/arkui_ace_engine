@@ -2338,8 +2338,10 @@ class ChildrenMainSize {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
     }
     this.defaultMainSize = childDefaultSize;
+    this.sizeArray = [];
     this.changeFlag = true;
-    this.changeArray = [];
+    // -1: represent newly created.
+    this.changeArray = [ { start: -1 } ];
   }
 
   set childDefaultSize(value) {
@@ -2362,10 +2364,23 @@ class ChildrenMainSize {
     let startValue = Math.trunc(start);
     let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
     if (paramCount === 1) {
+      this.sizeArray.splice(startValue);
       this.changeArray.push({ start: startValue });
     } else if (paramCount === 2) {
+      this.sizeArray.splice(startValue, deleteCountValue);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
     } else if (paramCount === 3) {
+      let childrenSizeLength = childrenSize.length;
+      for (let i = 0; i < childrenSizeLength; i++) {
+        if (this.isInvalid(childrenSize[i])) {
+          // -1: represent default size.
+          childrenSize[i] = -1;
+        }
+      }
+      while (startValue >= this.sizeArray.length) {
+        this.sizeArray.push(-1);
+      }
+      this.sizeArray.splice(startValue, deleteCountValue, ...childrenSize);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
     }
     this.changeFlag = !this.changeFlag;
@@ -2374,8 +2389,16 @@ class ChildrenMainSize {
   update(index, childSize) {
     if (this.isInvalid(index)) {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    } else if (this.isInvalid(childSize)) {
+      // -1: represent default size.
+      childSize = -1;
     }
-    this.changeArray.push({ start: Math.trunc(index), deleteCount: 1, childrenSize: [childSize] });
+    let startValue = Math.trunc(index);
+    while (startValue >= this.sizeArray.length) {
+      this.sizeArray.push(-1);
+    }
+    this.sizeArray.splice(startValue, 1, childSize);
+    this.changeArray.push({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
     this.changeFlag = !this.changeFlag;
   }
 
@@ -2635,12 +2658,25 @@ var ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape["ELLIPSE"] = 2] = "ELLIPSE";
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
+var DistributionType;
+(function (DistributionType) {
+  DistributionType[DistributionType["UNIFORM"] = 0] = "UNIFORM";
+  DistributionType[DistributionType["GAUSSIAN"] = 1] = "GAUSSIAN";
+})(DistributionType || (DistributionType = {}));
+
 var ParticleUpdater;
 (function (ParticleUpdater) {
   ParticleUpdater[ParticleUpdater["NONE"] = 0] = "NONE";
   ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
+
+var DisturbanceFieldsShape;
+(function (DisturbanceFieldsShape) {
+  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {

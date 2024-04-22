@@ -611,6 +611,14 @@ bool MarqueePattern::IsRunMarquee()
     auto textGeoNode = textNode->GetGeometryNode();
     CHECK_NULL_RETURN(textGeoNode, false);
     auto textWidth = textGeoNode->GetFrameSize().Width();
-    return GreatOrEqual(textWidth, marqueeSize.Width());
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    float padding = 0.0f;
+    if (layoutProperty->GetPaddingProperty()) {
+        const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+        padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().Value() +
+            paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().Value();
+    }
+    return GreatOrEqual(textWidth + padding, marqueeSize.Width());
 }
 } // namespace OHOS::Ace::NG

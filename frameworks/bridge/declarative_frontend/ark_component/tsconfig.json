@@ -86,6 +86,7 @@
         "src/ArkLine.ts",
         "src/ArkPolyline.ts",
         "src/ArkPolygon.ts",
+        "src/ArkParticle.ts",
         "src/ArkPath.ts",
         "src/ArkRect.ts",
         "src/ArkShape.ts",
@@ -93,7 +94,7 @@
         "src/ArkGridContainer.ts",
         "src/ArkDatePicker.ts",
         "src/ArkEffectComponent.ts",
-        "src/ArkRemoteWindow.ts"      
+        "src/ArkRemoteWindow.ts"
     ],
     "compilerOptions": {
         "module": "none",
