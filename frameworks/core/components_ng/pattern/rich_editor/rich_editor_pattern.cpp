@@ -2172,7 +2172,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
     auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
-    if (IsShowSelectMenuUsingMouse()) {
+    if (selectOverlay_->IsUsingMouse()) {
         CloseSelectOverlay();
         StopTwinkling();
     }
@@ -4648,7 +4648,7 @@ void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         return;
     }
     OnCopyOperation(isUsingExternalKeyboard);
-    if (IsShowSelectMenuUsingMouse() || isUsingExternalKeyboard) {
+    if (selectOverlay_->IsUsingMouse() || isUsingExternalKeyboard) {
         CloseSelectOverlay();
     } else {
         selectOverlay_->HideMenu();
