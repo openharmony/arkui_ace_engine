@@ -26,8 +26,12 @@ void RosenRenderParticle::UpdateDisturbance(
     auto rsNode = renderContext->GetRSNode();
     std::shared_ptr<Rosen::ParticleNoiseFields> fields = std::make_shared<Rosen::ParticleNoiseFields>();
     for (auto field : disturbanceArray) {
-        Rosen::Vector2f size = { field.size[0], field.size[1] };
-        Rosen::Vector2f position = { field.position[0], field.position[1] };
+        double sizeWidthPx = Dimension(field.size[0], DimensionUnit::VP).ConvertToPx();
+        double sizeHeightPx = Dimension(field.size[1], DimensionUnit::VP).ConvertToPx();
+        double positionXPx = Dimension(field.position[0], DimensionUnit::VP).ConvertToPx();
+        double positionYPx = Dimension(field.position[1], DimensionUnit::VP).ConvertToPx();
+        Rosen::Vector2f size = {static_cast<float>(sizeWidthPx), static_cast<float>(sizeHeightPx)};
+        Rosen::Vector2f position = {static_cast<float>(positionXPx), static_cast<float>(positionYPx)};
         auto rsField = std::make_shared<Rosen::ParticleNoiseField>(static_cast<int>(field.strength),
             static_cast<Rosen::ShapeType>(field.shape), size, position, field.feather, field.noiseScale,
             field.noiseFrequency, field.noiseAmplitude);
