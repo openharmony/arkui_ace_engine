@@ -79,4 +79,11 @@ void ForEachModelNG::CreateNewChildFinish(const std::string& id)
     stack->PopContainer();
 }
 
+void ForEachModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->SetOnMove(std::move(onMove));
+}
 } // namespace OHOS::Ace::NG
