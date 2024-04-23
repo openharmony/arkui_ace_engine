@@ -77,6 +77,10 @@ public:
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void UpdateInspectorId(const std::string& key) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
+    static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
+    static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
+    static void SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
@@ -110,14 +114,22 @@ public:
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& onChange);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnPasteWithEvent(FrameNode* frameNode,
+                                    std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
 private:
-    void CreateTextField(const RefPtr<SearchNode>& parentNode,
+    static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
+    static void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
-    void CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode);
-    void CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode);
-    void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
-    void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
-    RefPtr<SearchNode> GetOrCreateSearchNode(
+    static void CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode);
+    static void CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode);
+    static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
+    static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
+    static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
 };

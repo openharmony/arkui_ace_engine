@@ -49,6 +49,7 @@
 #include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -360,6 +361,14 @@ const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = 
     NodeModifier::SetIndexerCreatChangeEvent,
 };
 
+const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnSearchSubmit,
+    NodeModifier::SetOnSearchChange,
+    NodeModifier::SetOnSearchCopy,
+    NodeModifier::SetOnSearchCut,
+    NodeModifier::SetOnSearchPaste,
+};
+
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, ArkUI_Int64 extraParam)
 {
@@ -533,6 +542,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SEARCH: {
+            // search event type.
+            if (subKind >= sizeof(SEARCH_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SEARCH_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

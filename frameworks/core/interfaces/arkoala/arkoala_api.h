@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 93
+#define ARKUI_FULL_API_VERSION 94
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 93
+#define ARKUI_NODE_API_VERSION 94
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -563,6 +563,7 @@ enum ArkUINodeType {
     ARKUI_BLANK,
     ARKUI_DIVIDER,
     ARKUI_ALPHABET_INDEXER,
+    ARKUI_SEARCH,
 };
 
 enum ArkUIEventCategory {
@@ -664,6 +665,12 @@ enum ArkUIEventSubKind {
     ON_ALPHABET_INDEXER_POPUP_SELECTED,
     ON_ALPHABET_INDEXER_CHANGE_EVENT,
     ON_ALPHABET_INDEXER_CREAT_CHANGE_EVENT,
+
+    ON_SEARCH_SUBMIT = ARKUI_MAX_EVENT_NUM * ARKUI_SEARCH,
+    ON_SEARCH_CHANGE,
+    ON_SEARCH_COPY,
+    ON_SEARCH_CUT,
+    ON_SEARCH_PASTE,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -2760,6 +2767,12 @@ struct ArkUISearchModifier {
     void (*resetSearchSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setSearchTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSearchTextIndent)(ArkUINodeHandle node);
+    void (*setSearchValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetSearchValue)(ArkUINodeHandle node);
+    void (*setSearchPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr placeholder);
+    void (*resetSearchPlaceholder)(ArkUINodeHandle node);
+    void (*setSearchIcon)(ArkUINodeHandle node, ArkUI_CharPtr icon);
+    void (*resetSearchIcon)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
