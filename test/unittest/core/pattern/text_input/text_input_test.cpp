@@ -4942,4 +4942,223 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction008, TestSize.Level1)
     result = "👨‍👩‍👧‍👦👁️👁️‍🗨️";
     EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
 }
+
+/**
+ * @tc.name: GetGlobalPointsWithTransform
+ * @tc.desc: test GetGlobalPointsWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetGlobalPointsWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetGlobalPointsWithTransform.
+     */
+    std::vector<OffsetF> localPoints = { OffsetF(5.0f, 5.0f) };
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(-5.0f);
+        point.SetY(5.0f);
+    });
+    pattern_->selectOverlay_->GetGlobalPointsWithTransform(localPoints);
+    EXPECT_EQ(localPoints[0].GetX(), -5.0f);
+    EXPECT_EQ(localPoints[0].GetY(), 5.0f);
+}
+
+/**
+ * @tc.name: GetGlobalRectWithTransform
+ * @tc.desc: test GetGlobalRectWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetGlobalRectWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetGlobalRectWithTransform.
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    RectF rect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    pattern_->selectOverlay_->GetGlobalRectWithTransform(rect);
+    EXPECT_EQ(rect.GetOffset(), OffsetF(5.0f, 5.0f));
+    EXPECT_EQ(rect.GetSize(), SizeF(5.0f, 5.0f));
+}
+
+/**
+ * @tc.name: RevertLocalPointWithTransform
+ * @tc.desc: test RevertLocalPointWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, RevertLocalPointWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call RevertLocalPointWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(5.0f);
+        point.SetY(5.0f);
+    });
+    OffsetF offset(-5.0f, 5.0f);
+    pattern_->selectOverlay_->RevertLocalPointWithTransform(offset);
+    EXPECT_EQ(offset.GetX(), 5.0f);
+    EXPECT_EQ(offset.GetY(), 5.0f);
+}
+
+/**
+ * @tc.name: GetGlobalRectVertexWithTransform
+ * @tc.desc: test GetGlobalRectVertexWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetGlobalRectVertexWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetGlobalRectVertexWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    RectF rect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    auto vertex = pattern_->selectOverlay_->GetGlobalRectVertexWithTransform(rect);
+    EXPECT_EQ(vertex[0], OffsetF(5.0f, 5.0f));
+    EXPECT_EQ(vertex[1], OffsetF(10.0f, 5.0f));
+    EXPECT_EQ(vertex[2], OffsetF(5.0f, 10.0f));
+    EXPECT_EQ(vertex[3], OffsetF(10.0f, 10.0f));
+}
+
+/**
+ * @tc.name: GetLocalPointsWithTransform
+ * @tc.desc: test GetLocalPointsWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetLocalPointsWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetLocalPointsWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    std::vector<OffsetF> localPoints = { OffsetF(5.0f, 5.0f) };
+    pattern_->selectOverlay_->GetLocalPointsWithTransform(localPoints);
+    EXPECT_EQ(localPoints[0].GetX(), 5.0f);
+    EXPECT_EQ(localPoints[0].GetY(), 5.0f);
+}
+
+/**
+ * @tc.name: GetLocalRectWithTransform
+ * @tc.desc: test GetLocalRectWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, GetLocalRectWithTransform, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call GetLocalRectWithTransform
+     */
+    pattern_->selectOverlay_->hasTransform_ = true;
+    auto renderContext = frameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
+        point.SetX(point.GetX());
+        point.SetY(point.GetY());
+    });
+    RectF rect(OffsetF(0.0f, 0.0f), SizeF(5.0f, 5.0f));
+    pattern_->selectOverlay_->GetLocalRectWithTransform(rect);
+    EXPECT_EQ(rect.GetOffset().GetX(), 0.0f);
+    EXPECT_EQ(rect.GetOffset().GetY(), 0.0f);
+    EXPECT_EQ(rect.GetSize().Width(), 5.0f);
+    EXPECT_EQ(rect.GetSize().Height(), 5.0f);
+}
+
+/**
+ * @tc.name: IsPointInRect
+ * @tc.desc: test IsPointInRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, IsPointInRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    const std::string txt = "1234567890";
+    CreateTextField(txt, "", [](TextFieldModelNG model) { model.SetType(TextInputType::TEXT); });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Call IsPointInRect
+     */
+    OffsetF leftTop(0.0f, 0.0f);
+    OffsetF leftBottom(0.0f, 5.0f);
+    OffsetF rightTop(5.0f, 0.0f);
+    OffsetF rightBottom(5.0f, 5.0f);
+    OffsetF point(1.0f, 1.0f);
+    auto ret = pattern_->selectOverlay_->IsPointInRect(point, leftBottom, rightBottom, rightTop, leftTop);
+    EXPECT_TRUE(ret);
+    point = OffsetF(-1.0f, -1.0f);
+    ret = pattern_->selectOverlay_->IsPointInRect(point, leftBottom, rightBottom, rightTop, leftTop);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace::NG
