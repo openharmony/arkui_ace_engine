@@ -72,7 +72,9 @@ void CustomNodeBase::FireRecycleRenderFunc()
             ScopedViewStackProcessor scopedViewStackProcessor;
             recycleRenderFunc_();
         }
-        AceType::DynamicCast<UINode>(Claim(this))->OnReuse();
+        auto node = AceType::DynamicCast<UINode>(Claim(this));
+        node->OnReuse();
+        node->SetJSViewActive(true);
         recycleRenderFunc_ = nullptr;
     }
 }

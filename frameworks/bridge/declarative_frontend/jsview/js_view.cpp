@@ -628,11 +628,11 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         }
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        if (!recycleNode->HasRecycleRenderFunc()) {
+        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+        if (!recycleNode->HasRecycleRenderFunc() && jsView->recycleCustomNode_) {
             jsView->jsViewFunction_->ExecuteAboutToRecycle();
         }
         recycleNode->ResetRecycle();
-        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
     };
 
     auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {

@@ -134,6 +134,7 @@ void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
     }
 }
 
+// recycleSelf
 void ViewFunctions::ExecuteRecycle(const std::string& viewName)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
