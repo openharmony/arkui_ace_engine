@@ -819,7 +819,11 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
             }
             break;
         case TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST:
-            result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
+                result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            } else {
+                result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            }
             break;
         default:
             break;
@@ -847,12 +851,13 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
     int32_t left = 0;
     int32_t right = length - 1;
     float fontSize = 0.0f;
+    auto newContentConstraint = BuildInfinityLayoutConstraint(contentConstraint);
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     while (left <= right) {
         int32_t mid = left + (right - left) / 2;
         fontSize = static_cast<float>((mid == length - 1) ? (maxFontSize) : (minFontSize + stepSize * mid));
         textStyle.SetFontSize(Dimension(fontSize));
-        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+        if (!CreateParagraphAndLayout(textStyle, content, newContentConstraint, layoutWrapper)) {
             return false;
         }
         if (!IsInlineFocusAdaptExceedLimit(maxSize)) {
@@ -866,11 +871,25 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }
 
+LayoutConstraintF TextFieldLayoutAlgorithm::BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint)
+{
+    auto newContentConstraint = contentConstraint;
+    newContentConstraint.maxSize = { std::numeric_limits<double>::infinity(),
+        std::numeric_limits<double>::infinity() };
+    if (newContentConstraint.selfIdealSize.Width()) {
+        newContentConstraint.selfIdealSize.SetWidth(std::numeric_limits<double>::infinity());
+    }
+    if (newContentConstraint.selfIdealSize.Height()) {
+        newContentConstraint.selfIdealSize.SetHeight(std::numeric_limits<double>::infinity());
+    }
+    return newContentConstraint;
+}
+
 bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptExceedLimit(const SizeF& maxSize)
 {
     auto paragraph = GetParagraph();
     CHECK_NULL_RETURN(paragraph, false);
-    bool didExceedMaxLines = paragraph->DidExceedMaxLines();
+    bool didExceedMaxLines = false;
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetHeight() / paragraph->GetLineCount(),
         maxSize.Height());
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());
