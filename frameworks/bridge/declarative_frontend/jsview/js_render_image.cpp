@@ -95,6 +95,7 @@ JSRenderImage::JSRenderImage() {}
 
 napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     size_t argc = 0;
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &thisVar, nullptr));
