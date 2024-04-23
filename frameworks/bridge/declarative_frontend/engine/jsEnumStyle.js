@@ -2863,8 +2863,8 @@ let ButtonRole;
 let MenuPolicy;
 (function (MenuPolicy) {
   MenuPolicy['DEFAULT'] = 0;
-  MenuPolicy['NEVER'] = 1;
-  MenuPolicy['ALWAYS'] = 2;
+  MenuPolicy['HIDE'] = 1;
+  MenuPolicy['SHOW'] = 2;
 })(MenuPolicy || (MenuPolicy = {}));
 
 let PreDragStatus;
