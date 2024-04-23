@@ -582,6 +582,18 @@ void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetShowPasswordIcon(isShowPasswordIcon);
 }
 
+void JSTextField::ShowPasswordText(const JSCallbackInfo& info)
+{
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetShowPasswordText(false);
+        return;
+    }
+
+    bool showPassword = tmpInfo->ToBoolean();
+    TextFieldModel::GetInstance()->SetShowPasswordText(showPassword);
+}
+
 void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -911,6 +923,14 @@ void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
     CHECK_NULL_VOID(jsValue->IsFunction());
     JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSTextField::SetOnSecurityStateChange(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+    TextFieldModel::GetInstance()->SetOnSecurityStateChange(std::move(callback));
 }
 
 void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)

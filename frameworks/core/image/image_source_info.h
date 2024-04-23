@@ -23,6 +23,7 @@
 #include "base/geometry/size.h"
 #include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
+#include "base/utils/device_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 
@@ -110,6 +111,11 @@ public:
         needCache_ = needCache;
     }
 
+    ColorMode GetLocalColorMode() const
+    {
+        return localColorMode_;
+    }
+
 private:
     SrcType ResolveSrcType() const;
     void GenerateCacheKey();
@@ -133,6 +139,8 @@ private:
 
     // image source type for example:FILE, ASSET, NETWORK, MEMORY, BASE64, INTERNAL, RESOURCE or DATA_ABILITY,
     SrcType srcType_ = SrcType::UNSUPPORTED;
+
+    ColorMode localColorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
 };
 
 } // namespace OHOS::Ace

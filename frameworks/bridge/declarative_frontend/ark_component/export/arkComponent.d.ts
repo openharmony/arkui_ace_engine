@@ -49,6 +49,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _classType: ModifierType | undefined;
     _nativePtrChanged: boolean;
     constructor(nativePtr: KNode, classType?: ModifierType);
+    initialize(...args: Object[]);
     applyModifierPatch(): void;
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     outline(value: OutlineOptions): this;

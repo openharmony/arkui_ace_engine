@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -146,6 +147,11 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
     GenerateCacheKey();
+
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        localColorMode_ = pipelineContext->GetLocalColorMode();
+    }
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const

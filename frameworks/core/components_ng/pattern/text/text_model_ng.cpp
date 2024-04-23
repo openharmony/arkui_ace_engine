@@ -535,10 +535,11 @@ RefPtr<TextControllerBase> TextModelNG::GetTextController()
     return pattern->GetTextController();
 }
 
-void TextModelNG::SetClipEdge()
+void TextModelNG::SetClipEdge(bool clip)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    frameNode->GetRenderContext()->SetClipToFrame(clip);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

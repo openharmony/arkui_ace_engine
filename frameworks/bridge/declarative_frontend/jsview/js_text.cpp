@@ -851,7 +851,7 @@ void JSText::JsClip(const JSCallbackInfo& info)
     JSViewAbstract::JsClip(info);
     JSRef<JSVal> args = info[0];
     if (args->IsBoolean()) {
-        TextModel::GetInstance()->SetClipEdge();
+        TextModel::GetInstance()->SetClipEdge(args->ToBoolean());
     }
 }
 

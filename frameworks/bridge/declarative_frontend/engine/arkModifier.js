@@ -200,6 +200,9 @@ class AttributeUpdater {
     this._state = value;
   }
   initializeModifier(instance) {}
+  updateConstructorParams(...args) {
+    this._attribute.initialize(args);
+  }
 }
 AttributeUpdater.StateEnum = {
   INIT: 0,

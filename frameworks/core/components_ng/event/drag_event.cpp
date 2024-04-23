@@ -72,6 +72,7 @@ constexpr float SPRING_DAMPING_FRACTION = 0.73f;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
 constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
+constexpr float DEFAULT_OPACITY = 0.95f;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -205,6 +206,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
+            // For the drag initiacating from mouse, there is no chance to execute the modifier in the floating
+            // pharse, so need to update here to make sure the preview option is available to pass through to drag
+            // framwork later.
+            actuator->UpdatePreviewOptionFromModifier(frameNode);
             frameNode->MarkModifyDone();
             dragDropManager->SetIsShowBadgeAnimation(true);
             auto pattern = frameNode->GetPattern<TextBase>();
@@ -405,6 +410,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
+        // For the drag initiacating from long press gesture, the preview option set by the modifier
+        // should also be applied in floating pharse, so we need to update the preview option here.
+        actuator->UpdatePreviewOptionFromModifier(frameNode);
         auto focusHub = frameNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -866,6 +874,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
+    ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -906,6 +915,53 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     ShowPixelMapAnimation(imageNode, frameNode, hasContextMenu);
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set pixelMap success.");
     SetPreviewDefaultAnimateProperty(imageNode);
+}
+
+// called when the preview floating or drag begin, this method will try to execute the modifier
+// on one temporary frame node, and then get the value user setted from the modifier
+void DragEventActuator::UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode)
+{
+    auto modifierOnApply = frameNode->GetDragPreviewOption().onApply;
+    if (modifierOnApply == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "OnApply is null");
+        return;
+    }
+
+    // create one temporary frame node for receiving the value from the modifier
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(imageNode);
+
+    // execute the modifier
+    modifierOnApply(WeakClaim(RawPtr(imageNode)));
+
+    // get values from the temporary frame node
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto opacity = imageContext->GetOpacity();
+
+    OptionsAfterApplied options;
+    if (opacity.has_value()) {
+        options.opacity = opacity.value();
+    } else {
+        options.opacity = DEFAULT_OPACITY;
+    }
+
+    // get the old preview option
+    DragPreviewOption dragPreviewOption = frameNode->GetDragPreviewOption();
+    dragPreviewOption.options = options; // replace the options with the new one after applied
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+}
+
+void DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(
+    const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode)
+{
+    if (optionHolderNode->GetDragPreviewOption().onApply == nullptr) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "OnApply is null");
+        return;
+    }
+    auto optionsFromModifier = targetNode->GetDragPreviewOption().options;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, optionsFromModifier.opacity, targetNode);
 }
 
 void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator)
@@ -1137,6 +1193,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
     dragNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
+    ApplyNewestOptionExecutedFromModifierToNode(frameNode, dragNode);
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));

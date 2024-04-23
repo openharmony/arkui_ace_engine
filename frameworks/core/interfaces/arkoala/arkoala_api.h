@@ -562,6 +562,7 @@ enum ArkUINodeType {
     ARKUI_FLOW_ITEM,
     ARKUI_BLANK,
     ARKUI_DIVIDER,
+    ARKUI_ALPHABET_INDEXER,
 };
 
 enum ArkUIEventCategory {
@@ -573,6 +574,7 @@ enum ArkUIEventCategory {
     TEXT_INPUT = 5,
     GESTURE_ASYNC_EVENT = 6,
     TOUCH_EVENT = 7,
+    TEXT_ARRAY = 8,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -656,6 +658,12 @@ enum ArkUIEventSubKind {
     ON_CALENDAR_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CALENDAR_PICKER,
     ON_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
     ON_REACH_END,
+
+    ON_ALPHABET_INDEXER_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_ALPHABET_INDEXER,
+    ON_ALPHABET_INDEXER_REQUEST_POPUP_DATA,
+    ON_ALPHABET_INDEXER_POPUP_SELECTED,
+    ON_ALPHABET_INDEXER_CHANGE_EVENT,
+    ON_ALPHABET_INDEXER_CREAT_CHANGE_EVENT,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -768,6 +776,12 @@ struct ArkUINodeAsyncEvent {
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
 
+struct ArkUIAPIEventTextArray {
+    ArkUI_Int64 nativeStringArrayPtr;
+    ArkUI_Int32 length;
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
+};
+
 struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 repeat;
@@ -801,6 +815,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextInput textInputEvent;
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
         ArkUITouchEvent touchEvent;
+        ArkUIAPIEventTextArray textArrayEvent;
     };
 };
 
@@ -2269,6 +2284,9 @@ struct ArkUITextInputModifier {
     void (*resetTextInputTextOverflow)(ArkUINodeHandle node);
     void (*setTextInputTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputTextIndent)(ArkUINodeHandle node);
+    void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
+    void (*resetTextInputShowPassword)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2603,6 +2621,8 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetPopupTitleBackground)(ArkUINodeHandle node);
     void (*setAdaptiveWidth)(ArkUINodeHandle node);
     void (*resetAdaptiveWidth)(ArkUINodeHandle node);
+    void (*setArrayValue)(ArkUINodeHandle node, ArkUI_CharPtr* value, ArkUI_Uint32 length);
+    void (*resetArrayValue)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {

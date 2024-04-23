@@ -76,6 +76,7 @@
       OHOS::Ace::UdmfClient::*;
       OHOS::Ace::DragEvent::*;
       OHOS::Ace::ResourceManager::*;
+      OHOS::Ace::ResourceWrapper::*;
       OHOS::Ace::NG::AppBarView::*;
       OHOS::Ace::Color::*;
       OHOS::Ace::NG::UIObserverHandler::*;
@@ -101,12 +102,14 @@
       vtable?for?OHOS::Ace::SubwindowManager;
       vtable?for?OHOS::Ace::ThemeConstants;
       vtable?for?OHOS::Ace::UIContentImpl;
+      vtable?for?OHOS::Ace::ResourceWrapper;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
       VTT?for?OHOS::Ace::Framework::MediaQueryInfo;
       VTT?for?OHOS::Ace::Platform::AceContainer;
       VTT?for?OHOS::Ace::PluginComponentManager::UIServiceListener;
+      VTT?for?OHOS::Ace::ResourceWrapper;
       VTT?for?OHOS::Ace::Scheduler;
       VTT?for?OHOS::Ace::ThemeConstants;
 

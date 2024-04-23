@@ -683,6 +683,11 @@ private:
         lastDragTool_ = tool;
     }
 
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
+    {
+        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+    }
+
     SourceTool GetCurrentDragTool() const
     {
         return lastDragTool_;

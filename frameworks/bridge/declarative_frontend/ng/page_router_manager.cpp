@@ -1093,9 +1093,6 @@ void PageRouterManager::StartBackToIndex(int32_t index, const std::string& param
     }
     PopPageToIndex(index - 1, params, true, true);
     return;
-    if (!restorePageStack_.empty()) {
-        StartRestore(target);
-    }
 }
 
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)

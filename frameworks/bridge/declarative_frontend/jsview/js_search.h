@@ -73,6 +73,7 @@ public:
     static void SetOnEditChange(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
+    static void SetDragPreviewOptions(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {
