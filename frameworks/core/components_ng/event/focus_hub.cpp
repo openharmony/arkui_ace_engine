@@ -2239,7 +2239,10 @@ void FocusHub::SetFocusScopePriority(const std::string& focusScopeId, const uint
 bool FocusHub::GetChildPriorfocusNodes(std::list<RefPtr<FocusHub>> &priorfocusNodes, const std::string& focusScopeId)
 {
     if (!focusScopeId_.empty() && focusScopeId_ != focusScopeId) {
-        return false;
+        return true;
+    }
+    if (priorfocusNodes.size() > 0) {
+        return true;
     }
     if (focusPriority_ == FocusPriority::PRIOR_FOCUS_PRIOITY) {
         priorfocusNodes.emplace_back(AceType::Claim(this));
