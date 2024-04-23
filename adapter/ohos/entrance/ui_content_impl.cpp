@@ -1720,12 +1720,22 @@ void UIContentImpl::Focus()
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ChangeDarkModeBrightness(true);
 }
 
 void UIContentImpl::UnFocus()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window unfocus", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
     Platform::AceContainer::OnInactive(instanceId_);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ChangeDarkModeBrightness(false);
 }
 
 void UIContentImpl::Destroy()

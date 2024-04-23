@@ -3616,4 +3616,22 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
     return true;
 }
 
+void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
+{
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0) {
+        auto percent = SystemProperties::GetDarkModeBrightnessPercent();
+        auto stage = stageManager_->GetStageNode();
+        CHECK_NULL_VOID(stage);
+        auto renderContext = stage->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CalcDimension dimension;
+        if (isFocus) {
+            dimension.SetValue(1 + percent.front());
+        } else {
+            dimension.SetValue(1 + percent.back());
+        }
+        renderContext->UpdateFrontBrightness(dimension);
+    }
+}
+
 } // namespace OHOS::Ace::NG

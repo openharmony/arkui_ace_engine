@@ -277,6 +277,8 @@ public:
         appBgColor_ = color;
     }
 
+    virtual void ChangeDarkModeBrightness(bool isFocus) {}
+
     void SetFormRenderingMode(int8_t renderMode)
     {
         renderingMode_ = renderMode;

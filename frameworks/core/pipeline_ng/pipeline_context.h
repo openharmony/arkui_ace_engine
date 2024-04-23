@@ -693,6 +693,8 @@ public:
     void CheckNeedUpdateBackgroundColor(Color& color);
     bool CheckNeedDisableUpdateBackgroundImage();
 
+    void ChangeDarkModeBrightness(bool isFocus) override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
