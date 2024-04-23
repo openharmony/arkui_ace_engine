@@ -542,6 +542,42 @@ void WaterFlowLayoutInfo::PrintWaterFlowItems() const
     }
 }
 
+float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item) const
+{
+    float targetPosition = 0.0f;
+    ScrollAlign align = align_;
+    switch (align) {
+        case ScrollAlign::START:
+            targetPosition = -item.first;
+            break;
+        case ScrollAlign::END:
+            targetPosition = lastMainSize_ - (item.first + item.second);
+            break;
+        case ScrollAlign::AUTO:
+            if (currentOffset_ + item.first < 0) {
+                targetPosition = -item.first;
+            } else if (currentOffset_ + item.first + item.second > lastMainSize_) {
+                targetPosition = lastMainSize_ - (item.first + item.second);
+            } else {
+                targetPosition = currentOffset_;
+            }
+            break;
+        case ScrollAlign::CENTER:
+            targetPosition = -item.first + (lastMainSize_ - item.second) * HALF;
+            break;
+        default:
+            break;
+    }
+    return targetPosition;
+}
+
+void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
+{
+    currentOffset_ = JumpToTargetAlign(item);
+    align_ = ScrollAlign::START;
+    jumpIndex_ = EMPTY_JUMP_INDEX;
+}
+
 void WaterFlowLayoutInfo::UpdateOffset(float delta)
 {
     prevOffset_ = currentOffset_;
@@ -550,33 +586,9 @@ void WaterFlowLayoutInfo::UpdateOffset(float delta)
 
 float WaterFlowLayoutInfo::CalcTargetPosition(int32_t idx, int32_t crossIdx) const
 {
-    auto item = items_[GetSegment(idx)].at(crossIdx).at(idx);
-    float res = 0.0f;
-    ScrollAlign align = align_;
-    switch (align) {
-        case ScrollAlign::START:
-            res = item.first;
-            break;
-        case ScrollAlign::END:
-            res = -(lastMainSize_ - (item.first + item.second));
-            break;
-        case ScrollAlign::AUTO:
-            if (currentOffset_ + item.first < 0) {
-                res = item.first;
-            } else if (currentOffset_ + item.first + item.second > lastMainSize_) {
-                res = -(lastMainSize_ - (item.first + item.second));
-            } else {
-                res = -currentOffset_;
-            }
-            break;
-        case ScrollAlign::CENTER:
-            res = -(-item.first + (lastMainSize_ - item.second) / 2);
-            break;
-        default:
-            break;
-    }
-    return res;
+    return -JumpToTargetAlign(items_[GetSegment(idx)].at(crossIdx).at(idx));
 }
+
 bool WaterFlowLayoutInfo::OutOfBounds() const
 {
     bool outOfStart = itemStart_ && Positive(currentOffset_);

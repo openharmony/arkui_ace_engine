@@ -672,7 +672,7 @@ HWTEST_F(WaterFlowSegmentTest, Reset002, TestSize.Level1)
     EXPECT_EQ(info->currentOffset_, -857.0f);
 
     // child requires fresh layout, should jump back to index 75
-    layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     frameNode_->ChildrenUpdatedFrom(0);
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 25);
@@ -685,7 +685,7 @@ HWTEST_F(WaterFlowSegmentTest, Reset002, TestSize.Level1)
     EXPECT_EQ(info->itemInfos_.size(), 58);
 
     info->Reset();
-    layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 25);
     EXPECT_EQ(info->endIndex_, 57);
@@ -1832,8 +1832,8 @@ HWTEST_F(WaterFlowSegmentTest, Constraint001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     auto& info = pattern_->layoutInfo_;
-    EXPECT_EQ(info.startIndex_, 0);
-    EXPECT_EQ(info.endIndex_, 10);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.f / 3, 100)));
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(600.0f))));
@@ -1845,16 +1845,62 @@ HWTEST_F(WaterFlowSegmentTest, Constraint001, TestSize.Level1)
         EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 3) / 5);
     }
     EXPECT_EQ(GetChildWidth(frameNode_, 10), 500.f);
-    EXPECT_EQ(info.endIndex_, 10);
+    EXPECT_EQ(info->endIndex_, 10);
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(400.0f), CalcLength(Dimension(700.0f))));
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.f / 3, 100)));
-    EXPECT_EQ(info.endIndex_, 11);
+    EXPECT_EQ(info->endIndex_, 11);
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(700.0f))));
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 500.f / 3, 100)));
-    EXPECT_EQ(info.endIndex_, 11);
+    EXPECT_EQ(info->endIndex_, 11);
+}
+
+/**
+ * @tc.name: ResetSections001
+ * @tc.desc: Layout WaterFlow and then reset to old layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    UpdateCurrentOffset(-205.0f);
+    EXPECT_EQ(info->currentOffset_, -205.0f);
+    EXPECT_EQ(info->startIndex_, 3);
+    EXPECT_EQ(info->endIndex_, 11);
+
+    // fallback to layout without sections
+    pattern_->ResetSections();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->currentOffset_, -205.0f);
+    EXPECT_EQ(info->startIndex_, 1);
+    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(info->GetCrossCount(), 1);
+    if (SystemProperties::WaterFlowUseSegmentedLayout()) {
+        EXPECT_EQ(info->segmentTails_.size(), 1);
+        EXPECT_EQ(info->margins_.size(), 1);
+    } else {
+        EXPECT_TRUE(info->segmentTails_.empty());
+        EXPECT_TRUE(info->margins_.empty());
+    }
+
+    UpdateCurrentOffset(250.0f);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

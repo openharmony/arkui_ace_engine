@@ -265,8 +265,7 @@ bool WaterFlowPattern::ScrollToTargetIndex(int32_t index)
     if (crossIndex == -1) {
         return false;
     }
-    auto item = layoutInfo_->items_[layoutInfo_->GetSegment(index)].at(crossIndex).at(index);
-    float targetPosition = -layoutInfo_->JumpToTargetAlign(item);
+    float targetPosition = layoutInfo_->CalcTargetPosition(index, crossIndex);
     ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     return true;
 }

@@ -97,6 +97,7 @@ public:
         return prevPos - currentOffset_;
     }
 
+    float JumpToTargetAlign(const std::pair<float, float>& item) const;
     void JumpTo(const std::pair<float, float>& item);
 
     /**
