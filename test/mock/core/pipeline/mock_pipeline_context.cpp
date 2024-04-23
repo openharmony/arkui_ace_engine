@@ -399,6 +399,8 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 
 void PipelineContext::FlushPipelineImmediately() {}
 
+void PipelineContext::RebuildFontNode() {}
+
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_t /* timeStamp */)
 {
     return nullptr;
@@ -510,7 +512,7 @@ bool PipelineContext::NeedSoftKeyboard()
 
 void PipelineContext::SetCursor(int32_t cursorValue) {}
 
-void PipelineContext::RestoreDefault() {}
+void PipelineContext::RestoreDefault(int32_t windowId) {}
 
 void PipelineContext::HandleSubwindow(bool isShow) {}
 
@@ -662,11 +664,13 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostSyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {

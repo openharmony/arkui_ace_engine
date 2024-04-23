@@ -28,6 +28,7 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
@@ -343,6 +344,7 @@ public:
     void FlushBuild() override;
 
     void FlushPipelineImmediately() override;
+    void RebuildFontNode() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 
@@ -605,7 +607,7 @@ public:
 
     void SetCursor(int32_t cursorValue) override;
 
-    void RestoreDefault() override;
+    void RestoreDefault(int32_t windowId = 0) override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
@@ -693,13 +695,16 @@ public:
     bool CheckNeedDisableUpdateBackgroundImage();
 
     void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
+    void SetLocalColorMode(ColorMode colorMode)
     {
-        isFreezeFlushMessage_ = isFreezeFlushMessage;
+        auto localColorModeValue = static_cast<int32_t>(colorMode);
+        localColorMode_ = localColorModeValue;
     }
 
-    bool IsFreezeFlushMessage() const
+    ColorMode GetLocalColorMode() const
     {
-        return isFreezeFlushMessage_;
+        ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
+        return colorMode;
     }
 
 protected:
@@ -883,8 +888,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
-    bool isFreezeFlushMessage_ = false;
-    
+
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
     std::function<void()> dragWindowVisibleCallback_;
@@ -922,6 +926,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
 };
 } // namespace OHOS::Ace::NG
 

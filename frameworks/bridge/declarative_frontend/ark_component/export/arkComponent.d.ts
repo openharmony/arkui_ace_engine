@@ -49,6 +49,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _classType: ModifierType | undefined;
     _nativePtrChanged: boolean;
     constructor(nativePtr: KNode, classType?: ModifierType);
+    initialize(...args: Object[]);
     applyModifierPatch(): void;
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     outline(value: OutlineOptions): this;
@@ -61,6 +62,8 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this;
     backgroundEffect(options: BackgroundEffectOptions): this;
     backgroundBrightness(params: BackgroundBrightnessOptions): this;
+    backgroundBrightnessInternal(params: BrightnessOptions): this;
+    foregroundBrightness(params: BrightnessOptions): this;
     dragPreviewOptions(value: DragPreviewOptions): this;
     responseRegion(value: Array<Rectangle> | Rectangle): this;
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this;
@@ -697,6 +700,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         color?: ResourceColor;
     }): TextAttribute;
     letterSpacing(value: number | string): TextAttribute;
+    lineSpacing(value: LengthMetrics): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -1932,3 +1936,8 @@ declare class ArkParticleComponent extends ArkComponent implements ParticleAttri
 declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
 declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}
+
+declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    emitter(fields: Array<EmitterProps>): ParticleAttribute;
+}

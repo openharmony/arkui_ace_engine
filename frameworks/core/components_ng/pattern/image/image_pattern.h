@@ -194,14 +194,32 @@ public:
             }
         }
         imagesChangedFlag_ = true;
-        isAnimation_ = true;
+        RegisterVisibleAreaChange();
     }
 
-    void StartAnimation() {
+    void ResetImages()
+    {
+        images_.clear();
+    }
+
+    void ResetImageProperties();
+
+    void ResetImageAndAlt();
+
+    void ResetPictureSize();
+
+    bool GetHasSizeChanged()
+    {
+        return hasSizeChanged;
+    }
+
+    void StartAnimation()
+    {
         status_ = Animator::Status::RUNNING;
     }
 
-    void StopAnimation() {
+    void StopAnimation()
+    {
         status_ = Animator::Status::STOPPED;
         OnAnimatedModifyDone();
     }
@@ -349,6 +367,8 @@ private:
     void ResetFormAnimationFlag();
     void OnAnimatedModifyDone();
     void OnImageModifyDone();
+    void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
+    void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
@@ -398,6 +418,7 @@ private:
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
+    bool hasSizeChanged = false;
 };
 
 } // namespace OHOS::Ace::NG

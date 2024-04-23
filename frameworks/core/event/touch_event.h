@@ -78,6 +78,7 @@ struct TouchEvent final : public UIInputEvent {
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
+    int32_t postEventNodeId = 0;
     int32_t id = 0;
     float x = 0.0f;
     float y = 0.0f;

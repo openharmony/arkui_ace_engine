@@ -101,6 +101,13 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     return pattern->GetSearchController();
 }
 
+void SearchModelNG::SetDragPreviewOptions(const NG::DragPreviewOption option)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    searchTextField->SetDragPreviewOptions(option);
+}
+
 void SearchModelNG::SetCaretWidth(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -472,6 +479,22 @@ void SearchModelNG::SetInputFilter(const std::string& value, const std::function
     textFieldEventHub->SetOnInputFilterError(onError);
 }
 
+void SearchModelNG::SetInputFilter(
+    FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateInputFilter(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnInputFilterError(onError);
+}
+
 void SearchModelNG::SetOnEditChanged(std::function<void(bool)>&& func)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -486,6 +509,17 @@ void SearchModelNG::SetOnEditChanged(std::function<void(bool)>&& func)
 void SearchModelNG::SetTextIndent(const Dimension& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateTextIndent(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
+{
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);
@@ -1566,6 +1600,17 @@ void SearchModelNG::SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecora
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateTextDecorationStyle(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateSelectedBackgroundColor(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)

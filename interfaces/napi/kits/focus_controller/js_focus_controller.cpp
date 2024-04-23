@@ -70,7 +70,7 @@ static napi_value JSRequestFocus(napi_env env, napi_callback_info info)
                 break;
             case NG::RequestFocusResult::NON_EXIST:
                 NapiThrow(env,
-                    "This id refers to a nonexistent component which haven't been created or invisible right now.",
+                    "The component doesn't exist, is currently invisible, or has been disabled.",
                     ERROR_CODE_NON_EXIST);
                 break;
             default:

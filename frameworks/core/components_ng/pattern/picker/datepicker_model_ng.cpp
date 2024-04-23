@@ -630,7 +630,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
             overlayManager->ShowDateDialog(
                 properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker");
 }
 
 void DatePickerModelNG::SetSelectedTextStyle(

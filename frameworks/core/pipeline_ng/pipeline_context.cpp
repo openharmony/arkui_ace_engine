@@ -764,10 +764,6 @@ void PipelineContext::FlushModifier()
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
-    if (IsFreezeFlushMessage()) {
-        SetIsFreezeFlushMessage(false);
-        return;
-    }
     window_->FlushTasks();
 }
 
@@ -877,6 +873,13 @@ void PipelineContext::FlushPipelineImmediately()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     FlushPipelineWithoutAnimation();
+}
+
+void PipelineContext::RebuildFontNode()
+{
+    if (fontManager_) {
+        fontManager_->RebuildFontNodeNG();
+    }
 }
 
 void PipelineContext::FlushPipelineWithoutAnimation()
@@ -1153,7 +1156,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         callback();
         FlushBuild();
     } else {
-        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
+        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUISurfaceChanged");
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
@@ -1739,7 +1742,7 @@ bool PipelineContext::OnBackPressed()
             hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
             hasOverlay |= overlay->RemoveOverlay(true);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
     if (hasOverlay) {
         LOGI("popup consumed backpressed event");
         return true;
@@ -1773,7 +1776,7 @@ bool PipelineContext::OnBackPressed()
                 result = true;
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIBackPressedFindNavigationGroup");
 
     if (result) {
         // user accept
@@ -1790,7 +1793,7 @@ bool PipelineContext::OnBackPressed()
             }
             result = frontend->OnBackPressed();
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIBackPressed");
 
     if (result) {
         // user accept
@@ -3374,7 +3377,7 @@ void PipelineContext::SetCursor(int32_t cursorValue)
     }
 }
 
-void PipelineContext::RestoreDefault()
+void PipelineContext::RestoreDefault(int32_t windowId)
 {
     auto window = GetWindow();
     CHECK_NULL_VOID(window);
@@ -3382,7 +3385,7 @@ void PipelineContext::RestoreDefault()
     CHECK_NULL_VOID(mouseStyle);
     window->SetCursor(MouseFormat::DEFAULT);
     window->SetUserSetCursor(false);
-    mouseStyle->ChangePointerStyle(GetWindowId(), MouseFormat::DEFAULT);
+    mouseStyle->ChangePointerStyle(windowId > 0 ? windowId : GetWindowId(), MouseFormat::DEFAULT);
 }
 
 void PipelineContext::OpenFrontendAnimation(

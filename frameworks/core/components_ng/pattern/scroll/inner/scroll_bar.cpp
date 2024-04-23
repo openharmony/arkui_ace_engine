@@ -655,7 +655,8 @@ void ScrollBar::ScheduleDisappearDelayTask()
             CHECK_NULL_VOID(scrollBar);
             scrollBar->PlayScrollBarDisappearAnimation();
         });
-        taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);
+        taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION,
+            "ArkUIScrollBarDisappearAnimation");
     }
 }
 
@@ -723,6 +724,6 @@ void ScrollBar::ScheduleCaretLongPress()
             CHECK_NULL_VOID(pattern);
             pattern->HandleLongPress(true);
         },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarHandleLongPress");
 }
 } // namespace OHOS::Ace::NG

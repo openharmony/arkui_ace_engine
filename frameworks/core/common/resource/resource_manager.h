@@ -107,12 +107,11 @@ public:
     void RemoveResourceAdapter(const std::string& bundleName, const std::string& moduleName)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
+        auto mapKey = std::make_pair(bundleName, moduleName);
+        if (resourceAdapters_.find(mapKey) != resourceAdapters_.end()) {
+            resourceAdapters_.erase(mapKey);
+        }
         if (!bundleName.empty() && !moduleName.empty()) {
-            auto mapKey = std::make_pair(bundleName, moduleName);
-            if (resourceAdapters_.find(mapKey) != resourceAdapters_.end()) {
-                resourceAdapters_.erase(mapKey);
-            }
-
             std::string key = MakeCacheKey(bundleName, moduleName);
             CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
         }
@@ -123,6 +122,17 @@ public:
         std::unique_lock<std::shared_mutex> lock(mutex_);
         cacheList_.clear();
         cache_.clear();
+    }
+
+    void UpdateColorMode(ColorMode colorMode)
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
+            iter->second->UpdateColorMode(colorMode);
+        }
+        for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
+            iter->cacheObj->UpdateColorMode(colorMode);
+        }
     }
 
 private:

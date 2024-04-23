@@ -176,7 +176,7 @@ public:
     size_t GetComponentsCount() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
-    void PostJsTask(std::function<void()>&& task) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
 
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
@@ -228,6 +228,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
     void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuInnerNG(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
 
     Rect GetBoundingRectData(NodeId nodeId) override;
 
@@ -240,7 +242,7 @@ public:
     void WaitTimer(const std::string& callbackId, const std::string& delay, bool isInterval, bool isFirst) override;
     void ClearTimer(const std::string& callbackId) override;
 
-    void PostSyncTaskToPage(std::function<void()>&& task) override;
+    void PostSyncTaskToPage(std::function<void()>&& task, const std::string& name) override;
     void AddTaskObserver(std::function<void()>&& task) override;
     void RemoveTaskObserver() override;
 

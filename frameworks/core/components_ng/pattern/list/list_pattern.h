@@ -333,6 +333,8 @@ private:
     void UpdateFrameSizeToWeb();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
+    float GetStartOverScrollOffset(float offset) const;
+    float GetEndOverScrollOffset(float offset) const;
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 

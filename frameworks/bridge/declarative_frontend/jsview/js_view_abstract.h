@@ -114,6 +114,7 @@ public:
     static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
+    static void SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static void SetDefaultScale();
     static void JsScaleX(const JSCallbackInfo& info);
     static void JsScaleY(const JSCallbackInfo& info);
@@ -129,6 +130,7 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
+    static NG::DragPreviewOption ParseDragPreviewOptions (const JSCallbackInfo& info);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
@@ -141,6 +143,7 @@ public:
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
+    static void ParseBrightnessOption(const JSRef<JSObject>& jsObj, BrightnessOption& brightnessOption);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
     static void JsForegroundEffect(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
@@ -161,15 +164,21 @@ public:
     static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const float)>& callbackDidChange, const char* prop);
+    static void ParseLifeCycleCallback(const JSRef<JSObject>& paramObj, std::function<void()>& lifeCycleCallBack,
+        const char* prop);
+    static void ParseSpringBackCallback(const JSRef<JSObject>& paramObj,
+        std::function<void()>& sheetSpringBack, const char* prop);
     static void ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+        std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
+        std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
         std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
         std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
-        std::function<void(const float)>& onTypeDidChange);
+        std::function<void(const float)>& onTypeDidChange, std::function<void()>& sheetSpringBack);
     static void ParseSheetTitle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle,
         std::function<void()>& titleBuilderFunction);
     static panda::Local<panda::JSValueRef> JsDismissSheet(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static panda::Local<panda::JSValueRef> JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static panda::Local<panda::JSValueRef> JsSheetSpringBack(panda::JsiRuntimeCallInfo* runtimeCallInfo);
     static void ParseModalTransitonEffect(
         const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam, const JSExecutionContext& context);
     static void ParseOverlayCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
@@ -216,6 +225,8 @@ public:
     static void JsBackdropBlur(const JSCallbackInfo& info);
     static void JsLinearGradientBlur(const JSCallbackInfo& info);
     static void JsBackgroundBrightness(const JSCallbackInfo& info);
+    static void JsBackgroundBrightnessInternal(const JSCallbackInfo& info);
+    static void JsForegroundBrightness(const JSCallbackInfo& info);
     static void JsWindowBlur(const JSCallbackInfo& info);
     static void JsFlexBasis(const JSCallbackInfo& info);
     static void JsFlexGrow(const JSCallbackInfo& info);
@@ -270,6 +281,7 @@ public:
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
@@ -283,7 +295,6 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
     static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
-
     static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
         DimensionUnit defaultUnit, bool checkIllegal = false);
     static bool ParseJsonDimensionVp(
@@ -306,7 +317,6 @@ public:
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
         std::function<void(const std::string&)>& onResult);
     static bool ParseInvertProps(const JSRef<JSVal>& jsValue, InvertVariant& invert);
-
     static std::pair<CalcDimension, CalcDimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
     static void JsZIndex(const JSCallbackInfo& info);
@@ -353,6 +363,7 @@ public:
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
     static void JsMotionPath(const JSCallbackInfo& info);
+    static void JsMotionBlur(const JSCallbackInfo& info);
     static void JsShadow(const JSCallbackInfo& info);
     static void JsBlendMode(const JSCallbackInfo& info);
     static void JsGrayScale(const JSCallbackInfo& info);
@@ -408,14 +419,11 @@ public:
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
     static void JSRenderGroup(const JSCallbackInfo& info);
     static void JSRenderFit(const JSCallbackInfo& info);
-
     static void JsExpandSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);
-
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
-
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
 
 #ifndef WEARABLE_PRODUCT
@@ -470,6 +478,8 @@ public:
     static void SetColorBlend(Color color);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetBgDynamicBrightness(BrightnessOption brightnessOption);
+    static void SetFgDynamicBrightness(BrightnessOption brightnessOption);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);

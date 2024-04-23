@@ -17,6 +17,8 @@
 
 #include <cstdint>
 #include <list>
+#include <memory>
+#include <string>
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -484,7 +486,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -502,7 +504,7 @@ void GestureEventHub::CancelDragForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->CancelDragForWeb();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebCancelDrag");
 }
 
 void GestureEventHub::ResetDragActionForWeb()
@@ -536,7 +538,7 @@ void GestureEventHub::StartDragTaskForWeb()
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web in async task");
             dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartDrag");
 }
 
 RefPtr<PixelMap> CreatePixelMapFromString(const std::string& filePath)
@@ -792,7 +794,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                     CHECK_NULL_VOID(frameNode);
                     gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
         NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
         return;
@@ -932,6 +934,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
+    UpdateExtraInfo(frameNode, arkExtraInfoJson);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
@@ -1007,6 +1010,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
 }
 
+void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson)
+{
+    double opacity = frameNode->GetDragPreviewOption().options.opacity;
+    arkExtraInfoJson->Put("dip_opacity", opacity);
+}
+
 int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>& context)
 {
     auto pipeline = AceType::DynamicCast<PipelineContext>(context);
@@ -1021,7 +1030,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() {
             dragDropManager->HideDragPreviewOverlay();
-            }, TaskExecutor::TaskType::UI);
+            }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -1352,7 +1361,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragEnd");
     };
     return callback;
 }

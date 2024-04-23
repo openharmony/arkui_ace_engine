@@ -60,6 +60,7 @@ public:
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
     void SetOnChange(std::function<void(const std::string&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
+    void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
@@ -89,6 +90,7 @@ public:
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) override {};
     void SetCancelIconColor(const Color& iconColor) override {};
     void SetIsShowCancelButton(bool isShowCancelButton) override {};
+    void SetShowPasswordText(bool value) override {}
     void SetSelectAllValue(bool isSetSelectAllValue) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
 

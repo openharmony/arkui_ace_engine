@@ -204,7 +204,7 @@ void ResetSpanFontFamily(ArkUINodeHandle node)
     SpanModelNG::SetFontFamily(uiNode, families);
 }
 
-void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Uint32 style)
+void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
@@ -220,6 +220,7 @@ void GetSpanDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration
     CHECK_NULL_VOID(uiNode);
     decoration->decorationType = static_cast<int32_t>(SpanModelNG::GetTextDecoration(uiNode));
     decoration->color = SpanModelNG::GetTextDecorationColor(uiNode).GetValue();
+    decoration->style = static_cast<int32_t>(SpanModelNG::GetTextDecorationStyle(uiNode));
 }
 
 void ResetSpanDecoration(ArkUINodeHandle node)
@@ -284,17 +285,11 @@ void ResetSpanLetterSpacing(ArkUINodeHandle node)
     SpanModelNG::SetLetterSpacing(uiNode, DEFAULT_LETTER_SPACING_VALUE);
 }
 
-void SetSpanBaselineOffset(ArkUINodeHandle node, const struct ArkUIStringAndFloat* baselineOffsetValue)
+void SetSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    Dimension result;
-    if (baselineOffsetValue->valueStr != nullptr) {
-        result = StringUtils::StringToDimensionWithUnit(std::string(baselineOffsetValue->valueStr), DimensionUnit::FP);
-    } else {
-        result = Dimension(baselineOffsetValue->value, DimensionUnit::FP);
-    }
-    SpanModelNG::SetBaselineOffset(uiNode, result);
+    SpanModelNG::SetBaselineOffset(uiNode, CalcDimension(value, (DimensionUnit)unit));
 }
 
 float GetSpanBaselineOffset(ArkUINodeHandle node)

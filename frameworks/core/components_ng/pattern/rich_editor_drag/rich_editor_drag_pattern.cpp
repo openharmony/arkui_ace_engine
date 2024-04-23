@@ -47,7 +47,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     }
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
-    auto data = CalculateTextDragData(hostPattern, dragNode);
+    auto data = CalculateTextDragData(hostPattern, dragNode, info.selectedWidth);
     dragPattern->Initialize(data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
 
@@ -84,6 +84,9 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto boxes = hostPattern->GetTextBoxes();
     for (const auto& child : imageChildren) {
         auto imageIndex = placeholderIndex[index];
+        if (imageIndex >= rectsForPlaceholders.size()) {
+            break;
+        }
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {

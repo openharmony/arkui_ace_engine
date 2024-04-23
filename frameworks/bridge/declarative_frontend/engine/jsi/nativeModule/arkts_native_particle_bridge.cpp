@@ -17,6 +17,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t PARTICLE_DEFAULT_EMITTER_RATE = 5;
 
 ArkUINativeModuleValue ParticleBridge::SetDisturbanceField(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -89,4 +90,89 @@ ArkUINativeModuleValue ParticleBridge::ResetDisturbanceField(ArkUIRuntimeCallInf
     GetArkUINodeModifiers()->getParticleModifier()->ResetDisturbanceField(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ParticleBridge::SetEmitter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[0]->IsArray()) {
+        GetArkUINodeModifiers()->getParticleModifier()->ResetEmitter(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto paramArray = Framework::JSRef<Framework::JSArray>::Cast(info[0]);
+
+    ArkUIInt32orFloat32 index;
+    ArkUIInt32orFloat32 hasEmitRate;
+    ArkUIInt32orFloat32 emitRate;
+    ArkUIInt32orFloat32 hasPosition;
+    ArkUIInt32orFloat32 positionX;
+    ArkUIInt32orFloat32 positionY;
+    ArkUIInt32orFloat32 hasSize;
+    ArkUIInt32orFloat32 sizeX;
+    ArkUIInt32orFloat32 sizeY;
+
+    std::vector<ArkUIInt32orFloat32> dataVector;
+    auto length = paramArray->Length();
+    dataVector.resize(length * 9);
+    for (uint32_t i = 0; i < length; i++) {
+        auto paramObj = Framework::JSRef<Framework::JSArray>::Cast(paramArray->GetValueAt(i));
+        int indexValue = paramObj->GetProperty("index")->ToNumber<int>();
+        index.i32 = indexValue;
+        auto emitRateProperty = paramObj->GetProperty("emitRate");
+        if (emitRateProperty->IsNumber()) {
+            hasEmitRate.i32 = 1;
+            int emitRateValue = emitRateProperty->ToNumber<int>();
+            emitRate.i32 = emitRateValue > 0 ? emitRateValue : PARTICLE_DEFAULT_EMITTER_RATE;
+        } else {
+            hasEmitRate.i32 = 0;
+        }
+        auto positionProperty = paramObj->GetProperty("position");
+        if (positionProperty->IsObject()) {
+            hasPosition.i32 = 1;
+            auto positionValue = Framework::JSRef<Framework::JSObject>::Cast(positionProperty);
+            auto positonXvalue = positionValue->GetProperty("x")->ToNumber<float>();
+            positionX.f32 = positonXvalue;
+            auto positonYvalue = positionValue->GetProperty("y")->ToNumber<float>();
+            positionY.f32 = positonYvalue;
+        } else {
+            hasPosition.i32 = 0;
+        }
+        auto sizeProperty = paramObj->GetProperty("size");
+        if (sizeProperty->IsObject()) {
+            hasSize.i32 = 1;
+            auto sizeValue = Framework::JSRef<Framework::JSObject>::Cast(sizeProperty);
+            auto sizeXvalue = sizeValue->GetProperty("width")->ToNumber<float>();
+            sizeX.f32 = sizeXvalue;
+            auto sizeYvalue = sizeValue->GetProperty("height")->ToNumber<float>();
+            sizeY.f32 = sizeYvalue;
+        } else {
+            hasSize.i32 = 0;
+        }
+        dataVector.emplace_back(index);
+        dataVector.emplace_back(hasEmitRate);
+        dataVector.emplace_back(emitRate);
+        dataVector.emplace_back(hasPosition);
+        dataVector.emplace_back(positionX);
+        dataVector.emplace_back(positionY);
+        dataVector.emplace_back(hasSize);
+        dataVector.emplace_back(sizeX);
+        dataVector.emplace_back(sizeY);
+    }
+    GetArkUINodeModifiers()->getParticleModifier()->SetEmitter(nativeNode, dataVector.data(), dataVector.size());
+    return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ParticleBridge::ResetEmitter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getParticleModifier()->ResetEmitter(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+} // namespace OHOS::Ace::NG

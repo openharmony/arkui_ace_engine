@@ -24,19 +24,22 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
-class ResourceWrapper : public AceType {
+class ACE_FORCE_EXPORT ResourceWrapper : public AceType {
     DECLARE_ACE_TYPE(ResourceWrapper, AceType);
 
 public:
     ResourceWrapper(RefPtr<ThemeConstants>& themeConstants, RefPtr<ResourceAdapter>& resourceAdapter)
         : themeConstants_(themeConstants), resourceAdapter_(resourceAdapter) {};
-    ~ResourceWrapper() = default;
+    ResourceWrapper(
+        RefPtr<ThemeConstants>& themeConstants, RefPtr<ResourceAdapter>& resourceAdapter, ColorMode colorMode);
+    ~ResourceWrapper() override;
 
     Color GetColor(uint32_t key) const
     {
@@ -296,6 +299,7 @@ public:
 private:
     RefPtr<ThemeConstants> themeConstants_;
     RefPtr<ResourceAdapter> resourceAdapter_;
+    ColorMode localColorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
 };
 } // namespace OHOS::Ace
 

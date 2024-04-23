@@ -12,23 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
 
-class ComponentContent {
+class ComponentContent extends Content {
   // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   private builderNode_: BuilderNode;
   constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object) {
+    super();
     let builderNode = new BuilderNode(uiContext, {});
     this.builderNode_ = builderNode;
-    this.builderNode_.build(builder, params ?? {});
+    this.builderNode_.build(builder, params ?? undefined, false);
   }
 
   public update(params: Object) {
     this.builderNode_.update(params);
   }
 
-  public getFrameNode(): FrameNode {
-    return this.builderNode_.getFrameNode();
+  public getFrameNode(): FrameNode | null | undefined {
+    return this.builderNode_.getFrameNodeWithoutCheck();
+  }
+  public getNodePtr(): NodePtr {
+    return this.builderNode_.getNodePtr();
   }
 }

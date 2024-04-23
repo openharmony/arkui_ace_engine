@@ -199,7 +199,9 @@ void UIObserverHandler::HandleDrawCommandSendCallBack()
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask([callback = drawCommandSendHandleFunc_] { callback(); }, TaskExecutor::TaskType::JS);
+    taskExecutor->PostTask(
+        [callback = drawCommandSendHandleFunc_] { callback(); },
+        TaskExecutor::TaskType::JS, "ArkUIObserverDrawCommandSend");
 }
 
 void UIObserverHandler::HandleLayoutDoneCallBack()

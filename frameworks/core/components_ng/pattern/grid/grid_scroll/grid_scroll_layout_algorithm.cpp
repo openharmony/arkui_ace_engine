@@ -88,7 +88,6 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridLayoutInfo_.offsetEnd_ = moveToEndLineIndex_ > 0
                                      ? (gridLayoutInfo_.endIndex_ + 1 >= gridLayoutInfo_.childrenCount_)
                                      : gridLayoutInfo_.offsetEnd_;
-    gridLayoutInfo_.offsetUpdated_ = false;
 
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
@@ -1046,7 +1045,8 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
     /* targetIndex is in the matrix */
     if (IsIndexInMatrix(gridLayoutInfo_.jumpIndex_, startLine)) {
         // scroll to end of the screen
-        gridLayoutInfo_.currentOffset_ = mainSize - gridLayoutInfo_.lineHeightMap_[startLine];
+        gridLayoutInfo_.currentOffset_ =
+            mainSize - gridLayoutInfo_.lineHeightMap_[startLine] - gridLayoutInfo_.contentEndPadding_;
         // scroll to center of the screen
         if (gridLayoutInfo_.scrollAlign_ == ScrollAlign::CENTER) {
             gridLayoutInfo_.currentOffset_ /= 2;

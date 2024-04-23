@@ -181,7 +181,7 @@ private:
     void InitOnHoverEvent();
     void ShowDialog();
     void InitDialogProperties(DialogProperties& properties);
-    void PostTaskToUI(const std::function<void()>& task);
+    void PostTaskToUI(const std::function<void()>& task, const std::string& name);
     void HandleTaskCallback();
     void HandleZeroStartTaskCallback();
     void HandleTextFocusEvent(int32_t index);

@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -329,9 +330,12 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
     TextStyle aiSpanTextStyle = textStyle;
-    aiSpanTextStyle.SetTextColor(Color::BLUE);
+    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(hyerlinkTheme);
+    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
+    aiSpanTextStyle.SetTextColor(hyerlinkColor);
     aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
+    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -420,6 +424,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
         symbolTextStyle.SetEffectStrategy(
             symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
+        symbolTextStyle.SetFontFamilies({"HM Symbol"});
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
@@ -497,7 +502,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     return ret;
 }
 
-OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+OffsetF TextLayoutAlgorithm::SetContentOffset(LayoutWrapper* layoutWrapper)
 {
     OffsetF contentOffset(0.0, 0.0);
     CHECK_NULL_RETURN(layoutWrapper, contentOffset);
@@ -519,6 +524,12 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
         content->SetOffset(contentOffset);
     }
     return contentOffset;
+}
+
+OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+{
+    SetContentOffset(layoutWrapper);
+    return OffsetF(0.0, 0.0);
 }
 
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

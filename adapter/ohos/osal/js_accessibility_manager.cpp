@@ -2196,7 +2196,7 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
                 CHECK_NULL_VOID(jsAccessibilityManager);
                 jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
             },
-            TaskExecutor::TaskType::BACKGROUND);
+            TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySendSyncEvent");
     }
 }
 
@@ -2467,7 +2467,7 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
                 CHECK_NULL_VOID(jsAccessibilityManager);
                 jsAccessibilityManager->ExecuteActionNG(nodeId, paramsMap, op, pipeline, NG::UI_EXTENSION_OFFSET_MAX);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIAccessibilityExecuteAction");
         return;
     }
     auto node = GetAccessibilityNodeFromPage(nodeId);
@@ -2479,7 +2479,7 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
             jsAccessibilityManager->AccessibilityActionEvent(
                 op, paramsMap, node, AceType::DynamicCast<PipelineContext>(pipeline));
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityAction");
 }
 
 void JsAccessibilityManager::DumpProperty(const RefPtr<AccessibilityNode>& node)
@@ -2866,7 +2866,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
             ACE_SCOPED_TRACE("SearchElementInfoByAccessibilityId");
             jsAccessibilityManager->SearchElementInfoByAccessibilityId(elementId, requestId, callback, mode, windowId);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilitySearchElementInfoById");
 }
 
 void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
@@ -3102,7 +3102,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfosByText(co
                 ACE_SCOPED_TRACE("SearchElementInfosByText");
                 jsAccessibilityManager->SearchElementInfosByText(elementId, text, requestId, callback, windowId);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIAccessibilitySearchElementInfoByText");
     }
 }
 
@@ -3162,7 +3162,7 @@ void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(cons
             ACE_SCOPED_TRACE("FindFocusedElementInfo");
             jsAccessibilityManager->FindFocusedElementInfo(elementId, focusType, requestId, callback, windowId);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityFindFocusedElementInfo");
 }
 
 void JsAccessibilityManager::FindFocusedElementInfo(const int64_t elementId, const int32_t focusType,
@@ -3341,7 +3341,7 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
             ACE_SCOPED_TRACE("ExecuteAction");
             jsAccessibilityManager->ExecuteAction(elementId, param, requestId, callback, windowId);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityExecuteAction");
 }
 
 bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
@@ -3682,7 +3682,7 @@ void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
             ACE_SCOPED_TRACE("ClearCurrentFocus");
             jsAccessibilityManager->ClearCurrentFocus();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityClearCurrentFocus");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::OutsideTouch() {}
@@ -3800,7 +3800,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
             jsAccessibilityManager->SetWebAccessibilityState(state);
 #endif
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityStateChanged");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
@@ -3818,7 +3818,7 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
             ACE_SCOPED_TRACE("FocusMoveSearch");
             jsAccessibilityManager->FocusMoveSearch(elementId, direction, requestId, callback, windowId);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityFocusMoveSearch");
 }
 
 void JsAccessibilityManager::FocusMoveSearch(const int64_t elementId, const int32_t direction, const int32_t requestId,
@@ -4273,7 +4273,7 @@ void JsAccessibilityManager::SetSearchElementInfoByAccessibilityIdResult(Accessi
                 return;
             }
             callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
-        }, TaskExecutor::TaskType::BACKGROUND);
+        }, TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySetSearchElementInfoById");
 }
 
 void JsAccessibilityManager::SetSearchElementInfoByTextResult(AccessibilityElementOperatorCallback& callback,
@@ -4292,7 +4292,7 @@ void JsAccessibilityManager::SetSearchElementInfoByTextResult(AccessibilityEleme
                 return;
             }
             callback.SetSearchElementInfoByTextResult(infos, requestId);
-        }, TaskExecutor::TaskType::BACKGROUND);
+        }, TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySetSearchElementInfoByText");
 }
 
 void JsAccessibilityManager::SetFindFocusedElementInfoResult(

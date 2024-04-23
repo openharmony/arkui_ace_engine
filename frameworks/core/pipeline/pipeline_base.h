@@ -764,16 +764,20 @@ public:
 
     RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
 
-    void PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostSyncEvent(const TaskExecutor::Task& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload(const ConfigurationChange& configurationChange) {}
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
+    virtual void RebuildFontNode() {}
     FrontendType GetFrontendType() const
     {
         return frontendType_;
@@ -1091,7 +1095,7 @@ public:
 
     virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault() {}
+    virtual void RestoreDefault(int32_t windowId = 0) {}
 
     void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {

@@ -86,6 +86,7 @@ struct CustomBackgroundProperty {
 };
 
 struct ForegroundProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MotionBlur, MotionBlurOption);
     bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
     {
         if (!option.has_value()) {
@@ -194,6 +195,8 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradientBlur, NG::LinearGradientBlurPara);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpDegree, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BgDynamicBrightnessOption, BrightnessOption);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FgDynamicBrightnessOption, BrightnessOption);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicDimDegree, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackBlendMode, BlendMode);

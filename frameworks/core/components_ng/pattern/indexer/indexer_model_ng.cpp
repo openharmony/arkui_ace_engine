@@ -319,6 +319,24 @@ void IndexerModelNG::SetAdaptiveWidth(bool state)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state);
 }
 
+RefPtr<FrameNode> IndexerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+
+    return frameNode;
+}
+
+void IndexerModelNG::SetArrayValue(FrameNode* frameNode, const std::vector<std::string>& arrayValue)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue, frameNode);
+}
+
+void IndexerModelNG::SetAdaptiveWidth(FrameNode* frameNode, bool state)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state, frameNode);
+}
+
 void IndexerModelNG::SetPopupBorderRadius(FrameNode* frameNode, const Dimension& radius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupBorderRadius, radius, frameNode);
@@ -559,5 +577,48 @@ void IndexerModelNG::SetPopupPositionY(FrameNode* frameNode, const std::optional
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             IndexerLayoutProperty, PopupPositionY, PROPERTY_UPDATE_NORMAL, frameNode);
     }
+}
+
+void IndexerModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelected(std::move(onSelect));
+}
+
+void IndexerModelNG::SetOnRequestPopupData(FrameNode* frameNode,
+    std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnRequestPopupData(std::move(RequestPopupData));
+}
+
+void IndexerModelNG::SetOnPopupSelected(FrameNode* frameNode,
+    std::function<void(const int32_t selected)>&& onPopupSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPopupSelected(std::move(onPopupSelected));
+}
+
+void IndexerModelNG::SetChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void IndexerModelNG::SetCreatChangeEvent(FrameNode* frameNode,
+    std::function<void(const int32_t selected)>&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }
 } // namespace OHOS::Ace::NG

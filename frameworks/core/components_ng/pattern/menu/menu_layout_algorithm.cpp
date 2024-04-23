@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline/pipeline_base.h"
@@ -51,6 +52,7 @@ constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
 constexpr float HEIGHT_CONSTRAINT_FACTOR = 0.8;
+constexpr float ARROW_WIDTH_FACTOR = 2.0;
 
 const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
     { Placement::BOTTOM_LEFT,
@@ -587,8 +589,24 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     float idealHeight = 0.0f;
     float idealWidth = 0.0f;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::list<RefPtr<LayoutWrapper>> builderChildList;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(childConstraint);
+        if (pattern->UseContentModifier()) {
+            if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->Reset();
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                child->Measure(childConstraint);
+                builderChildList.push_back(child);
+            }
+            BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
+        } else {
+            child->Measure(childConstraint);
+        }
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         idealHeight += childSize.Height();
         idealWidth = std::max(idealWidth, childSize.Width());
@@ -1303,8 +1321,8 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
         }
         SetMenuPlacementForAnimation(layoutWrapper);
-        arrowPosition_ = GetArrowPositionWithPlacement(size);
         if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
+            arrowPosition_ = GetArrowPositionWithPlacement(size, layoutWrapper);
             LayoutArrow(layoutWrapper);
         }
         geometryNode->SetFrameOffset(menuPosition);
@@ -1392,6 +1410,29 @@ RefPtr<MenuPaintProperty> MenuLayoutAlgorithm::GetPaintProperty(const LayoutWrap
     return paintProperty;
 }
 
+BorderRadiusProperty MenuLayoutAlgorithm::GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize)
+{
+    Dimension defaultDimension(0);
+    BorderRadiusProperty radius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, radius);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, radius);
+    auto defaultRadius = theme->GetMenuBorderRadius();
+    radius.SetRadius(defaultRadius);
+    auto menuLayoutProp = DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(menuLayoutProp, radius);
+    if (menuLayoutProp->GetBorderRadius().has_value()) {
+        auto menuNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_RETURN(menuNode, radius);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, radius);
+        radius = menuPattern->CalcIdealBorderRadius(menuLayoutProp->GetBorderRadiusValue(), menuSize);
+    }
+
+    return radius;
+}
+
 bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, const SizeF& menuSize)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
@@ -1414,30 +1455,60 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
     }
 
     propArrowOffset_ = paintProperty->GetArrowOffset().value_or(Dimension(0));
-    menuRadius_ = selectThemePtr->GetMenuBorderRadius().ConvertToPx();
-    arrowMinLimit_ = menuRadius_ + ARROW_WIDTH.ConvertToPx() / 2.0;
-    arrowWidth_ = ARROW_WIDTH.ConvertToPx();
-    auto targetSpaceReal = TARGET_SPACE.ConvertToPx();
-
-    if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
-        if (menuSize.Height() >= menuRadius_ * 2 + arrowWidth_) {
-            arrowInMenu_ = true;
-            targetSpace_ = targetSpaceReal;
-        }
-    }
-
-    if (setVertical_.find(placement_) != setVertical_.end()) {
-        if (menuSize.Width() >= menuRadius_ * 2 + arrowWidth_) {
-            arrowInMenu_ = true;
-            targetSpace_ = targetSpaceReal;
-        }
-    }
+    ProcessArrowParams(layoutWrapper, menuSize);
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return (menuPattern->IsContextMenu() || menuPattern->IsMenu()) && !targetTag_.empty() && arrowInMenu_;
     }
 
     return menuPattern->IsContextMenu() && !targetTag_.empty() && arrowInMenu_;
+}
+
+void MenuLayoutAlgorithm::ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize)
+{
+    BorderRadiusProperty menuBorderRadius = GetMenuRadius(layoutWrapper, menuSize);
+    auto radiusTopLeft = menuBorderRadius.radiusTopLeft.value_or(Dimension()).ConvertToPx();
+    auto radiusTopRight = menuBorderRadius.radiusTopRight.value_or(Dimension()).ConvertToPx();
+    auto radiusBottomLeft = menuBorderRadius.radiusBottomLeft.value_or(Dimension()).ConvertToPx();
+    auto radiusBottomRight = menuBorderRadius.radiusBottomRight.value_or(Dimension()).ConvertToPx();
+    arrowWidth_ = ARROW_WIDTH.ConvertToPx();
+
+    switch (placement_) {
+        case Placement::LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+            if (menuSize.Height() >= radiusTopRight + radiusBottomRight + arrowWidth_) {
+                arrowInMenu_ = true;
+            }
+            break;
+        case Placement::RIGHT:
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+            if (menuSize.Height() >= radiusTopLeft + radiusBottomLeft + arrowWidth_) {
+                arrowInMenu_ = true;
+            }
+            break;
+        case Placement::TOP:
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+            if (menuSize.Width() >= radiusBottomLeft + radiusBottomRight + arrowWidth_) {
+                arrowInMenu_ = true;
+            }
+            break;
+        case Placement::BOTTOM:
+        case Placement::BOTTOM_LEFT:
+        case Placement::BOTTOM_RIGHT:
+            if (menuSize.Width() >= radiusTopLeft + radiusTopRight + arrowWidth_) {
+                arrowInMenu_ = true;
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (arrowInMenu_) {
+        targetSpace_ = TARGET_SPACE.ConvertToPx();
+    }
 }
 
 void MenuLayoutAlgorithm::UpdatePropArrowOffset()
@@ -1472,27 +1543,48 @@ void MenuLayoutAlgorithm::UpdatePropArrowOffset()
     }
 }
 
-void MenuLayoutAlgorithm::UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize)
+void MenuLayoutAlgorithm::UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize, const LayoutWrapper* layoutWrapper)
 {
     UpdatePropArrowOffset();
+    BorderRadiusProperty menuBorderRadius = GetMenuRadius(layoutWrapper, menuSize);
+    auto radiusTopLeft = menuBorderRadius.radiusTopLeft.value_or(Dimension()).ConvertToPx();
+    auto radiusTopRight = menuBorderRadius.radiusTopRight.value_or(Dimension()).ConvertToPx();
+    auto radiusBottomLeft = menuBorderRadius.radiusBottomLeft.value_or(Dimension()).ConvertToPx();
+    auto radiusBottomRight = menuBorderRadius.radiusBottomRight.value_or(Dimension()).ConvertToPx();
+    float range = -1.0f;
 
-    if (setHorizontal_.find(arrowPlacement_) != setHorizontal_.end()) {
-        if (menuSize.Height() >= menuRadius_ * 2 + arrowWidth_) {
-            float range = menuSize.Height() - menuRadius_ * 2  - arrowWidth_;
-            float tempOffset = propArrowOffset_.Unit() == DimensionUnit::PERCENT ? propArrowOffset_.Value() * range :
-                propArrowOffset_.ConvertToPx();
-            arrowOffset_ = std::clamp(tempOffset, 0.0f, range);
-        }
+    switch (arrowPlacement_) {
+        case Placement::LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+            range = menuSize.Height() - radiusTopRight - radiusBottomRight - arrowWidth_;
+            arrowMinLimit_ = radiusTopRight + ARROW_WIDTH.ConvertToPx() / ARROW_WIDTH_FACTOR;
+            break;
+        case Placement::RIGHT:
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+            range = menuSize.Height() - radiusTopLeft - radiusBottomLeft - arrowWidth_;
+            arrowMinLimit_ = radiusTopLeft + ARROW_WIDTH.ConvertToPx() / ARROW_WIDTH_FACTOR;
+            break;
+        case Placement::TOP:
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+            range = menuSize.Width() - radiusBottomLeft - radiusBottomRight - arrowWidth_;
+            arrowMinLimit_ = radiusBottomLeft + ARROW_WIDTH.ConvertToPx() / ARROW_WIDTH_FACTOR;
+            break;
+        case Placement::BOTTOM:
+        case Placement::BOTTOM_LEFT:
+        case Placement::BOTTOM_RIGHT:
+            range = menuSize.Width() - radiusTopLeft - radiusTopRight - arrowWidth_;
+            arrowMinLimit_ = radiusTopLeft + ARROW_WIDTH.ConvertToPx() / ARROW_WIDTH_FACTOR;
+            break;
+        default:
+            break;
     }
-
-    if (setVertical_.find(arrowPlacement_) != setVertical_.end()) {
-        if (menuSize.Width() >= menuRadius_ * 2 + arrowWidth_) {
-            arrowInMenu_ = true;
-            float range = menuSize.Width() - menuRadius_ * 2  - arrowWidth_;
-            float tempOffset = propArrowOffset_.Unit() == DimensionUnit::PERCENT ? propArrowOffset_.Value() * range :
-                propArrowOffset_.ConvertToPx();
-            arrowOffset_ = std::clamp(tempOffset, 0.0f, range);
-        }
+    if (range >= 0) {
+        float tempOffset = propArrowOffset_.Unit() == DimensionUnit::PERCENT ? propArrowOffset_.Value() * range
+                                                                             : propArrowOffset_.ConvertToPx();
+        arrowOffset_ = std::clamp(tempOffset, 0.0f, range);
     }
 }
 
@@ -1776,9 +1868,9 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacement(
     return childPosition;
 }
 
-OffsetF MenuLayoutAlgorithm::GetArrowPositionWithPlacement(const SizeF& menuSize)
+OffsetF MenuLayoutAlgorithm::GetArrowPositionWithPlacement(const SizeF& menuSize, const LayoutWrapper* layoutWrapper)
 {
-    UpdateArrowOffsetWithMenuLimit(menuSize);
+    UpdateArrowOffsetWithMenuLimit(menuSize, layoutWrapper);
     auto addArrowOffsetToArrowMin = arrowOffset_ + arrowMinLimit_;
     auto space_ = ARROW_HIGHT.ConvertToPx();
     OffsetF childPosition;

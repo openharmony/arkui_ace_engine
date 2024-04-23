@@ -281,6 +281,7 @@ public:
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
     virtual void SetOnChange(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
+    virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
@@ -295,6 +296,7 @@ public:
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
+    virtual void SetShowPasswordText(bool value) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
@@ -328,6 +330,7 @@ public:
 
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetLineSpacing(const Dimension& value) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
     virtual void SetAdaptMaxFontSize(const Dimension& value) {};
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {};

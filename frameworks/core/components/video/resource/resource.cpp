@@ -64,7 +64,7 @@ void Resource::Release(const std::function<void(bool)>& onRelease)
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIVideoResourceRelease");
     }
 }
 
@@ -242,7 +242,7 @@ void Resource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    });
+    }, "ArkUIVideoCallResRegisterMethod");
 }
 
 void Resource::CallSyncResRegisterMethod(

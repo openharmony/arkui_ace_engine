@@ -61,17 +61,9 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
     CalcDimension radiusDim;
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        radiusDim.Reset();
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(radiusDim);
-        borderRadius.multiValued = false;
-        prop = borderRadius;
         return prop;
     }
-    if (JSViewAbstract::ParseJsDimensionVp(args, radiusDim)) {
-        if (radiusDim.Unit() == DimensionUnit::PERCENT) {
-            radiusDim.Reset();
-        }
+    if (JSViewAbstract::ParseJsDimensionVpNG(args, radiusDim)) {
         NG::BorderRadiusProperty borderRadius;
         borderRadius.SetRadius(radiusDim);
         borderRadius.multiValued = false;
@@ -97,8 +89,12 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
 void ParseFontOfButtonStyle(const JSRef<JSObject>& pickerButtonParamObject, ButtonInfo& buttonInfo)
 {
     CalcDimension fontSize;
-    if (JSViewAbstract::ParseJsDimensionVpNG(pickerButtonParamObject->GetProperty("fontSize"), fontSize)) {
-        buttonInfo.fontSize = fontSize;
+    JSRef<JSVal> sizeProperty = pickerButtonParamObject->GetProperty("fontSize");
+    if (JSViewAbstract::ParseJsDimensionVpNG(sizeProperty, fontSize) && fontSize.Unit() != DimensionUnit::PERCENT &&
+        GreatOrEqual(fontSize.Value(), 0.0)) {
+        if (JSViewAbstract::ParseJsDimensionFp(sizeProperty, fontSize)) {
+            buttonInfo.fontSize = fontSize;
+        }
     }
     Color fontColor;
     if (JSViewAbstract::ParseJsColor(pickerButtonParamObject->GetProperty("fontColor"), fontColor)) {
@@ -771,6 +767,6 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             overlayManager->ShowCalendarDialog(
                 properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
 }
 } // namespace OHOS::Ace::Framework

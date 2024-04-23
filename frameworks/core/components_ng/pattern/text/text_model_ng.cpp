@@ -230,6 +230,16 @@ void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
 }
 
+void TextModelNG::SetLineSpacing(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value);
+}
+
+void TextModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value, frameNode);
+}
+
 void TextModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value);
@@ -525,10 +535,11 @@ RefPtr<TextControllerBase> TextModelNG::GetTextController()
     return pattern->GetTextController();
 }
 
-void TextModelNG::SetClipEdge()
+void TextModelNG::SetClipEdge(bool clip)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    frameNode->GetRenderContext()->SetClipToFrame(clip);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -615,6 +626,16 @@ float TextModelNG::GetLineHeight(FrameNode* frameNode)
     return static_cast<float>(value.Value());
 }
 
+float TextModelNG::GetLineSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineSpacing(0);
+    auto value = layoutProperty->GetLineSpacing().value_or(defaultLineSpacing);
+    return static_cast<float>(value.Value());
+}
+
 TextDecoration TextModelNG::GetDecoration(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, TextDecoration::NONE);
@@ -629,6 +650,14 @@ Color TextModelNG::GetTextDecorationColor(FrameNode* frameNode)
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
     return layoutProperty->GetTextDecorationColor().value_or(Color::BLACK);
+}
+
+TextDecorationStyle TextModelNG::GetTextDecorationStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, TextDecorationStyle::SOLID);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDecorationStyle::SOLID);
+    return layoutProperty->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID);
 }
 
 TextCase TextModelNG::GetTextCase(FrameNode* frameNode)

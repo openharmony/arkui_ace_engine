@@ -94,7 +94,7 @@ void EventHub::PostEnabledTask()
             auto eventHub = weak.Upgrade();
             CHECK_NULL_VOID(eventHub);
             eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
-        }, TaskExecutor::TaskType::UI);
+        }, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
 }
 
 void EventHub::MarkModifyDone()

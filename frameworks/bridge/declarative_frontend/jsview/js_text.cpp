@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -83,6 +84,7 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -353,6 +355,19 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSText::SetLineSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    if (!ParseLengthMetricsToDimension(args, value)) {
+        value.Reset();
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextModel::GetInstance()->SetLineSpacing(value);
+}
+
 void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
@@ -469,6 +484,8 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
@@ -834,7 +851,7 @@ void JSText::JsClip(const JSCallbackInfo& info)
     JSViewAbstract::JsClip(info);
     JSRef<JSVal> args = info[0];
     if (args->IsBoolean()) {
-        TextModel::GetInstance()->SetClipEdge();
+        TextModel::GetInstance()->SetClipEdge(args->ToBoolean());
     }
 }
 
@@ -873,6 +890,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
+    JSClass<JSText>::StaticMethod("lineSpacing", &JSText::SetLineSpacing, opt);
     JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
     JSClass<JSText>::StaticMethod("minFontSize", &JSText::SetMinFontSize, opt);
     JSClass<JSText>::StaticMethod("maxFontSize", &JSText::SetMaxFontSize, opt);

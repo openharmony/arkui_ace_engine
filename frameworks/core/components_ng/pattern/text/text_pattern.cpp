@@ -83,14 +83,22 @@ GradientColor CreateTextGradientColor(float percent, Color color)
 
 void TextPattern::OnAttachToFrameNode()
 {
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        fontManager->AddFontNodeNG(host);
+    }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
             host->GetRenderContext()->UpdateClipEdge(true);
+            host->GetRenderContext()->SetClipToFrame(true);
         }
+    }
+    if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
+        host->GetRenderContext()->SetUsingContentRectForRenderFrame(true, true);
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
@@ -216,7 +224,10 @@ std::list<ResultObject> TextPattern::GetSpansInfoInStyledString(int32_t start, i
 {
     std::list<ResultObject> resultObjects;
     for (const auto& item : spans_) {
-        resultObjects.emplace_back(item->GetSpanResultObject(start, end));
+        auto obj = item->GetSpanResultObject(start, end);
+        if (obj.isInit) {
+            resultObjects.emplace_back(obj);
+        }
     }
     return resultObjects;
 }
@@ -303,7 +314,11 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (IsDraggable(info.GetLocalLocation())) {
+    auto localOffset = info.GetLocalLocation();
+    if (selectOverlay_->HasRenderTransform()) {
+        localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    }
+    if (IsDraggable(localOffset)) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
         gestureHub->SetIsTextDraggable(true);
@@ -311,8 +326,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
     textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
@@ -332,6 +346,9 @@ void TextPattern::HandleSpanLongPressEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
 
     auto localLocation = info.GetLocalLocation();
+    if (selectOverlay_->HasRenderTransform()) {
+        localLocation = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
+    }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1646,6 +1663,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     auto lm = node->GetLeadingMarginValue({});
     textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
     textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
+    textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = Dimension(lm.size.Width()).ConvertToVp();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = Dimension(lm.size.Height()).ConvertToVp();
@@ -1852,6 +1870,9 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
+    if (selectOverlay_->HasRenderTransform()) {
+        return selectOverlay_->GetPaintOffsetWithoutTransform() - rootOffset;
+    }
     return host->GetPaintRectOffset() - rootOffset;
 }
 
@@ -1870,6 +1891,9 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
     CHECK_NULL_RETURN(host, false);
     auto offset = host->GetPaintRectOffset();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
+    if (selectOverlay_->HasRenderTransform()) {
+        localOffset = ConvertGlobalToLocalOffset(globalOffset);
+    }
     return IsDraggable(localOffset);
 }
 
@@ -2031,11 +2055,13 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     HandleSelectionChange(start, end);
     parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
-    if (textSelector_.firstHandle == textSelector_.secondHandle) {
+    showSelected_ = true;
+    if (textSelector_.firstHandle == textSelector_.secondHandle && paragraph_) {
         ResetSelection();
         CloseSelectOverlay();
         return;
     }
+    showSelected_ = false;
     ShowSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2110,7 +2136,8 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void TextPattern::ProcessOverlayAfterLayout()
 {
-    if (selectOverlay_->SelectOverlayIsOn()) {
+    if (selectOverlay_->SelectOverlayIsOn() || showSelected_) {
+        showSelected_ = false;
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->UpdateAllHandlesOffset();
     }
@@ -2606,6 +2633,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::LINEHEIGHT:
                 if (textLayoutProp->HasLineHeight()) {
                     child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
+                }
+                break;
+            case PropertyInfo::LINESPACING:
+                if (textLayoutProp->HasLineSpacing()) {
+                    child->UpdateLineSpacingWithoutFlushDirty(textLayoutProp->GetLineSpacing().value());
                 }
                 break;
             case PropertyInfo::TEXTSHADOW:
@@ -3170,6 +3202,14 @@ void TextPattern::ProcessSpanString()
         } else {
             dataDetectorAdapter_->textForAI_ += span->content;
         }
+        if (span->onClick) {
+            auto gestureEventHub = host->GetOrCreateGestureEventHub();
+            InitClickEvent(gestureEventHub);
+        }
+        if (span->onLongPress) {
+            auto gestureEventHub = host->GetOrCreateGestureEventHub();
+            InitLongPressEvent(gestureEventHub);
+        }
         textForDisplay_ += span->content;
     }
     if (dataDetectorAdapter_->textForAI_ != textForDisplay_) {
@@ -3183,5 +3223,12 @@ void TextPattern::ProcessSpanString()
     if (contentMod_) {
         contentMod_->ContentChange();
     }
+}
+
+Offset TextPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
+{
+    auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
+    selectOverlay_->RevertLocalPointWithTransform(localPoint);
+    return Offset(localPoint.GetX(), localPoint.GetY());
 }
 } // namespace OHOS::Ace::NG

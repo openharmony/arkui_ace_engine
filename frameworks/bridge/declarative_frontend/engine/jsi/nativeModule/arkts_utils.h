@@ -52,6 +52,8 @@ public:
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsFontFamiliesFromResource(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
+    static bool ParseJsLengthMetrics(
+        const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,

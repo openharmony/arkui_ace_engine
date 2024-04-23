@@ -77,6 +77,8 @@ ACE_EXPORT extern const char JS_FOR_EACH_ETS_TAG[];
 ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
 // js if lese node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
+// js node slot node
+ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
 // js toast node
 ACE_EXPORT extern const char TOAST_ETS_TAG[];
 

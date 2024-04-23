@@ -71,6 +71,7 @@ var TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
   TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
   TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+  TextDataDetectorType[TextDataDetectorType["DATETIME"] = 4] = "DATETIME";
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
@@ -989,6 +990,7 @@ let DismissReason;
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
+  DismissReason[DismissReason.SLIDE_DOWN = 3] = "SLIDE_DOWN";
 })(DismissReason || (DismissReason = {}));
 
 var HoverEffect;
@@ -2320,7 +2322,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
@@ -2338,8 +2340,10 @@ class ChildrenMainSize {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
     }
     this.defaultMainSize = childDefaultSize;
+    this.sizeArray = [];
     this.changeFlag = true;
-    this.changeArray = [];
+    // -1: represent newly created.
+    this.changeArray = [ { start: -1 } ];
   }
 
   set childDefaultSize(value) {
@@ -2362,10 +2366,26 @@ class ChildrenMainSize {
     let startValue = Math.trunc(start);
     let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
     if (paramCount === 1) {
+      this.sizeArray.splice(startValue);
       this.changeArray.push({ start: startValue });
     } else if (paramCount === 2) {
+      this.sizeArray.splice(startValue, deleteCountValue);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
     } else if (paramCount === 3) {
+      let childrenSizeLength = childrenSize ? childrenSize.length : 0;
+      if (childrenSizeLength === 0) {
+        childrenSize = [];
+      }
+      for (let i = 0; i < childrenSizeLength; i++) {
+        if (this.isInvalid(childrenSize[i])) {
+          // -1: represent default size.
+          childrenSize[i] = -1;
+        }
+      }
+      while (startValue >= this.sizeArray.length) {
+        this.sizeArray.push(-1);
+      }
+      this.sizeArray.splice(startValue, deleteCountValue, ...childrenSize);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
     }
     this.changeFlag = !this.changeFlag;
@@ -2374,8 +2394,16 @@ class ChildrenMainSize {
   update(index, childSize) {
     if (this.isInvalid(index)) {
       throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    } else if (this.isInvalid(childSize)) {
+      // -1: represent default size.
+      childSize = -1;
     }
-    this.changeArray.push({ start: Math.trunc(index), deleteCount: 1, childrenSize: [childSize] });
+    let startValue = Math.trunc(index);
+    while (startValue >= this.sizeArray.length) {
+      this.sizeArray.push(-1);
+    }
+    this.sizeArray.splice(startValue, 1, childSize);
+    this.changeArray.push({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
     this.changeFlag = !this.changeFlag;
   }
 
@@ -2384,7 +2412,7 @@ class ChildrenMainSize {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
@@ -2480,6 +2508,7 @@ var SaveDescription;
   SaveDescription[SaveDescription["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
+  SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
 })(SaveDescription || (SaveDescription = {}));
 
 var SaveButtonOnClickResult;
@@ -2648,12 +2677,12 @@ var ParticleUpdater;
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
 
-var DisturbanceFieldsShape;
-(function (DisturbanceFieldsShape) {
-  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
-})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
+var DisturbanceFieldShape;
+(function (DisturbanceFieldShape) {
+  DisturbanceFieldShape[DisturbanceFieldShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldShape[DisturbanceFieldShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldShape[DisturbanceFieldShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldShape || (DisturbanceFieldShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {
