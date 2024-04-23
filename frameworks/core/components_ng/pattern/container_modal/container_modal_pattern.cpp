@@ -295,8 +295,9 @@ void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& control
         CHECK_NULL_VOID(floatingTitleLayoutProperty);
         // touch the title to move the floating window
         auto panActionStart = [wk = WeakClaim(RawPtr(windowManager)),
-            floatingTitleLayoutProperty](const GestureEvent&) {
+            ft = WeakClaim(RawPtr(floatingTitleLayoutProperty))](const GestureEvent&) {
             auto windowManager = wk.Upgrade();
+            auto floatingTitleLayoutProperty = ft.Upgrade();
             CHECK_NULL_VOID(windowManager);
             if (windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR &&
                 floatingTitleLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
