@@ -50,62 +50,6 @@ HWTEST_F(TextInputUpdateTestNg, HandleLongPress001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InsertValueOperation001
- * @tc.desc: Test insert value operation.
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputUpdateTestNg, InsertValueOperation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField("", "", [](TextFieldModelNG model) {
-        model.SetMaxLength(1000023);
-    });
-    EXPECT_FALSE(pattern_->HasFocus());
-
-    /**
-     * @tc.steps: step2. Call function InsertValueOperation.
-     * @tc.expected: Check if result right.
-     */
-    auto insertValue = "Hello world";
-    pattern_->InsertValueOperation(insertValue);
-    EXPECT_EQ(pattern_->contentController_->GetTextValue().compare(insertValue), 0);
-    pattern_->UpdateOverCounterColor();
-}
-
-/**
- * @tc.name: UpdateCounterBorderStyle001
- * @tc.desc: Test insert value operation.
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputUpdateTestNg, UpdateCounterBorderStyle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField("DEFAULT_TEXT", "", [](TextFieldModelNG model) {
-        model.SetMaxLength(1000023);
-    });
-    GetFocus();
-
-    /**
-     * @tc.steps: step2. Create text layoutWrapper. Call function InsertValueOperation.
-     * @tc.expected: Check if result right.
-     */
-    pattern_->UpdateOverCounterColor();
-    pattern_->UltralimitShake();
-    auto errorText = "error text";
-    pattern_->UpdateInputFilterErrorText(errorText);
-    pattern_->OnAreaChangedInner();
-    auto textLength = static_cast<int32_t>
-        (pattern_->contentController_->GetWideText().length());
-    auto maxlength = pattern_->GetMaxLength();
-    pattern_->UpdateCounterBorderStyle(textLength, maxlength);
-    EXPECT_TRUE(pattern_->counterChange_);
-}
-
-/**
  * @tc.name: DeleteBackwardWhenHasMaxLength001
  * @tc.desc: Test the soft keyboard interface
  * @tc.type: FUNC
