@@ -102,7 +102,7 @@ public:
 
     bool IsScrollable() const override
     {
-        return scrollable_;
+        return isScrollable_;
     }
 
     bool IsAtTop() const override;
@@ -299,7 +299,6 @@ private:
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     bool OnScrollCallback(float offset, int32_t source) override;
-    void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
@@ -366,7 +365,7 @@ private:
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
-    bool scrollable_ = true;
+    bool isScrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
     bool isNeedCheckOffset_ = false;
@@ -394,7 +393,7 @@ private:
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
-    RefPtr<Scrollable> scrollableTouchEvent_;
+    RefPtr<Scrollable> scrollable_;
 
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;
