@@ -795,7 +795,7 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
     delegate->OnTouchIconUrl(icon_url, precomposed);
 }
 
-bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
+bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, std::shared_ptr<NWeb::NWebCursorInfo> info)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
