@@ -181,14 +181,14 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
             auto host = dataDetectorAdapter->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-        });
+        }, "ArkUITextParseAIResult");
     };
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     uiTaskExecutor.PostTask([info, textFunc] {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
         DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
-    });
+    }, "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
@@ -290,6 +290,7 @@ void DataDetectorAdapter::StartAITask()
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         }
     });
-    taskExecutor->PostDelayedTask(aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME);
+    taskExecutor->PostDelayedTask(
+        aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
 }
 } // namespace OHOS::Ace

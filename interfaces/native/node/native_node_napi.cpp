@@ -130,4 +130,29 @@ int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_C
     *context = new ArkUI_Context({ .id = instanceId });
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
+
+int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, ArkUI_NodeContentHandle* content)
+{
+    bool hasProperty = false;
+    auto result = napi_has_named_property(env, value, "nativePtr_", &hasProperty);
+    if (result != napi_ok || !hasProperty) {
+        LOGE("fail to get native content value");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    napi_value nativeContent = nullptr;
+    result = napi_get_named_property(env, value, "nativePtr_", &nativeContent);
+    if (result != napi_ok) {
+        LOGE("fail to get native content");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    void* nativePtr = nullptr;
+    result = napi_get_value_external(env, nativeContent, &nativePtr);
+    if (result != napi_ok) {
+        LOGE("fail to get native content ptr");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    *content = reinterpret_cast<ArkUI_NodeContentHandle>(nativePtr);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 }

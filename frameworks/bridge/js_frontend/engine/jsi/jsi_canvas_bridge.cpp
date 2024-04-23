@@ -425,7 +425,7 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
         return;
     }
 
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasWebGLInit");
 
     canvasRenderContext->Init();
 
@@ -456,7 +456,7 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
                     pool->WebGLUpdate();
                 }
             };
-            delegate->PostUITask(task);
+            delegate->PostUITask(task, "ArkUICanvasWebGLUpdate");
         }
     };
     canvasRenderContext->SetUpdateCallback(onWebGLUpdateCallback);
@@ -498,7 +498,7 @@ void JsiCanvasBridge::HandleToDataURL(const shared_ptr<JsRuntime>& runtime, Node
         LOGE("ToDataURL failed. delegate is null.");
         return;
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasToDataURL");
     dataURL_ = runtime->NewString(dataUrl);
 }
 
@@ -730,7 +730,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMeasureText(const shared_ptr<JsRuntime>& 
         LOGE("JsMeasureText failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasMeasureText");
     auto textMetrics = runtime->NewObject();
     textMetrics->SetProperty(runtime, "width", runtime->NewNumber(width));
     textMetrics->SetProperty(runtime, "height", runtime->NewNumber(height));
@@ -1727,7 +1727,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsGetImageData(const shared_ptr<JsRuntime>&
         LOGE("JsGetImageData failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasGetImageData");
 
     auto imageData = runtime->NewObject();
     auto colorArray = runtime->NewArray();
@@ -1789,7 +1789,7 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
         LOGE("JsGetImageData failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasGetImageData");
 
     // 1 Get data from canvas
     uint32_t final_height = static_cast<uint32_t>(imageData->dirtyHeight);
@@ -1888,7 +1888,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsGetJsonData(const shared_ptr<JsRuntime>& 
         LOGE("JsGetJsonData failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasGetJsonData");
 
     return runtime->NewString(jsonData.c_str());
 }
@@ -2499,7 +2499,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsWidthGetter(const shared_ptr<JsRuntime>& 
     if (!delegate) {
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasGetWidth");
 
     return runtime->NewNumber(width);
 }
@@ -2537,7 +2537,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsHeightGetter(const shared_ptr<JsRuntime>&
     if (!delegate) {
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUICanvasGetHeight");
 
     return runtime->NewNumber(height);
 }

@@ -406,6 +406,40 @@ class SearchFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class SearchSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().search.setSelectedBackgroundColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchTextIndentModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchTextIndent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetTextIndent(node);
+    } else {
+      getUINativeModule().search.setTextIndent(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -543,6 +577,14 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   maxFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
+    return this;
+  }
+  selectedBackgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, SearchSelectedBackgroundColorModifier.identity, SearchSelectedBackgroundColorModifier, value);
+    return this;
+  }
+  textIndent(value: Dimension): this {
+    modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
     return this;
   }
 }

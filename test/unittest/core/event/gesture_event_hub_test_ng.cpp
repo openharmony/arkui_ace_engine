@@ -2719,4 +2719,27 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest002, TestSize.Level1)
     EXPECT_EQ(sizeGestureHierarchy, 1);
     EXPECT_EQ(group->gestures_.size(), 1);
 }
+
+
+/**
+ * @tc.name: GestureEventHubTest033
+ * @tc.desc: Test ClickEventActuator AddClickAfterEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    auto clickCallback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    guestureEventHub->AddClickAfterEvent(clickEvent);
+    EXPECT_NE(guestureEventHub->GetClickEvent(), nullptr);
+}
+
 } // namespace OHOS::Ace::NG

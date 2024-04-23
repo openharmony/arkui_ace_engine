@@ -14,8 +14,8 @@
  */
 #include "particle_modifier.h"
 
-#include "core/components_ng/pattern/particle/particle_model_ng.h"
 #include "base/geometry/dimension.h"
+#include "core/components_ng/pattern/particle/particle_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -47,12 +47,46 @@ void ResetDisturbanceField(ArkUINodeHandle node)
     ParticleModelNG::DisturbanceField(dataArray, frameNode);
 }
 
+void setEmitter(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<EmitterProps> emitterProps;
+    for (ArkUI_Int32 i = 0; i < length / 9; i++) {
+        EmitterProps prop;
+
+        //The numbers 0-9 represent each attribute in the object, corresponding to index，hasEmitRate，emitRate,
+        //hasPosition，positionX，positionY，hasSize，sizeX，sizeY. Among them, index 1, 3, and 6 are marker values,
+        // indicating whether the attributes following the markers exist.
+        prop.index = values[i * 9].i32;
+        if (values[i * 9 + 1].i32 == 1) {
+            prop.emitRate = values[i * 9 + 2].i32;
+        }
+        if (values[i * 9 + 3].i32 == 1) {
+            prop.position = VectorF(values[i * 9 + 4].f32, values[i * 9 + 5].f32);
+        }
+        if (values[i * 9 + 6].i32 == 1) {
+            prop.size = VectorF(values[i * 9 + 7].f32, values[i * 9 + 8].f32);
+        }
+        emitterProps.push_back(prop);
+    }
+    ParticleModelNG::updateEmitter(emitterProps, frameNode);
+}
+
+void resetEmitter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<EmitterProps> dataArray;
+    ParticleModelNG::updateEmitter(dataArray, frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIParticleModifier* GetParticleModifier()
 {
-    static const ArkUIParticleModifier modifier = { SetDisturbanceField, ResetDisturbanceField };
+    static const ArkUIParticleModifier modifier = { SetDisturbanceField, ResetDisturbanceField, setEmitter,
+        resetEmitter };
     return &modifier;
 }
 } // namespace NodeModifier

@@ -172,7 +172,7 @@ bool Scheduler::PrintVsyncInfoIfNeed() const
             CHECK_NULL_VOID(pipeline);
             pipeline->PrintVsyncInfoIfNeed();
         },
-        TaskExecutor::TaskType::UI, delay);
+        TaskExecutor::TaskType::UI, delay, "ArkUIAnimationPrintVsyncInfo");
     return false;
 }
 

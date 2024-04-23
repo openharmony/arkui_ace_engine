@@ -305,7 +305,8 @@ void TextClockPattern::RequestUpdateForNextSecond()
         }
         textClock->UpdateTimeText();
     });
-    context->GetTaskExecutor()->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delayTime);
+    context->GetTaskExecutor()->PostDelayedTask(
+        delayTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUITextClockUpdateTimeText");
 }
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
@@ -345,8 +346,9 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     // parse data time
     std::string tempdateTimeValue = dateTimeValue;
     std::string strAmPm = GetAmPm(tempdateTimeValue);
-    if (!strAmPm.empty()) {
-        tempdateTimeValue.replace(tempdateTimeValue.find(strAmPm), strAmPm.length(), "");
+    auto strAmPmPos = tempdateTimeValue.find(strAmPm);
+    if (!strAmPm.empty() && strAmPmPos != std::string::npos) {
+        tempdateTimeValue.replace(strAmPmPos, strAmPm.length(), "");
     }
     std::vector<std::string> curDateTime = ParseDateTimeValue(tempdateTimeValue);
     curDateTime[(int32_t)(TextClockElementIndex::CUR_AMPM_INDEX)] = strAmPm;

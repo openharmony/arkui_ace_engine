@@ -366,7 +366,7 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIMarkNeedRenderOnly");
 }
 
 void RosenRenderSurface::ConsumeXComponentBuffer()

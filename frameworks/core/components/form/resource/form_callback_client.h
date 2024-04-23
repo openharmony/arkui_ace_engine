@@ -41,7 +41,7 @@ public:
                     formManagerDelegate->ProcessFormUpdate(formJsInfo);
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessUpdate");
     }
 
     void ProcessFormUninstall(const int64_t formId) override
@@ -58,7 +58,7 @@ public:
                     formManagerDelegate->ProcessFormUninstall(formId);
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessUninstall");
     }
 
     void OnDeathReceived() override
@@ -75,7 +75,7 @@ public:
                     formManagerDelegate->OnDeathReceived();
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIFormDeathReceived");
     }
 
     void OnError(const int32_t errorCode, const std::string& errorMsg) override
@@ -92,7 +92,7 @@ public:
                     formManagerDelegate->OnFormError(std::to_string(errorCode), errorMsg);
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIFormError");
     }
 
     void SetFormManagerDelegate(WeakPtr<FormManagerDelegate> delegate)
@@ -119,7 +119,7 @@ public:
                     formManagerDelegate->ProcessRecycleForm();
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessRecycleForm");
     }
 
 private:

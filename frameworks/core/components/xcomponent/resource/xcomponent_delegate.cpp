@@ -125,7 +125,7 @@ void XComponentDelegate::CreatePluginResource(
         }
         state_ = State::CREATED;
         hash_ = MakeResourceHash();
-    });
+    }, "ArkUIXComponentCreatePluginResource");
 }
 
 // upper ui component which inherited from XComponentComponent

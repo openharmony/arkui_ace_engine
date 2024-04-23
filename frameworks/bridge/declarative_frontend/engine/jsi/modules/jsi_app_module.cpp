@@ -68,7 +68,7 @@ shared_ptr<JsValue> AppTerminate(const shared_ptr<JsRuntime>& runtime, const sha
         if (pipelineContext) {
             pipelineContext->Finish();
         }
-    });
+    }, "ArkUIAppTerminate");
     return runtime->NewNull();
 }
 
@@ -103,7 +103,7 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
                 imageCache->SetCapacity(size);
             }
         }
-    }, TaskExecutor::TaskType::UI);
+    }, TaskExecutor::TaskType::UI, "ArkUISetImageCacheCount");
     return runtime->NewNull();
 }
 
@@ -140,7 +140,7 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
                 imageCache->SetDataCacheLimit(size);
             }
         }
-    }, TaskExecutor::TaskType::UI);
+    }, TaskExecutor::TaskType::UI, "ArkUISetImageDataCacheSize");
     return runtime->NewNull();
 }
 

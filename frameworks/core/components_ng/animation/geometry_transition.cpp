@@ -335,7 +335,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
                     auto geometryTransition = weakGT.Upgrade();
                     CHECK_NULL_VOID(geometryTransition);
                     geometryTransition->isSynced_ = true;
-                }, TaskExecutor::TaskType::UI);
+                }, TaskExecutor::TaskType::UI, "ArkUIAnimationGeometryTransitionSynced");
         }
     }
     auto propertyCallback = [&]() {

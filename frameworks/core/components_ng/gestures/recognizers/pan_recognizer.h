@@ -133,6 +133,8 @@ private:
     void OnResetStatus() override;
     void OnSucceedCancel() override;
 
+    void AddOverTimeTrace();
+
     const TouchRestrict& GetTouchRestrict() const
     {
         return touchRestrict_;

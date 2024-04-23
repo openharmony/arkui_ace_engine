@@ -83,9 +83,14 @@ GradientColor CreateTextGradientColor(float percent, Color color)
 
 void TextPattern::OnAttachToFrameNode()
 {
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        auto host = GetHost();
+        fontManager->AddFontNodeNG(host);
+    }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
@@ -216,7 +221,10 @@ std::list<ResultObject> TextPattern::GetSpansInfoInStyledString(int32_t start, i
 {
     std::list<ResultObject> resultObjects;
     for (const auto& item : spans_) {
-        resultObjects.emplace_back(item->GetSpanResultObject(start, end));
+        auto obj = item->GetSpanResultObject(start, end);
+        if (obj.isInit) {
+            resultObjects.emplace_back(obj);
+        }
     }
     return resultObjects;
 }
@@ -1652,6 +1660,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     auto lm = node->GetLeadingMarginValue({});
     textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
     textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
+    textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = Dimension(lm.size.Width()).ConvertToVp();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = Dimension(lm.size.Height()).ConvertToVp();
@@ -2621,6 +2630,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::LINEHEIGHT:
                 if (textLayoutProp->HasLineHeight()) {
                     child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
+                }
+                break;
+            case PropertyInfo::LINESPACING:
+                if (textLayoutProp->HasLineSpacing()) {
+                    child->UpdateLineSpacingWithoutFlushDirty(textLayoutProp->GetLineSpacing().value());
                 }
                 break;
             case PropertyInfo::TEXTSHADOW:

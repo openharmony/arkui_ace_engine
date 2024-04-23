@@ -182,10 +182,10 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     PaintCaret(drawingContext);
     SetSelectedColor(selectedBackgroundColor_->Get());
     TextOverlayModifier::onDraw(drawingContext);
-    magnifierPainter_.PaintMagnifier(drawingContext.canvas);
     drawingContext.canvas.Restore();
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
+    magnifierPainter_.PaintMagnifier(drawingContext.canvas);
 }
 
 void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)

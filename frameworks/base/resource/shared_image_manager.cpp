@@ -60,9 +60,11 @@ void SharedImageManager::PostDelayedTaskToClearImageData(const std::string& name
     auto bkTask = [wp = taskExecutor_, cancelableCallback]() {
         auto taskExecutor = wp.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(cancelableCallback, TaskExecutor::TaskType::BACKGROUND);
+        taskExecutor->PostTask(
+            cancelableCallback, TaskExecutor::TaskType::BACKGROUND, "ArkUIImageClearSharedImageData");
     };
-    taskExecutor->PostDelayedTask(bkTask, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_IMAGE_DATA_CLEAN);
+    taskExecutor->PostDelayedTask(
+        bkTask, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_IMAGE_DATA_CLEAN, "ArkUIImageClearSharedImageData");
 }
 
 void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& sharedImage)
@@ -115,7 +117,7 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                 }
                 sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData");
 }
 
 void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)

@@ -114,7 +114,7 @@ private:
     void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;
-    bool PostTask(const TaskExecutor::Task& task);
+    bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
     bool IsSweepEffectOn();
 

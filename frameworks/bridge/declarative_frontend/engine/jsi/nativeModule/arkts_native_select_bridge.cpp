@@ -718,7 +718,7 @@ ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
     if (!secondArg->IsObject()) {
-        SelectModelNG::SetBuilderFunc(frameNode, nullptr);
+        SelectModelNG::ResetBuilderFunc(frameNode);
         return panda::JSValueRef::Undefined(vm);
     }
     panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);

@@ -989,6 +989,7 @@ let DismissReason;
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
+  DismissReason[DismissReason.SLIDE_DOWN = 3] = "SLIDE_DOWN";
 })(DismissReason || (DismissReason = {}));
 
 var HoverEffect;
@@ -2320,7 +2321,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
@@ -2370,7 +2371,10 @@ class ChildrenMainSize {
       this.sizeArray.splice(startValue, deleteCountValue);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
     } else if (paramCount === 3) {
-      let childrenSizeLength = childrenSize.length;
+      let childrenSizeLength = childrenSize ? childrenSize.length : 0;
+      if (childrenSizeLength === 0) {
+        childrenSize = [];
+      }
       for (let i = 0; i < childrenSizeLength; i++) {
         if (this.isInvalid(childrenSize[i])) {
           // -1: represent default size.
@@ -2407,7 +2411,7 @@ class ChildrenMainSize {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
@@ -2503,6 +2507,7 @@ var SaveDescription;
   SaveDescription[SaveDescription["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
+  SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
 })(SaveDescription || (SaveDescription = {}));
 
 var SaveButtonOnClickResult;

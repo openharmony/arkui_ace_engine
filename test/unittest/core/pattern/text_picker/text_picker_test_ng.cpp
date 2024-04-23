@@ -24,6 +24,8 @@
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
@@ -210,11 +212,15 @@ void TextPickerTestNg::InitTextPickerTestNg()
 void TextPickerTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
 }
 
 void TextPickerTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void TextPickerTestNg::SetUp()
@@ -3569,6 +3575,97 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPickerPaintTest003
+ * @tc.desc: Test SetStrokeWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPaintTest003, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
+     */
+    auto theme = MockPipelineContext::GetCurrentContext()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. execute SetStrokeWidth
+     * @tc.expected: the results we get are as expected
+     */
+    ItemDivider divider;
+    DividerInfo info;
+    auto result = textPickerPaintMethod->SetStrokeWidth(divider, 0.0, info);
+    EXPECT_FALSE(result);
+
+    divider.strokeWidth = 10.0_px;
+    result = textPickerPaintMethod->SetStrokeWidth(divider, 0.0, info);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: TextPickerPaintTest004
+ * @tc.desc: Test NeedPaintDividerLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPaintTest004, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get TextPickerPaintMethod RefPtr.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    theme->gradientHeight_ = Dimension(10.0);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. execute NeedPaintDividerLines
+     * @tc.expected: the results we get are as expected
+     */
+    RectF contentRect;
+    ItemDivider divider;
+    DividerInfo info;
+    auto result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, divider, 0.0, info);
+    EXPECT_FALSE(result);
+
+    auto thickness = theme->GetDividerThickness();
+    auto isShowInDialog = textPickerPattern->GetIsShowInDialog();
+
+    theme->dividerThickness_ = 10.0_px;
+    divider.strokeWidth = 10.0_px;
+    textPickerPattern->SetIsShowInDialog(true);
+    result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, divider, 0.0, info);
+    textPickerPattern->SetIsShowInDialog(false);
+    result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, divider, 0.0, info);
+    EXPECT_FALSE(result);
+
+    contentRect.width_ = 5.0f;
+    divider.endMargin = 10.0_px;
+    result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, divider, 0.0, info);
+    divider.isRtl = !divider.isRtl;
+    result = textPickerPaintMethod->NeedPaintDividerLines(contentRect, divider, 0.0, info);
+    EXPECT_TRUE(result);
+
+    theme->dividerThickness_ = thickness;
+    textPickerPattern->SetIsShowInDialog(isShowInDialog);
+}
+
+/**
  * @tc.name: TextPickerPatternTest001
  * @tc.desc: test OnKeyEvent
  * @tc.type: FUNC
@@ -4890,6 +4987,103 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest003, TestSize.Level1)
     divider.endMargin = 10.0_vp;
     TextPickerModelNG::GetInstance()->SetDivider(divider);
     EXPECT_EQ(textPickerLayoutProperty->GetDivider(), divider);
+}
+
+/**
+ * @tc.name: TextPickerModelTest004
+ * @tc.desc: Test SetTextPickerDialogShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker dialog model.
+     */
+    TextPickerDialogModelNG textPickerDialogModel;
+    RefPtr<AceType> pickerText = AceType::MakeRefPtr<AceType>();
+    TextPickerSettingData settingData;
+    std::function<void()> onCancel = []() {};
+    std::function<void(const std::string&)> onAccept = [](const std::string&) {};
+    std::function<void(const std::string&)> onChange = [](const std::string&) {};
+    TextPickerDialog textPickerDialog;
+    textPickerDialog.alignment = DialogAlignment::CENTER;
+    TextPickerDialogEvent textPickerDialogEvent;
+    std::vector<ButtonInfo> buttonInfos;
+
+    /**
+     * test method SetTextPickerDialogShow.
+     */
+    textPickerDialogModel.SetTextPickerDialogShow(pickerText, settingData, std::move(onCancel),
+        std::move(onAccept), std::move(onChange), textPickerDialog, textPickerDialogEvent, buttonInfos);
+    EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
+}
+
+/**
+ * @tc.name: TextPickerModelTest005
+ * @tc.desc: Test SetNormalTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelTest005, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker model.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(node, nullptr);
+    PickerTextStyle pickerTextStyle;
+    TextPickerModelNG::SetNormalTextStyle(node, theme, pickerTextStyle);
+    TextPickerModelNG::SetSelectedTextStyle(node, theme, pickerTextStyle);
+    TextPickerModelNG::SetDisappearTextStyle(node, theme, pickerTextStyle);
+
+    /**
+     * @tc.steps: step2. execute SetNormalTextStyle
+     * @tc.expected: prop is set as expected
+     */
+    Dimension fontSize(10.0f);
+    pickerTextStyle.fontSize = fontSize;
+    TextPickerModelNG::SetNormalTextStyle(node, theme, pickerTextStyle);
+    TextPickerModelNG::SetSelectedTextStyle(node, theme, pickerTextStyle);
+    TextPickerModelNG::SetDisappearTextStyle(node, theme, pickerTextStyle);
+
+    auto textPickerLayoutProperty = node->GetLayoutProperty<TextPickerLayoutProperty>();
+    EXPECT_EQ(textPickerLayoutProperty->GetFontSizeValue(Dimension(0)).Value(), 10.0f);
+}
+
+/**
+ * @tc.name: TextPickerModelTest006
+ * @tc.desc: Test SetColumns
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelTest006, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker model.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(node, nullptr);
+    std::vector<NG::TextCascadePickerOptions> options;
+    TextPickerModelNG::SetColumns(node, options);
+    TextPickerModelNG::getTextPickerRange(node);
+
+    /**
+     * @tc.steps: step2. execute SetColumns
+     * @tc.expected: prop is set as expected
+     */
+    TextPickerModelNG::isCascade_ = !TextPickerModelNG::isCascade_;
+    TextPickerModelNG::isSingleRange_ = !TextPickerModelNG::isSingleRange_;
+    NG::TextCascadePickerOptions options1;
+    options1.rangeResult = { "11", "12", "13" };
+    options.emplace_back(options1);
+    TextPickerModelNG::SetColumns(node, options);
+    TextPickerModelNG::getTextPickerRange(node);
+    EXPECT_EQ(TextPickerModelNG::isCascade_, true);
+    EXPECT_EQ(TextPickerModelNG::isSingleRange_, false);
 }
 
 /**

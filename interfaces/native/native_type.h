@@ -99,6 +99,13 @@ struct ArkUI_Context;
 typedef struct ArkUI_Context* ArkUI_ContextHandle;
 
 /**
+ * @brief Defines the pointer type of the ArkUI native node content object.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_NodeContent* ArkUI_NodeContentHandle;
+
+/**
  * @brief Defines the event callback type.
  *
  * @since 12

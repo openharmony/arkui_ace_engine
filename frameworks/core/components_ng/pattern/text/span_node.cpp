@@ -108,6 +108,8 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     if (textLineStyle) {
         json->PutExtAttr("lineHeight",
             textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str(), filter);
+        json->PutExtAttr("lineSpacing",
+            textLineStyle->GetLineSpacing().value_or(Dimension()).ToString().c_str(), filter);
         json->PutExtAttr("baselineOffset",
             textLineStyle->GetBaselineOffset().value_or(Dimension()).ToString().c_str(), filter);
     }
@@ -209,6 +211,7 @@ void SpanNode::DumpInfo()
     }
     dumpLog.AddDesc(std::string("FontSize: ").append(textStyle->GetFontSize().ToString()));
     dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle->GetLineHeight().ToString()));
+    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle->GetLineSpacing().ToString()));
     dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle->GetBaselineOffset().ToString()));
     dumpLog.AddDesc(std::string("WordSpacing: ").append(textStyle->GetWordSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
@@ -567,6 +570,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
         resultObject.valueString = content;
+        resultObject.isInit = true;
     }
     return resultObject;
 }
@@ -602,6 +606,7 @@ TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode)
     INHERIT_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
 
     INHERIT_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+    INHERIT_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
     return textStyle;
 }
 
@@ -631,6 +636,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
     COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
 
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
+    COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
@@ -696,6 +702,7 @@ void ImageSpanNode::DumpInfo()
     dumpLog.AddDesc("--------------- print text style ---------------");
     dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
     dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
+    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
     dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
     dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
@@ -786,6 +793,7 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
         if (options.imagePixelMap.has_value()) {
             resultObject.valuePixelMap = options.imagePixelMap.value();
         }
+        resultObject.isInit = true;
     }
     return resultObject;
 }
@@ -834,7 +842,7 @@ std::set<PropertyInfo> SpanNode::CalculateInheritPropertyInfo()
         PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::BASELINE_OFFSET, PropertyInfo::LINEHEIGHT,
         PropertyInfo::TEXT_ALIGN, PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
         PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY, PropertyInfo::WORD_BREAK,
-        PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE };
+        PropertyInfo::LINE_BREAK_STRATEGY, PropertyInfo::FONTFEATURE, PropertyInfo::LINESPACING };
     set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
         propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
     return inheritPropertyInfo;

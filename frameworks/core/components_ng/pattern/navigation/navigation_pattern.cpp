@@ -906,7 +906,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     }
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap");
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
@@ -1308,7 +1308,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             CHECK_NULL_VOID(transitionProxy);
             transitionProxy->FireFinishCallback();
         },
-        TaskExecutor::TaskType::UI, timeout);
+        TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     RefPtr<EventHub> eventHub;
     if (!preTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());

@@ -101,7 +101,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
                 finishCallback();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIComponentSnapshotComplete");
 }
 } // namespace
 

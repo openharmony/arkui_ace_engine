@@ -209,10 +209,11 @@ public:
 
     bool SetActiveChildRange(int32_t start, int32_t end)
     {
+        int32_t count = GetTotalCount();
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
-            if ((start <= end && start <= index && end >= index) ||
-                (start > end && (index <= end || index >= start))) {
+            if ((index < count) && ((start <= end && start <= index && end >= index) ||
+                (start > end && (index <= end || index >= start)))) {
                 if (node.second) {
                     auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
                     if (frameNode) {

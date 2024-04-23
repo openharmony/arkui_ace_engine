@@ -1707,7 +1707,7 @@ void IndexerPattern::StartDelayTask(uint32_t duration)
         pattern->StartBubbleDisappearAnimation();
         });
     context->GetTaskExecutor()->PostDelayedTask(
-        delayTask_, TaskExecutor::TaskType::UI, duration);
+        delayTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerBubbleDisappear");
 }
 
 void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration)
@@ -1722,7 +1722,7 @@ void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_
         hostNode->MarkDirtyNode();
         });
     context->GetTaskExecutor()->PostDelayedTask(
-        delayCollapseTask_, TaskExecutor::TaskType::UI, duration);
+        delayCollapseTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerCollapse");
 }
 
 void IndexerPattern::StartBubbleDisappearAnimation()

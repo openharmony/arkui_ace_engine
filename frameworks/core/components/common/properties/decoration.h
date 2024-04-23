@@ -121,6 +121,32 @@ struct BlurOption {
     std::vector<float> grayscale;
 };
 
+struct MotionBlurAnchor {
+    float x = 0.0f;
+    float y = 0.0f;
+    bool operator==(const MotionBlurAnchor& other) const
+    {
+        return NearEqual(x, other.x) && NearEqual(y, other.y);
+    }
+    bool operator!=(const MotionBlurAnchor& other) const
+    {
+        return !operator==(other);
+    }
+};
+
+struct MotionBlurOption {
+    Dimension radius;
+    MotionBlurAnchor anchor;
+    bool operator==(const MotionBlurOption& other) const
+    {
+        return radius == other.radius && anchor == other.anchor;
+    }
+    bool operator!=(const MotionBlurOption& other) const
+    {
+        return !operator==(other);
+    }
+};
+
 struct BlurStyleOption {
     BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
     ThemeColorMode colorMode = ThemeColorMode::SYSTEM;
@@ -189,6 +215,48 @@ struct EffectOption {
         jsonEffect->Put("options", jsonBrightnessOption);
 
         json->PutExtAttr("backgroundEffect", jsonEffect, filter);
+    }
+};
+
+struct BrightnessOption {
+    double rate { 1.0f };
+    double lightUpDegree { 0.0f };
+    double cubicCoeff { 0.0f };
+    double quadCoeff { 0.0f };
+    double saturation { 1.0f };
+    std::vector<float> posRGB;
+    std::vector<float> negRGB;
+    double fraction { 1.0f };
+    bool operator==(const BrightnessOption& other) const
+    {
+        return NearEqual(rate, other.rate) && NearEqual(lightUpDegree, other.lightUpDegree) &&
+               NearEqual(cubicCoeff, other.cubicCoeff) && NearEqual(quadCoeff, other.quadCoeff) &&
+               NearEqual(saturation, other.saturation) && posRGB == other.posRGB && negRGB == other.negRGB &&
+               NearEqual(fraction, other.fraction);
+    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        auto jsonBrightnessOption = JsonUtil::Create(true);
+        jsonBrightnessOption->Put("rate", rate);
+        jsonBrightnessOption->Put("lightUpDegree", lightUpDegree);
+        jsonBrightnessOption->Put("cubicCoeff", cubicCoeff);
+        jsonBrightnessOption->Put("quadCoeff", quadCoeff);
+        auto posRGBstr = "[0.0,0.0,0.0]";
+        if (posRGB.size() > 1) {
+            posRGBstr =
+                ("[" + std::to_string(posRGB[0]) + "," + std::to_string(posRGB[1]) + "," + std::to_string(posRGB[2]) + "]")
+                    .c_str();
+        }
+        jsonBrightnessOption->Put("posRGB", posRGBstr);
+        auto negRGBstr = "[0.0,0.0,0.0]";
+        if (negRGB.size() > 1) {
+            negRGBstr =
+                ("[" + std::to_string(negRGB[0]) + "," + std::to_string(negRGB[1]) + "," + std::to_string(negRGB[2]) + "]")
+                    .c_str();
+        }
+        jsonBrightnessOption->Put("negRGB", negRGBstr);
+        jsonBrightnessOption->Put("fraction", fraction);
+        json->Put("brightnessEffect", jsonBrightnessOption);
     }
 };
 

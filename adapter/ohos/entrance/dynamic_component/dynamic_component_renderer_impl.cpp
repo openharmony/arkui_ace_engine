@@ -124,7 +124,7 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
                     CHECK_NULL_VOID(pattern);
                     pattern->OnSizeChanged(width, height);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
         }
     };
     pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
@@ -169,7 +169,7 @@ void DynamicComponentRendererImpl::AttachRenderContext()
             parent->RebuildRenderContextTree();
             hostRenderContext->RequestNextFrame();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentAttachRenderContext");
 }
 
 void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -181,7 +181,7 @@ void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MM
             ContainerScope scope(uiContent->GetInstanceId());
             uiContent->ProcessPointerEvent(pointerEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessPointer");
 }
 
 void DynamicComponentRendererImpl::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -193,7 +193,7 @@ void DynamicComponentRendererImpl::TransferKeyEvent(const std::shared_ptr<MMI::K
             ContainerScope scope(uiContent->GetInstanceId());
             uiContent->ProcessKeyEvent(keyEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentProcessKey");
 }
 
 void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& config,
@@ -245,7 +245,8 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
     if (contentReady) {
         auto taskExecutor = GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewportConfig");
     }
 }
 
@@ -259,7 +260,7 @@ void DynamicComponentRendererImpl::DestroyContent()
             TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "destroy dynamic UI content");
             uiContent->Destroy();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDynamicComponentDestroy");
 }
 
 RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetTaskExecutor()

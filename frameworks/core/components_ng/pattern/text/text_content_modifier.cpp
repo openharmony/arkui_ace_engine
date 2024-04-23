@@ -111,7 +111,7 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }
     }
@@ -126,7 +126,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() || textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
         }
     }
@@ -141,7 +141,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() || textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
         }
     }
@@ -183,18 +183,19 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
     auto shadowOffsetXFloat = MakeRefPtr<AnimatablePropertyFloat>(shadow.GetOffset().GetX());
     auto shadowOffsetYFloat = MakeRefPtr<AnimatablePropertyFloat>(shadow.GetOffset().GetY());
     auto shadowColor = MakeRefPtr<AnimatablePropertyColor>(LinearColor(shadow.GetColor()));
-    auto isFilled = MakeRefPtr<PropertyBool>(shadow.GetIsFilled());
-    shadows_.emplace_back(ShadowProp { .shadow = shadow,
+    Shadow textShadow;
+    textShadow.SetBlurRadius(shadow.GetBlurRadius());
+    textShadow.SetOffset(shadow.GetOffset());
+    textShadow.SetColor(shadow.GetColor());
+    shadows_.emplace_back(ShadowProp { .shadow = textShadow,
         .blurRadius = shadowBlurRadiusFloat,
         .offsetX = shadowOffsetXFloat,
         .offsetY = shadowOffsetYFloat,
-        .color = shadowColor,
-        .isFilled = isFilled });
+        .color = shadowColor });
     AttachProperty(shadowBlurRadiusFloat);
     AttachProperty(shadowOffsetXFloat);
     AttachProperty(shadowOffsetYFloat);
     AttachProperty(shadowColor);
-    AttachProperty(isFilled);
 }
 
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
@@ -707,12 +708,15 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
 
     for (size_t i = 0; i < shadows_.size(); ++i) {
         auto&& newShadow = value[i];
-        shadows_[i].shadow = newShadow;
+        Shadow textShadow;
+        textShadow.SetBlurRadius(newShadow.GetBlurRadius());
+        textShadow.SetOffset(newShadow.GetOffset());
+        textShadow.SetColor(newShadow.GetColor());
+        shadows_[i].shadow = textShadow;
         shadows_[i].blurRadius->Set(newShadow.GetBlurRadius());
         shadows_[i].offsetX->Set(newShadow.GetOffset().GetX());
         shadows_[i].offsetY->Set(newShadow.GetOffset().GetY());
         shadows_[i].color->Set(LinearColor(newShadow.GetColor()));
-        shadows_[i].isFilled->Set(newShadow.GetIsFilled());
     }
 }
 
@@ -833,6 +837,9 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
     }
 
     marqueeSet_ = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::INVISIBLE);
+    }
     if (textRacing_) {
         PauseTextRace();
     }
@@ -842,6 +849,9 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
 void TextContentModifier::StopTextRace()
 {
     marqueeSet_ = false;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::VISIBLE);
+    }
     PauseTextRace();
 }
 
@@ -856,8 +866,7 @@ void TextContentModifier::ResumeTextRace(bool bounce)
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }
-
-    UpdateImageNodeVisible(VisibleType::VISIBLE);
+    
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
     option.SetDuration(marqueeDuration_);
@@ -909,7 +918,8 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
                 onFinish();
             } else {
-                taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI);
+                taskExecutor->PostTask(
+                    [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUITextStartTextRace");
             }
         });
 }
@@ -919,7 +929,6 @@ void TextContentModifier::PauseTextRace()
     if (!textRacing_) {
         return;
     }
-    UpdateImageNodeVisible(VisibleType::INVISIBLE);
     if (raceAnimation_) {
         AnimationUtils::StopAnimation(raceAnimation_);
     }
@@ -983,13 +992,11 @@ void TextContentModifier::AddDefaultShadow()
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
     auto offsetY = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetY());
     auto color = MakeRefPtr<AnimatablePropertyColor>(LinearColor(emptyShadow.GetColor()));
-    auto isFilled = MakeRefPtr<PropertyBool>(emptyShadow.GetIsFilled());
     shadows_.emplace_back(ShadowProp {
-        .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color, .isFilled = isFilled });
+        .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
     AttachProperty(blurRadius);
     AttachProperty(offsetX);
     AttachProperty(offsetY);
     AttachProperty(color);
-    AttachProperty(isFilled);
 }
 } // namespace OHOS::Ace::NG

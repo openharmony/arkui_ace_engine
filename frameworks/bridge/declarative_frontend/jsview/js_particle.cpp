@@ -592,7 +592,7 @@ void ParseColorOption(JSRef<JSObject>& colorJsObject, OHOS::Ace::NG::ParticleCol
     ParseColorInitRange(colorRangeJsValue, colorOption);
 
     auto colorDist = OHOS::Ace::NG::DistributionType::UNIFORM;
-    auto colorDistJsValue = colorJsObject->GetProperty("distribution");
+    auto colorDistJsValue = colorJsObject->GetProperty("distributionType");
     if (colorDistJsValue->IsNumber()) {
         auto colorDistInt = colorDistJsValue->ToNumber<int32_t>();
         if (colorDistInt >= static_cast<int32_t>(OHOS::Ace::NG::DistributionType::UNIFORM) &&
@@ -754,8 +754,7 @@ void JSParticle::Create(const JSCallbackInfo& args)
     }
     ParticleModel::GetInstance()->Create(arrayValue);
 }
-void JSParticle::AddDisturbance(
-    std::vector<OHOS::Ace::ParticleDisturbance>& dataArray, const JSRef<JSObject>& paramObj)
+void JSParticle::AddDisturbance(std::vector<OHOS::Ace::ParticleDisturbance>& dataArray, const JSRef<JSObject>& paramObj)
 {
     float strength = paramObj->GetProperty("strength")->ToNumber<float>();
     int shape = paramObj->GetProperty("shape")->ToNumber<int>();
@@ -827,11 +826,58 @@ void JSParticle::JsDisturbanceFields(const JSCallbackInfo& args)
     ParticleModel::GetInstance()->DisturbanceField(dataArray);
 }
 
+void JSParticle::ParseEmitterProps(std::vector<OHOS::Ace::EmitterProps>& data, const JSRef<JSObject>& paramObj)
+{
+    EmitterProps emitterProperty;
+    auto index = 0;
+    auto indexJsValue = paramObj->GetProperty("index")->ToNumber<int32_t>();
+    emitterProperty.index = indexJsValue > 0 ? indexJsValue : index;
+
+    auto emitRateProperty = paramObj->GetProperty("emitRate");
+    if (emitRateProperty->IsNumber()) {
+        auto emitRateValue = emitRateProperty->ToNumber<int32_t>();
+        emitterProperty.emitRate = emitRateValue > 0 ? emitRateValue : PARTICLE_DEFAULT_EMITTER_RATE;
+    }
+    auto positionProperty = paramObj->GetProperty("position");
+    if (positionProperty->IsObject()) {
+        auto positionValue = Framework::JSRef<Framework::JSObject>::Cast(positionProperty);
+        auto positionXValue = positionValue->GetProperty("x")->ToNumber<float>();
+        auto positonYValue = positionValue->GetProperty("y")->ToNumber<float>();
+        emitterProperty.position = { positionXValue, positonYValue };
+    }
+    auto sizeProperty = paramObj->GetProperty("size");
+    if (sizeProperty->IsObject()) {
+        auto sizeValue = Framework::JSRef<Framework::JSObject>::Cast(sizeProperty);
+        auto sizeXValue = sizeValue->GetProperty("width")->ToNumber<float>();
+        auto sizeYValue = sizeValue->GetProperty("height")->ToNumber<float>();
+        if (sizeXValue >= 0 && sizeYValue >= 0) {
+            emitterProperty.size = { sizeXValue, sizeYValue };
+        }
+    }
+    data.push_back(emitterProperty);
+}
+
+void JSParticle::JsEmitter(const JSCallbackInfo& args)
+{
+    if (args.Length() != 1 || !args[0]->IsArray()) {
+        return;
+    }
+    std::vector<EmitterProps> dataArray;
+    JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
+    for (size_t i = 0; i < dataJsArray->Length(); i++) {
+        auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));
+        ParseEmitterProps(dataArray, jsObject);
+    }
+
+    ParticleModel::GetInstance()->updateEmitter(dataArray);
+}
+
 void JSParticle::JSBind(BindingTarget globalObj)
 {
     JSClass<JSParticle>::Declare("Particle");
     JSClass<JSParticle>::StaticMethod("create", &JSParticle::Create);
     JSClass<JSParticle>::StaticMethod("disturbanceFields", &JSParticle::JsDisturbanceFields);
+    JSClass<JSParticle>::StaticMethod("emitter", &JSParticle::JsEmitter);
     JSClass<JSParticle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

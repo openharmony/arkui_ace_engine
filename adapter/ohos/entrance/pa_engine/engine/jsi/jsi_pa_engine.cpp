@@ -409,7 +409,7 @@ bool JsiPaEngine::Initialize(BackendType type, SrcLanguage language)
             return;
         }
         paEngine->InitializeInner(type, language);
-    });
+        }, "ArkUIPaEngineInit");
 
     return true;
 }

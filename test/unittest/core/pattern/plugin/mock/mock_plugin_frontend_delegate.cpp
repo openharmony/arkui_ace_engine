@@ -202,7 +202,7 @@ std::string PluginFrontendDelegate::GetParams()
 
 void PluginFrontendDelegate::TriggerPageUpdate(int32_t pageId, bool directExecute) {}
 
-void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task) {}
+void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task, const std::string& name) {}
 
 const std::string& PluginFrontendDelegate::GetAppID() const
 {
@@ -259,7 +259,7 @@ void PluginFrontendDelegate::WaitTimer(
 
 void PluginFrontendDelegate::ClearTimer(const std::string& callbackId) {}
 
-void PluginFrontendDelegate::PostSyncTaskToPage(std::function<void()>&& task) {}
+void PluginFrontendDelegate::PostSyncTaskToPage(std::function<void()>&& task, const std::string& name) {}
 
 void PluginFrontendDelegate::AddTaskObserver(std::function<void()>&& task) {}
 

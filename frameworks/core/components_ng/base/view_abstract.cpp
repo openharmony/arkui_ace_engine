@@ -376,6 +376,14 @@ void ViewAbstract::SetForegroundEffect(float radius)
     }
 }
 
+void ViewAbstract::SetMotionBlur(const MotionBlurOption &motionBlurOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(MotionBlur, motionBlurOption);
+}
+
 void ViewAbstract::SetBackgroundEffect(const EffectOption &effectOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1762,6 +1770,22 @@ void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
     ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
 }
 
+void ViewAbstract::SetBgDynamicBrightness(const BrightnessOption& brightnessOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BgDynamicBrightnessOption, brightnessOption);
+}
+
+void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
+}
+
 void ViewAbstract::SetFrontBlur(const Dimension &radius, const BlurOption &blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3007,6 +3031,11 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
+}
+
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3026,6 +3055,18 @@ void ViewAbstract::SetDynamicLightUp(FrameNode* frameNode, float rate, float lig
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpRate, rate, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree, frameNode);
+}
+
+void ViewAbstract::SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BgDynamicBrightnessOption, brightnessOption, frameNode);
+}
+
+void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)

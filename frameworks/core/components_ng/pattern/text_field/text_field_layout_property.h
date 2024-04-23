@@ -106,6 +106,7 @@ public:
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             json->PutExtAttr("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
             json->PutExtAttr("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+            json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
             auto jsonDecoration = JsonUtil::Create(true);
             std::string type = V2::ConvertWrapTextDecorationToStirng(
                 GetTextDecoration().value_or(TextDecoration::NONE));
@@ -149,6 +150,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);

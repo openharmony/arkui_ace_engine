@@ -193,7 +193,7 @@ void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t ca
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+    if (layoutWrapper->CheckNeedForceMeasureAndLayout()) {
         return true;
     }
     auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -859,7 +859,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
             SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
             wrapper->Measure(childLayoutConstraint_);
-        } else if (CheckNeedMeasure(wrapper)) {
+        } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
             wrapper->Measure(childLayoutConstraint_);
         }
@@ -896,7 +896,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
             SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
             wrapper->Measure(childLayoutConstraint_);
-        } else if (CheckNeedMeasure(wrapper)) {
+        } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
             wrapper->Measure(childLayoutConstraint_);
         }

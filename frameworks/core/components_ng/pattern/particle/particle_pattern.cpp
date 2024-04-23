@@ -76,4 +76,10 @@ void ParticlePattern::UpdateDisturbance(const std::vector<ParticleDisturbance>& 
     auto frameNode = GetHost();
     RosenRenderParticle::UpdateDisturbance(frameNode, disturbanceArray);
 }
+
+void ParticlePattern::updateEmitterPosition(const std::vector<EmitterProps>& props)
+{
+    auto frameNode = GetHost();
+    RosenRenderParticle::updateEmitterPosition(frameNode, props);
+}
 } // namespace OHOS::Ace::NG

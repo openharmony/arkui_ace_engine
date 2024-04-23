@@ -297,10 +297,7 @@ CalendarPickerSelectedType CalendarPickerPattern::CheckRegion(const Offset& glob
 bool CalendarPickerPattern::IsInNodeRegion(const RefPtr<FrameNode>& node, const PointF& point)
 {
     CHECK_NULL_RETURN(node, false);
-    auto geometryNode = node->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto rect = geometryNode->GetFrameRect();
-    rect.SetOffset(node->GetPaintRectOffset());
+    auto rect = node->GetTransformRectRelativeToWindow();
     return rect.IsInRegion(point);
 }
 
@@ -498,7 +495,7 @@ bool CalendarPickerPattern::HandleYearKeyWaitingEvent(
     if (yearPrefixZeroCount_ > 0 && yearPrefixZeroCount_ < YEAR_LENTH - 1 && number == 0 &&
         yearEnterCount_ == yearPrefixZeroCount_ + 1) {
         yearPrefixZeroCount_++;
-        PostTaskToUI(std::move(zeroStartTask));
+        PostTaskToUI(std::move(zeroStartTask), "ArkUICalendarPickerYearZeroStart");
         return true;
     } else if (yearPrefixZeroCount_ >= YEAR_LENTH - 1 && number == 0) {
         yearPrefixZeroCount_ = 0;
@@ -515,7 +512,7 @@ bool CalendarPickerPattern::HandleYearKeyWaitingEvent(
     if (yearEnterCount_ < YEAR_LENTH) {
         json->Replace("year", static_cast<int32_t>(newYear));
         SetDate(json->ToString());
-        PostTaskToUI(std::move(task));
+        PostTaskToUI(std::move(task), "ArkUICalendarPickerYearChange");
         return true;
     }
     newYear = std::max(newYear, MIN_YEAR);
@@ -558,12 +555,12 @@ bool CalendarPickerPattern::HandleYearKeyEvent(uint32_t number)
     } else {
         if (number == 0) {
             yearPrefixZeroCount_++;
-            PostTaskToUI(std::move(zeroStartTaskCallback));
+            PostTaskToUI(std::move(zeroStartTaskCallback), "ArkUICalendarPickerYearZeroStart");
             isKeyWaiting_ = true;
         } else {
             json->Replace("year", static_cast<int32_t>(number));
             SetDate(json->ToString());
-            PostTaskToUI(std::move(taskCallback));
+            PostTaskToUI(std::move(taskCallback), "ArkUICalendarPickerYearChange");
             isKeyWaiting_ = true;
         }
     }
@@ -611,13 +608,13 @@ bool CalendarPickerPattern::HandleMonthKeyEvent(uint32_t number)
     } else {
         if (number == 0) {
             monthPrefixZeroCount_++;
-            PostTaskToUI(std::move(zeroStartTaskCallback));
+            PostTaskToUI(std::move(zeroStartTaskCallback), "ArkUICalendarPickerMonthZeroStart");
             isKeyWaiting_ = true;
         } else {
             json->Replace("month", static_cast<int32_t>(number));
             SetDate(json->ToString());
 
-            PostTaskToUI(std::move(taskCallback));
+            PostTaskToUI(std::move(taskCallback), "ArkUICalendarPickerMonthChange");
             isKeyWaiting_ = true;
         }
     }
@@ -661,13 +658,13 @@ bool CalendarPickerPattern::HandleDayKeyEvent(uint32_t number)
     } else {
         if (number == 0) {
             dayPrefixZeroCount_++;
-            PostTaskToUI(std::move(zeroStartTaskCallback));
+            PostTaskToUI(std::move(zeroStartTaskCallback), "ArkUICalendarPickerDayZeroStart");
             isKeyWaiting_ = true;
         } else {
             json->Replace("day", static_cast<int32_t>(number));
             SetDate(json->ToString());
 
-            PostTaskToUI(std::move(taskCallback));
+            PostTaskToUI(std::move(taskCallback), "ArkUICalendarPickerDayChange");
             isKeyWaiting_ = true;
         }
     }
@@ -702,7 +699,7 @@ bool CalendarPickerPattern::HandleNumberKeyEvent(const KeyEvent& event)
     return false;
 }
 
-void CalendarPickerPattern::PostTaskToUI(const std::function<void()>& task)
+void CalendarPickerPattern::PostTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
     auto host = GetHost();
@@ -714,7 +711,7 @@ void CalendarPickerPattern::PostTaskToUI(const std::function<void()>& task)
     CHECK_NULL_VOID(taskExecutor);
 
     taskCount_++;
-    taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME);
+    taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, DELAY_TIME, name);
 }
 
 void CalendarPickerPattern::HandleTaskCallback()
