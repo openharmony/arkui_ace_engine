@@ -1842,6 +1842,7 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
         offsetRemain: number;
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 93
+#define ARKUI_FULL_API_VERSION 94
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 93
+#define ARKUI_NODE_API_VERSION 94
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2435,6 +2435,8 @@ struct ArkUIWaterFlowModifier {
     void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
+    void (*setEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
+    void (*resetEdgeEffect)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
