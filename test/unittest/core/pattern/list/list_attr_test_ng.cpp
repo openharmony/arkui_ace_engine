@@ -900,7 +900,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction001, TestSize.Level1)
 {
     /**
      * @tc.cases: Scrollable list, Not set ScrollEnabled
-     * @tc.expected: Default by list scrollable_
+     * @tc.expected: Default by list isScrollable_
      */
     CreateWithItem([](ListModelNG model) { model.SetScrollEnabled(true); });
     EXPECT_TRUE(pattern_->scrollableEvent_->GetEnable());
@@ -915,7 +915,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction002, TestSize.Level1)
 {
     /**
      * @tc.cases: UnScrollable list, Not set ScrollEnabled
-     * @tc.expected: Default by list scrollable_
+     * @tc.expected: Default by list isScrollable_
      */
     Create([](ListModelNG model) {
         model.SetScrollEnabled(true);
@@ -936,7 +936,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction003, TestSize.Level1)
 {
     /**
      * @tc.cases: Scrollable list, set ScrollEnabled:false
-     * @tc.expected: Default by list scrollable_
+     * @tc.expected: Default by list isScrollable_
      */
     CreateWithItem([](ListModelNG model) { model.SetScrollEnabled(false); });
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
@@ -951,7 +951,7 @@ HWTEST_F(ListAttrTestNg, AttrEnableScrollInteraction004, TestSize.Level1)
 {
     /**
      * @tc.cases: UnScrollable list, Set ScrollEnabled:true
-     * @tc.expected: Decided by list scrollable_
+     * @tc.expected: Decided by list isScrollable_
      */
     Create([](ListModelNG model) { model.SetScrollEnabled(true); });
     EXPECT_FALSE(pattern_->scrollableEvent_->GetEnable());
@@ -1014,7 +1014,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption001, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->scrollable_);
+    EXPECT_TRUE(pattern_->isScrollable_);
 }
 
 /**
@@ -1029,7 +1029,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption002, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->scrollable_);
+    EXPECT_TRUE(pattern_->isScrollable_);
 }
 
 /**
@@ -1044,7 +1044,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption003, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, false);
     });
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
-    EXPECT_FALSE(pattern_->scrollable_);
+    EXPECT_FALSE(pattern_->isScrollable_);
 }
 
 /**
@@ -1059,7 +1059,7 @@ HWTEST_F(ListAttrTestNg, EdgeEffectOption004, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
     });
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
-    EXPECT_TRUE(pattern_->scrollable_);
+    EXPECT_TRUE(pattern_->isScrollable_);
 }
 
 /**
