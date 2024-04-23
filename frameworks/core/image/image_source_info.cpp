@@ -104,7 +104,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
         return SrcType::INTERNAL;
     } else if (head == "data") {
         static constexpr char BASE64_PATTERN[] =
-            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP);base64$";
+            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP|heic|heif|HEIF);base64$";
         if (IsValidBase64Head(uri, BASE64_PATTERN)) {
             return SrcType::BASE64;
         }
