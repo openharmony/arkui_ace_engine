@@ -67,9 +67,29 @@ public:
         repeatCount_ = repeatCount;
     }
 
-    void SetIsActive(bool isActive)
+    void SetIsActive(std::optional<bool> isActive)
     {
         isActive_ = isActive;
+    }
+
+    void SetTriggerNum(uint32_t triggerNum)
+    {
+        if(!triggerNum_.has_value()) {
+            isTriggerNumChanged_ = true;
+        }else{
+            uint32_t lastTriggerNum = triggerNum_.Value();
+            if (triggerNum != lastTriggerNum){
+                isTriggerNumChanged_ = true;
+            }else{
+                isTriggerNumChanged_ = false;
+            }
+        }
+        triggerNum_ = triggerNum;
+    }
+
+    void SetIsTxtActive(bool isTxtActive)
+    {
+        isTxtActive_ = isTxtActive;
     }
 
     SymbolEffectType GetEffectType() const
@@ -97,9 +117,24 @@ public:
         return repeatCount_;
     }
 
-    bool GetIsActive() const
+    std::optional<bool> GetIsActive() const
     {
         return isActive_;
+    }   
+    
+    bool GetIsTxtActive() const
+    {
+        return isTxtActive_;
+    }
+
+    std::optional<bool> IsTriggerChanged() const
+    {
+        return isTriggerNumChanged_;
+    }
+
+    std::optional<uint32_t> GetTriggerNum() const
+    {
+        return triggerNum_;
     }
 
     bool operator==(const SymbolEffectOptions& info) const;
@@ -122,8 +157,11 @@ private:
     std::optional<ScopeType> scopeType_;
     std::optional<CommonSubType> commonSubType_;
     std::optional<FillStyle> fillStyle_;
+    std::optional<bool> isActive_;
+    std::optional<uint32_t> triggerNum_;
+    std::optional<bool> isTriggerNumChanged_;
+    bool isTxtActive_ = false;
     int32_t repeatCount_ = 1;
-    bool isActive_ = true;
 };
 
 } // namespace OHOS::Ace::NG

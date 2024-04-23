@@ -534,10 +534,15 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle)
             txtStyle.symbol.SetCommonSubType(commonType == 1 ? Rosen::Drawing::DrawingCommonSubType::UP
                                                              : Rosen::Drawing::DrawingCommonSubType::DOWN);
         }
-        txtStyle.symbol.SetAnimationStart(options.GetIsActive());
+        txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
         txtStyle.symbol.SetRepeatCount(options.GetRepeatCount());
     } else {
-        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
+        auto effectStrategy = textStyle.GetEffectStrategy();
+        if (effectStrategy < 0 || effectStrategy > 2) {
+            effectStrategy = 0;
+        }
+        txtStyle.symbol.SetSymbolEffect(effectStrategy);
+        txtStyle.symbol.SetAnimationStart(true);
     }
     txtStyle.fontFamilies.push_back("HM Symbol");
 }
@@ -768,9 +773,14 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
             }
         }
         txtStyle.symbol.SetRepeatCount(options.GetRepeatCount());
-        txtStyle.symbol.SetAnimationStart(options.GetIsActive());
+        txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
     } else {
-        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
+        auto effectStrategyValue = textStyle.GetEffectStrategy();
+        if (effectStrategyValue < 0 || effectStrategyValue > 2) {
+            effectStrategyValue = 0;
+        }
+        txtStyle.symbol.SetSymbolEffect(effectStrategyValue);
+        txtStyle.symbol.SetAnimationStart(true);
     }
     txtStyle.fontFamilies.push_back("HM Symbol");
 }

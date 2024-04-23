@@ -149,9 +149,8 @@ void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
     NG::SymbolEffectOptions symbolEffectOptions;
     parseSymbolEffect(symbolEffectObj, symbolEffectOptions);
 
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        auto effectionsObj = JSRef<JSObject>::Cast(info[1]);
-        parseEffectOptions(effectionsObj, symbolEffectOptions);
+    if (info.Length() > 1 && !info[1]->IsUndefined) {
+        parseSymbolSwitch(info[1],symbolEffectOptions);
     }
 
     setDefaultOptions(symbolEffectOptions);
@@ -197,16 +196,45 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     }
 }
 
-void JSSymbol::parseEffectOptions(const JSRef<JSObject> effectionsObj, NG::SymbolEffectOptions& symbolEffectOptions)
+void JSSymbol::parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptions& symbolEffectOptions)
 {
-    auto repeatCountProperty = effectionsObj->GetProperty("repeat");
-    if (repeatCountProperty->IsNumber()) {
-        symbolEffectOptions.SetRepeatCount(repeatCountProperty->ToNumber<int32_t>());
+    if (info[1]->IsBoolean()) {
+        symbolEffectOptions.SetIsActive(info[1]->IsBoolean());
+    }
+    if (info[1]->IsNumber()) {
+        uint32_t triggerValue = -1;
+        ParseJsInteger(info[1], triggerValue);
+        symbolEffectOptions.SetTriggerNum(triggerValue);
     }
 
-    auto isActiveProperty = effectionsObj->GetProperty("isActive");
-    if (isActiveProperty->IsBoolean()) {
-        symbolEffectOptions.SetIsActive(isActiveProperty->ToBoolean());
+    if (symbolEffectOptions.GetIsActive().has_value()) {
+        auto isActive = symbolEffectOptions.GetIsActive();
+        if (symbolEffectOptions.IsTriggerChanged().has_value()) {
+            auto isTriggerChanged = symbolEffectOptions.IsTriggerChanged().value();
+            if(isActive && isTriggerChanged) {
+                // isActive=true &&  triggerChanged = true
+                symbolEffectOptions.SetIsTxtActive(true);
+                symbolEffectOptions.SetRepeatCount(-1);
+            }else if(!isActive && isTriggerChanged) {
+                // isActive=false &&  triggerChanged = true
+                symbolEffectOptions.SetIsTxtActive(true);
+                symbolEffectOptions.SetRepeatCount(1);
+            }else{
+                // sActive=false/true &&  triggerChanged = false
+                symbolEffectOptions.SetIsTxtActive(false);
+            }
+        }else{
+           // 只设isActive = true/false
+            symbolEffectOptions.SetIsTxtActive(isActive);
+            symbolEffectOptions.SetRepeatCount(-1);
+        }
+    }else if (symbolEffectOptions.GetTriggerNum().has_value()) {
+        // 只设triggerValue
+        symbolEffectOptions.SetIsTxtActive(symbolEffectOptions.IsTriggerChanged().value_or(false));
+        symbolEffectOptions.SetRepeatCount(1);
+    }else{
+        // isActive && triggerValue未设置,默认不播放
+        symbolEffectOptions.SetIsTxtActive(false);
     }
 }
 

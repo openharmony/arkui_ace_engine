@@ -36,7 +36,7 @@ public:
 
 private:
     static void parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions);
-    static void parseEffectOptions(const JSRef<JSObject> effectionsObj, NG::SymbolEffectOptions& symbolEffectOptions);
+    static void parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptions& symbolEffectOptions);
     static void setDefaultOptions(NG::SymbolEffectOptions& symbolEffectOptions);
 };
 
