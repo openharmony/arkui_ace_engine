@@ -2389,7 +2389,7 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
     Offset textOffset = { touchX - textRect.GetX() - GetParentGlobalOffset().GetX(),
         touchY - textRect.GetY() - GetParentGlobalOffset().GetY() - theme->GetInsertCursorOffset().ConvertToPx() };
-    auto position = paragraphs_.GetIndex(textOffset);
+    auto position = isShowPlaceholder_? 0 : paragraphs_.GetIndex(textOffset);
     float caretHeight = 0.0f;
     SetCaretPosition(position);
     OffsetF lastTouchOffset = { static_cast<float>(textOffset.GetX()), static_cast<float>(textOffset.GetY()) };
@@ -2950,6 +2950,8 @@ void RichEditorPattern::SpanNodeFission(
             spanNodeAfter->MountToParent(host, infoAfter.GetSpanIndex());
             spanNodeAfter->UpdateContent(StringUtils::ToString(textAfter));
             CopyTextSpanStyle(spanNode, spanNodeAfter);
+            auto spanItemAfter = spanNodeAfter->GetSpanItem();
+            AddSpanItem(spanItemAfter, infoAfter.GetSpanIndex());
         }
     } else {
         text = StringUtils::ToString(textTemp);
