@@ -403,6 +403,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
+    layoutSeperately_ = true;
 }
 
 FrameNode::~FrameNode()
