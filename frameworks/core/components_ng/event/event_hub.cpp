@@ -318,6 +318,11 @@ bool EventHub::HasOnSizeChanged() const
     return static_cast<bool>(onSizeChanged_) || static_cast<bool>(onJsFrameNodeSizeChanged_);
 }
 
+bool EventHub::HasImmediatelyVisibleCallback()
+{
+    return visibleAreaUserCallback_.callback || visibleAreaInnerCallback_.callback;
+}
+
 void EventHub::ClearOnAreaChangedInnerCallbacks()
 {
     onAreaChangedInnerCallbacks_.clear();

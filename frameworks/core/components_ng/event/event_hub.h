@@ -448,7 +448,7 @@ public:
         keyboardShortcut.keys = keys;
         keyboardShortcut.onKeyboardShortcutAction = onKeyboardShortcutAction;
 
-        for (auto &shortCut: keyboardShortcut_) {
+        for (auto& shortCut : keyboardShortcut_) {
             if (shortCut.IsEqualTrigger(keyboardShortcut)) {
                 shortCut.onKeyboardShortcutAction = onKeyboardShortcutAction;
                 return;
@@ -503,8 +503,8 @@ public:
 
     void ClearCustomerOnDragFunc();
 
-    void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
-        const std::string& extraParams = "");
+    void FireCustomerOnDragFunc(
+        DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams = "");
 
     bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
 
@@ -515,6 +515,8 @@ public:
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
 
     void ClearOnAreaChangedInnerCallbacks();
+
+    bool HasImmediatelyVisibleCallback();
 
     void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
     {
@@ -529,6 +531,16 @@ public:
     bool HasDefaultOnDragStart() const
     {
         return static_cast<bool>(defaultOnDragStart_);
+    }
+
+    std::vector<double>& GetThrottledVisibleAreaRatios()
+    {
+        return throttledVisibleAreaRatios_;
+    }
+
+    VisibleCallbackInfo& GetThrottledVisibleAreaCallback()
+    {
+        return throttledVisibleAreaCallback_;
     }
 
     std::vector<double>& GetVisibleAreaRatios(bool isUser)
@@ -549,32 +561,32 @@ public:
         }
     }
 
-    void SetVisibleAreaRatios(const std::vector<double>& ratio, bool isUser)
+    void SetVisibleAreaRatiosAndCallback(
+        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser)
     {
         if (isUser) {
-            visibleAreaUserRatios_ = ratio;
-        } else {
-            visibleAreaInnerRatios_ = ratio;
-        }
-    }
-
-    void SetVisibleAreaCallback(const VisibleCallbackInfo& callback, bool isUser)
-    {
-        if (isUser) {
-            visibleAreaUserCallback_ = callback;
+            VisibleCallbackInfo* cbInfo =
+                (callback.period == 0) ? &visibleAreaUserCallback_ : &throttledVisibleAreaCallback_;
+            auto ratioInfo = (callback.period == 0) ? &visibleAreaUserRatios_ : &throttledVisibleAreaRatios_;
+            *cbInfo = callback;
+            *ratioInfo = radios;
         } else {
             visibleAreaInnerCallback_ = callback;
+            visibleAreaInnerRatios_ = radios;
         }
     }
 
-    void CleanVisibleAreaCallback(bool isUser)
+    void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false)
     {
-        if (isUser) {
-            visibleAreaUserRatios_.clear();
-            visibleAreaUserCallback_.callback = nullptr;
-        } else {
+        if (!isUser) {
             visibleAreaInnerRatios_.clear();
             visibleAreaInnerCallback_.callback = nullptr;
+        } else if (isThrottled) {
+            throttledVisibleAreaRatios_.clear();
+            throttledVisibleAreaCallback_.callback = nullptr;
+        } else {
+            visibleAreaUserRatios_.clear();
+            visibleAreaUserCallback_.callback = nullptr;
         }
     }
 
@@ -628,9 +640,11 @@ private:
     std::vector<KeyboardShortcut> keyboardShortcut_;
 
     std::vector<double> visibleAreaUserRatios_;
-    std::vector<double> visibleAreaInnerRatios_;
     VisibleCallbackInfo visibleAreaUserCallback_;
+    std::vector<double> visibleAreaInnerRatios_;
     VisibleCallbackInfo visibleAreaInnerCallback_;
+    std::vector<double> throttledVisibleAreaRatios_;
+    VisibleCallbackInfo throttledVisibleAreaCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

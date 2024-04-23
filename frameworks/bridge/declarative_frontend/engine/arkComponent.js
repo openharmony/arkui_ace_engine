@@ -4030,6 +4030,10 @@ class UICommonEvent {
   setNodePtr(nodePtr) {
     this._nodePtr = nodePtr;
   }
+  // the first param is used to indicate frameNode
+  // the second param is used to indicate the callback 
+  // the third param is used to indicate the instanceid
+  // other options will be indicated after them
   setOnClick(callback) {
     this._clickEvent = callback;
     getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
@@ -4077,6 +4081,10 @@ class UICommonEvent {
   setOnSizeChange(callback) {
     this._onSizeChangeEvent = callback;
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
+  }
+  setOnVisibleAreaApproximateChange(options, callback) {
+    this._onVisibleAreaApproximateChange = callback;
+    getUINativeModule().frameNode.setOnVisibleAreaApproximateChange(this._nodePtr, callback, this._instanceId, options.ratios, options.expectedUpdateInterval ? options.expectedUpdateInterval : 1000);
   }
 }
 

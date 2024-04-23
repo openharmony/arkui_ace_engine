@@ -2729,6 +2729,11 @@ bool PipelineContext::HasDifferentDirectionGesture() const
     return eventManager_->HasDifferentDirectionGesture();
 }
 
+void PipelineContext::AddVisibleAreaChangeNode(const int32_t nodeId)
+{
+    onVisibleAreaChangeNodeIds_.emplace(nodeId);
+}
+
 void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
     const std::vector<double>& ratios, const VisibleRatioCallback& callback, bool isUserCallback)
 {

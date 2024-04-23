@@ -193,19 +193,21 @@ public:
 
     void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, true);
-        eventHub_->SetVisibleAreaCallback(callback, true);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback()
+    void CleanVisibleAreaUserCallback(bool isApproximate = false)
     {
-        eventHub_->CleanVisibleAreaCallback(true);
+        if (isApproximate) {
+            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
+        } else {
+            eventHub_->CleanVisibleAreaCallback(true, false);
+        }
     }
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
-        eventHub_->SetVisibleAreaRatios(ratios, false);
-        eventHub_->SetVisibleAreaCallback(callback, false);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
     void CleanVisibleAreaInnerCallback()
@@ -434,16 +436,6 @@ public:
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent) const;
 
     void MarkNeedRenderOnly();
-
-    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
-    {
-        attachFunc_ = std::move(attachFunc);
-    }
-
-    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
-    {
-        detachFunc_ = std::move(detachFunc);
-    }
 
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
@@ -913,7 +905,11 @@ private:
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
+        VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
+        double lastVisibleRatio, bool isThrottled = false);
+    void ProcessThrottledVisibleCallback();
+    bool IsFrameDisappear();
+    void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
 
@@ -982,9 +978,6 @@ private:
     std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
 
-    std::function<void(int32_t)> attachFunc_;
-    std::function<void(int32_t)> detachFunc_;
-
     bool needSyncRenderTree_ = false;
 
     bool isPropertyDiffMarked_ = false;
@@ -1004,6 +997,10 @@ private:
 
     double lastVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastThrottledVisibleRatio_ = 0.0;
+    double lastThrottledVisibleCbRatio_ = 0.0;
+    int64_t lastThrottledTriggerTime_ = 0;
+    bool throttledCallbackOnTheWay_ = false;
 
     // internal node such as Text in Button CreateWithLabel
     // should not seen by preview inspector or accessibility

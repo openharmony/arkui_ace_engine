@@ -195,6 +195,9 @@ public:
 
     void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
 
+    // Just register notification, no need to update callback.
+    void AddVisibleAreaChangeNode(const int32_t nodeId);
+
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
