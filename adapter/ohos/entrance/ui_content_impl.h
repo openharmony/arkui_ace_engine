@@ -302,7 +302,7 @@ public:
 
     void SetFormRenderingMode(int8_t renderMode) override;
 
-    void SetNodeGrayScale(float grayscale) override;
+    void SetContentNodeGrayScale(float grayscale) override;
 
 private:
     UIContentErrorCode InitializeInner(

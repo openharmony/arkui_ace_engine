@@ -3088,13 +3088,13 @@ void UIContentImpl::RegisterOverlayNodePositionsUpdateCallback(
     container->RegisterOverlayNodePositionsUpdateCallback(std::move(callback));
 }
 
-void UIContentImpl::SetNodeGrayScale(float grayscale)
+void UIContentImpl::SetContentNodeGrayScale(float grayscale)
 {
     if (LessNotEqual(grayscale, 0.001f)) {
-        grayscale = 0.0;
+        grayscale = 0.0f;
     }
     if (GreatNotEqual(grayscale, 1.0)) {
-        grayscale = 1.0;
+        grayscale = 1.0f;
     }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
