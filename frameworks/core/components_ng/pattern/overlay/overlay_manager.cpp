@@ -1191,6 +1191,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        overlayManager->ErasePopupInfo(targetId);
         if ((isTypeWithOption && !isShowInSubWindow) ||
             (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
             overlayManager->BlurOverlayNode(popupNode);
@@ -1666,6 +1667,7 @@ void OverlayManager::CleanPopupInSubWindow()
                 removeNodes.emplace_back(removeNode);
                 auto subwindowMgr = SubwindowManager::GetInstance();
                 subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId());
+                ErasePopupInfo(target);
             }
             break;
         }
