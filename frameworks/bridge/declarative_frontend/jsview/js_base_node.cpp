@@ -34,6 +34,7 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
@@ -61,13 +62,14 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     } else {
         buildFunc->ExecuteJS();
     }
+    auto needProxyVal = info[2];
+    bool needProxy = needProxyVal->IsBoolean() ? needProxyVal->ToBoolean() : true;
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    // If the node is a UINode, amount it to a BuilderProxyNode.
-    // Let the returned node be a FrameNode.
+    // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
     auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
-    if (!flag && newNode) {
+    if (!flag && newNode && needProxy) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
             "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
@@ -80,7 +82,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         parent->ReplaceChild(viewNode_, newNode);
         newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
-    viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
+    viewNode_ = newNode;
     ProccessNode(isSupportExportTexture);
     UpdateEnd(info);
 }

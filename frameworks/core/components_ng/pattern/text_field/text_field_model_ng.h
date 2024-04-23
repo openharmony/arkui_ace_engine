@@ -55,11 +55,13 @@ public:
     void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
     void SetInputStyle(InputStyle value) override;
     void SetShowPasswordIcon(bool value) override;
+    void SetShowPasswordText(bool value) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override {};
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     void SetOnChange(std::function<void(const std::string&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
+    void SetOnSecurityStateChange(std::function<void(bool)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
@@ -141,6 +143,7 @@ public:
     static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
     static void SetShowPasswordIcon(FrameNode* frameNode, bool value);
+    static void SetShowPassword(FrameNode* frameNode, bool value);
     static void SetTextAlign(FrameNode* frameNode, TextAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
@@ -190,6 +193,7 @@ public:
     static TextInputType GetType(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static bool GetShowPasswordIcon(FrameNode* frameNode);
+    static bool GetShowPassword(FrameNode* frameNode);
     static bool GetTextFieldEditing(FrameNode* frameNode);
     static bool GetShowCancelButton(FrameNode* frameNode);
     static CalcDimension GetCancelIconSize(FrameNode* frameNode);

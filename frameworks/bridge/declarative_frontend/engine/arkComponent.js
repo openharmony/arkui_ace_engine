@@ -4244,6 +4244,12 @@ if (globalThis.Blank !== undefined) {
   };
 }
 
+globalThis.applyImageModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkImageComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
+
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
@@ -9863,6 +9869,23 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey {
   }
 }
 TextInputShowPasswordIconModifier.identity = Symbol('textInputShowPasswordIcon');
+class TextInputShowPasswordModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetShowPassword(node);
+    }
+    else {
+      getUINativeModule().textInput.setShowPassword(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputShowPasswordModifier.identity = Symbol('textInputShowPassword');
 class TextInputTextAlignModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10594,6 +10617,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   showPasswordIcon(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordIconModifier.identity, TextInputShowPasswordIconModifier, value);
+    return this;
+  }
+  showPassword(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordModifier.identity, TextInputShowPasswordModifier, value);
     return this;
   }
   textAlign(value) {
@@ -16745,6 +16772,26 @@ class ArkDataPanelComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().dataPanel.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, dataPanelConfig) {
+    dataPanelConfig.contentModifier = this.modifier;
+    if (isUndefined(this.dataPanelNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.dataPanelNode = new xNode.BuilderNode(context);
+      this.dataPanelNode.build(this.builder, dataPanelConfig);
+    } else {
+      this.dataPanelNode.update(dataPanelConfig);
+    }
+    return this.dataPanelNode.getFrameNode();
+  }
 }
 class DataPanelStrokeWidthModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -19193,6 +19240,14 @@ if (globalThis.XComponent !== undefined) {
     });
     applyUIAttributes(modifier, nativeNode, component);
     component.applyModifierPatch();
+  };
+  globalThis.DataPanel.contentModifier = function (style) {
+      const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+      let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+      let component = this.createOrGetNode(elmtId, () => {
+        return new ArkDataPanelComponent(nativeNode);
+      });
+    component.setContentModifier(style);
   };
 }
 

@@ -154,7 +154,7 @@ HWTEST_F(TabsCommonTestNg, FocusStep004, TestSize.Level1)
  * @tc.desc: Test the IsScrollable property of TabBar.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty001, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty001, TestSize.Level1)
 {
     /**
      * @tc.cases: Not set TabBarMode
@@ -169,7 +169,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty001, TestSize.Level1)
  * @tc.desc: Test the IsScrollable property of TabBar.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty002, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty002, TestSize.Level1)
 {
     /**
      * @tc.cases: Set TabBarMode::SCROLLABLE
@@ -184,7 +184,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty002, TestSize.Level1)
  * @tc.desc: Test the IsScrollable property of TabBar.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty003, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty003, TestSize.Level1)
 {
     /**
      * @tc.cases: Set TabBarMode::SCROLLABLE, but has no items
@@ -199,7 +199,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty003, TestSize.Level1)
  * @tc.desc: Test the index properties of tabbar.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty004, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty004, TestSize.Level1)
 {
     /**
      * @tc.cases: Create tabs with empty items
@@ -217,7 +217,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty004, TestSize.Level1)
  * @tc.desc: Test the index properties of tabbar.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty005, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create tabs with items
@@ -242,7 +242,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty005, TestSize.Level1)
  * @tc.desc: Test SetSpecificSupportAction
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and middle
@@ -270,7 +270,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
 * @tc.desc: test SetSpecificSupportAction
 * @tc.type: FUNC
 */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and top
@@ -296,7 +296,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
  * @tc.desc: Test SetSpecificSupportAction
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and bottom
@@ -322,7 +322,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
 * @tc.desc: test SetSpecificSupportAction
 * @tc.type: FUNC
 */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty009, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and top and bottom
@@ -346,7 +346,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty009, TestSize.Level1)
  * @tc.desc: Test SetSpecificSupportAction
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabBarAccessibilityProperty010, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Default is TabBarMode::FIXED
@@ -369,7 +369,7 @@ HWTEST_F(TabsTestNg, TabBarAccessibilityProperty010, TestSize.Level1)
  * @tc.desc: TabBar AccessibilityProperty PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
+HWTEST_F(TabsCommonTestNg, PerformActionTest001, TestSize.Level1)
 {
     CreateWithItem([](TabsModelNG model) {});
 
@@ -408,5 +408,4 @@ HWTEST_F(TabsTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
 }
-
 } // namespace OHOS::Ace::NG

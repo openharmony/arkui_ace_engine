@@ -17,6 +17,8 @@
 
 #include <cstdint>
 #include <list>
+#include <memory>
+#include <string>
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -932,6 +934,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
+    UpdateExtraInfo(frameNode, arkExtraInfoJson);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
@@ -1005,6 +1008,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->OnDragEnd(
             PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
     }
+}
+
+void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson)
+{
+    double opacity = frameNode->GetDragPreviewOption().options.opacity;
+    arkExtraInfoJson->Put("dip_opacity", opacity);
 }
 
 int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>& context)
