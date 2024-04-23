@@ -19,7 +19,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -70,6 +70,10 @@ private:
      */
     void RecoverFront(float viewportBound, int32_t& idx, int32_t minChildIdx);
     /**
+     * @return new startPos of the filled lane.
+     */
+    float FillFrontHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx);
+    /**
      * @brief Clear items above the viewport. 
      * Iterate by index to keep item range continuous.
      */
@@ -87,6 +91,10 @@ private:
      * @brief fills the viewport backward with cached idx -> lane mapping.
      */
     void RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx);
+    /**
+     * @return new endPos of the filled lane.
+     */
+    float FillBackHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx);
     /**
      * @brief Clear items below the viewport.
      * 

@@ -68,7 +68,7 @@ public:
      * For triggering events.
      *
      * @param prevPos previous layout position.
-     * @param firstLayout check this to prevent emitting ReachStart on the initial layout.
+     * @param firstLayout check this to emit ReachStart on the initial layout.
      * @return true if current position just reached content top.
      */
     virtual bool ReachStart(float prevPos, bool firstLayout) const = 0;

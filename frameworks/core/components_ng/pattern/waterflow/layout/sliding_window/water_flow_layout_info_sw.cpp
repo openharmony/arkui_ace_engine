@@ -27,6 +27,9 @@ void WaterFlowLayoutInfoSW::Sync(float mainSize, float mainGap)
     for (const auto& lane : lanes_) {
         std::cout << "SYNC lane = " << lane.ToString() << std::endl;
     }
+    if (startIndex_ <= endIndex_) {
+        storedOffset_ = lanes_[idxToLane_.at(startIndex_)].startPos;
+    }
     delta_ = 0.0f;
     lastMainSize_ = mainSize;
     mainGap_ = mainGap;
@@ -148,18 +151,18 @@ float WaterFlowLayoutInfoSW::StartPos() const
 
 bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
 {
-    if (firstLayout || !itemStart_ || lanes_.empty()) {
+    if (!itemStart_ || lanes_.empty()) {
         return false;
     }
-    return Negative(prevPos);
+    return firstLayout || Negative(prevPos);
 }
 
 bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
 {
-    if (!itemEnd_ || lanes_.empty()) {
+    if (!offsetEnd_ || lanes_.empty()) {
         return false;
     }
-    float prevEndPos = EndPos() - offset() + prevPos;
+    float prevEndPos = EndPos() - (totalOffset_ - prevPos);
     return GreatNotEqual(prevEndPos, lastMainSize_);
 }
 

@@ -28,8 +28,6 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -37,16 +35,12 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
 #include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
@@ -708,7 +702,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest010, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) { model.SetColumnsTemplate("1fr"); });
+    CreateWithItem([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr");
+    });
 
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
@@ -723,16 +719,23 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, -ITEM_HEIGHT }));
-
+    
+    // enable overScroll
+    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
+    pattern_->animateOverScroll_ = true;
     pattern_->layoutInfo_->startIndex_ = 0;
     // total offset = ITEM_HEIGHT
     pattern_->layoutInfo_->UpdateOffset(WATERFLOW_HEIGHT);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT * 2), { -ITEM_HEIGHT, 0 }));
 
     // total offset = -ITEM_HEIGHT * 3
     pattern_->layoutInfo_->UpdateOffset(-ITEM_HEIGHT * 4);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT * 2), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, 0 }));
@@ -1014,6 +1017,7 @@ HWTEST_F(WaterFlowTestNg, Callback001, TestSize.Level1)
      * @tc.expected: Trigger reachend
      */
     UpdateCurrentOffset(-WATERFLOW_HEIGHT);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
     EXPECT_TRUE(isReachEndCalled);
 
     /**
