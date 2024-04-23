@@ -71,6 +71,9 @@ class BuilderNode {
     getFrameNode() {
         return this._JSBuilderNode.getFrameNode();
     }
+    getFrameNodeWithoutCheck() {
+        return this._JSBuilderNode.getFrameNodeWithoutCheck();
+    }
     postTouchEvent(touchEvent) {
         return this._JSBuilderNode.postTouchEvent(touchEvent);
     }
@@ -177,6 +180,9 @@ class JSBuilderNode extends BaseNode {
             return this.frameNode_;
         }
         return null;
+    }
+    getFrameNodeWithoutCheck() {
+        return this.frameNode_;
     }
     observeComponentCreation(func) {
         let elmId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -1511,7 +1517,7 @@ class ComponentContent extends Content {
         this.builderNode_.update(params);
     }
     getFrameNode() {
-        return this.builderNode_.getFrameNode();
+        return this.builderNode_.getFrameNodeWithoutCheck();
     }
     getNodePtr() {
         return this.builderNode_.getNodePtr();
