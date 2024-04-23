@@ -3105,7 +3105,6 @@ void UIContentImpl::SetContentNodeGrayScale(float grayscale)
     CHECK_NULL_VOID(rootElement);
     auto renderContext = rootElement->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto dimension = new Dimension(grayscale);
-    renderContext->UpdateFrontGrayScale(*dimension);
+    renderContext->UpdateFrontGrayScale(Dimension(grayscale));
 }
 } // namespace OHOS::Ace
