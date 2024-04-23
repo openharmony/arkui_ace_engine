@@ -1204,16 +1204,23 @@ void IndexerPattern::UpdatePopupListGradientView(int32_t popupSize, int32_t maxI
         DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
         auto listEventHub = listNode->GetEventHub<ListEventHub>();
         CHECK_NULL_VOID(listEventHub);
-        auto onScroll = [this](Dimension offset, ScrollState state) {
-            auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
-            if (listNode->GetPattern<ListPattern>()->IsAtTop()) {
-                DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
+        auto onScroll = [weak = WeakClaim(this)](Dimension offset, ScrollState state) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto popupNode = pattern->popupNode_;
+            CHECK_NULL_VOID(popupNode);
+            auto listNode = DynamicCast<FrameNode>(popupNode->GetLastChild()->GetFirstChild());
+            CHECK_NULL_VOID(listNode);
+            auto listPattern = listNode->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (listPattern->IsAtTop()) {
+                pattern->DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
                 return;
-            } else if (listNode->GetPattern<ListPattern>()->IsAtBottom()) {
-                DrawPopupListGradient(PopupListGradientStatus::TOP);
+            } else if (listPattern->IsAtBottom()) {
+                pattern->DrawPopupListGradient(PopupListGradientStatus::TOP);
                 return;
             } else {
-                DrawPopupListGradient(PopupListGradientStatus::BOTH);
+                pattern->DrawPopupListGradient(PopupListGradientStatus::BOTH);
                 return;
             }
         };
