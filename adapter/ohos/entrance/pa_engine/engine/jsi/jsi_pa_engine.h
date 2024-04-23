@@ -108,8 +108,8 @@ public:
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) override;
     bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) override;
 
-    void PostTask(const std::function<void()>& task, const std::string& name = "", int64_t delayTime = 0) override;
-    void PostSyncTask(const std::function<void()>& task, const std::string& name = "") override;
+    void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime = 0) override;
+    void PostSyncTask(const std::function<void()>& task, const std::string& name) override;
     void RemoveTask(const std::string& name) override;
 
     std::shared_ptr<JsRuntime> GetJsRuntime() const;

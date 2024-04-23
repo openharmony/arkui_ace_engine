@@ -72,6 +72,9 @@ const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
 const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 // js if lese node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// js node slot
+const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
+
 // toast view
 const char TOAST_ETS_TAG[] = "Toast";
 
@@ -590,4 +593,8 @@ const char RENDER_NODE_ETS_TAG[] = "RenderNode";
 
 //CustomFrameNode
 const char CUSTOM_FRAME_NODE_ETS_TAG[] = "CustomFrameNode";
+
+// MovingPhoto
+const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
+const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 } // namespace OHOS::Ace::V2

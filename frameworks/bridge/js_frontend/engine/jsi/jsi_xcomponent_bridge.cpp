@@ -45,7 +45,7 @@ JsiXComponentBridge::~JsiXComponentBridge()
             taskExecutor->PostTask([ renderContext = std::move(renderContext_) ] () mutable {
                 renderContext.reset();
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIXComponentRenderContextRelease");
         }
     }
 }
@@ -147,7 +147,7 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
         LOGE("Delegate is null");
         return;
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUIXComponentNativeInit");
 
     hasPluginLoaded_ = true;
     return;
@@ -186,7 +186,7 @@ shared_ptr<JsValue> JsiXComponentBridge::JsGetXComponentSurfaceId(const shared_p
         LOGE("JsGetXComponentSurfaceId failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUIXComponentGetSurfaceId");
     return runtime->NewString(surfaceId);
 }
 
@@ -232,6 +232,6 @@ void JsiXComponentBridge::JsSetXComponentSurfaceSize(
         LOGE("JsSetXComponentSurfaceSize failed. delegate is null.");
         return;
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUIXComponentSetSurfaceSize");
 }
 } // namespace OHOS::Ace::Framework

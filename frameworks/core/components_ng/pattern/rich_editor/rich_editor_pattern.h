@@ -760,7 +760,7 @@ private:
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
     float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
-    void MoveCaretToContentRect();
+    void MoveCaretToContentRect(bool downStreamFirst = true);
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
     bool IsTextArea() const override
     {
@@ -782,6 +782,7 @@ private:
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
+    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos);
     bool IsClickBoundary(const int32_t position);
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);

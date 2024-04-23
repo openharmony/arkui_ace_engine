@@ -422,6 +422,36 @@ void JsiCallbackInfo::ReturnSelf() const
     retVal_ = thisObj;
 }
 
+bool JsiCallbackInfo::GetBooleanArg(size_t index, bool& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsBoolean()) {
+        return false;
+    }
+    value = arg->ToBoolean(info_->GetVM())->Value();
+    return true;
+}
+
+bool JsiCallbackInfo::GetDoubleArg(size_t index, double& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsNumber()) {
+        return false;
+    }
+    value = arg->ToNumber(info_->GetVM())->Value();
+    return true;
+}
+
+bool JsiCallbackInfo::GetStringArg(size_t index, std::string& value) const
+{
+    auto arg = info_->GetCallArgRef(index);
+    if (arg.IsEmpty() || !arg->IsString()) {
+        return false;
+    }
+    value = arg->ToString(info_->GetVM())->ToString();
+    return true;
+}
+
 // -----------------------
 // Implementation of JsiString
 // -----------------------

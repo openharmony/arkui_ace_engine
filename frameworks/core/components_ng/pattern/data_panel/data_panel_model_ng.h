@@ -17,9 +17,19 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_MODEL_NG_H
 
 #include "core/components_ng/pattern/data_panel/data_panel_model.h"
+#include "core/components_ng/base/common_configuration.h"
 
 namespace OHOS::Ace::NG {
-
+class DataPanelConfiguration : public CommonConfiguration {
+    public:
+        DataPanelConfiguration(std::vector<double>& values, double maxValue, bool enabled)
+            : CommonConfiguration(enabled), values_(values), maxValue_(maxValue)
+        {}
+        std::vector<double>& values_;
+        double maxValue_;
+};
+using DataPanelMakeCallback =
+    std::function<RefPtr<FrameNode>(const DataPanelConfiguration& dataPanelConfiguration)>;
 class ACE_EXPORT DataPanelModelNG : public OHOS::Ace::DataPanelModel {
 public:
     void Create(const std::vector<double>& values, double max, int32_t dataPanelType) override;
@@ -34,6 +44,7 @@ public:
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
     static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
     static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
+    static void SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& jsMake);
 };
 } // namespace OHOS::Ace::NG
 

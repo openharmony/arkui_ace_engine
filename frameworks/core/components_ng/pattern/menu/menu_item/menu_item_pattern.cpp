@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 #include <memory>
+#include <optional>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/log.h"
@@ -29,10 +30,12 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -289,6 +292,7 @@ void MenuItemPattern::ShowSubMenu()
         param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
+    ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
@@ -887,5 +891,24 @@ bool MenuItemPattern::IsSelectOverlayMenu()
     }
     return topLevelMenuPattern->IsSelectOverlayExtensionMenu() || topLevelMenuPattern->IsSelectOverlayCustomMenu() ||
            topLevelMenuPattern->IsSelectOverlaySubMenu();
+}
+
+void MenuItemPattern::ParseMenuRadius(MenuParam& param)
+{
+    auto menuWrapperNode = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    if (menuWrapperPattern->GetHasCustomRadius()) {
+        auto outterMenuNode = GetMenu(true);
+        CHECK_NULL_VOID(outterMenuNode);
+        auto menuLayoutProp = outterMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuLayoutProp);
+        if (menuLayoutProp->GetBorderRadius().has_value()) {
+            BorderRadiusProperty borderRadius = menuLayoutProp->GetBorderRadiusValue();
+            param.borderRadius = std::make_optional(borderRadius);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

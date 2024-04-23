@@ -44,8 +44,8 @@ public:
     void NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info) override;
 
 private:
-    void PostTaskToUI(const std::function<void()>& task);
-    void PostSyncTaskToUI(const std::function<void()>& task);
+    void PostTaskToUI(const std::function<void()>& task, const std::string& name);
+    void PostSyncTaskToUI(const std::function<void()>& task, const std::string& name);
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 

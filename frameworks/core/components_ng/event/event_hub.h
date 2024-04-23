@@ -57,7 +57,7 @@ enum class DragFuncType {
 };
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
-class EventHub : public virtual AceType {
+class ACE_FORCE_EXPORT EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
 
 public:

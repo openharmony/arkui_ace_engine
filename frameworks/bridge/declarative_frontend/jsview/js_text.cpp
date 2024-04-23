@@ -355,6 +355,19 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSText::SetLineSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    if (!ParseLengthMetricsToDimension(args, value)) {
+        value.Reset();
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextModel::GetInstance()->SetLineSpacing(value);
+}
+
 void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
@@ -838,7 +851,7 @@ void JSText::JsClip(const JSCallbackInfo& info)
     JSViewAbstract::JsClip(info);
     JSRef<JSVal> args = info[0];
     if (args->IsBoolean()) {
-        TextModel::GetInstance()->SetClipEdge();
+        TextModel::GetInstance()->SetClipEdge(args->ToBoolean());
     }
 }
 
@@ -877,6 +890,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
+    JSClass<JSText>::StaticMethod("lineSpacing", &JSText::SetLineSpacing, opt);
     JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
     JSClass<JSText>::StaticMethod("minFontSize", &JSText::SetMinFontSize, opt);
     JSClass<JSText>::StaticMethod("maxFontSize", &JSText::SetMaxFontSize, opt);

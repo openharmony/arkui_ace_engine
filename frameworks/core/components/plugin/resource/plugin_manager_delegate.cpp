@@ -123,7 +123,7 @@ void PluginManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& 
         delegate->state_ = State::CREATED;
         delegate->hash_ = delegate->MakeResourceHash();
         delegate->RegisterEvent();
-    });
+    }, "ArkUIPluginCreatePlatformResource");
     OnPluginComplete("Complete");
 }
 

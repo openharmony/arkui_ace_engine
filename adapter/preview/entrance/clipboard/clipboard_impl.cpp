@@ -44,7 +44,7 @@ void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, boo
                 setClipboardData(data);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIClipboardSetData");
 }
 
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
@@ -59,7 +59,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
                 callback(getClipboardData());
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIClipboardGetData");
 }
 
 void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
@@ -74,7 +74,7 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
                 callback(!getClipboardData().empty());
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIClipboardIsHasData");
 }
 
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
@@ -84,7 +84,7 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
     }
     taskExecutor_->PostTask([callbackSetClipboardPixmapData = callbackSetClipboardPixmapData_,
                                 pixmap] { callbackSetClipboardPixmapData(pixmap); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIClipboardSetPixelMapData");
 }
 
 void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode)
@@ -94,7 +94,7 @@ void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelM
     }
     taskExecutor_->PostTask([callbackGetClipboardPixmapData = callbackGetClipboardPixmapData_,
                                 callback] { callback(callbackGetClipboardPixmapData()); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIClipboardGetPixelMapData");
 }
 
 void ClipboardImpl::Clear() {}

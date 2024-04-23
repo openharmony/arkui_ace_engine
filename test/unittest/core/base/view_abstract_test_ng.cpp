@@ -2874,6 +2874,55 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractMenuBorderRadius001
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG (use true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuBorderRadius001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> mainNode =
+        FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    ViewStackProcessor::GetInstance()->Push(mainNode);
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
+    std::vector<NG::OptionParam> params = {};
+    std::function<void()> buildFunc;
+    MenuParam menuParam;
+
+    menuParam.type = MenuType::MENU;
+    menuParam.isShow = true;
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(16));
+    menuParam.borderRadius = borderRadius;
+
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(targetNode, nullptr);
+    std::function<void()> action = [] {};
+    params.emplace_back("MenuItem1", "", action);
+    params.emplace_back("MenuItem2", "", action);
+    viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
+    auto targetId = targetNode->GetId();
+
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    ASSERT_NE(menuNode, nullptr);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    EXPECT_EQ(wrapperPattern->GetHasCustomRadius(), true);
+}
+
+/**
  * @tc.name: ViewAbstractDisableClickByFrameNodeTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC

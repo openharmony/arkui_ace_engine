@@ -84,7 +84,7 @@ void FormFrontendDeclarative::UpdateData(const std::string& dataList)
                 frontend->UpdatePageData(dataList);
             }
         },
-        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+        TaskExecutor::TaskType::UI, "ArkUIFormFrontendUpdatePageData"); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 void FormFrontendDeclarative::UpdatePageData(const std::string& dataList)

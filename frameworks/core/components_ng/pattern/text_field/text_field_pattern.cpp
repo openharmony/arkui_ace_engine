@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <optional>
+#include <ratio>
 #include <regex>
 #include <string>
 #include <utility>
@@ -670,7 +671,11 @@ void TextFieldPattern::OnTextInputScroll(float offset)
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
 {
     CHECK_NULL_RETURN(paragraph_, 0);
-    return paragraph_->GetGlyphIndexByCoordinate(localOffset);
+    int32_t caretPositionIndex = 0;
+    if (!contentController_->IsEmpty()) {
+        caretPositionIndex = paragraph_->GetGlyphIndexByCoordinate(localOffset);
+    }
+    return caretPositionIndex;
 }
 
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset)
@@ -1377,14 +1382,6 @@ void TextFieldPattern::UpdateSelection(int32_t start, int32_t end)
     }
 }
 
-void TextFieldPattern::FireOnSelectionChange(int32_t start, int32_t end)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    eventHub->FireOnSelectionChange(start, end);
-}
-
 void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 {
     auto host = GetHost();
@@ -2034,7 +2031,8 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_);
+    taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_,
+        "ArkUITextFieldCursorTwinkling");
 }
 
 void TextFieldPattern::StartTwinkling()
@@ -2327,7 +2325,8 @@ void TextFieldPattern::AutoFillValueChanged()
     auto autoContentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END) {
+    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END
+        && CheckAutoFill()) {
         container->UpdatePopupUIExtension(host);
     }
 }
@@ -2336,7 +2335,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    AutoFillValueChanged();
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2356,6 +2354,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     }
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
+    AutoFillValueChanged();
     eventHub->FireOnChange(contentController_->GetTextValue());
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
@@ -2370,7 +2369,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
             }
             pattern->ScrollToSafeArea();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea");
     return true;
 }
 
@@ -4508,7 +4507,6 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
     if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
         StartTwinkling();
-        FireOnSelectionChange(position, position);
     }
     CloseSelectOverlay();
     auto tmpHost = GetHost();
@@ -4522,6 +4520,7 @@ void TextFieldPattern::SetSelectionFlag(
     if (!HasFocus()) {
         return;
     }
+    bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
         StartTwinkling();
@@ -4540,12 +4539,17 @@ void TextFieldPattern::SetSelectionFlag(
     selectOverlay_->SetUsingMouse(false);
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
-    } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
-        ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
-    } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
-        ProcessOverlay({ .menuIsShow = false, .animation = true });
-    } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
-        ProcessOverlay({ .menuIsShow = true, .animation = true });
+    } else {
+        if (options.has_value()) {
+            if (options.value().menuPolicy == MenuPolicy::NEVER) {
+                isShowMenu = false;
+            } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+                isShowMenu = true;
+            }
+        } else {
+            isShowMenu = false;
+        }
+        ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5855,6 +5859,13 @@ void TextFieldPattern::OnAttachToFrameNode()
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        auto host = GetHost();
+        fontManager->AddFontNodeNG(host);
+    }
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -5918,6 +5929,11 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
     selectController_->UpdateCaretIndex(static_cast<int32_t>(contentController_->GetWideText().length()));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (obscuredChange_) {
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnSecurityStateChanged(!isObscured);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -5999,11 +6015,29 @@ bool TextFieldPattern::IsShowPasswordIcon() const
     return layoutProperty->GetShowPasswordIconValue(isShowPasswordIcon) && IsInPasswordMode();
 }
 
+std::optional<bool> TextFieldPattern::IsShowPasswordText() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetShowPasswordTextValue();
+}
+
 bool TextFieldPattern::IsShowCancelButtonMode() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return !IsNormalInlineState() && !IsTextArea() && layoutProperty->GetIsShowCancelButton().value_or(false);
+}
+
+void TextFieldPattern::CheckPasswordAreaState()
+{
+    auto showPasswordState = IsShowPasswordText();
+    if (!showPasswordState.has_value()) {
+        return;
+    }
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordArea);
+    passwordArea->SetObscured(!showPasswordState.value());
 }
 
 void TextFieldPattern::ProcessResponseArea()
@@ -6025,15 +6059,25 @@ void TextFieldPattern::ProcessResponseArea()
             cleanNodeResponseArea_.Reset();
         }
     }
-
-    if (IsShowPasswordIcon()) {
+    if (IsInPasswordMode()) {
         auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
         if (passwordArea) {
-            passwordArea->Refresh();
+            if (IsShowPasswordIcon()) {
+                passwordArea->Refresh();
+            } else {
+                passwordArea->ClearArea();
+            }
+            CheckPasswordAreaState();
             return;
         }
+        // responseArea_ may not be a password area.
         responseArea_ = AceType::MakeRefPtr<PasswordResponseArea>(WeakClaim(this), GetTextObscured());
-        responseArea_->InitResponseArea();
+        if (IsShowPasswordIcon()) {
+            responseArea_->InitResponseArea();
+        } else {
+            responseArea_->ClearArea();
+        }
+        CheckPasswordAreaState();
         return;
     }
 

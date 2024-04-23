@@ -76,7 +76,7 @@ int32_t SecurityComponentProbe::GetComponentInfo(int32_t nodeId, std::string& co
             return;
         }
         taskRes = 0;
-    });
+    }, "ArkUISecurityComponentInitButtonInfo");
     tmux_.unlock();
     return taskRes;
 }

@@ -132,4 +132,32 @@ ArkUINativeModuleValue ImageSpanBridge::ResetTextBackgroundStyle(ArkUIRuntimeCal
     GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanTextBackgroundStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ImageSpanBridge::SetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CalcDimension result;
+    if (secondArg->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, result) &&
+        result.Unit() != DimensionUnit::PERCENT && !std::isnan(result.Value())) {
+        GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanBaselineOffset(
+            nativeNode, result.Value(), static_cast<int8_t>(result.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanBaselineOffset(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::ResetBaselineOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanBaselineOffset(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

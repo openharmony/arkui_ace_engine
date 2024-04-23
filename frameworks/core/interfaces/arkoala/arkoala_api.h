@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 92
+#define ARKUI_FULL_API_VERSION 94
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 92
+#define ARKUI_NODE_API_VERSION 94
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -62,6 +62,7 @@ struct _ArkUIPaint;
 struct _ArkUIFont;
 struct _ArkUIXComponentController;
 struct _ArkUINodeAdapter;
+struct _ArkUINodeContent;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -71,6 +72,7 @@ typedef _ArkUIPaint* ArkUIPaintHandle;
 typedef _ArkUIFont* ArkUIFontHandle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
+typedef _ArkUINodeContent* ArkUINodeContentHandle;
 
 struct ArkUICanvasArcOptions {
     ArkUI_Float32 x;
@@ -96,7 +98,6 @@ struct ArkUICornerRadius {
 };
 
 typedef struct _ArkUIDialog* ArkUIDialogHandle;
-
 
 struct ArkUITouchPoint {
     ArkUI_Int32 id;
@@ -561,6 +562,7 @@ enum ArkUINodeType {
     ARKUI_FLOW_ITEM,
     ARKUI_BLANK,
     ARKUI_DIVIDER,
+    ARKUI_ALPHABET_INDEXER,
 };
 
 enum ArkUIEventCategory {
@@ -572,6 +574,7 @@ enum ArkUIEventCategory {
     TEXT_INPUT = 5,
     GESTURE_ASYNC_EVENT = 6,
     TOUCH_EVENT = 7,
+    TEXT_ARRAY = 8,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -655,6 +658,12 @@ enum ArkUIEventSubKind {
     ON_CALENDAR_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CALENDAR_PICKER,
     ON_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
     ON_REACH_END,
+
+    ON_ALPHABET_INDEXER_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_ALPHABET_INDEXER,
+    ON_ALPHABET_INDEXER_REQUEST_POPUP_DATA,
+    ON_ALPHABET_INDEXER_POPUP_SELECTED,
+    ON_ALPHABET_INDEXER_CHANGE_EVENT,
+    ON_ALPHABET_INDEXER_CREAT_CHANGE_EVENT,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -767,6 +776,12 @@ struct ArkUINodeAsyncEvent {
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
 
+struct ArkUIAPIEventTextArray {
+    ArkUI_Int64 nativeStringArrayPtr;
+    ArkUI_Int32 length;
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
+};
+
 struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 repeat;
@@ -800,6 +815,7 @@ struct ArkUINodeEvent {
         ArkUIAPIEventTextInput textInputEvent;
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
         ArkUITouchEvent touchEvent;
+        ArkUIAPIEventTextArray textArrayEvent;
     };
 };
 
@@ -1407,6 +1423,9 @@ struct ArkUITextModifier {
     ArkUI_Int32 (*getTextEllipsisMode)(ArkUINodeHandle node);
     void (*setTextFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextFontFeature)(ArkUINodeHandle node);
+    void (*setTextLineSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    ArkUI_Float32 (*getTextLineSpacing)(ArkUINodeHandle node);
+    void (*resetTextLineSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2145,6 +2164,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaTextOverflow)(ArkUINodeHandle node);
     void (*setTextAreaTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextAreaTextIndent)(ArkUINodeHandle node);
+    void (*setTextAreaLineSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTextAreaLineSpacing)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2263,6 +2284,9 @@ struct ArkUITextInputModifier {
     void (*resetTextInputTextOverflow)(ArkUINodeHandle node);
     void (*setTextInputTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputTextIndent)(ArkUINodeHandle node);
+    void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
+    void (*resetTextInputShowPassword)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -2359,6 +2383,8 @@ struct ArkUIImageSpanModifier {
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetImageSpanTextBackgroundStyle)(ArkUINodeHandle node);
     void (*getImageSpanTextBackgroundStyle)(ArkUINodeHandle node, ArkUITextBackgroundStyleOptions* options);
+    void (*setImageSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetImageSpanBaselineOffset)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuModifier {
@@ -2409,6 +2435,8 @@ struct ArkUIWaterFlowModifier {
     void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
+    void (*setEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
+    void (*resetEdgeEffect)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
@@ -2597,6 +2625,8 @@ struct ArkUIAlphabetIndexerModifier {
     void (*resetPopupTitleBackground)(ArkUINodeHandle node);
     void (*setAdaptiveWidth)(ArkUINodeHandle node);
     void (*resetAdaptiveWidth)(ArkUINodeHandle node);
+    void (*setArrayValue)(ArkUINodeHandle node, ArkUI_CharPtr* value, ArkUI_Uint32 length);
+    void (*resetArrayValue)(ArkUINodeHandle node);
 };
 
 struct ArkUILoadingProgressModifier {
@@ -2885,7 +2915,7 @@ struct ArkUISpanModifier {
     void (*resetSpanFontColor)(ArkUINodeHandle node);
     void (*setSpanLetterSpacing)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue);
     void (*resetSpanLetterSpacing)(ArkUINodeHandle node);
-    void (*setSpanBaselineOffset)(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue);
+    void (*setSpanBaselineOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSpanBaselineOffset)(ArkUINodeHandle node);
     void (*setSpanFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo);
     void (*resetSpanFont)(ArkUINodeHandle node);
@@ -3260,6 +3290,19 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getLast)(ArkUINodeHandle node);
 };
 
+struct ArkUINodeContentEvent {
+    ArkUI_Int32 type;
+    void* userData;
+};
+
+struct ArkUINodeContentModifier {
+    ArkUI_Int32 (*addChild)(ArkUINodeContentHandle content, ArkUINodeHandle child);
+    ArkUI_Int32 (*insertChild)(ArkUINodeContentHandle content, ArkUINodeHandle child, ArkUI_Int32 position);
+    ArkUI_Int32 (*removeChild)(ArkUINodeContentHandle content, ArkUINodeHandle child);
+    ArkUI_Int32 (*registerEvent)(
+        ArkUINodeContentHandle content, void* userData, void (*receiver)(ArkUINodeContentEvent* event));
+};
+
 struct ArkUIAnimation {
     ArkUI_Int32 (*startAnimation)(const ArkUIAPIAnimationSpec* spec, ArkUI_Int32 callbackId);
     void (*openImplicitAnimation)(
@@ -3429,6 +3472,7 @@ struct ArkUINodeModifiers {
     const ArkUIRichEditorControllerModifier* (*getRichEditorControllerModifier)();
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
     const ArkUIParticleModifier* (*getParticleModifier)();
+    const ArkUINodeContentModifier* (*getNodeContentModifier)();
 };
 
 // same as inner defines in property.h

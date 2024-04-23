@@ -51,7 +51,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(LongPressEvent);
 };
 
-class ACE_EXPORT LongPressEventActuator : public GestureEventActuator {
+class ACE_FORCE_EXPORT LongPressEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(LongPressEventActuator, GestureEventActuator)
 public:
     explicit LongPressEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);

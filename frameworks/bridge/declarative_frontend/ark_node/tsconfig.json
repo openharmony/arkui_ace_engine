@@ -11,19 +11,22 @@
         "src/frame_node.ts",
         "src/render_node.ts",
         "src/xcomponent_node.ts",
+        "src/content.ts",
         "src/component_content.ts",
+        "src/node_content.ts",
     ],
     "compilerOptions": {
         "module": "none",
-        "target": "ES2016",
-        "outDir": "../engine/",
-        "outFile": "../engine/jsXNode.js",
-        "rootDir": "./src/",
+        "target": "ES2020",
+        "outDir": "build",
+        "outFile": "build/jsXNode.js",
+        "rootDir": "src",
         "declaration": false,
         "noEmitOnError": true,
         "experimentalDecorators": true,
         "lib": [
-            "ES2016"
+            "ES2020"
         ],
+        "removeComments": false
     }
 }

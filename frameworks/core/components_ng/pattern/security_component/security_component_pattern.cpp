@@ -535,10 +535,8 @@ void SecurityComponentPattern::RegisterSecurityComponent()
             }
 
             pattern->RegisterSecurityComponentRetry();
-        },
-            TaskExecutor::TaskType::UI);
-    },
-        TaskExecutor::TaskType::BACKGROUND);
+        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentRegisterRetry");
+    }, TaskExecutor::TaskType::BACKGROUND, "ArkUISecurityComponentRegister");
 }
 
 void SecurityComponentPattern::UnregisterSecurityComponent()
@@ -598,8 +596,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DoTriggerOnclick(result);
-        },
-            TaskExecutor::TaskType::UI);
+        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
         return 0;
     };
 
@@ -638,8 +635,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DoTriggerOnclick(result);
-        },
-            TaskExecutor::TaskType::UI);
+        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
         return 0;
     };
 

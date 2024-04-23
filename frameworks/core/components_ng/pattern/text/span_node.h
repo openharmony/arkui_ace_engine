@@ -280,6 +280,7 @@ enum class PropertyInfo {
     LINE_BREAK_STRATEGY,
     FONTFEATURE,
     BASELINE_OFFSET,
+    LINESPACING,
     SYMBOL_EFFECT_OPTIONS,
 };
 
@@ -396,6 +397,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();

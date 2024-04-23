@@ -357,7 +357,7 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
 
     deadlineTimer.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(deadlineTimer, time);
+    taskExecutor.PostDelayedTask(deadlineTimer, time, "ArkUIGestureClickDeadlineTimer");
 }
 
 Offset ClickRecognizer::ComputeFocusPoint()

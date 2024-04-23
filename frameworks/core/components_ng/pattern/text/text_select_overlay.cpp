@@ -39,6 +39,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
     textPattern->CalculateHandleOffsetAndShowOverlay();
+    selectTextUseTopHandle = true;
     return true;
 }
 
@@ -124,9 +125,11 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
-    bool isUseHandleTop = (isFirst != IsHandleReverse());
-    handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
-    
+    if (!selectTextUseTopHandle) {
+        bool isUseHandleTop = (isFirst != IsHandleReverse());
+        handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
+    }
+
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;

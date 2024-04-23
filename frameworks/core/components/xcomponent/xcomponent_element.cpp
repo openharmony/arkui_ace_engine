@@ -169,7 +169,7 @@ void XComponentElement::OnSurfaceDestroyEvent()
                     }
                 }
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIXComponentSurfaceDestroy");
 
         if (onXComponentDestroy_) {
             onXComponentDestroy_(param);
@@ -209,7 +209,7 @@ void XComponentElement::CreatePlatformResource()
             if (XComponentElement) {
                 LOGE("XComponentElement errorCallback");
             }
-        });
+        }, "ArkUIXComponentError");
     };
 
     texture_ = AceType::MakeRefPtr<NativeTexture>(context_, errorCallback);
@@ -300,7 +300,7 @@ void XComponentElement::OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surfac
                 xcomponentElement->xcomponent_->GetNodeId());
             xcomponentElement->OnXComponentInit("");
         }
-    });
+    }, "ArkUIXComponentSurfaceInit");
 }
 
 void XComponentElement::OnSurfaceChanged(const OHOS::sptr<OHOS::Surface>& surface, int32_t width, int32_t height)
@@ -361,7 +361,7 @@ void XComponentElement::SetMethodCall()
             if (xComponentElement) {
                 xComponentElement->ConfigSurface(surfaceWidth, surfaceHeight);
             }
-        });
+        }, "ArkUIXComponentSetSurfaceConfig");
     });
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -457,7 +457,7 @@ void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureW
                 xcomponentElement->OnXComponentInit("");
             }
         }
-    });
+    }, "ArkUIXComponentSurfaceInit");
 #else
     if (texture_) {
         texture_->SetSize(textureId, textureWidth, textureHeight,

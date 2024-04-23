@@ -183,6 +183,7 @@ void ScrollFadeController::SchedulePullHoldTask()
             client->ProcessRecede(PULL_RECEDE_TIME);
         }
     });
-    context->GetTaskExecutor()->PostDelayedTask(pullTask_, TaskExecutor::TaskType::UI, PULL_HOLD_TIME);
+    context->GetTaskExecutor()->PostDelayedTask(pullTask_, TaskExecutor::TaskType::UI, PULL_HOLD_TIME,
+        "ArkUIScrollScheduleProcessRecede");
 }
 } // namespace OHOS::Ace::NG

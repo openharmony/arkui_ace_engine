@@ -289,6 +289,16 @@ public:
         dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
     }
 
+    bool GetHasCustomRadius() const
+    {
+        return hasCustomRadius_;
+    }
+
+    void SetHasCustomRadius(bool hasCustomRadius)
+    {
+        hasCustomRadius_ = hasCustomRadius;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -327,9 +337,10 @@ private:
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
-    MenuDumpInfo dumpInfo_;
-    ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
     RefPtr<FrameNode> filterColumnNode_;
+    MenuDumpInfo dumpInfo_;
+    bool hasCustomRadius_ = false;
+    ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG
 

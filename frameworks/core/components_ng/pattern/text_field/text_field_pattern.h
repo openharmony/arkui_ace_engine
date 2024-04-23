@@ -1033,8 +1033,10 @@ public:
 
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
+    std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
     bool IsShowCancelButtonMode() const;
+    void CheckPasswordAreaState();
 
     bool GetShowSelect() const
     {
@@ -1204,7 +1206,6 @@ private:
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
-    void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
     void UpdateCaretRect(bool isEditorValueChanged);

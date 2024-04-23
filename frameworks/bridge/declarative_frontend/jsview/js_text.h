@@ -45,6 +45,7 @@ public:
     static void SetAlign(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);

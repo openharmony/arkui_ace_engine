@@ -43,7 +43,7 @@ class ImageAnalyzerManager;
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
+class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
@@ -153,6 +153,11 @@ public:
         syncLoad_ = value;
     }
 
+    bool GetSyncLoad() const
+    {
+        return syncLoad_;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
@@ -194,7 +199,7 @@ public:
             }
         }
         imagesChangedFlag_ = true;
-        isAnimation_ = true;
+        RegisterVisibleAreaChange();
     }
 
     void ResetImages()
@@ -367,6 +372,8 @@ private:
     void ResetFormAnimationFlag();
     void OnAnimatedModifyDone();
     void OnImageModifyDone();
+    void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
+    void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;

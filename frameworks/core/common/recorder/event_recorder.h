@@ -84,9 +84,9 @@ constexpr char KEY_NAV_PAGE[] = "navPage";
 constexpr char KEY_NAV_PAGE_TYPE[] = "navType";
 constexpr char KEY_NAV_PAGE_PARAM[] = "navPageParam";
 
-bool IsCacheAvaliable();
+ACE_FORCE_EXPORT bool IsCacheAvaliable();
 
-class EventParamsBuilder {
+class ACE_FORCE_EXPORT EventParamsBuilder {
 public:
     EventParamsBuilder();
 
@@ -129,7 +129,7 @@ private:
 
 std::string MapToString(const std::shared_ptr<std::unordered_map<std::string, std::string>>& input);
 
-class EventRecorder final {
+class ACE_FORCE_EXPORT EventRecorder final {
 public:
     static EventRecorder& Get();
 

@@ -111,7 +111,7 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
         }
     }
@@ -126,7 +126,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() || textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
         }
     }
@@ -141,7 +141,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() || textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
             fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
         }
     }
@@ -306,26 +306,13 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         CHECK_NULL_VOID(paragraph_);
         UpdateFadeout(drawingContext);
         auto& canvas = drawingContext.canvas;
-        canvas.Save();
         if (!textRacing_) {
-            auto contentSize = contentSize_->Get();
-            auto contentOffset = contentOffset_->Get();
-            if (clip_ && clip_->Get() &&
-                (!fontSize_.has_value() || !fontSizeFloat_ ||
-                    NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-                RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-                    contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-                canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-            }
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
         } else {
             // Racing
             float textRacePercent = marqueeOption_.direction == MarqueeDirection::LEFT
                                         ? GetTextRacePercent()
                                         : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
-            if (clip_ && clip_->Get()) {
-                canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
-            }
             float paragraph1Offset =
                 (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
             if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
@@ -338,7 +325,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
             }
         }
-        canvas.Restore();
     } else {
         DrawObscuration(drawingContext);
     }
@@ -837,6 +823,9 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
     }
 
     marqueeSet_ = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::INVISIBLE);
+    }
     if (textRacing_) {
         PauseTextRace();
     }
@@ -846,6 +835,9 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
 void TextContentModifier::StopTextRace()
 {
     marqueeSet_ = false;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        UpdateImageNodeVisible(VisibleType::VISIBLE);
+    }
     PauseTextRace();
 }
 
@@ -860,8 +852,7 @@ void TextContentModifier::ResumeTextRace(bool bounce)
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }
-
-    UpdateImageNodeVisible(VisibleType::VISIBLE);
+    
     AnimationOption option = AnimationOption();
     RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
     option.SetDuration(marqueeDuration_);
@@ -913,7 +904,8 @@ void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
             if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
                 onFinish();
             } else {
-                taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI);
+                taskExecutor->PostTask(
+                    [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUITextStartTextRace");
             }
         });
 }
@@ -923,7 +915,6 @@ void TextContentModifier::PauseTextRace()
     if (!textRacing_) {
         return;
     }
-    UpdateImageNodeVisible(VisibleType::INVISIBLE);
     if (raceAnimation_) {
         AnimationUtils::StopAnimation(raceAnimation_);
     }

@@ -23,9 +23,11 @@
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/theme_attributes.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
@@ -104,6 +106,11 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     }
 
     auto resConfig = aceContainer->GetResourceConfiguration();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext && pipelineContext->GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        auto localColorMode = pipelineContext->GetLocalColorMode();
+        resConfig.SetColorMode(localColorMode);
+    }
     newResourceAdapter->UpdateConfig(resConfig);
 
     return newResourceAdapter;
@@ -755,4 +762,15 @@ uint32_t ResourceAdapterImplV2::GetSymbolById(uint32_t resId) const
     return result;
 }
 
+void ResourceAdapterImplV2::UpdateColorMode(ColorMode colorMode)
+{
+    RefPtr<Container> container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+
+    auto resConfig = aceContainer->GetResourceConfiguration();
+    resConfig.SetColorMode(colorMode);
+    UpdateConfig(resConfig, false);
+}
 } // namespace OHOS::Ace

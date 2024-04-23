@@ -65,6 +65,7 @@ public:
     virtual void SetMaxLines(uint32_t value) = 0;
     virtual void SetTextIndent(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
+    virtual void SetLineSpacing(const Dimension& value) = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
     virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
@@ -102,7 +103,7 @@ public:
     {
         return nullptr;
     };
-    virtual void SetClipEdge() = 0;
+    virtual void SetClipEdge(bool clip) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;

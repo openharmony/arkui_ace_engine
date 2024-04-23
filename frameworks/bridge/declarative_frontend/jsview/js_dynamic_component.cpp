@@ -102,7 +102,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
                 UIExtensionModel::GetInstance()->InitializeDynamicComponent(
                     frameNode, hapPath, abcPath, entryPoint, env);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
     });
 }
 

@@ -62,6 +62,7 @@ struct SymbolSpanStyle {
     double fontSize = 0.0;
     double lineHeight = 0.0;
     double letterSpacing = 0.0;
+    double lineSpacing = 0.0;
     std::string symbolColor;
     FONT_FEATURES_LIST fontFeature;
     int32_t fontWeight = 0;
@@ -74,6 +75,7 @@ struct TextStyleResult {
     double fontSize = 0.0;
     double lineHeight = 0.0;
     double letterSpacing = 0.0;
+    double lineSpacing = 0.0;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     FONT_FEATURES_LIST fontFeature;
@@ -105,6 +107,7 @@ struct ResultObject {
     SymbolSpanStyle symbolSpanStyle;
     RefPtr<ResourceObject> valueResource;
     bool isDraggable = true;
+    bool isInit = false;
 };
 
 struct Selection {

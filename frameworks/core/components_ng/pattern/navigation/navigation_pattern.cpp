@@ -628,9 +628,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
                 preTopNavDestination->GetContentNode()->Clean(false, true);
             }
             parent->RemoveChild(preTopNavDestination, true);
-            auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-            CHECK_NULL_VOID(preTopNavDestinationPattern);
-            preTopNavDestinationPattern->SetCustomNode(nullptr);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
             preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
@@ -906,7 +903,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     }
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap");
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
@@ -1235,7 +1232,8 @@ void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bo
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
     int32_t start = isFromStandardIndex ? standardIndex : 0;
     int32_t end = isFromStandardIndex ? navigationStack_->Size() : standardIndex;
-    bool isShow = lifecycle == NavDestinationLifecycle::ON_SHOW || NavDestinationLifecycle::ON_WILL_SHOW;
+    bool isShow = (lifecycle == NavDestinationLifecycle::ON_SHOW)
+        || (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW);
     if (isShow) {
         for (int32_t index = start; index < end; index++) {
             NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle, true);
@@ -1308,7 +1306,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             CHECK_NULL_VOID(transitionProxy);
             transitionProxy->FireFinishCallback();
         },
-        TaskExecutor::TaskType::UI, timeout);
+        TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     RefPtr<EventHub> eventHub;
     if (!preTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -1718,6 +1716,12 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible)
 {
+    if (preDestination) {
+        preDestination->SetIsAnimated(isAnimated);
+    }
+    if (topDestination) {
+        topDestination->SetIsAnimated(isAnimated);
+    }
     // fire onWillHide
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -1733,7 +1737,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }
     if (!isAnimated) {
-        FireShowAndHideLifecycle(preDestination, topDestination, isPopPage);
+        FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;
     }
@@ -1745,7 +1749,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(navigationPattern);
         auto preDestination = weakPreDestination.Upgrade();
         auto topDestination = weakTopDestination.Upgrade();
-        navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage);
+        navigationPattern->FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, true);
         navigationPattern->TransitionWithAnimation(preDestination, topDestination, isPopPage);
     });
 }
@@ -1809,7 +1813,7 @@ void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth,
 }
 
 void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
-    const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage)
+    const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     // don't move position hide lifecycle is from top to end
@@ -1823,7 +1827,17 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
     if (isPopPage) {
         NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
     }
-    NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, false, true);
+    if (!isAnimated) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->AddAfterLayoutTask([weakNavigation = WeakClaim(this)]() {
+            auto navigation = weakNavigation.Upgrade();
+            CHECK_NULL_VOID(navigation);
+            navigation->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, false, true);
+        });
+    } else {
+        NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, false, true);
+    }
     FireInterceptionEvent(false, navigationStack_->GetTopNavPath());
 }
 } // namespace OHOS::Ace::NG

@@ -46,6 +46,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     };
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
+    initWindowMode_ = session_->GetWindowMode();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -83,7 +84,7 @@ void WindowScene::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
-    session_->SetAttachState(true);
+    session_->SetAttachState(true, initWindowMode_);
     session_->SetUINodeId(host->GetAccessibilityId());
     auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
         const std::vector<DimensionRect>& responseRegion) {
@@ -136,7 +137,7 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(0);
-    session_->SetAttachState(false);
+    session_->SetAttachState(false, initWindowMode_);
     if (IsMainWindow()) {
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, name: %{public}s",
             session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
@@ -172,8 +173,7 @@ void WindowScene::RegisterFocusCallback()
             auto focusHub = host->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(true);
-        },
-            TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowSceneRequestFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
@@ -189,8 +189,7 @@ void WindowScene::RegisterFocusCallback()
             auto focusHub = host->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             focusHub->SetParentFocusable(false);
-        },
-            TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowSceneLostFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
@@ -271,7 +270,7 @@ void WindowScene::BufferAvailableCallback()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBufferAvailable", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnActivation()
@@ -319,7 +318,7 @@ void WindowScene::OnActivation()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnConnect()
@@ -352,7 +351,7 @@ void WindowScene::OnConnect()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneConnect", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnForeground()
@@ -375,7 +374,7 @@ void WindowScene::OnForeground()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneForeground", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnDisconnect()
@@ -401,6 +400,6 @@ void WindowScene::OnDisconnect()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDisconnect", TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::NG

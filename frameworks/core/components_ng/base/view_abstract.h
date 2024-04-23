@@ -106,6 +106,7 @@ struct MenuParam {
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {

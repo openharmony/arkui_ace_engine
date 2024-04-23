@@ -165,6 +165,19 @@ class FrameNode {
     }
     this._childList.set(node._nodeId, node);
   }
+
+  addComponentContent(content: ComponentContent): void {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+      return;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    if (!flag) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+  }
+
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
     if (child === undefined || child === null) {
       return;
