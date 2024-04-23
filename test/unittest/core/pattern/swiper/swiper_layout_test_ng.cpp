@@ -105,7 +105,7 @@ HWTEST_F(SwiperLayoutTestNg, Arrow001, TestSize.Level1)
     EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundColorValue(), Color::FromString("#00000000"));
     EXPECT_EQ(leftArrowLayoutProperty->GetArrowSizeValue(), Dimension(18.f));
     EXPECT_EQ(leftArrowLayoutProperty->GetArrowColorValue(), Color::FromString("#182431"));
-    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(201.f, 772.01f, 24.f, 24.f)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(165.f, 772.01f, 24.f, 24.f)));
 }
 
 /**
@@ -143,7 +143,7 @@ HWTEST_F(SwiperLayoutTestNg, Arrow002, TestSize.Level1)
     EXPECT_EQ(leftArrowLayoutProperty->GetBackgroundColorValue(), Color::FromString("#19182431"));
     EXPECT_EQ(leftArrowLayoutProperty->GetArrowSizeValue(), Dimension(24.f));
     EXPECT_EQ(leftArrowLayoutProperty->GetArrowColorValue(), Color::GREEN);
-    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(448.f, 384.f, 32.f, 32.f)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(440.f, 384.f, 32.f, 32.f)));
 }
 
 /**
@@ -175,7 +175,7 @@ HWTEST_F(SwiperLayoutTestNg, Arrow003, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(swiperArrowParameters);
     });
-    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(448.01f, 353.f, 32.f, 32.f)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 5), RectF(448.01f, 317.f, 32.f, 32.f)));
 }
 
 /**
@@ -207,7 +207,7 @@ HWTEST_F(SwiperLayoutTestNg, Arrow004, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(swiperArrowParameters);
     });
-    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(224.f, 768.f, 32.f, 32.f)));
+    EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 6), RectF(224.f, 760.f, 32.f, 32.f)));
 }
 
 void SwiperLayoutTestNg::CheckItems(int32_t start, int32_t end, float prevMargin, float itemWidth)
@@ -400,8 +400,8 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     indicatorGeometryNode->SetFrameOffset(OffsetF(250.0f, 190.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(144.0f, 48.0f));
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 388.0f)));
-    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(456.0f, 388.0f)));
+    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(8.0f, 388.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(448.0f, 388.0f)));
 
     /**
      * @tc.cases: case2. Axis is HORIZONTAL, arrow is outside the switch.
@@ -409,16 +409,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     indicatorGeometryNode->SetFrameOffset(OffsetF(15.0f, 240.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(625.0f, 48.0f));
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 388.0f)));
-    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(456.0f, 388.0f)));
+    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(8.0f, 388.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(448.0f, 388.0f)));
 
     /**
      * @tc.cases: case3. Axis is HORIZONTAL, arrow is in the switch, not show indicator.
      */
     layoutProperty_->UpdateShowIndicator(false);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 388.0f)));
-    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(456.0f, 388.0f)));
+    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(8.0f, 388.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(448.0f, 388.0f)));
 
     /**
      * @tc.cases: case4. Axis is VERTICAL, arrow is in the switch.
@@ -428,8 +428,8 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     indicatorGeometryNode->SetFrameOffset(OffsetF(20.0f, 50.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(20.0f, 100.0f));
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 0.0f)));
-    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 456.0f)));
+    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 8.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 448.0f)));
 
     /**
      * @tc.cases: case5. Axis is VERTICAL, arrow is outside the switch.
@@ -437,16 +437,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     indicatorGeometryNode->SetFrameOffset(OffsetF(20.0f, 15.0f));
     indicatorGeometryNode->SetFrameSize(SizeF(20.0f, 220.0f));
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 0.0f)));
-    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 456.0f)));
+    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 8.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 448.0f)));
 
     /**
      * @tc.cases: case6. Axis is VERTICAL, arrow is in the switch, not show indicator.
      */
     layoutProperty_->UpdateShowIndicator(false);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 0.0f)));
-    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 456.0f)));
+    EXPECT_TRUE(IsEqual(leftArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 8.0f)));
+    EXPECT_TRUE(IsEqual(rightArrowGeometryNode->GetMarginFrameOffset(), OffsetF(228.0f, 448.0f)));
 }
 
 /**
