@@ -43,7 +43,7 @@ class ImageAnalyzerManager;
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
+class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
