@@ -115,10 +115,12 @@ public:
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
     static void SetDivider(FrameNode* frameNode, const ItemDivider& divider);
+    static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
     static int32_t isSingleRange()
     {
         return isSingleRange_;
     }
+    static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
@@ -145,7 +147,7 @@ public:
     void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, TextPickerDialog& textPickerDialog,
-        TextPickerDialogEvent& textPickerDialogEvent) override;
+        TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) override;
 };
 } // namespace OHOS::Ace::NG
 

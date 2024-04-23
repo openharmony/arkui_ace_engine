@@ -192,7 +192,8 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
         };
         BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendResultTask));
     };
-    context->GetTaskExecutor()->PostTask(std::move(getInspectorTask), TaskExecutor::TaskType::UI);
+    context->GetTaskExecutor()->PostTask(
+        std::move(getInspectorTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTreeJson");
 }
 
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)

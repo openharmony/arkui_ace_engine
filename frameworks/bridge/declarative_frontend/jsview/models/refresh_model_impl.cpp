@@ -182,6 +182,8 @@ void RefreshModelImpl::SetOnRefreshing(std::function<void()>&& refreshing)
 
 void RefreshModelImpl::SetOnOffsetChange(std::function<void(const float)>&& offsetChange) {}
 
+void RefreshModelImpl::ResetOnOffsetChange() {}
+
 void RefreshModelImpl::SetChangeEvent(std::function<void(const std::string)>&& changeEvent)
 {
     auto component = GetComponent();

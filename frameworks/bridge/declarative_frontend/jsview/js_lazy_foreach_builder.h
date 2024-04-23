@@ -71,14 +71,14 @@ public:
         }
     }
 
-    void NotifyDataChanged(size_t index, RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild) override
+    void NotifyDataChanged(size_t index, const RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild) override
     {
         if (updateChangedNodeFlag_ && !isRebuild) {
             changedLazyForEachNodes_[index] = lazyForEachNode;
         }
     }
 
-    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override
+    void NotifyDataDeleted(const RefPtr<NG::UINode>& lazyForEachNode, size_t index, bool removeIds) override
     {
         if (updateChangedNodeFlag_) {
             decltype(changedLazyForEachNodes_) temp(std::move(changedLazyForEachNodes_));

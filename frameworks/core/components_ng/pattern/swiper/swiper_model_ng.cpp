@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 
@@ -25,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -125,6 +127,15 @@ void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIsIndicatorCustomSize(isCustomSize);
+}
+
+void SwiperModelNG::SetIndicatorInteractive(bool interactive)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorInteractive(interactive);
 }
 
 void SwiperModelNG::SetAutoPlay(bool autoPlay)
@@ -250,14 +261,32 @@ void SwiperModelNG::SetMainSwiperSizeWidth() {}
 
 void SwiperModelNG::SetMainSwiperSizeHeight() {}
 
-void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin)
+void SwiperModelNG::SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin);
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
 }
 
-void SwiperModelNG::SetNextMargin(const Dimension& nextMargin)
+void SwiperModelNG::SetNextMargin(const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin);
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNextMarginIgnoreBlank(ignoreBlank);
+}
+
+void SwiperModelNG::SetIndicatorInteractive(FrameNode* frameNode, bool interactive)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorInteractive(interactive);
 }
 
 void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
@@ -349,14 +378,24 @@ void SwiperModelNG::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidSc
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
-void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin)
+void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNextMarginIgnoreBlank(ignoreBlank);
 }
 
-void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin)
+void SwiperModelNG::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPrevMarginIgnoreBlank(ignoreBlank);
 }
 
 void SwiperModelNG::SetIndex(FrameNode* frameNode, uint32_t index)
@@ -376,13 +415,19 @@ void SwiperModelNG::SetDuration(FrameNode* frameNode, uint32_t duration)
 
 void SwiperModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCachedCount(cachedCount);
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount, frameNode);
+}
+
+int32_t SwiperModelNG::GetCachedCount(FrameNode* frameNode)
+{
+    int32_t cachedCount = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    return cachedCount;
 }
 
 void SwiperModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
@@ -669,4 +714,13 @@ EdgeEffect SwiperModelNG::GetEffectMode(FrameNode* frameNode)
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwiperPaintProperty, EdgeEffect, mode, frameNode, mode);
     return mode;
 }
+
+int32_t SwiperModelNG::RealTotalCount(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->RealTotalCount();
+}
+
 } // namespace OHOS::Ace::NG

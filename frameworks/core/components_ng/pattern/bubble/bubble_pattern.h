@@ -72,6 +72,7 @@ public:
         bubbleMethod->SetArrowOffsetsFromClip(arrowOffsetsFromClip_);
         bubbleMethod->SetArrowWidth(arrowWidth_);
         bubbleMethod->SetArrowHeight(arrowHeight_);
+        bubbleMethod->SetBorder(border_);
         return bubbleMethod;
     }
 
@@ -196,6 +197,13 @@ public:
         return hasTransition_;
     }
 
+    void ResetFocusState()
+    {
+        SetIsDefaultHasBeFocused(false);
+        SetIsViewRootScopeFocused(true);
+        SetIsViewHasFocused(false);
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -230,7 +238,7 @@ private:
     OffsetT<Dimension> GetInvisibleOffset();
     RefPtr<RenderContext> GetRenderContext();
     void ResetToInvisible();
-    bool PostTask(const TaskExecutor::Task& task);
+    bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void StartOffsetEnteringAnimation();
     void StartAlphaEnteringAnimation(std::function<void()> finish);
     void StartOffsetExitingAnimation();
@@ -258,6 +266,7 @@ private:
     bool showArrow_ = false;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool isSetMessageColor_ = false;
+    Border border_;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

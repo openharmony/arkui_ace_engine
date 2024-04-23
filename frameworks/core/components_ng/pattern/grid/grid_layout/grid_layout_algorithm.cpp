@@ -267,6 +267,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
         TAG_LOGI(AceLogTag::ACE_GRID, "size of main axis value is infinity, use percent reference");
     }
+    rightToLeft_ = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);

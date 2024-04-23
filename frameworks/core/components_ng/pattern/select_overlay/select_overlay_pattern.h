@@ -164,39 +164,44 @@ public:
     void UpdateSelectArea(const RectF& selectArea);
 
 protected:
+    virtual void CheckHandleReverse();
+    virtual void UpdateHandleHotZone();
+    RectF GetHandlePaintRect(const SelectHandleInfo& handleInfo);
+    void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
     std::shared_ptr<SelectOverlayInfo> info_;
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<PanEvent> panEvent_;
     CancelableCallback<void()> hiddenHandleTask_;
     bool isHiddenHandle_ = false;
+    RectF firstHandleRegion_;
+    RectF secondHandleRegion_;
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void UpdateHandleHotZone();
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void HandleOnClick(GestureEvent& info);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDownEvent(const TouchEventInfo& info);
     void HandleOnTouch(GestureEvent& info);
     void HandlePanStart(GestureEvent& info);
     void HandlePanMove(GestureEvent& info);
     void HandlePanEnd(GestureEvent& info);
     void HandlePanCancel();
 
-    void CheckHandleReverse();
     bool IsHandlesInSameLine();
+    bool IsFirstHandleMoveStart(const Offset& touchOffset);
     void StopHiddenHandleTask();
     void HiddenHandle();
-    void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
+    void UpdateOffsetOnMove(RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst);
 
     RefPtr<TouchEventImpl> touchEvent_;
 
-    RectF firstHandleRegion_;
-    RectF secondHandleRegion_;
-
     bool firstHandleDrag_ = false;
     bool secondHandleDrag_ = false;
+    bool isFirstHandleTouchDown_ = false;
+    bool isSecondHandleTouchDown_ = false;
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
     bool hasExtensionMenu_ = false;

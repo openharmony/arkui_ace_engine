@@ -94,11 +94,8 @@ void MagnifierController::CreateMagnifierChildNode()
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textFieldpattern);
-
-    auto host = textFieldpattern->GetHost();
-    CHECK_NULL_VOID(host);
+    auto textBasePattern = DynamicCast<TextBase>(pattern);
+    CHECK_NULL_VOID(textBasePattern);
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);
@@ -128,7 +125,7 @@ void MagnifierController::SetMagnifierRect(const RefPtr<Pattern>& childPattern)
     auto textBasepattern = DynamicCast<TextBase>(pattern_.Upgrade());
     CHECK_NULL_VOID(textBasepattern);
 
-    auto contentRect = textBasepattern->GetContentRect();
+    auto contentRect = textBasepattern->GetPaintContentRect();
     magnifierRect_.localOffset = localOffset_;
     magnifierRect_.cursorOffset = textBasepattern->GetCaretOffset();
     magnifierRect_.contentSize = SizeF(contentRect.Width(), contentRect.Height());

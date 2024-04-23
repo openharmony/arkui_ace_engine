@@ -64,7 +64,7 @@ public:
                 pattern->FireConnect();
             }
         };
-        PostTaskToUI(std::move(task));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionConnect");
     }
 
     void OnExtensionDisconnected() override
@@ -80,7 +80,7 @@ public:
                 pattern->FireDisConnect();
             }
         };
-        PostTaskToUI(std::move(task));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionDisconnect");
     }
 
     void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) override {}
@@ -88,7 +88,7 @@ public:
     void OnBackPress() override {}
 
 private:
-    void PostTaskToUI(const std::function<void()>&& task) const
+    void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const
     {
         CHECK_NULL_VOID(task);
         auto container = AceEngine::Get().GetContainer(instanceId_);
@@ -97,7 +97,7 @@ private:
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
     }
 
     static void UpdateFrameNodeTree(

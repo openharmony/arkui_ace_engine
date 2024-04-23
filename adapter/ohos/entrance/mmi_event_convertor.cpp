@@ -78,6 +78,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.tiltX = pointerItem.GetTiltX();
     touchPoint.tiltY = pointerItem.GetTiltY();
     touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
+    touchPoint.originalId = pointerItem.GetOriginPointerId();
     return touchPoint;
 }
 
@@ -142,7 +143,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
         .SetSourceType(SourceType::NONE)
         .SetSourceTool(touchPoint.sourceTool)
-        .SetTouchEventId(pointerEvent->GetId());
+        .SetTouchEventId(pointerEvent->GetId())
+        .SetOriginalId(touchPoint.originalId);
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
@@ -150,6 +152,13 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     int32_t orgAction = pointerEvent->GetPointerAction();
     SetTouchEventType(orgAction, event);
     UpdateTouchEvent(pointerEvent, event);
+    if (event.sourceType == SourceType::TOUCH && event.sourceTool == SourceTool::PEN) {
+        // Pen use type double XY position.
+        event.x = item.GetWindowXPos();
+        event.y = item.GetWindowYPos();
+        event.screenX = item.GetDisplayXPos();
+        event.screenY = item.GetDisplayYPos();
+    }
     return event;
 }
 
@@ -289,6 +298,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
+    events.originalId = item.GetOriginPointerId();
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;
@@ -310,6 +320,12 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     auto sourceTool = GetSourceTool(item.GetToolType());
     if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
         events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+        // Pen use type double XY position.
+        events.x = item.GetWindowXPos();
+        events.y = item.GetWindowYPos();
+        events.screenX = item.GetDisplayXPos();
+        events.screenY = item.GetDisplayYPos();
+        events.originalId = events.id;
     }
     events.touchEventId = pointerEvent->GetId();
 }
@@ -362,11 +378,13 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     GetEventDevice(orgDevice, event);
     event.sourceTool = GetSourceTool(item.GetToolType());
     event.pointerEvent = pointerEvent;
+    event.originalId = item.GetOriginPointerId();
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.time = time;
     event.touchEventId = pointerEvent->GetId();
+    event.targetDisplayId = pointerEvent->GetTargetDisplayId();
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
@@ -412,6 +430,7 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.force = static_cast<float>(pointerItem.GetPressure());
     event.deviceId = pointerItem.GetDeviceId();
     event.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
+    event.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     event.sourceTool = GetSourceTool(pointerItem.GetToolType());
     event.targetWindowId = pointerItem.GetTargetWindowId();
 }

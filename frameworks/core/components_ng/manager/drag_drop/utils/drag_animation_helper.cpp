@@ -34,8 +34,8 @@ namespace {
     constexpr float DEFAULT_ANIMATION_SCALE = 0.95f;
     constexpr float GATHER_SPRING_RESPONSE = 0.304f;
     constexpr float GATHER_SPRING_DAMPING_FRACTION = 0.97f;
-    constexpr float GRID_MOVE_SCALE = 0.05f;
-    constexpr float LIST_MOVE_SCALE = 0.04f;
+    constexpr float GRID_MOVE_SCALE = 0.1f;
+    constexpr float LIST_MOVE_SCALE = 0.1f;
     constexpr float EULER_NUMBER = 2.71828f;
     constexpr float GATHER_OFFSET_RADIUS = 0.1f;
     constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
@@ -60,7 +60,7 @@ void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, float& maxDista
         CHECK_NULL_VOID(imageNode);
         auto width = child.width;
         auto height = child.height;
-        OffsetF curPos = {child.offset.GetX() + width / 2, child.offset.GetY() + height / 2};
+        OffsetF curPos = {child.offset.GetX() + child.halfWidth, child.offset.GetY() + child.halfHeight};
         float dis = sqrt(pow(gatherNodeCenter.GetX() - curPos.GetX(), 2) +
             pow(gatherNodeCenter.GetY() - curPos.GetY(), 2));
         maxDistance = std::max(maxDistance, dis);
@@ -120,7 +120,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
                 CHECK_NULL_VOID(imageNode);
                 auto imageContext = imageNode->GetRenderContext();
                 CHECK_NULL_VOID(imageContext);
-                auto curPos = child.offset + OffsetF(child.width / 2.0f, child.height / 2.0f);
+                auto curPos = child.offset + OffsetF(child.halfWidth, child.halfHeight);
                 auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, maxTranslation,
                     maxDistance, minDistance);
                 imageContext->UpdatePosition(OffsetT<Dimension>(
@@ -179,6 +179,9 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     actuator->ClearGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     pipeline->FlushSyncGeometryNodeTasks();
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetIsTouchGatherAnimationPlaying(true);
     PlayGatherNodeOpacityAnimation(manager);
     PlayGatherNodeTranslateAnimation(actuator, manager);
 }
@@ -259,6 +262,14 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(GATHER_SPRING_RESPONSE,
         GATHER_SPRING_DAMPING_FRACTION, 0.0f);
     option.SetCurve(curve);
+
+    option.SetOnFinishEvent([]() {
+        auto pipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto dragDropManager = pipelineContext->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetIsTouchGatherAnimationPlaying(false);
+    });
     AnimationUtils::Animate(
         option,
         [overlayManager, gatherNodeCenter]() {
@@ -333,7 +344,12 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
-    auto childSize = manager->GetGatherNodeChildrenInfo().size() + 1;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto badgeNumber = dragDropManager->GetBadgeNumber();
+    auto childSize = badgeNumber > 0 ? badgeNumber : manager->GetGatherNodeChildrenInfo().size() + 1;
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
     auto textRenderContext = textNode->GetRenderContext();

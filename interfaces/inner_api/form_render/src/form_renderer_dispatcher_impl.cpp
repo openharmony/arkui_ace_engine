@@ -120,21 +120,21 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
     formRenderer->OnSurfaceChange(width, height);
 }
 
-void FormRendererDispatcherImpl::SetVisibleChange(bool isVisible)
+void FormRendererDispatcherImpl::SetObscured(bool isObscured)
 {
     auto handler = eventHandler_.lock();
     if (!handler) {
         HILOG_ERROR("eventHandler is nullptr");
         return;
     }
-
-    handler->PostTask([content = uiContent_, isVisible]() {
+    handler->PostTask([content = uiContent_, isObscured]() {
         auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-        uiContent->ProcessFormVisibleChange(isVisible);
+        HILOG_INFO("Update ChangeSensitiveNodes: %{public}s", isObscured ? "true" : "false");
+        uiContent->ChangeSensitiveNodes(isObscured);
     });
 }
 } // namespace Ace

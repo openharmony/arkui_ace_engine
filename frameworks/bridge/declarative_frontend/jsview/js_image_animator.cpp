@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/models/image_animator_model_impl.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<ImageAnimatorModel> ImageAnimatorModel::instance_ = nullptr;
@@ -257,8 +258,13 @@ void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& im
         return;
     }
     JSRef<JSObject> jsObjImage = JSRef<JSObject>::Cast(image);
-    ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src);
+    bool srcValid = ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src);
     GetJsMediaBundleInfo(jsObjImage->GetProperty("src"), imageProperties.bundleName, imageProperties.moduleName);
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        imageProperties.pixelMap = CreatePixelMapFromNapiValue(jsObjImage->GetProperty("src"));
+#endif
+    }
     ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width);
     ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height);
     ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top);

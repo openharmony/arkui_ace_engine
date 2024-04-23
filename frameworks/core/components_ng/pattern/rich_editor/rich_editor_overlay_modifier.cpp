@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
     const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     : TextOverlayModifier(), pattern_(pattern), edgeEffect_(edgeEffect),
-      scrollBarOverlayModifier_(scrollbarOverlayModifier)
+      scrollBarOverlayModifier_(scrollbarOverlayModifier), magnifierPainter_(pattern)
 {
     caretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(caretVisible_);
@@ -185,6 +185,7 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     drawingContext.canvas.Restore();
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
+    magnifierPainter_.PaintMagnifier(drawingContext.canvas);
 }
 
 void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)

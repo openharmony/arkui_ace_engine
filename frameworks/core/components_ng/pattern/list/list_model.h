@@ -22,6 +22,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -79,6 +80,11 @@ public:
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
     virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
+    virtual void SetFadingEdge(bool fadingEdge) = 0;
+    virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
+    {
+        return nullptr;
+    }
 
     virtual DisplayMode GetDisplayMode() const = 0;
 

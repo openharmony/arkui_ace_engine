@@ -76,6 +76,26 @@ class TextAreaLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class TextAreaLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    } else {
+      getUINativeModule().textArea.setLineSpacing(node, this.value.value, this.value.unit);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaLineHeightModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -98,12 +118,12 @@ class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
   constructor(value: WordBreak) {
     super(value);
   }
-  static identity: Symbol = Symbol('textInputWordBreak');
+  static identity: Symbol = Symbol('textAreaWordBreak');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.resetWordBreak(node);
+      getUINativeModule().textArea.resetWordBreak(node);
     } else {
-      getUINativeModule().text.setWordBreak(node, this.value!);
+      getUINativeModule().textArea.setWordBreak(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -138,6 +158,57 @@ class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
       getUINativeModule().textArea.resetMaxLines(node);
     } else {
       getUINativeModule().textArea.setMaxLines(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaMinFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMinFontSize(node);
+    } else {
+      getUINativeModule().textArea.setMinFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaMaxFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMaxFontSize(node);
+    } else {
+      getUINativeModule().textArea.setMaxFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
+  constructor(value: TextHeightAdaptivePolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaHeightAdaptivePolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetHeightAdaptivePolicy(node);
+    } else {
+      getUINativeModule().textArea.setHeightAdaptivePolicy(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -410,6 +481,74 @@ class TextAreaFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextAreaSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().textArea.setSelectedBackgroundColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextAreaCaretStyleModifier extends ModifierWithKey<CaretStyle> {
+  constructor(value: CaretStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaCaretStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetCaretStyle(node);
+    } else {
+      getUINativeModule().textArea.setCaretStyle(node, this.value.width!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class TextAreaTextOverflowModifier extends ModifierWithKey<TextOverflow> {
+  constructor(value: TextOverflow) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaTextOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetTextOverflow(node);
+    } else {
+      getUINativeModule().textArea.setTextOverflow(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class TextAreaTextIndentModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaTextIndent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetTextIndent(node);
+    } else {
+      getUINativeModule().textArea.setTextIndent(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -534,8 +673,40 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  lineSpacing(value: LengthMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier, value);
+    return this;
+  }
   wordBreak(value: WordBreak): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
+    return this;
+  }
+  minFontSize(value: number | string | Resource): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMinFontSizeModifier.identity, TextAreaMinFontSizeModifier, value);
+    return this;
+  }
+  maxFontSize(value: number | string | Resource): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxFontSizeModifier.identity, TextAreaMaxFontSizeModifier, value);
+    return this;
+  }
+  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAreaAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHeightAdaptivePolicyModifier.identity, TextAreaHeightAdaptivePolicyModifier, value);
+    return this;
+  }
+  selectedBackgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectedBackgroundColorModifier.identity, TextAreaSelectedBackgroundColorModifier, value);
+    return this;
+  }
+  caretStyle(value: CaretStyle): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaCaretStyleModifier.identity, TextAreaCaretStyleModifier, value);
+    return this;
+  }
+  textOverflow(value: TextOverflow): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextOverflowModifier.identity, TextAreaTextOverflowModifier, value);
+    return this;
+  }
+  textIndent(value: Dimension): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextIndentModifier.identity, TextAreaTextIndentModifier, value);
     return this;
   }
 }

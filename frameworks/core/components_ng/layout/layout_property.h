@@ -46,6 +46,7 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+class InspectorFilter;
 
 class ACE_FORCE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
@@ -59,7 +60,7 @@ public:
 
     virtual void Reset();
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
@@ -247,6 +248,7 @@ public:
     PaddingPropertyF CreatePaddingAndBorder();
     PaddingPropertyF CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault, float paddingVerticalDefault,
         float borderHorizontalDefault, float borderVerticalDefault);
+    BorderWidthPropertyF CreateBorder();
 
     MarginPropertyF CreateMargin();
 

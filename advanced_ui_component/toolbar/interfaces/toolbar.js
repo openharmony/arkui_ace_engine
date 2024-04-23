@@ -163,7 +163,6 @@ export class ToolBar extends ViewPU {
       Column.create();
       Column.width('100%');
       Column.height('100%');
-      Column.bindMenu(ObservedObject.GetRawObject(this.menuContent), { offset: { x: 5, y: -10 } });
       Column.padding({ left: 4, right: 4 });
       Column.borderRadius({
         id: -1,
@@ -189,6 +188,7 @@ export class ToolBar extends ViewPU {
       });
       Image.margin({ top: 8, bottom: 2 });
       Image.objectFit(ImageFit.Contain);
+      Image.bindMenu(ObservedObject.GetRawObject(this.menuContent), { offset: { x: 5, y: -10 } });
       t || Image.pop();
       ViewStackProcessor.StopGetAccessRecording();
     }));

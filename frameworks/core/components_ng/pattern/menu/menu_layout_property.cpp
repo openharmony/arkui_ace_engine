@@ -16,20 +16,21 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
 namespace OHOS::Ace::NG {
-void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
-    json->Put("title", GetTitle().value_or("").c_str());
-    json->Put("offset", GetPositionOffset().value_or(OffsetF()).ToString().c_str());
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("title", GetTitle().value_or("").c_str(), filter);
+    json->PutExtAttr("offset", GetPositionOffset().value_or(OffsetF()).ToString().c_str(), filter);
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
-    json->Put("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str());
+    json->PutExtAttr("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str(), filter);
     auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
-    json->Put("fontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
+    json->PutExtAttr("fontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str(), filter);
     auto fontJsonObject = JsonUtil::Create(true);
     fontJsonObject->Put("size", GetFontSize().value_or(defaultFontSize).ToString().c_str());
     fontJsonObject->Put("weight",
@@ -37,7 +38,7 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     fontJsonObject->Put("style",
         V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
     fontJsonObject->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
-    json->Put("font", fontJsonObject);
+    json->PutExtAttr("font", fontJsonObject, filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuPattern = host->GetPattern<MenuPattern>();
@@ -61,8 +62,8 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("icon", pattern->GetIcon().c_str());
         jsonDashArray->Put(std::to_string(index++).c_str(), jsonValue);
     }
-    json->Put("bindMenu", jsonDashArray);
+    json->PutExtAttr("bindMenu", jsonDashArray, filter);
 
-    json->Put("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false");
+    json->PutExtAttr("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false", filter);
 }
 } // namespace OHOS::Ace::NG

@@ -15,12 +15,32 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
+#include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t TYPE_CYCLE = 0;
+
+void SetDefaultBorderRadius(void)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DataPanelTheme>();
+    CHECK_NULL_VOID(theme);
+    auto defaultRadiusDimension = theme->GetDefaultBorderRadius();
+    ViewAbstract::SetBorderRadius(defaultRadiusDimension);
+    ViewAbstract::SetClipEdge(true);
+}
+} // namespace
+
 void DataPanelModelNG::Create(const std::vector<double>& values, double max, int32_t dataPanelType)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -33,6 +53,10 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Values, values);
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, Max, max);
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, dataPanelType);
+
+    if (dataPanelType != TYPE_CYCLE) {
+        SetDefaultBorderRadius();
+    }
 }
 
 void DataPanelModelNG::SetEffect(bool isCloseEffect)
@@ -83,5 +107,12 @@ void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShad
 void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
+}
+
+void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
 }
 } // namespace OHOS::Ace::NG

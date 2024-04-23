@@ -30,6 +30,8 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+class InspectorFilter;
+
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 using OnPreDragFunc = std::function<void(const PreDragStatus)>;
@@ -55,7 +57,7 @@ enum class DragFuncType {
 };
 
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
-class EventHub : public virtual AceType {
+class ACE_FORCE_EXPORT EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
 
 public:
@@ -390,7 +392,7 @@ public:
     }
 
     // get XTS inspector value
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 

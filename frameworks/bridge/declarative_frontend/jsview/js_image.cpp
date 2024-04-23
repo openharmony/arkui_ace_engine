@@ -23,6 +23,7 @@
 #endif
 
 #include "base/geometry/ng/vector.h"
+#include "base/image/drawing_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
@@ -51,6 +52,19 @@ namespace {
 }
 
 namespace OHOS::Ace {
+
+namespace {
+ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
+    const std::string &moduleName)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (pixmap) {
+        return ImageSourceInfo(pixmap);
+    }
+#endif
+    return { src, bundleName, moduleName };
+}
+} // namespace
 
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
 std::mutex ImageModel::mutex_;
@@ -104,14 +118,25 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
 
 void JSImage::SetAlt(const JSCallbackInfo& args)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (args.Length() < 1) {
         return;
     }
 
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    bool isCard = context->IsFormRender();
+
     std::string src;
+    bool srcValid = false;
     if (args[0]->IsString()) {
         src = args[0]->ToString();
-    } else if (!ParseJsMedia(args[0], src)) {
+    } else {
+        srcValid = ParseJsMedia(args[0], src);
+    }
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
     int32_t resId = 0;
@@ -122,13 +147,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
             resId = tmp->ToNumber<int32_t>();
         }
     }
-    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
-        return;
-    }
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(args[0], bundleName, moduleName);
-    ImageSourceInfo srcInfo = ImageSourceInfo { src, bundleName, moduleName };
+    RefPtr<PixelMap> pixmap = nullptr;
+
+    // input is Drawable
+    if (!srcValid && !isCard) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixmap = CreatePixelMapFromNapiValue(args[0]);
+#endif
+    }
+    auto srcInfo = CreateSourceInfo(src, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
 }
@@ -150,11 +180,17 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
 
 void JSImage::SetMatchTextDirection(bool value)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetMatchTextDirection(value);
 }
 
 void JSImage::SetFitOriginalSize(bool value)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetFitOriginSize(value);
 }
 
@@ -248,14 +284,19 @@ void JSImage::Create(const JSCallbackInfo& info)
     RefPtr<PixelMap> pixmap = nullptr;
 
     // input is PixelMap / Drawable
-    if (!srcValid) {
+    if (!srcValid && !isCard) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (!isCard) {
-            if (IsDrawable(info[0])) {
-                pixmap = GetDrawablePixmap(info[0]);
-            } else {
-                pixmap = CreatePixelMapFromNapiValue(info[0]);
+        std::vector<RefPtr<PixelMap>> pixelMaps;
+        int32_t duration = -1;
+        int32_t iterations = 1;
+        if (IsDrawable(info[0])) {
+            if (GetPixelMapListFromAnimatedDrawable(info[0], pixelMaps, duration, iterations)) {
+                CreateImageAnimation(pixelMaps, duration, iterations);
+                return;
             }
+            pixmap = GetDrawablePixmap(info[0]);
+        } else {
+            pixmap = CreatePixelMapFromNapiValue(info[0]);
         }
 #endif
     }
@@ -286,6 +327,9 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
 
 void JSImage::JsImageResizable(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     auto infoObj = info[0];
     ImageResizableSlice sliceResult;
     if (!infoObj->IsObject()) {
@@ -341,11 +385,17 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetImageSourceSize(JSViewAbstract::ParseSize(info));
 }
 
 void JSImage::SetImageFill(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -366,6 +416,9 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
 void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (info.Length() < 1) {
         ImageModel::GetInstance()->SetImageRenderMode(ImageRenderMode::ORIGINAL);
         return;
@@ -384,6 +437,9 @@ void JSImage::SetImageRenderMode(const JSCallbackInfo& info)
 
 void JSImage::SetImageInterpolation(int32_t imageInterpolation)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     auto interpolation = static_cast<ImageInterpolation>(imageInterpolation);
     if (interpolation < ImageInterpolation::NONE || interpolation > ImageInterpolation::HIGH) {
         interpolation = ImageInterpolation::NONE;
@@ -436,11 +492,17 @@ void JSImage::JsBlur(const JSCallbackInfo& info)
 
 void JSImage::SetAutoResize(bool autoResize)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->SetAutoResize(autoResize);
 }
 
 void JSImage::SetSyncLoad(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -502,6 +564,13 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
+#ifndef PREVIEW
+        auto drawingColorFilter = CreateDrawingColorFilter(tmpInfo);
+        if (drawingColorFilter) {
+            ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
+            return;
+        }
+#endif
         JSColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
@@ -548,6 +617,17 @@ void JSImage::SetSmoothEdge(const JSCallbackInfo& info)
         parseRes = DEFAULT_SMOOTHEDGE_VALUE;
     }
     ImageModel::GetInstance()->SetSmoothEdge(static_cast<float>(parseRes));
+}
+
+void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
+{
+    std::vector<ImageProperties> imageList;
+    for (int i = 0; i < pixelMaps.size(); i++) {
+        ImageProperties image;
+        image.pixelMap = pixelMaps[i];
+        imageList.push_back(image);
+    }
+    ImageModel::GetInstance()->CreateAnimation(imageList, duration, iterations);
 }
 
 void JSImage::JSBind(BindingTarget globalObj)
@@ -641,6 +721,9 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto enumNumber = info[0]->ToNumber<int>();
@@ -654,6 +737,9 @@ void JSImage::SetCopyOption(const JSCallbackInfo& info)
 
 void JSImage::EnableAnalyzer(bool isEnableAnalyzer)
 {
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
     ImageModel::GetInstance()->EnableAnalyzer(isEnableAnalyzer);
 }
 

@@ -47,8 +47,6 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         geometryNode->SetFrameSize(SizeF());
         return;
     }
-    bool autoWidth = layoutProperty->GetWidthAutoValue(false);
-    bool autoHeight = layoutProperty->GetHeightAutoValue(false);
     geometryNode->SetFrameSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -78,17 +76,19 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         swiperSize = MeasureSwiper(layoutProperty, swiperWrapper, idealSize, tabBarSize, dividerStrokeWidth);
     }
 
-    if ((axis == Axis::VERTICAL) && autoWidth) {
+    auto paddingH = layoutProperty->CreatePaddingAndBorder().Width();
+    auto paddingV = layoutProperty->CreatePaddingAndBorder().Height();
+    if ((axis == Axis::VERTICAL) && layoutProperty->GetWidthAutoValue(false)) {
         if (!barOverlap) {
-            geometryNode->SetFrameWidth(tabBarSize.Width() + dividerStrokeWidth + swiperSize.Width());
+            geometryNode->SetFrameWidth(tabBarSize.Width() + dividerStrokeWidth + swiperSize.Width() + paddingH);
         } else {
-            geometryNode->SetFrameWidth(dividerStrokeWidth + swiperSize.Width());
+            geometryNode->SetFrameWidth(dividerStrokeWidth + swiperSize.Width() + paddingH);
         }
-    } else if ((axis == Axis::HORIZONTAL) && autoHeight) {
+    } else if ((axis == Axis::HORIZONTAL) && layoutProperty->GetHeightAutoValue(false)) {
         if (!barOverlap) {
-            geometryNode->SetFrameHeight(tabBarSize.Height() + dividerStrokeWidth + swiperSize.Height());
+            geometryNode->SetFrameHeight(tabBarSize.Height() + dividerStrokeWidth + swiperSize.Height() + paddingV);
         } else {
-            geometryNode->SetFrameHeight(dividerStrokeWidth + swiperSize.Height());
+            geometryNode->SetFrameHeight(dividerStrokeWidth + swiperSize.Height() + paddingV);
         }
     }
 }

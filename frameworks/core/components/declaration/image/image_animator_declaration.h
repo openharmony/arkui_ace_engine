@@ -26,6 +26,7 @@ namespace OHOS::Ace {
 
 struct ImageProperties {
     std::string src;
+    RefPtr<PixelMap> pixelMap;
     std::string bundleName;
     std::string moduleName;
     CalcDimension width;

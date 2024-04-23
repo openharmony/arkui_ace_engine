@@ -63,7 +63,7 @@ void RichTextResource::Release(const std::function<void(bool)>& onRelease)
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIRichTextResourceRelease");
     }
 }
 
@@ -167,7 +167,7 @@ void RichTextResource::CallResRegisterMethod(const std::string& method, const st
         if (callback) {
             callback(result);
         }
-    });
+    }, "ArkUIRichTextCallResRegister");
 }
 
 std::string RichTextResource::GetStringParam(const std::string& param, const std::string& name) const

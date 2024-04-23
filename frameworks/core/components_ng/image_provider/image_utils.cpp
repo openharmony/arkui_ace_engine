@@ -31,22 +31,22 @@ void ImageUtils::PostTask(
             CHECK_NULL_VOID(task);
             task();
         },
-        taskType);
+        taskType, std::string(taskTypeName));
 }
 
-void ImageUtils::PostToUI(std::function<void()>&& task, const int32_t containerId)
+void ImageUtils::PostToUI(std::function<void()>&& task, const std::string& name, const int32_t containerId)
 {
     ContainerScope scope(containerId);
 
     CHECK_NULL_VOID(task);
-    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::UI, "UI");
+    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::UI, name.c_str());
 }
 
-void ImageUtils::PostToBg(std::function<void()>&& task, const int32_t containerId)
+void ImageUtils::PostToBg(std::function<void()>&& task, const std::string& name, const int32_t containerId)
 {
     ContainerScope scope(containerId);
 
     CHECK_NULL_VOID(task);
-    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, "BACKGROUND");
+    ImageUtils::PostTask(std::move(task), TaskExecutor::TaskType::BACKGROUND, name.c_str());
 }
 } // namespace OHOS::Ace::NG

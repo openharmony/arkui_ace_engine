@@ -37,37 +37,83 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto hourColumn = allChildNode["hour"].Upgrade();
     CHECK_NULL_RETURN(hourColumn, "");
-    auto minuteColumn = allChildNode["minute"].Upgrade();
-    CHECK_NULL_RETURN(minuteColumn, "");
     auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_RETURN(hourPickerColumnPattern, "");
+
+    std::string result;
     int hour = hourPickerColumnPattern->GetCurrentIndex(); // + 1;
     if (!timePickerRowPattern->GetHour24()) {
         hour += 1;
     }
     std::string textHour = std::to_string(hour);
     if (hour < DOUBLE_DIGIT) {
-        textHour = ZERO + textHour;
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            textHour = ZERO + textHour;
+        } else if (timePickerRowPattern->GetHour24()) {
+            if (timePickerRowPattern->GetPrefixHour() != ZeroPrefixType::HIDE) {
+                textHour = ZERO + textHour;
+            }
+        } else {
+            if (timePickerRowPattern->GetPrefixHour() == ZeroPrefixType::SHOW) {
+                textHour = ZERO + textHour;
+            }
+        }
     }
-    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
-    CHECK_NULL_RETURN(minutePickerColumnPattern, "");
-    int minute = minutePickerColumnPattern->GetCurrentIndex();
+    result += textHour;
 
-    std::string textMinute = std::to_string(minute);
-    if (minute < DOUBLE_DIGIT) {
-        textMinute = ZERO + textMinute;
-    }
-
+    GetMinuteText(result);
+    GetSecondText(result);
     if (!timePickerRowPattern->GetHour24()) {
         auto amPmColumn = allChildNode["amPm"].Upgrade();
         CHECK_NULL_RETURN(amPmColumn, "");
         auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         if (amPmPickerColumnPattern->GetCurrentIndex() == 0) {
-            return AM + textHour + COLON + textMinute;
+            result = AM + result;
         } else {
-            return PM + textHour + COLON + textMinute;
+            result = PM + result;
         }
     }
-    return textHour + COLON + textMinute;
+    return result;
+}
+
+void TimePickerRowAccessibilityProperty::GetMinuteText(std::string& result) const
+{
+    auto frameNode = host_.Upgrade();
+    auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    CHECK_NULL_VOID(minuteColumn);
+
+    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_VOID(minutePickerColumnPattern);
+    int minute = minutePickerColumnPattern->GetCurrentIndex();
+    std::string textMinute = std::to_string(minute);
+    if (minute < DOUBLE_DIGIT) {
+        if (timePickerRowPattern->GetPrefixMinute() != ZeroPrefixType::HIDE) {
+            textMinute = ZERO + textMinute;
+        }
+    }
+    result += COLON + textMinute;
+}
+
+void TimePickerRowAccessibilityProperty::GetSecondText(std::string& result) const
+{
+    auto frameNode = host_.Upgrade();
+    auto timePickerRowPattern = frameNode->GetPattern<NG::TimePickerRowPattern>();
+    if (timePickerRowPattern->GetHasSecond()) {
+        auto allChildNode = timePickerRowPattern->GetAllChildNode();
+        auto secondColumn = allChildNode["second"].Upgrade();
+        CHECK_NULL_VOID(secondColumn);
+        auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_VOID(secondPickerColumnPattern);
+        int second = secondPickerColumnPattern->GetCurrentIndex();
+        std::string textSecond = std::to_string(second);
+        if (second < DOUBLE_DIGIT) {
+            if (timePickerRowPattern->GetPrefixSecond() != ZeroPrefixType::HIDE) {
+                textSecond = ZERO + textSecond;
+            }
+        }
+        result += COLON + textSecond;
+    }
 }
 } // namespace OHOS::Ace::NG

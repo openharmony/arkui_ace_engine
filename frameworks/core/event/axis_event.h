@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_AXIS_EVENT_H
 
 #include <list>
+#include <utility>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -82,15 +83,20 @@ struct AxisEvent final : public UIInputEvent {
     float localX = 0.0;
     float localY = 0.0;
 
+    int32_t targetDisplayId = 0;
+    int32_t originalId = 0;
+
     AxisEvent() {}
 
     AxisEvent(int32_t id, float x, float y, float screenX, float screenY, double verticalAxis, double horizontalAxis,
         double pinchAxisScale, double rotateAxisAngle, bool isRotationEvent, AxisAction action, TimeStamp timestamp,
-        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent)
+        int64_t deviceId, SourceType sourceType, SourceTool sourceTool, std::shared_ptr<MMI::PointerEvent> pointerEvent,
+        int32_t targetDisplayId, int32_t originalId)
         : id(id), x(x), y(y), screenX(screenX), screenY(screenY), verticalAxis(verticalAxis),
           horizontalAxis(horizontalAxis), pinchAxisScale(pinchAxisScale), rotateAxisAngle(rotateAxisAngle),
           isRotationEvent(isRotationEvent), action(action), deviceId(deviceId), sourceType(sourceType),
-          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent))
+          sourceTool(sourceTool), pointerEvent(std::move(pointerEvent)), targetDisplayId(targetDisplayId),
+          originalId(originalId)
     {
         time = timestamp;
     }
@@ -99,11 +105,12 @@ struct AxisEvent final : public UIInputEvent {
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
-                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent };
+                isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, targetDisplayId,
+                originalId };
         }
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis,
             pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
-            pointerEvent };
+            pointerEvent, targetDisplayId, originalId };
     }
 
     Offset GetOffset() const
@@ -168,6 +175,12 @@ struct AxisEvent final : public UIInputEvent {
             result = Offset(-horizontalAxis, -verticalAxis);
         }
         return result * (LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
+    }
+
+    // MMI has the different direction, need to check truth direction.
+    std::pair<float, float> ConvertToSummationAxisValue(const AxisEvent& event) const
+    {
+        return std::make_pair(event.horizontalAxis - horizontalAxis, event.verticalAxis - verticalAxis);
     }
 };
 

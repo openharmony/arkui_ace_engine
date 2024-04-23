@@ -328,6 +328,9 @@ public:
 
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
         OffsetF gatherNodeCenter, float scale);
+    static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
+        const RefPtr<FrameNode>& imageNode);
+    static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
     double CalcGatherNodeMaxDistanceWithPoint(const RefPtr<OverlayManager>& overlayManager, int32_t x, int32_t y);
 
     void SetPixelMapOffset(OffsetF pixelMapOffset) {
@@ -361,6 +364,21 @@ public:
         return isShowBadgeAnimation_;
     }
 
+    void SetBadgeNumber(int32_t badgeNumber)
+    {
+        badgeNumber_ = badgeNumber;
+    }
+
+    int32_t GetBadgeNumber() const
+    {
+        return badgeNumber_;
+    }
+    
+    void SetIsTouchGatherAnimationPlaying(bool isTouchGatherAnimationPlaying)
+    {
+        isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -368,6 +386,7 @@ private:
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     bool GetDragPreviewInfo(
         const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager, DragPreviewInfo& dragPreviewInfo);
+    bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
@@ -387,6 +406,12 @@ private:
     void NotifyDragFrameNode(
         const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
     void TransDragWindowToDragFwk(int32_t windowContainerId);
+    void ResetDragDrop(int32_t windowId, const Point& point);
+    bool isDistanceLimited(const Point& point);
+    bool isTimeLimited(const PointerEvent& pointerEvent, const Point& point);
+    bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
+    bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
+    bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -399,6 +424,9 @@ private:
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
+    Point preMovePoint_ = Point(0, 0);
+    int64_t preTimeStamp_ = 0L;
+    int64_t nanoPreDragMoveAnimationTime_ = 0L;
     WeakPtr<FrameNode> prepareDragFrameNode_;
     std::function<void(const std::string&)> addDataCallback_ = nullptr;
     std::function<void(const std::string&)> getDataCallback_ = nullptr;
@@ -429,10 +457,13 @@ private:
     DragPreviewInfo info_;
     bool isDragFwkShow_ { false };
     OffsetF pixelMapOffset_ {0.0f, 0.0f};
+    OffsetF prePointerOffset_ {0.0f, 0.0f};
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
+    bool isTouchGatherAnimationPlaying_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
+    int32_t badgeNumber_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

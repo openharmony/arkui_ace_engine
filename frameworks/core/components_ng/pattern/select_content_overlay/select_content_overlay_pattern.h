@@ -28,13 +28,24 @@ public:
     explicit SelectContentOverlayPattern(std::shared_ptr<SelectOverlayInfo> info): SelectOverlayPattern(info) {}
     ~SelectContentOverlayPattern() override = default;
 
-    void UpdateMenuIsShow(bool menuIsShow);
+    void UpdateMenuIsShow(bool menuIsShow, bool noAnimation = false);
     void UpdateMenuInfo(const SelectMenuInfo& info);
     void UpdateIsShowHandleLine(bool isShowHandleLine);
     void UpdateIsSingleHandle(bool isSingleHandle);
     void RestartHiddenHandleTask(bool isDelay);
     void CancelHiddenHandleTask();
     SelectMenuInfo GetSelectMenuInfo();
+
+protected:
+    void CheckHandleReverse() override;
+    void UpdateHandleHotZone() override;
+
+private:
+    bool UpdateHandleHotZoneWithPoint();
+    void UpdateHandleHotRegion(RectF& hotRegion, const OffsetF& offset);
+    DimensionRect ConvertToHotRect(const RectF& rect);
+    bool IsHandleInSameLine(const RectF& first, const RectF& second);
+    OffsetF GetHandleHotZoneOffset(bool isFirst, float raidus, bool handleOnTop);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SelectContentOverlayPattern);

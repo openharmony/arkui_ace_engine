@@ -165,6 +165,8 @@ private:
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void ClearFocus() override;
         void OutsideTouch() override;
+        void GetCursorPosition(const int64_t elementId, const int32_t requestId,
+            Accessibility::AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {
@@ -280,6 +282,10 @@ private:
         const RefPtr<PipelineBase>& mainContext);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const RefPtr<NG::PipelineContext>& context,
+        const CommonProperty& commonProperty, const SearchParameter& searchParam);
+
+    void FindTextByTextHint(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,
         const CommonProperty& commonProperty, const SearchParameter& searchParam);
 

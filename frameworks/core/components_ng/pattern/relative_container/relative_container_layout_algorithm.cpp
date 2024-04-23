@@ -23,6 +23,7 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -80,6 +81,7 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     incomingDegreeMap_.clear();
     horizontalChainNodeMap_.clear();
     verticalChainNodeMap_.clear();
+    renderList_.clear();
     auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint.has_value());
     bool idealWidthValid = layoutConstraint.value().selfIdealSize.Width().has_value();
@@ -540,7 +542,7 @@ void RelativeContainerLayoutAlgorithm::CheckChain(LayoutWrapper* layoutWrapper)
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(childLayoutProperty);
         const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             continue;
         }
 
@@ -814,6 +816,9 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             result = result.substr(0, result.length() - 1);
         }
         result += "]";
+        auto pattern = layoutWrapper->GetHostNode()->GetPattern<RelativeContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTopologicalResult(result);
     }
 
     for (const auto& nodeName : renderList_) {
@@ -1003,13 +1008,14 @@ bool RelativeContainerLayoutAlgorithm::IsAlignRuleInChain(const AlignDirection& 
 
 void RelativeContainerLayoutAlgorithm::InsertToReliedOnMap(const std::string& anchorName, const std::string& nodeName)
 {
-    if (reliedOnMap_.count(anchorName) == 0) {
+    auto iter = reliedOnMap_.find(anchorName);
+    if (iter == reliedOnMap_.end()) {
         std::set<std::string> reliedList;
         reliedList.insert(nodeName);
         reliedOnMap_[anchorName] = reliedList;
         return;
     }
-    reliedOnMap_[anchorName].insert(nodeName);
+    iter->second.insert(nodeName);
 }
 
 void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
@@ -1018,7 +1024,7 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
         auto childWrapper = mapItem.second.layoutWrapper;
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         auto childHostNode = childWrapper->GetHostNode();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             continue;
         }
         for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
@@ -1100,7 +1106,7 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
         auto childWrapper = mapItem.second.layoutWrapper;
         auto childHostNode = childWrapper->GetHostNode();
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             visitedNode.push(mapItem.first);
             layoutQueue.push(mapItem.second.id);
             continue;

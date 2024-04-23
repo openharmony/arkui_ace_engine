@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -83,6 +84,7 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -107,6 +109,15 @@ void JSText::SetFont(const JSCallbackInfo& info)
 void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 {
     auto tmpInfo = info[0];
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    font.fontSize = theme->GetTextStyle().GetFontSize();
+    font.fontWeight = theme->GetTextStyle().GetFontWeight();
+    font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
+    font.fontStyle = theme->GetTextStyle().GetFontStyle();
+    
     if (!tmpInfo->IsObject()) {
         return;
     }
@@ -115,12 +126,6 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     CalcDimension size;
     if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
         font.fontSize = size;
-    } else {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        font.fontSize = theme->GetTextStyle().GetFontSize();
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -306,7 +311,10 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        return;
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
+        value = 0;
     }
     TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
 }
@@ -314,7 +322,10 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        return;
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
+        value = 0;
     }
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
 }
@@ -344,13 +355,24 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSText::SetLineSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    if (!ParseLengthMetricsToDimension(args, value)) {
+        value.Reset();
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextModel::GetInstance()->SetLineSpacing(value);
+}
+
 void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     std::vector<std::string> fontFamilies;
     JSRef<JSVal> args = info[0];
-    if (!ParseJsFontFamilies(args, fontFamilies)) {
-        return;
-    }
+    ParseJsFontFamilies(args, fontFamilies);
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
@@ -413,7 +435,10 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        return;
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
+        value = 0;
     }
     TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
 }
@@ -459,6 +484,8 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
@@ -471,7 +498,10 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        return;
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
+        value = 0;
     }
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
@@ -490,9 +520,9 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode]
-            (const BaseEventInfo* info) {
+            (BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
+            auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
@@ -821,7 +851,7 @@ void JSText::JsClip(const JSCallbackInfo& info)
     JSViewAbstract::JsClip(info);
     JSRef<JSVal> args = info[0];
     if (args->IsBoolean()) {
-        TextModel::GetInstance()->SetClipEdge();
+        TextModel::GetInstance()->SetClipEdge(args->ToBoolean());
     }
 }
 
@@ -860,6 +890,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
+    JSClass<JSText>::StaticMethod("lineSpacing", &JSText::SetLineSpacing, opt);
     JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
     JSClass<JSText>::StaticMethod("minFontSize", &JSText::SetMinFontSize, opt);
     JSClass<JSText>::StaticMethod("maxFontSize", &JSText::SetMaxFontSize, opt);
@@ -905,10 +936,29 @@ void JSTextController::CloseSelectionMenu()
     controller->CloseSelectionMenu();
 }
 
+void JSTextController::SetStyledString(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsObject()) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+    if (!spanString) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+        return;
+    }
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto spanStringController = spanString->GetController();
+    CHECK_NULL_VOID(spanStringController);
+    controller->SetStyledString(spanStringController);
+}
+
 void JSTextController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextController>::Declare("TextController");
     JSClass<JSTextController>::Method("closeSelectionMenu", &JSTextController::CloseSelectionMenu);
+    JSClass<JSTextController>::CustomMethod("setStyledString", &JSTextController::SetStyledString);
     JSClass<JSTextController>::Bind(globalObj, JSTextController::Constructor, JSTextController::Destructor);
 }
 
@@ -964,6 +1014,12 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(args);
+    ParseMarqueeParam(paramObject, options);
+    TextModel::GetInstance()->SetMarqueeOptions(options);
+}
+
+void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options)
+{
     auto getStart = paramObject->GetProperty("start");
     if (getStart->IsBoolean()) {
         options.UpdateTextMarqueeStart(getStart->ToBoolean());
@@ -989,7 +1045,7 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
     auto delay = paramObject->GetProperty("delay");
     if (delay->IsNumber()) {
         auto delayDouble = delay->ToNumber<double>();
-        int32_t delayValue = static_cast<int32_t>(delayDouble);
+        auto delayValue = static_cast<int32_t>(delayDouble);
         if (delayValue < 0) {
             delayValue = 0;
         }
@@ -1002,7 +1058,16 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
             getFromStart->ToBoolean() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
     }
 
-    TextModel::GetInstance()->SetMarqueeOptions(options);
+    auto getFadeout = paramObject->GetProperty("fadeout");
+    if (getFadeout->IsBoolean()) {
+        options.UpdateTextMarqueeFadeout(getFadeout->ToBoolean());
+    }
+
+    auto getStartPolicy = paramObject->GetProperty("marqueeStartPolicy");
+    if (getStartPolicy->IsNumber()) {
+        auto startPolicy = static_cast<MarqueeStartPolicy>(getStartPolicy->ToNumber<int32_t>());
+        options.UpdateTextMarqueeStartPolicy(startPolicy);
+    }
 }
 
 void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)

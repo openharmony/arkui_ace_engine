@@ -16,6 +16,7 @@ import("../../components.gni")
 build_component_ng("rich_editor_pattern_ng") {
   sources = [
     "paragraph_manager.cpp",
+    "rich_editor_accessibility_property.cpp",
     "rich_editor_content_modifier.cpp",
     "rich_editor_controller.cpp",
     "rich_editor_event_hub.cpp",
@@ -25,6 +26,7 @@ build_component_ng("rich_editor_pattern_ng") {
     "rich_editor_overlay_modifier.cpp",
     "rich_editor_paint_method.cpp",
     "rich_editor_pattern.cpp",
+    "rich_editor_select_overlay.cpp",
   ]
 
   standard_input_deps = [

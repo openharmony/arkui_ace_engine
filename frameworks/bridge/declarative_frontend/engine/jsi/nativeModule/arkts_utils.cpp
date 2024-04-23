@@ -27,8 +27,13 @@
 namespace OHOS::Ace::NG {
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
+const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
+const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr uint32_t RES_TYPE_INDEX = 2;
+constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
+constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
 const std::string DEFAULT_STR = "-1";
 constexpr  int32_t REPLACEHOLDER_INDEX = 2;
 const Color DEFAULT_TEXT_SHADOW_COLOR = Color::BLACK;
@@ -223,14 +228,163 @@ bool IsGetResourceByName(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
     if (!bundleName->IsString() || !moduleName->IsString()) {
         return false;
     }
-    if (!bundleName->ToString(vm)->ToString().empty() || !moduleName->ToString(vm)->ToString().empty()) {
-        return false;
-    }
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
     if (params->Length(vm) == 0) {
         return false;
     }
     return true;
+}
+
+bool ConvertResourceType(const std::string& typeName, ResourceType& resType)
+{
+    static const std::unordered_map<std::string, ResourceType> resTypeMap {
+        { "color", ResourceType::COLOR },
+        { "media", ResourceType::MEDIA },
+        { "float", ResourceType::FLOAT },
+        { "string", ResourceType::STRING },
+        { "plural", ResourceType::PLURAL },
+        { "pattern", ResourceType::PATTERN },
+        { "boolean", ResourceType::BOOLEAN },
+        { "integer", ResourceType::INTEGER },
+        { "strarray", ResourceType::STRARRAY },
+        { "intarray", ResourceType::INTARRAY },
+    };
+    auto it = resTypeMap.find(typeName);
+    if (it == resTypeMap.end()) {
+        return false;
+    }
+    resType = it->second;
+    return true;
+}
+
+bool ParseDollarResource(std::string& targetModule, ResourceType& resType,
+    std::string& resName, bool isParseType)
+{
+    std::smatch results;
+    std::regex tokenRegex(RESOURCE_TOKEN_PATTERN);
+    if (!std::regex_match(resName, results, tokenRegex)) {
+        return false;
+    }
+    targetModule = results[1];
+    if (isParseType && !ConvertResourceType(results[RES_TYPE_INDEX], resType)) {
+        return false;
+    }
+    return true;
+}
+
+void CompleteResourceObjectFromParams(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj,
+    std::string& targetModule, ResourceType& resType, std::string& resName)
+{
+    auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    int32_t typeNum = -1;
+    if (type->IsNumber()) {
+        typeNum = type->Int32Value(vm);
+    }
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    int32_t resIdValue = resId->Int32Value(vm);
+    if (resIdValue != UNKNOWN_RESOURCE_ID) {
+        return;
+    }
+    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+    auto identity = panda::ArrayRef::GetValueAt(vm, params, 0);
+    if (!identity->IsString()) {
+        return;
+    }
+    resName = identity->ToString(vm)->ToString();
+    bool isParseDollarResourceSuccess =
+        ParseDollarResource(targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE);
+    if (!isParseDollarResourceSuccess) {
+        return;
+    }
+
+    auto moduleName = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+    if (moduleName->IsString() && moduleName->ToString(vm)->ToString().empty()) {
+        std::regex resNameRegex(RESOURCE_NAME_PATTERN);
+        std::smatch resNameResults;
+        if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
+            jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"),
+                panda::StringRef::NewFromUtf8(vm, resNameResults.str(1).c_str()));
+        } else {
+            jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"),
+                panda::StringRef::NewFromUtf8(vm, ""));
+        }
+    }
+    if (typeNum == UNKNOWN_RESOURCE_TYPE) {
+        jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "type"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(resType)));
+    }
+}
+
+void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& type, Local<panda::ObjectRef>& jsObj,
+    ResourceType& resType, const std::string& resName)
+{
+    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+    if (!args->IsArray(vm)) {
+        return;
+    }
+    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+    auto paramCount = params->Length(vm);
+    auto name = panda::StringRef::NewFromUtf8(vm, resName.c_str());
+    if (resType == ResourceType::PLURAL || resType == ResourceType::STRING) {
+        std::vector<Local<JSValueRef>> tmpParams;
+        for (uint32_t i = 0; i < paramCount; i++) {
+            auto param = panda::ArrayRef::GetValueAt(vm, params, i);
+            tmpParams.insert(tmpParams.end(), param);
+        }
+        panda::ArrayRef::SetValueAt(vm, params, 0, name);
+        uint32_t paramIndex = 1;
+        auto firstParam = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+        if (!firstParam->IsNull()) {
+            panda::ArrayRef::SetValueAt(vm, params, paramIndex, firstParam);
+            paramIndex++;
+        }
+        for (auto tmpParam : tmpParams) {
+            panda::ArrayRef::SetValueAt(vm, params, paramIndex, tmpParam);
+            paramIndex++;
+        }
+    } else {
+        panda::ArrayRef::SetValueAt(vm, params, 0, name);
+    }
+    jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "id"),
+                panda::NumberRef::New(vm, UNKNOWN_RESOURCE_ID));
+    jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "type"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(resType)));
+    if (!jsObj->Has(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"))) {
+        jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"),
+                panda::StringRef::NewFromUtf8(vm, ""));
+    }
+    if (!jsObj->Has(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"))) {
+        jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"),
+            panda::StringRef::NewFromUtf8(vm, ""));
+    }
+}
+
+void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
+{
+    // dynamic $r raw input format is
+    // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
+    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    ResourceType resType;
+    std::string targetModule;
+    std::string resName;
+    if (resId->IsString()) {
+        auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+        int32_t typeNum = -1;
+        if (type->IsNumber()) {
+            typeNum = type->Int32Value(vm);
+        }
+        resName = resId->ToString(vm)->ToString();
+        if (!ParseDollarResource(targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
+            return;
+        }
+        CompleteResourceObjectFromId(vm, type, jsObj, resType, resName);
+    } else if (resId->IsNumber()) {
+        int32_t resIdValue = resId->Int32Value(vm);
+        if (resIdValue == -1) {
+            CompleteResourceObjectFromParams(vm, jsObj, targetModule, resType, resName);
+        }
+    }
 }
 
 
@@ -651,6 +805,12 @@ bool ArkTSUtils::ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& j
         vm, jsValue, result, DimensionUnit::FP, isSupportPercent, enableCheckInvalidvalue);
 }
 
+bool ArkTSUtils::ParseJsDimensionFpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+    bool isSupportPercent)
+{
+    return ArkTSUtils::ParseJsDimensionNG(vm, jsValue, result, DimensionUnit::FP, isSupportPercent);
+}
+
 bool ArkTSUtils::ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
@@ -734,6 +894,24 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(
     return true;
 }
 
+bool ArkTSUtils::ParseJsLengthMetrics(
+    const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension& result)
+{
+    auto jsObj = jsValue->ToObject(vm);
+    auto value = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "unit"));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber(vm)->Value());
+    }
+    CalcDimension dimension(value->ToNumber(vm)->Value(), unit);
+    result = dimension;
+    return true;
+}
+
 bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
 {
     if (!jsValue->IsObject() && !jsValue->IsString()) {
@@ -745,6 +923,7 @@ bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue
     }
     if (jsValue->IsObject()) {
         auto obj = jsValue->ToObject(vm);
+        CompleteResourceObject(vm, obj);
         auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
         if (!resId->IsNumber()) {
             return false;
@@ -1121,6 +1300,15 @@ void ArkTSUtils::ParsePadding(
             result.value = dimen.Value();
         }
     }
+}
+
+panda::Local<panda::ObjectRef> ArkTSUtils::GetContext(EcmaVM* vm)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
+    return NapiValueToLocalValue(frontend->GetContextValue());
 }
 
 bool ArkTSUtils::ParseResponseRegion(

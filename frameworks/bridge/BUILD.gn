@@ -45,6 +45,9 @@ template("framework_bridge") {
     if (defined(config.js_pa_support) && config.js_pa_support) {
       deps += [ "$ace_root/${config.pa_engine_path}:pa_backend_$platform" ]
     }
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
+    }
   }
 }
 
@@ -73,6 +76,9 @@ template("framework_bridge_ng") {
 
     if (defined(config.js_pa_support) && config.js_pa_support) {
       deps += [ "$ace_root/${config.pa_engine_path}:pa_backend_$platform" ]
+    }
+    if (use_hilog) {
+      external_deps = [ "hilog:libhilog" ]
     }
   }
 }

@@ -66,7 +66,7 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static float GetFriction(FrameNode* frameNode);
     static void SetFriction(FrameNode* frameNode, double friction);
-    static int32_t GetScrollSnap(FrameNode* frameNode);
+    static ScrollSnapOptions GetScrollSnap(FrameNode* frameNode);
     static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
     static int32_t GetScrollBar(FrameNode* frameNode);

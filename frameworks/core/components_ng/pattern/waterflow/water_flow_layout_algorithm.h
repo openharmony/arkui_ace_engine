@@ -63,7 +63,6 @@ private:
     }
     float MeasureFooter(LayoutWrapper* layoutWrapper);
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
-    void JumpToTargetAlign(const std::pair<float, float>& item);
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;
@@ -73,6 +72,7 @@ private:
     float crossGap_ = 0.0f;
     float mainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
+    float footerMainStartPos_ = 0.0f;
     bool canOverScroll_ = false;
     WaterFlowLayoutInfo layoutInfo_;
 };

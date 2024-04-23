@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -909,8 +909,23 @@ double CustomPaintPattern::GetHeight()
     return canvasSize_->Height();
 }
 
+void CustomPaintPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+{
+    paintMethod_->SetRSCanvasCallback(callback);
+}
+
+void CustomPaintPattern::SetInvalidate()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {};
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::SetTextDirection(TextDirection direction)
 {
+    currentSetTextDirection_ = direction;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
@@ -1018,7 +1033,7 @@ void CustomPaintPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& on
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    });
+    }, "ArkUICanvasStartImageAnalyzer");
 }
 
 void CustomPaintPattern::StopImageAnalyzer()
@@ -1086,5 +1101,34 @@ void CustomPaintPattern::DumpAdvanceInfo()
             std::string("contentOffsetChange: ").append(recordConfig_.contentOffsetChange ? "true" : "false"));
     }
     DumpLog::GetInstance().AddDesc(contentModifier_->GetDumpInfo());
+}
+
+void CustomPaintPattern::Reset()
+{
+    auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.Reset();
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomPaintPattern::OnLanguageConfigurationUpdate()
+{
+    UpdateTextDefaultDirection();
+}
+
+void CustomPaintPattern::OnModifyDone()
+{
+    UpdateTextDefaultDirection();
+}
+
+void CustomPaintPattern::UpdateTextDefaultDirection()
+{
+    if (currentSetTextDirection_ != TextDirection::INHERIT) {
+        return;
+    }
+    SetTextDirection(TextDirection::INHERIT);
 }
 } // namespace OHOS::Ace::NG

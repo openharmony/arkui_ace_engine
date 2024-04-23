@@ -30,6 +30,7 @@ constexpr int32_t ERROR_CODE_INTERNAL_ERROR = 100001;    // Internal error.
 constexpr int32_t ERROR_CODE_URI_ERROR = 100002;         // Uri error.
 constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;   // The pages are pushed too much.
 constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004; // Named route error.
+constexpr int32_t ERROR_CODE_LOAD_PAGE_ERROR = 100007;   // Load page root component failed.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;    // Uri error for lite.
 
 // push destination error code
@@ -54,6 +55,9 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT = 100016;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED = 106102;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR = 106103;
+constexpr int32_t ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_NO_LISTENER_ERROR = 106104;
+constexpr int32_t ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_EXIST = 106105;
+constexpr int32_t ERROR_CODE_NATIVE_IMPL_NODE_ADAPTER_CHILD_NODE_EXIST = 106106;
 
 // AI error for Canvas,XComponent
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_UNSUPPORTED = 110001;
@@ -68,4 +72,9 @@ constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;     // GetData failed, da
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ERROR = 103301;
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST = 103302;
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_NOT_FOUND = 103303;
+
+// RequestFocus error code
+constexpr int32_t ERROR_CODE_NON_FOCUSABLE = 150001;
+constexpr int32_t ERROR_CODE_NON_FOCUSABLE_ANCESTOR = 150002;
+constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
 } // namespace OHOS::Ace

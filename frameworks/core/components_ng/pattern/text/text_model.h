@@ -34,15 +34,15 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+class ACE_EXPORT SpanStringBase : public AceType {
+    DECLARE_ACE_TYPE(SpanStringBase, AceType);
+};
 class ACE_EXPORT TextControllerBase : public AceType {
     DECLARE_ACE_TYPE(TextControllerBase, AceType);
 
 public:
     virtual void CloseSelectionMenu() = 0;
-};
-
-class ACE_EXPORT SpanStringBase : public AceType {
-    DECLARE_ACE_TYPE(SpanStringBase, AceType);
+    virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
 };
 
 class ACE_EXPORT TextModel {
@@ -65,6 +65,7 @@ public:
     virtual void SetMaxLines(uint32_t value) = 0;
     virtual void SetTextIndent(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
+    virtual void SetLineSpacing(const Dimension& value) = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
     virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
@@ -79,7 +80,7 @@ public:
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
-    virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
+    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) = 0;
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
@@ -102,8 +103,8 @@ public:
     {
         return nullptr;
     };
-    virtual void SetClipEdge() = 0;
-    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
+    virtual void SetClipEdge(bool clip) = 0;
+    virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
 

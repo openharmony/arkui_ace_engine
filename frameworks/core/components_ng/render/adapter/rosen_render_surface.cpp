@@ -18,6 +18,7 @@
 #include "surface_utils.h"
 #include "sync_fence.h"
 
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -35,6 +36,31 @@ constexpr int32_t MAX_BUFFER_SIZE = 3;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
+const std::string SURFACE_WIDTH = "surface_width";
+const std::string SURFACE_HEIGHT = "surface_height";
+
+GraphicTransformType ConvertRotation(Rotation rotation)
+{
+    GraphicTransformType transform = GraphicTransformType::GRAPHIC_ROTATE_BUTT;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+        case Rotation::ROTATION_90:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_90;
+            break;
+        case Rotation::ROTATION_180:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_180;
+            break;
+        case Rotation::ROTATION_270:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_270;
+            break;
+        default:
+            transform = GraphicTransformType::GRAPHIC_ROTATE_NONE;
+            break;
+    }
+    return transform;
+}
 } // namespace
 
 #ifdef OHOS_PLATFORM
@@ -108,8 +134,6 @@ void RosenRenderSurface::InitSurface()
             if (producerSurface_ == nullptr) {
                 return;
             }
-            auto defaultUsage = producerSurface_->GetDefaultUsage();
-            producerSurface_->SetDefaultUsage(defaultUsage | BUFFER_USAGE_MEM_DMA);
             if (drawBufferListener_ == nullptr) {
                 drawBufferListener_ = new DrawBufferListener(WeakClaim(this));
             }
@@ -118,8 +142,6 @@ void RosenRenderSurface::InitSurface()
             auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rsNode);
             CHECK_NULL_VOID(surfaceNode);
             producerSurface_ = surfaceNode->GetSurface();
-            auto defaultUsage = producerSurface_->GetDefaultUsage();
-            producerSurface_->SetDefaultUsage(defaultUsage | BUFFER_USAGE_MEM_DMA | BUFFER_USAGE_HW_COMPOSER);
         }
     }
     RegisterSurface();
@@ -177,6 +199,13 @@ void RosenRenderSurface::AdjustNativeWindowSize(uint32_t width, uint32_t height)
     NativeWindowHandleOpt(nativeWindow_, SET_BUFFER_GEOMETRY, width, height);
 }
 
+void RosenRenderSurface::UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height)
+{
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->SetUserData(SURFACE_WIDTH, std::to_string(width));
+    producerSurface_->SetUserData(SURFACE_HEIGHT, std::to_string(height));
+}
+
 std::string RosenRenderSurface::GetUniqueId() const
 {
     if (!producerSurface_) {
@@ -195,6 +224,23 @@ void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t 
 void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
 {
     extSurfaceCallbackInterface_ = extSurfaceCallback;
+}
+
+void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
+{
+    auto transform = ConvertRotation(dmRotation);
+    CHECK_NULL_VOID(producerSurface_);
+    producerSurface_->SetTransformHint(transform);
+}
+
+void RosenRenderSurface::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("UserData[surface_width]: ")
+            .append(producerSurface_ ? producerSurface_->GetUserData(SURFACE_WIDTH) : "NoSurface"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("UserData[surface_height]: ")
+            .append(producerSurface_ ? producerSurface_->GetUserData(SURFACE_HEIGHT) : "NoSurface"));
 }
 
 void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)
@@ -320,7 +366,7 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIMarkNeedRenderOnly");
 }
 
 void RosenRenderSurface::ConsumeXComponentBuffer()

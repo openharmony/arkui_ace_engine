@@ -69,12 +69,12 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
     dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
-    if (param.width.has_value()) {
+    if (param.width.has_value() && NonNegative(param.width.value().Value())) {
         dialogLayoutProp->UpdateWidth(param.width.value());
     } else {
         dialogLayoutProp->UpdateGridCount(param.gridCount);
     }
-    if (param.height.has_value()) {
+    if (param.height.has_value() && NonNegative(param.height.value().Value())) {
         dialogLayoutProp->UpdateHeight(param.height.value());
     }
     // create gray background

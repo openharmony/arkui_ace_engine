@@ -127,6 +127,8 @@ public:
     void GetStateByIndex(int32_t index, std::string& name, std::string& path, std::string& params);
     void GetStateByUrl(std::string& url, std::vector<Framework::StateInfo>& stateArray);
 
+    void GetPageNameAndPath(const RefPtr<FrameNode>& pageNode, std::string& name, std::string& path);
+
     std::string GetParams() const;
 
     int32_t GetIndexByUrl(const std::string& url) const;
@@ -208,6 +210,8 @@ private:
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");
 
     bool CheckIndexValid(int32_t index) const;
+    bool CheckOhmUrlValid(const std::string& ohmUrl);
+    void ThrowError(const std::string& msg, int32_t code);
 
     RefPtr<Framework::ManifestParser> manifestParser_;
 

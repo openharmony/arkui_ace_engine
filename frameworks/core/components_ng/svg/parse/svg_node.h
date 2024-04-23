@@ -27,6 +27,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/render/drawing_forward.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
@@ -54,6 +55,8 @@ public:
     ~SvgNode() override = default;
 
     void InitStyle(const RefPtr<SvgBaseDeclaration>& parent);
+
+    void PushAnimatorOnFinishCallback(const std::function<void()>& onFinishCallback);
 
     // draw entrance function, approve override by second level class.
     virtual void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
@@ -120,11 +123,40 @@ public:
         return smoothEdge_;
     }
 
+    void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
+    {
+        colorFilter_ = colorFilter;
+    }
+
+    void SetEffectFilterArea(const Rect& effectFilterArea)
+    {
+        effectFilterArea_ = effectFilterArea;
+    }
+
+    Rect GetEffectFilterArea() const
+    {
+        return effectFilterArea_;
+    }
+
+    std::optional<ImageColorFilter> GetColorFilter() const
+    {
+        return colorFilter_;
+    }
+
     RefPtr<SvgBaseDeclaration> GetDeclaration()
     {
         return declaration_;
     }
 
+    void SetImagePath(const std::string& path)
+    {
+        imagePath_ = path;
+    }
+
+    std::string GetImagePath() const
+    {
+        return imagePath_;
+    }
 protected:
     // override as need by derived class
     // called by function AppendChild
@@ -182,8 +214,13 @@ protected:
     std::string hrefClipPath_;
     std::string hrefMaskId_;
     std::string hrefFilterId_;
+    std::string imagePath_;
     uint8_t opacity_ = 0xFF;
     float smoothEdge_ = 0.0f;
+    std::optional<ImageColorFilter> colorFilter_;
+    Rect effectFilterArea_;
+    double useOffsetX_ = 0.0;
+    double useOffsetY_ = 0.0;
 
     bool hrefFill_ = true;   // get fill attributes from reference
     bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference

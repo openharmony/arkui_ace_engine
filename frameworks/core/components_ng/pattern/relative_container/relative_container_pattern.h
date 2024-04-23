@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RELATIVE_CONTAINER_RELATIVE_CONTAINER_PATTERN_H
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
@@ -43,6 +44,20 @@ public:
     {
         return false;
     }
+
+    void SetTopologicalResult(std::string result)
+    {
+        topologicalResult_ = result;
+    }
+
+    void DumpInfo() override
+    {
+        DumpLog::GetInstance().AddDesc(std::string("topologicalResult:").append(topologicalResult_));
+    }
+
+private:
+    std::string topologicalResult_;
+
 };
 
 } // namespace OHOS::Ace::NG

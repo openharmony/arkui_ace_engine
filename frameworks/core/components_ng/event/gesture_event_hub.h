@@ -154,6 +154,7 @@ public:
     {
         if (!recreateGesture_) {
             gestures_.clear();
+            backupGestures_.clear();
         }
         gestures_.emplace_back(gesture);
         backupGestures_.emplace_back(gesture);
@@ -243,6 +244,14 @@ public:
         touchEventActuator_->AddTouchEvent(touchEvent);
     }
 
+    void AddTouchAfterEvent(const RefPtr<TouchEventImpl>& touchEvent)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+        touchEventActuator_->AddTouchAfterEvent(touchEvent);
+    }
+
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (!touchEventActuator_) {
@@ -297,6 +306,7 @@ public:
     void ClearJSFrameNodeOnTouch();
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
@@ -314,11 +324,24 @@ public:
         return clickEventActuator_->IsClickEventsEmpty();
     }
 
+    GestureEventFunc GetClickEvent()
+    {
+        if (!IsClickable()) {
+            return nullptr;
+        }
+        return clickEventActuator_->GetClickEvent();
+    }
+
     void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const
     {
         return longPressEventActuator_ != nullptr;
+    }
+
+    void SetRedirectClick(bool redirectClick)
+    {
+        redirectClick_ = redirectClick;
     }
 
     bool ActLongClick();
@@ -616,6 +639,13 @@ public:
     void SetDragGatherPixelMaps(const GestureEvent& info);
     void SetMouseDragGatherPixelMaps();
     void SetNotMouseDragGatherPixelMaps();
+#if defined(PIXEL_MAP_SUPPORTED)
+    static void PrintBuilderNode(
+        const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void PrintIfImageNode(
+        const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
+    static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+#endif
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -633,6 +663,7 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -678,6 +709,7 @@ private:
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
     OnReponseRegionFunc responseRegionFunc_;
+    bool redirectClick_  = false;
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;

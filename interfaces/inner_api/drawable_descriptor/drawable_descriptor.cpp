@@ -46,14 +46,15 @@ const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
 #endif
 constexpr float SIDE = 192.0f;
+const int DEFAULT_DURATION = 1000;
 
 // define for get resource path in preview scenes
 const static char PREVIEW_LOAD_RESOURCE_ID[] = "ohos_drawable_descriptor_path";
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM
-constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "\\resources\\entry\\resources.index";
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "\\resources\\resources.index";
 #else
-constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/entry/resources.index";
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/resources.index";
 #endif
 
 #ifdef LINUX_PLATFORM
@@ -176,6 +177,11 @@ std::shared_ptr<Media::PixelMap> DrawableDescriptor::GetPixelMap()
     return nullptr;
 }
 
+DrawableDescriptor::DrawableType DrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::BASE;
+}
+
 std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource(
     DrawableItem& drawableItem, uint32_t& errorCode)
 {
@@ -221,6 +227,11 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
     } else {
         HILOGE("Get background from json buffer failed");
         return false;
+    }
+    if (isBackground) {
+        backgroundItem_.data_.reset();
+    } else {
+        foregroundItem_.data_.reset();
     }
     return true;
 #else
@@ -522,6 +533,11 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
     return nullptr;
 }
 
+DrawableDescriptor::DrawableType LayeredDrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::LAYERED;
+}
+
 std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 {
     std::string data;
@@ -559,5 +575,39 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 #endif
     resMgr->GetStringByName(PREVIEW_LOAD_RESOURCE_ID, data);
     return data;
+}
+
+std::shared_ptr<Media::PixelMap> AnimatedDrawableDescriptor::GetPixelMap()
+{
+    if (pixelMapList_.empty()) {
+        return nullptr;
+    }
+    return pixelMapList_[0];
+}
+
+DrawableDescriptor::DrawableType AnimatedDrawableDescriptor::GetDrawableType()
+{
+    return DrawableType::ANIMATED;
+}
+
+std::vector<std::shared_ptr<Media::PixelMap>> AnimatedDrawableDescriptor::GetPixelMapList()
+{
+    return pixelMapList_;
+}
+
+int32_t AnimatedDrawableDescriptor::GetDuration()
+{
+    if (duration_ <= 0) {
+        duration_ = DEFAULT_DURATION * pixelMapList_.size();
+    }
+    return duration_;
+}
+
+int32_t AnimatedDrawableDescriptor::GetIterations()
+{
+    if (iterations_ < -1) {
+        iterations_ = 1;
+    }
+    return iterations_;
 }
 } // namespace OHOS::Ace::Napi

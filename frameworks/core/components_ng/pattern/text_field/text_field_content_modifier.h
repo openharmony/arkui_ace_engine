@@ -39,6 +39,8 @@ public:
 
     void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
+    void SetAdaptMinFontSize(const Dimension& value);
+    void SetAdaptMaxFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
     void SetFontStyle(const OHOS::Ace::FontStyle& value);
@@ -60,13 +62,13 @@ public:
     void SetShowUnderlineState(bool value);
     void SetFontReady(bool value);
     void SetTextOverflow(const TextOverflow value);
-    void SetTextDecoration(const TextDecoration& value);
-    void SetTextDecorationStyle(const TextDecorationStyle value);
-    void SetTextDecorationColor(const Color& value);
+    void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style);
     void ContentChange();
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
+    void SetDefaultAdaptMinFontSize(const TextStyle& textStyle);
+    void SetDefaultAdaptMaxFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultFontStyle(const TextStyle& textStyle);
@@ -83,6 +85,12 @@ private:
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
+
+    std::optional<Dimension> adaptMinFontSize_;
+    RefPtr<AnimatablePropertyFloat> adaptMinFontSizeFloat_;
+
+    std::optional<Dimension> adaptMaxFontSize_;
+    RefPtr<AnimatablePropertyFloat> adaptMaxFontSizeFloat_;
 
     std::optional<FontWeight> fontWeight_;
     RefPtr<AnimatablePropertyFloat> fontWeightFloat_;

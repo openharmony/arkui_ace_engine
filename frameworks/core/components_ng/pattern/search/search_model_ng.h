@@ -61,16 +61,28 @@ public:
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
+    void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
+    void SetOnEditChanged(std::function<void(bool)>&& func) override;
+    void SetTextIndent(const Dimension& value) override;
     void SetMaxLength(uint32_t value) override;
     void ResetMaxLength() override;
     void SetType(TextInputType value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetAdaptMinFontSize(const Dimension& value) override;
+    void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetTextDecoration(Ace::TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(Ace::TextDecorationStyle value) override;
-    void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void UpdateInspectorId(const std::string& key) override;
+    void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetInputFilter(
+        FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
@@ -99,7 +111,8 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
-    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_MAP& value);
+    static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);

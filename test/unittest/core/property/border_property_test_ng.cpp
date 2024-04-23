@@ -29,6 +29,10 @@ using namespace testing::ext;
 class BorderPropertyTestNg : public testing::Test {};
 
 namespace OHOS::Ace::NG {
+namespace {
+const InspectorFilter filter;
+}
+
 /**
  * @tc.name: BorderPropertyTestNg001
  * @tc.desc: Test BorderStyleProperty::ToJsonValue function.
@@ -45,7 +49,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg001, TestSize.Level1)
      */
     auto json = JsonUtil::Create(true);
     auto borderJson = JsonUtil::Create(true);
-    borderStyleProperty.ToJsonValue(json, borderJson);
+    borderStyleProperty.ToJsonValue(json, borderJson, filter);
 
     auto ret = json->GetValue("borderStyle")->GetString("left", "");
     EXPECT_EQ(ret, "BorderStyle.Solid");
@@ -66,7 +70,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg001, TestSize.Level1)
     borderStyleProperty.styleTop = BorderStyle::DOTTED;
     borderStyleProperty.styleRight = BorderStyle::NONE;
     borderStyleProperty.styleBottom = BorderStyle::DASHED;
-    borderStyleProperty.ToJsonValue(json, borderJson);
+    borderStyleProperty.ToJsonValue(json, borderJson, filter);
 
     ret = json->GetValue("borderStyle")->GetString("left", "");
     EXPECT_EQ(ret, "BorderStyle.Dashed");
@@ -113,7 +117,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg003, TestSize.Level1)
      */
     auto json = JsonUtil::Create(true);
     auto borderJson = JsonUtil::Create(true);
-    borderWidthProperty.ToJsonValue(json, borderJson);
+    borderWidthProperty.ToJsonValue(json, borderJson, filter);
 
     auto ret = json->GetValue("borderWidth")->GetString("left", "");
     EXPECT_EQ(ret, "0.00vp");
@@ -132,7 +136,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg003, TestSize.Level1)
     borderJson = JsonUtil::Create(true);
     auto borderWidth = Dimension(1.0f);
     borderWidthProperty.SetBorderWidth(borderWidth);
-    borderWidthProperty.ToJsonValue(json, borderJson);
+    borderWidthProperty.ToJsonValue(json, borderJson, filter);
 
     ret = json->GetValue("borderWidth")->GetString("left", "");
     EXPECT_EQ(ret, "1.00px");
@@ -160,7 +164,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg004, TestSize.Level1)
      */
     auto json = JsonUtil::Create(true);
     auto borderJson = JsonUtil::Create(true);
-    borderColorProperty.ToJsonValue(json, borderJson);
+    borderColorProperty.ToJsonValue(json, borderJson, filter);
 
     auto borderColor = json->GetValue("borderColor");
     auto left = borderColor->GetString("left", "");
@@ -179,7 +183,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg004, TestSize.Level1)
     json = JsonUtil::Create(true);
     borderJson = JsonUtil::Create(true);
     borderColorProperty.SetColor(Color::BLUE);
-    borderColorProperty.ToJsonValue(json, borderJson);
+    borderColorProperty.ToJsonValue(json, borderJson, filter);
 
     borderColor = json->GetValue("borderColor");
     left = borderColor->GetString("left", "");
@@ -208,7 +212,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg005, TestSize.Level1)
      */
     auto json = JsonUtil::Create(true);
     auto borderJson = JsonUtil::Create(true);
-    borderRadiusProperty.ToJsonValue(json, borderJson);
+    borderRadiusProperty.ToJsonValue(json, borderJson, filter);
 
     auto borderRadius = json->GetString("borderRadius");
     EXPECT_EQ(borderRadius, "0.00vp");
@@ -221,7 +225,7 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg005, TestSize.Level1)
     borderJson = JsonUtil::Create(true);
     auto borderRadiusVal = Dimension(1.0f);
     borderRadiusProperty.SetRadius(borderRadiusVal);
-    borderRadiusProperty.ToJsonValue(json, borderJson);
+    borderRadiusProperty.ToJsonValue(json, borderJson, filter);
 
     borderRadius = json->GetString("borderRadius");
     EXPECT_EQ(borderRadius, "1.00px");

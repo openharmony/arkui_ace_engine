@@ -57,6 +57,7 @@ public:
     enum class DrawableType {
         BASE,
         LAYERED,
+        ANIMATED,
     };
     DrawableDescriptor() = default;
     explicit DrawableDescriptor(std::shared_ptr<Media::PixelMap> pixelMap) : pixelMap_(std::move(pixelMap)) {};
@@ -64,6 +65,7 @@ public:
         : mediaData_(std::move(mediaData)), len_(len) {};
     virtual ~DrawableDescriptor() = default;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMap();
+    virtual DrawableType GetDrawableType();
 
 private:
     bool GetPixelMapFromBuffer();
@@ -103,6 +105,7 @@ public:
     std::unique_ptr<DrawableDescriptor> GetBackground();
     std::unique_ptr<DrawableDescriptor> GetMask();
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
+    DrawableType GetDrawableType() override;
     static std::string GetStaticMaskClipPath();
     void InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
         std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo);
@@ -141,6 +144,22 @@ private:
     OptionalPixelMap background_;
     OptionalPixelMap mask_;
     OptionalPixelMap layeredPixelMap_;
+};
+
+class ACE_EXPORT AnimatedDrawableDescriptor : public DrawableDescriptor {
+public:
+    AnimatedDrawableDescriptor(std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps, int32_t duration,
+        int32_t iterations): pixelMapList_(std::move(pixelMaps)), duration_(duration), iterations_(iterations) {};
+    ~AnimatedDrawableDescriptor() override = default;
+    std::shared_ptr<Media::PixelMap> GetPixelMap() override;
+    DrawableType GetDrawableType() override;
+    std::vector<std::shared_ptr<Media::PixelMap>> GetPixelMapList();
+    int32_t GetDuration();
+    int32_t GetIterations();
+private:
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList_;
+    int32_t duration_ = -1;
+    int32_t iterations_ = 1;
 };
 
 class DrawableDescriptorFactory {

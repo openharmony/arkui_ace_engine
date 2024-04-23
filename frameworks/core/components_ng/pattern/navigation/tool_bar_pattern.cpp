@@ -25,12 +25,17 @@ void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
     options_ = std::move(opt);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UpdateBackgroundStyle(host);
+}
+
+void NavToolbarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
+{
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (options_.bgOptions.color.has_value()) {
         renderContext->UpdateBackgroundColor(options_.bgOptions.color.value());
     } else {
-        SetDefaultBackgroundColorIfNeeded();
+        SetDefaultBackgroundColorIfNeeded(host);
     }
     if (options_.bgOptions.blurStyle.has_value()) {
         BlurStyleOption blur;
@@ -41,18 +46,23 @@ void NavToolbarPattern::SetToolbarOptions(NavigationToolbarOptions&& opt)
     }
 }
 
-void NavToolbarPattern::SetDefaultBackgroundColorIfNeeded()
+void NavToolbarPattern::SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host)
 {
     if (options_.bgOptions.color.has_value()) {
         return;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     renderContext->UpdateBackgroundColor(theme->GetToolBarBgColor());
+}
+
+void NavToolbarPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    UpdateBackgroundStyle(host);
 }
 } // namespace OHOS::Ace::NG

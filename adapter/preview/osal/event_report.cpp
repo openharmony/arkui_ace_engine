@@ -69,6 +69,12 @@ void EventReport::ReportDoubleClickTitle(int32_t stateChange) {}
 
 void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange) {}
 
-void EventReport::PerformanceEventReport(PerformanceExecpType type, const std::string& pageUrl,
-    const std::string& msg) {}
+void EventReport::ReportPageNodeOverflow(const std::string& pageUrl, int32_t nodeCount, int32_t threshold) {}
+
+void EventReport::ReportPageDepthOverflow(const std::string& pageUrl, int32_t depth, int32_t threshold) {}
+
+void EventReport::ReportFunctionTimeout(const std::string& functionName, int64_t time, int32_t threshold) {}
+
+void EventReport::ReportHoverStatusChange(int32_t foldStatus, int32_t time, bool isHoverMode,
+                                          int32_t appRotation, int32_t windowMode) {}
 } // namespace OHOS::Ace

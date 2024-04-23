@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_MODEL_NG_H
 
+#include <cstdint>
+
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
@@ -32,6 +34,7 @@ public:
     RefPtr<SwiperController> Create() override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
+    void SetIndicatorInteractive(bool interactive) override;
     void SetAutoPlay(bool autoPlay) override;
     void SetAutoPlayInterval(uint32_t interval) override;
     void SetDuration(uint32_t duration) override;
@@ -62,8 +65,8 @@ public:
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
-    void SetPreviousMargin(const Dimension& prevMargin) override;
-    void SetNextMargin(const Dimension& nextMargin) override;
+    void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) override;
+    void SetNextMargin(const Dimension& nextMargi, bool ignoreBlankn) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) override;
     void SetIndicatorIsBoolean(bool isBoolean) override;
     void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) override;
@@ -74,12 +77,14 @@ public:
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin);
-    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin);
+    static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
+    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
+    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin, bool ignoreBlankn = false);
     static void SetIndex(FrameNode* frameNode, uint32_t index);
     static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDirection(FrameNode* frameNode, Axis axis);
@@ -119,6 +124,8 @@ public:
     static bool GetShowIndicator(FrameNode* frameNode);
     static int GetShowDisplayArrow(FrameNode* frameNode);
     static EdgeEffect GetEffectMode(FrameNode* frameNode);
+
+    static int32_t RealTotalCount(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

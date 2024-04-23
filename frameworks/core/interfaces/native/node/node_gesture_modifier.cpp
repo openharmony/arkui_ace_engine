@@ -96,7 +96,32 @@ ArkUIGesture* createSwipeGesture(ArkUI_Int32 fingers, ArkUI_Int32 directions, Ar
         swipeDirection.type = SwipeDirection::HORIZONTAL;
     }
     if (directions & ArkUI_GESTURE_DIRECTION_VERTICAL) {
-        swipeDirection.type = SwipeDirection::VERTICAL;
+        swipeDirection.type += SwipeDirection::VERTICAL;
+    }
+    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
+    swipeGestureObject->IncRefCount();
+    return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(swipeGestureObject));
+}
+
+ArkUIGesture* createSwipeGestureByModifier(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed)
+{
+    SwipeDirection swipeDirection{ SwipeDirection::NONE};
+    switch (direction) {
+        case ArkUI_SWIPE_GESTURE_DIRECTION_ALL:
+            swipeDirection.type = SwipeDirection::ALL;
+            break;
+        case ArkUI_SWIPE_GESTURE_DIRECTION_NONE:
+            swipeDirection.type = SwipeDirection::NONE;
+            break;
+        case ArkUI_SWIPE_GESTURE_DIRECTION_HORIZONTAL:
+            swipeDirection.type = SwipeDirection::HORIZONTAL;
+            break;
+        case ArkUI_SWIPE_GESTURE_DIRECTION_VERTICAL:
+            swipeDirection.type = SwipeDirection::VERTICAL;
+            break;
+        default:
+            swipeDirection.type = SwipeDirection::NONE;
+            break;
     }
     auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingers, swipeDirection, speed);
     swipeGestureObject->IncRefCount();
@@ -254,6 +279,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         createPinchGesture,
         createRotationGesture,
         createSwipeGesture,
+        createSwipeGestureByModifier,
         createGestureGroup,
         addGestureToGestureGroup,
         dispose,

@@ -17,8 +17,8 @@
 
 #include <optional>
 
-#include "key_event.h"
-#include "pointer_event.h"
+#include "core/event/key_event.h"
+#include "core/event/pointer_event.h"
 #include "session/host/include/extension_session.h"
 #include "session/host/include/session.h"
 #include "ui/rs_surface_node.h"
@@ -85,7 +85,7 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 
 FocusPattern UIExtensionPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::NONE };
+    return { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
 }
 
 RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionAdapter()
@@ -112,6 +112,28 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
     UpdateWant(want);
 }
 
+void UIExtensionPattern::MountPlaceholderNode()
+{
+    if (!isShowPlaceholder_ && placeholderNode_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->AddChild(placeholderNode_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isShowPlaceholder_ = true;
+    }
+}
+
+void UIExtensionPattern::RemovePlaceholderNode()
+{
+    if (isShowPlaceholder_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChildAtIndex(0);
+        isShowPlaceholder_ = false;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
     CHECK_NULL_VOID(sessionWrapper_);
@@ -127,6 +149,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         NotifyDestroy();
     }
+    MountPlaceholderNode();
     sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
 }
@@ -153,6 +176,7 @@ void UIExtensionPattern::OnConnect()
     auto surfaceNode = sessionWrapper_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     context->SetRSNode(surfaceNode);
+    RemovePlaceholderNode();
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();

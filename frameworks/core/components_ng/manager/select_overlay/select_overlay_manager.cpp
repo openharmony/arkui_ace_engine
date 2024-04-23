@@ -107,7 +107,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             });
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
 
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     return proxy;
@@ -288,12 +288,13 @@ void SelectOverlayManager::HandleGlobalEvent(
     }
     bool acceptTouchUp = !touchDownPoints_.empty();
     if (touchPoint.type == TouchType::UP && touchPoint.sourceType == SourceType::TOUCH && acceptTouchUp) {
-        if (touchDownPoints_.back().id != touchPoint.id) {
+        auto lastTouchDownPoint = touchDownPoints_.back();
+        if (lastTouchDownPoint.id != touchPoint.id) {
             return;
         }
         touchDownPoints_.pop_back();
-        point.SetX(touchDownPoints_.back().x - rootOffset.GetX());
-        point.SetY(touchDownPoints_.back().y - rootOffset.GetY());
+        point.SetX(lastTouchDownPoint.x - rootOffset.GetX());
+        point.SetY(lastTouchDownPoint.y - rootOffset.GetY());
     }
 
     // handle global mouse event.

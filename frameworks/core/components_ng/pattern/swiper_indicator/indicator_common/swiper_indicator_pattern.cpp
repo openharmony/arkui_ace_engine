@@ -86,19 +86,24 @@ void SwiperIndicatorPattern::OnModifyDone()
 
     swiperEventHub->SetIndicatorOnChange(
         [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
-            auto indicator = weak.Upgrade();
-            CHECK_NULL_VOID(indicator);
-            auto textContext = context.Upgrade();
-            CHECK_NULL_VOID(textContext);
-            if (textContext->swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
-                RefPtr<FrameNode> firstTextNode;
-                RefPtr<FrameNode> lastTextNode;
-                auto layoutProperty = indicator->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-                firstTextNode = DynamicCast<FrameNode>(indicator->GetFirstChild());
-                lastTextNode = DynamicCast<FrameNode>(indicator->GetLastChild());
-                textContext->UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
-            }
-            indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAfterLayoutTask([weak, context]() {
+                auto indicator = weak.Upgrade();
+                CHECK_NULL_VOID(indicator);
+                auto textContext = context.Upgrade();
+                CHECK_NULL_VOID(textContext);
+                if (textContext->swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
+                    RefPtr<FrameNode> firstTextNode;
+                    RefPtr<FrameNode> lastTextNode;
+                    auto layoutProperty = indicator->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+                    firstTextNode = DynamicCast<FrameNode>(indicator->GetFirstChild());
+                    lastTextNode = DynamicCast<FrameNode>(indicator->GetLastChild());
+                    textContext->UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
+                }
+                indicator->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            });
+            pipeline->RequestFrame();
         });
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
@@ -132,6 +137,10 @@ void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestu
 
 void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
+    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+        return;
+    }
+
     if (info.GetSourceDevice() == SourceType::MOUSE) {
         isClicked_ = true;
         HandleMouseClick(info);
@@ -511,6 +520,19 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     CHECK_NULL_VOID(host);
     touchBottomType_ = TouchBottomType::NONE;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperIndicatorPattern::SetIndicatorInteractive(bool isInteractive)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (isInteractive) {
+        eventHub->SetEnabled(true);
+    } else {
+        eventHub->SetEnabled(false);
+    }
 }
 
 bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)

@@ -55,6 +55,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
     static Edge GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
@@ -70,6 +71,7 @@ public:
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
+    static void SetOnSecurityStateChange(const JSCallbackInfo& info);
     static void SetOnContentScroll(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
@@ -98,14 +100,21 @@ public:
     static void SetPasswordRules(const JSCallbackInfo& info);
     static void SetEnableAutoFill(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
+    static void ShowPasswordText(const JSCallbackInfo& info);
     static void SetSelectAllValue(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
     static void SetDecoration(const JSCallbackInfo& info);
+    static void SetMinFontSize(const JSCallbackInfo& info);
+    static void SetMaxFontSize(const JSCallbackInfo& info);
+    static void SetHeightAdaptivePolicy(int32_t value);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo& info);
+    static void SetTextOverflow(const JSCallbackInfo& info);
+    static void SetTextIndent(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

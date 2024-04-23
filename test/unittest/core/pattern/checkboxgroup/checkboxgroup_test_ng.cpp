@@ -29,6 +29,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -51,6 +52,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string NAME = "checkbox";
 const std::string GROUP_NAME = "checkboxGroup";
 const std::string GROUP_NAME_CHANGE = "checkboxGroupChange";
@@ -138,7 +140,7 @@ HWTEST_F(CheckBoxGroupTestNG, OnModifyDone001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the OnModifyDone function of the checkboxgroup pattern
      * @tc.expected: the margin property meetings expectations
@@ -168,7 +170,7 @@ HWTEST_F(CheckBoxGroupTestNG, UpdateUIStatus001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the UpdateUIStatus function of the checkboxgroup pattern.
      * @tc.expected: the UpdateUIStatus meetings expectations.
@@ -203,7 +205,7 @@ HWTEST_F(CheckBoxGroupTestNG, OnAfterModifyDone001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the OnAfterModifyDone function of the checkboxgroup pattern.
      * @tc.expected: the inspectorId property meetings expectations.
@@ -237,7 +239,7 @@ HWTEST_F(CheckBoxGroupTestNG, UpdateGroupCheckStatus001, TestSize.Level1)
      */
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(std::optional<string>());
-    
+
     /**
      * @tc.steps: step2. call the OnAfterModifyDone function of the checkboxgroup pattern.
      * @tc.expected: the initSelected_ property meetings expectations.
@@ -371,7 +373,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelect(), SELECTED);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedColor(), SELECTED_COLOR);
     auto json = JsonUtil::Create(true);
-    checkBoxPaintProperty->ToJsonValue(json);
+    checkBoxPaintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectAll"), "true");
 }
 
@@ -956,6 +958,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest001, TestSize.Level1)
     geometryNode->SetContentOffset(CONTENT_OFFSET);
     auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
     ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->UpdateCheckBoxGroupSelectedStyle(CheckBoxStyle::SQUARE_STYLE);
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
     /**
      *  @tc.case: case. When isTouch is true, CheckBoxGroupModifier will call DrawTouchBoard.
@@ -1880,5 +1883,115 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest027, TestSize.Level1)
     pattern->updateFlag_ = false;
     pattern->MarkIsSelected(isSelected);
     EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintPropertyTest028
+ * @tc.desc: Set CheckBoxGroup style value into CheckBoxGroupPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    /**
+     * @tc.steps: step2. Set parameters to CheckBoxGroup property
+     */
+    checkBoxGroupModelNG.SetCheckboxGroupStyle(CheckBoxStyle::SQUARE_STYLE);
+    /**
+     * @tc.steps: step3. Get paint property and get CheckBoxGroup property
+     * @tc.expected: Check the CheckBoxGroup property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    ASSERT_TRUE(checkBoxPaintProperty->HasCheckBoxGroupSelectedStyle());
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintPropertyTest029
+ * @tc.desc: Verify ToJsonValue of shape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    /**
+     * @tc.steps: step2. Set parameters to CheckBoxGroup property
+     */
+    checkBoxGroupModelNG.SetCheckboxGroupStyle(CheckBoxStyle::SQUARE_STYLE);
+    /**
+     * @tc.steps: step3. Get paint property and get CheckBoxGroup property
+     * @tc.expected: Check the CheckBoxGroup property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    auto json = JsonUtil::Create(true);
+    checkBoxPaintProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("checkboxShape"), "1");
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPatternTest030
+ * @tc.desc: Test OnAfterModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CheckBoxModelNG checkboxModelNG;
+    checkboxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkboxModelNG.SetCheckboxStyle(CheckBoxStyle::CIRCULAR_STYLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    CheckBoxGroupModelNG checkboxGroupModelNG;
+    checkboxGroupModelNG.Create(GROUP_NAME);
+    checkboxGroupModelNG.SetCheckboxGroupStyle(CheckBoxStyle::SQUARE_STYLE);
+    auto groupFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(groupFrameNode, nullptr);
+    auto pattern = groupFrameNode->GetPattern<CheckBoxGroupPattern>();
+    EXPECT_NE(pattern, nullptr);
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap;
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode);
+    checkBoxGroupMap[GROUP_NAME].push_back(groupFrameNode);
+
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier = AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    EXPECT_NE(checkBoxGroupModifier, nullptr);
+    pattern->UpdateCheckBoxStyle();
+    /**
+     * @tc.steps: step2. Get paint property and get CheckBoxGroup and CheckBox property
+     * @tc.expected: Check the CheckBoxGroup and CheckBox property value
+     */
+    auto groupPaintProperty = groupFrameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    EXPECT_NE(groupPaintProperty, nullptr);
+    EXPECT_EQ(groupPaintProperty->GetCheckBoxGroupSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedStyleValue(), CheckBoxStyle::CIRCULAR_STYLE);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

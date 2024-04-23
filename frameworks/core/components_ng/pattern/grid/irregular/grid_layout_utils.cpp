@@ -40,6 +40,8 @@ GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const Layo
     if (size.columns > info->crossCount_) {
         size.columns = info->crossCount_;
     }
+    size.columns = std::max(1, size.columns);
+    size.rows = std::max(1, size.rows);
     return size;
 }
 } // namespace OHOS::Ace::NG

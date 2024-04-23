@@ -36,6 +36,7 @@ public:
     void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override;
     void SetOnSelect(SelectFunc&& onSelect) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
     static void SetSelected(FrameNode* frameNode, bool selected);
     static void SetRowStart(FrameNode* frameNode, int32_t rowStart);

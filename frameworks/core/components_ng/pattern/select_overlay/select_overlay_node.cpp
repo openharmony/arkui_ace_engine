@@ -1029,7 +1029,11 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
         isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL] = true;
     }
 
-    if (info->menuInfo.showCopy) {
+    bool enableMenuShare = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        enableMenuShare = false;
+    }
+    if (info->menuInfo.showCopy && enableMenuShare) {
         float buttonWidth = 0.0f;
         auto buttonShare = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), nullptr, GetId(), buttonWidth, false);

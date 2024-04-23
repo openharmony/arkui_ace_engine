@@ -53,6 +53,9 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
 
+protected:
+    virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
+
 private:
     void RemoveAreaChangeInner();
 

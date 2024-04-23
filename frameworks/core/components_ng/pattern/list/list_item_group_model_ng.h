@@ -34,6 +34,7 @@ public:
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override;
     void SetFooter(std::function<void()>&& footer) override;
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

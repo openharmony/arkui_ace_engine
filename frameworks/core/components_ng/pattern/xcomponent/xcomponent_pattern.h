@@ -22,6 +22,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
@@ -129,7 +130,6 @@ public:
         }
     }
 
-    void OnPaint();
     void NativeXComponentOffset(double x, double y);
     void NativeXComponentChange(float width, float height);
     void NativeXComponentDestroy();
@@ -140,7 +140,7 @@ public:
 
     void InitNativeWindow(float textureWidth, float textureHeight);
     void XComponentSizeInit();
-    void XComponentSizeChange(float textureWidth, float textureHeight);
+    void XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent);
 
     void* GetNativeWindow()
     {
@@ -160,6 +160,11 @@ public:
     const std::string& GetLibraryName() const
     {
         return libraryname_;
+    }
+
+    void SetLibraryName(const std::string& libraryname)
+    {
+        libraryname_ = libraryname;
     }
 
     const std::optional<std::string>& GetSoPath() const
@@ -190,11 +195,6 @@ public:
     const SizeF& GetSurfaceSize() const
     {
         return surfaceSize_;
-    }
-
-    const OffsetF& GetGlobalPosition() const
-    {
-        return globalPosition_;
     }
 
     const OffsetF& GetLocalPosition() const
@@ -270,7 +270,7 @@ public:
     void SetIdealSurfaceOffsetX(float offsetX);
     void SetIdealSurfaceOffsetY(float offsetY);
     void ClearIdealSurfaceOffset(bool isXAxis);
-    void UpdateSurfaceBounds(bool needForceRender = false);
+    void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
     void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
@@ -280,7 +280,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
     void OnWindowHide() override;
@@ -288,6 +288,9 @@ private:
     void NativeSurfaceHide();
     void NativeSurfaceShow();
     void OnModifyDone() override;
+    void BeforeCreateLayoutWrapper() override;
+    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();
@@ -368,6 +371,7 @@ private:
     std::optional<float> selfIdealSurfaceHeight_;
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
+    std::string surfaceId_;
 
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;

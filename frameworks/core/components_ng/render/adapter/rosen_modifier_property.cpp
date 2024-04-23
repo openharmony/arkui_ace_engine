@@ -77,6 +77,18 @@ void AddOrChangeTranslateZModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     }
 }
 
+void AddOrChangePerspectiveModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSPerspModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSPerspModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+
 void AddOrChangeTranslateModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSTranslateModifier>& modifier,
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)

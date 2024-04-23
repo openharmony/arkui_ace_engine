@@ -24,6 +24,9 @@ void ListTestNg::SetUpTestSuite()
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 
+    auto listTheme = AceType::MakeRefPtr<ListTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(ListTheme::TypeId())).WillRepeatedly(Return(listTheme));
+
     auto listItemTheme = AceType::MakeRefPtr<ListItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
     listItemTheme->itemDefaultColor_ = Color::WHITE;
@@ -192,12 +195,54 @@ void ListTestNg::CreateGroupWithSetting(
     }
 }
 
+void ListTestNg::CreateGroupWithSettingChildrenMainSize(int32_t groupNumber)
+{
+    for (int32_t index = 0; index < groupNumber; ++index) {
+        auto header = GetDefaultHeaderBuilder();
+        auto footer = GetDefaultHeaderBuilder();
+        ListItemGroupModelNG groupModel;
+        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        groupModel.SetSpace(Dimension(SPACE));
+        groupModel.SetDivider(ITEM_DIVIDER);
+        groupModel.SetHeader(std::move(header));
+        groupModel.SetFooter(std::move(footer));
+
+        auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
+        const int32_t itemNumber = 2;
+        childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
+        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+}
+
 void ListTestNg::CreateGroup(int32_t groupNumber, Axis axis)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         ListItemGroupModelNG groupModel;
         groupModel.Create(V2::ListItemGroupStyle::NONE);
         CreateItem(GROUP_LINE_NUMBER, axis, V2::ListItemStyle::NONE);
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+}
+
+
+void ListTestNg::CreateGroupChildrenMainSize(int32_t groupNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel;
+        groupModel.Create(V2::ListItemGroupStyle::NONE);
+        auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
+        const int32_t itemNumber = 2;
+        childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
+        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateItem(1, Axis::VERTICAL, V2::ListItemStyle::NONE);
         ViewStackProcessor::GetInstance()->Pop();
     }
 }

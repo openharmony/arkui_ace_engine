@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ScrollPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
@@ -139,6 +140,7 @@ public:
     }
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
+    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
@@ -328,7 +330,7 @@ public:
         return isInitialized_;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);

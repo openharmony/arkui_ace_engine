@@ -33,15 +33,21 @@ public:
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
+    void SetOnWillAppear(std::function<void()>&& willAppear) override;
+    void SetOnWillShow(std::function<void()>&& willShow) override;
+    void SetOnWillHide(std::function<void()>&& willHide) override;
+    void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     void SetNavDestinationMode(NavDestinationMode mode) override;
     bool ParseCommonTitle(
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
+    void SetBackgroundColor(const Color& color, bool isVaild = true) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

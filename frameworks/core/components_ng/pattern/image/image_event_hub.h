@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 
 using CompleteEvent = std::function<void(const LoadImageSuccessEvent& info)>;
 using ErrorEvent = std::function<void(const LoadImageFailEvent& info)>;
+using FinishEvent = std::function<void()>;
 
 class ImageEventHub : public EventHub {
     DECLARE_ACE_TYPE(ImageEventHub, EventHub)
@@ -55,10 +56,23 @@ public:
             completeEvent_(info);
         }
     }
+    
+    void SetOnFinish(FinishEvent&& finishEvent)
+    {
+        finishEvent_ = std::move(finishEvent);
+    }
+
+    void FireFinishEvent() const
+    {
+        if (finishEvent_) {
+            finishEvent_();
+        }
+    }
 
 private:
-     ErrorEvent errorEvent_;
-     CompleteEvent completeEvent_;
+    ErrorEvent errorEvent_;
+    CompleteEvent completeEvent_;
+    FinishEvent finishEvent_;
 };
 
 } // namespace OHOS::Ace::NG

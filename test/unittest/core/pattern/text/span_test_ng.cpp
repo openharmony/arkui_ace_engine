@@ -44,6 +44,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const std::string CREATE_VALUE = "Hello World";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
@@ -78,6 +79,13 @@ const uint32_t RENDER_STRATEGY_MULTI_OPACITY = 2;
 const uint32_t EFFECT_STRATEGY_NONE = 0;
 const uint32_t EFFECT_STRATEGY_SCALE = 1;
 const uint32_t EFFECT_STRATEGY_HIERARCHICAL = 2;
+const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+const std::string BUNDLE_NAME;
+const std::string MODULE_NAME;
+constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
+constexpr double IMAGE_SOURCESIZE_HEIGHT = 200.0;
+constexpr double WIDTH = 400.0;
+constexpr double HEIGHT = 500.0;
 } // namespace
 
 class SpanTestNg : public testing::Test {};
@@ -159,7 +167,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue001, TestSize.Level1)
     auto json = std::make_unique<JsonValue>();
     spanNode->spanItem_->content = "";
     spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->ToJsonValue(json);
+    spanNode->spanItem_->ToJsonValue(json, filter);
     bool ret = json->Contains(FONT_SIZE);
     EXPECT_EQ(ret, false);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
@@ -178,7 +186,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue002, TestSize.Level1)
     auto json = std::make_unique<JsonValue>();
     spanNode->spanItem_->content = "";
     spanNode->spanItem_->fontStyle = std::make_unique<FontStyle>();
-    spanNode->spanItem_->ToJsonValue(json);
+    spanNode->spanItem_->ToJsonValue(json, filter);
     bool ret = json->Contains(FONT_SIZE);
     EXPECT_EQ(ret, false);
     ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
@@ -508,11 +516,19 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
     EXPECT_CALL(*paragraph, AddPlaceholder).Times(5);
     EXPECT_CALL(*paragraph, PopStyle).Times(5);
 
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::TOP);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::CENTER);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
-    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::NONE);
+    PlaceholderStyle placeholderStyle;
+    placeholderStyle.width = 9.0;
+    placeholderStyle.height = 10.0;
+    placeholderStyle.verticalAlign = VerticalAlign::TOP;
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::CENTER;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::BOTTOM;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
+    placeholderStyle.verticalAlign = VerticalAlign::NONE;
+    index = spanItem->UpdateParagraph(nullptr, paragraph, placeholderStyle);
 
     MockParagraph::TearDown();
 }
@@ -538,6 +554,65 @@ HWTEST_F(SpanTestNg, Create001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetImageFitValue(ImageFit::COVER), ImageFit::FILL);
     EXPECT_EQ(layoutProperty->GetVerticalAlignValue(VerticalAlign::BOTTOM), VerticalAlign::TOP);
+}
+
+/**
+ * @tc.name: SpanSetBaselineOffsetTest001
+ * @tc.desc: Test baseline offset of span.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanSetBaselineOffsetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create span node
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test baseline offset
+     */
+    Dimension offset = Dimension(10.0, DimensionUnit::PX);
+    spanModelNG.SetBaselineOffset(offset);
+    EXPECT_EQ(spanNode->GetBaselineOffset(), Dimension(10.0, DimensionUnit::PX));
+
+    offset = Dimension(-5.0, DimensionUnit::VP);
+    spanModelNG.SetBaselineOffset(offset);
+    EXPECT_EQ(spanNode->GetBaselineOffset(), Dimension(-5.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ImageSpanSetBaselineOffset001
+ * @tc.desc: Test ImageSpanView set baseline offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset001, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    std::string bundleName;
+    std::string moduleName;
+    std::string src;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(src, pixMap, bundleName, moduleName);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    Dimension offset = Dimension(10.0, DimensionUnit::VP);
+    layoutProperty->UpdateBaselineOffset(offset);
+    EXPECT_TRUE(layoutProperty->HasBaselineOffset());
+    EXPECT_EQ(layoutProperty->GetBaselineOffset(), Dimension(10.0, DimensionUnit::VP));
+
+    offset = Dimension(-5.0, DimensionUnit::VP);
+    layoutProperty->UpdateBaselineOffset(offset);
+    EXPECT_EQ(layoutProperty->GetBaselineOffset(), Dimension(-5.0, DimensionUnit::VP));
 }
 
 /**
@@ -650,7 +725,7 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue001, TestSize.Level1)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
     auto json = JsonUtil::Create(true);
-    spanNode->ToJsonValue(json);
+    spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -680,7 +755,7 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue002, TestSize.Level1)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
     auto json = JsonUtil::Create(true);
-    spanNode->ToJsonValue(json);
+    spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("fontSize"));
@@ -711,7 +786,7 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
     auto json = JsonUtil::Create(true);
-    spanNode->ToJsonValue(json);
+    spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -969,5 +1044,53 @@ HWTEST_F(SpanTestNg, SymbolSpanCreateTest001, TestSize.Level1)
      */
     auto symbolId = spanNode->spanItem_->GetSymbolUnicode();
     EXPECT_EQ(symbolId, SYMBOL_ID);
+}
+
+/**
+ * @tc.name: ImageSpanEventTest001
+ * @tc.desc: Test ImageSpan onComplete event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    NG::ImageSpanView::Create();
+    bool isTrigger = false;
+    auto onComplete = [&isTrigger](const LoadImageSuccessEvent& info) { isTrigger = true; };
+    imageSpan.SetOnComplete(std::move(onComplete));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
+    eventHub->FireCompleteEvent(loadImageSuccessEvent);
+    EXPECT_EQ(isTrigger, true);
+}
+
+/**
+ * @tc.name: ImageSpanEventTest002
+ * @tc.desc: Test ImageSpan onError event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
+{
+    ImageModelNG imageSpan;
+    RefPtr<PixelMap> pixMap = nullptr;
+    imageSpan.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    NG::ImageSpanView::Create();
+    bool isTrigger = false;
+    auto onError = [&isTrigger](const LoadImageFailEvent& info) { isTrigger = true; };
+    imageSpan.SetOnError(std::move(onError));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
+    eventHub->FireErrorEvent(loadImageFailEvent);
+    EXPECT_EQ(isTrigger, true);
 }
 } // namespace OHOS::Ace::NG

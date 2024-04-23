@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/property/property.h"
@@ -69,11 +70,11 @@ public:
 
     RectF GetIndicatorRect(int32_t index);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("barHeight", GetTabBarHeight().value_or(0.0_vp).ToString().c_str());
-        json->Put("currentIndex", propIndicator_.value_or(0));
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("barHeight", GetTabBarHeight().value_or(0.0_vp).ToString().c_str(), filter);
+        json->PutExtAttr("currentIndex", propIndicator_.value_or(0), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

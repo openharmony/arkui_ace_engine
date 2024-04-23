@@ -41,6 +41,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -72,7 +73,9 @@
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
+class InspectorFilter;
 class OnTextChangedListener;
+
 struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
@@ -524,7 +527,7 @@ public:
     {
         return selectController_->GetSelectedRects();
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
     void InitValueText(std::string content);
@@ -741,10 +744,10 @@ public:
         if (!IsSelected()) {
             return false;
         }
-        Offset offset = globalOffset -
-                        Offset(IsTextArea() ? contentRect_.GetX() : textRect_.GetX(),
-                            IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) -
-                        Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+        auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+        auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+        auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
+        Offset offset = localOffset - Offset(offsetX, offsetY);
         for (const auto& rect : selectController_->GetSelectedRects()) {
             bool isInRange = rect.IsInRegion({ offset.GetX(), offset.GetY() });
             if (isInRange) {
@@ -906,6 +909,10 @@ public:
     }
     std::string GetShowResultImageSrc() const;
     std::string GetHideResultImageSrc() const;
+    std::string GetNormalUnderlineColorStr() const;
+    std::string GetTypingUnderlineColorStr() const;
+    std::string GetDisableUnderlineColorStr() const;
+    std::string GetErrorUnderlineColorStr() const;
     void OnAttachToFrameNode() override;
 
     bool GetTextInputFlag() const
@@ -931,11 +938,6 @@ public:
     bool GetScrollBarVisible() const
     {
         return scrollBarVisible_;
-    }
-
-    float GetPreviewWidth() const
-    {
-        return inlineState_.frameRect.Width();
     }
 
     void SetFillRequestFinish(bool success)
@@ -1031,8 +1033,10 @@ public:
 
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
+    std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
     bool IsShowCancelButtonMode() const;
+    void CheckPasswordAreaState();
 
     bool GetShowSelect() const
     {
@@ -1050,9 +1054,9 @@ public:
 
     bool HandleSpaceEvent();
 
-    virtual void InitBackGroundColorAndBorderRadius();
-
-    void SavePreUnderLineState();
+    virtual void ApplyNormalTheme();
+    void ApplyUnderlineTheme();
+    void ApplyInlineTheme();
 
     int32_t GetContentWideTextLength() override
     {
@@ -1090,6 +1094,8 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
+    OffsetF GetPaintRectGlobalOffset() const;
+
     void NeedRequestKeyboard()
     {
         needToRequestKeyboardInner_ = true;
@@ -1100,6 +1106,11 @@ public:
     void OnVirtualKeyboardAreaChanged() override;
     void ScrollPage(bool reverse, bool smooth = false) override;
     void InitScrollBarClickEvent() override {}
+    bool IsUnderlineMode();
+    bool IsInlineMode();
+    bool IsShowError();
+    void ResetContextAttr();
+    void RestoreDefaultMouseState();
 
     bool IsTransparent()
     {
@@ -1109,6 +1120,15 @@ public:
     RefPtr<Clipboard> GetClipboard() override
     {
         return clipboard_;
+    }
+
+    const Dimension& GetAvoidSoftKeyboardOffset() const override;
+
+    RectF GetPaintContentRect() override
+    {
+        auto transformContentRect = contentRect_;
+        selectOverlay_->GetLocalRectWithTransform(transformContentRect);
+        return transformContentRect;
     }
 
 protected:
@@ -1157,15 +1177,13 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
+    void HanldeMaxLengthAndUnderlineTypingColor();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ProcessOverlayAfterLayout(bool isGlobalAreaChanged);
-    void ProcessOverlay(const OverlayRequest& request = OverlayRequest())
-    {
-        selectOverlay_->ProcessOverlay(request);
-    }
+    void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
     bool SelectOverlayIsOn()
     {
@@ -1188,7 +1206,6 @@ private:
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
-    void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
     void UpdateCaretRect(bool isEditorValueChanged);
@@ -1215,18 +1232,12 @@ private:
     void CalculateDefaultCursor();
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
-    void SaveUnderlineStates();
-    void ApplyUnderlineStates();
-    void SavePasswordModeStates();
     void SetAccessibilityAction();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
 
     void UpdateCopyAllStatus();
-    void SaveInlineStates();
-    void ApplyInlineStates();
     void RestorePreInlineStates();
-    void RestoreUnderlineStates();
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
@@ -1288,8 +1299,11 @@ private:
     void KeyboardContentTypeToInputType();
     void ProcessScroll();
     void ProcessCounter();
-    RefPtr<TextFieldLayoutProperty> GetTextFieldLayoutProperty();
     void HandleParentGlobalOffsetChange();
+    void SetThemeAttr();
+    void SetThemeBorderAttr();
+    void ProcessInlinePaddingAndMargin();
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
 
     RectF frameRect_;
     RectF textRect_;
@@ -1348,11 +1362,6 @@ private:
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
-    bool preInline = false;
-    bool preUnderline = false;
-    bool preErrorState_ = false;
-    float preErrorMargin_ = 0.0f;
-    bool restoreMarginState_ = false;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
@@ -1401,10 +1410,6 @@ private:
     bool inlineFocusState_ = false;
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
-    bool needApplyInlineSize_ = false;
-    PreState inlineState_;
-    // inline --end
-    PreState preUnderlineState_;
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;

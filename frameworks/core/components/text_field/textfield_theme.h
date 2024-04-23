@@ -21,6 +21,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
+#include "core/components/swiper/render_swiper.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -72,6 +73,11 @@ public:
                 pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
                 pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp));
+            theme->underlinePadding_ =
+                Edge(pattern->GetAttr<Dimension>("textfield_underline_padding_horizontal", 0.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_underline_padding_vertical", 12.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_underline_padding_horizontal", 0.0_vp),
+                    pattern->GetAttr<Dimension>("textfield_underline_padding_vertical", 12.0_vp));
             theme->fontWeight_ =
                 FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_font_weight", 0.0)));
             theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("textfield_border_radius", 0.0_vp));
@@ -159,12 +165,19 @@ public:
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
-            // The default height is 48VP, of which 12VP is 12VP each for the upper and lower padding
             theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 24.0_vp);
+            theme->contentHeight_ = pattern->GetAttr<Dimension>("textfield_content_height", 0.0_vp);
             auto showPasswordDirectly = pattern->GetAttr<std::string>("show_password_directly", "0");
             theme->showPasswordDirectly_ = StringUtils::StringToInt(showPasswordDirectly);
             auto textfield_show_handle = pattern->GetAttr<std::string>("textfield_show_handle", "0");
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfield_show_handle);
+
+            theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
+            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
+            theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);
+            theme->textInputAndErrTipsSpacing_ =
+                pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
+            theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
         }
     };
 
@@ -175,9 +188,19 @@ public:
         return padding_;
     }
 
+    const Edge& GetUnderlinePadding() const
+    {
+        return underlinePadding_;
+    }
+
     const Dimension& GetHeight() const
     {
         return height_;
+    }
+
+    const Dimension& GetContentHeight() const
+    {
+        return contentHeight_;
     }
 
     const Dimension& GetFontSize() const
@@ -480,12 +503,44 @@ public:
         return textfieldShowHandle_;
     }
 
+    const Dimension& GetTextInputWidth() const
+    {
+        return textInputBorderWidth_;
+    }
+
+    const Color& GetTextInputColor() const
+    {
+        return textInputBorderColor_;
+    }
+
+    const Dimension& GetTextInputAndErrTipsSpacing() const
+    {
+        return textInputAndErrTipsSpacing_;
+    }
+
+    bool IsShowPasswordIcon() const
+    {
+        return showPasswordIcon_;
+    }
+
+    const Dimension& GetErrorTextInputBorderWidth() const
+    {
+        return errorTextInputBorderWidth_;
+    }
+
+    const Dimension& GetAvoidKeyboardOffset() const
+    {
+        return avoidKeyboardOffset_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
 private:
     Edge padding_;
+    Edge underlinePadding_;
     Dimension height_;
+    Dimension contentHeight_;
     Dimension fontSize_;
     Dimension underlineFontSize_;
     FontWeight fontWeight_ = FontWeight::NORMAL;
@@ -553,11 +608,19 @@ private:
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
 
+    Dimension avoidKeyboardOffset_ = 24.0_vp;
+
     bool showEllipsis_ = true;
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;;
+
+    Dimension textInputBorderWidth_ = 0.0_vp;
+    Dimension textInputAndErrTipsSpacing_ = 4.0_vp;
+    Dimension errorTextInputBorderWidth_ = 1.0_vp;
+    Color textInputBorderColor_;
+    bool showPasswordIcon_ = true;
 };
 
 } // namespace OHOS::Ace

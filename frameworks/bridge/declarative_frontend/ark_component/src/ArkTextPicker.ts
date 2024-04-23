@@ -62,6 +62,11 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerDividerModifier.identity, TextpickerDividerModifier, value);
     return this;
   }
+  gradientHeight(value: Dimension): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerGradientHeightModifier.identity, TextpickerGradientHeightModifier, value);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -121,6 +126,23 @@ class TextpickerDividerModifier extends ModifierWithKey<DividerOptions | null> {
       this.stageValue?.color === this.value?.color &&
       this.stageValue?.startMargin === this.value?.startMargin &&
       this.stageValue?.endMargin === this.value?.endMargin);
+  }
+}
+
+class TextpickerGradientHeightModifier extends ModifierWithKey<Dimension>{
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerGradientHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetGradientHeight(node);
+    } else {
+      getUINativeModule().textpicker.setGradientHeight(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

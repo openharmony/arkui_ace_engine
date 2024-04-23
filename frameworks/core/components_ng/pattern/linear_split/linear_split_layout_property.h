@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_LAYOUT_PROPERTY_H
 
 #include "linear_split_model.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -44,18 +45,18 @@ public:
         ResetDivider();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("resizeable", propResizable_.value_or(false) ? "true" : "false");
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("resizeable", propResizable_.value_or(false) ? "true" : "false", filter);
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
             divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
             divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         } else {
             auto divider = JsonUtil::Create(true);
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         }
     }
 

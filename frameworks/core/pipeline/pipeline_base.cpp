@@ -230,10 +230,10 @@ void PipelineBase::SetRootSize(double density, float width, float height)
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
 #else
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
 #endif
 }
 
@@ -242,10 +242,26 @@ void PipelineBase::SetFontScale(float fontScale)
     const static float CARD_MAX_FONT_SCALE = 1.3f;
     if (!NearEqual(fontScale_, fontScale)) {
         fontScale_ = fontScale;
-        if (isJsCard_ && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
+        if ((isJsCard_ || isFormRender_) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
             fontScale_ = CARD_MAX_FONT_SCALE;
         }
-        fontManager_->RebuildFontNode();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->RebuildFontNode();
+    }
+}
+
+void PipelineBase::SetFontWeightScale(float fontWeightScale)
+{
+    const static float CARD_MAX_FONT_WEIGHT_SCALE = 1.25f;
+    if (!NearEqual(fontWeightScale_, fontWeightScale)) {
+        fontWeightScale_ = fontWeightScale;
+        if (isJsCard_ && GreatOrEqual(fontWeightScale_, CARD_MAX_FONT_WEIGHT_SCALE)) {
+            fontWeightScale_ = CARD_MAX_FONT_WEIGHT_SCALE;
+        }
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->RebuildFontNode();
     }
 }
 
@@ -422,24 +438,24 @@ RefPtr<OffscreenCanvas> PipelineBase::CreateOffscreenCanvas(int32_t width, int32
     return RenderOffscreenCanvas::Create(AceType::WeakClaim(this), width, height);
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type)
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(std::move(task), type);
+        taskExecutor_->PostTask(std::move(task), type, name);
     }
 }
 
-void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
+void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(task, type);
+        taskExecutor_->PostTask(task, type, name);
     }
 }
 
-void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostSyncTask(task, type);
+        taskExecutor_->PostSyncTask(task, type, name);
     }
 }
 
@@ -686,26 +702,28 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
     }
 }
 
-void PipelineBase::OnVirtualKeyboardAreaChange(
-    Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, bool supportAvoidance)
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
+#ifdef OHOS_STANDARD_SYSTEM
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
         if (subwindow && subwindow->GetShown()) {
             // subwindow is shown, main window no need to handle the keyboard event
             return;
         }
+#endif
     }
     double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
+    OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction, safeHeight, supportAvoidance);
 }
 
-void PipelineBase::OnVirtualKeyboardAreaChange(
-    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
@@ -719,7 +737,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
-    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction, forceChange);
 }
 
 void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
@@ -857,7 +875,8 @@ bool PipelineBase::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI);
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI,
+            "ArkUIDestroyPipeline");
     }
 }
 

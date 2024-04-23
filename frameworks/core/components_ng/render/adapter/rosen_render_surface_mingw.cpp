@@ -73,6 +73,10 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
 {
 }
 
+void RosenRenderSurface::SetTransformHint(Rotation dmRotation)
+{
+}
+
 void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height) {}
 
 void RosenRenderSurface::ConsumeWebBuffer() {}
@@ -86,5 +90,9 @@ void RosenRenderSurface::DrawBufferForXComponent(
 {}
 
 void RosenRenderSurface::releaseSurfaceBuffers() {}
+
+void RosenRenderSurface::UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height) {}
+
+void RosenRenderSurface::DumpInfo() {}
 
 } // namespace OHOS::Ace::NG

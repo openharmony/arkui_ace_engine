@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/radius.h"
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/property/property.h"
@@ -70,9 +71,9 @@ public:
         ResetTopRightRadius();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        ShapePaintProperty::ToJsonValue(json);
+        ShapePaintProperty::ToJsonValue(json, filter);
         if (!propTopLeftRadius_.has_value() || !propTopRightRadius_.has_value() || !propBottomLeftRadius_.has_value() ||
             !propBottomRightRadius_.has_value()) {
             return;
@@ -86,20 +87,20 @@ public:
             propBottomRightRadius_.value().GetY().ConvertToPx() };
         radiusArray[3] = { propBottomLeftRadius_.value().GetX().ConvertToPx(),
             propBottomLeftRadius_.value().GetY().ConvertToPx() };
-        json->Put("radius", radiusArray.data());
+        json->PutExtAttr("radius", radiusArray.data(), filter);
         if (radiusArray[0][0] == radiusArray[1][0] &&
             radiusArray[0][0] == radiusArray[2][0] &&
             radiusArray[0][0] == radiusArray[3][0]) {
-            json->Put("radiusWidth", radiusArray[0][0]);
+            json->PutExtAttr("radiusWidth", radiusArray[0][0], filter);
         } else {
-            json->Put("radiusWidth", 0);
+            json->PutExtAttr("radiusWidth", 0, filter);
         }
         if (radiusArray[0][1] == radiusArray[1][1] &&
             radiusArray[0][1] == radiusArray[2][1] &&
             radiusArray[0][1] == radiusArray[3][1]) {
-            json->Put("radiusHeight", radiusArray[0][1]);
+            json->PutExtAttr("radiusHeight", radiusArray[0][1], filter);
         } else {
-            json->Put("radiusHeight", 0);
+            json->PutExtAttr("radiusHeight", 0, filter);
         }
     }
 

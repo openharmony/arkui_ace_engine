@@ -45,6 +45,7 @@ public:
     static void SetAlign(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);
@@ -78,8 +79,9 @@ public:
     static void SetFontFeature(const JSCallbackInfo &info);
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetMarqueeOptions(const JSCallbackInfo& info);
+    static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
-    
+
 private:
     static RefPtr<TextComponentV2> GetComponent();
 };
@@ -112,6 +114,7 @@ public:
 
     void CloseSelectionMenu();
 
+    void SetStyledString(const JSCallbackInfo& info);
 private:
     WeakPtr<TextControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextController);

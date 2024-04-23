@@ -151,6 +151,18 @@ void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
     }
 }
 
+void SvgNode::PushAnimatorOnFinishCallback(const std::function<void()>& onFinishCallback)
+{
+    for (auto& child : children_) {
+        auto svgAnimate = DynamicCast<SvgAnimation>(child);
+        if (svgAnimate) {
+            svgAnimate->AddOnFinishCallBack(onFinishCallback);
+        } else {
+            child->PushAnimatorOnFinishCallback(onFinishCallback);
+        }
+    }
+}
+
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     if (!OnCanvas(canvas)) {
@@ -189,11 +201,13 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     auto smoothEdge = GetSmoothEdge();
+    auto colorFilter = GetColorFilter();
     for (auto& node : children_) {
         if (node && node->drawTraversed_) {
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 node->SetSmoothEdge(smoothEdge);
             }
+            node->SetColorFilter(colorFilter);
             node->Draw(canvas, viewPort, color);
         }
     }
@@ -244,6 +258,12 @@ void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
     CHECK_NULL_VOID(svgContext);
     auto refFilter = svgContext->GetSvgNodeById(hrefFilterId_);
     CHECK_NULL_VOID(refFilter);
+    auto effectPath = AsPath(viewPort);
+    auto bounds = effectPath.GetBounds();
+    refFilter->SetEffectFilterArea({
+        useOffsetX_ + bounds.GetLeft(), useOffsetY_ + bounds.GetTop(),
+        bounds.GetWidth(), bounds.GetHeight()
+    });
     refFilter->Draw(canvas, viewPort, std::nullopt);
     return;
 }

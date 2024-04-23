@@ -229,15 +229,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 
 void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, const SizeF& realSize)
 {
-    if (!magicNodes_.empty()) {
-        const auto& childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-        for (auto& [index, children] : magicNodes_) {
-            for (auto& item : children) {
-                item.layoutConstraint = childLayoutConstraint;
-            }
-        }
-        return;
-    }
     maxDisplayPriority_ = 0;
     totalFlexWeight_ = 0.0f;
     outOfLayoutChildren_.clear();
@@ -275,14 +266,15 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
             }
         }
 
-        if (!magicNodes_.count(childDisplayPriority)) {
+        auto iter = magicNodes_.find(childDisplayPriority);
+        if (iter == magicNodes_.end()) {
             magicNodes_.insert(
                 std::map<int32_t, std::list<MagicLayoutNode>>::value_type(childDisplayPriority, { node }));
             if (GreatNotEqual(childLayoutWeight, 0.0f)) {
                 magicNodeWeights_.insert(std::map<int32_t, float>::value_type(childDisplayPriority, childLayoutWeight));
             }
         } else {
-            magicNodes_[childDisplayPriority].emplace_back(node);
+            iter->second.emplace_back(node);
             if (GreatNotEqual(childLayoutWeight, 0.0f)) {
                 magicNodeWeights_[childDisplayPriority] += childLayoutWeight;
             }

@@ -24,10 +24,13 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/frontend.h"
 
 namespace OHOS::Ace {
 std::shared_mutex EngineHelper::mutex_;
 std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> EngineHelper::engineWeakMap_;
+
+std::function<void(int32_t)> EngineHelper::removeUIContextFunc_;
 
 ScopedDelegate::ScopedDelegate(const RefPtr<Framework::FrontendDelegate>& delegate, int32_t id)
     : delegate_(delegate), scope_(new ContainerScope(id))
@@ -62,6 +65,10 @@ void EngineHelper::RemoveEngine(int32_t id)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     engineWeakMap_.erase(id);
+
+    if (removeUIContextFunc_) {
+        removeUIContextFunc_(id);
+    }
 }
 
 RefPtr<Framework::JsEngine> EngineHelper::GetCurrentEngine()
@@ -138,5 +145,12 @@ std::pair<int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
         return StringToPair(match[0].str());
     }
     return { 0, 0 };
+}
+
+void EngineHelper::RegisterRemoveUIContextFunc(const std::function<void(int32_t)>& removeUIContextFunc)
+{
+    if (!removeUIContextFunc_) {
+        removeUIContextFunc_ = removeUIContextFunc;
+    }
 }
 } // namespace OHOS::Ace

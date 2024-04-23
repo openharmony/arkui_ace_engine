@@ -22,10 +22,13 @@
 #include <unordered_map>
 #include <utility>
 
+#include "interfaces/inner_api/ace/arkui_rect.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
@@ -38,7 +41,7 @@
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
-#include "core/components_ng/manager/navigation_dump/navigation_dump_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -56,7 +59,7 @@ namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public PipelineBase {
+class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
@@ -196,11 +199,7 @@ public:
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
-    void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);
-    void RemoveFormVisibleChangeNode(int32_t nodeId);
-
     void HandleVisibleAreaChangeEvent();
-    void HandleFormVisibleChangeEvent(bool isVisible);
 
     void HandleSubwindow(bool isShow);
 
@@ -331,6 +330,8 @@ public:
 
     const RefPtr<FocusManager>& GetFocusManager() const;
 
+    const RefPtr<FocusManager>& GetOrCreateFocusManager();
+
     const RefPtr<FrameRateManager>& GetFrameRateManager()
     {
         return frameRateManager_;
@@ -339,6 +340,7 @@ public:
     void FlushBuild() override;
 
     void FlushPipelineImmediately() override;
+    void RebuildFontNode() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 
@@ -400,7 +402,7 @@ public:
 
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
 
-    bool RequestFocus(const std::string& targetNodeId) override;
+    bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
@@ -412,6 +414,7 @@ public:
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
     void NotifyMemoryLevel(int32_t level) override;
+    void FlushModifier() override;
     void FlushMessages() override;
 
     void FlushUITasks() override;
@@ -600,7 +603,7 @@ public:
 
     void SetCursor(int32_t cursorValue) override;
 
-    void RestoreDefault() override;
+    void RestoreDefault(int32_t windowId = 0) override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
@@ -656,9 +659,9 @@ public:
         return onceVsyncListener_ != nullptr;
     }
 
-    const RefPtr<NavigationDumpManager>& GetNavigationDumpManager() const
+    const RefPtr<NavigationManager>& GetNavigationManager() const
     {
-        return navigationDumpMgr_;
+        return navigationMgr_;
     }
 
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
@@ -669,6 +672,34 @@ public:
     void ChangeSensitiveNodes(bool flag) override
     {
         privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
+    }
+
+    void FlushRequestFocus();
+
+    Dimension GetCustomTitleHeight();
+
+    void SetOverlayNodePositions(std::vector<Ace::RectF> rects);
+
+    std::vector<Ace::RectF> GetOverlayNodePositions();
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>&& callback);
+
+    void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
+
+    void CheckNeedUpdateBackgroundColor(Color& color);
+    bool CheckNeedDisableUpdateBackgroundImage();
+
+    void SetLocalColorMode(ColorMode colorMode)
+    {
+        auto localColorModeValue = static_cast<int32_t>(colorMode);
+        localColorMode_ = localColorModeValue;
+    }
+
+    ColorMode GetLocalColorMode() const
+    {
+        ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
+        return colorMode;
     }
 
 protected:
@@ -686,10 +717,22 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
-    void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        const bool supportAvoidance = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
+
+    void SetIsLayouting(bool layouting)
+    {
+        taskScheduler_->SetIsLayouting(layouting);
+    }
+
+    void AvoidanceLogic(float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
+        const float safeHeight = 0.0f, const bool supportAvoidance = false);
+    void OriginalAvoidanceLogic(
+        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    RefPtr<FrameNode> GetContainerModalNode();
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -703,6 +746,7 @@ private:
     void FlushTouchEvents();
 
     void FlushFocusView();
+    void FlushFocusScroll();
 
     void ProcessDelayTasks();
 
@@ -799,7 +843,6 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
-    std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -859,7 +902,6 @@ private:
     std::list<std::function<void()>> animationClosuresList_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
-    std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
@@ -867,6 +909,8 @@ private:
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+    std::vector<Ace::RectF> overlayNodePositions_;
+    std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;
@@ -874,7 +918,8 @@ private:
 
     int32_t preNodeId_ = -1;
 
-    RefPtr<NavigationDumpManager> navigationDumpMgr_ = MakeRefPtr<NavigationDumpManager>();
+    RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
 };
 } // namespace OHOS::Ace::NG
 

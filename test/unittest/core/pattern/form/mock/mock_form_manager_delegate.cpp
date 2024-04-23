@@ -90,7 +90,7 @@ void FormManagerDelegate::ReleaseRenderer() {}
 
 void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) {}
 
-void FormManagerDelegate::SetVisibleChange(bool isVisible) {}
+void FormManagerDelegate::SetObscured(bool isObscured) {}
 
 #if OHOS_STANDARD_SYSTEM
 bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::string& moduleName,

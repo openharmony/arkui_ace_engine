@@ -89,8 +89,8 @@ const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
 const std::string DEFAULT_INPUT_FILTER = "[a-z]";
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 template<typename CheckItem, typename Expected>
 struct TestItem {
     CheckItem item;
@@ -852,6 +852,121 @@ HWTEST_F(TextFieldUXTest, OnBackPressed001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaMinFontSize001
+ * @tc.desc: test TextArea minFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMinFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMinFontSize(1.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetAdaptMinFontSize(), 1.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaMaxFontSize001
+ * @tc.desc: test TextArea maxFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMaxFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetAdaptMaxFontSize(2.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetAdaptMaxFontSize(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextAreaHeightAdaptivePolicy001
+ * @tc.desc: test TextArea heightAdaptivePolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaHeightAdaptivePolicy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    layoutProperty_->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(layoutProperty_->GetHeightAdaptivePolicy(), TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+}
+
+/**
  * @tc.name: TextInputTypeToString001
  * @tc.desc: Test TextInputTypeToString
  * @tc.type: FUNC
@@ -1013,5 +1128,125 @@ HWTEST_F(TextFieldUXTest, FontFeature002, TestSize.Level1)
     layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 0"));
     TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate001
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::START);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(2.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate002
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::CENTER);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(232.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate003
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaInputRectUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Update text align.
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::END);
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextAreaInputRectUpdate(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(462.0f, 2.0f, 0.0f, 2.0f));
+
+    layoutProperty_->UpdateTextAlign(TextAlign::LEFT);
+    EXPECT_EQ(textAreaRect, RectF(462.0f, 2.0f, 0.0f, 2.0f));
+}
+
+/**
+ * @tc.name: TextIsEmptyRect001
+ * @tc.desc: Test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextIsEmptyRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call TextIsEmptyRect.
+     */
+    RectF textAreaRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+    pattern_->TextIsEmptyRect(textAreaRect);
+    EXPECT_EQ(textAreaRect, RectF(0.0f, 0.0f, 0.0f, 50.0f));
+}
+
+/**
+ * @tc.name: testWordBreak001
+ * @tc.desc: test testArea text WordBreak
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaWordBreak001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set wordBreak NORMAL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
+
+    /**
+     * @tc.step: step3. Set wordBreak BREAK_ALL
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.step: step4. Set wordBreak BREAK_WORD
+     */
+    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
 }
 }

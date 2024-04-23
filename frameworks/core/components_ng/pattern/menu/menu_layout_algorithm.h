@@ -19,13 +19,33 @@
 #include <list>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
+
+struct MenuDumpInfo {
+    uint32_t menuPreviewMode = 0;
+    uint32_t menuType = 0;
+    bool enableArrow = false;
+    std::string targetNode;
+    OffsetF targetOffset;
+    SizeF targetSize;
+    float previewBeginScale;
+    float previewEndScale;
+    float top;
+    float bottom;
+    OffsetF globalLocation;
+    std::string originPlacement;
+    OffsetF finalPosition;
+    std::string finalPlacement = "NONE";
+};
 class MenuLayoutProperty;
 class MenuPattern;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -46,7 +66,7 @@ public:
     }
 
     bool hierarchicalParameters_ = false;
-    void InitHierarchicalParameters(bool isShowInSubWindow);
+    void InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);
@@ -68,6 +88,13 @@ private:
         NORMAL = 0,
         TOP_LEFT_ERROR,
         BOTTOM_RIGHT_ERROR,
+    };
+    enum class DirectionState {
+        Bottom_Direction = 1,
+        Top_Direction,
+        Right_Direction,
+        Left_Direction,
+        None_Direction,
     };
     struct PreviewMenuParam {
         SizeF windowGlobalSizeF;
@@ -102,9 +129,9 @@ private:
     void SetMenuPlacementForAnimation(LayoutWrapper* layoutWrapper);
 
     void LayoutArrow(const LayoutWrapper* layoutWrapper);
-    OffsetF GetArrowPositionWithPlacement(const SizeF& menuSize);
+    OffsetF GetArrowPositionWithPlacement(const SizeF& menuSize, const LayoutWrapper* layoutWrapper);
     bool GetIfNeedArrow(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
-    void UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize);
+    void UpdateArrowOffsetWithMenuLimit(const SizeF& menuSize, const LayoutWrapper* layoutWrapper);
     void UpdatePropArrowOffset();
     void LimitContainerModalMenuRect(double& rectWidth, double& rectHeight);
 
@@ -171,6 +198,10 @@ private:
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     OffsetF FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale);
+    bool CheckPlacement(const SizeF& childSize);
+
+    void ProcessArrowParams(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
+    BorderRadiusProperty GetMenuRadius(const LayoutWrapper* layoutWrapper, const SizeF& menuSize);
 
     OffsetF targetOffset_;
     SizeF targetSize_;
@@ -186,7 +217,6 @@ private:
     float rightSpace_ = 0.0f;
 
     // arrow
-    float menuRadius_ = 0.0f;
     float targetSpace_ = 0.0f;
     float arrowMinLimit_ = 0.0f;
     float arrowOffset_ = 0.0f;
@@ -209,9 +239,14 @@ private:
     OffsetF previewOriginOffset_;
     OffsetF previewOffset_;
     SizeF previewSize_;
-
+    int32_t state_ = 0;
+    int32_t prevState_ = -1;
+    OffsetF preOffset_;
+    Rect preRect_;
+    bool flag_ = false;
     // previewSacle_ must be greater than 0
     float previewScale_ = 1.0f;
+    MenuDumpInfo dumpInfo_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

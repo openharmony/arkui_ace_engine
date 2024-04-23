@@ -101,7 +101,7 @@ struct VisibleCallbackInfo {
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public PipelineBase {
+class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(PipelineContext, PipelineBase);
 
 public:
@@ -230,8 +230,9 @@ public:
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
-    void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+    void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        const bool supportAvoidance = false) override;
 
     // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
@@ -352,7 +353,7 @@ public:
     bool AccessibilityRequestFocus(const ComposeId& id);
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
-    bool RequestFocus(const std::string& targetNodeId) override;
+    bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     bool RequestDefaultFocus();
 
     bool NeedSoftKeyboard() override

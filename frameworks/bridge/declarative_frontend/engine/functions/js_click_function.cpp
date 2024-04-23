@@ -61,9 +61,11 @@ void JsClickFunction::Execute(const ClickInfo& info)
     JsFunction::ExecuteJS(1, &param);
 }
 
-void JsClickFunction::Execute(const GestureEvent& info)
+void JsClickFunction::Execute(GestureEvent& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objectTemplate->NewInstance();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -78,6 +80,7 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
+    obj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
     if (info.GetTiltX().has_value()) {
         obj->SetProperty<double>("tiltX", info.GetTiltX().value());
     }
@@ -87,8 +90,8 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
-
-    JSRef<JSVal> param = obj;
+    obj->Wrap<GestureEvent>(&info);
+    JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
     JsFunction::ExecuteJS(1, &param);
 }
 

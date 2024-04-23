@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT ImageAnimatorPattern : public Pattern {
     DECLARE_ACE_TYPE(ImageAnimatorPattern, Pattern);
@@ -58,14 +59,14 @@ public:
         return MakeRefPtr<ImageAnimatorEventHub>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void SetImages(std::vector<ImageProperties>&& images)
     {
         images_ = std::move(images);
         durationTotal_ = 0;
         for (const auto& childImage : images_) {
-            if (!childImage.src.empty() && childImage.duration > 0) {
+            if ((!childImage.src.empty() || childImage.pixelMap != nullptr) && childImage.duration > 0) {
                 durationTotal_ += childImage.duration;
             }
         }
@@ -120,10 +121,12 @@ private:
     void UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNode, int32_t index);
     void UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index);
     std::list<CacheImageStruct>::iterator FindCacheImageNode(const std::string& src);
+    std::list<CacheImageStruct>::iterator FindCacheImageNode(const RefPtr<PixelMap>& src);
     int32_t GetNextIndex(int32_t preIndex);
     void GenerateCachedImages();
     void AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode);
     static bool IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const std::string& src);
+    static bool IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const RefPtr<PixelMap>& src);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     bool IsFormRender();
     void UpdateFormDurationByRemainder();

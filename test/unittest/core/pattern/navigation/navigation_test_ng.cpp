@@ -32,6 +32,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -80,6 +81,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr Dimension DEFAULT_NAVBAR_WIDTH = 240.0_vp;
 constexpr int32_t TEST_DATA = 10;
 constexpr int32_t STANDARD_INDEX = -1;
@@ -360,7 +362,7 @@ HWTEST_F(NavigationTestNg, NavigationTestNg002, TestSize.Level1)
     RefPtr<NavBarNode> navBarNode = AceType::MakeRefPtr<OHOS::Ace::NG::NavBarNode>(TEST_TAG, nodeId, patternCreator);
     navigationGroupNode.SetNavBarNode(navBarNode);
     ASSERT_NE(AceType::DynamicCast<OHOS::Ace::NG::NavBarNode>(navigationGroupNode.GetNavBarNode()), nullptr);
-    navigationGroupNode.ToJsonValue(json);
+    navigationGroupNode.ToJsonValue(json, filter);
 }
 
 /**
@@ -3176,6 +3178,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     pattern->OnModifyDone();
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     auto destinationProperty = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestination->GetLayoutProperty());
     EXPECT_TRUE(destinationProperty != nullptr);
     destinationProperty->UpdateHideTitleBar(true);
@@ -3199,6 +3202,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     auto layoutPropertyB = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationB->GetLayoutProperty());
     EXPECT_NE(layoutPropertyB, nullptr);
     layoutPropertyB->UpdateHideTitleBar(true);
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
     EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
 
@@ -3213,20 +3217,12 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     auto layoutPropertyC = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationC->GetLayoutProperty());
     EXPECT_NE(layoutPropertyC, nullptr);
     layoutPropertyC->UpdateHideTitleBar(true);
-
     navigationStack->Add("C", navDestinationC);
     pattern->OnModifyDone();
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(navigationNode, geometryNode, navigationNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    navigationNode->hideNodes_.emplace_back(navDestination);
+    PipelineContext::GetCurrentContext()->FlushBuildFinishCallbacks();
     EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
     EXPECT_EQ(layoutPropertyC->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
@@ -3563,7 +3559,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest001, TestSize.Level1)
     auto frameNode = NavigationTestNg::CreateDestination("A");
     mockStack->Add("A", frameNode);
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 }
 
 /**
@@ -3600,7 +3596,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest002, TestSize.Level1)
     auto frameNode = NavigationTestNg::CreateDestination("A");
     mockStack->Add("A", frameNode);
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 
     /**
      * @tc.steps: step2.set navigation before and after interception during destination transition
@@ -3641,7 +3637,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest002, TestSize.Level1)
      */
     mockStack->Remove();
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 }
 
 /**
@@ -3707,7 +3703,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest003, TestSize.Level1)
      * @tc.expected: step3. trigger navigation before and after callback.
      */
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
 }
 
 /**
@@ -3770,7 +3766,7 @@ HWTEST_F(NavigationTestNg, NavigationInterceptionTest004, TestSize.Level1)
     auto frameNode = NavigationTestNg::CreateDestination("A");
     mockStack->Add("A", frameNode);
     navigationPattern->MarkNeedSyncWithJsStack();
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
     EXPECT_EQ(times, 0);
 }
 
@@ -6895,5 +6891,57 @@ HWTEST_F(NavigationTestNg, NavigationLoadPage004, TestSize.Level1)
     auto destinationPattern = AceType::DynamicCast<NavDestinationPattern>(destinationNode->GetPattern());
     EXPECT_NE(destinationPattern, nullptr);
     EXPECT_EQ(destinationPattern->GetName(), "pageOne");
+}
+
+/**
+ * @tc.name: NavigationManager001
+ * @tc.desc: Test navigation manager get navigationInfo success or not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationManager001, TestSize.Level1)
+{
+    /**
+     * @tc.steps:step1. create navigation node and set navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationNode, nullptr);
+
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
+        return AceType::MakeRefPtr<MockNavigationStack>();
+    };
+    auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
+        navigationModel.SetNavigationStackProvided(false);
+        auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);
+        ASSERT_NE(mockStack, nullptr);
+    };
+    navigationModel.SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    auto navigationStack = pattern->GetNavigationStack();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+
+    /**
+     * @tc.steps:step2. get navigation info from empty node, and check the return value
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto navigationMgr = context->GetNavigationManager();
+    ASSERT_NE(navigationMgr, nullptr);
+    auto result = navigationMgr->GetNavigationInfo(nullptr);
+    ASSERT_EQ(result, nullptr);
+
+    /**
+     * @tc.steps:step3. get navigation info from navbar node, and check the return value
+     */
+    result = navigationMgr->GetNavigationInfo(navBarNode);
+    ASSERT_NE(result, nullptr);
+    auto navigationId = result->navigationId;
+    ASSERT_EQ(navigationId, "");
+    auto stack = result->pathStack;
+    ASSERT_EQ(stack, navigationStack);
 }
 } // namespace OHOS::Ace::NG

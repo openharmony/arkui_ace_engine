@@ -62,6 +62,16 @@ void PaintWrapper::FlushOverlayModifier()
     renderContext->FlushOverlayModifier(overlayModifier);
 }
 
+void PaintWrapper::FlushContentModifier()
+{
+    CHECK_NULL_VOID(nodePaintImpl_);
+    auto contentModifier = nodePaintImpl_->GetContentModifier(this);
+    CHECK_NULL_VOID(contentModifier);
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->FlushContentModifier(contentModifier);
+}
+
 void PaintWrapper::FlushRender()
 {
     auto renderContext = renderContext_.Upgrade();

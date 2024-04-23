@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -30,9 +31,20 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr double NUM_TWO = 2.0;
+}
+
 std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<RadioPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return std::nullopt;
+    }
     InitializeParam();
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -79,5 +91,34 @@ void RadioLayoutAlgorithm::InitializeParam()
     defaultHeight_ = radioTheme->GetHeight().ConvertToPx();
     horizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding().ConvertToPx();
     verticalPadding_ = radioTheme->GetHotZoneVerticalPadding().ConvertToPx();
+}
+
+void RadioLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    auto left = padding.left.value_or(0);
+    auto top = padding.top.value_or(0);
+    auto paddingOffset = OffsetF(left, top);
+    auto align = Alignment::CENTER;
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childWrapper);
+    SizeF childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+    NG::OffsetF child_offset;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (size.Width() - childSize.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (size.Height() - childSize.Height()) / NUM_TWO);
+    auto translate = child_offset + paddingOffset;
+    childWrapper->GetGeometryNode()->SetMarginFrameOffset(translate);
+    childWrapper->Layout();
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    if (content) {
+        NG::OffsetF offset;
+        offset.SetX((1.0 + align.GetHorizontal()) * (size.Width() - content->GetRect().GetSize().Width()) / NUM_TWO);
+        offset.SetY((1.0 + align.GetVertical()) * (size.Height() - content->GetRect().GetSize().Height()) / NUM_TWO);
+        auto translate = offset + paddingOffset;
+        content->SetOffset(translate);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_renderer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_drawing_rendering_context.h"
 
 namespace OHOS::Ace::Framework {
 

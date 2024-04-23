@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
+enum class DragAnimType { FLOATING, FLOATING_CANCEL, DEFAULT };
 class RichEditorDragOverlayModifier : public TextDragOverlayModifier {
     DECLARE_ACE_TYPE(RichEditorDragOverlayModifier, TextDragOverlayModifier);
 
@@ -32,15 +33,102 @@ public:
     RichEditorDragOverlayModifier(
         const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, const WeakPtr<TextPattern>& hostPattern)
         : TextDragOverlayModifier(pattern), hostPattern_(hostPattern)
-    {}
+    {
+        firstHandle_ = AceType::MakeRefPtr<PropertyRectF>(RectF(0, 0, 0, 0));
+        secondHandle_ = AceType::MakeRefPtr<PropertyRectF>(RectF(0, 0, 0, 0));
+        handleRadius_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+        handleColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLACK);
+        innerHandleRadius_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+        innerHandleColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLACK);
+        handleOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+        selectedColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+        AttachProperty(firstHandle_);
+        AttachProperty(secondHandle_);
+        AttachProperty(handleRadius_);
+        AttachProperty(handleColor_);
+        AttachProperty(innerHandleRadius_);
+        AttachProperty(innerHandleColor_);
+        AttachProperty(handleOpacity_);
+        AttachProperty(selectedColor_);
+    }
+
     ~RichEditorDragOverlayModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
+    void StartFloatingAnimate() override;
+    void StartFloatingSelBackgroundAnimate();
+    void StartFloatingCancelAnimate() override;
+    void StartSelBackgroundCancelAnimate();
+
+    void SetFirstHandle(const RectF& handle)
+    {
+        CHECK_NULL_VOID(firstHandle_);
+        firstHandle_->Set(handle);
+    }
+
+    void SetSecondHandle(const RectF& handle)
+    {
+        CHECK_NULL_VOID(secondHandle_);
+        secondHandle_->Set(handle);
+    }
+
+    void SetHandleRadius(float radius)
+    {
+        CHECK_NULL_VOID(handleRadius_);
+        handleRadius_->Set(radius);
+    }
+
+    void SetHandleColor(const Color& color)
+    {
+        CHECK_NULL_VOID(handleColor_);
+        handleColor_->Set(color);
+    }
+
+    void SetInnerHandleRadius(float radius)
+    {
+        CHECK_NULL_VOID(innerHandleRadius_);
+        innerHandleRadius_->Set(radius);
+    }
+
+    void SetInnerHandleColor(const Color& color)
+    {
+        CHECK_NULL_VOID(innerHandleColor_);
+        innerHandleColor_->Set(color);
+    }
+
+    void SetHandleOpacity(float opacity)
+    {
+        CHECK_NULL_VOID(handleOpacity_);
+        handleOpacity_->Set(opacity);
+    }
+
+    void SetSelectedColor(uint32_t selectedColor)
+    {
+        CHECK_NULL_VOID(selectedColor_);
+        selectedColor_->Set(static_cast<int32_t>(selectedColor));
+    }
 
 private:
     void PaintImage(DrawingContext& context);
+    void PaintBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
+        RefPtr<RichEditorPattern> richEditorPattern);
+    void PaintSelBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
+        RefPtr<RichEditorPattern> richEditorPattern);
+    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool isFirstHandle, float startX, float startY);
+    void PaintHandleRing(RSCanvas& canvas);
+    void PaintHandleHold(RSCanvas& canvas, const RectF& handleRect, const OffsetF& startPoint,
+        const OffsetF& endPoint);
 
+    DragAnimType type_ = DragAnimType::DEFAULT;
     const WeakPtr<TextPattern> hostPattern_;
+    RefPtr<PropertyRectF> firstHandle_;
+    RefPtr<PropertyRectF> secondHandle_;
+    RefPtr<PropertyFloat> handleRadius_;
+    RefPtr<PropertyColor> handleColor_;
+    RefPtr<PropertyFloat> innerHandleRadius_;
+    RefPtr<PropertyColor> innerHandleColor_;
+    RefPtr<AnimatablePropertyFloat> handleOpacity_;
+    RefPtr<PropertyInt> selectedColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

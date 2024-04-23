@@ -20,6 +20,7 @@
 
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -42,9 +43,9 @@ public:
         ResetTextStyle();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
@@ -70,7 +71,7 @@ public:
         jsonOffset->Put("dx", dialogOffset.GetX().ToString().c_str());
         jsonOffset->Put("dy", dialogOffset.GetY().ToString().c_str());
         jsonDialogAlign->Put("offset", jsonOffset);
-        json->Put("edgeAlign", jsonDialogAlign);
+        json->PutExtAttr("edgeAlign", jsonDialogAlign, filter);
 
         auto font = JsonUtil::Create(true);
         CHECK_NULL_VOID(font);
@@ -80,7 +81,7 @@ public:
         CHECK_NULL_VOID(textStyle);
         textStyle->Put("color", GetColor().value_or(calendarTheme->GetEntryFontColor()).ColorToString().c_str());
         textStyle->Put("font", font);
-        json->Put("textStyle", textStyle);
+        json->PutExtAttr("textStyle", textStyle, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogAlignType, CalendarEdgeAlign, PROPERTY_UPDATE_MEASURE);

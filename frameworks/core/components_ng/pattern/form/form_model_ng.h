@@ -42,7 +42,8 @@ public:
     void SetOnLoad(std::function<void(const std::string&)>&& onLoad) override;
     void SetVisible(VisibleType visible) override;
     void SetVisibility(VisibleType visible) override;
-    
+    void SetObscured(const std::vector<ObscuredReasons>& reasons) override;
+
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void AllowUpdate(FrameNode* frameNode, bool value);
     static void SetDimension(FrameNode* frameNode, int32_t value);

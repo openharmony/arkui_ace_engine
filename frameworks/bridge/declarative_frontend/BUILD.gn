@@ -136,7 +136,17 @@ template("declarative_js_engine") {
       defines += [ "SIMULATOR_64" ]
     }
 
-    deps = []
+    deps = [
+      ":ark_modifier",
+      ":gen_obj_src_ark_component",
+      ":gen_obj_src_js_enum_style",
+      ":gen_obj_src_js_proxyclass",
+      ":shape",
+      ":uicontext",
+      ":x_node",
+      "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+    ]
+
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
@@ -189,15 +199,18 @@ template("declarative_js_engine") {
       "jsview/js_circle.cpp",
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
+      "jsview/js_color_metrics.cpp",
       "jsview/js_column.cpp",
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
+      "jsview/js_drawing_rendering_context.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_ellipse_shape.cpp",
@@ -268,6 +281,7 @@ template("declarative_js_engine") {
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
+      "jsview/js_repeat.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -333,8 +347,9 @@ template("declarative_js_engine") {
       "jsview/models/button_model_impl.cpp",
       "jsview/models/calendar_controller_model_impl.cpp",
       "jsview/models/calendar_model_impl.cpp",
-      "jsview/models/canvas_model_impl.cpp",
-      "jsview/models/canvas_renderer_model_impl.cpp",
+      "jsview/models/canvas/canvas_model_impl.cpp",
+      "jsview/models/canvas/canvas_rendering_context_2d_model_impl.cpp",
+      "jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.cpp",
       "jsview/models/checkbox_model_impl.cpp",
       "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
@@ -371,7 +386,6 @@ template("declarative_js_engine") {
       "jsview/models/menu_model_impl.cpp",
       "jsview/models/navigation_model_impl.cpp",
       "jsview/models/navigator_model_impl.cpp",
-      "jsview/models/offscreen_context_model_impl.cpp",
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
       "jsview/models/patternlock_model_impl.cpp",
@@ -383,7 +397,6 @@ template("declarative_js_engine") {
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
       "jsview/models/relative_container_model_impl.cpp",
-      "jsview/models/rendering_context_model_impl.cpp",
       "jsview/models/richeditor_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/scroll_bar_model_impl.cpp",
@@ -561,23 +574,6 @@ template("declarative_js_engine") {
       }
     }
 
-    deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
-
-    deps += [
-      ":gen_obj_src_ark_component",
-      ":gen_obj_src_js_enum_style",
-      ":gen_obj_src_js_proxyclass",
-    ]
-
-    deps += [
-      ":uicontext",
-      ":x_node",
-    ]
-
-    deps += [ ":ark_modifier" ]
-
-    deps += [ ":shape" ]
-
     include_dirs +=
         [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
@@ -653,7 +649,17 @@ template("declarative_js_engine_ng") {
       defines += [ "SIMULATOR_64" ]
     }
 
-    deps = []
+    deps = [
+      ":ark_modifier",
+      ":gen_obj_src_ark_component",
+      ":gen_obj_src_js_enum_style",
+      ":gen_obj_src_js_proxyclass",
+      ":shape",
+      ":uicontext",
+      ":x_node",
+      "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+    ]
+
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
@@ -717,15 +723,18 @@ template("declarative_js_engine_ng") {
       "jsview/js_circle.cpp",
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
+      "jsview/js_color_metrics.cpp",
       "jsview/js_column.cpp",
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
+      "jsview/js_drawing_rendering_context.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_ellipse_shape.cpp",
       "jsview/js_flex.cpp",
@@ -788,6 +797,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
+      "jsview/js_repeat.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -840,7 +850,11 @@ template("declarative_js_engine_ng") {
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
+    }
 
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
       sources += [
@@ -981,23 +995,6 @@ template("declarative_js_engine_ng") {
         "napi:ace_napi",
       ]
     }
-
-    deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
-
-    deps += [
-      ":gen_obj_src_ark_component",
-      ":gen_obj_src_js_enum_style",
-      ":gen_obj_src_js_proxyclass",
-    ]
-
-    deps += [
-      ":uicontext",
-      ":x_node",
-    ]
-
-    deps += [ ":ark_modifier" ]
-
-    deps += [ ":shape" ]
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {

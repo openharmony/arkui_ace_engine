@@ -28,7 +28,8 @@ void WindowSceneModel::Create(int32_t persistentId)
 {
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain][WMSSystem] session is nullptr");
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
+            "[WMSMain][WMSSystem] session is nullptr, persistentId:%{public}d", persistentId);
         return;
     }
 
@@ -51,6 +52,7 @@ void WindowSceneModel::Create(int32_t persistentId)
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
     stack->Push(windowNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);

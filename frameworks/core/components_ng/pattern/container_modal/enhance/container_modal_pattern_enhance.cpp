@@ -65,20 +65,20 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     PaddingProperty padding;
-    if (isShow && customTitleSettedShow_) {
+    if (isShow && customTitleSettedShow_ && isFloatingWindow) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
             CalcLength(CONTENT_PADDING) };
     }
     layoutProperty->UpdatePadding(padding);
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(isShow ? CONTAINER_BORDER_WIDTH : 0.0_vp);
+    borderWidth.SetBorderWidth((isFloatingWindow && isShow) ? CONTAINER_BORDER_WIDTH : 0.0_vp);
     layoutProperty->UpdateBorderWidth(borderWidth);
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(isFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
     // only floating window show border
-    bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
     renderContext->UpdateBorderRadius(borderRadius);
@@ -93,7 +93,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
-    stageBorderRadius.SetRadius(isShow ? CONTAINER_INNER_RADIUS : 0.0_vp);
+    stageBorderRadius.SetRadius((isFloatingWindow && isShow) ? CONTAINER_INNER_RADIUS : 0.0_vp);
     stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();

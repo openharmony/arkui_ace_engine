@@ -40,7 +40,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         ContainerScope scope(client->GetInstanceId());
         client->InsertValue(StringUtils::Str16ToStr8(text));
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldInsertText");
 }
 
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
@@ -57,7 +57,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteBackward(length);
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldDeleteBackward");
 }
 
 void OnTextChangedListenerImpl::DeleteForward(int32_t length)
@@ -74,7 +74,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteForward(length);
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldDeleteForward");
 }
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
@@ -86,7 +86,7 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
         ContainerScope scope(client->GetInstanceId());
         client->SetInputMethodStatus(status);
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldSetKeyboardStatus");
 }
 
 std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
@@ -99,7 +99,7 @@ std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
         ContainerScope scope(client->GetInstanceId());
         leftResult = client->GetLeftTextOfCursor(number);
     };
-    PostSyncTaskToUI(task);
+    PostSyncTaskToUI(task, "ArkUITextFieldGetLeftTextOfCursor");
     return leftResult;
 }
 
@@ -113,7 +113,7 @@ std::u16string OnTextChangedListenerImpl::GetRightTextOfCursor(int32_t number)
         ContainerScope scope(client->GetInstanceId());
         rightResult = client->GetRightTextOfCursor(number);
     };
-    PostSyncTaskToUI(task);
+    PostSyncTaskToUI(task, "ArkUITextFieldGetRightTextOfCursor");
     return rightResult;
 }
 
@@ -127,7 +127,7 @@ int32_t OnTextChangedListenerImpl::GetTextIndexAtCursor()
         ContainerScope scope(client->GetInstanceId());
         index = client->GetTextIndexAtCursor();
     };
-    PostSyncTaskToUI(task);
+    PostSyncTaskToUI(task, "ArkUITextFieldGetTextIndexAtCursor");
     return index;
 }
 
@@ -148,7 +148,6 @@ void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey&
 
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleKeyboardStatus status: %{public}d", status);
     SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
 }
 
@@ -176,7 +175,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
                 break;
         }
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldHandleFunctionKey");
 }
 
 void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
@@ -205,7 +204,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
                 break;
         }
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldMoveCursor");
 }
 
 void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
@@ -219,7 +218,7 @@ void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
         ContainerScope scope(client->GetInstanceId());
         client->HandleSetSelection(start, end);
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldHandleSetSelection");
 }
 
 void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
@@ -233,7 +232,7 @@ void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
         ContainerScope scope(client->GetInstanceId());
         client->HandleExtendAction(action);
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldHandleExtendAction");
 }
 
 void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
@@ -266,10 +265,10 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
         ContainerScope scope(client->GetInstanceId());
         client->HandleSelect(direction);
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldHandleSelect");
 }
 
-void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task)
+void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
     auto textFieldPattern = pattern_.Upgrade();
@@ -280,10 +279,10 @@ void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& ta
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 
-void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
+void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, const std::string& name)
 {
     CHECK_NULL_VOID(task);
     auto textFieldPattern = pattern_.Upgrade();
@@ -294,7 +293,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)
@@ -312,7 +311,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
             ContainerScope scope(client->GetInstanceId());
             client->NotifyKeyboardClosedByUser();
         };
-        PostTaskToUI(task);
+        PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }
     KeyBoardInfo keyboardInfo;
     if (info.panelInfo.panelType == MiscServices::PanelType::SOFT_KEYBOARD) {
@@ -330,6 +329,6 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         CHECK_NULL_VOID(textFieldManager);
         textFieldManager->SetImeShow(keyboardInfo.visible);
     };
-    PostTaskToUI(task);
+    PostTaskToUI(task, "ArkUITextFieldSetImeShow");
 }
 } // namespace OHOS::Ace::NG

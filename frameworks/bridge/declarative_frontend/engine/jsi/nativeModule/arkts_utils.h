@@ -52,10 +52,14 @@ public:
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsFontFamiliesFromResource(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
+    static bool ParseJsLengthMetrics(
+        const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
+    static bool ParseJsDimensionFpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        bool isSupportPercent = true);
     static bool ParseJsDimensionVp(
         const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
@@ -67,6 +71,7 @@ public:
     static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result);
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);
     static bool ParseJsString(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result);
+    static panda::Local<panda::ObjectRef> GetContext(EcmaVM* vm);
     static bool ParseJsStringFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
     static uint32_t parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static uint32_t parseShadowFill(const EcmaVM* vm, const Local<JSValueRef>& jsValue);

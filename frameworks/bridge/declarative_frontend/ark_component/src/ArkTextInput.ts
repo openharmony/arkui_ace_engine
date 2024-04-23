@@ -166,11 +166,96 @@ class TextInputWordBreakModifier extends ModifierWithKey<WordBreak> {
   static identity: Symbol = Symbol('textInputWordBreak');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().text.resetWordBreak(node);
+      getUINativeModule().textInput.resetWordBreak(node);
     } else {
-      getUINativeModule().text.setWordBreak(node, this.value!);
+      getUINativeModule().textInput.setWordBreak(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMinFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMinFontSize(node);
+    } else {
+      getUINativeModule().textInput.setMinFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMaxFontSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMaxFontSize(node);
+    } else {
+      getUINativeModule().textInput.setMaxFontSize(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
+  constructor(value: TextHeightAdaptivePolicy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputHeightAdaptivePolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetHeightAdaptivePolicy(node);
+    } else {
+      getUINativeModule().textInput.setHeightAdaptivePolicy(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class TextInputTextOverflowModifier extends ModifierWithKey<TextOverflow> {
+  constructor(value: TextOverflow) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputTextOverflow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetTextOverflow(node);
+    } else {
+      getUINativeModule().textInput.setTextOverflow(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class TextInputTextIndentModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputTextIndent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetTextIndent(node);
+    } else {
+      getUINativeModule().textInput.setTextIndent(node, this.value!);
+    }
+  }
+  
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -186,6 +271,22 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
       getUINativeModule().textInput.resetShowPasswordIcon(node);
     } else {
       getUINativeModule().textInput.setShowPasswordIcon(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class TextInputShowPasswordModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputShowPassword');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetShowPassword(node);
+    } else {
+      getUINativeModule().textInput.setShowPassword(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -747,6 +848,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputShowPasswordIconModifier, value);
     return this;
   }
+  showPassword(value: boolean): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordModifier.identity,
+      TextInputShowPasswordModifier, value);
+    return this;
+  }
   textAlign(value: TextAlign): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputTextAlignModifier.identity,
       TextInputTextAlignModifier, value);
@@ -834,6 +940,26 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   wordBreak(value: WordBreak): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputWordBreakModifier.identity, TextInputWordBreakModifier, value);
+    return this;
+  }
+  minFontSize(value: number | string | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMinFontSizeModifier.identity, TextInputMinFontSizeModifier, value);
+    return this;
+  }
+  maxFontSize(value: number | string | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMaxFontSizeModifier.identity, TextInputMaxFontSizeModifier, value);
+    return this;
+  }
+  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputHeightAdaptivePolicyModifier.identity, TextInputHeightAdaptivePolicyModifier, value);
+    return this;
+  }
+  textOverflow(value: TextOverflow): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextOverflowModifier.identity, TextInputTextOverflowModifier, value);
+    return this;
+  }
+  textIndent(value: Dimension): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputTextIndentModifier.identity, TextInputTextIndentModifier, value);
     return this;
   }
 }

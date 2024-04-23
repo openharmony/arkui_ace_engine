@@ -49,8 +49,9 @@ void ScrollBar::InitTheme()
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
-    SetInactiveWidth(theme->GetNormalWidth());
-    SetNormalWidth(theme->GetNormalWidth());
+    themeNormalWidth_ = theme->GetNormalWidth();
+    SetInactiveWidth(themeNormalWidth_);
+    SetNormalWidth(themeNormalWidth_);
     SetActiveWidth(theme->GetActiveWidth());
     SetTouchWidth(theme->GetTouchWidth());
     SetMinHeight(theme->GetMinHeight());
@@ -206,12 +207,7 @@ void ScrollBar::SetRectTrickRegion(
     double normalWidth = NormalizeToPx(normalWidth_);
     if (LessOrEqual(activeSize, normalWidth)) {
         if (GreatNotEqual(normalWidth, mainSize)) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-            CHECK_NULL_VOID(theme);
-            normalWidth_ = theme->GetNormalWidth();
-            normalWidth = NormalizeToPx(normalWidth_);
+            normalWidth = NormalizeToPx(themeNormalWidth_);
         } else {
             activeSize = normalWidth;
         }
@@ -332,11 +328,12 @@ double ScrollBar::GetNormalWidthToPx() const
 
 float ScrollBar::CalcPatternOffset(float scrollBarOffset) const
 {
-    if (!isDriving_ || NearZero(barRegionSize_ - activeRect_.Height())) {
+    auto activeRectLength = positionMode_ == PositionMode::BOTTOM ? activeRect_.Width() : activeRect_.Height();
+    if (!isDriving_ || NearZero(barRegionSize_ - activeRectLength)) {
         return scrollBarOffset;
     }
     auto mainSize = (positionMode_ == PositionMode::BOTTOM ? viewPortSize_.Width() : viewPortSize_.Height());
-    return -scrollBarOffset * (estimatedHeight_ - mainSize) / (barRegionSize_ - activeRect_.Height());
+    return -scrollBarOffset * (estimatedHeight_ - mainSize) / (barRegionSize_ - activeRectLength);
 }
 
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
@@ -533,6 +530,9 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     if (frictionController_ && frictionController_->IsRunning()) {
         frictionController_->Stop();
     }
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR,"inner scrollBar drag start, localLocation: %{public}s, "
+        "globalLocation: %{public}s",
+        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
         if (dragFRCSceneCallback_) {
@@ -564,6 +564,9 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         dragFRCSceneCallback_(0, NG::SceneStatus::END);
     }
     auto velocity = info.GetMainVelocity();
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
+        "velocity is %{public}f",
+        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             scrollEndCallback_();
@@ -652,7 +655,8 @@ void ScrollBar::ScheduleDisappearDelayTask()
             CHECK_NULL_VOID(scrollBar);
             scrollBar->PlayScrollBarDisappearAnimation();
         });
-        taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);
+        taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION,
+            "ArkUIScrollBarDisappearAnimation");
     }
 }
 
@@ -720,6 +724,6 @@ void ScrollBar::ScheduleCaretLongPress()
             CHECK_NULL_VOID(pattern);
             pattern->HandleLongPress(true);
         },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarHandleLongPress");
 }
 } // namespace OHOS::Ace::NG

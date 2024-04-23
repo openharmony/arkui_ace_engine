@@ -24,9 +24,9 @@ void UIDisplaySync::CheckRate(int32_t vsyncRate, int32_t refreshRateMode)
     CHECK_NULL_VOID(data_);
     CHECK_NULL_VOID(data_->rate_);
     CHECK_NULL_VOID(data_->rateRange_);
-    if (IsCommonDivisor(data_->rateRange_->preferred_, vsyncRate)) {
-        drawFPS_ = data_->rateRange_->preferred_;
-    } else {
+    drawFPS_ = FindMatchedRefreshRate(vsyncRate, data_->rateRange_->preferred_);
+    if (drawFPS_ < data_->rateRange_->min_ ||
+        drawFPS_ > data_->rateRange_->max_) {
         drawFPS_ = SearchMatchedRate(vsyncRate);
     }
 
@@ -75,6 +75,9 @@ void UIDisplaySync::OnFrame()
                      "Preferred[%d] DrawFPS[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
                      GetId(), data_->timestamp_, data_->targetTimestamp_,
                      data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Preferred[%{public}d] DrawFPS[%{public}d]"
+        "VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
+        data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
     if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
@@ -93,7 +96,7 @@ void UIDisplaySync::OnFrame()
 void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
     if (GetCurrentContext()) {
-        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[DisplaySync] existed in Pipeline.");
+        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] existed in Pipeline.");
         return;
     }
 
@@ -101,10 +104,10 @@ void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
     if (!context) {
         context = PipelineBase::GetCurrentContextSafely();
         if (!context) {
-            TAG_LOGD(AceLogTag::ACE_ANIMATION, "[DisplaySync] CurrentContext is nullptr.");
+            TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] CurrentContext is nullptr.");
             return;
         }
-        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[DisplaySync] Add to current context safely.");
+        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] Add to current context safely.");
     }
 
     context_ = context;
@@ -243,21 +246,62 @@ bool UIDisplaySync::IsNonAutoRefreshRateMode() const
     return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }
 
+std::vector<int32_t> UIDisplaySync::FindRefreshRateFactors(int32_t refreshRate)
+{
+    std::vector<int32_t> refreshRateFactors;
+    for (int32_t i = 1; i * i <= refreshRate; ++i) {
+        if (refreshRate % i == 0) {
+            refreshRateFactors.emplace_back(i);
+            if (i != refreshRate / i) {
+                refreshRateFactors.emplace_back(refreshRate / i);
+            }
+        }
+    }
+    sort(refreshRateFactors.begin(), refreshRateFactors.end());
+    return refreshRateFactors;
+}
+
+int32_t UIDisplaySync::FindMatchedRefreshRate(int32_t vsyncRate, int32_t targetRate)
+{
+    if (targetRate == 0 || targetRate > vsyncRate) {
+        return vsyncRate;
+    }
+
+    if (IsCommonDivisor(targetRate, vsyncRate)) {
+        return targetRate;
+    }
+
+    if (!refreshRateToFactorsMap_.count(vsyncRate)) {
+        refreshRateToFactorsMap_[vsyncRate] = FindRefreshRateFactors(vsyncRate);
+    }
+
+    std::vector<int32_t> refreshRateFactors = refreshRateToFactorsMap_[vsyncRate];
+    if (refreshRateFactors.empty()) {
+        return 0;
+    }
+    auto it = std::lower_bound(refreshRateFactors.begin(), refreshRateFactors.end(), targetRate);
+    if (it == refreshRateFactors.begin()) {
+        return *it;
+    } else if (it == refreshRateFactors.end()) {
+        return *(it - 1);
+    }
+    return std::abs(*it - targetRate) < std::abs(*(it - 1) - targetRate) ? *it : *(it - 1);
+}
+
 int32_t UIDisplaySync::SearchMatchedRate(int32_t vsyncRate, int32_t iterCount)
 {
     if (vsyncRate != 0 && iterCount >= vsyncRate) {
-        return iterCount / vsyncRate;
+        return FindMatchedRefreshRate(vsyncRate, data_->rateRange_->preferred_);
     }
 
-    if (iterCount == 0 || data_->rateRange_->IsZero() || !data_->rateRange_->IsValid() ||
-        (data_->rateRange_->preferred_ > vsyncRate)) {
+    if (iterCount == 0 || vsyncRate == 0) {
         return vsyncRate;
     }
 
     int32_t expectedRate = vsyncRate / iterCount;
     if (data_->rateRange_->min_ <= expectedRate &&
         data_->rateRange_->max_ >= expectedRate) {
-        return expectedRate;
+        return FindMatchedRefreshRate(vsyncRate, expectedRate);
     }
 
     return SearchMatchedRate(vsyncRate, ++iterCount);

@@ -220,7 +220,6 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(pipelineContext, false);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, false);
-    border_.SetBorderRadius(popupTheme->GetRadius());
     padding_ = popupTheme->GetPadding();
     return enableArrow_ && showArrow_ && popupTheme->GetPopupDoubleBorderEnable();
 }
@@ -275,7 +274,6 @@ void BubblePaintMethod::ClipBubble(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipelineContext);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
-    border_.SetBorderRadius(popupTheme->GetRadius());
     if (clipFrameNode_) {
         ClipBubbleWithPath(clipFrameNode_);
     }

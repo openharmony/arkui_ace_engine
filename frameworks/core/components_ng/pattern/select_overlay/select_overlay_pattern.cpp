@@ -233,8 +233,8 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
 void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     const auto& changedPoint = info.GetChangedTouches().front();
-    if (info_->onTouchDown && changedPoint.GetTouchType() == TouchType::DOWN) {
-        info_->onTouchDown(info);
+    if (changedPoint.GetTouchType() == TouchType::DOWN) {
+        HandleTouchDownEvent(info);
     } else if (info_->onTouchDown && changedPoint.GetTouchType() == TouchType::UP) {
         info_->onTouchUp(info);
     } else if (info_->onTouchMove && changedPoint.GetTouchType() == TouchType::MOVE) {
@@ -245,24 +245,41 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
+void SelectOverlayPattern::HandleTouchDownEvent(const TouchEventInfo& info)
+{
+    if (info_->onTouchDown) {
+        info_->onTouchDown(info);
+    }
+    auto touchOffset = info.GetChangedTouches().front().GetLocalLocation();
+    PointF point = { touchOffset.GetX(), touchOffset.GetY() };
+    if (firstHandleRegion_.IsInRegion(point)) {
+        isFirstHandleTouchDown_ = true;
+    } else if (secondHandleRegion_.IsInRegion(point)) {
+        isSecondHandleTouchDown_ = true;
+    }
+}
+
 void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
 {
-    PointF point = { info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() };
-    if (firstHandleRegion_.IsInRegion(point) && info.GetSourceDevice() != SourceType::MOUSE) {
+    if (info.GetSourceDevice() == SourceType::MOUSE) {
+        return;
+    }
+    if (!isFirstHandleTouchDown_ && !isSecondHandleTouchDown_) {
+        LOGW("no handle is pressed");
+        return;
+    }
+    if (IsFirstHandleMoveStart(info.GetLocalLocation())) {
         firstHandleDrag_ = true;
         secondHandleDrag_ = false;
         if (info_->onHandleMoveStart) {
             info_->onHandleMoveStart(firstHandleDrag_);
         }
-    } else if (secondHandleRegion_.IsInRegion(point) && info.GetSourceDevice() != SourceType::MOUSE) {
+    } else {
         firstHandleDrag_ = false;
         secondHandleDrag_ = true;
         if (info_->onHandleMoveStart) {
             info_->onHandleMoveStart(firstHandleDrag_);
         }
-    } else {
-        LOGW("the point is not in drag area");
-        return;
     }
 
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -275,6 +292,8 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
     if (info_->isSingleHandle && !info_->isHandleLineShow) {
         StopHiddenHandleTask();
     }
+    isFirstHandleTouchDown_ = false;
+    isSecondHandleTouchDown_ = false;
 }
 
 void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
@@ -283,21 +302,9 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     CHECK_NULL_VOID(host);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
     if (firstHandleDrag_) {
-        firstHandleRegion_ += offset;
-        info_->firstHandle.paintRect += offset;
-        CheckHandleReverse();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        if (info_->onHandleMove) {
-            info_->onHandleMove(info_->firstHandle.paintRect, true);
-        }
+        UpdateOffsetOnMove(firstHandleRegion_, info_->firstHandle, offset, true);
     } else if (secondHandleDrag_) {
-        secondHandleRegion_ += offset;
-        info_->secondHandle.paintRect += offset;
-        CheckHandleReverse();
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        if (info_->onHandleMove) {
-            info_->onHandleMove(info_->secondHandle.paintRect, false);
-        }
+        UpdateOffsetOnMove(secondHandleRegion_, info_->secondHandle, offset, false);
     } else {
         LOGW("the move point is not in drag area");
     }
@@ -305,6 +312,25 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     CHECK_NULL_VOID(context);
     if (host->IsLayoutDirtyMarked()) {
         context->AddDirtyLayoutNode(host);
+    }
+}
+
+void SelectOverlayPattern::UpdateOffsetOnMove(
+    RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst)
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    region += offset;
+    handleInfo.paintRect += offset;
+    auto paintRect = handleInfo.paintRect;
+    handleInfo.paintInfo = handleInfo.paintInfo + offset;
+    if (handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
+        paintRect = handleInfo.paintInfoConverter(handleInfo.paintInfo);
+    }
+    CheckHandleReverse();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (info_->onHandleMove) {
+        info_->onHandleMove(paintRect, isFirst);
     }
 }
 
@@ -318,18 +344,29 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
     }
     if (firstHandleDrag_) {
         if (info_->onHandleMoveDone) {
-            info_->onHandleMoveDone(info_->firstHandle.paintRect, true);
+            auto paintRect = GetHandlePaintRect(info_->firstHandle);
+            info_->onHandleMoveDone(paintRect, true);
         }
         firstHandleDrag_ = false;
     } else if (secondHandleDrag_) {
         if (info_->onHandleMoveDone) {
-            info_->onHandleMoveDone(info_->secondHandle.paintRect, false);
+            auto paintRect = GetHandlePaintRect(info_->secondHandle);
+            info_->onHandleMoveDone(paintRect, false);
         }
         secondHandleDrag_ = false;
     }
     if (info_->isSingleHandle && !info_->isHandleLineShow) {
         StartHiddenHandleTask();
     }
+}
+
+RectF SelectOverlayPattern::GetHandlePaintRect(const SelectHandleInfo& handleInfo)
+{
+    auto paintRect = handleInfo.paintRect;
+    if (handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
+        paintRect = handleInfo.paintInfoConverter(handleInfo.paintInfo);
+    }
+    return paintRect;
 }
 
 void SelectOverlayPattern::HandlePanCancel()
@@ -382,6 +419,18 @@ bool SelectOverlayPattern::IsHandlesInSameLine()
     }
     return GreatNotEqual(lowerHandleTop, heigherHandleRect.Top())
         && LessNotEqual(lowerHandleTop, heigherHandleRect.Bottom());
+}
+
+bool SelectOverlayPattern::IsFirstHandleMoveStart(const Offset& touchOffset)
+{
+    if (isFirstHandleTouchDown_ && isSecondHandleTouchDown_) {
+        auto firstHandleCenter = Offset{ firstHandleRegion_.Center().GetX(), firstHandleRegion_.Center().GetX() };
+        auto secondHandleCenter = Offset{ secondHandleRegion_.Center().GetX(), secondHandleRegion_.Center().GetX() };
+        auto distanceToFirstHandle = (firstHandleCenter - touchOffset).GetDistance();
+        auto distanceToSecondHandle = (secondHandleCenter - touchOffset).GetDistance();
+        return GreatNotEqual(distanceToSecondHandle, distanceToFirstHandle);
+    }
+    return isFirstHandleTouchDown_;
 }
 
 void SelectOverlayPattern::SetHandleReverse(bool reverse)
@@ -567,9 +616,10 @@ void SelectOverlayPattern::StartHiddenHandleTask(bool isDelay)
         client->HiddenHandle();
     });
     if (isDelay) {
-        taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);
+        taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS,
+            "ArkUISelectOverlayHiddenHandle");
     } else {
-        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle");
     }
 }
 

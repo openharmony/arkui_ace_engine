@@ -23,13 +23,18 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT Inspector {
 public:
     static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key);
-    static std::string GetInspectorNodeByKey(const std::string& key);
+    static std::string GetInspectorNodeByKey(const std::string& key,
+        const InspectorFilter& filter = InspectorFilter());
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);
     static void GetRectangleById(const std::string& key, Rectangle& rectangle);
     static std::string GetInspector(bool isLayoutInspector = false);
+    static std::string GetInspector(bool isLayoutInspector, const InspectorFilter& filter, bool& needThrow);
+    static std::string GetInspectorOfNode(RefPtr<NG::UINode> node);
     static std::string GetSubWindowInspector(bool isLayoutInspector = false);
     static std::string GetSimplifiedInspector(int32_t containerId);
     static void HideAllMenus();

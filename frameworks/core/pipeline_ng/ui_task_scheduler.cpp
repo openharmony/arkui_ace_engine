@@ -94,6 +94,7 @@ void UITaskScheduler::ExpandSafeArea()
 
 void UITaskScheduler::FlushSyncGeometryNodeTasks()
 {
+    ACE_LAYOUT_SCOPED_TRACE("FlushSyncGeometryNodeTasks");
     ExpandSafeArea();
     auto tasks = std::move(syncGeometryNodeTasks_);
     for (auto& task : tasks) {
@@ -219,33 +220,8 @@ void UITaskScheduler::FlushTask()
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
-    FlushDelayJsActive();
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
-}
-
-void UITaskScheduler::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
-{
-    auto iter = delayJsActiveNodes_.find(custom);
-    if (iter != delayJsActiveNodes_.end()) {
-        iter->second = active;
-    } else {
-        delayJsActiveNodes_.emplace(custom, active);
-    }
-}
-
-void UITaskScheduler::FlushDelayJsActive()
-{
-    auto nodes = std::move(delayJsActiveNodes_);
-    for (auto [node, active] : nodes) {
-        auto customNode = node.Upgrade();
-        if (customNode) {
-            if (customNode->GetJsActive() != active) {
-                customNode->SetJsActive(active);
-                customNode->FireSetActiveFunc(active);
-            }
-        }
-    }
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)

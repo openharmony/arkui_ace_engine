@@ -45,6 +45,7 @@ bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
+bool SystemProperties::syncDebugTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -79,6 +80,7 @@ bool SystemProperties::astcEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::imageFileCacheConvertAstc_ = false;
+int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 2;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::resourceDecoupling_ = true;
@@ -92,6 +94,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
+bool SystemProperties::faultInjectEnabled_ = false;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -292,5 +295,10 @@ bool SystemProperties::GetSideBarContainerBlurEnable()
 float SystemProperties::GetDefaultResolution()
 {
     return 1.0f;
+}
+
+std::string SystemProperties::GetAtomicServiceBundleName()
+{
+    return UNDEFINED_PARAM;
 }
 } // namespace OHOS::Ace

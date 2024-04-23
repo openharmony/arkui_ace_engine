@@ -336,7 +336,11 @@ public:
 
     void JSGetNavDestinationInfo(const JSCallbackInfo& info);
 
+    void JSGetNavigationInfo(const JSCallbackInfo& info);
+
     void JSGetUIContext(const JSCallbackInfo& info);
+
+    void JSGetUniqueId(const JSCallbackInfo& info);
 
     // Release the UINode hold on the JS object and trigger the delete phase.
     void JSResetRecycleCustomNode(const JSCallbackInfo& info)

@@ -27,7 +27,7 @@ constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
 
 bool IsCacheAvaliable()
 {
-    return NodeDataCache::Get().ShouldCollectData() || EventRecorder::Get().IsComponentRecordEnable();
+    return EventRecorder::Get().IsComponentRecordEnable() && !NodeDataCache::Get().IsShareNodeEmpty();
 }
 
 EventParamsBuilder::EventParamsBuilder()
@@ -278,7 +278,7 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
             EventController::Get().NotifyEvent(
                 EventCategory::CATEGORY_COMPONENT, static_cast<int32_t>(EventType::CLICK), std::move(params));
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUINotifyClickEvent");
 }
 
 void EventRecorder::OnChange(EventParamsBuilder&& builder)

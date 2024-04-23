@@ -15,9 +15,12 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
+#include <cstdint>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
@@ -208,8 +211,11 @@ void ListModelNG::SetMultiSelectable(bool selectable)
 int32_t ListModelNG::GetScrollEnabled(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    int32_t value = 0;
-    ACE_GET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, value, frameNode);
+    int32_t value = true;
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    if (layoutProperty->GetScrollEnabled()) {
+        value = layoutProperty->GetScrollEnabledValue();
+    }
     return value;
 }
 
@@ -426,6 +432,13 @@ void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
 }
 
+int32_t ListModelNG::GetCachedCount(FrameNode* frameNode)
+{
+    int32_t cachedCount = 1;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, CachedCount, cachedCount, frameNode, 1);
+    return cachedCount;
+}
+
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
@@ -505,8 +518,8 @@ void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
 float ListModelNG::GetScrollBarWidth(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0.0f);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarWidth();
-    return value->ConvertToVp();
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarWidth();
+    return value.ConvertToVp();
 }
 
 void ListModelNG::SetListScrollBarWidth(FrameNode* frameNode, const std::string& value)
@@ -517,8 +530,8 @@ void ListModelNG::SetListScrollBarWidth(FrameNode* frameNode, const std::string&
 uint32_t ListModelNG::GetScrollBarColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarColor();
-    return value->GetValue();
+    auto value = frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetBarColor();
+    return value.GetValue();
 }
 
 void ListModelNG::SetListScrollBarColor(FrameNode* frameNode, const std::string& value)
@@ -623,6 +636,16 @@ void ListModelNG::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnim
     pattern->SetChainAnimationOptions(options);
 }
 
+void ListModelNG::SetFadingEdge(bool fadingEdge)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, FadingEdge, fadingEdge);
+}
+
+void ListModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, FadingEdge, fadingEdge, frameNode);
+}
+
 void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
     CHECK_NULL_VOID(frameNode);
@@ -655,4 +678,12 @@ void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onSc
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
+RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetOrCreateListChildrenMainSize();
+}
 } // namespace OHOS::Ace::NG

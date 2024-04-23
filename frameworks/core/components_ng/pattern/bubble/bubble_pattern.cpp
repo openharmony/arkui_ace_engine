@@ -71,6 +71,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowOffsetsFromClip_ = bubbleLayoutAlgorithm->GetArrowOffsetsFromClip();
     arrowWidth_ = bubbleLayoutAlgorithm->GetArrowWidth();
     arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
+    border_ = bubbleLayoutAlgorithm->GetBorder();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -398,13 +399,13 @@ void BubblePattern::Animation(
         option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
 }
 
-bool BubblePattern::PostTask(const TaskExecutor::Task& task)
+bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void BubblePattern::StartEnteringTransitionEffects(
@@ -415,7 +416,7 @@ void BubblePattern::StartEnteringTransitionEffects(
     pattern->transitionStatus_ = TransitionStatus::ENTERING;
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
-    layoutProp->UpdateVisibility(VisibleType::VISIBLE, true);
+    layoutProp->UpdateVisibility(VisibleType::VISIBLE, false);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto isBlock = layoutProp->GetBlockEventValue(true);
     auto& renderContext = popupNode->GetRenderContext();
@@ -441,7 +442,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -555,7 +556,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetPopupHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();

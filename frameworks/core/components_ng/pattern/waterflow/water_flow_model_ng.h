@@ -81,6 +81,9 @@ public:
     static float GetColumnsGap(FrameNode* frameNode);
     static float GetRowsGap(FrameNode* frameNode);
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
+    static void SetCachedCount(FrameNode* frameNode, int32_t value);
+    static int32_t GetCachedCount(FrameNode* frameNode);
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -75,6 +76,14 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_RETURN(listItemEventHub, nullptr);
+    if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
+        !listItemEventHub->GetEndOnDelete()) {
+        return MakeRefPtr<BoxLayoutAlgorithm>();
+    }
     auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, childNodeIndex_);
     layoutAlgorithm->SetAxis(axis_);
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
@@ -296,8 +305,14 @@ void ListItemPattern::MarkDirtyNode()
 
 void ListItemPattern::ChangeAxis(Axis axis)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
     axis_ = axis;
-    InitSwiperAction(true);
+    if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
+        InitSwiperAction(true);
+    }
 }
 
 void ListItemPattern::InitSwiperAction(bool axisChanged)
@@ -779,9 +794,9 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("selectable", selectable_);
+    json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
 }
 
 void ListItemPattern::SetAccessibilityAction()

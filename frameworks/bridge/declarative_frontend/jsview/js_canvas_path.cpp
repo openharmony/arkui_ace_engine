@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
+constexpr size_t GCTHRESHOLD = 50;
 
 JSCanvasPath::JSCanvasPath() = default;
 
@@ -40,6 +41,7 @@ void JSCanvasPath::JsPath2DSetTransform(const JSCallbackInfo& info)
             translateX = PipelineBase::Vp2PxWithCurrentDensity(translateX);
             translateY = PipelineBase::Vp2PxWithCurrentDensity(translateY);
             path2d_->SetTransform(scaleX, skewX, skewY, scaleY, translateX, translateY);
+            SetPathSize(info);
         }
     }
 }
@@ -55,6 +57,7 @@ void JSCanvasPath::JsPath2DMoveTo(const JSCallbackInfo& info)
             X = PipelineBase::Vp2PxWithCurrentDensity(X);
             Y = PipelineBase::Vp2PxWithCurrentDensity(Y);
             path2d_->MoveTo(X, Y);
+            SetPathSize(info);
         }
     }
 }
@@ -70,6 +73,7 @@ void JSCanvasPath::JsPath2DLineTo(const JSCallbackInfo& info)
             X = PipelineBase::Vp2PxWithCurrentDensity(X);
             Y = PipelineBase::Vp2PxWithCurrentDensity(Y);
             path2d_->LineTo(X, Y);
+            SetPathSize(info);
         }
     }
 }
@@ -96,6 +100,7 @@ void JSCanvasPath::JsPath2DArc(const JSCallbackInfo& info)
                 JSViewAbstract::ParseJsBool(info[5], anticlockwise);
             }
             path2d_->Arc(X, Y, radius, startAngle, endAngle, anticlockwise);
+            SetPathSize(info);
         }
     }
 }
@@ -120,6 +125,7 @@ void JSCanvasPath::JsPath2DArcTo(const JSCallbackInfo& info)
             y2 = PipelineBase::Vp2PxWithCurrentDensity(y2);
             radius = PipelineBase::Vp2PxWithCurrentDensity(radius);
             path2d_->ArcTo(x1, y1, x2, y2, radius);
+            SetPathSize(info);
         }
     }
 }
@@ -140,6 +146,7 @@ void JSCanvasPath::JsPath2DQuadraticCurveTo(const JSCallbackInfo& info)
         x = PipelineBase::Vp2PxWithCurrentDensity(x);
         y = PipelineBase::Vp2PxWithCurrentDensity(y);
         path2d_->QuadraticCurveTo(cpx, cpy, x, y);
+        SetPathSize(info);
     }
 }
 
@@ -165,6 +172,7 @@ void JSCanvasPath::JsPath2DBezierCurveTo(const JSCallbackInfo& info)
         x = PipelineBase::Vp2PxWithCurrentDensity(x);
         y = PipelineBase::Vp2PxWithCurrentDensity(y);
         path2d_->BezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+        SetPathSize(info);
     }
 }
 
@@ -198,6 +206,7 @@ void JSCanvasPath::JsPath2DEllipse(const JSCallbackInfo& info)
         }
 
         path2d_->Ellipse(X, Y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
+        SetPathSize(info);
     }
 }
 
@@ -218,12 +227,31 @@ void JSCanvasPath::JsPath2DRect(const JSCallbackInfo& info)
         height = PipelineBase::Vp2PxWithCurrentDensity(height);
 
         path2d_->Rect(x, y, width, height);
+        SetPathSize(info);
     }
 }
 
 void JSCanvasPath::JsPath2DClosePath(const JSCallbackInfo& info)
 {
     path2d_->ClosePath();
+    SetPathSize(info);
 }
 
+void JSCanvasPath::SetPathSize(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(path2d_);
+    const std::vector<std::pair<PathCmd, PathArgs>> caches = path2d_->GetCaches();
+    size_t pathSize = caches.size();
+    if (pathSize - lastPathSize_ > GCTHRESHOLD) {
+        EcmaVM* vm = info.GetVm();
+        CHECK_NULL_VOID(vm);
+        panda::CopyableGlobal<ObjectRef> pathCmdObj = panda::CopyableGlobal<ObjectRef>(pathCmdObj_);
+        if (!pathCmdObj.IsEmpty()) {
+            pathCmdObj->SetNativePointerField(
+                vm, 0, nullptr, &JSCanvasPath::DestructorInterceptor, nullptr,
+                (pathSize - lastPathSize_) * sizeof(std::pair<PathCmd, PathArgs>));
+            lastPathSize_ = pathSize;
+        }
+    }
+}
 } // namespace OHOS::Ace::Framework

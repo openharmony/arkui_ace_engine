@@ -13,47 +13,48 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
-void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
+    LayoutProperty::ToJsonValue(json, filter);
     auto sticky = propStickyMode_.value_or(V2::StickyMode::NONE);
     if (sticky == V2::StickyMode::NORMAL) {
-        json->Put("sticky", "Sticky.Normal");
+        json->PutExtAttr("sticky", "Sticky.Normal", filter);
     } else if (sticky == V2::StickyMode::OPACITY) {
-        json->Put("sticky", "Sticky.Opacity");
+        json->PutExtAttr("sticky", "Sticky.Opacity", filter);
     } else {
-        json->Put("sticky", "Sticky.None");
+        json->PutExtAttr("sticky", "Sticky.None", filter);
     }
     auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
     if (editMode == V2::EditMode::NONE) {
-        json->Put("editable", "EditMode.None");
+        json->PutFixedAttr("editable", "EditMode.None", filter, FIXED_ATTR_EDITABLE);
     } else if (editMode == V2::EditMode::MOVABLE) {
-        json->Put("editable", "EditMode.Movable");
+        json->PutFixedAttr("editable", "EditMode.Movable", filter, FIXED_ATTR_EDITABLE);
     } else if (editMode == V2::EditMode::DELETABLE) {
-        json->Put("editable", "EditMode.Deletable");
+        json->PutFixedAttr("editable", "EditMode.Deletable", filter, FIXED_ATTR_EDITABLE);
     } else if (editMode == (V2::EditMode::DELETABLE | V2::EditMode::MOVABLE)) {
-        json->Put("editable", true);
+        json->PutFixedAttr("editable", true, filter, FIXED_ATTR_EDITABLE);
     } else {
-        json->Put("editable", false);
+        json->PutFixedAttr("editable", false, filter, FIXED_ATTR_EDITABLE);
     }
     if (propEdgeEffect_.has_value()) {
         auto swipeAction = JsonUtil::Create(true);
         swipeAction->Put("edgeEffect", propEdgeEffect_.value() == V2::SwipeEdgeEffect::Spring ?
             "SwipeEdgeEffect.Spring" : "SwipeEdgeEffect.Node");
-        json->Put("swipeAction", swipeAction);
+        json->PutExtAttr("swipeAction", swipeAction, filter);
     } else {
         auto swipeAction = JsonUtil::Create(true);
-        json->Put("swipeAction", swipeAction);
+        json->PutExtAttr("swipeAction", swipeAction, filter);
     }
-    json->Put("startDeleteAreaDistance",
-        propStartDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
-    json->Put("endDeleteAreaDistance",
-        propEndDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+    json->PutExtAttr("startDeleteAreaDistance",
+        propStartDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("endDeleteAreaDistance",
+        propEndDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
 }
 }

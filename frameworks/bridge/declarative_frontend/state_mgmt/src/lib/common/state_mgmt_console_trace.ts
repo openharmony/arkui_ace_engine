@@ -39,10 +39,14 @@ class stateMgmtConsole {
   }
   public static propertyAccess(...args: any): void {
     // enable for fine grain debugging variable observation
-    // aceConsole.debug (...args)
+    // aceConsole.error(...args)
   }
   public static applicationError(...args: any): void {
     aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+  }
+
+  public static applicationWarn(...args: any): void {
+    aceConsole.warn(...args);
   }
   public static featureCombinationError(msg: string): void {
     aceConsole.warn(msg);
@@ -69,7 +73,7 @@ class errorReport {
       msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
     } catch (e) { }
 
-    msg += "!";
+    msg += '!';
     stateMgmtConsole.applicationError(msg);
     throw new TypeError(msg);
   }
@@ -83,7 +87,7 @@ class errorReport {
       msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
     } catch (e) { }
 
-    msg += "!";
+    msg += '!';
 
     throw new TypeError(msg);
   }

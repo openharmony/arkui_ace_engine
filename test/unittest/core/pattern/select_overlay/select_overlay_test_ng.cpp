@@ -503,6 +503,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info.localLocation_ = Offset(1, 1);
     pattern->HandleOnClick(info);
     EXPECT_TRUE(pattern->GetSelectOverlayInfo()->menuInfo.menuIsShow);
+    pattern->isFirstHandleTouchDown_ = true;
     pattern->HandlePanStart(info);
     EXPECT_TRUE(pattern->firstHandleDrag_);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
@@ -520,6 +521,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info2.localLocation_ = Offset(11, 11);
     ASSERT_NE(pattern->info_, nullptr);
     pattern->info_->isHandleLineShow = false;
+    pattern->isSecondHandleTouchDown_ = true;
     pattern->HandlePanStart(info2);
     EXPECT_TRUE(pattern->secondHandleDrag_);
     const auto& offset2 = OffsetF(info2.GetDelta().GetX(), info2.GetDelta().GetY());
@@ -549,12 +551,14 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     pattern->info_->onHandleMoveStart = [&](bool isFirst) {
         callBackFlag = 1;
     };
+    pattern->isFirstHandleTouchDown_ = true;
     pattern->HandlePanStart(info4);
     EXPECT_EQ(callBackFlag, 1);
 
     // not in first region and in second region
     info4.localLocation_ = Offset(11, 11);
     callBackFlag = 0;
+    pattern->isSecondHandleTouchDown_ = true;
     pattern->HandlePanStart(info4);
     EXPECT_EQ(callBackFlag, 1);
 
@@ -2759,6 +2763,75 @@ HWTEST_F(SelectOverlayTestNg, ComputeSelectMenuPosition001, TestSize.Level1)
     OffsetF expectRet2(16.0, 0.0);
     bool equal2 = (ret2 == expectRet2);
     EXPECT_TRUE(equal2);
+}
+
+/**
+ * @tc.name: NewMenuAvoidStrategy001
+ * @tc.desc: Test NewMenuAvoidStrategy001 in Select Overlay algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuInfo.menuIsShow = false;
+    selectInfo.selectArea = { 100, 500, 200, 50 };
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+    * @tc.steps: step2. Create pattern and geometryNode.
+    */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+    * @tc.steps: step3. Get layoutWrapper and layoutAlgorithm.
+    * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
+    */
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    auto newNode = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
+
+    /**
+    * @tc.steps: step4. Test cases.
+    */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+
+    auto menuWidth = 200;
+    auto menuHeight = 100;
+    auto ret1 = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    std::cout << ret1.ToString();
+    OffsetF expectRet1(100, 400);
+    bool equal1 = (ret1 == expectRet1);
+    EXPECT_TRUE(equal1);
+
+    infoPtr->firstHandle.isShow = false;
+    infoPtr->secondHandle.isShow = false;
+    auto ret2 = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    OffsetF expectRet2(100, -100);
+    bool equal2 = (ret2 == expectRet2);
+    EXPECT_TRUE(equal2);
+
+    infoPtr->firstHandle.isShow = false;
+    infoPtr->secondHandle.isShow = true;
+    auto ret3 = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    OffsetF expectRet3(100, -100);
+    bool equal3 = (ret3 == expectRet3);
+    EXPECT_TRUE(equal3);
 }
 
 /**

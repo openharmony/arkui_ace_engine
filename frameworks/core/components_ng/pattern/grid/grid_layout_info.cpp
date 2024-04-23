@@ -174,6 +174,9 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
     }
     // assume lineHeightMap is continuous in range [begin, rbegin].
     int32_t itemCount = FindItemCount(lineHeightMap_.begin()->first, lineHeightMap_.rbegin()->first);
+    if (itemCount == 0) {
+        return 0.0f;
+    }
     if (itemCount == childrenCount_ || (lineHeightMap_.begin()->first == 0 && itemCount >= startIndex_)) {
         return GetStartLineOffset(mainGap);
     }
@@ -188,13 +191,31 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
 
 int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
 {
-    const auto firstLine = gridMatrix_.find(startLine);
-    const auto lastLine = gridMatrix_.find(endLine);
-    if (firstLine == gridMatrix_.end() || lastLine == gridMatrix_.end()) {
-        return -1;
+    auto firstLine = gridMatrix_.find(startLine);
+    auto lastLine = gridMatrix_.find(endLine);
+    if (firstLine == gridMatrix_.end() || firstLine->second.empty()) {
+        for (auto i = startLine; i <= endLine; ++i) {
+            auto it = gridMatrix_.find(i);
+            if (it != gridMatrix_.end()) {
+                firstLine = it;
+                break;
+            }
+        }
+        if (firstLine == gridMatrix_.end() || firstLine->second.empty()) {
+            return 0;
+        }
     }
-    if (firstLine->second.empty() || lastLine->second.empty()) {
-        return -1;
+    if (lastLine == gridMatrix_.end() || lastLine->second.empty()) {
+        for (auto i = endLine; i >= startLine; --i) {
+            auto it = gridMatrix_.find(i);
+            if (it != gridMatrix_.end()) {
+                lastLine = it;
+                break;
+            }
+        }
+        if (lastLine == gridMatrix_.end() || lastLine->second.empty()) {
+            return 0;
+        }
     }
 
     int32_t minIdx = firstLine->second.begin()->second;
@@ -204,6 +225,7 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
     for (auto it : lastLine->second) {
         maxIdx = std::max(maxIdx, it.second);
     }
+    maxIdx = std::max(maxIdx, FindEndIdx(endLine).itemIdx);
     return maxIdx - minIdx + 1;
 }
 
@@ -530,22 +552,83 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             }
         }
     }
-    return {};
+    return { .itemIdx = 0, .y = 0, .x = 0 };
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
+    if (hasMultiLineItem_) {
+        ClearMapsToEndContainsMultiLineItem(idx - 1);
+        return;
+    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridIt, gridMatrix_.end());
     ClearHeightsToEnd(idx);
 }
 
+void GridLayoutInfo::ClearMapsToEndContainsMultiLineItem(int32_t idx)
+{
+    int32_t maxIndex = INT_MIN;
+    for (const auto& col : gridMatrix_[idx]) {
+        maxIndex = std::max(maxIndex, col.second);
+    }
+
+    int targetLine = idx;
+    while (targetLine < gridMatrix_.rbegin()->first) {
+        int32_t minIndex = INT_MAX;
+        for (const auto& col : gridMatrix_[targetLine + 1]) {
+            minIndex = std::min(minIndex, col.second);
+        }
+        if (maxIndex < minIndex) {
+            break;
+        }
+        targetLine++;
+    }
+    gridMatrix_.erase(gridMatrix_.find(targetLine + 1), gridMatrix_.end());
+
+    auto lineIt = lineHeightMap_.find(targetLine + 1);
+    if (lineIt != lineHeightMap_.end()) {
+        lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+    }
+}
+
 void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
 {
+    if (hasMultiLineItem_) {
+        ClearMapsFromStartContainsMultiLineItem(idx);
+        return;
+    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridMatrix_.begin(), gridIt);
     auto lineIt = lineHeightMap_.lower_bound(idx);
     lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+}
+
+void GridLayoutInfo::ClearMapsFromStartContainsMultiLineItem(int32_t idx)
+{
+    int32_t minIndex = INT_MAX;
+    for (const auto& col : gridMatrix_[idx]) {
+        minIndex = std::min(minIndex, col.second);
+    }
+
+    auto iter = gridMatrix_.begin();
+    int targetLine = idx;
+    while (targetLine > iter->first) {
+        int32_t maxIndex = INT_MIN;
+        for (const auto& col : gridMatrix_[targetLine - 1]) {
+            maxIndex = std::max(maxIndex, col.second);
+        }
+        if (maxIndex < minIndex) {
+            break;
+        }
+        targetLine--;
+    }
+    gridMatrix_.erase(gridMatrix_.begin(), gridMatrix_.find(targetLine));
+
+    auto lineIt = lineHeightMap_.find(targetLine);
+    if (lineIt != lineHeightMap_.end()) {
+        lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+    }
 }
 
 void GridLayoutInfo::ClearHeightsToEnd(int32_t idx)
@@ -570,5 +653,40 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
         }
     }
     gridMatrix_.erase(it, gridMatrix_.end());
+}
+
+float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) const
+{
+    float len = 0.0f;
+    float offset = currentOffset_;
+
+    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
+    for (auto it = lineHeightMap_.find(startMainLineIndex_); it != endIt; ++it) {
+        // skip adding starting lines that are outside viewport in LayoutIrregular
+        if (!regular && Negative(it->second + offset + mainGap)) {
+            offset += it->second + mainGap;
+            continue;
+        }
+        len += it->second + mainGap;
+    }
+    return len - mainGap;
+}
+
+float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const
+{
+    if (lineHeightMap_.empty() || endIndex_ < childrenCount_ - 1 ||
+        endMainLineIndex_ < lineHeightMap_.rbegin()->first) {
+        return Infinity<float>();
+    }
+
+    float offset = currentOffset_;
+    // currentOffset_ is relative to startMainLine, which might be entirely above viewport
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    while (it != lineHeightMap_.end() && Negative(offset + it->second + mainGap)) {
+        offset += it->second + mainGap;
+        ++it;
+    }
+    float bottomPos = offset + heightInView;
+    return bottomPos - mainSize;
 }
 } // namespace OHOS::Ace::NG

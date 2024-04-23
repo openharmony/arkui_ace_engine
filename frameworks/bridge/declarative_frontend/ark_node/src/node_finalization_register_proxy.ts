@@ -16,10 +16,10 @@
 class BuilderNodeFinalizationRegisterProxy {
   constructor() {
     this.finalizationRegistry_ = new FinalizationRegistry((heldValue: RegisterParams) => {
-      if (heldValue.name === 'BuilderNode') {
+      if (heldValue.name === 'BuilderRootFrameNode') {
         const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
         BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
-        builderNode.dispose();
+        builderNode.disposeNode();
       }
     });
   }

@@ -16,10 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
+#include "core/components_ng/pattern/radio/radio_model.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/radio/radio_model.h"
 
 namespace OHOS::Ace::NG {
+class RadioConfiguration : public CommonConfiguration {
+public:
+    RadioConfiguration(const std::string& value, bool checked, bool enabled)
+        : CommonConfiguration(enabled), value_(value), checked_(checked)
+    {}
+    std::string value_;
+    bool checked_;
+};
+using RadioMakeCallback =
+    std::function<RefPtr<FrameNode>(RadioConfiguration& radioConfiguration)>;
 
 class ACE_EXPORT RadioModelNG : public OHOS::Ace::RadioModel {
 public:
@@ -48,6 +60,8 @@ public:
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newArgs);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
+    static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
+    static void SetChangeValue(FrameNode* frameNode, bool value);
 };
 } // namespace OHOS::Ace::NG
 

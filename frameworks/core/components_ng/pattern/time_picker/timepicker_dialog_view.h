@@ -19,6 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,31 +27,39 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TimePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const TimePickerSettingData& settingData,
-        std::map<std::string, PickerTime> timePickerProperty,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetSelectedTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
     static void SetDialogTitleDate(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerDate& value);
     static void SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime = false);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
-    static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& dateNode,
-        const RefPtr<FrameNode>& timePickerNode,
+    static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
-        const RefPtr<FrameNode>& timePickerNode,
-        DialogEvent& acceptEvent);
+        const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
-        const RefPtr<FrameNode>& timePickerNode);
+        const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos);
     static RefPtr<FrameNode> CreateBoxNode();
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
+    static void UpdateButtonLayoutProperty(
+        const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
+    static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+        const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+        const RefPtr<ButtonTheme>& buttonTheme);
     static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties);
 };
 } // namespace OHOS::Ace::NG

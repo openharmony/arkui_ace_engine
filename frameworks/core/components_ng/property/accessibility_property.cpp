@@ -15,6 +15,7 @@
 
 #include "accessibility_property.h"
 
+#include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +43,7 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
         AceAction::ACTION_SELECT,
         AceAction::ACTION_SET_SELECTION,
         AceAction::ACTION_CLEAR_SELECTION,
+        AceAction::ACTION_SET_CURSOR_POSITION,
     };
 
     std::unordered_set<AceAction> supportActions;
@@ -102,6 +104,11 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     }
 }
 
+float AccessibilityProperty::GetScrollOffSet() const
+{
+    return DEFAULT_ACCESSIBILITY_SCROLL_OFFSET;
+}
+
 std::string AccessibilityProperty::GetAccessibilityText() const
 {
     return accessibilityText_.value_or("");
@@ -122,7 +129,7 @@ AccessibilityHoverTestPath AccessibilityProperty::HoverTest(
 std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const RefPtr<FrameNode>& node,
     const PointF& parentPoint)
 {
-    auto nodeInfo = JsonUtil::Create(false);
+    auto nodeInfo = JsonUtil::Create();
     nodeInfo->Put("id", node->GetAccessibilityId());
     nodeInfo->Put("tag", node->GetTag().c_str());
     if (!node->IsRootNode()) {

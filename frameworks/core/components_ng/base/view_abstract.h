@@ -106,6 +106,7 @@ struct MenuParam {
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -132,7 +133,10 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
+    static void SetMotionBlur(const MotionBlurOption &motionBlurOption);
     static void SetBackgroundEffect(const EffectOption &effectOption);
+    static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
+    static void SetForegroundEffect(float radius);
     static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
@@ -181,6 +185,8 @@ public:
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
+    static void SetBgDynamicBrightness(const BrightnessOption& brightnessOption);
+    static void SetFgDynamicBrightness(const BrightnessOption& brightnessOption);
     static void SetDynamicDim(float DimDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
@@ -213,11 +219,12 @@ public:
         GridSizeType type = GridSizeType::UNDEFINED);
 
     // position
-    static void SetPosition(const OffsetT<Dimension> &value);
-    static void SetOffset(const OffsetT<Dimension> &value);
+    static void SetPosition(const OffsetT<Dimension>& value);
+    static void SetOffset(const OffsetT<Dimension>& value);
     static void SetPositionEdges(const EdgesParam& value);
     static void SetOffsetEdges(const EdgesParam& value);
-    static void MarkAnchor(const OffsetT<Dimension> &value);
+    static void MarkAnchor(const OffsetT<Dimension>& value);
+    static void ResetPosition();
 
     // render position
     static void SetZIndex(int32_t value);
@@ -365,6 +372,8 @@ public:
 
     static void SetFreeze(bool freeze);
 
+    static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
+
     // useShadowBatching
     static void SetUseShadowBatching(bool useShadowBatching);
 
@@ -390,6 +399,7 @@ public:
     static void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(float value);
+    static void SetLightColor(const Color& value);
     static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(float value);
@@ -486,7 +496,7 @@ public:
     static void ResetFlexShrink(FrameNode* frameNode);
     static void SetFlexShrink(FrameNode* frameNode, float value);
     static void SetFlexGrow(FrameNode* frameNode, float value);
-    static void SetLayoutWeight(FrameNode* frameNode, int32_t value);
+    static void SetLayoutWeight(FrameNode* frameNode, float value);
     static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
     static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
     static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
@@ -503,8 +513,12 @@ public:
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
+    static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
     static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
+    static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
+    static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
+    static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
@@ -549,6 +563,7 @@ public:
     static bool GetNeedFocus(FrameNode* frameNode);
     static double GetOpacity(FrameNode* frameNode);
     static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
+    static BorderWidthProperty GetLayoutBorderWidth(FrameNode* frameNode);
     static BorderRadiusProperty GetBorderRadius(FrameNode* frameNode);
     static BorderColorProperty GetBorderColor(FrameNode* frameNode);
     static BorderStyleProperty GetBorderStyle(FrameNode* frameNode);
@@ -594,10 +609,10 @@ public:
     static float GetFlexGrow(FrameNode* frameNode);
     static float GetFlexShrink(FrameNode* frameNode);
     static Dimension GetFlexBasis(FrameNode* frameNode);
-    static float GetMinWidth(FrameNode* frameNode);
-    static float GetMaxWidth(FrameNode* frameNode);
-    static float GetMinHeight(FrameNode* frameNode);
-    static float GetMaxHeight(FrameNode* frameNode);
+    static Dimension GetMinWidth(FrameNode* frameNode);
+    static Dimension GetMaxWidth(FrameNode* frameNode);
+    static Dimension GetMinHeight(FrameNode* frameNode);
+    static Dimension GetMaxHeight(FrameNode* frameNode);
     static Dimension GetGrayScale(FrameNode* frameNode);
     static InvertVariant GetInvert(FrameNode* frameNode);
     static Dimension GetSepia(FrameNode* frameNode);
@@ -611,18 +626,21 @@ public:
     static Dimension GetBrightness(FrameNode* frameNode);
     static Dimension GetSaturate(FrameNode* frameNode);
     static BackgroundImagePosition GetBackgroundImagePosition(FrameNode* frameNode);
-    static float GetWidth(FrameNode* frameNode);
-    static float GetHeight(FrameNode* frameNode);
+    static Dimension GetWidth(FrameNode* frameNode);
+    static Dimension GetHeight(FrameNode* frameNode);
     static Color GetBackgroundColor(FrameNode* frameNode);
     static std::string GetBackgroundImageSrc(FrameNode* frameNode);
     static ImageRepeat GetBackgroundImageRepeat(FrameNode* frameNode);
     static PaddingProperty GetPadding(FrameNode* frameNode);
+    static std::optional<CalcSize> GetConfigSize(FrameNode* frameNode);
     static std::string GetKey(FrameNode* frameNode);
     static bool GetEnabled(FrameNode* frameNode);
     static MarginProperty GetMargin(FrameNode* frameNode);
     static TranslateOptions GetTranslate(FrameNode* frameNode);
     static float GetAspectRatio(FrameNode* frameNode);
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
+    static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
+    static float GetLayoutWeight(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

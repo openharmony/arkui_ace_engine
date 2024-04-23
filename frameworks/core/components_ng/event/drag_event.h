@@ -199,6 +199,7 @@ public:
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
     void HandleTouchUpEvent();
+    void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
     RefPtr<FrameNode> GetItemFatherNode();
     RefPtr<FrameNode> GetFrameNode();
@@ -209,7 +210,11 @@ public:
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
     static RefPtr<FrameNode> CreateBadgeTextNode(
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
-    
+private:
+    void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
+    void ApplyNewestOptionExecutedFromModifierToNode(
+        const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode);
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     WeakPtr<FrameNode> itemFatherNode_;
@@ -220,8 +225,9 @@ private:
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
-    std::function<void(GestureEvent&)> actionStart_;
 
+    RefPtr<PixelMap> textPixelMap_;
+    std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
     std::function<void()> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
@@ -230,6 +236,7 @@ private:
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isSelectedItemNode_ = false;
+    bool isOnBeforeLiftingAnimation = false;
 
     bool isDragUserReject_ = false;
 

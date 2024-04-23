@@ -84,8 +84,6 @@ public:
         return indexInListItemGroup_;
     }
 
-    void Initialize(LayoutWrapper* layoutWrapper);
-
     void SetHasStartDeleteArea(bool hasStartDeleteArea)
     {
         hasStartDeleteArea_ = hasStartDeleteArea;

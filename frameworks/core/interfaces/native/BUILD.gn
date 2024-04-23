@@ -30,6 +30,7 @@ template("ace_core_interfaces_native_node") {
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
       "node/calendar_picker_modifier.cpp",
+      "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
       "node/column_split_modifier.cpp",
@@ -57,11 +58,14 @@ template("ace_core_interfaces_native_node") {
       "node/nav_router_modifier.cpp",
       "node/navigation_modifier.cpp",
       "node/navigator_modifier.cpp",
+      "node/node_adapter_impl.cpp",
+      "node/node_animate.cpp",
       "node/node_api.cpp",
       "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
       "node/node_container_modifier.cpp",
+      "node/node_content_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
       "node/node_gesture_modifier.cpp",
       "node/node_image_modifier.cpp",
@@ -83,6 +87,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_timepicker_modifier.cpp",
       "node/node_toggle_modifier.cpp",
       "node/panel_modifier.cpp",
+      "node/particle_modifier.cpp",
       "node/path_modifier.cpp",
       "node/pattern_lock_modifier.cpp",
       "node/polygon_modifier.cpp",
@@ -127,6 +132,13 @@ template("ace_core_interfaces_native_node") {
     if (defined(config.plugin_components_support) &&
         config.plugin_components_support) {
       sources += [ "node/plugin_modifier.cpp" ]
+    }
+    external_deps = []
+    if (is_ohos) {
+      external_deps += [ "input:libmmi-client" ]
+    }
+    if (use_hilog) {
+      external_deps += [ "hilog:libhilog" ]
     }
 
     cflags_cc = []

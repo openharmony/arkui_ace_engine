@@ -23,6 +23,7 @@
 
 #include "display_manager.h"
 #include "dm_common.h"
+#include "interfaces/inner_api/ace/arkui_rect.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 
@@ -63,10 +64,12 @@ struct ParsedConfig {
     std::string direction;
     std::string densitydpi;
     std::string themeTag;
+    std::string fontScale;
+    std::string fontWeightScale;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty() && themeTag.empty());
+                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty());
     }
 };
 
@@ -416,6 +419,7 @@ public:
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static void SetFontScale(int32_t instanceId, float fontScale);
+    static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
     static std::pair<std::string, UIContentErrorCode> RestoreRouterStack(
         int32_t instanceId, const std::string& contentInfo);
@@ -582,6 +586,11 @@ public:
         return isUIExtensionAbilityHost_;
     }
 
+    std::vector<Ace::RectF> GetOverlayNodePositions();
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>&& callback);
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -599,6 +608,8 @@ private:
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
 
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
+    void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
+    void ReleaseResourceAdapter();
 
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;

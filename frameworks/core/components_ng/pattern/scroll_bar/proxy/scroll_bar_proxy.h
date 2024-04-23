@@ -93,6 +93,8 @@ public:
      */
     bool NotifySnapScroll(float delta, float velocity, float controlDistance, float dragDistance) const;
 
+    void NotifyScrollBarNode(float distance, int32_t source) const;
+
     float CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const;
 
     void SetScrollSnapTrigger_(bool scrollSnapTrigger)

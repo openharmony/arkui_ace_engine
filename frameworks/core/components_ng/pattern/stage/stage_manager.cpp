@@ -55,9 +55,11 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     stageManager->SetStageInTrasition(true);
+    auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
+    auto statusBarHeight = static_cast<float>(safeAreaInsets.top_.Length());
     if (transitionType == PageTransitionType::EXIT_PUSH || transitionType == PageTransitionType::EXIT_POP) {
         pagePattern->TriggerPageTransition(
-            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType]() {
+            transitionType, [weak = WeakPtr<FrameNode>(page), transitionType, statusBarHeight]() {
                 LOGI("pageTransition exit finish");
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
@@ -80,12 +82,15 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 auto stageManager = context->GetStageManager();
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
+                constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+                page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
+                    REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
             });
         return;
     }
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
-        transitionType, [weak = WeakPtr<FrameNode>(page)]() {
+        transitionType, [weak = WeakPtr<FrameNode>(page), statusBarHeight]() {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             LOGI("pageTransition in finish");
             auto page = weak.Upgrade();
@@ -100,8 +105,8 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
             constexpr float REMOVE_CLIP_SIZE = 10000.0f;
-            page->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE),
-                RadiusF(EdgeF(0.0f, 0.0f)));
+            page->GetRenderContext()->ClipWithRRect(RectF(0.0f, -statusBarHeight, REMOVE_CLIP_SIZE,
+                REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
             stageManager->SetStageInTrasition(false);

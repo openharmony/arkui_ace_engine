@@ -30,7 +30,7 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
-    touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
+    touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetOriginalId());
     touchInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     touchInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
     touchInfoObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
@@ -85,6 +85,7 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
     eventObj->SetPropertyObject(
         "getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetHistoricalPoints));
+    eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
     eventObj->Wrap<TouchEventInfo>(&info);
     return eventObj;
 }

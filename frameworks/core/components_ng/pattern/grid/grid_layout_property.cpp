@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -46,20 +47,20 @@ void GridLayoutProperty::ResetPositionFlags() const
     pattern->ResetPositionFlags();
 }
 
-void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
-    json->Put("columnsTemplate", propColumnsTemplate_.value_or("").c_str());
-    json->Put("rowsTemplate", propRowsTemplate_.value_or("").c_str());
-    json->Put("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str());
-    json->Put("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str());
-    json->Put("cachedCount", propCachedCount_.value_or(1));
-    json->Put("editMode", propEditable_.value_or(false) ? "true" : "false");
-    json->Put("layoutDirection", GetGridDirectionStr().c_str());
-    json->Put("maxCount", propMaxCount_.value_or(Infinity<int32_t>()));
-    json->Put("minCount", propMinCount_.value_or(1));
-    json->Put("cellLength", propCellLength_.value_or(0));
-    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("columnsTemplate", propColumnsTemplate_.value_or("").c_str(), filter);
+    json->PutExtAttr("rowsTemplate", propRowsTemplate_.value_or("").c_str(), filter);
+    json->PutExtAttr("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("cachedCount", propCachedCount_.value_or(1), filter);
+    json->PutExtAttr("editMode", propEditable_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("layoutDirection", GetGridDirectionStr().c_str(), filter);
+    json->PutExtAttr("maxCount", propMaxCount_.value_or(Infinity<int32_t>()), filter);
+    json->PutExtAttr("minCount", propMinCount_.value_or(1), filter);
+    json->PutExtAttr("cellLength", propCellLength_.value_or(0), filter);
+    json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const

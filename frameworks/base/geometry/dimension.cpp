@@ -149,7 +149,7 @@ std::string Dimension::ToString() const
     static const int32_t percentIndex = 3;
     static const int32_t percentUnit = 100;
     static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto" };
-    if (static_cast<int>(unit_) > unitsNum) {
+    if (static_cast<int>(unit_) >= unitsNum) {
         return StringUtils::DoubleToString(value_).append("px");
     }
     if (unit_ == DimensionUnit::NONE) {
@@ -186,7 +186,10 @@ Dimension Dimension::FromString(const std::string& str)
         if (str[i] >= '0' && str[i] <= '9') {
             value = StringUtils::StringToDouble(str.substr(0, i + 1));
             auto subStr = str.substr(i + 1);
-            unit = uMap.count(subStr) ? uMap.at(subStr) : unit;
+            auto iter = uMap.find(subStr);
+            if (iter != uMap.end()) {
+                unit = iter->second;
+            }
             value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
             break;
         }

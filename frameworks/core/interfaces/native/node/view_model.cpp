@@ -25,6 +25,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
+#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -56,6 +57,11 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/components_ng/pattern/divider/divider_model_ng.h"
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -251,6 +257,13 @@ void* createSliderNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createCanvasNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CanvasModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createDatePickerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = DatePickerModelNG::CreateFrameNode(nodeId);
@@ -307,6 +320,41 @@ void* createCircleNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createGridNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = GridModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createGridItemNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = GridItemModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createBlankNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = BlankModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createDividerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = DividerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = IndexerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -335,9 +383,9 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         nullptr, // Navigator
         nullptr, // Web
         createSliderNode,
-        nullptr, // Canvas
+        createCanvasNode,
         nullptr, // Radio
-        nullptr, // Grid
+        createGridNode,
 #ifdef XCOMPONENT_SUPPORTED
         createXComponentNode,
 #else
@@ -352,10 +400,13 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createTimePickerNode,
         createTextPickerNode,
         createCalendarPickerNode,
-        nullptr, // GridItem
+        createGridItemNode,
         createCustomNode,
         createWaterFlowNode,
         createFlowItemNode,
+        createBlankNode,
+        createDividerNode,
+        createAlphabetIndexerNode,
         createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {

@@ -38,6 +38,7 @@ namespace OHOS::Ace::NG {
         }
 
         if (needBuild) {
+            RecycleItemsOutOfBoundary();
             ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             std::pair<std::string, RefPtr<UINode>> itemInfo;
             if (useNewInterface_) {
@@ -144,7 +145,7 @@ namespace OHOS::Ace::NG {
         return node;
     }
 
-    std::list<RefPtr<UINode>>& LazyForEachBuilder::OnDataBulkDeleted(size_t index, size_t count)
+    std::list<std::pair<std::string, RefPtr<UINode>>>& LazyForEachBuilder::OnDataBulkDeleted(size_t index, size_t count)
     {
         if (cachedItems_.empty()) {
             return nodeList_;
@@ -154,7 +155,7 @@ namespace OHOS::Ace::NG {
 
             for (auto& [oldindex, child] : temp) {
                 if (static_cast<size_t>(oldindex) >= index && static_cast<size_t>(oldindex) < index + count) {
-                    nodeList_.push_back(child.second);
+                    nodeList_.emplace_back(child.first, child.second);
                 } else {
                     cachedItems_.try_emplace(
                         index > static_cast<size_t>(oldindex) ? oldindex : oldindex - count, std::move(child));
@@ -162,7 +163,7 @@ namespace OHOS::Ace::NG {
             }
         }
         for (auto& [key, child] : expiringItem_) {
-            if (static_cast<size_t>(child.first) > index) {
+            if (static_cast<size_t>(child.first) >= index + count) {
                 child.first -= count;
                 continue;
             }
@@ -191,6 +192,55 @@ namespace OHOS::Ace::NG {
         return false;
     }
 
+    std::list<std::pair<std::string, RefPtr<UINode>>>& LazyForEachBuilder::OnDataBulkChanged(size_t index, size_t count)
+    {
+        if (cachedItems_.empty()) {
+            return nodeList_;
+        }
+        if (static_cast<size_t>(cachedItems_.rbegin()->first) < index) {
+            return nodeList_;
+        }
+        for (const auto& [itemIndex, child] : cachedItems_) {
+            if (static_cast<size_t>(itemIndex) >= index && static_cast<size_t>(itemIndex) < index + count) {
+                NotifyDataChanged(index, child.second, false);
+                nodeList_.emplace_back(child.first, child.second);
+            }
+        }
+        for (auto& [key, node] : expiringItem_) {
+            if (static_cast<size_t>(node.first) >= index && static_cast<size_t>(node.first) < index + count) {
+                node.first = -1;
+            }
+        }
+        return nodeList_;
+    }
+
+    void LazyForEachBuilder::OnDataMoveToNewPlace(size_t from, size_t to)
+    {
+        if (from == to) {
+            return;
+        }
+        decltype(cachedItems_) temp(std::move(cachedItems_));
+        if (from < to) {
+            for (const auto& [itemIndex, child] : temp) {
+                auto position = static_cast<size_t>(itemIndex);
+                if (position > from && position <= to) {
+                    cachedItems_.emplace(position - 1, child);
+                } else if (position == from) {
+                    cachedItems_.emplace(to, child);
+                }
+            }
+        } else {
+            for (const auto& [itemIndex, child] : temp) {
+                auto position = static_cast<size_t>(itemIndex);
+                if (position >= to && position < from) {
+                    cachedItems_.emplace(position + 1, child);
+                } else if (position == from) {
+                    cachedItems_.emplace(to, child);
+                }
+            }
+        }
+    }
+
     bool LazyForEachBuilder::OnDataMoved(size_t from, size_t to)
     {
         if (from == to) {
@@ -212,6 +262,19 @@ namespace OHOS::Ace::NG {
         return true;
     }
 
+    void LazyForEachBuilder::GetAllItems(std::vector<UINode*>& items)
+    {
+        for (const auto& item : cachedItems_) {
+            items.emplace_back(RawPtr(item.second.second));
+        }
+        for (const auto& item : expiringItem_) {
+            items.emplace_back(RawPtr(item.second.second));
+        }
+        for (const auto& item : nodeList_) {
+            items.emplace_back(RawPtr(item.second));
+        }
+    }
+
     std::pair<int32_t, std::list<RefPtr<UINode>>> LazyForEachBuilder::OnDatasetChange(
         std::list<V2::Operation> DataOperations)
     {
@@ -222,10 +285,15 @@ namespace OHOS::Ace::NG {
             expiringTempItem_.try_emplace(cacheChild.first, LazyForEachChild(key, cacheChild.second));
         }
         decltype(expiringTempItem_) expiringTemp(std::move(expiringTempItem_));
+        std::list<RefPtr<UINode>> nodeList;
+        for (const auto& item : nodeList_) {
+            nodeList.emplace_back(item.second);
+        }
+
         for (auto operation : DataOperations) {
             bool isReload = ClassifyOperation(operation, initialIndex, cachedTemp, expiringTemp);
             if (isReload) {
-                return std::pair(initialIndex, nodeList_);
+                return std::pair(initialIndex, std::move(nodeList));
             }
         }
         std::map<int32_t, int32_t> indexChangedMap;
@@ -236,7 +304,7 @@ namespace OHOS::Ace::NG {
             expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
         }
         operationList_.clear();
-        return std::pair(initialIndex, nodeList_);
+        return std::pair(initialIndex, std::move(nodeList));
     }
 
     void LazyForEachBuilder::RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
@@ -252,10 +320,10 @@ namespace OHOS::Ace::NG {
             auto info = operationList_.find(index)->second;
             changedIndex = indexChangedMap.find(index)->second;
             if (info.isDeleting) {
-                nodeList_.push_back(child.second);
+                nodeList_.emplace_back(child.first, child.second);
             } else if (info.isChanged) {
                 expiringTempItem_.try_emplace(index, LazyForEachChild(info.key, nullptr));
-            } else if (info.extraKey.size() > 0) {
+            } else if (!info.extraKey.empty()) {
                 expiringTempItem_.try_emplace(index + changedIndex, child);
                 for (int32_t i = 0; i < static_cast<int32_t>(info.extraKey.size()); i++) {
                     expiringTempItem_.try_emplace(index + i, LazyForEachChild(info.extraKey[i], nullptr));
@@ -500,5 +568,18 @@ namespace OHOS::Ace::NG {
             }
             cachedItems_.erase(index);
         }
+    }
+
+    void LazyForEachBuilder::RecordOutOfBoundaryNodes(int32_t index)
+    {
+        outOfBoundaryNodes_.emplace_back(index);
+    }
+
+    void LazyForEachBuilder::RecycleItemsOutOfBoundary()
+    {
+        for (const auto& i: outOfBoundaryNodes_) {
+            RecycleChildByIndex(i);
+        }
+        outOfBoundaryNodes_.clear();
     }
 }

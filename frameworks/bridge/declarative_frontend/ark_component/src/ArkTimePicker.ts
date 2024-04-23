@@ -44,6 +44,11 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
   onChange(callback: (value: TimePickerResult) => void): this {
     throw new Error('Method not implemented.');
   }
+  dateTimeOptions(value: DateTimeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity,
+      TimepickerDateTimeOptionsModifier, value);
+    return this;
+  }
 }
 
 class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
@@ -146,6 +151,20 @@ class TimepickerUseMilitaryTimeModifier extends ModifierWithKey<boolean> {
       getUINativeModule().timepicker.resetTimepickerUseMilitaryTime(node);
     } else {
       getUINativeModule().timepicker.setTimepickerUseMilitaryTime(node, this.value);
+    }
+  }
+}
+
+class TimepickerDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> {
+  constructor(value: DateTimeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerDateTimeOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
     }
   }
 }
