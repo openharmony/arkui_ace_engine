@@ -2002,13 +2002,13 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             CalcDimension height;
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
-            style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
+            style.leadingMargin->size = NG::LeadingMarginSize(width, height);
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
             if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
                 CalcDimension width;
                 JSContainerBase::ParseJsDimensionVp(lm, width);
-                style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
+                style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
             }
         }
     } else if (!lm->IsNull()) {
@@ -2016,7 +2016,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
         CalcDimension width;
         JSContainerBase::ParseJsDimensionVp(lm, width);
-        style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
+        style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
     }
     return true;
 }

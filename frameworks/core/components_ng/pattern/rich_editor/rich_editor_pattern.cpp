@@ -1370,8 +1370,8 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
 
             res.emplace_back(ParagraphInfo {
                 .leadingMarginPixmap = lm.pixmap,
-                .leadingMarginSize = { Dimension(lm.size.Width()).ConvertToVp(),
-                    Dimension(lm.size.Height()).ConvertToVp() },
+                .leadingMarginSize = { lm.size.Width().ToString(),
+                    lm.size.Height().ToString() },
                 .textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START)),
                 .wordBreak = static_cast<int32_t>((*it)->GetWordBreakValue(WordBreak::BREAK_WORD)),
                 .lineBreakStrategy = static_cast<int32_t>((*it)->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY)),
@@ -1716,8 +1716,8 @@ bool RichEditorPattern::HandleUserGestureEvent(
         if (isParagraphHead && !selectedRects.empty()) {
             if (item->leadingMargin.has_value()) {
                 auto addWidth = item->leadingMargin.value().size.Width();
-                selectedRects[0].SetLeft(selectedRects[0].GetX() - addWidth);
-                selectedRects[0].SetWidth(selectedRects[0].GetSize().Width() + addWidth);
+                selectedRects[0].SetLeft(selectedRects[0].GetX() - addWidth.ConvertToPx());
+                selectedRects[0].SetWidth(selectedRects[0].GetSize().Width() + addWidth.ConvertToPx());
             }
             paragraphOffset.SetX(selectedRects[0].GetOffset().GetX());
             paragraphOffset.SetY(selectedRects[0].GetOffset().GetY());

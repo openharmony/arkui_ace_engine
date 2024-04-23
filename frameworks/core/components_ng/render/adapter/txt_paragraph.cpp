@@ -164,7 +164,7 @@ void TxtParagraph::Build()
 #endif
 
     if (paraStyle_.leadingMargin) {
-        SetIndents({ paraStyle_.leadingMargin->size.Width() });
+        SetIndents({ paraStyle_.leadingMargin->size.Width().ConvertToPx() });
     }
 }
 
@@ -300,8 +300,8 @@ void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
         CHECK_NULL_VOID(pixelMapImage);
         auto& rsCanvas = const_cast<RSCanvas&>(canvas);
         auto size = paraStyle_.leadingMargin->size;
-        auto width = size.Width();
-        auto height = size.Height();
+        auto width = size.Width().ConvertToPx();
+        auto height = size.Height().ConvertToPx();
         pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
     }
 }
@@ -681,7 +681,7 @@ void TxtParagraph::HandleTextAlign(CaretMetricsF& result, TextAlign align)
 
 void TxtParagraph::HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin)
 {
-    result.offset.SetX(leadingMargin.size.Width());
+    result.offset.SetX(leadingMargin.size.Width().ConvertToPx());
 }
 
 bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
