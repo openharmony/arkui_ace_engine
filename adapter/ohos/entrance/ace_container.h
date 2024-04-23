@@ -23,6 +23,7 @@
 
 #include "display_manager.h"
 #include "dm_common.h"
+#include "interfaces/inner_api/ace/arkui_rect.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 
@@ -585,6 +586,11 @@ public:
         return isUIExtensionAbilityHost_;
     }
 
+    std::vector<Ace::RectF> GetOverlayNodePositions();
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>&& callback);
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -603,6 +609,7 @@ private:
 
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
     void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
+    void ReleaseResourceAdapter();
 
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;

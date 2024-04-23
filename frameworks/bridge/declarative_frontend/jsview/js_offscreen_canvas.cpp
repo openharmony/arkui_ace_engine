@@ -296,28 +296,32 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
 {
-    std::string type = "ImageBitmap";
     if (offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
-    uint32_t id = offscreenCanvasContext_->GetId();
-    auto final_height = static_cast<uint32_t>(PipelineBase::Px2VpWithCurrentDensity(GetHeight()));
-    auto final_width = static_cast<uint32_t>(PipelineBase::Px2VpWithCurrentDensity(GetWidth()));
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    napi_value constructor = nullptr;
+    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
+    if (status != napi_ok) {
+        return nullptr;
+    }
     napi_value renderImage = nullptr;
-    napi_value jsType = nullptr;
-    napi_value jsId = nullptr;
-    napi_value jsHeight = nullptr;
-    napi_value jsWidth = nullptr;
     napi_create_object(env, &renderImage);
-    napi_create_string_utf8(env, type.c_str(), type.length(), &jsType);
-    napi_create_uint32(env, id, &jsId);
-    napi_create_double(env, final_height, &jsHeight);
-    napi_create_double(env, final_width, &jsWidth);
-    napi_set_named_property(env, renderImage, "__type", jsType);
-    napi_set_named_property(env, renderImage, "__id", jsId);
-    napi_set_named_property(env, renderImage, "height", jsHeight);
-    napi_set_named_property(env, renderImage, "width", jsWidth);
-    BindNativeFunction(env, renderImage, "close", JSRenderImage::JsClose);
+    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    void* nativeObj = nullptr;
+    status = napi_unwrap(env, renderImage, &nativeObj);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    auto jsImage = (JSRenderImage*)nativeObj;
+    jsImage->SetContextId(offscreenCanvasContext_->GetId());
     return renderImage;
 }
 

@@ -528,6 +528,11 @@ public:
         return errorTextInputBorderWidth_;
     }
 
+    const Dimension& GetAvoidKeyboardOffset() const
+    {
+        return avoidKeyboardOffset_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -602,6 +607,8 @@ private:
 
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
+
+    Dimension avoidKeyboardOffset_ = 24.0_vp;
 
     bool showEllipsis_ = true;
     bool draggable_ = false;

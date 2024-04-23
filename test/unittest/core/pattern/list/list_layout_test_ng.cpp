@@ -24,6 +24,7 @@ public:
     void UpdateContentModifier();
     RefPtr<ListPaintMethod> UpdateOverlayModifier();
     AssertionResult VerifySticky(int32_t groupIndex, bool isHeader, float expectOffsetY);
+    void UpdateDividerMap();
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -48,6 +49,16 @@ AssertionResult ListLayoutTestNg::VerifySticky(int32_t groupIndex, bool isHeader
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, groupIndex);
     float offsetY = isHeader ? GetChildRect(groupNode, 0).GetY() : GetChildRect(groupNode, 1).GetY();
     return IsEqual(offsetY, expectOffsetY);
+}
+
+void ListLayoutTestNg::UpdateDividerMap()
+{
+    int cur = 0;
+    for (auto& child : pattern_->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+    UpdateContentModifier();
 }
 
 /**
@@ -1009,6 +1020,52 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PaintMethod006
+ * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set divider startMargin and endMargin normal value
+     * @tc.expected: offset.GetX() == startMargin and length = LIST_WIDTH - startMargin - endMargin
+     */
+    auto itemDivider = ITEM_DIVIDER;
+    CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
+    UpdateDividerMap();
+    auto dividerList = pattern_->listContentModifier_->dividerList_->Get();
+    auto dividerMap = AceType::DynamicCast<ListDividerArithmetic>(dividerList)->GetDividerMap();
+    EXPECT_EQ(dividerMap.size(), 8);
+    auto length = LIST_WIDTH - (ITEM_DIVIDER.startMargin + ITEM_DIVIDER.endMargin).ConvertToPx();
+    EXPECT_EQ(pattern_->listContentModifier_->width_, ITEM_DIVIDER.strokeWidth.ConvertToPx());
+    for (auto child : dividerMap) {
+        EXPECT_EQ(child.second.offset.GetX(), ITEM_DIVIDER.startMargin.ConvertToPx());
+        EXPECT_EQ(child.second.length, length);
+    }
+
+    /**
+     * @tc.steps: step2. Set divider startMargin and endMargin abnormal value
+     * @tc.expected: startMargin == 0 and endMargin == 0
+     */
+    std::vector<V2::ItemDivider> dividerArray = { { Dimension(10), Dimension(-10), Dimension(-10) },
+        { Dimension(10), Dimension(LIST_WIDTH), Dimension(LIST_WIDTH) },
+        { Dimension(10), Dimension(10, DimensionUnit::PERCENT), Dimension(10, DimensionUnit::PERCENT) } };
+    for (auto itemDivider : dividerArray) {
+        layoutProperty_->UpdateDivider(itemDivider);
+        FlushLayoutTask(frameNode_);
+        UpdateDividerMap();
+        dividerList = pattern_->listContentModifier_->dividerList_->Get();
+        dividerMap = AceType::DynamicCast<ListDividerArithmetic>(dividerList)->GetDividerMap();
+        EXPECT_EQ(dividerMap.size(), 8);
+        EXPECT_EQ(pattern_->listContentModifier_->width_, itemDivider.strokeWidth.ConvertToPx());
+        for (auto child : dividerMap) {
+            EXPECT_EQ(child.second.offset.GetX(), 0.f);
+            EXPECT_EQ(child.second.length, LIST_WIDTH);
+        }
+    }
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: Test list_pattern OnModifyDone
  * @tc.type: FUNC
@@ -1627,5 +1684,73 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask002, TestSize.Level1)
             EXPECT_TRUE(child.second.isPressed);
         }
     }
+}
+
+/**
+ * @tc.name: ChildrenMainSize005
+ * @tc.desc: Test childrenMainSize layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ChildrenMainSize005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list
+     * @tc.expected: Default Size is 0
+     */
+    Create([](ListModelNG model) {
+        auto childrenSize = model.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(0);
+        childrenSize->ChangeData(0, 2, { 100.f, 100.f });
+        childrenSize->ChangeData(4, 1, { 200.f });
+        childrenSize->ChangeData(5, 8, { 100.f, 100.f, 100.f, 100.f, 100.f, 100.f, 100.f, 100.f });
+        CreateItem(2);
+        CreateItemWithSize(2, SizeT<Dimension>(FILL_LENGTH, Dimension(0.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateItem(8);
+    });
+    EXPECT_TRUE(ScrollToIndex(1, false, ScrollAlign::START, 100.f));
+    EXPECT_TRUE(ScrollToIndex(2, false, ScrollAlign::START, 200.f));
+    EXPECT_TRUE(ScrollToIndex(3, false, ScrollAlign::START, 200.f));
+    EXPECT_TRUE(ScrollToIndex(4, false, ScrollAlign::START, 200.f));
+}
+
+/**
+ * @tc.name: ChildrenMainSize006
+ * @tc.desc: Test childrenMainSize layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list
+     * @tc.expected: Default Size is 100
+     */
+    Create([](ListModelNG model) {
+        auto childrenSize = model.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
+        childrenSize->ChangeData(2, 2, { -100.f, 200.f });
+        CreateItem(2);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(-100.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateItem(8);
+    });
+    EXPECT_TRUE(ScrollToIndex(3, false, ScrollAlign::START, ITEM_HEIGHT));
+    EXPECT_TRUE(ScrollToIndex(4, false, ScrollAlign::START, 300.f));
+
+    /**
+     * @tc.steps: step2. insert data
+     * @tc.expected: childrenSize_.size() == 10
+     */
+    Create([](ListModelNG model) {
+        auto childrenSize = model.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
+        childrenSize->ChangeData(8, 0, { 50.f, 200.f });
+        CreateItem(8);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+    });
+    EXPECT_EQ(pattern_->childrenSize_->childrenSize_.size(), 10);
+    EXPECT_TRUE(ScrollToIndex(8, false, ScrollAlign::END, 50.f));
+    EXPECT_TRUE(ScrollToIndex(9, false, ScrollAlign::END, 250.f));
 }
 } // namespace OHOS::Ace::NG

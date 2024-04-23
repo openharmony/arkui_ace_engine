@@ -47,7 +47,8 @@ public:
     static void CalendarPickerDialogShow(const JSRef<JSObject>& paramObj,
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
-        const std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent);
+        const std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent,
+        const std::vector<ButtonInfo>& buttonInfos);
 
 private:
     static std::map<std::string, NG::DialogEvent> ChangeDialogEvent(const JSCallbackInfo& info);

@@ -62,7 +62,7 @@ struct TestProperty {
     std::optional<Ace::FontWeight> fontWeight = std::nullopt;
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
     std::optional<std::vector<Shadow>> textShadow = std::nullopt;
-    std::optional<FONT_FEATURES_MAP> fontFeature = std::nullopt;
+    std::optional<FONT_FEATURES_LIST> fontFeature = std::nullopt;
 };
 
 class TextClockTestNG : public testing::Test {
@@ -160,13 +160,13 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
     EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), errSetShadows);
     EXPECT_EQ(errShadow.GetBlurRadius(), 0);
 
-    FONT_FEATURES_MAP fontFeatures;
-    fontFeatures.try_emplace("ss01", 1);
+    FONT_FEATURES_LIST fontFeatures;
+    fontFeatures.emplace_back(std::make_pair("ss01", 1));
     textClockLayoutProperty->UpdateFontFeature(fontFeatures);
     EXPECT_EQ(textClockLayoutProperty->GetFontFeature(), fontFeatures);
 
-    FONT_FEATURES_MAP errFontFeatures;
-    errFontFeatures.try_emplace("ss02", 1);
+    FONT_FEATURES_LIST errFontFeatures;
+    errFontFeatures.emplace_back(std::make_pair("ss02", 1));
     textClockLayoutProperty->UpdateFontFeature(fontFeatures);
     EXPECT_EQ(textClockLayoutProperty->GetFontFeature(), fontFeatures);
 
@@ -497,8 +497,8 @@ HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
     std::vector<Shadow> setShadows;
     setShadows.emplace_back(shadow);
     testProperty.textShadow = std::make_optional(setShadows);
-    FONT_FEATURES_MAP fontFeatures;
-    fontFeatures.try_emplace("ss02", 1);
+    FONT_FEATURES_LIST fontFeatures;
+    fontFeatures.emplace_back(std::make_pair("ss02", 1));
     testProperty.fontFeature = std::make_optional(fontFeatures);
 
     RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);

@@ -744,10 +744,10 @@ public:
         if (!IsSelected()) {
             return false;
         }
-        Offset offset = globalOffset -
-                        Offset(IsTextArea() ? contentRect_.GetX() : textRect_.GetX(),
-                            IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) -
-                        Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+        auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
+        auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
+        auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
+        Offset offset = localOffset - Offset(offsetX, offsetY);
         for (const auto& rect : selectController_->GetSelectedRects()) {
             bool isInRange = rect.IsInRegion({ offset.GetX(), offset.GetY() });
             if (isInRange) {
@@ -1092,6 +1092,8 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
+    OffsetF GetPaintRectGlobalOffset() const;
+
     void NeedRequestKeyboard()
     {
         needToRequestKeyboardInner_ = true;
@@ -1116,6 +1118,15 @@ public:
     RefPtr<Clipboard> GetClipboard() override
     {
         return clipboard_;
+    }
+
+    const Dimension& GetAvoidSoftKeyboardOffset() const override;
+
+    RectF GetPaintContentRect() override
+    {
+        auto transformContentRect = contentRect_;
+        selectOverlay_->GetLocalRectWithTransform(transformContentRect);
+        return transformContentRect;
     }
 
 protected:
@@ -1170,10 +1181,7 @@ private:
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ProcessOverlayAfterLayout(bool isGlobalAreaChanged);
-    void ProcessOverlay(const OverlayRequest& request = OverlayRequest())
-    {
-        selectOverlay_->ProcessOverlay(request);
-    }
+    void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
     bool SelectOverlayIsOn()
     {
@@ -1196,7 +1204,6 @@ private:
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
-    void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
     void UpdateCaretRect(bool isEditorValueChanged);
@@ -1294,6 +1301,7 @@ private:
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
 
     RectF frameRect_;
     RectF textRect_;

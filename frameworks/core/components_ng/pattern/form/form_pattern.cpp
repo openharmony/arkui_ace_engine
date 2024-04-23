@@ -22,6 +22,8 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/common/form_manager.h"
 #include "core/common/frontend.h"
@@ -33,6 +35,8 @@
 #include "core/components_ng/pattern/form/form_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -117,7 +121,7 @@ void FormPattern::OnAttachToFrameNode()
                     FormManager::GetInstance().RemoveSubContainer(id);
                 }
             },
-            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
+            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE, "ArkUIFormRemoveSubContainer");
     });
 
     InitClickEvent();
@@ -244,7 +248,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime)
             }
             form->TakeSurfaceCaptureForUI();
         },
-        TaskExecutor::TaskType::UI, delayTime);
+        TaskExecutor::TaskType::UI, delayTime, "ArkUIFormTakeSurfaceCapture");
 }
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
@@ -307,7 +311,7 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleOnSnapshot(pixelMap);
-    });
+    }, "ArkUIFormHandleOnSnapshot");
 }
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -559,6 +563,11 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     if (host->IsDraggable()) {
         EnableDrag();
     }
+
+    if (!isJsCard_) {
+        LoadFormSkeleton();
+    }
+
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
         formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
@@ -644,6 +653,175 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
     }
 }
 
+void FormPattern::LoadFormSkeleton()
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "LoadFormSkeleton");
+    int32_t dimension = cardInfo_.dimension;
+    int32_t dimensionHeight = GetFormDimensionHeight(dimension);
+    if (dimensionHeight <= 0) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "LoadFormSkeleton failed, invalid dimensionHeight!");
+        return;
+    }
+
+    RemoveFormSkeleton();
+
+    auto columnNode = CreateColumnNode();
+    CHECK_NULL_VOID(columnNode);
+
+    double cardWidth = cardInfo_.width.Value();
+    double cardHeight = cardInfo_.height.Value();
+    auto colorMode = SystemProperties::GetColorMode();
+    bool isDarkMode = colorMode == ColorMode::DARK;
+    std::shared_ptr<FormSkeletonParams> params = std::make_shared<FormSkeletonParams>(cardWidth,
+        cardHeight, dimension, dimensionHeight, isDarkMode);
+    CreateSkeletonView(columnNode, params, dimensionHeight);
+    
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext != nullptr) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+        renderContext->UpdateBackBlurStyle(styleOption);
+        renderContext->UpdateBackgroundColor(isDarkMode ?
+            Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT));
+        renderContext->UpdateOpacity(CONTENT_BG_OPACITY);
+    }
+    columnNode->MarkModifyDone();
+    columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    layoutProperty->UpdateVisibility(visible);
+}
+
+int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
+{
+    auto iter = OHOS::AppExecFwk::Constants::DIMENSION_MAP.
+        find(static_cast<OHOS::AppExecFwk::Constants::Dimension>(dimension));
+    if (iter == OHOS::AppExecFwk::Constants::DIMENSION_MAP.end()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "GetFormDimensionHeight failed, invalid dimension: %{public}d",
+            dimension);
+        return 0;
+    }
+    std::string formDimensionStr = iter->second;
+    std::stringstream streamDimension(formDimensionStr);
+    std::string dimensionHeightStr;
+    if (!std::getline(streamDimension, dimensionHeightStr, FORM_DIMENSION_SPLITTER)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "GetFormDimensionHeight failed!");
+        return 0;
+    }
+    return StringUtils::StringToInt(dimensionHeightStr);
+}
+
+void FormPattern::CreateSkeletonView(const RefPtr<FrameNode>& parent,
+    const std::shared_ptr<FormSkeletonParams>& params, int32_t dimensionHeight)
+{
+    float lineHeight = params->GetLineHeight();
+    uint32_t fillColor = params->GetFillColor();
+    float lineMarginLeft = params->GetLineMarginLeft();
+
+    // 1. Set title line
+    MarginProperty titleMargin;
+    titleMargin.top = CalcLength(params->GetTitleMarginTop());
+    titleMargin.left = CalcLength(lineMarginLeft);
+    CalcSize titleIdealSize = { CalcLength(params->GetTitleLineWidth()), CalcLength(lineHeight) };
+    auto titleLineNode = CreateRectNode(parent, titleIdealSize, titleMargin,
+        fillColor, params->GetTitleOpacity());
+    CHECK_NULL_VOID(titleLineNode);
+
+    // 2. Set content lines
+    for (int32_t i = 0; i < params->GetContentLineNum(); i++) {
+        MarginProperty contentMargin;
+        contentMargin.top = CalcLength(i == 0 ? params->GetTitleContentMargins() :
+            params->GetContentMargins());
+        contentMargin.left = CalcLength(lineMarginLeft);
+        CalcSize contentIdealSize = { CalcLength(params->GetLineWidth()), CalcLength(lineHeight) };
+        auto contentLineNode = CreateRectNode(parent, contentIdealSize, contentMargin,
+            fillColor, params->GetContentOpacity());
+        CHECK_NULL_VOID(contentLineNode);
+    }
+    
+    // 3. Set ending line if form dimension height greater than 1
+    if (dimensionHeight > 1) {
+        MarginProperty endingMargin;
+        endingMargin.top = CalcLength(params->GetEndingLineMarginTop());
+        endingMargin.left = CalcLength(lineMarginLeft);
+        CalcSize endingIdealSize = { CalcLength(params->GetEndingLineWidth()), CalcLength(lineHeight) };
+        auto endingLineNode = CreateRectNode(parent, endingIdealSize, endingMargin,
+            fillColor, params->GetContentOpacity());
+        CHECK_NULL_VOID(endingLineNode);
+    }
+}
+
+void FormPattern::RemoveFormSkeleton()
+{
+    ContainerScope scope(scopeId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = host->GetLastChild();
+    CHECK_NULL_VOID(child);
+
+    std::list<RefPtr<UINode>> children = host->GetChildren();
+    if (children.size() > 0 && child->GetTag() == V2::COLUMN_ETS_TAG) {
+        host->RemoveChildAtIndex(children.size() - 1);
+    }
+}
+
+RefPtr<FrameNode> FormPattern::CreateColumnNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_RETURN(columnNode, nullptr);
+
+    auto width = static_cast<float>(cardInfo_.width.Value());
+    auto height = static_cast<float>(cardInfo_.height.Value());
+    CalcSize idealSize = { CalcLength(width), CalcLength(height) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    columnNode->UpdateLayoutConstraint(layoutConstraint);
+
+    auto layoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+
+    host->AddChild(columnNode);
+    return columnNode;
+}
+
+RefPtr<FrameNode> FormPattern::CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
+    const MarginProperty& margin, uint32_t fillColor, double opacity)
+{
+    auto rectNode = FrameNode::CreateFrameNode(V2::RECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<RectPattern>());
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    rectNode->UpdateLayoutConstraint(layoutConstraint);
+
+    rectNode->GetLayoutProperty()->UpdateMargin(margin);
+
+    auto paintProperty = rectNode->GetPaintProperty<RectPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    paintProperty->UpdateFill(Color(fillColor));
+    paintProperty->UpdateFillOpacity(opacity);
+
+    paintProperty->UpdateTopLeftRadius(NG::Radius(RECT_RADIUS));
+    paintProperty->UpdateTopRightRadius(NG::Radius(RECT_RADIUS));
+    paintProperty->UpdateBottomLeftRadius(NG::Radius(RECT_RADIUS));
+    paintProperty->UpdateBottomRightRadius(NG::Radius(RECT_RADIUS));
+
+    rectNode->MountToParent(parent);
+    rectNode->MarkDirtyNode();
+
+    return rectNode;
+}
+
 void FormPattern::InitFormManagerDelegate()
 {
     if (formManagerBridge_) {
@@ -684,7 +862,7 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(container);
             container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
             container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
-        });
+        }, "ArkUIFormRunCard");
     });
 
     formManagerBridge_->AddFormUpdateCallback(
@@ -704,7 +882,7 @@ void FormPattern::InitFormManagerDelegate()
                 if (form->ISAllowUpdate()) {
                     form->GetSubContainer()->UpdateCard(data, imageDataMap);
                 }
-            });
+            }, "ArkUIFormUpdateCard");
         });
 
     formManagerBridge_->AddFormErrorCallback(
@@ -721,7 +899,7 @@ void FormPattern::InitFormManagerDelegate()
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
                 form->FireOnErrorEvent(code, msg);
-            });
+            }, "ArkUIFormFireErrorEvent");
         });
 
     formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
@@ -737,7 +915,7 @@ void FormPattern::InitFormManagerDelegate()
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
             form->FireOnUninstallEvent(formId);
-        });
+        }, "ArkUIFormFireUninstallEvent");
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
@@ -754,7 +932,7 @@ void FormPattern::InitFormManagerDelegate()
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
                 form->FireFormSurfaceNodeCallback(node, isDynamic);
-            });
+            }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
@@ -770,7 +948,7 @@ void FormPattern::InitFormManagerDelegate()
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
             form->FireFormSurfaceChangeCallback(width, height);
-        });
+        }, "ArkUIFormFireSurfaceChange");
     });
 
     formManagerBridge_->AddFormSurfaceDetachCallback([weak = WeakClaim(this), instanceID]() {
@@ -801,7 +979,7 @@ void FormPattern::InitFormManagerDelegate()
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleUnTrustForm();
-        });
+        }, "ArkUIFormHandleUnTrust");
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
@@ -827,6 +1005,8 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    RemoveFormSkeleton();
 
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
@@ -929,7 +1109,7 @@ void FormPattern::CreateCardContainer()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireOnAcquiredEvent(id);
-        });
+        }, "ArkUIFormFireAcquiredEvent");
     });
 
     subContainer_->SetFormLoadCallback([weak = WeakClaim(this)]() {
@@ -1064,7 +1244,7 @@ void FormPattern::OnLoadEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireOnLoadEvent();
-    });
+    }, "ArkUIFormFireLoadEvent");
 }
 
 void FormPattern::OnActionEvent(const std::string& action)
@@ -1098,7 +1278,7 @@ void FormPattern::OnActionEvent(const std::string& action)
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
                 pattern->FireOnRouterEvent(eventAction);
-            });
+            }, "ArkUIFormFireRouterEvent");
         }
     }
 

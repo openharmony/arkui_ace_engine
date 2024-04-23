@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/slider/render_slider.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
@@ -205,6 +206,7 @@ private:
     bool IsSelectOverlayMenu();
 
     void RecordChangeEvent() const;
+    void ParseMenuRadius(MenuParam& param);
 
     std::list<TouchRegion> hoverRegions_;
 

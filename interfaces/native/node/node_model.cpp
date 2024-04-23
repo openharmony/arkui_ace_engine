@@ -74,7 +74,7 @@ void* FindFunction(void* library, const char* name)
 
 ArkUIFullNodeAPI* impl = nullptr;
 
-ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
+bool InitialFullNodeImpl(int version)
 {
     if (!impl) {
         typedef ArkUIAnyAPI* (*GetAPI_t)(int);
@@ -82,37 +82,42 @@ ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
         void* module = FindModule();
         if (module == nullptr) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
-            return nullptr;
+            return false;
         }
         // Note, that RTLD_DEFAULT is ((void *) 0).
         getAPI = reinterpret_cast<GetAPI_t>(FindFunction(module, "GetArkUIAnyFullNodeAPI"));
         if (!getAPI) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot find GetArkUIAnyFullNodeAPI()");
-            return nullptr;
+            return false;
         }
 
         impl = reinterpret_cast<ArkUIFullNodeAPI*>((*getAPI)(version));
         if (!impl) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "getAPI() returned null");
-            return nullptr;
+            return false;
         }
 
         if (impl->version != version) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE,
                 "API version mismatch: expected %{public}d, but get the version %{public}d", version, impl->version);
-            return nullptr;
+            return false;
         }
     }
 
     impl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
     impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
-    return impl;
+    return true;
 }
 } // namespace
 
 ArkUIFullNodeAPI* GetFullImpl()
 {
-    return GetAnyFullNodeImpl(ARKUI_NODE_API_VERSION);
+    return impl;
+}
+
+bool InitialFullImpl()
+{
+    return InitialFullNodeImpl(ARKUI_NODE_API_VERSION);
 }
 
 struct InnerEventExtraParam {
@@ -448,14 +453,13 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
     return 0;
 }
 
-
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
 {
     if (!nodePtr) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!InRegion(static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_DEFAULT),
-        static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
+            static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
         return ERROR_CODE_PARAM_INVALID;
     }
     nodePtr->lengthMetricUnit = unit;
@@ -534,3 +538,51 @@ int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NodeModel
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    return impl->getNodeModifiers()->getNodeContentModifier()->addChild(
+        reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle);
+}
+
+int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node, int32_t position)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    return impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
+        reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle, position);
+}
+
+int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    return impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
+        reinterpret_cast<ArkUINodeContentHandle>(handle), node->uiNodeHandle);
+}
+
+int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback)
+{
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    auto innerCallback = reinterpret_cast<void (*)(ArkUINodeContentEvent* event)>(callback);
+    return impl->getNodeModifiers()->getNodeContentModifier()->registerEvent(
+        reinterpret_cast<ArkUINodeContentHandle>(handle), nullptr, innerCallback);
+}
+
+ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event)
+{
+    CHECK_NULL_RETURN(event, static_cast<ArkUI_NodeContentEventType>(-1));
+    auto* innerEvent = reinterpret_cast<ArkUINodeContentEvent*>(event);
+    return static_cast<ArkUI_NodeContentEventType>(innerEvent->type);
+}
+
+#ifdef __cplusplus
+};
+#endif

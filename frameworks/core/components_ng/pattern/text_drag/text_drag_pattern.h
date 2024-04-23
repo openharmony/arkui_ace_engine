@@ -34,6 +34,12 @@ struct SelectPositionInfo {
         : startX_(startX), startY_(startY), endX_(endX), endY_(endY)
     {}
 
+    void InitGlobalInfo(float globalX, float globalY)
+    {
+        globalX_ = globalX;
+        globalY_ = globalY;
+    }
+
     float startX_ = 0;
     float startY_ = 0;
     float endX_ = 0;
@@ -148,7 +154,7 @@ public:
     const std::shared_ptr<RSPath>& GetSelBackgroundPath()
     {
         if (!selBackGroundPath_) {
-            selBackGroundPath_ = GenerateSelBackgroundPath(TEXT_DRAG_OFFSET.ConvertToPx());
+            selBackGroundPath_ = GenerateSelBackgroundPath(0.0);
         }
         return selBackGroundPath_;
     }
@@ -190,10 +196,11 @@ public:
     }
 
 protected:
-    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<FrameNode>& dragContext);
+    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragContext,
+        float selectedWidth = 0.0);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
-    void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset);
+    void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
     void CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
 

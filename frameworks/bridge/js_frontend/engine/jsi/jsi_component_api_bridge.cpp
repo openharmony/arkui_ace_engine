@@ -68,7 +68,7 @@ shared_ptr<JsValue> JsiComponentApiBridge::JsGetScrollOffset(const shared_ptr<Js
         LOGE("JsGetScrollOffset failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUIJsGetScrollOffset");
     shared_ptr<JsValue> offsetContext = runtime->NewObject();
     offsetContext->SetProperty(runtime, "x", runtime->NewNumber(offset.GetX()));
     offsetContext->SetProperty(runtime, "y", runtime->NewNumber(offset.GetY()));
@@ -210,7 +210,7 @@ void JsiComponentApiBridge::JsScrollTo(
         LOGE("JsScrollTo failed. delegate is null.");
         return;
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUIJsScrollTo");
 }
 
 } // namespace OHOS::Ace::Framework

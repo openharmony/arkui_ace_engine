@@ -1512,6 +1512,18 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseLengthMetricsToDimension(info[0], value)) {
+        value.Reset();
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetLineSpacing(value);
+}
+
 void JSTextField::SetFontFeature(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

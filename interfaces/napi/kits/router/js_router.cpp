@@ -650,7 +650,7 @@ void CallBackToJSTread(std::shared_ptr<RouterAsyncContext> context)
 
             napi_close_handle_scope(context->env, scope);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIRouterAlertCallback");
 }
 
 static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_info info)

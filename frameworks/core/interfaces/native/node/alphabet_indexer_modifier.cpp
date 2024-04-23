@@ -485,6 +485,20 @@ void ResetPopupTitleBackground(ArkUINodeHandle node)
     Color color = indexerTheme->GetPopupTitleBackground();
     IndexerModelNG::SetPopupTitleBackground(frameNode, color);
 }
+
+void SetAdaptiveWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAdaptiveWidth(frameNode, true);
+}
+
+void ResetAdaptiveWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAdaptiveWidth(frameNode, false);
+}
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -498,7 +512,7 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
         SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
         ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
-        ResetPopupTitleBackground };
+        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth };
 
     return &modifier;
 }

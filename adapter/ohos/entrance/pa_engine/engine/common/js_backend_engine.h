@@ -81,8 +81,8 @@ public:
     virtual int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) = 0;
     virtual void OnCommand(const OHOS::AAFwk::Want& want, int startId) = 0;
     virtual bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) = 0;
-    virtual void PostTask(const std::function<void()>& task, const std::string& name = "", int64_t delayTime = 0) = 0;
-    virtual void PostSyncTask(const std::function<void()>& task, const std::string& name = "") = 0;
+    virtual void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime = 0) = 0;
+    virtual void PostSyncTask(const std::function<void()>& task, const std::string& name) = 0;
     virtual void RemoveTask(const std::string& name) = 0;
 
     void SetFormData(const AppExecFwk::FormProviderData& formProviderData)

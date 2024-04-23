@@ -2132,7 +2132,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest001, TestSize.Level1)
      * @tc.expected: step3. result equals.
      */
     longPressRecognizer.OnRejected();
-    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -2211,7 +2211,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest003, TestSize.Level1)
     longPressRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(longPressRecognizer.globalPoint_.GetX(), touchEvent.x);
     EXPECT_EQ(longPressRecognizer.globalPoint_.GetY(), touchEvent.y);
-    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::READY);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
@@ -2220,7 +2220,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest003, TestSize.Level1)
      */
     longPressRecognizer.useCatchMode_ = false;
     longPressRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::READY);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
@@ -10751,7 +10751,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchMoveEventTest005, TestSize.Leve
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), 0);
+    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), touchEvent.x);
 }
 
 /**
@@ -11558,14 +11558,14 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchUpEvent002, TestSize.Level1)
     panRecognizerPtr->isForDrag_ = true;
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
     panRecognizerPtr->HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::FAIL);
 
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->fingers_ = 0;
     panRecognizerPtr->isForDrag_ = false;
     panRecognizerPtr->currentFingers_ = panRecognizerPtr->fingers_;
     panRecognizerPtr->HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(panRecognizerPtr->refereeState_, RefereeState::FAIL);
 }
 
 /**
@@ -12381,7 +12381,7 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize
         AceType::WeakClaim(AceType::RawPtr(guestureEventHub)), panDirection, 1, 50.0f);
     guestureEventHub->dragEventActuator_->isDragUserReject_ = true;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::NONE);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
 
     /**
      * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
@@ -12392,7 +12392,7 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     guestureEventHub->dragEventActuator_->isDragUserReject_ = false;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_FALSE(guestureEventHub->dragEventActuator_->isDragUserReject_);
+    EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
 }
 
 /**
@@ -12616,7 +12616,7 @@ HWTEST_F(GesturesTestNg, RotationRecognizerHandleAxisEventTest002, TestSize.Leve
      */
     recognizer->refereeState_ = RefereeState::READY;
     recognizer->HandleTouchUpEvent(event);
-    EXPECT_EQ(recognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(recognizer->refereeState_, RefereeState::READY);
 
     recognizer->refereeState_ = RefereeState::SUCCEED;
     recognizer->HandleTouchUpEvent(event);

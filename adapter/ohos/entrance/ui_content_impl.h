@@ -20,6 +20,7 @@
 
 #include "ability_info.h"
 #include "display_manager.h"
+#include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -293,6 +294,13 @@ public:
     {
         return isUIExtensionAbilityHost_;
     }
+
+    std::vector<Ace::RectF> GetOverlayNodePositions() const override;
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
+
+    void SetFormRenderingMode(int8_t renderMode) override;
 
 private:
     UIContentErrorCode InitializeInner(

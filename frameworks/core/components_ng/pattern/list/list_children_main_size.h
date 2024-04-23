@@ -36,6 +36,7 @@ inline constexpr ListChangeFlag LIST_UPDATE_CHILD_SIZE = 1 << 1;
 inline constexpr ListChangeFlag LIST_UPDATE_LANES = 1 << 2;
 inline constexpr ListChangeFlag LIST_UPDATE_SPACE = 1 << 3;
 inline constexpr ListChangeFlag LIST_GROUP_UPDATE_HEADER_FOOTER = 1 << 4;
+inline constexpr ListChangeFlag LIST_UPDATE_ITEM_COUNT = 1 << 5;
 
 namespace {
 constexpr float DEFAULT_SIZE = -1.0f;
@@ -99,11 +100,33 @@ public:
         }
     }
 
+    void SyncChildrenSize(float childSize)
+    {
+        childrenSize_.emplace_back(childSize);
+    }
+
+    void SyncChildrenSizeOver()
+    {
+        if (onChildrenSizeChange_) {
+            onChildrenSizeChange_(std::make_tuple(-1, -1, -1), LIST_UPDATE_CHILD_SIZE);
+        }
+        initialized_ = true;
+    }
+
+    bool NeedSync() const
+    {
+        return !initialized_;
+    }
+
     float GetChildSize(int32_t index) const
     {
         if (index > (static_cast<int32_t>(childrenSize_.size()) - 1) || index < 0 ||
             NearEqual(childrenSize_[index], DEFAULT_SIZE)) {
             return defaultSize_;
+        }
+        if (Negative(childrenSize_[index])) {
+            TAG_LOGW(AceLogTag::ACE_LIST, "ChildrenMainSize child index:%{public}d, size:%{public}f.",
+                index, childrenSize_[index]);
         }
         return childrenSize_[index];
     }
@@ -115,6 +138,7 @@ public:
 private:
     std::vector<float> childrenSize_;
     float defaultSize_ = 0.0f;
+    bool initialized_ = false;
     std::function<void(std::tuple<int32_t, int32_t, int32_t>, ListChangeFlag)> onChildrenSizeChange_;
 };
 

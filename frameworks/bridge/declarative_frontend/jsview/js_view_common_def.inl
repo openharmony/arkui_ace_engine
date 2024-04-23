@@ -96,6 +96,8 @@ bool ConvertFromJSValueNG(const JSRef<JSVal>& jsValue, T& result)
         return ret;
     } else if constexpr (std::is_same_v<T, CalcDimension>) {
         return JSViewAbstract::ParseJsDimensionVpNG(jsValue, result);
+    } else if constexpr (std::is_same_v<T, NG::CalcLength>) {
+        return JSViewAbstract::ParseJsLengthVpNG(jsValue, result);
     } else if constexpr (std::is_same_v<T, Color>) {
         return JSViewAbstract::ParseJsColor(jsValue, result);
     }

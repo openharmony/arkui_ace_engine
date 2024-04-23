@@ -64,7 +64,7 @@ JsAcePage::~JsAcePage()
                 accessibilityManager->ClearPageAccessibilityNodes(domDoc->GetRootNodeId());
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPageClearAccessibilityNodes");
 
     // Release Dom and Components in UI thread
     RefPtr<PageTransitionComponent> pageTransition;
@@ -82,7 +82,7 @@ JsAcePage::~JsAcePage()
             component.Reset();
             radioGroups.reset();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPageReleaseDomAndComponent");
 #endif
 }
 
@@ -271,7 +271,8 @@ void JsAcePage::RemoveAnimationBridge(NodeId nodeId)
             LOGE("taskExecutor is nullptr");
             return;
         }
-        taskExecutor->PostSyncTask([&bridge]() { bridge.Reset(); }, TaskExecutor::TaskType::JS);
+        taskExecutor->PostSyncTask([&bridge]() { bridge.Reset(); },
+            TaskExecutor::TaskType::JS, "ArkUIReleaseAnimationBridge");
     }
 }
 

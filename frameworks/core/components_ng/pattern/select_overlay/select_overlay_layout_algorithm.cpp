@@ -78,8 +78,8 @@ void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
 
     // paint rect is in global position, need to convert to local position
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    const auto firstHandleRect = info_->firstHandle.paintRect - offset;
-    const auto secondHandleRect = info_->secondHandle.paintRect - offset;
+    const auto firstHandleRect = info_->firstHandle.GetPaintRect() - offset;
+    const auto secondHandleRect = info_->secondHandle.GetPaintRect() - offset;
 
     auto top = info_->isNewAvoid ? info_->selectArea.Top() : firstHandleRect.Top();
     auto bottom = info_->isNewAvoid ? info_->selectArea.Bottom() : secondHandleRect.Bottom();
@@ -177,10 +177,10 @@ bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const SelectOverlayInfo& info
         return true;
     }
     if (info.isSingleHandle) {
-        return info.firstHandle.paintRect.IsWrappedBy(info.showArea);
+        return info.firstHandle.GetPaintRect().IsWrappedBy(info.showArea);
     }
-    return info.firstHandle.paintRect.IsWrappedBy(info.showArea) &&
-           info.secondHandle.paintRect.IsWrappedBy(info.showArea);
+    return info.firstHandle.GetPaintRect().IsWrappedBy(info.showArea) &&
+           info.secondHandle.GetPaintRect().IsWrappedBy(info.showArea);
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper)
@@ -214,8 +214,8 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     // paint rect is in global position, need to convert to local position
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    const auto firstHandleRect = info_->firstHandle.paintRect - offset;
-    const auto secondHandleRect = info_->secondHandle.paintRect - offset;
+    const auto firstHandleRect = info_->firstHandle.GetPaintRect() - offset;
+    const auto secondHandleRect = info_->secondHandle.GetPaintRect() - offset;
 
     auto singleHandle = firstHandleRect;
     if (!info_->firstHandle.isShow) {
@@ -265,10 +265,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
     // Adjust position of overlay.
     auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
-        if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
-            menuPosition.SetX(theme->GetDefaultMenuPositionX());
-        } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
-            menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
+        auto defaultMenuPositionX = theme->GetDefaultMenuPositionX();
+        if (LessOrEqual(menuPosition.GetX(), defaultMenuPositionX)) {
+            menuPosition.SetX(defaultMenuPositionX);
+        } else if (GreatOrEqual(
+            menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width() - defaultMenuPositionX)) {
+                menuPosition.SetX(overlayWidth - menuWidth - defaultMenuPositionX);
         }
     };
     adjustPositionXWithViewPort(menuPosition);
@@ -358,8 +360,8 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
     AdjustMenuTooFarAway(menuOffset, menuRect);
     // menu cover up handle
-    auto upPaint = upHandle.paintRect - offset;
-    auto downPaint = downHandle.paintRect - offset;
+    auto upPaint = upHandle.GetPaintRect() - offset;
+    auto downPaint = downHandle.GetPaintRect() - offset;
     if (!info_->isSingleHandle && upHandle.isShow && !downHandle.isShow) {
         auto circleOffset = OffsetF(
             upPaint.GetX() - (spaceBetweenHandle - upPaint.Width()) / 2.0f, upPaint.GetY() - spaceBetweenHandle);
@@ -399,6 +401,10 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, con
     auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
     auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset();
     auto centerX = menuRect.Width() / 2.0f;
+    if (info_->callerNodeInfo) {
+        hostFrameRect = info_->callerNodeInfo->paintFrameRect;
+        hostGlobalOffset = info_->callerNodeInfo->paintOffset;
+    }
     if (GreatNotEqual(menuRect.GetX() + centerX, hostGlobalOffset.GetX() + hostFrameRect.Width())) {
         menuOffset.SetX(hostGlobalOffset.GetX() + hostFrameRect.Width() - centerX);
         return;

@@ -80,7 +80,7 @@ void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
             }
             fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIFontLoadFromNetwork");
 }
 
 void RosenFontLoader::LoadFromFile(const RefPtr<PipelineBase>& context)
@@ -109,7 +109,7 @@ void RosenFontLoader::LoadFromFile(const RefPtr<PipelineBase>& context)
             const std::vector<uint8_t> fontData(assetData->GetData(), assetData->GetData() + assetData->GetSize());
             fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIFontLoadFromFile");
 }
 
 RefPtr<Asset> RosenFontLoader::GetAssetFromFile(const std::string& fileName) const
@@ -228,7 +228,7 @@ void RosenFontLoader::LoadFromResource(
             const std::vector<uint8_t> fontData(data.get(), data.get() + dataLen);
             fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIFontLoadFromResource");
 }
 
 void RosenFontLoader::LoadFromAsset(const RefPtr<PipelineBase>& context)
@@ -260,7 +260,7 @@ void RosenFontLoader::LoadFromAsset(const RefPtr<PipelineBase>& context)
             const std::vector<uint8_t> fontData(assetData->GetData(), assetData->GetData() + assetData->GetSize());
             fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIFontLoadFromAsset");
 }
 
 void RosenFontLoader::PostLoadFontTask(const std::vector<uint8_t>& fontData, const RefPtr<PipelineBase>& context)
@@ -278,7 +278,7 @@ void RosenFontLoader::PostLoadFontTask(const std::vector<uint8_t>& fontData, con
             // When font is already loaded, notify all which used this font.
             fontLoader->NotifyCallbacks();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIFontLoadFromList");
 }
 
 void RosenFontLoader::NotifyCallbacks()

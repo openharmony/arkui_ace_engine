@@ -56,6 +56,14 @@ void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::GRID_ITEM_ETS_TAG, nodeId,
+        [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
+
+    return frameNode;
+}
+
 void GridItemModelNG::SetRowStart(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowStart, value);

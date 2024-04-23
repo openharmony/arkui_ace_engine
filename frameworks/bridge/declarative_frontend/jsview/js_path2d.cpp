@@ -32,9 +32,9 @@ void JSPath2D::Constructor(const JSCallbackInfo& args)
     args.SetSize(sizeof(JSPath2D));
     EcmaVM* vm = args.GetVm();
     CHECK_NULL_VOID(vm);
-    panda::JsiRuntimeCallInfo* runtimeCallInfo = args.GetJsiRuntimeCallInfo();
-    CHECK_NULL_VOID(runtimeCallInfo);
-    jsPath2d->thisObj_ = panda::CopyableGlobal<panda::JSValueRef>(vm, runtimeCallInfo->GetThisRef());
+    Local<ObjectRef> pathCmdObj = ObjectRef::New(vm);
+    pathCmdObj->SetNativePointerFieldCount(vm, 1);
+    jsPath2d->pathCmdObj_ = panda::CopyableGlobal<panda::JSValueRef>(vm, pathCmdObj);
 }
 
 void JSPath2D::Destructor(JSPath2D* controller)

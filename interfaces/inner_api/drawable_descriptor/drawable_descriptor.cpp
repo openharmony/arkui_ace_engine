@@ -228,6 +228,11 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         HILOGE("Get background from json buffer failed");
         return false;
     }
+    if (isBackground) {
+        backgroundItem_.data_.reset();
+    } else {
+        foregroundItem_.data_.reset();
+    }
     return true;
 #else
     return false;

@@ -752,14 +752,14 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                     inspectorTimer.Reset(callback);
                     auto taskExecutor =
                         SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                    taskExecutor.PostDelayedTask(inspectorTimer, LONG_PRESS_DELAY);
+                    taskExecutor.PostDelayedTask(inspectorTimer, LONG_PRESS_DELAY, "ArkUIInspectorLongPressTouchEvent");
                     break;
                 }
                 default:
                     break;
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIInspectorSendEventByKey");
 
     return true;
 }

@@ -65,7 +65,7 @@ std::string ConvertTextShadow(const std::vector<Shadow>& textShadow)
     return result;
 }
 
-std::string ConvertFeature(const FONT_FEATURES_MAP& fontFeaTures)
+std::string ConvertFeature(const FONT_FEATURES_LIST& fontFeaTures)
 {
     std::string result;
     for (const auto& item : fontFeaTures) {
@@ -98,6 +98,6 @@ void TextClockLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("textShadow",
         ConvertTextShadow(GetTextShadow().value_or(std::vector<Shadow>())).c_str(), filter);
     json->PutExtAttr("fontFeature",
-        ConvertFeature(GetFontFeature().value_or(FONT_FEATURES_MAP())).c_str(), filter);
+        ConvertFeature(GetFontFeature().value_or(FONT_FEATURES_LIST())).c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

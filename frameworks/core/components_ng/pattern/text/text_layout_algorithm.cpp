@@ -36,6 +36,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+constexpr double IMAGE_SPAN_BASELINE_OFFSET = 1.25;
 /**
  * The baseline information needs to be calculated based on contentOffsetY.
  */
@@ -206,6 +207,8 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     auto placeHolderLayoutConstrain = layoutConstrain;
     placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
@@ -231,19 +234,29 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
                 continue;
             }
             (*iterItems)->Measure(layoutConstrain);
-            auto verticalAlign = VerticalAlign::BOTTOM;
+            PlaceholderStyle placeholderStyle;
+            Dimension baselineOffset = Dimension(0.0f);
             auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>((*iterItems)->GetLayoutProperty());
             if (imageLayoutProperty) {
-                verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
+                placeholderStyle.verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(
+                    VerticalAlign::BOTTOM);
+                baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(
+                    Dimension(0.0f));
             }
             auto geometryNode = (*iterItems)->GetGeometryNode();
             if (!geometryNode) {
                 iterItems++;
                 continue;
             }
-            auto width = geometryNode->GetMarginFrameSize().Width();
-            auto height = geometryNode->GetMarginFrameSize().Height();
-            child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, verticalAlign);
+            placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
+            placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
+            if (NearZero(baselineOffset.Value())) {
+                child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, placeholderStyle);
+            } else {
+                (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).NormalizeToPx(pipeline->GetDipScale(),
+                    pipeline->GetFontScale(), pipeline->GetLogicScale(), 0.0f, placeholderStyle.baselineOffset);
+                child->placeholderIndex = imageSpanItem->UpdateParagraph(frameNode, paragraph_, placeholderStyle);
+            }
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
@@ -270,9 +283,11 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
                 iterItems++;
                 continue;
             }
-            auto width = geometryNode->GetMarginFrameSize().Width();
-            auto height = geometryNode->GetMarginFrameSize().Height();
-            child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, VerticalAlign::NONE);
+            PlaceholderStyle placeholderStyle;
+            placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
+            placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
+            placeholderStyle.verticalAlign = VerticalAlign::NONE;
+            child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, placeholderStyle);
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
@@ -405,6 +420,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
         symbolTextStyle.SetEffectStrategy(
             symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
+        symbolTextStyle.SetFontFamilies({"HM Symbol"});
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
@@ -1089,6 +1105,7 @@ ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(
         .wordBreak = textStyle.GetWordBreak(),
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .textOverflow = textStyle.GetTextOverflow(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
     };
 }
 } // namespace OHOS::Ace::NG

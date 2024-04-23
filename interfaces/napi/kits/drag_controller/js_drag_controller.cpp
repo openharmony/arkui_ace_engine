@@ -559,7 +559,7 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
             napi_value dragAndDropInfoValue;
             GetCallBackDataForJs(asyncCtx, dragNotifyMsg, dragStatus, dragAndDropInfoValue);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIDragHandleSuccess");
 }
 
 void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode, const std::string& errMsg = "")
@@ -601,7 +601,7 @@ void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
         [globalX = asyncCtx->globalX, globalY = asyncCtx->globalY, context = pipelineContext]() {
             context->OnDragEvent({ globalX, globalY }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart");
 }
 
 void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
@@ -764,7 +764,7 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
             }
             StartDragService(asyncCtx);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIDragMultipleComplete");
 }
 
 void OnComplete(DragControllerAsyncCtx* asyncCtx)
@@ -866,7 +866,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 }
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIDragComplete");
 }
 
 bool ParseTouchPoint(DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType)
@@ -1309,7 +1309,7 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
                     Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(dropResult);
                     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(false);
                 },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIDragStop");
         }
     };
     bool getPointSuccess = container->GetCurPointerEventInfo(

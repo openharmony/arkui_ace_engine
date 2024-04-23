@@ -19,10 +19,9 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-
-#include "core/components/common/properties/color.h"
 #define private public
 #define protected public
+
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -30,12 +29,15 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/measure_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,6 +60,7 @@ class SpanStringTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static ImageSpanOptions GetImageOption(const std::string& src);
 };
 
 void SpanStringTestNg::SetUpTestSuite()
@@ -74,6 +77,24 @@ void SpanStringTestNg::SetUpTestSuite()
 void SpanStringTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+}
+
+ImageSpanOptions SpanStringTestNg::GetImageOption(const std::string& src)
+{
+    ImageSpanSize size { .width = 50.0_vp, .height = 50.0_vp };
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(2.0_vp);
+    MarginProperty margins;
+    margins.SetEdges(CalcLength(10.0));
+    PaddingProperty paddings;
+    paddings.SetEdges(CalcLength(5.0));
+    ImageSpanAttribute attr { .paddingProp = paddings,
+        .marginProp = margins,
+        .borderRadius = borderRadius,
+        .objectFit = ImageFit::COVER,
+        .verticalAlign = VerticalAlign::BOTTOM };
+    ImageSpanOptions option { .image = src, .imageAttribute = attr };
+    return option;
 }
 
 class TestNode : public UINode {
@@ -138,13 +159,16 @@ HWTEST_F(SpanStringTestNg, SpanString002, TestSize.Level1)
     std::vector<RefPtr<SpanBase>> spans;
     spans.push_back(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 3));
     spans.push_back(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
-    auto spanStringWithSpans1 = AceType::MakeRefPtr<SpanString>("01234567891", spans);
-    auto spanStringWithSpans2 = AceType::MakeRefPtr<SpanString>("01234567891", spans);
+    auto spanStringWithSpans1 = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans1->BindWithSpans(spans);
+    auto spanStringWithSpans2 = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans2->BindWithSpans(spans);
     EXPECT_TRUE(spanStringWithSpans1->IsEqualToSpanString(spanStringWithSpans2));
     std::vector<RefPtr<SpanBase>> spans1;
     spans1.push_back(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 3));
     spans1.push_back(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 7));
-    auto spanStringWithSpans3 = AceType::MakeRefPtr<SpanString>("01234567891", spans1);
+    auto spanStringWithSpans3 = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans3->BindWithSpans(spans1);
     EXPECT_FALSE(spanStringWithSpans3->IsEqualToSpanString(spanStringWithSpans2));
     auto subSpanStringWithSpans2 = spanStringWithSpans2->GetSubSpanString(0, 7);
     auto subSpanStringWithSpans3 = spanStringWithSpans3->GetSubSpanString(0, 7);
@@ -229,7 +253,8 @@ HWTEST_F(SpanStringTestNg, SpanString004, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
-    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, 0, 1));
+    spanString3->AddSpan(
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 0, 3));
     Shadow textShadow;
@@ -269,7 +294,8 @@ HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 {
     auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
-    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, 0, 1));
+    spanString3->AddSpan(
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
     Shadow textShadow;
@@ -648,7 +674,8 @@ HWTEST_F(SpanStringTestNg, GestureSpanString001, TestSize.Level1)
     GestureStyle gestureInfo;
     ConstructGestureStyle(gestureInfo);
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891", spanBases);
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans->BindWithSpans(spanBases);
 
     /**
      * @tc.steps: step2. compare SpansMap and gestureInfo
@@ -675,7 +702,8 @@ HWTEST_F(SpanStringTestNg, GestureSpanString002, TestSize.Level1)
     ConstructGestureStyle(gestureInfo);
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891", spanBases);
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    spanStringWithSpans->BindWithSpans(spanBases);
 
     std::list<RefPtr<SpanBase>> resultList = { AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3),
         AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 3) };
@@ -769,7 +797,8 @@ HWTEST_F(SpanStringTestNg, GestureSpanString004, TestSize.Level1)
     std::vector<RefPtr<SpanBase>> spanBases;
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("01234567891", spanBases);
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("01234567891");
+    spanString->BindWithSpans(spanBases);
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
@@ -817,5 +846,140 @@ HWTEST_F(SpanStringTestNg, GestureSpanString004, TestSize.Level1)
     iter++;
     EXPECT_EQ((*iter)->onClick, nullptr);
     EXPECT_EQ((*iter)->onLongPress, nullptr);
+}
+
+/**
+ * @tc.name: MutableSpanString009
+ * @tc.desc: Test imageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString009, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+
+    auto spans = mutableStr->GetSpans(0, 2);
+    EXPECT_TRUE(spans.size() == 0);
+
+    spans = mutableStr->GetSpans(-1, 1);
+    EXPECT_TRUE(spans.size() == 0);
+
+    spans = mutableStr->GetSpans(0, 1);
+    EXPECT_TRUE(spans.size() == 1);
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    EXPECT_TRUE(spans[0]->IsAttributesEqual(imageSpan));
+}
+
+/**
+ * @tc.name: MutableSpanString010
+ * @tc.desc: Test the insertString in the case of imageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString010, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+
+    mutableStr->InsertString(0, "123");
+    auto text = mutableStr->GetString();
+    EXPECT_TRUE(text == "123 ");
+    auto length = mutableStr->GetLength();
+    EXPECT_TRUE(length == 4);
+
+    mutableStr->InsertString(4, "456");
+    text = mutableStr->GetString();
+    EXPECT_TRUE(text == "123 456");
+    length = mutableStr->GetLength();
+    EXPECT_TRUE(length == 7);
+
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_TRUE(spans.size() == 1);
+
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    EXPECT_TRUE(spans[0]->IsAttributesEqual(imageSpan));
+}
+
+/**
+ * @tc.name: MutableSpanString011
+ * @tc.desc: Test the insertSpanString in the case of imageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString011, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+
+    auto spanStr = AceType::MakeRefPtr<SpanString>("123");
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
+    mutableStr->InsertSpanString(0, spanStr);
+    auto text = mutableStr->GetString();
+    EXPECT_EQ(text, "123 ");
+    auto length = mutableStr->GetLength();
+    EXPECT_EQ(length, 4);
+
+    spanStr = AceType::MakeRefPtr<SpanString>("456");
+    spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
+    mutableStr->InsertSpanString(4, spanStr);
+    text = mutableStr->GetString();
+    EXPECT_EQ(text, "123 456");
+    length = mutableStr->GetLength();
+    EXPECT_EQ(length, 7);
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 3);
+}
+
+/**
+ * @tc.name: MutableSpanString012
+ * @tc.desc: Test the replaceSpan/addSpan in the case of imageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString012, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    mutableStr->InsertString(0, "123");
+    mutableStr->InsertString(4, "456");
+
+    auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
+    auto imageSpan1 = AceType::MakeRefPtr<ImageSpan>(imageOption1);
+    mutableStr->ReplaceSpan(3, 1, imageSpan1);
+    auto length = mutableStr->GetLength();
+    EXPECT_TRUE(length == 7);
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_TRUE(spans[0]->IsAttributesEqual(imageSpan1));
+
+    auto imageOption2 = SpanStringTestNg::GetImageOption("src/icon-3.png");
+    auto imageSpan2 = AceType::MakeRefPtr<ImageSpan>(imageOption2);
+    imageSpan2->UpdateStartIndex(3);
+    imageSpan2->UpdateEndIndex(4);
+    mutableStr->AddSpan(imageSpan2);
+    spans = mutableStr->GetSpans(0, 7);
+    EXPECT_TRUE(spans[0]->IsAttributesEqual(imageSpan2));
+}
+
+/**
+ * @tc.name: MutableSpanString013
+ * @tc.desc: Test the appendSpan/removeSpan in the case of imageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString013, TestSize.Level1)
+{
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    mutableStr->InsertString(0, "123");
+    mutableStr->InsertString(4, "456");
+    auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
+    auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
+    mutableStr->AppendSpanString(imageSpan1);
+    auto spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 1);
+    mutableStr->RemoveSpan(0, 7, SpanType::Image);
+    spans = mutableStr->GetSpans(0, 6);
+    EXPECT_EQ(spans.size(), 0);
+    spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 1);
+    mutableStr->RemoveSpans(0, 7);
+    spans = mutableStr->GetSpans(0, 7);
+    EXPECT_EQ(spans.size(), 0);
 }
 } // namespace OHOS::Ace::NG

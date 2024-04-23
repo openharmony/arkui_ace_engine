@@ -71,4 +71,9 @@ uint32_t ImageSourcePreview::GetFrameCount()
 {
     return 0;
 }
+
+std::string ImageSourcePreview::GetEncodedFormat()
+{
+    return "";
+}
 } // namespace OHOS::Ace

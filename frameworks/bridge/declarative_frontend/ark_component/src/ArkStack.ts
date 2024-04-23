@@ -14,9 +14,20 @@
  */
 
 /// <reference path='./import.ts' />
+
+interface StackParam {
+  alignContent: Alignment
+}
+
 class ArkStackComponent extends ArkComponent implements StackAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): StackAttribute {
+    if (value[0] !== undefined) {
+      this.alignContent((value[0] as StackParam).alignContent);
+    }
+    return this
   }
   alignContent(value: Alignment): StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);

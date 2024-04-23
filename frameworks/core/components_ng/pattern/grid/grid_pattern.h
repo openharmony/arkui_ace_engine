@@ -230,6 +230,8 @@ public:
 
     bool IsPredictOutOfRange(int32_t index) const;
 
+    bool IsReverse() const override;
+
 private:
     float GetEndOffset();
     float GetMainGap() const;
@@ -267,6 +269,8 @@ private:
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
 
+    void SyncLayoutBeforeSpring();
+
     void FireOnScrollStart() override;
 
     inline bool UseIrregularLayout() const;
@@ -291,12 +295,12 @@ private:
     bool isDownStep_ = false;
     bool isLeftEndStep_ = false;
     bool isRightEndStep_ = false;
+    bool isSmoothScrolling_ = false;
 
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
-    bool isSmoothScrolling_ = false;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
     std::optional<GridPredictLayoutParam> predictLayoutParam_;

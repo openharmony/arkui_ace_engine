@@ -779,12 +779,32 @@ HWTEST_F(RatingTestNg, RatingMeasureTest013, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
     /**
      * @tc.steps: step1. Create LayoutWrapperNode and RatingLayoutAlgorithm.
+     * add contentModifierNode for fitting new builder
      */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStars(RATING_STAR_NUM);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->SetRatingScore(RATING_SCORE);
+    auto node = [](RatingConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(config.starNum_, RATING_STAR_NUM);
+        EXPECT_EQ(config.isIndicator_, RATING_INDICATOR);
+        EXPECT_EQ(config.rating_, RATING_SCORE);
+        EXPECT_EQ(config.stepSize_, DEFAULT_STEP_SIZE);
+        return nullptr;
+    };
+    ratingPattern->SetBuilderFunc(node);
+    ratingPattern->BuildContentModifierNode();
     auto ratingLayoutProperty = AceType::MakeRefPtr<RatingLayoutProperty>();
     ratingLayoutProperty->UpdateIndicator(true);
     ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
     ASSERT_NE(ratingLayoutProperty, nullptr);
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(nullptr, nullptr, ratingLayoutProperty);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
     auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr);
     ASSERT_NE(ratingLayoutAlgorithm, nullptr);
     LayoutConstraintF layoutConstraint;

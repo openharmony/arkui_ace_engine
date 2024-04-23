@@ -68,6 +68,7 @@ public:
         paintProperty->propIsShowIndicator_ = CloneIsShowIndicator();
         paintProperty->propIndicatorIconSourceInfo_ = CloneIndicatorIconSourceInfo();
         paintProperty->propIndicatorSpace_ = CloneIndicatorSpace();
+        paintProperty->propIndicatorChange_ = CloneIndicatorChange();
         return paintProperty;
     }
 
@@ -242,6 +243,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowIndicator, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorIconSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorSpace, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorChange, bool, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(GaugePaintProperty);
 };
 

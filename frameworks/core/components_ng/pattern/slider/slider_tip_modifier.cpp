@@ -303,7 +303,7 @@ void SliderTipModifier::SetTipFlag(bool flag)
                 CHECK_NULL_VOID(pipeline);
                 pipeline->RequestFrame();
             },
-            TaskExecutor::TaskType::UI, BUBBLE_DISAPPEAR_DELAY_TIMER);
+            TaskExecutor::TaskType::UI, BUBBLE_DISAPPEAR_DELAY_TIMER, "ArkUISliderSetBubbleDisappearAnimation");
     }
     tipFlag_->Set(flag);
 }

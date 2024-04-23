@@ -55,9 +55,6 @@ void CustomPaintPattern::OnAttachToFrameNode()
             AceType::MakeRefPtr<RenderingContext2DModifier>();
     }
     paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_);
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        UpdateTextDirection(TextDirection::RTL);
-    }
 }
 
 RefPtr<NodePaintMethod> CustomPaintPattern::CreateNodePaintMethod()
@@ -343,9 +340,6 @@ void CustomPaintPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 
 void CustomPaintPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    if (!isSetTextDirection_) {
-        SetTextDirection(TextDirection::INHERIT);
-    }
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.FillText(paintWrapper, text, x, y, maxWidth);
     };
@@ -357,9 +351,6 @@ void CustomPaintPattern::FillText(const std::string& text, double x, double y, s
 
 void CustomPaintPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-    if (!isSetTextDirection_) {
-        SetTextDirection(TextDirection::INHERIT);
-    }
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.StrokeText(paintWrapper, text, x, y, maxWidth);
     };
@@ -934,6 +925,7 @@ void CustomPaintPattern::SetInvalidate()
 
 void CustomPaintPattern::SetTextDirection(TextDirection direction)
 {
+    currentSetTextDirection_ = direction;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
@@ -944,8 +936,11 @@ void CustomPaintPattern::SetTextDirection(TextDirection direction)
     if (direction == TextDirection::INHERIT) {
         direction = directionCommon;
     }
-    UpdateTextDirection(direction);
-    isSetTextDirection_ = true;
+    auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetTextDirection(direction);
+    };
+    paintMethod_->PushTask(task);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void CustomPaintPattern::SetFilterParam(const std::string& filterStr)
@@ -1038,7 +1033,7 @@ void CustomPaintPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& on
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    });
+    }, "ArkUICanvasStartImageAnalyzer");
 }
 
 void CustomPaintPattern::StopImageAnalyzer()
@@ -1121,20 +1116,19 @@ void CustomPaintPattern::Reset()
 
 void CustomPaintPattern::OnLanguageConfigurationUpdate()
 {
-    if (isSetTextDirection_) {
-        return;
-    }
-    UpdateTextDirection(AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR);
+    UpdateTextDefaultDirection();
 }
 
-void CustomPaintPattern::UpdateTextDirection(TextDirection direction)
+void CustomPaintPattern::OnModifyDone()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto task = [direction](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
-        paintMethod.SetTextDirection(direction);
-    };
-    paintMethod_->PushTask(task);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    UpdateTextDefaultDirection();
+}
+
+void CustomPaintPattern::UpdateTextDefaultDirection()
+{
+    if (currentSetTextDirection_ != TextDirection::INHERIT) {
+        return;
+    }
+    SetTextDirection(TextDirection::INHERIT);
 }
 } // namespace OHOS::Ace::NG
