@@ -19,6 +19,7 @@
 #include <functional>
 #include <string>
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_component_v2.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
@@ -47,6 +48,7 @@ public:
     void SetBaselineOffset(const Dimension& value) override;
     void SetTextCase(TextCase value) override;
     void SetWordBreak(WordBreak value) override {};
+    void SetLineBreakStrategy(LineBreakStrategy value) override {};
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
