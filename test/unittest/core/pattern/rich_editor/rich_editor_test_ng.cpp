@@ -957,6 +957,7 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue001, TestSize.Level1)
     richEditorPattern->CalcInsertValueObj(info);
     EXPECT_EQ(info.GetSpanIndex(), 1);
     EXPECT_EQ(info.GetOffsetInSpan(), 0);
+    
 }
 
 /**
