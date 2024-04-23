@@ -18216,6 +18216,26 @@ class ArkTextTimerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextTimerFormatModifier.identity, TextTimerFormatModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, textTimerConfiguration) {
+    textTimerConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.textTimerNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.textTimerNode = new xNode.BuilderNode(context);
+      this.textTimerNode.build(this.builder, textTimerConfiguration);
+    } else {
+      this.textTimerNode.update(textTimerConfiguration);
+    }
+    return this.textTimerNode.getFrameNode();
+  }
   onTimer(event) {
     throw new Error('Method not implemented.');
   }
@@ -18306,6 +18326,14 @@ if (globalThis.TextTimer !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.TextTimerModifier(nativePtr, classType);
     });
+  };
+  globalThis.TextTimer.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkTextTimerComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 

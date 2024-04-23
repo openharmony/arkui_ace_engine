@@ -16,9 +16,27 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TIMER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TIMER_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model.h"
 
 namespace OHOS::Ace::NG {
+class TextTimerConfiguration : public CommonConfiguration {
+    public:
+        TextTimerConfiguration(double count, bool isCountDown, bool started, int64_t elapsedTime, bool enabled)
+            : CommonConfiguration(enabled),
+            count_(count),
+            isCountDown_(isCountDown),
+            started_(started),
+            elapsedTime_(elapsedTime)
+        {}
+        double count_ = 60000.0;
+        bool isCountDown_ = false;
+        bool started_ = false;
+        uint64_t elapsedTime_ = 0;
+};
+using TextTimerMakeCallback =
+    std::function<RefPtr<FrameNode>(const TextTimerConfiguration& textTimerConfiguration)>;
 class ACE_EXPORT TextTimerModelNG : public OHOS::Ace::TextTimerModel {
 public:
     RefPtr<TextTimerController> Create() override;
@@ -38,6 +56,7 @@ public:
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetFormat(FrameNode* frameNode, const std::string& format);
+    static void SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& jsMake);
 };
 } // namespace OHOS::Ace::NG
 
