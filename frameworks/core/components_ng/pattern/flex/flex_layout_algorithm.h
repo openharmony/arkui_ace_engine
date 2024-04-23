@@ -51,7 +51,7 @@ struct BaselineProperties {
     }
 };
 
-class ACE_EXPORT FlexLayoutAlgorithm : public LayoutAlgorithm {
+class ACE_FORCE_EXPORT FlexLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(FlexLayoutAlgorithm, LayoutAlgorithm);
 
 public:

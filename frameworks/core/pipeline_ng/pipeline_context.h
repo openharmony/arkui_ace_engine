@@ -58,7 +58,7 @@ namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public PipelineBase {
+class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:

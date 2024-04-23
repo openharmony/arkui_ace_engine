@@ -55,11 +55,11 @@ class ACE_EXPORT ElementRegister {
 public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
-    static ElementRegister* GetInstance();
+    ACE_FORCE_EXPORT static ElementRegister* GetInstance();
     RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
 
-    RefPtr<AceType> GetNodeById(ElementIdType elementId);
+    ACE_FORCE_EXPORT RefPtr<AceType> GetNodeById(ElementIdType elementId);
     /**
      * version of GetNodeById(elmtId) function to return an Element of
      * given class. returns nullptr if Element with this elmtId baddest found
@@ -77,7 +77,7 @@ public:
     RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
     NG::FrameNode* GetFrameNodePtrById(ElementIdType elementId);
 
-    bool AddUINode(const RefPtr<NG::UINode>& node);
+    ACE_FORCE_EXPORT bool AddUINode(const RefPtr<NG::UINode>& node);
 
     bool Exists(ElementIdType elementId);
 
@@ -100,7 +100,7 @@ public:
      * Use with caution: e.g. only use when knowing the Element will
      * be added with new ElementId shortly
      */
-    bool RemoveItemSilently(ElementIdType elementId);
+    ACE_FORCE_EXPORT bool RemoveItemSilently(ElementIdType elementId);
 
     void MoveRemovedItems(RemovedElementsType& removedItems);
 
