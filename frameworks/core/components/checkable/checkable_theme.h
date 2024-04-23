@@ -86,6 +86,10 @@ public:
     {
         return defaultHeight_;
     }
+    const Dimension& GetDefaultWidthNG() const
+    {
+        return defaultWidthNG_;
+    }
     double GetRadioInnerSizeRatio() const
     {
         return radioInnerSizeRatio_;
@@ -225,6 +229,8 @@ protected:
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
     Dimension focusBoardSize_;
+    Dimension defaultWidthNG_;
+    Dimension defaultHeightNG_;
     double hoverDuration_ = 0.0f;
     double hoverToTouchDuration_ = 0.0f;
     double touchDuration_ = 0.0f;
@@ -269,13 +275,11 @@ public:
             theme->height_ = theme->width_;
             theme->hotZoneHorizontalPadding_ = checkboxPattern->GetAttr<Dimension>("checkbox_hotzone_padding", 0.0_vp);
             theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size", 0.0_vp);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->defaultPaddingSize_ =
-                    checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
-                theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
-            }
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             theme->defaultHeight_ = theme->defaultWidth_;
+            theme->defaultWidthNG_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
+            theme->defaultHeightNG_ = theme->defaultWidth_;
+            theme->defaultPaddingSize_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
             theme->needFocus_ = static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_need_focus", 0.0));
             theme->backgroundSolid_ =
                 static_cast<bool>(checkboxPattern->GetAttr<double>("checkbox_inactive_background_solid", 0.0));

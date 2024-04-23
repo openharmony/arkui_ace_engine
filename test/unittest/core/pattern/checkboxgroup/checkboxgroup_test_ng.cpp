@@ -153,11 +153,11 @@ HWTEST_F(CheckBoxGroupTestNG, OnModifyDone001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_TRUE(layoutProperty->GetMarginProperty());
+    EXPECT_TRUE(layoutProperty->GetPaddingProperty());
     pattern->OnModifyDone();
-    EXPECT_TRUE(layoutProperty->GetMarginProperty());
+    EXPECT_TRUE(layoutProperty->GetPaddingProperty());
     pattern->OnModifyDone();
-    EXPECT_TRUE(layoutProperty->GetMarginProperty());
+    EXPECT_TRUE(layoutProperty->GetPaddingProperty());
 }
 
 /**
@@ -1543,10 +1543,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
-    checkboxTheme->defaultWidth_ = Dimension(COMPONENT_WIDTH);
-    checkboxTheme->defaultHeight_ = Dimension(COMPONENT_WIDTH);
-    checkboxTheme->hotZoneHorizontalPadding_ = Dimension(COMPONENT_WIDTH / 4);
-    checkboxTheme->hotZoneVerticalPadding_ = Dimension(COMPONENT_WIDTH / 4);
+    checkboxTheme->defaultWidthNG_ = Dimension(COMPONENT_WIDTH);
+    checkboxTheme->defaultPaddingSize_ = Dimension(COMPONENT_WIDTH / 4);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
     auto checkBoxGroupLayoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
     ASSERT_NE(checkBoxGroupLayoutAlgorithm, nullptr);
@@ -1558,7 +1556,7 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupLayoutAlgorithmTest001, TestSize.Leve
     auto size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), COMPONENT_WIDTH / 2);
     EXPECT_FLOAT_EQ(size->Height(), COMPONENT_WIDTH / 2);
-    checkboxTheme->defaultHeight_ = Dimension(COMPONENT_HEIGHT);
+    checkboxTheme->defaultHeightNG_ = Dimension(COMPONENT_HEIGHT);
     size = checkBoxGroupLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     EXPECT_FLOAT_EQ(size->Width(), COMPONENT_WIDTH / 2);
     EXPECT_FLOAT_EQ(size->Height(), COMPONENT_WIDTH / 2);
