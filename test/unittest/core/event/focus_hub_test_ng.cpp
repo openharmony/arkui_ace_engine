@@ -3559,7 +3559,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0103, TestSize.Level1)
     auto focusHubParent = frameNode->GetOrCreateFocusHub();
     focusHubParent->SetFocusScopeId("scope1", false);
     auto focusHubChild2 = child2->GetOrCreateFocusHub();
-    focusHubChild2->SetFocusScopePriority("scope1", FocusPriority::PRIOR_FOCUS_PRIOITY);
+    focusHubChild2->SetFocusScopePriority("scope1", 2000);
     EXPECT_TRUE(focusHubParent->AcceptFocusOfPriorityChild());
 }
 
@@ -3584,7 +3584,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0104, TestSize.Level1)
     auto focusHubParent = frameNode->GetOrCreateFocusHub();
     focusHubParent->SetFocusScopeId("scope1", false);
     auto focusHubChild2 = child2->GetOrCreateFocusHub();
-    focusHubChild2->SetFocusScopePriority("scope1", FocusPriority::PRIOR_FOCUS_PRIOITY);
+    focusHubChild2->SetFocusScopePriority("scope1", 2000);
     focusHubParent->OnFocusScope();
     ASSERT_NE(focusHubParent->lastWeakFocusNode_.Upgrade(), nullptr);
 }
