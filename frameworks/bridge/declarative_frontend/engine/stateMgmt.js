@@ -5724,8 +5724,7 @@ class UINodeRegisterProxy {
     }
     populateRemoveElementInfo(removedElements) {
         for (const elmtId of removedElements) {
-            const removedElementInfo = { elmtId, tag: '' };
-            this.removeElementsInfo_.push(removedElementInfo);
+            this.removeElementsInfo_.push(elmtId);
         }
     }
     /* just get the remove items from the native side
@@ -5744,12 +5743,12 @@ class UINodeRegisterProxy {
             return;
         }
         let owningView;
-        this.removeElementsInfo_.forEach((rmElmtInfo) => {
-            const owningViewPUWeak = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId);
+        this.removeElementsInfo_.forEach((elmtId) => {
+            const owningViewPUWeak = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
             if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
-                    owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
+                    owningView.purgeDeleteElmtId(elmtId);
                 }
                 else {
                     
@@ -5759,7 +5758,7 @@ class UINodeRegisterProxy {
                 
             }
             // FIXME: only do this if app uses V3
-            ObserveV2.getObserve().clearBinding(rmElmtInfo.elmtId);
+            ObserveV2.getObserve().clearBinding(elmtId);
         });
         this.removeElementsInfo_.length = 0;
     }

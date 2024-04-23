@@ -148,20 +148,17 @@ void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)
 }
 void JSViewStackProcessor::JsMoveDeletedElmtIds(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsArray()) {
+    auto jsArrInfo = info[0];
+    if (!jsArrInfo->IsArray()) {
         return;
     }
-    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsArrInfo);
 
     RemovedElementsType removedElements;
     ElementRegister::GetInstance()->MoveRemovedItems(removedElements);
     size_t index = jsArr->Length();
     for (const auto& rmElmtId : removedElements) {
-        // TS Object of type RemovedElementInfo:
-        JSRef<JSObject> jsObject = JSRef<JSObject>::New();
-        jsObject->SetPropertyObject("elmtId", JSRef<JSVal>::Make(ToJSValue(rmElmtId.first)));
-        jsObject->SetPropertyObject("tag", JSRef<JSVal>::Make(ToJSValue(rmElmtId.second)));
-        jsArr->SetValueAt(index++, jsObject);
+        jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(rmElmtId)));
     }
 }
 
