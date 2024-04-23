@@ -129,6 +129,7 @@ public:
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config));
     MOCK_METHOD1(DestroyCustomPopupUIExtension, void(int32_t nodeId));
     MOCK_METHOD1(UpdateTransform, void(const OHOS::Rosen::Transform& transform));
+    MOCK_METHOD1(SetNodeGrayScale, void(float grayscale));
 };
 } // namespace Ace
 } // namespace OHOS
