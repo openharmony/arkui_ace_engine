@@ -318,6 +318,11 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
 }
 
+void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+{
+    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
+}
+
 std::optional<SelectOverlayInfo> RichEditorSelectOverlay::GetSelectOverlayInfo()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
