@@ -65,6 +65,7 @@ public:
     virtual void SetMaxLines(uint32_t value) = 0;
     virtual void SetTextIndent(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
+    virtual void SetLineSpacing(const Dimension& value) = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
     virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;

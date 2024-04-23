@@ -182,7 +182,7 @@ void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
         stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
     });
 
-    taskExecutor->PostDelayedTask(pressStyleTask_, TaskExecutor::TaskType::UI, delayTime);
+    taskExecutor->PostDelayedTask(pressStyleTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUIPressStateStyle");
 }
 
 void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
@@ -206,7 +206,8 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
         stateStyleMgr->PostListItemPressStyleTask(stateStyleMgr->currentState_);
     });
 
-    taskExecutor->PostDelayedTask(pressCancelStyleTask_, TaskExecutor::TaskType::UI, delayTime);
+    taskExecutor->PostDelayedTask(
+        pressCancelStyleTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUIPressCancelStateStyle");
 }
 
 void StateStyleManager::PostListItemPressStyleTask(UIState state)

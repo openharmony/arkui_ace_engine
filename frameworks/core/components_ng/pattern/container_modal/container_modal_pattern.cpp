@@ -643,7 +643,7 @@ void ContainerModalPattern::CallButtonsRectChange()
                 cb(containerModal, buttons);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIContainerModalButtonsRectChange");
 }
 
 void ContainerModalPattern::InitTitle()

@@ -72,6 +72,9 @@ const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
 const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 // js if lese node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// js node slot
+const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
+
 // toast view
 const char TOAST_ETS_TAG[] = "Toast";
 

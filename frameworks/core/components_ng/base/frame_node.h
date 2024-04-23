@@ -422,6 +422,16 @@ public:
 
     void MarkNeedRenderOnly();
 
+    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
+    {
+        attachFunc_ = std::move(attachFunc);
+    }
+
+    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
+    {
+        detachFunc_ = std::move(detachFunc);
+    }
+
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
@@ -931,6 +941,9 @@ private:
     std::optional<bool> skipMeasureContent_;
     std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
+
+    std::function<void(int32_t)> attachFunc_;
+    std::function<void(int32_t)> detachFunc_;
 
     bool needSyncRenderTree_ = false;
 

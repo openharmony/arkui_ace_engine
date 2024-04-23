@@ -1746,8 +1746,10 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     RegistVirtualKeyBoardListener();
+    bool isFirstCreate = false;
     if (!delegate_) {
         // first create case,
+        isFirstCreate = true;
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
         CHECK_NULL_VOID(delegate_);
         observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
@@ -1877,7 +1879,7 @@ void WebPattern::OnModifyDone()
             CHECK_NULL_VOID(webPattern);
             webPattern->InitSlideUpdateListener();
         };
-        PostTaskToUI(std::move(task));
+        PostTaskToUI(std::move(task), "ArkUIWebInitSlideUpdateListener");
     }
 
     auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
@@ -1887,14 +1889,14 @@ void WebPattern::OnModifyDone()
             webPattern->delegate_->UpdateNativeEmbedModeEnabled(false);
         }
     };
-    PostTaskToUI(std::move(embedEnabledTask));
+    PostTaskToUI(std::move(embedEnabledTask), "ArkUIWebUpdateNativeEmbedModeEnabled");
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddOnAreaChangeNode(host->GetId());
 
     // offline mode
-    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
+    if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE && isFirstCreate) {
         TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
@@ -1977,7 +1979,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
                 CHECK_NULL_VOID(webPattern);
                 webPattern->UpdateLayoutAfterKerboardShow(width, height, keyboard, oldWebHeight);
             },
-            TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME);
+            TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKerboardShow");
     }
     return true;
 }
@@ -2714,7 +2716,7 @@ void WebPattern::ShowTooltip(const std::string& tooltip, int64_t tooltipTimestam
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    taskExecutor->PostDelayedTask(tooltipTask, TaskExecutor::TaskType::UI, TOOLTIP_DELAY_MS);
+    taskExecutor->PostDelayedTask(tooltipTask, TaskExecutor::TaskType::UI, TOOLTIP_DELAY_MS, "ArkUIWebShowTooltip");
 }
 
 void WebPattern::CalculateTooltipMargin(RefPtr<FrameNode>& textNode, MarginProperty& textMargin)
@@ -2872,7 +2874,7 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDateDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIWebShowDateDialog");
     return true;
 }
 
@@ -2922,7 +2924,7 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
             overlayManager->ShowTimeDialog(
                 properties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIWebShowTimeDialog");
     return true;
 }
 
@@ -2975,7 +2977,7 @@ bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDa
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIWebShowTextDialog");
     return true;
 }
 
@@ -3607,7 +3609,7 @@ void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
     isNeedReDrawRect_ = true;
 }
 
-void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
+void WebPattern::PostTaskToUI(const std::function<void()>&& task, const std::string& name) const
 {
     CHECK_NULL_VOID(task);
     auto container = Container::Current();
@@ -3616,7 +3618,7 @@ void WebPattern::PostTaskToUI(const std::function<void()>&& task) const
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset)

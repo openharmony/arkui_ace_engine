@@ -77,6 +77,7 @@ public:
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     static void SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc);
+    static void ResetBuilderFunc(FrameNode* frameNode);
     static void SetChangeValue(FrameNode* frameNode, int index, const std::string& value);
     ControlSize GetControlSize() override;
 

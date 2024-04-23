@@ -203,7 +203,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
                     eventHub->HandleOnItemDragEnd(info);
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart");
     };
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
 #else

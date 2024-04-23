@@ -110,7 +110,7 @@ void AbilityComponentDelegate::Stop()
             if (delegate) {
                 delegate->UnregisterEvent();
             }
-        });
+        }, "ArkUIAbilityComponentStop");
     }
 }
 
@@ -261,7 +261,7 @@ void AbilityComponentDelegate::CreatePluginResource(const WeakPtr<PipelineContex
         delegate->state_ = State::CREATED;
         delegate->hash_ = delegate->MakeResourceHash();
         delegate->RegisterEvent();
-    });
+    }, "ArkUIAbilityComponentCreatePluginResource");
 }
 
 void AbilityComponentDelegate::OnReady() const
@@ -277,7 +277,7 @@ void AbilityComponentDelegate::OnReady() const
                 onReady();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIAbilityComponentReady");
 }
 
 void AbilityComponentDelegate::OnDestroy() const
@@ -293,7 +293,7 @@ void AbilityComponentDelegate::OnDestroy() const
                 onDestroy();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIAbilityComponentDestroy");
 }
 
 void AbilityComponentDelegate::OnAbilityCreated(const std::string& param) const
@@ -309,7 +309,7 @@ void AbilityComponentDelegate::OnAbilityCreated(const std::string& param) const
                 onAbilityCreated(param);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIAbilityComponentAbilityCreated");
 }
 
 void AbilityComponentDelegate::OnAbilityMovedFront() const
@@ -325,7 +325,7 @@ void AbilityComponentDelegate::OnAbilityMovedFront() const
                 onAbilityMovedFront();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIAbilityComponentAbilityMovedFront");
 }
 
 void AbilityComponentDelegate::OnAbilityWillRemove() const
@@ -341,7 +341,7 @@ void AbilityComponentDelegate::OnAbilityWillRemove() const
                 onAbilityWillRemove();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIAbilityComponentAbilityWillRemove");
 }
 
 void AbilityComponentDelegate::StartAbility(const std::string& want)

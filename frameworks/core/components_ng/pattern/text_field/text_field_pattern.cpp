@@ -670,7 +670,11 @@ void TextFieldPattern::OnTextInputScroll(float offset)
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
 {
     CHECK_NULL_RETURN(paragraph_, 0);
-    return paragraph_->GetGlyphIndexByCoordinate(localOffset);
+    int32_t caretPositionIndex = 0;
+    if (!contentController_->IsEmpty()) {
+        caretPositionIndex = paragraph_->GetGlyphIndexByCoordinate(localOffset);
+    }
+    return caretPositionIndex;
 }
 
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPositionNG(const Offset& localOffset)
@@ -1377,14 +1381,6 @@ void TextFieldPattern::UpdateSelection(int32_t start, int32_t end)
     }
 }
 
-void TextFieldPattern::FireOnSelectionChange(int32_t start, int32_t end)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    eventHub->FireOnSelectionChange(start, end);
-}
-
 void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 {
     auto host = GetHost();
@@ -2034,7 +2030,8 @@ void TextFieldPattern::ScheduleCursorTwinkling()
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_);
+    taskExecutor->PostDelayedTask(cursorTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_,
+        "ArkUITextFieldCursorTwinkling");
 }
 
 void TextFieldPattern::StartTwinkling()
@@ -2370,7 +2367,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
             }
             pattern->ScrollToSafeArea();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea");
     return true;
 }
 
@@ -4508,7 +4505,6 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
     if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
         StartTwinkling();
-        FireOnSelectionChange(position, position);
     }
     CloseSelectOverlay();
     auto tmpHost = GetHost();
@@ -4522,6 +4518,7 @@ void TextFieldPattern::SetSelectionFlag(
     if (!HasFocus()) {
         return;
     }
+    bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
         StartTwinkling();
@@ -4540,12 +4537,17 @@ void TextFieldPattern::SetSelectionFlag(
     selectOverlay_->SetUsingMouse(false);
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
-    } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
-        ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
-    } else if (options.value().menuPolicy == MenuPolicy::NEVER) {
-        ProcessOverlay({ .menuIsShow = false, .animation = true });
-    } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
-        ProcessOverlay({ .menuIsShow = true, .animation = true });
+    } else {
+        if (options.has_value()) {
+            if (options.value().menuPolicy == MenuPolicy::NEVER) {
+                isShowMenu = false;
+            } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+                isShowMenu = true;
+            }
+        } else {
+            isShowMenu = false;
+        }
+        ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5855,6 +5857,13 @@ void TextFieldPattern::OnAttachToFrameNode()
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        auto host = GetHost();
+        fontManager->AddFontNodeNG(host);
+    }
     auto onTextSelectorChange = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

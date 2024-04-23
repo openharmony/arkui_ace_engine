@@ -78,7 +78,7 @@ std::string HyperlinkResources::CallResRegisterMethod(const std::string& method,
             std::string result;
             resRegister->OnMethodCall(method, param, result);
         }
-    });
+    }, "ArkUICallResRegisterMethod");
     return "";
 }
 
@@ -119,7 +119,7 @@ void HyperlinkResources::CreatePluginResource(const WeakPtr<PipelineContext>& co
             return;
         }
         hyperlinkResource->id_ = resRegister->CreateResource(HYPERLINK_PARAM, HYPER_CREATE_PARAM);
-    });
+    }, "ArkUICreatePluginResource");
 }
 
 void HyperlinkResources::ReleasePluginResource()
@@ -148,7 +148,7 @@ void HyperlinkResources::ReleasePluginResource()
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIReleasePluginResource");
     }
 }
 

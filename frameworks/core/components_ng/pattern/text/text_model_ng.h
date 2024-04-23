@@ -41,6 +41,7 @@ public:
     void SetMaxLines(uint32_t value) override;
     void SetTextIndent(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetLineSpacing(const Dimension& value) override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
@@ -84,6 +85,7 @@ public:
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -114,6 +116,7 @@ public:
     static Font GetFont(FrameNode* frameNode);
     static std::string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
+    static float GetLineSpacing(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
     static Color GetTextDecorationColor(FrameNode* frameNode);
     static TextDecorationStyle GetTextDecorationStyle(FrameNode* frameNode);

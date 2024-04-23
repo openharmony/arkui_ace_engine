@@ -150,7 +150,7 @@ void PluginFrontendDelegate::ChangeLocale(const std::string& language, const std
 {
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIPluginChangeLocale");
 }
 
 void PluginFrontendDelegate::GetI18nData(std::unique_ptr<JsonValue>& json)
@@ -272,13 +272,13 @@ void PluginFrontendDelegate::OnJSCallback(const std::string& callbackId, const s
                 delegate->jsCallback_(callbackId, args);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginHandleJsCallback");
 }
 
 void PluginFrontendDelegate::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
     taskExecutor_->PostTask([dispatcherCallback = dispatcherCallback_, dispatcher] { dispatcherCallback(dispatcher); },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginSetJsMessageDispatcher");
 }
 
 void PluginFrontendDelegate::TransferComponentResponseData(int32_t callbackId, int32_t code,
@@ -297,7 +297,7 @@ void PluginFrontendDelegate::TransferComponentResponseData(int32_t callbackId, i
                 context->GetMessageBridge()->HandleCallback(callbackId, std::move(data));
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginTransferComponentResponseData");
 }
 
 void PluginFrontendDelegate::TransferJsResponseData(
@@ -314,7 +314,7 @@ void PluginFrontendDelegate::TransferJsResponseData(
                 groupJsBridge->TriggerModuleJsCallback(callbackId, code, std::move(data));
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginTransferJsResponseData");
 }
 
 #if defined(PREVIEW)
@@ -327,7 +327,7 @@ void PluginFrontendDelegate::TransferJsResponseDataPreview(
                 groupJsBridge->TriggerModuleJsCallbackPreview(callbackId, code, responseData);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginTransferJsResponseData");
 }
 #endif
 
@@ -340,7 +340,7 @@ void PluginFrontendDelegate::TransferJsPluginGetError(
                 groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, errorCode, std::move(errorMessage));
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError");
 }
 
 void PluginFrontendDelegate::TransferJsEventData(int32_t callbackId, int32_t code,
@@ -352,7 +352,7 @@ void PluginFrontendDelegate::TransferJsEventData(int32_t callbackId, int32_t cod
                 groupJsBridge->TriggerEventJsCallback(callbackId, code, std::move(data));
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginTransferJsEventData");
 }
 
 void PluginFrontendDelegate::LoadPluginJsCode(std::string&& jsCode) const
@@ -363,7 +363,7 @@ void PluginFrontendDelegate::LoadPluginJsCode(std::string&& jsCode) const
                 groupJsBridge->LoadPluginJsCode(std::move(jsCode));
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode");
 }
 
 void PluginFrontendDelegate::LoadPluginJsByteCode(
@@ -377,7 +377,7 @@ void PluginFrontendDelegate::LoadPluginJsByteCode(
         [jsCode = std::move(jsCode), jsCodeLen = std::move(jsCodeLen), groupJsBridge = groupJsBridge_]() mutable {
             groupJsBridge->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsByteCode");
 }
 
 bool PluginFrontendDelegate::OnPageBackPress()
@@ -393,7 +393,7 @@ bool PluginFrontendDelegate::OnPageBackPress()
                 result = page->FireDeclarativeOnBackPressCallback();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginPageBackPress");
     return result;
 }
 
@@ -406,7 +406,7 @@ void PluginFrontendDelegate::NotifyAppStorage(const WeakPtr<Framework::JsEngine>
             CHECK_NULL_VOID(jsEngine);
             jsEngine->NotifyAppStorage(key, value);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginNotifyAppStorage");
 }
 
 void PluginFrontendDelegate::OnSuspended()
@@ -422,7 +422,7 @@ void PluginFrontendDelegate::OnBackGround()
             CHECK_NULL_VOID(delegate);
             delegate->OnPageHide();
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginPageHide");
 }
 
 void PluginFrontendDelegate::OnForeground()
@@ -433,7 +433,7 @@ void PluginFrontendDelegate::OnForeground()
             CHECK_NULL_VOID(delegate);
             delegate->OnPageShow();
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginPageShow");
 }
 
 void PluginFrontendDelegate::OnConfigurationUpdated(const std::string& data)
@@ -442,7 +442,7 @@ void PluginFrontendDelegate::OnConfigurationUpdated(const std::string& data)
         [onConfigurationUpdated = onConfigurationUpdated_, data] {
             onConfigurationUpdated(data);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginConfigurationUpdated");
 }
 
 bool PluginFrontendDelegate::OnStartContinuation()
@@ -455,7 +455,7 @@ bool PluginFrontendDelegate::OnStartContinuation()
                 ret = delegate->onStartContinuationCallBack_();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginStartContinuation");
     return ret;
 }
 
@@ -468,7 +468,7 @@ void PluginFrontendDelegate::OnCompleteContinuation(int32_t code)
                 delegate->onCompleteContinuationCallBack_(code);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginCompleteContinuation");
 }
 
 void PluginFrontendDelegate::OnRemoteTerminated()
@@ -480,7 +480,7 @@ void PluginFrontendDelegate::OnRemoteTerminated()
                 delegate->onRemoteTerminatedCallBack_();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginRemoteTerminated");
 }
 
 void PluginFrontendDelegate::OnSaveData(std::string& data)
@@ -493,7 +493,7 @@ void PluginFrontendDelegate::OnSaveData(std::string& data)
                 delegate->onSaveDataCallBack_(savedData);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginSaveData");
     std::string pageUri = GetRunningPageUrl();
     data = std::string("{\"url\":\"").append(pageUri).append("\",\"__remoteData\":").append(savedData).append("}");
 }
@@ -508,7 +508,7 @@ bool PluginFrontendDelegate::OnRestoreData(const std::string& data)
                 ret = delegate->onRestoreDataCallBack_(data);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginRestoreData");
     return ret;
 }
 
@@ -520,7 +520,7 @@ void PluginFrontendDelegate::OnMemoryLevel(const int32_t level)
                 onMemoryLevel(level);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginMemoryLevel");
 }
 
 void PluginFrontendDelegate::GetPluginsUsed(std::string& data)
@@ -537,7 +537,7 @@ void PluginFrontendDelegate::OnActive()
         [onActive = onActive_]() {
             onActive();
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginActive");
 }
 
 void PluginFrontendDelegate::OnInactive()
@@ -546,7 +546,7 @@ void PluginFrontendDelegate::OnInactive()
         [onInactive = onInactive_]() {
             onInactive();
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginInactive");
 }
 
 void PluginFrontendDelegate::OnNewRequest(const std::string& data)
@@ -561,14 +561,15 @@ void PluginFrontendDelegate::CallPopPage()
 
 void PluginFrontendDelegate::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); },
+        TaskExecutor::TaskType::JS, "ArkUIPluginResetStagingPage");
 }
 
 void PluginFrontendDelegate::OnApplicationDestroy(const std::string& packageName)
 {
     taskExecutor_->PostSyncTask(
         [destroyApplication = destroyApplication_, packageName] { destroyApplication(packageName); },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginApplicationDestroy");
 }
 
 void PluginFrontendDelegate::UpdateApplicationState(const std::string& packageName, Frontend::State state)
@@ -577,7 +578,7 @@ void PluginFrontendDelegate::UpdateApplicationState(const std::string& packageNa
         [updateApplicationState = updateApplicationState_, packageName, state] {
             updateApplicationState(packageName, state);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginUpdateApplicationState");
 }
 
 void PluginFrontendDelegate::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
@@ -586,7 +587,7 @@ void PluginFrontendDelegate::OnWindowDisplayModeChanged(bool isShownInMultiWindo
         [onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow, data] {
             onWindowDisplayModeChanged(isShownInMultiWindow, data);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginWindowDisplayModeChanged");
 }
 
 void PluginFrontendDelegate::OnSaveAbilityState(std::string& data)
@@ -595,7 +596,7 @@ void PluginFrontendDelegate::OnSaveAbilityState(std::string& data)
         [onSaveAbilityState = onSaveAbilityState_, &data] {
             onSaveAbilityState(data);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginSaveAbilityState");
 }
 
 void PluginFrontendDelegate::OnRestoreAbilityState(const std::string& data)
@@ -604,7 +605,7 @@ void PluginFrontendDelegate::OnRestoreAbilityState(const std::string& data)
         [onRestoreAbilityState = onRestoreAbilityState_, data] {
             onRestoreAbilityState(data);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginRestoreAbilityState");
 }
 
 void PluginFrontendDelegate::OnNewWant(const std::string& data)
@@ -613,7 +614,7 @@ void PluginFrontendDelegate::OnNewWant(const std::string& data)
         [onNewWant = onNewWant_, data] {
             onNewWant(data);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginNewWant");
 }
 
 void PluginFrontendDelegate::FireAsyncEvent(
@@ -631,7 +632,7 @@ void PluginFrontendDelegate::FireAsyncEvent(
                 delegate->asyncEvent_(eventId, args);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginFireAsyncEvent");
 }
 
 bool PluginFrontendDelegate::FireSyncEvent(
@@ -658,7 +659,7 @@ void PluginFrontendDelegate::FireSyncEvent(
                 delegate->syncEvent_(eventId, args);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginFireSyncEvent");
 
     result = jsCallBackResult_[callbackId];
     jsCallBackResult_.erase(callbackId);
@@ -734,7 +735,7 @@ void PluginFrontendDelegate::PostponePageTransition()
           auto pipelineContext = delegate->pipelineContextHolder_.Get();
           pipelineContext->PostponePageTransition();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginPostponePageTransition");
 }
 
 void PluginFrontendDelegate::LaunchPageTransition()
@@ -746,7 +747,7 @@ void PluginFrontendDelegate::LaunchPageTransition()
           auto pipelineContext = delegate->pipelineContextHolder_.Get();
           pipelineContext->LaunchPageTransition();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginLaunchPageTransition");
 }
 
 void PluginFrontendDelegate::BackWithTarget(const PageTarget& target, const std::string& params)
@@ -883,12 +884,12 @@ void PluginFrontendDelegate::TriggerPageUpdate(int32_t pageId, bool directExecut
         [updateTask, pipelineContext, directExecute]() {
             pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginAddPageUpdateTask");
 }
 
-void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task)
+void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
 const std::string& PluginFrontendDelegate::GetAppID() const
@@ -931,7 +932,7 @@ void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t durat
         [durationTime, message, bottom, isRightToLeft, context = pipelineContext] {
             ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginShowToast");
 }
 
 void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::string& message,
@@ -944,7 +945,8 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
                 taskExecutor->PostTask(
-                    [callback, successType]() { callback(0, successType); }, TaskExecutor::TaskType::JS);
+                    [callback, successType]() { callback(0, successType); },
+                    TaskExecutor::TaskType::JS, "ArkUIPluginShowDialogSuccess");
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
     }
@@ -953,7 +955,8 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         auto cancelEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
-                taskExecutor->PostTask([callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS);
+                taskExecutor->PostTask(
+                    [callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS, "ArkUIPluginShowDialogCancel");
             });
         callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     }
@@ -962,7 +965,9 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         auto completeEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             completeEventMarker, [callback, taskExecutor = taskExecutor_] {
-                taskExecutor->PostTask([callback]() { callback(MIN_ROUT_COUNT, 0); }, TaskExecutor::TaskType::JS);
+                taskExecutor->PostTask(
+                    [callback]() { callback(MIN_ROUT_COUNT, 0); },
+                    TaskExecutor::TaskType::JS, "ArkUIPluginShowDialogComplete");
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
@@ -986,7 +991,7 @@ Rect PluginFrontendDelegate::GetBoundingRectData(NodeId nodeId)
     auto task = [context = pipelineContextHolder_.Get(), nodeId, &rect]() {
         context->GetBoundingRectData(nodeId, rect);
     };
-    PostSyncTaskToPage(task);
+    PostSyncTaskToPage(task, "ArkUIPluginGetBoundingRectData");
     return rect;
 }
 
@@ -999,7 +1004,7 @@ std::string PluginFrontendDelegate::GetInspector(NodeId nodeId)
             attrs = accessibilityNodeManager->GetInspectorNodeById(nodeId);
         }
     };
-    PostSyncTaskToPage(task);
+    PostSyncTaskToPage(task, "ArkUIPluginGetInspectorNode");
     return attrs;
 }
 
@@ -1028,7 +1033,7 @@ void PluginFrontendDelegate::WaitTimer(
     if (!result.second) {
         result.first->second = cancelableTimer;
     }
-    taskExecutor_->PostDelayedTask(cancelableTimer, TaskExecutor::TaskType::JS, delayTime);
+    taskExecutor_->PostDelayedTask(cancelableTimer, TaskExecutor::TaskType::JS, delayTime, "ArkUIPluginWaitTimer");
 }
 
 void PluginFrontendDelegate::ClearTimer(const std::string& callbackId)
@@ -1042,10 +1047,10 @@ void PluginFrontendDelegate::ClearTimer(const std::string& callbackId)
     }
 }
 
-void PluginFrontendDelegate::PostSyncTaskToPage(std::function<void()>&& task)
+void PluginFrontendDelegate::PostSyncTaskToPage(std::function<void()>&& task, const std::string& name)
 {
     pipelineContextHolder_.Get(); // Wait until Pipeline Context is attached.
-    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void PluginFrontendDelegate::AddTaskObserver(std::function<void()>&& task)
@@ -1132,9 +1137,9 @@ void PluginFrontendDelegate::LoadJS(
                         page->GetDomDocument()->HandlePageLoadFinish();
                     }
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIPageLoadFinish");
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginLoadJsPage");
 }
 
 void PluginFrontendDelegate::OnSurfaceChanged()
@@ -1167,7 +1172,7 @@ void PluginFrontendDelegate::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginMediaQueryUpdate");
 }
 
 void PluginFrontendDelegate::OnPageReady(
@@ -1217,7 +1222,7 @@ void PluginFrontendDelegate::OnPageReady(
                 delegate->OnPageShow();
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginPageReady");
 }
 
 void PluginFrontendDelegate::OnPrePageChange(const RefPtr<JsAcePage>& page)
@@ -1252,7 +1257,8 @@ void PluginFrontendDelegate::SetCurrentPage(int32_t pageId)
     if (page != nullptr) {
         jsAccessibilityManager_->SetVersion(AccessibilityVersion::JS_DECLARATIVE_VERSION);
         jsAccessibilityManager_->SetRunningPage(page);
-        taskExecutor_->PostTask([updatePage = updatePage_, page] { updatePage(page); }, TaskExecutor::TaskType::JS);
+        taskExecutor_->PostTask([updatePage = updatePage_, page] { updatePage(page); },
+            TaskExecutor::TaskType::JS, "ArkUIPluginSetCurrentPage");
     } else {
         LOGE("PluginFrontendDelegate SetCurrentPage page is null.");
     }
@@ -1321,7 +1327,7 @@ void PluginFrontendDelegate::PopToPage(const std::string& url)
                 });
             pipelineContext->PopToPage(pageId);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginPopToPage");
 }
 
 void PluginFrontendDelegate::PopToPageTransitionListener(
@@ -1385,7 +1391,7 @@ void PluginFrontendDelegate::PopPage()
                 });
             pipelineContext->PopPage();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginPopPage");
 }
 
 void PluginFrontendDelegate::PopPageTransitionListener(
@@ -1432,7 +1438,7 @@ void PluginFrontendDelegate::ClearInvisiblePages()
                 delegate->SetCurrentPage(pageId);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginClearInvisiblePages");
 }
 
 void PluginFrontendDelegate::OnReplacePageSuccess(
@@ -1490,7 +1496,7 @@ void PluginFrontendDelegate::ReplacePage(
             }
             delegate->isStagingPageExist_ = false;
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginReplacePage");
 }
 
 void PluginFrontendDelegate::LoadReplacePage(int32_t pageId, const PageTarget& target, const std::string& params)
@@ -1523,7 +1529,7 @@ void PluginFrontendDelegate::LoadReplacePage(int32_t pageId, const PageTarget& t
                 delegate->ReplacePage(page, url);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginLoadReplacePage");
 }
 
 void PluginFrontendDelegate::SetColorMode(ColorMode colorMode)
@@ -1574,7 +1580,7 @@ void PluginFrontendDelegate::OnPageDestroy(int32_t pageId)
                 delegate->RecyclePageId(pageId);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginPageDestroy");
 }
 
 int32_t PluginFrontendDelegate::GetRunningPageId() const
@@ -1649,7 +1655,7 @@ void PluginFrontendDelegate::HandleImage(
                             bool success, int32_t width, int32_t height) {
         taskExecutor->PostTask(
             [callback = std::move(jsCallback), success, width, height] { callback(success, width, height); },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUIPluginHandleImage");
     };
     pipelineContextHolder_.Get()->TryLoadImageInfo(src, std::move(loadCallback));
 }
@@ -1698,7 +1704,7 @@ void PluginFrontendDelegate::FlushAnimationTasks()
         if (!callbackId.empty()) {
             auto taskIter = animationFrameTaskMap_.find(callbackId);
             if (taskIter != animationFrameTaskMap_.end()) {
-                taskExecutor_->PostTask(taskIter->second, TaskExecutor::TaskType::JS);
+                taskExecutor_->PostTask(taskIter->second, TaskExecutor::TaskType::JS, "ArkUIPluginFlushAnimationTask");
             }
         }
         animationFrameTaskIds_.pop();

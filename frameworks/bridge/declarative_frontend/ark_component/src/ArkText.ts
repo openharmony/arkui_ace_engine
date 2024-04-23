@@ -330,6 +330,26 @@ class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class TextLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetLineSpacing(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().text.resetLineSpacing(node);
+    } else {
+      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
   constructor(value: { overflow: TextOverflow }) {
     super(value);
@@ -540,9 +560,28 @@ class TextFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextContentModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textContent');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.setContent(node, "");
+    }
+    else {
+      getUINativeModule().text.setContent(node, this.value);
+    }
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]) {
+    modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
+    return this;
   }
   enableDataDetector(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextEnableDataDetectorModifier.identity, TextEnableDataDetectorModifier, value);
@@ -611,6 +650,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   letterSpacing(value: number | string): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
+    return this;
+  }
+  lineSpacing(value: LengthMetrics): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, value);
     return this;
   }
   textCase(value: TextCase): TextAttribute {

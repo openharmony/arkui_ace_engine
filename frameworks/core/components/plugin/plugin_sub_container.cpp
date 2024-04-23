@@ -169,7 +169,7 @@ void PluginSubContainer::UpdateSurfaceSize()
             }
             context->OnSurfaceChanged(surfaceWidth, surfaceHeight);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginUpdateSurfaceSize");
 }
 
 void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const std::string& module,
@@ -205,7 +205,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
             }
             context->SetupRootElement();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginSetupRootElement");
 
     if (frontend_) {
         frontend_->AttachPipelineContext(pipelineContext_);
@@ -267,7 +267,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
             }
             context->SetupRootElement();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPluginSetupRootElement");
 
     if (frontend_) {
         frontend_->AttachPipelineContext(pipelineContext_);
@@ -335,7 +335,7 @@ void PluginSubContainer::SetPluginComponentTheme(const std::string& path, const 
                 themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
                 themeManager->LoadCustomTheme(weakAsset.Upgrade());
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIPluginLoadTheme");
     }
 }
 

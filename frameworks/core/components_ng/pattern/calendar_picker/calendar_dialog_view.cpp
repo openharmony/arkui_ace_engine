@@ -45,6 +45,10 @@ constexpr Dimension DIALOG_WIDTH = 336.0_vp;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
+constexpr size_t CANCEL_BUTTON_FONT_COLOR_INDEX = 0;
+constexpr size_t CANCEL_BUTTON_BACKGROUND_COLOR_INDEX = 1;
+constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
+constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 } // namespace
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
     const CalendarSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -108,10 +112,25 @@ void CalendarDialogView::DisableResetOptionButtonColor(
     const RefPtr<CalendarDialogPattern>& calendarDialogPattern, const std::vector<ButtonInfo>& buttonInfos)
 {
     CHECK_NULL_VOID(calendarDialogPattern);
+    size_t fontColorIndex = 0;
+    size_t backgoundColorIndex = 0;
     for (size_t index = 0; index < buttonInfos.size(); index++) {
+        if (index == 0) {
+            fontColorIndex = ACCEPT_BUTTON_FONT_COLOR_INDEX;
+            backgoundColorIndex = ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX;
+        } else {
+            fontColorIndex = CANCEL_BUTTON_FONT_COLOR_INDEX;
+            backgoundColorIndex = CANCEL_BUTTON_BACKGROUND_COLOR_INDEX;
+        }
+
         if (buttonInfos[index].role.has_value() || buttonInfos[index].buttonStyle.has_value() ||
-            buttonInfos[index].backgroundColor.has_value() || buttonInfos[index].fontColor.has_value()) {
-            calendarDialogPattern->SetUpdateOptionsButtonColor(false);
+            buttonInfos[index].fontColor.has_value()) {
+            calendarDialogPattern->SetOptionsButtonUpdateColorFlags(fontColorIndex, false);
+        }
+
+        if (buttonInfos[index].role.has_value() || buttonInfos[index].buttonStyle.has_value() ||
+            buttonInfos[index].backgroundColor.has_value()) {
+            calendarDialogPattern->SetOptionsButtonUpdateColorFlags(backgoundColorIndex, false);
         }
     }
 }
@@ -391,6 +410,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     textLayoutProperty->UpdateContent(
         Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textNode->MountToParent(buttonNode);
 
@@ -416,6 +436,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     buttonEventHub->SetStateEffect(true);
 
     auto buttonRenderContext = buttonNode->GetRenderContext();
+    auto defaultBGColor = SystemProperties::GetDeviceType() == DeviceType::PHONE
+                              ? Color::TRANSPARENT
+                              : calendarTheme->GetDialogButtonBackgroundColor();
+    buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
     buttonNode->MarkModifyDone();
     return buttonNode;

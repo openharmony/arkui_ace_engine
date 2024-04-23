@@ -145,7 +145,7 @@ void SubContainer::UpdateSurfaceSize()
             }
             context->OnSurfaceChanged(surfaceWidth, surfaceHeight);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIFormUpdateSurfaceSize");
 }
 
 void SubContainer::UpdateSurfaceSizeWithAnimathion()
@@ -263,7 +263,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
                 themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
                 themeManager->LoadCustomTheme(weakAsset.Upgrade());
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIFormLoadTheme");
     }
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
@@ -292,7 +292,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
             }
             context->SetupRootElement();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIFormSetupRootElement");
 
     frontend_->AttachPipelineContext(pipelineContext_);
     frontend_->SetLoadCardCallBack(outSidePipelineContext_);
