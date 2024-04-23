@@ -144,8 +144,8 @@ public:
 
     void UpdateTransform(const OHOS::Rosen::Transform& transform) override {};
 
-    void SetNodeGrayScale(float grayscale) override;
-    
+    void SetNodeGrayScale(float grayscale) override {};
+
 private:
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
         napi_value storage);
