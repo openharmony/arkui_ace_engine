@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -140,15 +141,15 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
     return "";
 }
 
-void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("title", GetTitleString().c_str());
-    json->Put("subtitle", GetSubtitleString().c_str());
-    json->Put("menus", GetBarItemsString(true).c_str());
-    json->Put("toolBar", GetBarItemsString(false).c_str());
+    json->PutExtAttr("title", GetTitleString().c_str(), filter);
+    json->PutExtAttr("subtitle", GetSubtitleString().c_str(), filter);
+    json->PutExtAttr("menus", GetBarItemsString(true).c_str(), filter);
+    json->PutExtAttr("toolBar", GetBarItemsString(false).c_str(), filter);
     auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
 }
 
 } // namespace OHOS::Ace::NG

@@ -25,7 +25,6 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -655,11 +654,11 @@ ArkUI_Uint32 GetTextInputCaretColor(ArkUINodeHandle node)
     return TextFieldModelNG::GetCaretColor(frameNode).GetValue();
 }
 
-ArkUI_Float32 GetTextInputCaretStyle(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputCaretStyle(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetCaretStyle(frameNode).Value();
+    return TextFieldModelNG::GetCaretStyle(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_Bool GetTextInputShowUnderline(ArkUINodeHandle node)
@@ -696,7 +695,7 @@ void GetTextInputPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     CHECK_NULL_VOID(frameNode);
     Font value = TextFieldModelNG::GetPlaceholderFont(frameNode);
     if (value.fontSize.has_value()) {
-        font->fontSize = value.fontSize.value().Value();
+        font->fontSize = value.fontSize.value().GetNativeValue(static_cast<DimensionUnit>(font->fontSizeUnit));
     }
     if (value.fontWeight.has_value()) {
         font->fontWeight = static_cast<ArkUI_Int32>(value.fontWeight.value());
@@ -768,11 +767,11 @@ ArkUI_Int32 GetTextInputCancelButtonStyle(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetCleanNodeStyle(frameNode));
 }
 
-ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputCancelIconSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetCancelIconSize(frameNode).Value();
+    return TextFieldModelNG::GetCancelIconSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_CharPtr getTextInputTextCancelIconSrc(ArkUINodeHandle node)
@@ -818,11 +817,11 @@ ArkUI_Int32 GetTextInputFontWeight(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(TextFieldModelNG::GetFontWeight(frameNode));
 }
 
-ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node)
+ArkUI_Float32 GetTextInputFontSize(ArkUINodeHandle node, ArkUI_Int32 unit)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return TextFieldModelNG::GetFontSize(frameNode).Value();
+    return TextFieldModelNG::GetFontSize(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -975,6 +974,125 @@ void ResetTextInputPadding(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     TextFieldModelNG::ResetTextInputPadding(frameNode);
+}
+
+void SetTextInputAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAdaptMinFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextInputAdaptMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
+    TextFieldModelNG::SetAdaptMinFontSize(frameNode, minFontSize);
+}
+
+void SetTextInputAdaptMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetAdaptMaxFontSize(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetTextInputAdaptMaxFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    TextFieldModelNG::SetAdaptMaxFontSize(frameNode, maxFontSize);
+}
+
+void SetTextInputHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, static_cast<Ace::TextHeightAdaptivePolicy>(value));
+}
+
+void ResetTextInputHeightAdaptivePolicy(ArkUINodeHandle node) {}
+
+void SetTextInputPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIResourceLength* size, ArkUI_Int32 weight,
+    ArkUI_CharPtr family, ArkUI_Int32 style)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Font font;
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(size->unit);
+    if (size->unit >= 0) {
+        if (unitEnum == DimensionUnit::CALC) {
+            font.fontSize = CalcDimension(size->string, DimensionUnit::CALC);
+        } else {
+            font.fontSize = CalcDimension(size->value, unitEnum);
+        }
+    } else {
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontSize = theme->GetFontSize();
+    }
+
+    if (weight > -1) {
+        font.fontWeight = static_cast<FontWeight>(weight);
+    } else {
+        font.fontWeight = DEFAULT_FONT_WEIGHT;
+    }
+
+    if (family != nullptr) {
+        font.fontFamilies = Framework::ConvertStrToFontFamilies(std::string(family));
+    } else {
+        std::vector<std::string> fontFamilies;
+        fontFamilies.emplace_back(DEFAULT_FONT_FAMILY[0]);
+        font.fontFamilies = fontFamilies;
+    }
+
+    if (style >= 0) {
+        font.fontStyle = static_cast<Ace::FontStyle>(style);
+    } else {
+        font.fontStyle = DEFAULT_FONT_STYLE;
+    }
+    TextFieldModelNG::SetPlaceholderFont(frameNode, font);
+}
+
+void SetTextInputTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextOverflow valueTextOverflow = static_cast<TextOverflow>(value);
+    TextFieldModelNG::SetTextOverflow(frameNode, valueTextOverflow);
+}
+
+void ResetTextInputTextOverflow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
+}
+
+void SetTextInputTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+void ResetTextInputTextIndent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::VP));
 }
 } // namespace
 
@@ -1213,7 +1331,10 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputDecoration, ResetTextInputDecoration, SetTextInputLetterSpacing, ResetTextInputLetterSpacing,
         SetTextInputLineHeight, ResetTextInputLineHeight, SetTextInputFontFeature, ResetTextInputFontFeature,
         SetTextInputWordBreak, ResetTextInputWordBreak, SetTextInputPasswordRules, ResetTextInputPasswordRules,
-        SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill, ResetTextInputPadding,
+        SetTextInputEnableAutoFill, ResetTextInputEnableAutoFill, ResetTextInputPadding, SetTextInputAdaptMinFontSize,
+        ResetTextInputAdaptMinFontSize, SetTextInputAdaptMaxFontSize, ResetTextInputAdaptMaxFontSize,
+        SetTextInputHeightAdaptivePolicy, ResetTextInputHeightAdaptivePolicy, SetTextInputPlaceholderFontEnum,
+        SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent, ResetTextInputTextIndent,
         SetTextInputSelectAll, ResetTextInputSelectAll, SetTextInputShowCounter, ResetTextInputShowCounter,
         SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter, ResetTextInputFilter,
         SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange, ResetTextInputOnChange, 

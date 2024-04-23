@@ -30,4 +30,15 @@ void TextController::CloseSelectionMenu()
         textPattern->CloseSelectionMenu();
     }
 }
+
+void TextController::SetStyledString(const RefPtr<SpanStringBase>& value)
+{
+    auto textPattern = pattern_.Upgrade();
+    if (textPattern) {
+        auto spanString = AceType::DynamicCast<SpanString>(value);
+        if (spanString) {
+            textPattern->SetStyledString(spanString);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -38,11 +38,7 @@ public:
 
     sptr<Rosen::Session> GetSession();
 
-    void OnVisibleChange(bool visible) override
-    {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "system window scene will change visible to %{public}s",
-            visible ? "true" : "false");
-    }
+    void OnVisibleChange(bool visible) override;
 
     std::list<int32_t> GetRouteOfFirstScope() override
     {
@@ -53,14 +49,17 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
     void RegisterEventCallback();
     void RegisterResponseRegionCallback();
-
+    void PostCheckContextTransparentTask();
+    void PostFaultInjectTask();
     int32_t instanceId_ = Container::CurrentId();
     sptr<Rosen::Session> session_;
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
+    CancelableCallback<void()> checkContextTransparentTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SystemWindowScene);
 };

@@ -643,7 +643,7 @@ void ContainerModalPattern::CallButtonsRectChange()
                 cb(containerModal, buttons);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIContainerModalButtonsRectChange");
 }
 
 void ContainerModalPattern::InitTitle()
@@ -744,5 +744,17 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
         return defaultRes;
     };
     eventHub->SetOnTouchTestFunc(func);
+}
+
+Dimension ContainerModalPattern::GetCustomTitleHeight()
+{
+    auto customTitleRow = GetCustomTitleRow();
+    Dimension zeroHeight;
+    CHECK_NULL_RETURN(customTitleRow, zeroHeight);
+    auto property = customTitleRow->GetLayoutProperty();
+    if (property->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return zeroHeight;
+    }
+    return titleHeight_;
 }
 } // namespace OHOS::Ace::NG

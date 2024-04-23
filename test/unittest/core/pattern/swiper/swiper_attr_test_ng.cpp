@@ -17,7 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class SwiperAttrTestNg : public SwiperTestNg {
 public:
@@ -166,11 +168,10 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsShowIndicator());
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 5); // 4 items and indicator
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_EQ(indicatorNode->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+    EXPECT_EQ(indicatorNode_->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(196.05f, 768.02f, 87.9f, 31.98f)));
 
-    auto wrapper = FlushLayoutTask(indicatorNode);
+    auto wrapper = FlushLayoutTask(indicatorNode_);
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
     EXPECT_FALSE(paintMethod->dotIndicatorModifier_->indicatorMask_);
     EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::FromString("#182431"));
@@ -212,11 +213,10 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator002, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsShowIndicator());
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 5); // 4 items and indicator
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    EXPECT_EQ(indicatorNode->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+    EXPECT_EQ(indicatorNode_->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 4), RectF(10.f, 10.f, 114.5f, 37.3f)));
 
-    auto wrapper = FlushLayoutTask(indicatorNode);
+    auto wrapper = FlushLayoutTask(indicatorNode_);
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
     EXPECT_TRUE(paintMethod->dotIndicatorModifier_->indicatorMask_);
     EXPECT_EQ(paintMethod->dotIndicatorModifier_->unselectedColor_->Get(), Color::RED);
@@ -242,17 +242,16 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator003, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) { model.SetIndicatorType(SwiperIndicatorType::DIGIT); });
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstTextNode = GetChildFrameNode(indicatorNode, 0);
-    auto lastTextNode = GetChildFrameNode(indicatorNode, 1);
+    auto firstTextNode = GetChildFrameNode(indicatorNode_, 0);
+    auto lastTextNode = GetChildFrameNode(indicatorNode_, 1);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
-    EXPECT_EQ(firstTextLayoutProperty->GetFontSize(), Dimension(14.f));
-    EXPECT_EQ(firstTextLayoutProperty->GetFontWeight(), FontWeight::W800);
-    EXPECT_EQ(lastTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
-    EXPECT_EQ(lastTextLayoutProperty->GetFontSize(), Dimension(14.f));
-    EXPECT_EQ(lastTextLayoutProperty->GetFontWeight(), FontWeight::W800);
+    EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), INDICATOR_TEXT_FONT_COLOR);
+    EXPECT_EQ(firstTextLayoutProperty->GetFontSize(), INDICATOR_TEXT_FONT_SIZE);
+    EXPECT_EQ(firstTextLayoutProperty->GetFontWeight(), INDICATOR_TEXT_FONT_WEIGHT);
+    EXPECT_EQ(lastTextLayoutProperty->GetTextColor(), INDICATOR_TEXT_FONT_COLOR);
+    EXPECT_EQ(lastTextLayoutProperty->GetFontSize(), INDICATOR_TEXT_FONT_SIZE);
+    EXPECT_EQ(lastTextLayoutProperty->GetFontWeight(), INDICATOR_TEXT_FONT_WEIGHT);
 }
 
 /**
@@ -278,9 +277,8 @@ HWTEST_F(SwiperAttrTestNg, AttrIndicator004, TestSize.Level1)
         model.SetDigitIndicatorStyle(swiperDigitalParameters);
     });
     EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto firstTextNode = GetChildFrameNode(indicatorNode, 0);
-    auto lastTextNode = GetChildFrameNode(indicatorNode, 1);
+    auto firstTextNode = GetChildFrameNode(indicatorNode_, 0);
+    auto lastTextNode = GetChildFrameNode(indicatorNode_, 1);
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(firstTextLayoutProperty->GetTextColor(), Color::GREEN);
@@ -701,8 +699,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
      * @tc.expected: Margin is 10,5
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
-        model.SetPreviousMargin(Dimension(5.f));
+        model.SetNextMargin(Dimension(10.f), false);
+        model.SetPreviousMargin(Dimension(5.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
@@ -720,8 +718,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin003, TestSize.Level1)
      * @tc.expected: Margin is 0
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1.f));
-        model.SetPreviousMargin(Dimension(5));
+        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1.f), false);
+        model.SetPreviousMargin(Dimension(5), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -739,8 +737,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level1)
      * @tc.expected: Margin is 0
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
-        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1.f));
+        model.SetNextMargin(Dimension(10.f), false);
+        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -757,7 +755,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
      * @tc.cases: Only set nextMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
+        model.SetNextMargin(Dimension(10.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -774,7 +772,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
      * @tc.cases: Only set preMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetPreviousMargin(Dimension(5.f));
+        model.SetPreviousMargin(Dimension(5.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
@@ -1055,23 +1053,15 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level1)
      * @tc.expected: paintProperty->GetPrevMargin() is equal to dimension.
      */
     auto dimension = Dimension(-1.0);
-    model.SetPreviousMargin(dimension);
+    model.SetPreviousMargin(dimension, false);
     EXPECT_EQ(layoutProperty->GetPrevMargin(), dimension);
 
     /**
      * @tc.steps: step3.3. Test SetNextMargin function.
      * @tc.expected: paintProperty->GetNextMargin() is equal to dimension.
      */
-    model.SetNextMargin(dimension);
+    model.SetNextMargin(dimension, false);
     EXPECT_EQ(layoutProperty->GetNextMargin(), dimension);
-
-    /**
-     * @tc.steps: step3.4. Test SetOnChangeEvent function.
-     * @tc.expected: pattern->onIndexChangeEvent_ is not null.
-     */
-    auto onChangeEvent = [](const BaseEventInfo* info) {};
-    model.SetOnChangeEvent(std::move(onChangeEvent));
-    EXPECT_NE(pattern->onIndexChangeEvent_, nullptr);
 
     /**
      * @tc.steps: step3.5. Test SetIndicatorIsBoolean function.
@@ -1121,356 +1111,6 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SelectedFontSize001
- * @tc.desc: Test SwiperIndicator SelectedFontSize
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, SelectedFontSize001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-
-    /**
-     * @tc.steps: step3. SelectedFontSize is 14.
-     */
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
-    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(frontTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
-
-    /**
-     * @tc.steps: step4. SelectedFontSize is 60.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    Dimension fontSize = 60.0_px;
-    layoutProperty->UpdateSelectedFontSize(fontSize);
-    indicatorPattern->OnModifyDone();
-    EXPECT_EQ(frontTextLayoutProperty->GetFontSize()->ConvertToPx(), 60);
-}
-
-/**
- * @tc.name: SelectedFontSize002
- * @tc.desc: Test SwiperIndicator SelectedFontSize
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, SelectedFontSize002, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
-    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step4. SelectedFontSize is -1.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    Dimension fontSize = -1.0_px;
-    layoutProperty->UpdateSelectedFontSize(fontSize);
-    indicatorPattern->OnModifyDone();
-    EXPECT_EQ(frontTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
-}
-
-/**
- * @tc.name: FontSize001
- * @tc.desc: Test SwiperIndicator FontSize
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, FontSize001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-
-    /**
-     * @tc.steps: step3. FontSize is 14.
-     */
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-
-    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
-    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(backTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
-
-    /**
-     * @tc.steps: step3. FontSize is 30.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    Dimension fontSize = 30.0_px;
-    layoutProperty->UpdateFontSize(fontSize);
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(backTextLayoutProperty->GetFontSize()->ConvertToPx(), 30);
-}
-
-/**
- * @tc.name: FontSize002
- * @tc.desc: Test SwiperIndicator FontSize
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, FontSize002, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
-    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step3. FontSize is -10.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    Dimension fontSize = -10.0_px;
-    layoutProperty->UpdateFontSize(fontSize);
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(backTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
-}
-
-/**
- * @tc.name: FontColor001
- * @tc.desc: Test SwiperIndicator FontColor
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, FontColor001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-
-    /**
-     * @tc.steps: step3. FontColor is 0xff000000.
-     */
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
-    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(backTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
-
-    /**
-     * @tc.steps: step3. FontColor is WHITE.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    layoutProperty->UpdateFontColor(Color::WHITE);
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(backTextLayoutProperty->GetTextColor()->GetValue(), 0xffffffff);
-}
-
-/**
- * @tc.name: FontColor002
- * @tc.desc: Test SwiperIndicator FontColor
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, FontColor002, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
-    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step3. FontColor is 0xff00ff00.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    layoutProperty->UpdateFontColor(Color());
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(backTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
-}
-
-/**
- * @tc.name: SelectedFontColor001
- * @tc.desc: Test SwiperIndicator SelectedFontColor
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, SelectedFontColor001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-
-    /**
-     * @tc.steps: step3. SelectedFontColor001 is 0xff000000.
-     */
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
-    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(frontTextLayoutProperty->GetTextColor(), Color::FromString("#ff182431"));
-
-    /**
-     * @tc.steps: step4. SelectedFontColor is WHITE.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    layoutProperty->UpdateSelectedFontColor(Color::WHITE);
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(frontTextLayoutProperty->GetTextColor()->GetValue(), 0xffffffff);
-}
-
-/**
- * @tc.name: SelectedFontColor002
- * @tc.desc: Test SwiperIndicator SelectedFontColor
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, SelectedFontColor002, TestSize.Level2)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
-    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
-    /**
-     * @tc.steps: step3. SelectedFontColor is Color().
-     */
-    layoutProperty->UpdateSelectedFontColor(Color());
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(frontTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
-}
-
-/**
- * @tc.name: FontWeight001
- * @tc.desc: Test SwiperIndicator FontWeight
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, FontWeight001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-
-    /**
-     * @tc.steps: step3. FontWeight is NORMAL.
-     */
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
-    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(backTextLayoutProperty->GetFontWeight(), FontWeight::W800);
-    /**
-     * @tc.steps: step3. FontWeight is BOLDER.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    layoutProperty->UpdateFontWeight(FontWeight::BOLDER);
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(backTextLayoutProperty->GetFontWeight(), FontWeight::BOLDER);
-}
-
-/**
- * @tc.name: SelectedFontWeight001
- * @tc.desc: Test SwiperIndicator SelectedFontWeight
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAttrTestNg, SelectedFontWeight001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetIndicatorType(SwiperIndicatorType::DIGIT);
-    });
-    auto indicatorNode = GetChildFrameNode(frameNode_, 4);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    indicatorPattern->OnModifyDone();
-    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
-
-    /**
-     * @tc.steps: step3. SelectedFontWeight is NORMAL.
-     */
-    auto swiperEventHub = pattern_->GetEventHub<SwiperEventHub>();
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
-    algorithm->Measure(&layoutWrapper);
-    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
-    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
-    EXPECT_EQ(frontTextLayoutProperty->GetFontWeight(), FontWeight::W800);
-    /**
-     * @tc.steps: step3. SelectedFontWeight is MEDIUM.
-     */
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    layoutProperty->UpdateSelectedFontWeight(FontWeight::MEDIUM);
-    swiperEventHub->FireIndicatorChangeEvent(0);
-    EXPECT_EQ(frontTextLayoutProperty->GetFontWeight(), FontWeight::MEDIUM);
-}
-
-/**
  * @tc.name: SetMinSize001
  * @tc.desc: Swiper Model NG.
  * @tc.type: FUNC
@@ -1511,7 +1151,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
      * @tc.expected: Check the swiper property value
      */
     auto json = JsonUtil::Create(true);
-    paintProperty_->ToJsonValue(json);
+    paintProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("autoPlay"), "false");
 
     /**

@@ -40,7 +40,7 @@ class ConfigureStateMgmt {
      * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
      * @returns true if no mix of features detected, false if mix is detected
      */
-    public usingV2ObservedTrack(feature: string, contextOfUse: string = "") {
+    public usingV2ObservedTrack(feature: string, contextOfUse: string = ''): void {
         this.v2ObservedTrackInUse_ = true;
         stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of stateMgmt V2 feature ${feature} ${contextOfUse} - enable V2 state observation.`);
     }
@@ -53,7 +53,7 @@ class ConfigureStateMgmt {
  * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
  * @returns true if no mix of features detected, false if mix is detected
  */
-    public usingPUObservedTrack(feature: string, contextOfUse: string = "") {
+    public usingPUObservedTrack(feature: string, contextOfUse: string = ''): void {
         this.puObservedTrackInUse_ = true;
         stateMgmtConsole.debug(`ConfigureStateMgmt: Found use of stateMgmt PU feature ${feature} ${contextOfUse} - enable PU state observation.`);
     }

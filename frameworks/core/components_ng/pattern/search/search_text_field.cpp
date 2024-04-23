@@ -52,7 +52,7 @@ void SearchTextFieldPattern::InitDragEvent()
     TextFieldPattern::InitDragEvent();
 }
 
-void SearchTextFieldPattern::InitBackGroundColorAndBorderRadius()
+void SearchTextFieldPattern::ApplyNormalTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

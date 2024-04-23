@@ -34,11 +34,38 @@ constexpr int32_t MENU_SHOW_ANIMATION_DURATION = 250;
 constexpr int32_t MENU_HIDE_ANIMATION_DURATION = 200;
 constexpr int32_t HANDLE_ANIMATION_DURATION = 150;
 
+struct SelectHandlePaintInfo {
+    OffsetF startPoint;
+    OffsetF endPoint;
+    float width = 0.0f;
+
+    SelectHandlePaintInfo operator-(const OffsetF& offset) const
+    {
+        return {
+            .startPoint = startPoint - offset,
+            .endPoint = endPoint - offset,
+            .width = width
+        };
+    }
+
+    SelectHandlePaintInfo operator+(const OffsetF& offset) const
+    {
+        return {
+            .startPoint = startPoint + offset,
+            .endPoint = endPoint + offset,
+            .width = width
+        };
+    }
+};
+
 struct SelectHandleInfo {
     bool isShow = true;
     bool needLayout = false;
+    bool isPaintHandleWithPoints = false;
     // in Global coordinates.
     RectF paintRect;
+    SelectHandlePaintInfo paintInfo;
+    std::function<RectF(const SelectHandlePaintInfo&)> paintInfoConverter;
 
     bool operator==(const SelectHandleInfo& info) const
     {
@@ -50,7 +77,27 @@ struct SelectHandleInfo {
         return !(*this == info);
     }
 
+    const RectF GetPaintRect() const
+    {
+        if (isPaintHandleWithPoints) {
+            auto offsetX = std::max(paintInfo.startPoint.GetX(), paintInfo.endPoint.GetX());
+            auto offsetY = std::min(paintInfo.startPoint.GetY(), paintInfo.endPoint.GetY());
+            auto height = paintInfo.endPoint.GetY() - paintInfo.startPoint.GetY();
+            return RectF(OffsetF(offsetX, offsetY), SizeF(paintInfo.width, std::abs(height)));
+        }
+        return paintRect;
+    }
+
     static Dimension GetDefaultLineWidth();
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_BOOL(jsonValue, isShow);
+        JSON_STRING_PUT_BOOL(jsonValue, needLayout);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, paintRect);
+        return jsonValue->ToString();
+    }
 };
 
 using SelectOverlayDirtyFlag = uint32_t;
@@ -63,6 +110,8 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT;
+
+inline constexpr int32_t REQUEST_RECREATE = 1;
 
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
 enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, CAMERA_INPUT, APPEAR, DISAPPEAR };
@@ -116,6 +165,20 @@ struct SelectMenuInfo {
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
                  (showCut == info.showCut) && (showCameraInput == info.showCameraInput));
     }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_BOOL(jsonValue, menuDisable);
+        JSON_STRING_PUT_BOOL(jsonValue, menuIsShow);
+        JSON_STRING_PUT_BOOL(jsonValue, singleHandleMenuIsShow);
+        JSON_STRING_PUT_BOOL(jsonValue, showCopy);
+        JSON_STRING_PUT_BOOL(jsonValue, showPaste);
+        JSON_STRING_PUT_BOOL(jsonValue, showCopyAll);
+        JSON_STRING_PUT_BOOL(jsonValue, showCut);
+        JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
+        return jsonValue->ToString();
+    }
 };
 
 struct SelectMenuCallback {
@@ -147,6 +210,11 @@ struct SelectedByMouseInfo {
     }
 };
 
+struct CallerFrameNodeInfo {
+    RectF paintFrameRect;
+    OffsetF paintOffset;
+};
+
 struct SelectOverlayInfo {
     bool isUsingMouse = false;
     bool isSingleHandle = false;
@@ -160,6 +228,7 @@ struct SelectOverlayInfo {
     bool isUseOverlayNG = false;
     SelectHandleInfo firstHandle;
     SelectHandleInfo secondHandle;
+    std::function<bool(const RectF&, const RectF&)> checkHandleReverse;
     std::optional<Color> handlerColor;
     HitTestMode hitTestMode = HitTestMode::HTMTRANSPARENT_SELF;
 
@@ -193,9 +262,29 @@ struct SelectOverlayInfo {
     std::function<bool(const PointF&)> checkIsTouchInHostArea;
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
+    std::optional<CallerFrameNodeInfo> callerNodeInfo;
 
     bool isHandleLineShow = true;
     std::string selectText;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_BOOL(jsonValue, isUsingMouse);
+        JSON_STRING_PUT_BOOL(jsonValue, isSingleHandle);
+        JSON_STRING_PUT_BOOL(jsonValue, handleReverse);
+        JSON_STRING_PUT_BOOL(jsonValue, isSelectRegionVisible);
+        JSON_STRING_PUT_BOOL(jsonValue, isNewAvoid);
+        JSON_STRING_PUT_BOOL(jsonValue, recreateOverlay);
+        JSON_STRING_PUT_BOOL(jsonValue, isUseOverlayNG);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, firstHandle);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, secondHandle);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, showArea);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, selectArea);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, rightClickOffset);
+        JSON_STRING_PUT_STRING(jsonValue, selectText);
+        return jsonValue->ToString();
+    }
 };
 
 } // namespace OHOS::Ace::NG

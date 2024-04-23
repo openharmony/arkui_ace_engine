@@ -27,6 +27,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/image_analyzer_mgr.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
@@ -471,7 +472,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest005, TestSize.Level1)
 
 /**
  * @tc.name: XComponentLayoutAlgorithmTest006
- * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.desc: Test BeforeSyncGeometryProperties
  * @tc.type: FUNC
  */
 HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
@@ -485,7 +486,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
     ASSERT_TRUE(frameNode);
 
     /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap
+     * @tc.steps: step2. call BeforeSyncGeometryProperties
      *            case: hasXComponentInit_ = false
      * @tc.expected: hasXComponentInit_ = true
      */
@@ -496,11 +497,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(MAX_SIZE);
     geometryNode->SetContentSize(MAX_SIZE);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    EXPECT_TRUE(layoutProperty);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
-    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    frameNode->geometryNode_ = geometryNode;
     EXPECT_FALSE(pattern->hasXComponentInit_);
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), IsSurfaceValid())
         .WillOnce(Return(true))
@@ -509,8 +506,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
         AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
-    auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config); // IsSurfaceValid=true
-    EXPECT_FALSE(flag);
+    pattern->BeforeSyncGeometryProperties(config); // IsSurfaceValid=true
     EXPECT_TRUE(pattern->hasXComponentInit_);
     // test OnRebuildFrame
     pattern->OnRebuildFrame(); // type="surface", IsSurfaceValid=true
@@ -521,9 +517,9 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
     pattern->OnRebuildFrame();     // type="component"
 
     /**
-     * @tc.steps: step3. call OnDirtyLayoutWrapperSwap adjust frameOffsetChanges, contentOffsetChanges and
+     * @tc.steps: step3. call BeforeSyncGeometryProperties adjust frameOffsetChanges, contentOffsetChanges and
      *                   contentSizeChanges
-     * @tc.expected: OnDirtyLayoutWrapperSwap return false
+     * @tc.expected: BeforeSyncGeometryProperties return false
      */
     bool frameOffsetChanges[2] = { false, true };
     bool contentOffsetChanges[2] = { false, true };
@@ -539,34 +535,28 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
                     AdjustNativeWindowSize(CHILD_WIDTH, CHILD_HEIGHT))
                     .WillOnce(Return());
             }
-            flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-            EXPECT_FALSE(flag);
+            pattern->BeforeSyncGeometryProperties(config);
         }
     }
 
     /**
-     * @tc.steps: step4. call OnDirtyLayoutWrapperSwap
+     * @tc.steps: step4. call BeforeSyncGeometryProperties
      *            case: size is zero
-     * @tc.expected: OnDirtyLayoutWrapperSwap return false
+     * @tc.expected: BeforeSyncGeometryProperties return false
      */
     geometryNode->SetContentSize({ 0.0f, 0.0f });
-    flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(flag);
+    pattern->BeforeSyncGeometryProperties(config);
 
     /**
-     * @tc.steps: step5. call OnDirtyLayoutWrapperSwap
+     * @tc.steps: step5. call BeforeSyncGeometryProperties
      *            case: type="component", config.skipMeasure = true, dirty->SkipMeasureContent() = true
-     * @tc.expected: OnDirtyLayoutWrapperSwap return false
+     * @tc.expected: BeforeSyncGeometryProperties return false
      */
-    layoutWrapper->skipMeasureContent_ = true;
-    flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(flag);
+    pattern->BeforeSyncGeometryProperties(config);
     config.skipMeasure = true;
-    flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(flag);
+    pattern->BeforeSyncGeometryProperties(config);
     pattern->type_ = XCOMPONENT_COMPONENT_TYPE_VALUE;
-    flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(flag);
+    pattern->BeforeSyncGeometryProperties(config);
 }
 
 /**
@@ -1100,7 +1090,7 @@ HWTEST_F(XComponentTestNg, XComponentGetSizeTest016, TestSize.Level1)
     EXPECT_EQ(type, XCOMPONENT_SURFACE_TYPE_VALUE);
 
     /**
-     * @tc.steps: step4. call OnDirtyLayoutWrapperSwap
+     * @tc.steps: step4. call BeforeSyncGeometryProperties
      *            case: hasXComponentInit_ = false
      * @tc.expected: hasXComponentInit_ = true
      */
@@ -1112,11 +1102,7 @@ HWTEST_F(XComponentTestNg, XComponentGetSizeTest016, TestSize.Level1)
     geometryNode->SetFrameSize(MAX_SIZE);
     geometryNode->SetContentSize(MAX_SIZE);
     geometryNode->SetFrameOffset(OffsetF(MAX_WIDTH, MAX_HEIGHT));
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    EXPECT_TRUE(layoutProperty);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
-    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    frameNode->geometryNode_ = geometryNode;
     EXPECT_FALSE(pattern->hasXComponentInit_);
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), IsSurfaceValid())
         .WillOnce(Return(true))
@@ -1125,8 +1111,7 @@ HWTEST_F(XComponentTestNg, XComponentGetSizeTest016, TestSize.Level1)
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
         AdjustNativeWindowSize(MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
-    auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config); // IsSurfaceValid=true
-    EXPECT_FALSE(flag);
+    pattern->BeforeSyncGeometryProperties(config); // IsSurfaceValid=true
     EXPECT_TRUE(pattern->hasXComponentInit_);
     // test OnRebuildFrame
     pattern->OnRebuildFrame(); // type="surface", IsSurfaceValid=true
@@ -1186,11 +1171,7 @@ HWTEST_F(XComponentTestNg, XComponentSetRenderTypeTest17, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(MAX_SIZE);
     geometryNode->SetContentSize(MAX_SIZE);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    EXPECT_TRUE(layoutProperty);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
-    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    frameNode->geometryNode_ = geometryNode;
     EXPECT_FALSE(pattern->hasXComponentInit_);
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), IsSurfaceValid())
         .WillOnce(Return(true))
@@ -1200,9 +1181,8 @@ HWTEST_F(XComponentTestNg, XComponentSetRenderTypeTest17, TestSize.Level1)
         .WillOnce(Return());
 
     pattern->SetRenderType(NodeRenderType::RENDER_TYPE_TEXTURE);
-    auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config); // IsSurfaceValid=true
+    pattern->BeforeSyncGeometryProperties(config); // IsSurfaceValid=true
     EXPECT_TRUE(pattern->hasXComponentInit_);
-    EXPECT_FALSE(flag);
 }
 
 /**
@@ -2003,12 +1983,14 @@ HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
      * @tc.expected: IsSupportImageAnalyzerFeature() return right value
      */
     pattern->EnableAnalyzer(true);
-    EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
+    EXPECT_TRUE(pattern->isEnableAnalyzer_);
 
-    pattern->EnableAnalyzer(false);
-    EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+    if (ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()) {
+        EXPECT_TRUE(pattern->IsSupportImageAnalyzerFeature());
+    } else {
+        EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
+    }
 
-    pattern->EnableAnalyzer(true);
     pattern->imageAnalyzerManager_ = nullptr;
     EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
 }
@@ -2045,7 +2027,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     pattern->surfaceId_ = SURFACE_ID;
 
     /**
-     * @tc.steps: step2. call onDirtyLayoutWrapper
+     * @tc.steps: step2. call BeforeSyncGeometryProperties
      * @tc.expected: onSurfaceCreated & onSurfaceChanged has called
      */
     DirtySwapConfig config;
@@ -2053,11 +2035,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(MAX_SIZE);
     geometryNode->SetContentSize(MAX_SIZE);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    EXPECT_TRUE(layoutProperty);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
-    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    frameNode->geometryNode_ = geometryNode;
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_), IsSurfaceValid())
         .WillOnce(Return(true));
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
@@ -2066,7 +2044,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
         SetBounds(0, 0, MAX_WIDTH, MAX_HEIGHT))
         .WillOnce(Return());
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    pattern->BeforeSyncGeometryProperties(config);
     EXPECT_EQ(onSurfaceCreatedSurfaceId, SURFACE_ID);
     EXPECT_EQ(onSurfaceChangedSurfaceId, SURFACE_ID);
 

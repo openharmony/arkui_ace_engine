@@ -36,6 +36,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(indexerLayoutProperty);
+    auto maxItemWidth = GetMaxItemWidth(layoutWrapper);
     LayoutConstraintF layoutConstraint;
     if (indexerLayoutProperty->GetLayoutConstraint().has_value()) {
         layoutConstraint = indexerLayoutProperty->GetLayoutConstraint().value();
@@ -50,7 +51,10 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         static_cast<float>(defaultHorizontalPadding), static_cast<float>(defaultVerticalPadding), 0, 0);
     auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
-    auto contentWidth = itemSize_ + horizontalPadding;
+    auto adaptiveWidth = indexerLayoutProperty->GetAdaptiveWidthValue(false);
+    auto contentWidth =
+        (adaptiveWidth ? (GreatOrEqual(maxItemWidth, itemSize_) ? maxItemWidth : itemSize_) : itemSize_) +
+        horizontalPadding;
     auto contentHeight = itemCount_ * itemSize_ + verticalPadding;
     auto selfIdealSize = layoutConstraint.selfIdealSize;
     auto actualWidth = selfIdealSize.Width().has_value()
@@ -63,13 +67,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     itemWidth_ = GreatOrEqual(actualWidth - horizontalPadding, 0.0f) ? actualWidth - horizontalPadding : 0.0f;
     auto childCount = layoutWrapper->GetTotalChildCount();
     if (indexerLayoutProperty->GetIsPopupValue(false)) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount - 1);
-        CHECK_NULL_VOID(childWrapper);
-        auto childLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(childLayoutProperty);
-        auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
-        layoutConstraint->Reset();
-        childWrapper->Measure(layoutConstraint);
+        MeasurePopup(layoutWrapper, childCount);
         childCount--;
     }
     itemSizeRender_ = GreatOrEqual(contentHeight - verticalPadding, 0.0f) && childCount > 0
@@ -152,5 +150,39 @@ OffsetT<Dimension> IndexerLayoutAlgorithm::GetPositionOfPopupNode(
     }
     userDefinePositionY -= top;
     return OffsetT<Dimension>(Dimension(userDefinePositionX), Dimension(userDefinePositionY));
+}
+
+float IndexerLayoutAlgorithm::GetMaxItemWidth(LayoutWrapper* layoutWrapper)
+{
+    auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(indexerLayoutProperty, INDEXER_ZERO_WIDTH);
+    auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
+    auto maxItemWidth = INDEXER_ZERO_WIDTH;
+    auto childCount = layoutWrapper->GetTotalChildCount();
+    if (indexerLayoutProperty->GetIsPopupValue(false)) {
+        childCount--;
+    }
+    for (int32_t index = 0; index < childCount; index++) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_RETURN(childWrapper, INDEXER_ZERO_WIDTH);
+        childWrapper->Measure(childLayoutConstraint);
+        auto node = childWrapper->GetGeometryNode();
+        auto size = node->GetFrameSize();
+        if (size.Width() > maxItemWidth) {
+            maxItemWidth = size.Width();
+        }
+    }
+    return maxItemWidth;
+}
+
+void IndexerLayoutAlgorithm::MeasurePopup(LayoutWrapper* layoutWrapper, uint32_t childCount)
+{
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount - 1);
+    CHECK_NULL_VOID(childWrapper);
+    auto childLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(childLayoutProperty);
+    auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
+    layoutConstraint->Reset();
+    childWrapper->Measure(layoutConstraint);
 }
 } // namespace OHOS::Ace::NG

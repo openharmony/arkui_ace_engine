@@ -37,7 +37,10 @@ public:
         return lanes_;
     }
 
-    float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex) override;
+    float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex,
+        bool groupLayoutAll = true) override;
+
+    float GetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex) override;
 
     static int32_t CalculateLanesParam(std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength,
         int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter = 0.0f);
@@ -65,6 +68,7 @@ private:
     static void ModifyLaneLength(
         std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength, float crossSize);
     int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t index);
+    bool CheckCurRowMeasureFinished(LayoutWrapper* layoutWrapper, int32_t curIndex, bool isGroup);
     std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount) override;
     std::list<int32_t> LayoutCachedALineForward(
         LayoutWrapper* layoutWrapper, int32_t& index, float& startPos, float crossSize);

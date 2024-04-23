@@ -28,9 +28,9 @@ void TaskRunnerAdapterImpl::Initialize(bool useCurrentEventRunner, const std::st
     eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner_);
 }
 
-void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& caller)
+void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& name)
 {
-    eventHandler_->PostTask(std::move(task));
+    eventHandler_->PostTask(std::move(task), name);
 }
 
 void TaskRunnerAdapterImpl::PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller)
@@ -38,9 +38,9 @@ void TaskRunnerAdapterImpl::PostTaskForTime(std::function<void()> task, uint32_t
     eventHandler_->PostTimingTask(std::move(task), targetTime, "");
 }
 
-void TaskRunnerAdapterImpl::PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& caller)
+void TaskRunnerAdapterImpl::PostDelayedTask(std::function<void()> task, uint32_t delay, const std::string& name)
 {
-    eventHandler_->PostTask(std::move(task), delay);
+    eventHandler_->PostTask(std::move(task), name, delay);
 }
 
 bool TaskRunnerAdapterImpl::RunsTasksOnCurrentThread()

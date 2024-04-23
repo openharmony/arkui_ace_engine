@@ -606,7 +606,7 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     }
     Dimension startFontSize = animationProperties_[index].fontSize;
     Color startColor = animationProperties_[index].currentColor;
-    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
+    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown && scale)) {
         textLayoutProperty->UpdateFontSize(startFontSize);
         textLayoutProperty->UpdateTextColor(startColor);
         return;
@@ -1243,6 +1243,9 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
             CHECK_NULL_VOID(column);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->RequestFrame();
     }
 }
 void TimePickerColumnPattern::TossAnimationStoped()

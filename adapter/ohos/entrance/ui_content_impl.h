@@ -20,6 +20,7 @@
 
 #include "ability_info.h"
 #include "display_manager.h"
+#include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -153,6 +154,8 @@ public:
     void OnFormSurfaceChange(float width, float height) override;
 
     void SetFormBackgroundColor(const std::string& color) override;
+
+    void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) override;
 
     SerializeableObjectArray DumpUITree() override
     {
@@ -292,6 +295,13 @@ public:
         return isUIExtensionAbilityHost_;
     }
 
+    std::vector<Ace::RectF> GetOverlayNodePositions() const override;
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
+
+    void SetFormRenderingMode(int8_t renderMode) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -319,6 +329,8 @@ private:
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
 
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
+
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -344,6 +356,7 @@ private:
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
     std::string formData_;
+    bool fontScaleFollowSystem_ = true;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
     std::unordered_map<int32_t, int32_t> popupUIExtensionRecords_;

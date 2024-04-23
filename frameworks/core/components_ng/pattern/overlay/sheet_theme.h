@@ -74,7 +74,7 @@ public:
         {
             RefPtr<ThemeStyle> sheetPattern = themeConstants->GetPatternByName(THEME_PATTERN_SHEET);
             if (!sheetPattern) {
-                LOGE("sheetPattern is null");
+                TAG_LOGE(AceLogTag::ACE_SHEET, "sheetPattern is null");
                 return;
             }
 

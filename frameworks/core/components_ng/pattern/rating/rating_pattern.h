@@ -30,6 +30,7 @@
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 #define ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(name, type)     \
     static std::optional<type> Get##name##FromTheme()             \
@@ -199,7 +200,7 @@ private:
     bool isSecondaryImageInfoFromTheme_ = false;
     bool isBackgroundImageInfoFromTheme_ = false;
     // get XTS inspector value
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

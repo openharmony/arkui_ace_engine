@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/time/time_change_listener.h"
 
@@ -84,6 +85,27 @@ public:
 
     void OnTimeChange() override;
 
+    void SetBuilderFunc(TextClockMakeCallback&& makeFunc)
+    {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
+    int32_t GetBuilderId()
+    {
+        return nodeId_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -114,7 +136,12 @@ private:
     std::string GetFormat() const;
     float GetHoursWest() const;
     RefPtr<FrameNode> GetTextNode();
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
 
+    std::optional<TextClockMakeCallback> makeFunc_ = std::nullopt;
+    RefPtr<FrameNode> contentModifierNode_ = nullptr;
+    int32_t nodeId_ = -1;
     RefPtr<TextClockController> textClockController_;
     float hourWest_ = 0.0f;
     std::optional<int32_t> textId_;

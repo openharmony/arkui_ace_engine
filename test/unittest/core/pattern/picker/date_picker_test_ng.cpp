@@ -42,6 +42,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
@@ -87,6 +88,7 @@ DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr double PATTERN_OFFSET = 1000;
 constexpr double UP_FONT_SIZE = 5.0;
 constexpr double TEST_FONT_SIZE = 10.0;
@@ -500,7 +502,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow001, TestSize.Level1)
     auto overlayManger = pipeline->GetOverlayManager();
     overlayManger->FireBackPressEvent();
 
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_NE(dialogNode, nullptr);
 }
 
@@ -541,7 +545,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow002, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
     auto midStackNode =
@@ -590,7 +596,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow003, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_NE(dialogNode, nullptr);
 }
 
@@ -631,7 +639,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow004, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
     auto titleNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild());
@@ -682,7 +692,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow005, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
     auto midStackNode =
@@ -731,7 +743,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow006, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
     auto midStackNode =
@@ -780,7 +794,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow007, TestSize.Level1)
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
 
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     ASSERT_NE(dialogNode, nullptr);
     auto midStackNode =
@@ -812,7 +828,7 @@ HWTEST_F(DatePickerTestNg, DatePickerRowLayoutPropertyToJsonValue001, TestSize.L
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     auto disappearFont = JsonUtil::Create(true);
-    pickerProperty->ToJsonValue(disappearFont);
+    pickerProperty->ToJsonValue(disappearFont, filter);
     EXPECT_NE(disappearFont, nullptr);
 }
 
@@ -1606,7 +1622,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow008, TestSize.Level1)
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
@@ -1666,7 +1684,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow009, TestSize.Level1)
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
@@ -1726,7 +1746,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow010, TestSize.Level1)
     auto cancelFunc = [](const GestureEvent& info) { (void)info; };
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogCancelEvent["cancelId"] = cancelFunc;
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
 
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
@@ -2129,12 +2151,12 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest010, TestSize.Level1)
      * @tc.step: step2. call pattern's ToJsonValue method.
      * @tc.expected: jsonValue2->GetValue("constructor") is not nullptr.
      */
-    pickerPattern->ToJsonValue(jsonValue);
+    pickerPattern->ToJsonValue(jsonValue, filter);
     /**
      * cover branch LunarValue == true
      */
     rowLayoutProperty->UpdateLunar(true);
-    pickerPattern->ToJsonValue(jsonValue2);
+    pickerPattern->ToJsonValue(jsonValue2, filter);
     ASSERT_NE(jsonValue2->GetValue("constructor"), nullptr);
 }
 
@@ -2473,8 +2495,9 @@ HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
     datePickerNode->MountToParent(pickerStack);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
+    std::vector<ButtonInfo> buttonInfos;
     auto contentRow = DatePickerDialogView::CreateButtonNode(
-        monthDaysNode, datePickerNode, dialogEvent, std::move(dialogCancelEvent));
+        monthDaysNode, datePickerNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent));
     contentRow->AddChild(DatePickerDialogView::CreateDividerNode(datePickerNode), 1);
     auto buttonTitleNode = DatePickerDialogView::CreateTitleButtonNode(datePickerNode);
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
@@ -2805,7 +2828,9 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow011, TestSize.Level1)
      * @tc.step: step3. call DatePickerDialogView::Show and find DatePickerPattern call GetSelectedObject.
      * @tc.expected: selectedDate same as setting.
      */
-    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     ASSERT_NE(dialogNode, nullptr);
     auto midStackNode =
         AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));

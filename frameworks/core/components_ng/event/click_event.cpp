@@ -80,6 +80,10 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
             auto userCallback = actuator->userCallback_;
             (*userCallback)(info);
         }
+        if (actuator->clickAfterEvents_) {
+            auto clickAfterEvents = actuator->clickAfterEvents_;
+            (*clickAfterEvents)(info);
+        }
         if (actuator->jsFrameNodeCallback_) {
             auto jsFrameNodeCallback = actuator->jsFrameNodeCallback_;
             (*jsFrameNodeCallback)(info);

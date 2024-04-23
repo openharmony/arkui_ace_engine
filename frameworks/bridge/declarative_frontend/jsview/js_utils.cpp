@@ -113,6 +113,12 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 }
 } // namespace
 
+bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<PixelMap>>& pixelMaps,
+    int32_t& duration, int32_t& iterations)
+{
+    return PixelMap::GetPxielMapListFromAnimatedDrawable(UnwrapNapiValue(obj), pixelMaps, duration, iterations);
+}
+
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
 {
     return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));

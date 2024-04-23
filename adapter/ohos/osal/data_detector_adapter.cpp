@@ -84,22 +84,13 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        std::function<void ()> onMenuDisappear;
         std::string action = wantParams.GetStringParam("action");
         if (!action.empty() && onClickMenu) {
-            onMenuDisappear = [action, onClickMenu]() {
-                onClickMenu(action);
-            };
+            onClickMenu(action);
         }
         std::string closeMenu = wantParams.GetStringParam("closeMenu");
         if (closeMenu == "true") {
-            int32_t targetId = targetNode->GetId();
-            auto menuNode = overlayManager->GetMenuNode(targetId);
-            CHECK_NULL_VOID(menuNode);
-            auto menuPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuPattern);
-            menuPattern->RegisterMenuDisappearCallback(onMenuDisappear);
-            overlayManager->HideMenu(menuNode, targetId);
+            overlayManager->CloseUIExtensionMenu(onClickMenu, targetNode->GetId());
             return;
         }
         std::string longestContent = wantParams.GetStringParam("longestContent");
@@ -190,14 +181,14 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
             auto host = dataDetectorAdapter->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-        });
+        }, "ArkUITextParseAIResult");
     };
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     uiTaskExecutor.PostTask([info, textFunc] {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
         DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
-    });
+    }, "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
@@ -299,6 +290,7 @@ void DataDetectorAdapter::StartAITask()
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         }
     });
-    taskExecutor->PostDelayedTask(aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME);
+    taskExecutor->PostDelayedTask(
+        aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
 }
 } // namespace OHOS::Ace

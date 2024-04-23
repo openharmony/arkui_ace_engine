@@ -41,7 +41,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallIn
     return nativeWeakRef;
 }
 
-ArkUINativeModuleValue CreateStrongRef(EcmaVM* vm, const RefPtr<AceType>& ref)
+ArkUINativeModuleValue NativeUtilsBridge::CreateStrongRef(EcmaVM* vm, const RefPtr<AceType>& ref)
 {
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     CHECK_NULL_RETURN(ref, panda::JSValueRef::Undefined(vm));
@@ -51,6 +51,8 @@ ArkUINativeModuleValue CreateStrongRef(EcmaVM* vm, const RefPtr<AceType>& ref)
     nativeStrongRef->SetNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleForStrong));
+    nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "dispose"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::Dispose));
     return nativeStrongRef;
 }
 
@@ -63,7 +65,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateNativeStrongRef(ArkUIRuntimeCall
         return panda::JSValueRef::Undefined(vm);
     }
     auto refPtr = AceType::Claim(reinterpret_cast<AceType*>(firstArg->ToNativePointer(vm)->Value()));
-    return CreateStrongRef(vm, refPtr);
+    return NativeUtilsBridge::CreateStrongRef(vm, refPtr);
 }
 
 ArkUINativeModuleValue NativeUtilsBridge::WeakRefInvalid(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -106,9 +108,19 @@ ArkUINativeModuleValue NativeUtilsBridge::Upgrade(ArkUIRuntimeCallInfo* runtimeC
     auto* weak = GetPointerField<NativeWeakRef>(runtimeCallInfo);
     if (weak != nullptr) {
         auto ref = weak->weakRef.Upgrade();
-        return CreateStrongRef(vm, ref);
+        return NativeUtilsBridge::CreateStrongRef(vm, ref);
     }
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue NativeUtilsBridge::Dispose(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto* ptr = GetPointerField<NativeStrongRef>(runtimeCallInfo);
+    if (ptr != nullptr) {
+        ptr->strongRef.Reset();
+        return panda::JSValueRef::Undefined(vm);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

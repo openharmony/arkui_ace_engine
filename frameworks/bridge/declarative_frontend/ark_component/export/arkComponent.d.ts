@@ -61,6 +61,8 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this;
     backgroundEffect(options: BackgroundEffectOptions): this;
     backgroundBrightness(params: BackgroundBrightnessOptions): this;
+    backgroundBrightnessInternal(params: BrightnessOptions): this;
+    foregroundBrightness(params: BrightnessOptions): this;
     dragPreviewOptions(value: DragPreviewOptions): this;
     responseRegion(value: Array<Rectangle> | Rectangle): this;
     mouseResponseRegion(value: Array<Rectangle> | Rectangle): this;
@@ -306,7 +308,7 @@ declare class ArkGridColComponent extends ArkComponent implements GridColAttribu
     gridColOffset(value: number | GridColColumnOption): GridColAttribute;
     order(value: number | GridColColumnOption): GridColAttribute;
 }
-declare class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
+declare class ImageColorFilterModifier extends ModifierWithKey<ColorFilter | DrawingColorFilter> {
     constructor(value: ColorFilter);
     static identity: Symbol;
     applyPeer(node: KNode, reset: boolean): void;
@@ -697,6 +699,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         color?: ResourceColor;
     }): TextAttribute;
     letterSpacing(value: number | string): TextAttribute;
+    lineSpacing(value: LengthMetrics): TextAttribute;
     textCase(value: TextCase): TextAttribute;
     baselineOffset(value: number | string): TextAttribute;
     copyOption(value: CopyOptions): TextAttribute;
@@ -1742,6 +1745,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     onScrollFrameBegin(event: (offset: number, state: ScrollState) => {
         offsetRemain: number;
     }): this;
+    fadingEdge(value: boolean): this;
 }
 declare class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1923,4 +1927,16 @@ declare class ArkGridContainerComponent extends ArkComponent implements ColumnAt
 declare class ArkEffectComponentComponent extends ArkComponent implements EffectComponentAttribute {
 }
 declare class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
+}
+declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    disturbanceFields(fields: Array<DisturbanceFieldsOptions>): ParticleAttribute;
+}
+declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
+declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
+declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}
+
+declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    emitter(fields: Array<EmitterProps>): ParticleAttribute;
 }

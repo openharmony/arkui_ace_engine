@@ -150,6 +150,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     if (immediately) {
+        pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
     } else {
         pipelineContext->RequestFrame();
@@ -170,6 +171,7 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->CloseImplicitAnimation();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     if (immediately) {
+        pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
     } else {
         pipelineContext->RequestFrame();
@@ -529,7 +531,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                         CHECK_NULL_VOID(pipelineContext);
                         AnimateToForStageMode(pipelineContext, option, func, onFinishEvent, immediately);
                     },
-                    TaskExecutor::TaskType::UI);
+                    TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode");
                 return;
             }
             AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);

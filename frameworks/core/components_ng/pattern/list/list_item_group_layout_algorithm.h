@@ -24,6 +24,8 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
+class ListPositionMap;
+class ListChildrenMainSize;
 struct LayoutedItemInfo {
     int32_t startIndex = 0;
     float startPos = 0.0f;
@@ -106,6 +108,12 @@ public:
         endPos_ = endPos;
         referencePos_ = referencePos;
         forwardLayout_ = forwardLayout;
+        refPos_ = referencePos;
+    }
+
+    float GetRefPos() const
+    {
+        return refPos_;
     }
 
     void SetContentOffset(float contentStartOffset, float contentEndOffset)
@@ -210,6 +218,18 @@ public:
         return layoutedItemInfo_;
     }
 
+    void SetListChildrenMainSize(const RefPtr<ListChildrenMainSize>& childrenMainSize)
+    {
+        childrenSize_ = childrenMainSize;
+    }
+
+    void SetListPositionMap(const RefPtr<ListPositionMap>& posMap)
+    {
+        posMap_ = posMap;
+    }
+
+    void AdjustByPosMap();
+
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
 
     float GetStartHeaderPos() const
@@ -279,6 +299,8 @@ private:
     float paddingAfterContent_ = 0.0f;
 
     PositionMap itemPosition_;
+    RefPtr<ListChildrenMainSize> childrenSize_;
+    RefPtr<ListPositionMap> posMap_;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
@@ -301,6 +323,7 @@ private:
     float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
+    float refPos_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     bool forwardLayout_ = true;

@@ -161,12 +161,11 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateChainedTransition(menuParam.transition);
         }
-        if (!wrapperPattern->IsShow() && menuParam.isShow) {
-            overlayManager->ShowMenu(targetId, menuParam.positionOffset, menuNode);
-        } else if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+        if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
             overlayManager->HideMenu(menuNode, targetId, false);
         }
-    } else if (menuParam.isShow) {
+    }
+    if (menuParam.isShow) {
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
         } else if (buildFunc) {
@@ -249,6 +248,7 @@ void BindContextMenuSingle(
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
             } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
@@ -301,7 +301,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                                 builder, targetNode, menuPosition, previewBuildFunc, menuParam);
                         }
                     },
-                    TaskExecutor::TaskType::PLATFORM);
+                    TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
             };
             auto inputHub = targetNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(inputHub);
@@ -342,7 +342,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         NG::ViewAbstractModelNG::CreateCustomMenu(
                             builder, targetNode, menuPosition, previewBuildFunc, menuParam);
                     },
-                    TaskExecutor::TaskType::PLATFORM);
+                    TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
             ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
@@ -458,8 +458,10 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange)
+    std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
@@ -492,6 +494,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         if (showInPage) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
             overlayManager = GetOverlayFromPage(pageLevelId, isNav);
         }
         CHECK_NULL_VOID(overlayManager);
@@ -500,8 +503,10 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
-        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
-        std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange), targetNode);
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), targetNode);
 }
 
 void ViewAbstractModelNG::DismissSheet()
@@ -522,6 +527,15 @@ void ViewAbstractModelNG::DismissContentCover()
     overlayManager->DismissContentCover();
 }
 
+void ViewAbstractModelNG::SheetSpringBack()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SheetSpringBack();
+}
+
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -536,6 +550,14 @@ void ViewAbstractModelNG::SetAccessibilityText(const std::string& text)
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityText(text);
+}
+
+void ViewAbstractModelNG::SetAccessibilityTextHint(const std::string& text)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityTextHint(text);
 }
 
 void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& description)

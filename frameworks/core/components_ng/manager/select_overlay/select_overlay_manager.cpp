@@ -107,7 +107,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             });
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
 
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     return proxy;

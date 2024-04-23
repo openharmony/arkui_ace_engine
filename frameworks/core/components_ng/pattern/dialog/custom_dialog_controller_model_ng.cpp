@@ -70,7 +70,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         CHECK_NULL_VOID(dialog);
         dialogs.emplace_back(dialog);
     };
-    executor->PostTask(task, TaskExecutor::TaskType::UI);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
 }
 
 RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProperties& dialogProperties,
@@ -157,7 +157,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         }
     };
-    executor->PostTask(task, TaskExecutor::TaskType::UI);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
 }
 
 void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)

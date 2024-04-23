@@ -22,6 +22,8 @@
 #include "testing_enums.h"
 #include "testing_shader_effect.h"
 
+#include "base/geometry/rect.h"
+
 namespace OHOS::Ace::Testing {
 enum class FilterType {
     NO_TYPE,
@@ -69,7 +71,8 @@ public:
         return std::make_shared<TestingImageFilter>();
     }
 
-    static std::shared_ptr<TestingImageFilter> CreateShaderImageFilter(std::shared_ptr<TestingShaderEffect> shader)
+    static std::shared_ptr<TestingImageFilter> CreateShaderImageFilter(
+        std::shared_ptr<TestingShaderEffect> shader, const Rect& rect = {})
     {
         return std::make_shared<TestingImageFilter>();
     }

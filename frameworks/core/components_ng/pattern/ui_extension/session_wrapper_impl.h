@@ -106,7 +106,7 @@ private:
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
     sptr<Rosen::ExtensionSession> session_;
-    bool isNotifyOccupiedAreaChange_ = false;
+    bool isNotifyOccupiedAreaChange_ = true;
     RectF displayArea_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;

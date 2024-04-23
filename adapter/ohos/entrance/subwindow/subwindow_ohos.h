@@ -88,9 +88,8 @@ public:
         return isShowed_;
     }
 
-    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
-    void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
-    void DeleteHotAreas(int32_t overlayId) override;
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId) override;
+    void DeleteHotAreas(int32_t nodeId) override;
     void ClearToast() override;
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) override;
@@ -137,8 +136,6 @@ public:
     }
     void ResizeWindowForFoldStatus() override;
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
-    void SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId) override;
-    void DeletePopupHotAreas(int32_t overlayId) override;
     void MarkDirtyDialogSafeArea() override;
 private:
     RefPtr<StackElement> GetStack();
@@ -178,7 +175,7 @@ private:
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 
-    void HideFilter();
+    void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
 
@@ -190,7 +187,6 @@ private:
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
     std::unordered_map<int32_t, std::vector<Rosen::Rect>> hotAreasMap_;
-    std::unordered_map<int32_t, std::vector<Rosen::Rect>> popupHotAreasMap_;
 
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;

@@ -76,9 +76,11 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
                 backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
             }
             backButtonWrapper->Measure(constraint);
+            backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
             return;
         }
         auto buttonLayoutProperty = backButtonNode->GetLayoutProperty();
+        buttonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         PaddingProperty padding;
         padding.SetEdges(CalcLength(BUTTON_PADDING));
         buttonLayoutProperty->UpdatePadding(padding);
@@ -227,7 +229,7 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>
     if (!pipeline->GetInstallationFree()) {
         return afterAvoidWidth;
     }
-    
+
     auto titlebarRect = titleBarNode->GetParentGlobalOffsetDuringLayout();
 
     auto container = Container::Current();
@@ -671,7 +673,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         return;
     }
 
-    if (NearZero(titlePattern->GetTempTitleOffsetY())) {
+    if (NearZero(titlePattern->GetTempTitleOffsetY()) || !titlePattern->GetIsTitleMoving()) {
         initialTitleOffsetY_ = menuHeight_ + offsetY;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
@@ -747,7 +749,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
 
             auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
             CHECK_NULL_VOID(titlePattern);
-            if (NearZero(titlePattern->GetTempTitleOffsetY())) {
+            if (NearZero(titlePattern->GetTempTitleOffsetY()) || !titlePattern->GetIsTitleMoving()) {
                 OffsetF titleOffset = OffsetF(offsetX, initialSubtitleOffsetY_);
                 geometryNode->SetMarginFrameOffset(titleOffset);
                 subtitleWrapper->Layout();

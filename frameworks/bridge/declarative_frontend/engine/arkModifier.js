@@ -13,6 +13,20 @@
  * limitations under the License.
  */
 
+const overrideMap = new Map();
+overrideMap.set(
+  'ArkCheckboxComponent',
+  new Map([
+    ['Symbol(width)', CheckboxWidthModifier],
+    ['Symbol(height)', CheckboxHeightModifier]
+  ])
+);
+overrideMap.set(
+  'ArkTextComponent',
+  new Map([
+    ['Symbol(foregroundColor)', TextForegroundColorModifier]
+  ])
+);
 function applyAndMergeModifier(instance, modifier) {
   let myMap = modifier._modifiersWithKeys;
   myMap.setOnChange((value) => {
@@ -44,13 +58,28 @@ class ModifierUtils {
   }
   static mergeMaps(stageMap, newMap) {
     newMap.forEach((value, key) => {
-      stageMap.set(key, copyModifierWithKey(value));
+      stageMap.set(key, this.copyModifierWithKey(value));
     });
-    return stageMap;
+  }
+  static mergeMapsEmplace(stageMap, newMap, componentOverrideMap) {
+    newMap.forEach((value, key) => {
+      if (componentOverrideMap.has(key.toString())) {
+        const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
+        stageMap.set(key, newValue);
+      } else {
+        stageMap.set(key, this.copyModifierWithKey(value));
+      }
+    });
   }
   static applyAndMergeModifier(instance, modifier) {
     let component = instance;
-    mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+    if (component.constructor.name && overrideMap.has(component.constructor.name)) {
+      const componentOverrideMap = overrideMap.get(component.constructor.name);
+      this.mergeMapsEmplace(component._modifiersWithKeys, modifier._modifiersWithKeys,
+        componentOverrideMap);
+    } else {
+      this.mergeMaps(component._modifiersWithKeys, modifier._modifiersWithKeys);
+    }
   }
   static applySetOnChange(modifier) {
     let myMap = modifier._modifiersWithKeys;
@@ -787,7 +816,7 @@ class SliderModifier extends ArkSliderComponent {
   }
 }
 class SpanModifier extends ArkSpanComponent {
-   constructor(nativePtr, classType) {
+  constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
@@ -946,6 +975,16 @@ class WaterFlowModifier extends ArkWaterFlowComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
+class ParticleModifier extends ArkParticleComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
 
 export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
@@ -955,4 +994,5 @@ export default { CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonM
   ProgressModifier, QRCodeModifier, RadioModifier, RatingModifier, RectModifier, RelativeContainerModifier, RichEditorModifier, RowModifier, RowSplitModifier,
   ScrollModifier, SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier,
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
-  ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater };
+  ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
+  ParticleModifier };

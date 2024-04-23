@@ -53,9 +53,6 @@ class XComponentPattern : public Pattern {
 
 public:
     XComponentPattern() = default;
-    XComponentPattern(const std::string& id, XComponentType type,
-        const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
-        float initHeight = 0.0f);
     XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
         float initHeight = 0.0f);
@@ -133,7 +130,6 @@ public:
         }
     }
 
-    void OnPaint();
     void NativeXComponentOffset(double x, double y);
     void NativeXComponentChange(float width, float height);
     void NativeXComponentDestroy();
@@ -284,7 +280,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
     void OnWindowHide() override;
@@ -293,6 +289,8 @@ private:
     void NativeSurfaceShow();
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
+    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
     void InitNativeNodeCallbacks();
     void InitEvent();

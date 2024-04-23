@@ -33,6 +33,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float DEFAULT_WIDTH = 800.0f;
 constexpr int32_t DEFAULT_COLUMN_NUM = 8;
 constexpr float DEFAULT_COLUMN_WIDTH = 100.0f;
@@ -111,7 +112,7 @@ HWTEST_F(GridContainerTestNg, DefaultProperty001, TestSize.Level1)
     // rubbish code for coverity
     clone.Reset();
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
 }
 
 /**

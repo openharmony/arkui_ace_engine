@@ -91,4 +91,8 @@ void RosenRenderSurface::DrawBufferForXComponent(
 
 void RosenRenderSurface::releaseSurfaceBuffers() {}
 
+void RosenRenderSurface::UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height) {}
+
+void RosenRenderSurface::DumpInfo() {}
+
 } // namespace OHOS::Ace::NG

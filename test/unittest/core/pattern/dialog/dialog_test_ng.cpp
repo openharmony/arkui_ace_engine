@@ -39,6 +39,8 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
+
 const std::string SHEET_TITLE = "sheet item";
 const std::string SHEET_TITLE_2 = "sheet item 2";
 const std::string SHEET_TITLE_3 = "sheet item 3";
@@ -290,6 +292,68 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0020, TestSize.Level1)
             EXPECT_TRUE(result);
         }
     }
+
+    /**
+     * @tc.steps: step3. call SetAlignmentSwitch function in api version 12.
+     * @tc.expected: the results are correct.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    for (size_t i = 0; i < sizeof(aligns) / sizeof(aligns[0]); i++) {
+        dialogLayoutAlgorithm->alignment_ = aligns[i];
+        auto result = dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
+        EXPECT_TRUE(result);
+    }
+}
+
+/**
+ * @tc.name: DialogFrameNodeCreator0021
+ * @tc.desc: Test Dialog IsAlignmentByWholeScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create params and DialogLayoutAlgorithm object.
+     * tc.expected: the params and DialogLayoutAlgorithm created successfully.
+     */
+    const DialogAlignment aligns[] = {
+        DialogAlignment::TOP,
+        DialogAlignment::CENTER,
+        DialogAlignment::BOTTOM,
+        DialogAlignment::DEFAULT,
+        DialogAlignment::TOP_START,
+        DialogAlignment::TOP_END,
+        DialogAlignment::CENTER_START,
+        DialogAlignment::CENTER_END,
+        DialogAlignment::BOTTOM_START,
+        DialogAlignment::BOTTOM_END,
+    };
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    /**
+     * @tc.steps: step2. call IsAlignmentByWholeScreen function in api version 11.
+     * @tc.expected: the results are correct.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    for (size_t i = 0; i < sizeof(aligns) / sizeof(aligns[0]); i++) {
+        dialogLayoutAlgorithm->alignment_ = aligns[i];
+        auto result = dialogLayoutAlgorithm->IsAlignmentByWholeScreen();
+        EXPECT_FALSE(result);
+    }
+
+    /**
+     * @tc.steps: step3. call IsAlignmentByWholeScreen function in api version 12.
+     * @tc.expected: the results are correct.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    for (size_t i = 0; i < sizeof(aligns) / sizeof(aligns[0]); i++) {
+        dialogLayoutAlgorithm->alignment_ = aligns[i];
+        auto result = dialogLayoutAlgorithm->IsAlignmentByWholeScreen();
+        if (i == 1 || i == 3 || i == 6 || i == 7) {
+            EXPECT_TRUE(result);
+        } else {
+            EXPECT_FALSE(result);
+        }
+    }
 }
 
 /**
@@ -350,7 +414,7 @@ HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
      * @tc.expected: json->GetKey() equal to "".
      */
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetKey(), "");
 }
 

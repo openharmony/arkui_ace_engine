@@ -242,6 +242,29 @@ void JSForm::JsOnLoad(const JSCallbackInfo& info)
     }
 }
 
+void JSForm::JsObscured(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        LOGE("Obscured reasons undefined");
+        return;
+    }
+    if (!info[0]->IsArray()) {
+        LOGE("Obscured reasons not Array");
+        return;
+    }
+    auto obscuredArray = JSRef<JSArray>::Cast(info[0]);
+    size_t size = obscuredArray->Length();
+    std::vector<ObscuredReasons> reasons;
+    reasons.reserve(size);
+    for (size_t i = 0; i < size; ++i) {
+        JSRef<JSVal> reason = obscuredArray->GetValueAt(i);
+        if (reason->IsNumber()) {
+            reasons.push_back(static_cast<ObscuredReasons>(reason->ToNumber<int32_t>()));
+        }
+    }
+    FormModel::GetInstance()->SetObscured(reasons);
+}
+
 void JSForm::JSBind(BindingTarget globalObj)
 {
     JSClass<JSForm>::Declare("FormComponent");
@@ -253,6 +276,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("visibility", &JSForm::SetVisibility, opt);
     JSClass<JSForm>::StaticMethod("moduleName", &JSForm::SetModuleName, opt);
     JSClass<JSForm>::StaticMethod("clip", &JSViewAbstract::JsClip, opt);
+    JSClass<JSForm>::StaticMethod("obscured", &JSForm::JsObscured);
 
     JSClass<JSForm>::StaticMethod("onAcquired", &JSForm::JsOnAcquired);
     JSClass<JSForm>::StaticMethod("onError", &JSForm::JsOnError);

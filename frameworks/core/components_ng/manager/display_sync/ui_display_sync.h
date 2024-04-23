@@ -178,6 +178,8 @@ public:
     bool IsAutoRefreshRateMode() const;
     bool IsNonAutoRefreshRateMode() const;
 
+    std::vector<int32_t> FindRefreshRateFactors(int32_t refreshRate);
+    int32_t FindMatchedRefreshRate(int32_t vsyncRate, int32_t targetRate);
     int32_t SearchMatchedRate(int32_t vsyncRate, int32_t iterCount = 1);
     RefPtr<PipelineBase> GetCurrentContext();
 
@@ -191,6 +193,7 @@ private:
     int32_t refreshRateMode_ = 0;
     WeakPtr<PipelineBase> context_;
     int32_t drawFPS_ = 0;
+    std::unordered_map<int32_t, std::vector<int32_t>> refreshRateToFactorsMap_;
 };
 } // namespace OHOS::Ace
 

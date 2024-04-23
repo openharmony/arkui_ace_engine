@@ -210,6 +210,8 @@ private:
         bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");
 
     bool CheckIndexValid(int32_t index) const;
+    bool CheckOhmUrlValid(const std::string& ohmUrl);
+    void ThrowError(const std::string& msg, int32_t code);
 
     RefPtr<Framework::ManifestParser> manifestParser_;
 

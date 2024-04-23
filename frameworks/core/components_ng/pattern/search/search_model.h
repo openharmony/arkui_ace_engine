@@ -71,13 +71,18 @@ public:
     virtual void SetType(TextInputType value);
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetAdaptMinFontSize(const Dimension& value) {};
+    virtual void SetAdaptMaxFontSize(const Dimension& value) {};
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
-    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
+    virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void UpdateInspectorId(const std::string& key) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
 
+    virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};
+    virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
+    virtual void SetTextIndent(const Dimension& value) {};
 private:
     static std::unique_ptr<SearchModel> instance_;
     static std::mutex mutex_;

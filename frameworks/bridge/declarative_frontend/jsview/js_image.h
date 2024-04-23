@@ -29,6 +29,8 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo);
 class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
+    static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps,
+        int32_t duration, int32_t iterations);
     static void HandleLoadImageSuccess(const BaseEventInfo& param);
     static void HandleLoadImageFail(const BaseEventInfo& param);
     static void SetAlt(const JSCallbackInfo& args);
@@ -65,12 +67,11 @@ public:
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo &info);
     static void JsImageResizable(const JSCallbackInfo& info);
+    static bool IsDrawable(const JSRef<JSVal>& jsValue);
 
 protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
-
-    static bool IsDrawable(const JSRef<JSVal>& jsValue);
 };
 
 class JSColorFilter : public AceType {

@@ -24,10 +24,68 @@ function getUINativeModule(): any {
 
 enum ModifierType {
   ORIGIN = 0,
-  STATE = 1
+  STATE = 1,
+  FRAME_NODE = 2
 }
 
 type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
+
+class ObservedMap {
+  private map_: Map<Symbol, AttributeModifierWithKey>;
+  private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
+
+  constructor() {
+    this.map_ = new Map();
+  }
+
+  public clear(): void {
+    this.map_.clear();
+  }
+
+  public delete(key: Symbol): boolean {
+    return this.map_.delete(key);
+  }
+
+  public forEach(callbackfn: (value: AttributeModifierWithKey, key: Symbol,
+    map: Map<Symbol, AttributeModifierWithKey>) => void, thisArg?: any): void {
+    this.map_.forEach(callbackfn, thisArg);
+  }
+  public get(key: Symbol): AttributeModifierWithKey | undefined {
+    return this.map_.get(key);
+  }
+  public has(key: Symbol): boolean {
+    return this.map_.has(key);
+  }
+  public set(key: Symbol, value: AttributeModifierWithKey): this {
+    const _a = this.changeCallback;
+    this.map_.set(key, value);
+    _a === null || _a === void 0 ? void 0 : _a(key, value);
+    return this;
+  }
+  public get size(): number {
+    return this.map_.size;
+  }
+  public entries(): IterableIterator<[Symbol, AttributeModifierWithKey]> {
+    return this.map_.entries();
+  }
+  public keys(): IterableIterator<Symbol> {
+    return this.map_.keys();
+  }
+  public values(): IterableIterator<AttributeModifierWithKey> {
+    return this.map_.values();
+  }
+  public [Symbol.iterator](): IterableIterator<[Symbol, AttributeModifierWithKey]> {
+    return this.map_.entries();
+  }
+  public get [Symbol.toStringTag](): string {
+    return 'ObservedMapTag';
+  }
+  public setOnChange(callback: (key: Symbol, value: AttributeModifierWithKey) => void): void {
+    if (this.changeCallback === undefined) {
+      this.changeCallback = callback;
+    }
+  }
+}
 
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
@@ -1175,6 +1233,34 @@ class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignme
   }
 }
 
+class BackgroundImageResizableModifier extends ModifierWithKey<ResizableOptions> {
+  constructor(value: ResizableOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('backgroundImageResizable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundImageResizable(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      let sliceRight: Length | undefined;
+      if (!isUndefined(this.value.slice)) {
+        let tempSlice = this.value.slice as EdgeWidths;
+        sliceTop = tempSlice.top;
+        sliceBottom = tempSlice.bottom;
+        sliceLeft = tempSlice.left;
+        sliceRight = tempSlice.right;
+      }
+      getUINativeModule().common.setBackgroundImageResizable(node, sliceTop, sliceBottom, sliceLeft, sliceRight);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class LinearGradientBlurModifier extends ModifierWithKey<ArkLinearGradientBlur> {
   constructor(value: ArkLinearGradientBlur) {
     super(value);
@@ -1704,6 +1790,20 @@ class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   }
 }
 
+class MotionBlurModifier extends ModifierWithKey<MotionBlurOptions> {
+  constructor(value: MotionBlurOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('motionBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMotionBlur(node);
+    } else {
+      getUINativeModule().common.setMotionBlur(node, this.value.radius, this.value.anchor.x, this.value.anchor.y);
+    }
+  }
+}
+
 class GroupDefaultFocusModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -2182,6 +2282,50 @@ class BackgroundBrightnessModifier extends ModifierWithKey<BackgroundBrightnessO
   }
 }
 
+class BackgroundBrightnessInternalModifier extends ModifierWithKey<BrightnessOptions> {
+  constructor(params: BrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('backgroundBrightnessInternal');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundBrightnessInternal(node);
+    } else {
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
+    }
+  }                       
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
+      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+  }
+}
+
+class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
+  constructor(params: BrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('foregroundBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundBrightness(node);
+    } else {
+      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
+      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+  }
+}
+
 class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
   constructor(value: DragPreviewOptions) {
     super(value);
@@ -2573,7 +2717,12 @@ const isUndefined = (val: basicType): boolean => typeof val === 'undefined';
 const isObject = (val: basicType): boolean => typeof val === 'object';
 const isFunction = (val: basicType): boolean => typeof val === 'function';
 const isLengthType = (val: any): boolean => typeof val === 'string' || typeof val === 'number';
-
+function parseWithDefaultNumber(val, defaultValue) {
+  if (isNumber(val)) {
+    return val;
+  }
+  else { return defaultValue; }
+}
 function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(
   modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>,
   modifierClass: new (value: T) => M,
@@ -2615,14 +2764,29 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiers = new Map();
-    this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    if (classType === ModifierType.FRAME_NODE) {
+      this._modifiersWithKeys = new ObservedMap();
+      (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
+        if (this.nativePtr === undefined) {
+          return;
+        }
+        value.applyStage(this.nativePtr);
+        getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+      })
+    } else {
+      this._modifiersWithKeys = new Map();
+    }
     if (classType === ModifierType.STATE) {
       this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
     this._nativePtrChanged = false;
+  }
+
+  setNodePtr(nodePtr: KNode) {
+    this.nativePtr = nodePtr;
   }
 
   getOrCreateGestureEvent() {
@@ -2762,6 +2926,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  backgroundBrightnessInternal(params: BrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundBrightnessInternalModifier.identity,
+      BackgroundBrightnessInternalModifier, params);
+    return this;
+  }
+
+  foregroundBrightness(params: BrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundBrightnessModifier.identity,
+      ForegroundBrightnessModifier, params);
+    return this;
+  }
+
   dragPreviewOptions(value: DragPreviewOptions): this {
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, value);
@@ -2886,6 +3062,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   backgroundImagePosition(value: Position | Alignment): this {
     modifierWithKey(this._modifiersWithKeys, BackgroundImagePositionModifier.identity, BackgroundImagePositionModifier, value);
+    return this;
+  }
+
+  backgroundImageResizable(value: ResizableOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageResizableModifier.identity, BackgroundImageResizableModifier, value);
     return this;
   }
 
@@ -3571,6 +3752,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  motionPath(value: MotionBlurOptions): this {
+    modifierWithKey(this._modifiersWithKeys, MotionBlurModifier.identity, MotionBlurModifier, value);
+    return this;
+  }
+
   shadow(value: ShadowOptions | ShadowStyle): this {
     modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
     return this;
@@ -3749,40 +3935,61 @@ const isTruthyString = (val: any) => typeof val === 'string' && val.trim() !== '
 class UICommonEvent {
   private _nodePtr: Object | null;
   private _instanceId: number;
+  private _clickEvent?: (event: ClickEvent) => void;
+  private _touchEvent?: (event: TouchEvent) => void;
+  private _onAppearEvent?: () => void;
+  private _onDisappearEvent?: () => void;
+  private _onKeyEvent?: (event: KeyEvent) => void;
+  private _onFocusEvent?: () => void;
+  private _onBlur?: () => void;
+  private _onHoverEvent?: (isHover: boolean, event: HoverEvent) => void;
+  private _onMouseEvent?: (event: MouseEvent) => void;
+  private _onSizeChangeEvent?: SizeChangeCallback;
+
   setInstanceId(instanceId: number): void {
     this._instanceId = instanceId;
   }
   setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
-  setOnClick(callback: (event?: ClickEvent) => void): void {
+  setOnClick(callback: (event: ClickEvent) => void): void {
+    this._clickEvent = callback;
     getUINativeModule().frameNode.setOnClick(this._nodePtr, callback, this._instanceId);
   }
-  setOnTouch(callback: (event?: TouchEvent) => void): void {
+  setOnTouch(callback: (event: TouchEvent) => void): void {
+    this._touchEvent = callback;
     getUINativeModule().frameNode.setOnTouch(this._nodePtr, callback, this._instanceId);
   }
   setOnAppear(callback: () => void): void {
+    this._onAppearEvent = callback;
     getUINativeModule().frameNode.setOnAppear(this._nodePtr, callback, this._instanceId);
   }
   setOnDisappear(callback: () => void): void {
+    this._onDisappearEvent = callback;
     getUINativeModule().frameNode.setOnDisappear(this._nodePtr, callback, this._instanceId);
   }
-  setOnKeyEvent(callback: (event?: KeyEvent) => void): void {
+  setOnKeyEvent(callback: (event: KeyEvent) => void): void {
+    this._onKeyEvent = callback;
     getUINativeModule().frameNode.setOnKeyEvent(this._nodePtr, callback, this._instanceId);
   }
   setOnFocus(callback: () => void): void {
+    this._onFocusEvent = callback;
     getUINativeModule().frameNode.setOnFocus(this._nodePtr, callback, this._instanceId);
   }
   setOnBlur(callback: () => void): void {
+    this._onBlur = callback;
     getUINativeModule().frameNode.setOnBlur(this._nodePtr, callback, this._instanceId);
   }
-  setOnHover(callback: (isHover?: boolean, event?: HoverEvent) => void): void {
+  setOnHover(callback: (isHover: boolean, event: HoverEvent) => void): void {
+    this._onHoverEvent = callback;
     getUINativeModule().frameNode.setOnHover(this._nodePtr, callback, this._instanceId);
   }
-  setOnMouse(callback: (event?: MouseEvent) => void): void {
+  setOnMouse(callback: (event: MouseEvent) => void): void {
+    this._onMouseEvent = callback;
     getUINativeModule().frameNode.setOnMouse(this._nodePtr, callback, this._instanceId);
   }
   setOnSizeChange(callback: SizeChangeCallback): void {
+    this._onSizeChangeEvent = callback;
     getUINativeModule().frameNode.setOnSizeChange(this._nodePtr, callback, this._instanceId);
   }
 }
@@ -3791,6 +3998,9 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
@@ -3813,6 +4023,39 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
     }
   } else {
     applyUIAttributes(modifier, nativeNode, component);
+    component.applyModifierPatch();
+  }
+}
+
+function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<T>,
+  componentBuilder: (nativePtr: KNode) => ArkComponent,
+  modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
+{
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return componentBuilder(nativeNode);
+  });
+  if (modifier.isAttributeUpdater === true) {
+    let modifierJS = globalThis.requireNapi('arkui.modifier');
+    if (modifier.modifierState === modifierJS.AttributeUpdater.StateEnum.INIT) {
+      modifier.modifierState = modifierJS.AttributeUpdater.StateEnum.UPDATE;
+      modifier.attribute = modifierBuilder(nativeNode, ModifierType.STATE, modifierJS);
+      modifierJS.ModifierUtils.applySetOnChange(modifier.attribute);
+      modifier.initializeModifier(modifier.attribute);
+      component.applyModifierPatch();
+    } else {
+      modifier.attribute.applyStateUpdatePtr(component);
+      modifier.attribute.applyNormalAttribute(component);
+      if (modifier.applyNormalAttribute) {
+        modifier.applyNormalAttribute(component);
+      }
+      component.applyModifierPatch();
+    }
+  } else {
+    if (modifier.applyNormalAttribute) {
+      modifier.applyNormalAttribute(component);
+    }
     component.applyModifierPatch();
   }
 }

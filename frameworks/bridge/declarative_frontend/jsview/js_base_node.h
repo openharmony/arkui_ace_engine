@@ -41,26 +41,17 @@ public:
     void FinishUpdateFunc(const JSCallbackInfo& info);
     void Create(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
-    void CreateFrameNode(const JSCallbackInfo& info);
-    void ConvertToFrameNode(const JSCallbackInfo& info);
+    void ProccessNode(bool isSupportExportTexture);
     void PostTouchEvent(const JSCallbackInfo& info);
-    void CreateRenderNode(const JSCallbackInfo& info);
     void UpdateStart(const JSCallbackInfo& info);
     void UpdateEnd(const JSCallbackInfo& info);
-    void Dispose(const JSCallbackInfo& info)
+    void Dispose(const JSCallbackInfo&  /*info*/)
     {
         viewNode_.Reset();
     }
 
-    RefPtr<NG::UINode> GetViewNode() const
-    {
-        return viewNode_;
-    }
-
-protected:
-    RefPtr<NG::UINode> viewNode_;
-
 private:
+    RefPtr<NG::FrameNode> viewNode_;
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     std::string surfaceId_;

@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
@@ -133,6 +134,9 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     CheckScrollToEdge(oldScrollableDistance, scrollableDistance_);
+    if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
+        CheckRestartSpring(true);
+    }
     auto axis = GetAxis();
     auto oldMainSize = GetMainAxisSize(viewPort_, axis);
     auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
@@ -730,6 +734,16 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
+std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbility()
+{
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_RETURN(pattern, false);
+                return pattern->OnScrollCallback(moveOffset, SCROLL_FROM_FOCUS_JUMP);
+            },
+        GetAxis() };
+}
+
 std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
 {
     std::optional<float> predictSnapOffset;
@@ -1024,12 +1038,12 @@ void ScrollPattern::TriggerModifyDone()
     OnModifyDone();
 }
 
-void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json);
+    ScrollablePattern::ToJsonValue(json, filter);
     auto initialOffset = JsonUtil::Create(true);
     initialOffset->Put("xOffset", initialOffset_.GetX().ToString().c_str());
     initialOffset->Put("yOffset", initialOffset_.GetY().ToString().c_str());
-    json->Put("initialOffset", initialOffset);
+    json->PutExtAttr("initialOffset", initialOffset, filter);
 }
 } // namespace OHOS::Ace::NG

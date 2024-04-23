@@ -83,14 +83,7 @@ public:
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
 
-    bool AboutToAddCurrentFingers(int32_t touchId) override
-    {
-        if (fingersId_.find(touchId) != fingersId_.end()) {
-            return false;
-        }
-        currentFingers_++;
-        return true;
-    }
+    bool AboutToAddCurrentFingers(int32_t touchId) override;
 
 private:
     class PanVelocity {
@@ -99,6 +92,7 @@ private:
         double GetMainAxisVelocity();
         void UpdateTouchPoint(int32_t id, const TouchEvent& event, bool end);
         void Reset(int32_t id);
+        void ResetAll();
         void SetDirection(int32_t directionType);
 
     private:
@@ -125,6 +119,7 @@ private:
     GestureAcceptResult IsPanGestureAccept() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
+    void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     GestureJudgeResult TriggerGestureJudgeCallback();
@@ -137,6 +132,8 @@ private:
 
     void OnResetStatus() override;
     void OnSucceedCancel() override;
+
+    void AddOverTimeTrace();
 
     const TouchRestrict& GetTouchRestrict() const
     {

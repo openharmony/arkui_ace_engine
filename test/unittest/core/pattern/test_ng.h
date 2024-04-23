@@ -101,6 +101,20 @@ public:
         return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
     }
 
+    AssertionResult IsEqual(const ListItemIndex& actual, const ListItemIndex& expected)
+    {
+        if (actual.index == expected.index && actual.area == expected.area &&
+            actual.indexInGroup == expected.indexInGroup) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: "
+                                  << "{ " << actual.index << " , " << actual.area << " , " << actual.indexInGroup
+                                  << " }"
+                                  << " Expected: "
+                                  << "{ " << expected.index << " , " << expected.area << " , " << expected.indexInGroup
+                                  << " }";
+    }
+
     template<typename T>
     AssertionResult IsEqual(const T& actual, const T& expected)
     {

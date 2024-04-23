@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
@@ -908,6 +909,26 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto navigationMgr = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationMgr);
+    auto result = navigationMgr->GetNavigationInfo(GetViewNode());
+    CHECK_NULL_VOID(result);
+    auto stack = result->pathStack.Upgrade();
+    CHECK_NULL_VOID(stack);
+    auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
+    CHECK_NULL_VOID(jsStack);
+    auto navPathStackObj = jsStack->GetDataSourceObj();
+    CHECK_NULL_VOID(!navPathStackObj->IsEmpty());
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty<std::string>("navigationId", result->navigationId);
+    obj->SetPropertyObject("pathStack", navPathStackObj);
+    info.SetReturnValue(obj);
+}
+
 void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
 {
     ContainerScope scope(GetInstanceId());
@@ -918,6 +939,17 @@ void JSViewPartialUpdate::JSGetUIContext(const JSCallbackInfo& info)
     auto context = frontend->GetContextValue();
     auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
     info.SetReturnValue(jsVal);
+}
+
+void JSViewPartialUpdate::JSGetUniqueId(const JSCallbackInfo& info)
+{
+    auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
+    auto nodeId = -1;
+    if (node) {
+        nodeId = node->GetId();
+    }
+    
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nodeId)));
 }
 
 void JSViewPartialUpdate::JSBind(BindingTarget object)
@@ -944,7 +976,10 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "queryNavigationInfo", &JSViewPartialUpdate::JSGetNavigationInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
+    JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

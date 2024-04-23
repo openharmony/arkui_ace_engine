@@ -37,9 +37,10 @@ public:
     void SetTextCase(TextCase value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetLetterSpacing(const Dimension& value) override;
+    void SetBaselineOffset(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     // TODO: add extra event for span.
-    void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     
 
@@ -56,10 +57,12 @@ public:
     static void SetTextDecorationColor(UINode* uiNode, const Color& value);
     static void SetTextColor(UINode* uiNode, const Color& value);
     static void SetLetterSpacing(UINode* uiNode, const Dimension& value);
+    static void SetBaselineOffset(UINode* uiNode, const Dimension& value);
     static void SetFont(UINode* uiNode, const Font& value);
     static std::string GetContent(UINode* uiNode);
     static Ace::TextDecoration GetTextDecoration(UINode* uiNode);
     static Color GetTextDecorationColor(UINode* uiNode);
+    static Ace::TextDecorationStyle GetTextDecorationStyle(UINode* uiNode);
     static Color GetFontColor(UINode* uiNode);
     static Dimension GetFontSize(UINode* uiNode);
     static Ace::FontStyle GetFontStyle(UINode* uiNode);
@@ -67,6 +70,7 @@ public:
     static Dimension GetTextLineHeight(UINode* uiNode);
     static Ace::TextCase GetTextCase(UINode* uiNode);
     static Dimension GetLetterSpacing(UINode* uiNode);
+    static Dimension GetBaselineOffset(UINode* uiNode);
     static TextStyle GetDefaultTextStyle();
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;

@@ -155,7 +155,7 @@ void FormElement::HandleOnAcquireEvent(int64_t id)
                 element->onAcquireEvent_(info);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIFormHandleOnAcquireEvent");
 }
 
 void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action)
@@ -183,7 +183,7 @@ void FormElement::HandleOnRouterEvent(const std::unique_ptr<JsonValue>& action)
                 element->onRouterEvent_(info);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIFormHandleOnRouterEvent");
 }
 
 void FormElement::HandleOnErrorEvent(const std::string code, const std::string msg)
@@ -212,7 +212,7 @@ void FormElement::HandleOnErrorEvent(const std::string code, const std::string m
                 element->onErrorEvent_(info);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIFormHandleOnErrorEvent");
 }
 
 void FormElement::HandleOnUninstallEvent(int64_t formId)
@@ -239,7 +239,7 @@ void FormElement::HandleOnUninstallEvent(int64_t formId)
                 element->onUninstallEvent_(info);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIFormHandleOnUninstallEvent");
 }
 
 void FormElement::Prepare(const WeakPtr<Element>& parent)
@@ -279,7 +279,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                                                formJsInfo.formSrc, frontendType, uiSyntax);
                         }
                     }
-                });
+                }, "ArkUIFormAcquireAndRunCard");
             });
         formManagerBridge_->AddFormUpdateCallback([weak = WeakClaim(this), instanceID](int64_t id, std::string data,
             std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap) {
@@ -295,7 +295,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                         form->GetSubContainer()->UpdateCard(data, imageDataMap);
                     }
                 }
-            });
+            }, "ArkUIFormUpdateCard");
         });
         formManagerBridge_->AddFormErrorCallback(
             [weak = WeakClaim(this), instanceID](std::string code, std::string msg) {
@@ -319,7 +319,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                     if (renderForm) {
                         renderForm->RemoveChildren();
                     }
-                });
+                }, "ArkUIFormRemoveCard");
             });
         formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
             ContainerScope scope(instanceID);
@@ -332,7 +332,7 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                 if (form) {
                     form->HandleOnUninstallEvent(formId);
                 }
-            });
+            }, "ArkUIFormUninstall");
         });
     }
 }
@@ -415,7 +415,7 @@ void FormElement::CreateCardContainer()
                 LOGI("card id:%{public}" PRId64, id);
                 form->HandleOnAcquireEvent(id);
             }
-        });
+        }, "ArkUIFormAcquire");
     });
 }
 

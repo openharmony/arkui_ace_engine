@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -713,9 +714,10 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             animationTargetIndex_ != indicator) {
             swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
             animationTargetIndex_.reset();
-        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED) {
+        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED ||
+            *windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
             // UNDEFINED currently implies window change on foldable
-            TriggerTranslateAnimation(layoutProperty, indicator_, indicator_);
+            PlayTabBarTranslateAnimation(indicator_);
             UpdateIndicator(indicator_);
         }
         windowSizeChangeReason_.reset();
@@ -730,7 +732,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::FIRST_MOVE, "");
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }
@@ -1098,6 +1100,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
         auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
         maskGeometryNode->SetMarginFrameOffset(maskOffset + tabBarOffset);
         maskGeometryNode->SetFrameSize(SizeF(imageSize * radiusRatio * 2.0f, imageSize * radiusRatio * 2.0f));
+        maskRenderContext->SavePaintRect();
         maskRenderContext->SyncGeometryProperties(nullptr);
         BorderRadiusProperty borderRadiusProperty;
         borderRadiusProperty.SetRadius(Dimension(imageSize * radiusRatio));
@@ -1112,6 +1115,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
         maskImageProperty->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(Dimension(imageSize)), NG::CalcLength(Dimension(imageSize))));
         maskImageRenderContext->SetVisible(false);
+        maskImageRenderContext->SavePaintRect();
         maskImageRenderContext->SyncGeometryProperties(nullptr);
     }
     maskImageRenderContext->UpdateOpacity(opacity);
@@ -2041,16 +2045,16 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
     }
 }
 
-void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    Pattern::ToJsonValue(json);
+    Pattern::ToJsonValue(json, filter);
     auto selectedModes = JsonUtil::CreateArray(true);
     for (const auto& selectedMode : selectedModes_) {
         auto mode = JsonUtil::Create(true);
         mode->Put("mode", selectedMode == SelectedMode::INDICATOR ? "INDICATOR" : "BOARD");
         selectedModes->Put(mode);
     }
-    json->Put("selectedModes", selectedModes->ToString().c_str());
+    json->PutExtAttr("selectedModes", selectedModes->ToString().c_str(), filter);
 
     auto indicatorStyles = JsonUtil::CreateArray(true);
     for (const auto& indicatorStyle : indicatorStyles_) {
@@ -2062,7 +2066,7 @@ void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         indicator->Put("marginTop", indicatorStyle.marginTop.ToString().c_str());
         indicatorStyles->Put(indicator);
     }
-    json->Put("indicatorStyles", indicatorStyles->ToString().c_str());
+    json->PutExtAttr("indicatorStyles", indicatorStyles->ToString().c_str(), filter);
 
     auto tabBarStyles = JsonUtil::CreateArray(true);
     for (const auto& tabBarStyle : tabBarStyles_) {
@@ -2072,7 +2076,7 @@ void TabBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
                                                                          : "BOTTOMTABBATSTYLE");
         tabBarStyles->Put(style);
     }
-    json->Put("tabBarStyles", tabBarStyles->ToString().c_str());
+    json->PutExtAttr("tabBarStyles", tabBarStyles->ToString().c_str(), filter);
 }
 
 void TabBarPattern::FromJson(const std::unique_ptr<JsonValue>& json)

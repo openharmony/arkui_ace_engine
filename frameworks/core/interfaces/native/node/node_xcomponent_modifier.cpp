@@ -16,6 +16,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -120,6 +121,16 @@ ArkUI_Uint32 GetXComponentSurfaceHeight(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return XComponentModelNG::GetXComponentSurfaceHeight(frameNode);
 }
+
+void* GetNativeXComponent(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_RETURN(xcPattern, nullptr);
+    auto pair = xcPattern->GetNativeXComponent();
+    return reinterpret_cast<void*>(pair.second.lock().get());
+}
 } // namespace
 
 namespace NodeModifier {
@@ -141,6 +152,7 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         GetXComponentType,
         GetXComponentSurfaceWidth,
         GetXComponentSurfaceHeight,
+        GetNativeXComponent,
     };
 
     return &modifier;

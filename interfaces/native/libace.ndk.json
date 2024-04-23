@@ -513,27 +513,27 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeAdapter_NotifyItemReloaded"
+        "name": "OH_ArkUI_NodeAdapter_ReloadAllItems"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeAdapter_NotifyItemChanged"
+        "name": "OH_ArkUI_NodeAdapter_ReloadItem"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeAdapter_NotifyItemRemoved"
+        "name": "OH_ArkUI_NodeAdapter_RemoveItem"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeAdapter_NotifyItemInserted"
+        "name": "OH_ArkUI_NodeAdapter_InsertItem"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeAdapter_NotifyItemMoved"
+        "name": "OH_ArkUI_NodeAdapter_MoveItem"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeAdapter_GetAllItem"
+        "name": "OH_ArkUI_NodeAdapter_GetAllItems"
     },
     {
         "first_introduced": "12",
@@ -557,10 +557,110 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_NodeAdapterEvent_SetAddedItem"
+        "name": "OH_ArkUI_NodeAdapterEvent_SetItem"
     },
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_NodeAdapterEvent_SetNodeId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_Create"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetDuration"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetTempo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetDelay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetIterations"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetPlayMode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_GetExpectedFrameRateRange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetDuration"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetTempo"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetDelay"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetIterations"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetPlayMode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_AnimateOption_SetExpectedFrameRateRange"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetContextFromNapiValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetNativeXComponent"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_SetInterceptHitTestMode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_AddNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_InsertNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_RemoveNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContent_RegisterCallback"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeContentEvent_GetEventType"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNodeContentFromNapiValue"
     }
 ]

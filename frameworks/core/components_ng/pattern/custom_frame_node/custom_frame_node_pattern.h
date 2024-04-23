@@ -20,6 +20,9 @@
 
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/render_node/render_node_modifier.h"
+#include "core/components_ng/pattern/render_node/render_node_paint_method.h"
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -58,35 +61,40 @@ public:
         return true;
     }
 
-    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
+    RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        attachFunc_ = std::move(attachFunc);
+        auto renderNodePaintProperty = MakeRefPtr<RenderNodePaintProperty>();
+        renderNodePaintProperty->UpdateRenderNodeFlag(0);
+        return renderNodePaintProperty;
     }
 
-    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        detachFunc_ = std::move(detachFunc);
-    }
-
-    void OnAttachToMainTree() override
-    {
-        CHECK_NULL_VOID(attachFunc_);
         auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        attachFunc_(host->GetId());
+        CHECK_NULL_RETURN(host, nullptr);
+
+        if (!renderNodeModifier_) {
+            renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+        }
+        auto paintMethod = AceType::MakeRefPtr<RenderNodePaintMethod>(renderNodeModifier_);
+        return paintMethod;
     }
 
-    void OnDetachFromMainTree() override
+    void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
     {
-        CHECK_NULL_VOID(detachFunc_);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        detachFunc_(host->GetId());
+        drawCallback_ = drawCallback;
+        renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+    }
+
+    void Invalidate()
+    {
+        CHECK_NULL_VOID(renderNodeModifier_);
+        renderNodeModifier_->Modify();
     }
 
 private:
-    std::function<void(int32_t)> attachFunc_;
-    std::function<void(int32_t)> detachFunc_;
+    std::function<void(DrawingContext& context)> drawCallback_;
+    RefPtr<RenderNodeModifier> renderNodeModifier_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_FRAME_NODE_CUSTOM_FRAME_NODE_PATTERN_H

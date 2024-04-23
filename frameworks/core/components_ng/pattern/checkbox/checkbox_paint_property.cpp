@@ -15,23 +15,26 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 
+#include "core/components_ng/base/inspector_filter.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 const Color DEFAULT_SELECTED_COLOR = Color(0xFF007DFF);
 const Dimension DEFAULT_CHECKMARK_SIZE = Dimension(0, DimensionUnit::VP);
 } // namespace
 
-void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkboxTheme);
-    PaintProperty::ToJsonValue(json);
-    json->Put("isOn", GetCheckBoxSelect().value_or(false) ? "true" : "false");
-    json->Put("selectedColor", GetCheckBoxSelectedColor().value_or(DEFAULT_SELECTED_COLOR).ColorToString().c_str());
-    json->Put("unselectedColor", GetCheckBoxUnSelectedColor().value_or(
-        checkboxTheme->GetInactiveColor()).ColorToString().c_str());
+    PaintProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("isOn", GetCheckBoxSelect().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("selectedColor",
+        GetCheckBoxSelectedColor().value_or(DEFAULT_SELECTED_COLOR).ColorToString().c_str(), filter);
+    json->PutExtAttr("unselectedColor", GetCheckBoxUnSelectedColor().value_or(
+        checkboxTheme->GetInactiveColor()).ColorToString().c_str(), filter);
     auto markJsValue = JsonUtil::Create(true);
     markJsValue->Put("strokeColor", GetCheckBoxCheckMarkColor().value_or(
         checkboxTheme->GetPointColor()).ColorToString().c_str());
@@ -40,8 +43,9 @@ void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     markJsValue->Put("strokeWidth", GetCheckBoxCheckMarkWidth().value_or(
         checkboxTheme->GetCheckStroke()).ToString().c_str());
 
-    json->Put("mark", markJsValue->ToString().c_str());
-    json->Put("shape", std::to_string((int)(GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE))).c_str());
+    json->PutExtAttr("mark", markJsValue->ToString().c_str(), filter);
+    json->PutExtAttr("shape",
+        std::to_string((int)(GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE))).c_str(), filter);
 }
 
 } // namespace OHOS::Ace::NG

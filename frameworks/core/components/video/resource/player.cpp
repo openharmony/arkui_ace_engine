@@ -85,7 +85,7 @@ void Player::Create(const std::function<void(int64_t)>& onCreate)
         if (player) {
             player->CreatePlayer(onCreate);
         }
-    });
+    }, "ArkUIVideoCreatePlayer");
 }
 
 void Player::CreatePlayer(const std::function<void(int64_t)>& onCreate)
@@ -278,7 +278,7 @@ void Player::SetTickActive(bool isActive)
                 scheduler_->Stop();
             }
         }
-    });
+    }, "ArkUIVideoSetTickActive");
 }
 
 void Player::OnTick(uint64_t timeStamp)
@@ -438,7 +438,7 @@ void Player::AddPreparedListener(PreparedListener&& listener)
         if (player) {
             player->OnAddPreparedListener(std::move(listener));
         }
-    });
+    }, "ArkUIVideoAddPreparedListener");
 }
 
 void Player::OnAddPreparedListener(PreparedListener&& listener)
@@ -463,7 +463,7 @@ void Player::AddPlayStatusListener(PlayStatusListener&& listener)
         if (player) {
             player->OnAddPlayStatusListener(std::move(listener));
         }
-    });
+    }, "ArkUIVideoAddPlayStatusListener");
 }
 
 void Player::OnAddPlayStatusListener(PlayStatusListener&& listener)
@@ -485,7 +485,7 @@ void Player::AddCurrentPosListener(CurrentPosListener&& listener)
         if (player) {
             player->OnAddCurrentPosListener(std::move(listener));
         }
-    });
+    }, "ArkUIVideoAddCurrentPosListener");
 }
 
 void Player::OnAddCurrentPosListener(CurrentPosListener&& listener)
@@ -507,7 +507,7 @@ void Player::AddCompletionListener(CompletionListener&& listener)
         if (player) {
             player->OnAddCompletionListener(std::move(listener));
         }
-    });
+    }, "ArkUIVideoAddCompletionListener");
 }
 
 void Player::OnAddCompletionListener(CompletionListener&& listener)
@@ -530,7 +530,7 @@ void Player::PopListener()
         if (player) {
             player->OnPopListener();
         }
-    });
+    }, "ArkUIVideoPopListener");
 }
 
 void Player::AddRefreshRenderListener(RefreshRenderListener&& listener)
@@ -611,7 +611,7 @@ void Player::Release(const std::function<void(bool)>& onRelease)
             if (player) {
                 player->UnregisterEvent();
             }
-        });
+        }, "ArkUIVideoUnregisterEvent");
     }
 
     Resource::Release(onRelease);

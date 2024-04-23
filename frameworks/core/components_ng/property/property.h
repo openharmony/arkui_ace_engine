@@ -343,10 +343,10 @@ public:                                                             \
 #define ACE_PROPERTY_TO_JSON_VALUE(target, type) \
     do {                                         \
         if (target) {                            \
-            (target)->ToJsonValue(json);         \
+            (target)->ToJsonValue(json, filter); \
         } else {                                 \
             type p;                              \
-            p.ToJsonValue(json);                 \
+            p.ToJsonValue(json, filter);         \
         }                                        \
     } while (false)
 

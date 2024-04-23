@@ -115,7 +115,7 @@ public:
 
     void ThrowRepeatOperationError(int32_t index);
 
-    void RecycleChildByIndex(int32_t index);
+    void RecordOutOfBoundaryNodes(int32_t index);
 
     void InvalidIndexOfChangedData(size_t index)
     {
@@ -209,10 +209,11 @@ public:
 
     bool SetActiveChildRange(int32_t start, int32_t end)
     {
+        int32_t count = GetTotalCount();
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
-            if ((start <= end && start <= index && end >= index) ||
-                (start > end && (index <= end || index >= start))) {
+            if ((index < count) && ((start <= end && start <= index && end >= index) ||
+                (start > end && (index <= end || index >= start)))) {
                 if (node.second) {
                     auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
                     if (frameNode) {
@@ -283,7 +284,7 @@ public:
         return itemInfo.second;
     }
 
-    void CheckCacheIndex(std::unordered_set<int32_t>& idleIndexes, int32_t count) {
+    void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count) {
         for (int32_t i = 1; i <= cacheCount_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
@@ -350,7 +351,7 @@ public:
 
     bool ProcessPreBuildingIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache, int64_t deadline,
         const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask,
-        std::unordered_set<int32_t>& idleIndexes)
+        std::set<int32_t>& idleIndexes)
     {
         if (idleIndexes.find(preBuildingIndex_) == idleIndexes.end()) {
             preBuildingIndex_ = -1;
@@ -363,12 +364,13 @@ public:
     bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        outOfBoundaryNodes_.clear();
         if (itemConstraint && !canRunLongPredictTask) {
             return false;
         }
         auto count = OnGetTotalCount();
         std::unordered_map<std::string, LazyForEachCacheChild> cache;
-        std::unordered_set<int32_t> idleIndexes;
+        std::set<int32_t> idleIndexes;
         if (startIndex_ != -1 && endIndex_ != -1) {
             CheckCacheIndex(idleIndexes, count);
         }
@@ -393,7 +395,7 @@ public:
     }
 
     void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
-        std::unordered_set<int32_t>& idleIndexes)
+        std::set<int32_t>& idleIndexes)
     {
         for (auto& [key, node] : expiringItem_) {
             auto iter = idleIndexes.find(node.first);
@@ -556,6 +558,9 @@ protected:
     void GetAllItems(std::vector<UINode*>& items);
 
 private:
+    void RecycleItemsOutOfBoundary();
+    void RecycleChildByIndex(int32_t index);
+
     std::map<int32_t, LazyForEachChild> cachedItems_;
     std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
     std::list<std::pair<std::string, RefPtr<UINode>>> nodeList_;
@@ -568,6 +573,7 @@ private:
         {"exchange", 5},
         {"reload", 6}
     };
+    std::list<int32_t> outOfBoundaryNodes_;
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;

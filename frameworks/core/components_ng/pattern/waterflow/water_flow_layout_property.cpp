@@ -19,6 +19,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -33,14 +34,14 @@ void WaterFlowLayoutProperty::ResetWaterflowLayoutInfoAndMeasure() const
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
-void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
-    json->Put("columnsTemplate", propColumnsTemplate_.value_or("").c_str());
-    json->Put("rowsTemplate", propRowsTemplate_.value_or("").c_str());
-    json->Put("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str());
-    json->Put("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str());
-    json->Put("layoutDirection ", GetWaterflowDirectionStr().c_str());
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("columnsTemplate", propColumnsTemplate_.value_or("").c_str(), filter);
+    json->PutExtAttr("rowsTemplate", propRowsTemplate_.value_or("").c_str(), filter);
+    json->PutExtAttr("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("layoutDirection ", GetWaterflowDirectionStr().c_str(), filter);
     auto jsonConstraintSize = JsonUtil::Create(true);
     if (itemLayoutConstraint_) {
         jsonConstraintSize->Put("minWidth", itemLayoutConstraint_->minSize.value_or(CalcSize())
@@ -63,11 +64,11 @@ void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) cons
                                                 .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
                                                 .ToString()
                                                 .c_str());
-        json->Put("itemConstraintSize", jsonConstraintSize->ToString().c_str());
+        json->PutExtAttr("itemConstraintSize", jsonConstraintSize->ToString().c_str(), filter);
     } else {
-        json->Put("itemConstraintSize", "0");
+        json->PutExtAttr("itemConstraintSize", "0", filter);
     }
-    json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
+    json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
 }
 
 std::string WaterFlowLayoutProperty::GetWaterflowDirectionStr() const

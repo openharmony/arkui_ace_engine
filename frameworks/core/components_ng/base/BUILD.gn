@@ -21,6 +21,7 @@ build_component_ng("base_ng") {
     "frame_node.cpp",
     "geometry_node.cpp",
     "inspector.cpp",
+    "inspector_filter.cpp",
     "modifier.cpp",
     "observer_handler.cpp",
     "ui_node.cpp",

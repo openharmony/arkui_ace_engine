@@ -37,6 +37,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const size_t ARRAY_SIZE = 1;
 } // namespace
 
@@ -182,7 +183,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest002, TestSize.Lev
     EXPECT_TRUE(props.ActActionScrollForward());
     props.SetActionSelect([]() {});
     EXPECT_TRUE(props.ActActionSelect());
-    props.SetActionSetSelection([](int32_t start, int32_t end) {});
+    props.SetActionSetSelection([](int32_t start, int32_t end, bool isforward) {});
     EXPECT_TRUE(props.ActActionSetSelection(0, 1));
     props.SetActionSetText([](std::string text) {});
     EXPECT_TRUE(props.ActActionSetText("abc"));
@@ -203,7 +204,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest003, TestSize.Lev
     props.SetText("test");
     EXPECT_EQ(props.GetText(), "test");
     auto json = std::make_unique<JsonValue>();
-    props.ToJsonValue(json);
+    props.ToJsonValue(json, filter);
     EXPECT_FALSE(json->GetBool("scrollable", false));
     EXPECT_FALSE(props.IsCheckable());
     EXPECT_FALSE(props.IsChecked());
@@ -278,25 +279,22 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest004, TestSize.Lev
     columnAccessibilityProperty2->SetAccessibilityText("column2");
     buttonAccessibilityProperty1->SetAccessibilityDescription("Button1");
 
-    columnFrameNode1->AddChild(buttonNode1);
-    columnFrameNode1->AddChild(buttonNode2);
-    columnFrameNode1->AddChild(columnFrameNode2);
-    columnFrameNode2->AddChild(buttonNode3);
-    columnFrameNode2->AddChild(buttonNode4);
+    columnFrameNode1->frameChildren_.emplace(buttonNode1);
+    columnFrameNode1->frameChildren_.emplace(buttonNode2);
+    columnFrameNode1->frameChildren_.emplace(columnFrameNode2);
+    columnFrameNode2->frameChildren_.emplace(buttonNode3);
+    columnFrameNode2->frameChildren_.emplace(buttonNode4);
 
     auto columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
     columnAccessibilityProperty1->SetAccessibilityGroup(true);
     columnAccessibilityProperty1->SetAccessibilityLevel("yes");
 
-    buttonAccessibilityProperty3->SetAccessibilityText("buttonAccessibilityProperty3");
-    buttonAccessibilityProperty3->SetAccessibilityGroup(true);
-    buttonAccessibilityProperty3->SetAccessibilityLevel("yes");
     auto columnAccessibilityText1 = columnAccessibilityProperty1->GetGroupText();
     /**
      * @tc.expected: step1. expect target text combine
      */
     EXPECT_EQ(buttonAccessibilityProperty1->GetAccessibilityDescription(), "Button1");
-    EXPECT_EQ(columnAccessibilityText1, "Button1, Button2");
+    EXPECT_EQ(columnAccessibilityText1, "Button1, Button2, Button3, Button4");
 
     columnAccessibilityProperty1->SetAccessibilityLevel("no-hide-descendants");
     columnAccessibilityText1 = columnAccessibilityProperty1->GetGroupText();
@@ -379,11 +377,27 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest006, TestSize.Lev
     auto buttonNode2 =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 3, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode2->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityText("test");
-    columnFrameNode1->AddChild(buttonNode2);
-    columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
-    columnAccessibilityProperty1->SetAccessibilityGroup(true);
-    columnAccessibilityProperty1->SetAccessibilityLevel("yes");
-    text = columnAccessibilityProperty1->GetAccessibilityText();
+    text = buttonNode2->GetAccessibilityProperty<AccessibilityProperty>()->GetAccessibilityText();
     EXPECT_EQ(text, "test");
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest007
+ * @tc.desc: Set action and execute it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. actions is empty
+     * @tc.expected: act every action return false
+     */
+    AccessibilityProperty props;
+    props.SetActionSetSelection([](int32_t start, int32_t end, bool isforward) {});
+    EXPECT_TRUE(props.ActActionSetSelection(0, 1));
+    props.SetActionSetIndex([](int32_t start) {});
+    EXPECT_TRUE(props.ActActionSetIndex(1));
+    props.SetActionGetIndex([]() {return 2;});
+    EXPECT_TRUE(props.ActActionGetIndex());
 }
 } // namespace OHOS::Ace::NG

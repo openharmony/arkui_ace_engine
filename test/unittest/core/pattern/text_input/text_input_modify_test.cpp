@@ -234,7 +234,7 @@ HWTEST_F(TextFieldModifyTest, TextinputCaretPositionOnHandleMove001, TestSize.Le
      * tc.expected: step2. Check if the value is right.
      */
     OffsetF localOffset1(1.0f, 1.0f);
-    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1), 25);
+    EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1), 0);
 
     FlushLayoutTask(frameNode_);
     GetFocus();
@@ -2240,23 +2240,104 @@ HWTEST_F(TextFieldModifyTest, UpdateOverlayModifier001, TestSize.Level1)
 
     paintProperty->ResetSelectedBackgroundColor();
     EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
-    int32_t settingApiVersion = 12;
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(settingApiVersion);
-    Color cursorColor = Color::RED;
-    double defaultOpacity = 0.2;
-    auto expectedSelectedColor = cursorColor.ChangeOpacity(defaultOpacity);
-    paintProperty->UpdateCursorColor(cursorColor);
-    paintMethod->UpdateOverlayModifier(paintWrapper);
-    EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == expectedSelectedColor);
 
-    /**
-     * @tc.steps: step3. set select background color and call UpdateContentModifier
-     * tc.expected: step3. selected color equals setting select background.
-     */
     paintProperty->UpdateSelectedBackgroundColor(Color::BLUE);
     paintMethod->UpdateOverlayModifier(paintWrapper);
     EXPECT_TRUE(overlayModifier->selectedColor_->Get().ToColor() == Color::BLUE);
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: HandleOnDragStatusCallback
+ * @tc.desc: Test cursor drag status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, HandleOnDragStatusCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    std::vector<DragEventType> dragEventType = {
+        DragEventType::MOVE,
+        DragEventType::LEAVE,
+        DragEventType::DROP
+    };
+
+    /**
+     * @tc.steps: step2. set handle cursor on drag moved
+     */
+    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
+    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
+    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
+
+    /**
+     * @tc.steps: step3. set handle cursor on drag leaved
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->HandleOnDragStatusCallback(dragEventType[1], notifyDragEvent);
+    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
+
+    /**
+     * @tc.steps: step3. set handle cursor on drag ended
+     */
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    pattern_->isCursorAlwaysDisplayed_ = true;
+    pattern_->HandleOnDragStatusCallback(dragEventType[2], notifyDragEvent);
+    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
+}
+
+/**
+ * @tc.name: CheckTextAlignByDirection
+ * @tc.desc: Test the effect of using TextAlign with direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, CheckTextAlignByDirection, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. set direction RTL
+     */
+    auto direction = TextDirection::RTL;
+    auto textAlign = TextAlign::START;
+    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(textAlign, TextAlign::END);
+
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+    textAlign = TextAlign::END;
+    pattern_->CheckTextAlignByDirection(textAlign, direction);
+    EXPECT_EQ(textAlign, TextAlign::START);
+}
+
+/**
+ * @tc.name: CheckTextAlignByDirection
+ * @tc.desc: Test the methods for obtaining caret metrics.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, GetCaretMetrics, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call function GetCaretMetrics
+     */
+    CaretMetricsF caretMetrics;
+    pattern_->GetCaretMetrics(caretMetrics);
+    EXPECT_EQ(caretMetrics.offset, OffsetF(0, 0));
+    EXPECT_EQ(caretMetrics.height, 50);
 }
 } // namespace OHOS::Ace::NG

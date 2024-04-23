@@ -20,11 +20,13 @@
 
 namespace OHOS::Ace::NG {
 
-bool PostEventManager::PostEvent(const RefPtr<NG::UINode>& uiNode, const TouchEvent& touchEvent)
+bool PostEventManager::PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& touchEvent)
 {
     if (!CheckPointValidity(touchEvent)) {
         return false;
     }
+    CHECK_NULL_RETURN(uiNode, false);
+    touchEvent.postEventNodeId = uiNode->GetId();
     auto result = false;
     switch (touchEvent.type) {
         case TouchType::DOWN:
@@ -70,11 +72,11 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = touchEvent.sourceType;
     touchRestrict.touchEvent = touchEvent;
+    touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
     auto result = eventManager->PostEventTouchTest(scalePoint, targetNode, touchRestrict);
     if (!result) {
         return false;
     }
-
     HandlePostEvent(targetNode, touchEvent);
     return true;
 }

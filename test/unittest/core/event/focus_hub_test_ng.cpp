@@ -32,7 +32,9 @@
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
@@ -617,7 +619,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0015, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
@@ -1105,7 +1109,7 @@ HWTEST_F(FocusHubTestNg, FocusHubRemoveChildTest001, TestSize.Level1)
      */
     parent->currentFocus_ = true;
     parent->RemoveChild(focusHub);
-    EXPECT_EQ(parent->blurReason_, BlurReason::FRAME_DESTROY);
+    EXPECT_EQ(parent->blurReason_, BlurReason::FOCUS_SWITCH);
     EXPECT_EQ(focusHub->blurReason_, BlurReason::FRAME_DESTROY);
 }
 
@@ -1257,7 +1261,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
     auto lastFocusNode = focusHub->lastWeakFocusNode_.Upgrade();
     lastFocusNode->currentFocus_ = true;
     lastFocusNode->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
 
     /**
      * @tc.steps7: call the function OnKeyEvent with FocusType::SCOPE.
@@ -1503,7 +1507,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableBlur001, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
@@ -1548,7 +1554,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableKey001, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
@@ -2007,7 +2015,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0045, TestSize.Level1)
 
 /**
  * @tc.name: FocusHubTestNg0046
- * @tc.desc: Test the function HandleParentScroll.
+ * @tc.desc: Test the function TriggerFocusScroll.
  * @tc.type: FUNC
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
@@ -2030,7 +2038,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
     focusHub->onPaintFocusStateCallback_ = []() { return true; };
     focusHub->PaintAllFocusState();
-    focusHub->HandleParentScroll();
+    focusHub->TriggerFocusScroll();
     EXPECT_TRUE(focusHub->isFocusUnit_);
 }
 
@@ -2061,7 +2069,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     EXPECT_TRUE(focusHub->CalculatePosition());
     focusHub1->focusType_ = FocusType::NODE;
-    EXPECT_FALSE(focusHub->PaintAllFocusState());
+    EXPECT_TRUE(focusHub->PaintAllFocusState());
     EXPECT_TRUE(focusHub->CalculatePosition());
 }
 
@@ -3500,5 +3508,33 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0101, TestSize.Level1)
      */
     focusHub->SetFocusType(FocusType::DISABLE);
     EXPECT_FALSE(focusHub->IsSyncRequestFocusable());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0102
+ * @tc.desc: Test the function ScrollByOffsetToParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0102, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto textFieldNode = FrameNode::CreateFrameNode("frameNode", 103, AceType::MakeRefPtr<TextFieldPattern>());
+    textFieldNode->GetOrCreateFocusHub();
+    auto textFieldFocusHub = textFieldNode->GetFocusHub();
+    ASSERT_NE(textFieldNode, nullptr);
+    ASSERT_FALSE(focusHub->ScrollByOffsetToParent(textFieldNode));
+
+    auto listNode = FrameNode::CreateFrameNode("frameNode", 104, AceType::MakeRefPtr<ListPattern>());
+    listNode->GetOrCreateFocusHub();
+    auto listFocusHub = listNode->GetFocusHub();
+    ASSERT_NE(listFocusHub, nullptr);
+    ASSERT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
 } // namespace OHOS::Ace::NG

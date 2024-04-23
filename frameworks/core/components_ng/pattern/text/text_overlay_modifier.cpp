@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -27,7 +28,11 @@ TextOverlayModifier::TextOverlayModifier()
     AttachProperty(selectedColor_);
     changeSelectedRects_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(changeSelectedRects_);
-    isClip_ = AceType::MakeRefPtr<PropertyBool>(false);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        isClip_ = MakeRefPtr<PropertyBool>(true);
+    } else {
+        isClip_ = MakeRefPtr<PropertyBool>(false);
+    }
     AttachProperty(isClip_);
     showSelect_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(showSelect_);
@@ -101,5 +106,10 @@ bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<RectF>& selec
 void TextOverlayModifier::SetShowSelect(bool value)
 {
     showSelect_->Set(value);
+}
+
+std::vector<RectF> TextOverlayModifier::GetSelectedRects() const
+{
+    return selectedRects_;
 }
 } // namespace OHOS::Ace::NG

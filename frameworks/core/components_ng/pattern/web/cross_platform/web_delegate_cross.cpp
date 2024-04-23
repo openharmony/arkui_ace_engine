@@ -702,7 +702,7 @@ void WebDelegateCross::CreatePluginResource(
         webDelegate->hash_ = webDelegate->MakeResourceHash();
         webDelegate->RegisterWebEvent();
         webDelegate->RegisterWebObjectEvent();
-    });
+    }, "ArkUIWebCreatePluginResource");
 }
 
 int WebDelegateCross::GetWebId()
@@ -975,7 +975,7 @@ void WebDelegateCross::OnPageStarted(const std::string& param)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebPageStartEvent");
 }
 
 void WebDelegateCross::OnPageFinished(const std::string& param)
@@ -1000,7 +1000,7 @@ void WebDelegateCross::OnPageFinished(const std::string& param)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebPageFinishEvent");
 }
 
 void WebDelegateCross::OnPageError(const std::string& param)
@@ -1027,7 +1027,7 @@ void WebDelegateCross::OnProgressChanged(const std::string& param)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebProgressChangeEvent");
 }
 
 void WebDelegateCross::OnReceivedTitle(const std::string& param)
@@ -1051,7 +1051,7 @@ void WebDelegateCross::OnReceivedTitle(const std::string& param)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebTitleReceiveEvent");
 }
 
 void WebDelegateCross::OnErrorReceive(void* object)
@@ -1090,7 +1090,7 @@ void WebDelegateCross::OnErrorReceive(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebReceivedErrorEvent");
 }
 
 void WebDelegateCross::OnScroll(void* object)
@@ -1119,7 +1119,7 @@ void WebDelegateCross::OnScroll(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebScrollEvent");
 }
 
 void WebDelegateCross::OnScaleChange(void* object)
@@ -1148,7 +1148,7 @@ void WebDelegateCross::OnScaleChange(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebScaleChangeEvent");
 }
 
 void WebDelegateCross::OnHttpErrorReceive(void* object)
@@ -1193,7 +1193,7 @@ void WebDelegateCross::OnHttpErrorReceive(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebHttpErrorReceiveEvent");
 }
 
 bool WebDelegateCross::OnConsoleMessage(void* object)
@@ -1227,7 +1227,7 @@ bool WebDelegateCross::OnConsoleMessage(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebConsoleMessageEvent");
     return result;
 }
 
@@ -1264,7 +1264,7 @@ bool WebDelegateCross::OnLoadIntercept(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebLoadInterceptEvent");
     return result;
 }
 
@@ -1289,7 +1289,7 @@ void WebDelegateCross::OnPageVisible(const std::string& param)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebPageVisibleEvent");
 }
 
 void WebDelegateCross::OnDownloadStart(void* object)
@@ -1322,7 +1322,7 @@ void WebDelegateCross::OnDownloadStart(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebDownloadStartEvent");
 }
 
 bool WebDelegateCross::OnCommonDialog(void* object, DialogEventType dialogEventType)
@@ -1352,7 +1352,7 @@ bool WebDelegateCross::OnCommonDialog(void* object, DialogEventType dialogEventT
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebFireOnCommonDialogEvent");
     return result;
 }
 
@@ -1384,7 +1384,7 @@ bool WebDelegateCross::OnPermissionRequest(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebPermissionRequestEvent");
     return result;
 }
 
@@ -1416,7 +1416,7 @@ bool WebDelegateCross::OnHttpAuthRequest(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebHttpAuthRequestEvent");
     return result;
 }
 
@@ -1453,7 +1453,7 @@ bool WebDelegateCross::OnShowFileChooser(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebFileSelectorShowEvent");
     return isAllowed;
 }
 
@@ -1483,7 +1483,7 @@ void WebDelegateCross::OnGeolocationPermissionsShowPrompt(void* object)
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebGeolocationShowEvent");
 }
 
 void WebDelegateCross::OnGeolocationPermissionsHidePrompt()
@@ -1507,7 +1507,7 @@ void WebDelegateCross::OnGeolocationPermissionsHidePrompt()
                 return;
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIWebGeolocationHideEvent");
 }
 
 void WebDelegateCross::UpdateUserAgent(const std::string& userAgent) {}

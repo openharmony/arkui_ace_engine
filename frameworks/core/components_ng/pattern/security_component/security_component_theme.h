@@ -218,6 +218,8 @@ private:
             securityComponentPattern->GetAttr<std::string>("description_receive", ""));
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_continue_to_receive", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_save_to_gallery", ""));
     }
 
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SecurityComponentTheme>& theme)

@@ -119,6 +119,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   nestedScroll(value: SwiperNestedScrollMode): this {
     throw new Error('Method not implemented.');
   }
+  indicatorInteractive(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
+    return this;
+  }
 }
 class SwiperNextMarginModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('swiperNextMargin');
@@ -621,6 +625,19 @@ class SwiperEnabledModifier extends ModifierWithKey<boolean> {
 
     } else {
       getUINativeModule().swiper.setSwiperEnabled(node, this.value);
+    }
+  }
+}
+class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('indicatorInteractive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetIndicatorInteractive(node);
+    } else {
+      getUINativeModule().swiper.setIndicatorInteractive(node, this.value);
     }
   }
 }

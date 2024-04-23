@@ -58,6 +58,8 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
 #endif
     { KeyComb(KeyCode::KEY_DEL), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_FORWARD_DEL), [](tic* c) -> void { c->HandleOnDelete(false); } },
+    { KeyComb(KeyCode::KEY_DEL, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(true); } },
+    { KeyComb(KeyCode::KEY_FORWARD_DEL, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(false); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), [](tic* c) -> void { c->HandleOnCopy(true); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_SHIFT), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
@@ -100,6 +102,9 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Home); } },
     { KeyComb(KeyCode::KEY_MOVE_END, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::End); } },
+    { KeyComb(KeyCode::KEY_B, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_B); } },
+    { KeyComb(KeyCode::KEY_I, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_I); } },
+    { KeyComb(KeyCode::KEY_U, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_U); } },
 };
 
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)

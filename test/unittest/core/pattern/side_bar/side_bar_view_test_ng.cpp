@@ -35,6 +35,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr Dimension STROKE_WIDTH = 10.0_vp;
 constexpr Dimension START_MARGIN = 5.0_vp;
 constexpr Dimension END_MARGIN = 5.0_vp;
@@ -569,7 +570,7 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg011, TestSize.Level1)
     auto clone = layoutProperty->Clone();
     clone.Reset();
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
 }
 
 /**

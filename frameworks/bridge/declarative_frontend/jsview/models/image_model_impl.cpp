@@ -256,4 +256,9 @@ bool ImageModelImpl::UpdateDragItemInfo(DragItemInfo& itemInfo)
     return true;
 }
 
+bool ImageModelImpl::GetIsAnimation()
+{
+    return false;
+}
+
 } // namespace OHOS::Ace::Framework

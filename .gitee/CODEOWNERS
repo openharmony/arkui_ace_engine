@@ -13,6 +13,9 @@ adapter/ohos/capability/window_connection_ng/  @lushi1202
 adapter/ohos/entrance/pa_engine/  @jayleehw
 adapter/ohos/osal/ace_trace.cpp  @lushi1202
 adapter/ohos/osal/anr_thread.cpp  @lushi1202
+adapter/ohos/osal/js_accessibility_manager.h  @jayleehw
+adapter/ohos/osal/js_accessibility_manager.cpp  @jayleehw
+adapter/ohos/osal/layout_inspector.cpp  @jayleehw
 adapter/ohos/osal/log_wrapper.cpp  @lushi1202
 
 [Preview adapter]
@@ -25,16 +28,21 @@ interfaces/ @sunfei2021
 frameworks/core/pipeline/  @yan-shuifeng @lightningHo
 frameworks/core/pipeline_ng/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/base/  @yan-shuifeng @lightningHo
+frameworks/core/components_ng/base/inspector.h  @jayleehw
+frameworks/core/components_ng/base/inspector.cpp  @jayleehw
 frameworks/core/components_ng/layout/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/render/  @yan-shuifeng @lightningHo
 frameworks/core/components_ng/render/adapter/  @yan-shuifeng @sunfei2021
 frameworks/core/components_ng/layout/  @yan-shuifeng @yangfan229
 frameworks/core/components_ng/property/  @yan-shuifeng
+frameworks/core/components_ng/property/accessibility_property.h  @jayleehw
+frameworks/core/components_ng/property/accessibility_property.cpp  @jayleehw
 frameworks/core/components_ng/syntax/  @yan-shuifeng @lightningHo @houhaoyu
 frameworks/core/components_ng/manager/safe_area/  @xiexiyun
 
 [Common source]
 frameworks/core/common/  @yan-shuifeng @sunfei2021
+frameworks/core/common/layout_inspector.h  @jayleehw
 
 [State Management]
 frameworks/bridge/declarative_frontend/state_mgmt/   @guido_grassel @s10021109
@@ -90,12 +98,29 @@ frameworks/core/components_ng/pattern/loading_progress/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/marquee/  @liyujie43
 frameworks/core/components_ng/pattern/menu/  @Armstrong15
 frameworks/core/components_ng/pattern/model/  @
-frameworks/core/components_ng/pattern/navigation/  @tsj_2020
-frameworks/core/components_ng/pattern/navigator/  @tsj_2020
-frameworks/core/components_ng/pattern/navrouter/  @tsj_2020
-frameworks/core/components_ng/pattern/option/  @cheng-feiwang
+frameworks/core/components_ng/pattern/navigation/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components_ng/pattern/navigator/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components_ng/pattern/navrouter/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components_ng/pattern/option/  @Armstrong15
 frameworks/core/components_ng/pattern/overlay/  @cheng-feiwang
-frameworks/core/components_ng/pattern/panel/  @Armstrong15
+frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/modal_style.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_pattern.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_property.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_style.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_theme.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_view.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_view.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/panel/  @cheng-feiwang @raulnaruto_admin
 frameworks/core/components_ng/pattern/patternlock/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/picker/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/plugin/  @wangchensu1 @keerecles @ZhangYu-Home
@@ -119,11 +144,11 @@ frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @fredtt
 frameworks/core/components_ng/pattern/select_overlay/  @luckclover
 frameworks/core/components_ng/pattern/shape/  @sunbees
-frameworks/core/components_ng/pattern/side_bar/  @tsj_2020
+frameworks/core/components_ng/pattern/side_bar/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components_ng/pattern/slider/  @fredtt
 frameworks/core/components_ng/pattern/stack/  @xiexiyun
 frameworks/core/components_ng/pattern/stage/  @yan-shuifeng
-frameworks/core/components_ng/pattern/stepper/  @tsj_2020
+frameworks/core/components_ng/pattern/stepper/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components_ng/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan
 frameworks/core/components_ng/pattern/tabs/  @xuzhidan
@@ -192,8 +217,8 @@ frameworks/core/components/marquee/  @liyujie43
 frameworks/core/components/menu/  @Armstrong15
 frameworks/core/components/mouse_listener/  @catpoison
 frameworks/core/components/multimodal/  @
-frameworks/core/components/navigation_bar/  @tsj_2020
-frameworks/core/components/navigator/  @tsj_2020
+frameworks/core/components/navigation_bar/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components/navigator/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components/option/  @cheng-feiwang
 frameworks/core/components/overlay/  @yangfan229
 frameworks/core/components/padding/  @yangfan229
@@ -226,12 +251,12 @@ frameworks/core/components/shadow/  @
 frameworks/core/components/shape/  @sunbees
 frameworks/core/components/shared_transition/  @hehongyang9
 frameworks/core/components/sheet/  @cheng-feiwang
-frameworks/core/components/side_bar/  @tsj_2020
+frameworks/core/components/side_bar/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components/slider/  @fredtt
 frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
-frameworks/core/components/stepper/  @tsj_2020
+frameworks/core/components/stepper/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components/svg/  @wu-yinxiao
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
@@ -259,7 +284,7 @@ frameworks/core/components/wrap/  @yangfan229
 frameworks/core/components/xcomponent/  @sunbees
 
 [Accessibility source]
-frameworks/core/accessibility/  @zcdqs
+frameworks/core/accessibility/  @jayleehw
 
 [Animations source]
 frameworks/core/animation/  @hehongyang9

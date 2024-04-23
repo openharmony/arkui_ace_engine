@@ -19,6 +19,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
@@ -82,15 +83,15 @@ public:
         ResetSetCounter();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("showPasswordIcon", propShowPasswordIcon_.value_or(true));
-        json->Put("errorText", propErrorText_.value_or("").c_str());
-        json->Put("showErrorText", propShowErrorText_.value_or(false));
-        json->Put("showCounter", propShowCounter_.value_or(false));
-        json->Put("highlightBorder", propShowHighlightBorder_.value_or(true));
-        json->Put("showUnderline", propShowUnderline_.value_or(false));
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
+        json->PutExtAttr("errorText", propErrorText_.value_or("").c_str(), filter);
+        json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
+        json->PutExtAttr("showCounter", propShowCounter_.value_or(false), filter);
+        json->PutExtAttr("highlightBorder", propShowHighlightBorder_.value_or(true), filter);
+        json->PutExtAttr("showUnderline", propShowUnderline_.value_or(false), filter);
         auto jsonCancelButton = JsonUtil::Create(true);
         jsonCancelButton->Put("style", static_cast<int32_t>(propCleanNodeStyle_.value_or(CleanNodeStyle::INPUT)));
         auto jsonIconOptions = JsonUtil::Create(true);
@@ -98,13 +99,14 @@ public:
         jsonIconOptions->Put("src", propIconSrc_.value_or("").c_str());
         jsonIconOptions->Put("color", propIconColor_.value_or(Color()).ColorToString().c_str());
         jsonCancelButton->Put("icon", jsonIconOptions->ToString().c_str());
-        json->Put("cancelButton", jsonCancelButton->ToString().c_str());
-        json->Put("selectAll", propSelectAllValue_.value_or(false));
-        json->Put("passwordRules", propPasswordRules_.value_or("").c_str());
-        json->Put("enableAutoFill", propEnableAutoFill_.value_or(true));
+        json->PutExtAttr("cancelButton", jsonCancelButton->ToString().c_str(), filter);
+        json->PutExtAttr("selectAll", propSelectAllValue_.value_or(false), filter);
+        json->PutExtAttr("passwordRules", propPasswordRules_.value_or("").c_str(), filter);
+        json->PutExtAttr("enableAutoFill", propEnableAutoFill_.value_or(true), filter);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            json->Put("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str());
-            json->Put("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str());
+            json->PutExtAttr("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str(), filter);
+            json->PutExtAttr("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str(), filter);
+            json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
             auto jsonDecoration = JsonUtil::Create(true);
             std::string type = V2::ConvertWrapTextDecorationToStirng(
                 GetTextDecoration().value_or(TextDecoration::NONE));
@@ -113,10 +115,18 @@ public:
             std::string style = V2::ConvertWrapTextDecorationStyleToString(
                 GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
             jsonDecoration->Put("style", style.c_str());
-            json->Put("decoration", jsonDecoration->ToString().c_str());
+            json->PutExtAttr("decoration", jsonDecoration->ToString().c_str(), filter);
+            json->PutExtAttr("minFontSize", GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
+            json->PutExtAttr("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+            json->PutExtAttr("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str(), filter);
         }
-        json->Put("wordBreak",
-            V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str());
+        json->PutExtAttr("wordBreak",
+            V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
+        json->PutExtAttr("textOverflow",
+            V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
+        json->PutExtAttr("textIndent",
+            std::to_string(static_cast<int32_t>(GetTextIndent().value_or(0.0_vp).Value())).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -125,8 +135,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FONT_FEATURES_MAP, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecoration, TextDecoration, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
@@ -135,8 +147,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLength, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_GROUP(PlaceholderFontStyle, FontStyle);

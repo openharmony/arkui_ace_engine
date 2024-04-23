@@ -24,6 +24,7 @@
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT GridRowLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(GridRowLayoutProperty, LayoutProperty);
@@ -54,7 +55,7 @@ public:
         LayoutProperty::Reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Columns, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Gutter, V2::Gutter, PROPERTY_UPDATE_MEASURE);

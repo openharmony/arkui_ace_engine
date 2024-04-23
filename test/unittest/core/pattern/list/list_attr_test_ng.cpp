@@ -17,7 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class ListAttrTestNg : public ListTestNg {
 public:
@@ -52,7 +54,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
      * @tc.expected: The json value is correct
      */
     auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(Dimension::FromString(json->GetString("space")), Dimension(10));
     EXPECT_EQ(json->GetString("initialIndex"), "1");
     EXPECT_EQ(json->GetString("listDirection"), "Axis.Vertical");
@@ -77,7 +79,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
     layoutProperty_->UpdateDivider(ITEM_DIVIDER);
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("listDirection"), "Axis.Horizontal");
     EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.End");
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Footer");
@@ -96,7 +98,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::BOTH);
     layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::END);
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.Start");
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Header | StickyStyle.Footer");
     EXPECT_EQ(json->GetString("scrollSnapAlign"), "ScrollSnapAlign.END");
@@ -108,7 +110,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     layoutProperty_->UpdateStickyStyle(V2::StickyStyle::NONE);
     layoutProperty_->UpdateScrollSnapAlign(V2::ScrollSnapAlign::NONE);
     json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.None");
     EXPECT_EQ(json->GetString("scrollSnapAlign"), "ScrollSnapAlign.NONE");
 
@@ -193,7 +195,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      * @tc.expected: The json value is correct
      */
     auto json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(static_cast<V2::StickyMode>(json->GetInt("sticky")), V2::StickyMode::NONE);
     EXPECT_FALSE(json->GetBool("editable"));
     EXPECT_EQ(Dimension::FromString(json->GetString("startDeleteAreaDistance")), Dimension(0, DimensionUnit::VP));
@@ -207,7 +209,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     layoutProperty->UpdateEditMode(V2::EditMode::NONE);
     layoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::Spring);
     json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Normal");
     EXPECT_EQ(json->GetString("editable"), "EditMode.None");
     auto swipeAction = json->GetObject("swipeAction");
@@ -221,7 +223,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     layoutProperty->UpdateEditMode(V2::EditMode::MOVABLE);
     layoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::None);
     json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Opacity");
     EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
     swipeAction = json->GetObject("swipeAction");
@@ -233,7 +235,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      */
     layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE);
     json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("editable"), "EditMode.Deletable");
 
     /**
@@ -242,7 +244,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
      */
     layoutProperty->UpdateEditMode(V2::EditMode::DELETABLE | V2::EditMode::MOVABLE);
     json = JsonUtil::Create(true);
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->GetBool("editable"));
 }
 
@@ -293,6 +295,13 @@ HWTEST_F(ListAttrTestNg, AttrSpace003, TestSize.Level1)
      * @tc.expected: Space was going to be zero
      */
     CreateWithItem([](ListModelNG model) { model.SetSpace(Dimension(LIST_HEIGHT)); });
+    EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
+
+    /**
+     * @tc.cases: Set invalid space: -1
+     * @tc.expected: Space was going to be zero
+     */
+    CreateWithItem([](ListModelNG model) { model.SetSpace(Dimension(-1)); });
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
 }
 
@@ -1252,5 +1261,80 @@ HWTEST_F(ListAttrTestNg, ChainAnimation003, TestSize.Level1)
     chainAnimation = pattern_->chainAnimation_;
     EXPECT_FLOAT_EQ(chainAnimation->conductivity_, conductivity);
     EXPECT_FLOAT_EQ(chainAnimation->intensity_, intensity);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test SetFadingEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: SetFadingEdge false
+     * @tc.expected: FadingEdge false
+     */
+    Create([](ListModelNG model) {
+        model.SetFadingEdge(false);
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_FALSE(layoutProperty_->GetFadingEdgeValue(true));
+
+    /**
+     * @tc.cases: SetFadingEdge true
+     * @tc.expected: FadingEdge true
+     */
+    Create([](ListModelNG model) {
+        model.SetFadingEdge(true);
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_TRUE(layoutProperty_->GetFadingEdgeValue(false));
+    frameNode_->SetOverlayNode(nullptr);
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test SetFadingEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ContentStartOffset 50.f and Space 10.f
+     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
+     */
+    Create([](ListModelNG model) {
+        model.SetFadingEdge(true);
+        model.SetContentStartOffset(50.f);
+        model.SetContentEndOffset(50.f);
+        model.SetSpace(Dimension(10.f));
+        CreateItem(TOTAL_LINE_NUMBER);
+    });
+    EXPECT_EQ(pattern_->GetTotalOffset(), -50);
+    EXPECT_EQ(pattern_->startMainPos_, 50.f);
+    EXPECT_EQ(pattern_->endMainPos_, 820.f);
+    EXPECT_EQ(pattern_->contentStartOffset_, 50.f);
+    EXPECT_EQ(pattern_->contentEndOffset_, 50.f);
+
+    /**
+     * @tc.cases: ScrollTo 0.f
+     * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
+     */
+    pattern_->ScrollTo(0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->startMainPos_, 0.f);
+    EXPECT_EQ(pattern_->endMainPos_, 880.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.cases: ScrollTo 50.f
+     * @tc.expected: startMainPos_ < 0
+     */
+    pattern_->ScrollTo(50);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->startMainPos_, -50.f);
+    EXPECT_EQ(pattern_->endMainPos_, 830.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
 }
 } // namespace OHOS::Ace::NG

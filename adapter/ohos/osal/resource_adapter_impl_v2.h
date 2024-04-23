@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_RESOURCE_ADAPTER_IMPL_V2_H
 
 #include <mutex>
-#include <shared_mutex>
 
 #include "resource_manager.h"
 
@@ -92,6 +91,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::string packagePathStr_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
+    std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
 };
 } // namespace OHOS::Ace

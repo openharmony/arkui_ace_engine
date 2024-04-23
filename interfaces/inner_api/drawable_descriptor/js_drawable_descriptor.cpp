@@ -29,11 +29,82 @@
 namespace {
 constexpr char DRAWABLE_BASE[] = "DrawableDescriptor";
 constexpr char DRAWABLE_LAYERED[] = "LayeredDrawableDescriptor";
+constexpr char DRAWABLE_ANIMATED[] = "AnimatedDrawableDescriptor";
 } // namespace
 
 namespace OHOS::Ace::Napi {
 thread_local napi_ref JsDrawableDescriptor::baseConstructor_;
 thread_local napi_ref JsDrawableDescriptor::layeredConstructor_;
+thread_local napi_ref JsDrawableDescriptor::animatedConstructor_;
+
+static bool GetPixelMapArray(
+    napi_env env, napi_value arg, std::vector<std::shared_ptr<Media::PixelMap>>& pixelMaps)
+{
+    bool isArray = false;
+    uint32_t length = 0;
+    napi_is_array(env, arg, &isArray);
+    if (!isArray) {
+        return false;
+    }
+    napi_get_array_length(env, arg, &length);
+    if (length < 1) {
+        return false;
+    }
+    for (uint32_t i = 0; i < length; i++) {
+        napi_value pixelMapValue = nullptr;
+        napi_get_element(env, arg, i, &pixelMapValue);
+        if (pixelMapValue == nullptr) {
+            continue;
+        }
+        Media::PixelMapNapi* pixmapNapi = nullptr;
+        napi_unwrap(env, pixelMapValue, reinterpret_cast<void**>(&pixmapNapi));
+        if (pixmapNapi == nullptr) {
+            continue;
+        }
+        pixelMaps.push_back(*(pixmapNapi->GetPixelMap()));
+    }
+    if (pixelMaps.size() <= 0) {
+        return false;
+    }
+    return true;
+}
+
+napi_value JsDrawableDescriptor::AnimatedConstructor(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    size_t argc = 2;
+    napi_value argv[2] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    if (argc < 1) {
+        return nullptr;
+    }
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    if (!GetPixelMapArray(env, argv[0], pixelMaps)) {
+        return nullptr;
+    }
+
+    //napi_get_named_property
+    napi_value napiDuration;
+    napi_value napiIterations;
+    int32_t duration = -1;
+    int32_t iterations = 1;
+    if (argc > 1 && argv[1]) {
+        napi_get_named_property(env, argv[1], "duration", &napiDuration);
+        napi_get_named_property(env, argv[1], "iterations", &napiIterations);
+        napi_get_value_int32(env, napiDuration, &duration);
+        napi_get_value_int32(env, napiIterations, &iterations);
+    }
+    // create JsDrawable
+    auto* animatedDrawable = new AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    // wrap to napi_value
+    napi_wrap(env, thisVar, animatedDrawable, Destructor, nullptr, nullptr);
+    napi_escape_handle(env, scope, thisVar, &thisVar);
+    napi_close_escapable_handle_scope(env, scope);
+    return thisVar;
+}
 
 napi_value JsDrawableDescriptor::Constructor(napi_env env, napi_callback_info info)
 {
@@ -84,13 +155,25 @@ napi_value JsDrawableDescriptor::InitLayeredDrawable(napi_env env)
     return cons;
 }
 
+napi_value JsDrawableDescriptor::InitAnimatedDrawable(napi_env env)
+{
+    napi_value cons = nullptr;
+    napi_property_descriptor animatedDes[] = {
+        DECLARE_NAPI_FUNCTION("getPixelMap", GetPixelMap),
+    };
+    NAPI_CALL(env, napi_define_class(env, DRAWABLE_ANIMATED, NAPI_AUTO_LENGTH, AnimatedConstructor, nullptr,
+                       sizeof(animatedDes) / sizeof(napi_property_descriptor), animatedDes, &cons));
+    NAPI_CALL(env, napi_create_reference(env, cons, 1, &animatedConstructor_));
+    return cons;
+}
+
 napi_value JsDrawableDescriptor::ToNapi(
     napi_env env, DrawableDescriptor* drawable, DrawableDescriptor::DrawableType type)
 {
     if (!drawable) {
         return nullptr;
     }
-    if (!baseConstructor_ || !layeredConstructor_) {
+    if (!baseConstructor_ || !layeredConstructor_ || !animatedConstructor_) {
         // init js class constructor by importing module manually
         napi_value globalValue;
         napi_get_global(env, &globalValue);
@@ -107,6 +190,9 @@ napi_value JsDrawableDescriptor::ToNapi(
     napi_value result = nullptr;
     napi_status status;
     switch (type) {
+        case DrawableDescriptor::DrawableType::ANIMATED:
+            status = napi_get_reference_value(env, animatedConstructor_, &constructor);
+            break;
         case DrawableDescriptor::DrawableType::LAYERED:
             status = napi_get_reference_value(env, layeredConstructor_, &constructor);
             break;
@@ -223,6 +309,11 @@ napi_value JsDrawableDescriptor::Export(napi_env env, napi_value exports)
     // export child class
     cons = InitLayeredDrawable(env);
     NAPI_CALL(env, napi_set_named_property(env, exports, DRAWABLE_LAYERED, cons));
+
+    //export child class
+    cons = InitAnimatedDrawable(env);
+    NAPI_CALL(env, napi_set_named_property(env, exports, DRAWABLE_ANIMATED, cons));
+
     return exports;
 }
 } // namespace OHOS::Ace::Napi

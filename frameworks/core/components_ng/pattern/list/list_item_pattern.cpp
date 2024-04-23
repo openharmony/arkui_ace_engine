@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -31,8 +32,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float SWIPER_TH = 0.25f;
-constexpr float SWIPER_SPEED_TH = 1200.f;
-constexpr float SWIPE_RATIO = 1.848f;
+constexpr float NEW_SWIPER_TH = 0.5f;
+constexpr float SWIPER_SPEED_TH = 1500.f;
+constexpr float SWIPE_RATIO = 0.6f;
 constexpr float SWIPE_SPRING_MASS = 1.f;
 constexpr float SWIPE_SPRING_STIFFNESS = 228.f;
 constexpr float SWIPE_SPRING_DAMPING = 30.f;
@@ -74,6 +76,14 @@ void ListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& list
 
 RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_RETURN(listItemEventHub, nullptr);
+    if (!HasStartNode() && !HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
+        !listItemEventHub->GetEndOnDelete()) {
+        return MakeRefPtr<BoxLayoutAlgorithm>();
+    }
     auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, childNodeIndex_);
     layoutAlgorithm->SetAxis(axis_);
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
@@ -123,6 +133,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
         }
     } else if (HasStartNode()) {
         host->RemoveChildAtIndex(startNodeIndex_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (endNodeIndex_ > startNodeIndex_) {
             endNodeIndex_--;
         }
@@ -153,6 +164,7 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
         }
     } else if (HasEndNode()) {
         host->RemoveChildAtIndex(endNodeIndex_);
+        host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         if (startNodeIndex_ > endNodeIndex_) {
             startNodeIndex_--;
         }
@@ -185,6 +197,19 @@ RefPtr<FrameNode> ListItemPattern::GetListFrameNode() const
     return frameNode;
 }
 
+RefPtr<FrameNode> ListItemPattern::GetParentFrameNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+    while (parent && !frameNode) {
+        parent = parent->GetParent();
+        frameNode = AceType::DynamicCast<FrameNode>(parent);
+    }
+    return frameNode;
+}
+
 Axis ListItemPattern::GetAxis() const
 {
     auto frameNode = GetListFrameNode();
@@ -201,30 +226,14 @@ void ListItemPattern::SetSwiperItemForList()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItem(AceType::WeakClaim(this));
-    auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
-        auto item = weak.Upgrade();
-        CHECK_NULL_RETURN(item, true);
-        auto host = item->GetHost();
-        CHECK_NULL_RETURN(host, true);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, true);
-        auto offset = geometryNode->GetMarginFrameOffset();
-        auto size = geometryNode->GetMarginFrameSize();
-        double xOffset = static_cast<double>(localPoint.GetX()) - offset.GetX();
-        double yOffset = static_cast<double>(localPoint.GetY()) - offset.GetY();
-        if (yOffset > 0 && yOffset < size.Height()) {
-            if (item->startNodeSize_ && xOffset > 0 && xOffset < item->startNodeSize_) {
-                return false;
-            }
-            if (item->endNodeSize_ && xOffset > size.Width() - item->endNodeSize_ && xOffset < size.Width()) {
-                return false;
-            }
-        }
-        return true;
-    };
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto scrollableEvent = listPattern->GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
+        auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
+            auto item = weak.Upgrade();
+            CHECK_NULL_RETURN(item, true);
+            return item->ClickJudge(localPoint);
+        };
         scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
     }
 }
@@ -294,8 +303,14 @@ void ListItemPattern::MarkDirtyNode()
 
 void ListItemPattern::ChangeAxis(Axis axis)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(listItemEventHub);
     axis_ = axis;
-    InitSwiperAction(true);
+    if (HasStartNode() || HasEndNode() || listItemEventHub->GetStartOnDelete() || listItemEventHub->GetEndOnDelete()) {
+        InitSwiperAction(true);
+    }
 }
 
 void ListItemPattern::InitSwiperAction(bool axisChanged)
@@ -384,7 +399,11 @@ float ListItemPattern::CalculateFriction(float gamma)
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0f;
     }
-    return exp(-ratio * gamma);
+    float result = ratio * std::pow(1.0 - gamma, SQUARE);
+    if (!std::isnan(result) && LessNotEqual(result, 1.0f)) {
+        return result;
+    }
+    return 1.0f;
 }
 
 float ListItemPattern::GetFriction()
@@ -653,7 +672,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
     CHECK_NULL_VOID(listItemEventHub);
     float end = 0.0f;
     float friction = GetFriction();
-    float threshold = SWIPER_TH;
+    float threshold = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ? NEW_SWIPER_TH : SWIPER_TH;
     float speedThreshold = SWIPER_SPEED_TH;
     bool reachRightSpeed = info.GetMainVelocity() > speedThreshold;
     bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
@@ -773,9 +792,9 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
     }
 }
 
-void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("selectable", selectable_);
+    json->PutFixedAttr("selectable", selectable_, filter, FIXED_ATTR_SELECTABLE);
 }
 
 void ListItemPattern::SetAccessibilityAction()
@@ -978,6 +997,44 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, estimateHeight);
     return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis);
+}
+
+bool ListItemPattern::ClickJudge(const PointF& localPoint)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    auto offset = geometryNode->GetFrameOffset();
+    if (indexInListItemGroup_ != -1) {
+        auto parentFrameNode = GetParentFrameNode();
+        CHECK_NULL_RETURN(parentFrameNode, true);
+        auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+        CHECK_NULL_RETURN(parentGeometryNode, true);
+        auto parentOffset = parentGeometryNode->GetFrameOffset();
+        offset = offset + parentOffset;
+    }
+    auto size = geometryNode->GetFrameSize();
+    auto xOffset = localPoint.GetX() - offset.GetX();
+    auto yOffset = localPoint.GetY() - offset.GetY();
+    if (GetAxis() == Axis::VERTICAL) {
+        if (yOffset > 0 && yOffset < size.Height()) {
+            if (startNodeSize_ && xOffset > 0 && xOffset < startNodeSize_) {
+                return false;
+            } else if (endNodeSize_ && xOffset > size.Width() - endNodeSize_ && xOffset < size.Width()) {
+                return false;
+            }
+        }
+    } else {
+        if (xOffset > 0 && xOffset < size.Width()) {
+            if (startNodeSize_ && yOffset > 0 && yOffset < startNodeSize_) {
+                return false;
+            } else if (endNodeSize_ && yOffset > size.Height() - endNodeSize_ && yOffset < size.Height()) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
 

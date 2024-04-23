@@ -277,6 +277,11 @@ public:
         appBgColor_ = color;
     }
 
+    void SetFormRenderingMode(int8_t renderMode)
+    {
+        renderingMode_ = renderMode;
+    }
+
     const Color& GetAppBgColor() const
     {
         return appBgColor_;
@@ -650,6 +655,12 @@ public:
     }
     void SetFontScale(float fontScale);
 
+    float GetFontWeightScale() const
+    {
+        return fontWeightScale_;
+    }
+    void SetFontWeightScale(float fontWeightScale);
+
     uint32_t GetWindowId() const
     {
         return windowId_;
@@ -753,16 +764,20 @@ public:
 
     RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
 
-    void PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+    void PostSyncEvent(const TaskExecutor::Task& task, const std::string& name,
+        TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload(const ConfigurationChange& configurationChange) {}
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
+    virtual void RebuildFontNode() {}
     FrontendType GetFrontendType() const
     {
         return frontendType_;
@@ -781,11 +796,11 @@ public:
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
-    void OnVirtualKeyboardAreaChange(
-        Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void OnVirtualKeyboardAreaChange(
-        Rect keyboardArea, double positionY, double height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        bool supportAvoidance = false);
+    void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
 
     void OnFoldStatusChanged(FoldStatus foldStatus);
 
@@ -894,6 +909,7 @@ public:
     {
         return displayWindowRectInfo_;
     }
+    virtual void FlushModifier() {}
     virtual void FlushMessages() = 0;
     void SetGSVsyncCallback(std::function<void(void)>&& callback)
     {
@@ -1079,7 +1095,7 @@ public:
 
     virtual void SetCursor(int32_t cursorValue) {}
 
-    virtual void RestoreDefault() {}
+    virtual void RestoreDefault(int32_t windowId = 0) {}
 
     void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
     {
@@ -1145,12 +1161,12 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 
-    virtual void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
+        const bool supportAvoidance = false)
     {}
-    virtual void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, double positionY, double height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    virtual void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false)
     {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
@@ -1187,6 +1203,7 @@ protected:
 
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;
+    float fontWeightScale_ = 1.0f;
     float designWidthScale_ = 1.0f;
     float viewScale_ = 1.0f;
     double density_ = 1.0;
@@ -1199,6 +1216,7 @@ protected:
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
+    int8_t renderingMode_ = 0;
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;

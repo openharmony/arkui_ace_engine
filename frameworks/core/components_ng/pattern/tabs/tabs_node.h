@@ -28,6 +28,7 @@ constexpr int32_t SWIPER_INDEX = 0;
 constexpr int32_t DIVIDER_INDEX = 1;
 constexpr int32_t TAB_BAR_INDEX = 2;
 } // namespace
+class InspectorFilter;
 
 class ACE_EXPORT TabsNode : public GroupNode {
     DECLARE_ACE_TYPE(TabsNode, GroupNode);
@@ -38,7 +39,7 @@ public:
     {}
     ~TabsNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool HasSwiperNode() const
     {

@@ -28,7 +28,7 @@ Flow A:
 3. ViewPU.purgeDeletedElmtIds calls C+++ UINodeRegisterProxy.obtainElementIds(),
 4. UINodeRegisterProxy.obtainElementIds() calls C++  ElementRegister::MoveRemovedItems to move elmtIds of deleted UINodes UINodeRegisterProxy
    (those added by RemoveItems(elmtId) in step 1).
-5. UINodeRegisterProxy.unregisterElmtIdsFromViewPUs: unregister the removedElementIds from the all the viewpus:
+5. UINodeRegisterProxy.unregisterElmtIdsFromIViews: unregister the removedElementIds from the all the viewpus:
   1) purge the update function in viewpu
   2) purge the dependent element if from statevariable
 
@@ -49,7 +49,8 @@ type RemovedElementInfo = { elmtId : number, tag : string };
 function uiNodeCleanUpIdleTask(): void {
     stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask:`);
     UINodeRegisterProxy.obtainDeletedElmtIds();
-    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+    UINodeRegisterProxy.cleanUpDeadReferences();
 }
 
 class UINodeRegisterProxy {
@@ -58,29 +59,29 @@ class UINodeRegisterProxy {
 
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
-        if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {
+        if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds !== 'function') {
             stateMgmtConsole.error(`UINodeRegisterProxy obtainDeletedElmtIds is not a function: ${UINodeRegisterProxy.instance_.obtainDeletedElmtIds}.` );
         } else {
             UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
         }
     }
 
-    public static unregisterElmtIdsFromViewPUs(): void {
-        stateMgmtConsole.debug('UINodeRegisterProxy.unregisterElmtIdsFromViewPUs elmtIds');
-        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+    // FIXME unregisterElmtIdsFromIViews needs adaptation
+    public static unregisterElmtIdsFromIViews(): void {
+        stateMgmtConsole.debug('UINodeRegisterProxy.unregisterElmtIdsFromIViews elmtIds');
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
     }
 
-     // unregisters all the received removedElements in func parameter
-     public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void {
-
+    // unregisters all the received removedElements in func parameter
+    public static unregisterRemovedElmtsFromViewPUs(removedElements: Array<number>): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs elmtIds ${removedElements}`);
         UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
-        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
     }
 
     private populateRemoveElementInfo(removedElements: Array<number>) {
         for (const elmtId of removedElements) {
-            const removedElementInfo: RemovedElementInfo = { elmtId, tag: "" };
+            const removedElementInfo: RemovedElementInfo = { elmtId, tag: '' };
             this.removeElementsInfo_.push(removedElementInfo);
         }
     }
@@ -95,17 +96,17 @@ class UINodeRegisterProxy {
         this.removeElementsInfo_ = removedElementsInfo;
     }
 
-    public unregisterElmtIdsFromViewPUs(): void {
+    public unregisterElmtIdsFromIViews(): void {
         stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds newly obtained from ElementRegister: ${JSON.stringify(this.removeElementsInfo_)} .`);
         
-        if (this.removeElementsInfo_.length == 0) {
+        if (this.removeElementsInfo_.length === 0) {
             stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds needs to purgeDelete. } .`);
             return;
         }
-        let owningView : ViewPU | undefined;
+        let owningView : IView | undefined;
         this.removeElementsInfo_.forEach((rmElmtInfo  : RemovedElementInfo) => {
-            const owningViewPUWeak : WeakRef<ViewPU> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
-            if (owningViewPUWeak != undefined) {
+            const owningViewPUWeak : WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
+            if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
                     owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
@@ -113,17 +114,22 @@ class UINodeRegisterProxy {
                     stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
             } else {
-                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`)
+                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`);
             }
 
             // FIXME: only do this if app uses V3
-            ObserveV3.getObserve().clearBinding(rmElmtInfo.elmtId);
+            ObserveV2.getObserve().clearBinding(rmElmtInfo.elmtId);
         })
 
         this.removeElementsInfo_.length = 0;
     }
 
+    public static cleanUpDeadReferences(): void {
+        stateMgmtConsole.debug('UINodeRegisterProxy.cleanUpDeadReferences');
+        ObserveV2.getObserve().cleanUpDeadReferences();
+    }
+
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
     public removeElementsInfo_: Array<RemovedElementInfo> = new Array<RemovedElementInfo>();
-    public static ElementIdToOwningViewPU_: Map<number, WeakRef<ViewPU>> = new Map<number, WeakRef<ViewPU>>();
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<IView>> = new Map<number, WeakRef<IView>>();
 }

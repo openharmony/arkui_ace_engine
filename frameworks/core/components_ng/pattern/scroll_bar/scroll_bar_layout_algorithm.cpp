@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -43,9 +44,17 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
 
 void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& parentSize, OptionalSizeF& idealSize)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(theme);
     if (axis == Axis::HORIZONTAL) {
         if (!idealSize.Height()) {
-            idealSize.SetHeight(childSize.Height());
+            if (childSize.Height()) {
+                idealSize.SetHeight(childSize.Height());
+            } else {
+                idealSize.SetHeight(theme->GetDefaultHeight().ConvertToPx());
+            }
         }
         if (!idealSize.Width() && parentSize.Width().has_value()) {
             idealSize.SetWidth(parentSize.Width().value());
@@ -53,7 +62,11 @@ void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& par
         return;
     }
     if (!idealSize.Width()) {
-        idealSize.SetWidth(childSize.Width());
+        if (childSize.Width()) {
+            idealSize.SetWidth(childSize.Width());
+        } else {
+            idealSize.SetWidth(theme->GetDefaultWidth().ConvertToPx());
+        }
     }
     if (!idealSize.Height() && parentSize.Height().has_value()) {
         idealSize.SetHeight(parentSize.Height().value());
@@ -81,12 +94,19 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
-    childWrapper->Measure(childLayoutConstraint);
-
-    // Use child size when self idea size of scroll is not setted.
-    auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
-    UpdateIdealSize(axis, childSize, parentSize, idealSize);
+    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
+    if (!childWrapper && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+        UpdateIdealSize(axis, size, parentSize, idealSize);
+        scrollBarPattern->SetChild(false);
+    } else {
+        CHECK_NULL_VOID(childWrapper);
+        childWrapper->Measure(childLayoutConstraint);
+        // Use child size when self idea size of scroll is not setted.
+        auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+        UpdateIdealSize(axis, childSize, parentSize, idealSize);
+        scrollBarPattern->SetChild(true);
+    }
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);

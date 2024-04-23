@@ -96,7 +96,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
-    if (clickEventActuator_) {
+    if (clickEventActuator_ && !redirectClick_) {
         clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
     if (userParallelClickEventActuator_) {
@@ -410,8 +410,7 @@ bool GestureEventHub::IsPixelMapNeedScale() const
     CHECK_NULL_RETURN(frameNode, false);
     auto width = pixelMap_->GetWidth();
     auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
-    if (frameNode->GetTag() == V2::WEB_ETS_TAG ||
-        frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE || width == 0 || width < maxWidth) {
+    if (frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE || width == 0 || width < maxWidth) {
         return false;
     }
     return true;
@@ -485,7 +484,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -503,7 +502,7 @@ void GestureEventHub::CancelDragForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->CancelDragForWeb();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebCancelDrag");
 }
 
 void GestureEventHub::ResetDragActionForWeb()
@@ -537,7 +536,7 @@ void GestureEventHub::StartDragTaskForWeb()
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web in async task");
             dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartDrag");
 }
 
 RefPtr<PixelMap> CreatePixelMapFromString(const std::string& filePath)
@@ -561,12 +560,15 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     } else {
         auto coordinateX = frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
-        auto rateX = NearZero(frameNodeSize_.Width()) ? 0.0f : (info.GetGlobalLocation().GetX() - coordinateX)
-            / frameNodeSize_.Width();
-        auto rateY = NearZero(frameNodeSize_.Height()) ? 0.0f : (info.GetGlobalLocation().GetY() - coordinateY)
-            / frameNodeSize_.Height();
-        result.SetX(-rateX * size.Width());
-        result.SetY(-rateY * size.Height());
+        if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width())) {
+            result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+            result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+        } else {
+            auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
+            auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
+            result.SetX(-rateX * size.Width());
+            result.SetY(-rateY * size.Height());
+        }
     }
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);
@@ -746,8 +748,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
     if (dragPreviewInfo.inspectorId != "") {
-        auto dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
-        CHECK_NULL_VOID(dragPreviewPixelMap);
+        auto dragPreviewPixelMap = GetDragPreviewPixelMap();
+        if (dragPreviewPixelMap == nullptr) {
+            dragPreviewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        }
         dragDropInfo.pixelMap = dragPreviewPixelMap;
         OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
         return;
@@ -788,7 +792,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                     CHECK_NULL_VOID(frameNode);
                     gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
         NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
         return;
@@ -844,26 +848,30 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         pixelMap = dragDropInfo.pixelMap;
         SetPixelMap(dragDropInfo.pixelMap);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-        dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
         GenerateMousePixelMap(info);
-        SetDragGatherPixelMaps(info);
         if (pixelMap_) {
             pixelMap = pixelMap_;
         }
     } else {
-        SetDragGatherPixelMaps(info);
         CHECK_NULL_VOID(pixelMap_);
         if (pixelMap == nullptr) {
             pixelMap = pixelMap_;
         }
     }
+    SetDragGatherPixelMaps(info);
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        recordsSize = badgeNumber.value();
+    }
+    dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * defaultPixelMapScale;
-    auto overlayManager = pipeline->GetOverlayManager();
     auto windowScale = dragDropManager->GetWindowScale();
+    float scale = windowScale * defaultPixelMapScale;
+    auto overlayManager = pipeline->GetOverlayManager();
     bool isSwitchToSubWindow = false;
     RefPtr<FrameNode> imageNode = nullptr;
     RefPtr<FrameNode> textNode = nullptr;
@@ -887,7 +895,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
         }
-        auto childSize = GetSelectItemSize();
+        auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
         if (childSize > 1) {
             recordsSize = childSize;
         }
@@ -977,6 +985,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedDisplayInSubwindow()) {
             overlayManager->RemovePixelMap();
+            overlayManager->RemovePreviewBadgeNode();
             overlayManager->RemoveGatherNode();
             pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
@@ -1012,7 +1021,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() {
             dragDropManager->HideDragPreviewOverlay();
-            }, TaskExecutor::TaskType::UI);
+            }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -1144,6 +1153,14 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
+
+    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+}
+
+void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
+{
+    CheckClickActuator();
+    clickEventActuator_->AddClickAfterEvent(clickEvent);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }
@@ -1323,7 +1340,6 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
-                dragDropManager->HideDragPreviewOverlay();
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
@@ -1336,7 +1352,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragEnd");
     };
     return callback;
 }

@@ -328,6 +328,7 @@ public:
         const ImageFit& imageFit);
 
     void UpdateRecordingCanvas(float width, float height);
+    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
 
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
@@ -420,6 +421,7 @@ protected:
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     Shadow shadow_;
+    std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
     std::unique_ptr<Rosen::Typography> paragraph_;
 
     WeakPtr<PipelineBase> context_;

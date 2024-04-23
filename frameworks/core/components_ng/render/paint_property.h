@@ -23,6 +23,8 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // PaintProperty are used to set render properties.
 class PaintProperty : public Property {
     DECLARE_ACE_TYPE(PaintProperty, Property)
@@ -40,7 +42,7 @@ public:
 
     virtual void Reset() {}
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 

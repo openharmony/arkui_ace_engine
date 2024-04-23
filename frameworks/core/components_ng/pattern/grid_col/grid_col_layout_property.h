@@ -24,6 +24,7 @@
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT GridColLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(GridColLayoutProperty, LinearLayoutProperty);
@@ -48,7 +49,7 @@ public:
         LinearLayoutProperty::Reset();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Span, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Offset, V2::GridContainerSize, PROPERTY_UPDATE_MEASURE);

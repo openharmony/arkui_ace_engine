@@ -138,4 +138,16 @@ void UIExtensionManager::NotifySizeChangeReason(WindowSizeChangeReason type,
         }
     }
 }
+
+bool UIExtensionManager::IsShowPlaceholder(int32_t nodeId)
+{
+    auto it = aliveUIExtensions_.find(nodeId);
+    if (it != aliveUIExtensions_.end()) {
+        auto uiExtension = it->second.Upgrade();
+        if (uiExtension) {
+            return uiExtension->IsShowPlaceholder();
+        }
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

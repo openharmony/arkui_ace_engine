@@ -31,6 +31,8 @@ public:
     ~SvgFe() override = default;
     static RefPtr<SvgNode> Create();
 
+    void OnInitStyle() override;
+
     void RegisterResult(const std::string& id, std::shared_ptr<RSImageFilter>& imageFilter,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const;
 
@@ -42,13 +44,20 @@ public:
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash);
 
     void GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor,
-        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash);
+        std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash,
+        const Rect& effectFilterArea = {});
 
 protected:
     virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
         ColorInterpolationType& currentColor,
         std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
     {}
+
+    Dimension x_;
+    Dimension y_;
+    Dimension height_;
+    Dimension width_;
+    Rect effectFilterArea_;
 };
 
 } // namespace OHOS::Ace::NG

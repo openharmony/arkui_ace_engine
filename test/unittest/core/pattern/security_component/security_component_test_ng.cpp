@@ -57,23 +57,24 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr float DEFAULT_ICON_SIZE = 16.0f;
-    constexpr float DEFAULT_FONT_SIZE = 16.0f;
-    constexpr float DEFAULT_ICON_MIN_SIZE = 12.0f;
-    constexpr float DEFAULT_FONT_MIN_SIZE = 12.0f;
-    constexpr float DEFAULT_PADDING = 10.0f;
-    constexpr float DEFAULT_BORDER_RADIUS = 1.0f;
-    constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
-    constexpr float DEFAULT_PADDING_WITHOUT_BG = 4.0f;
-    constexpr float DEFAULT_BUTTON_SIZE = 20.0f;
-    constexpr float MIN_SIZE = 1.0f;
-    constexpr float ENLARGE_SIZE = 50.0f;
-    const std::string DEFAULT_TEXT = "Add Security Component Buttom";
-    constexpr int INDEX_ZERO = 0;
-    constexpr int INDEX_ONE = 1;
-    constexpr int INDEX_TWO = 2;
-    constexpr int INDEX_SIZE = 3;
-    constexpr int ICON_RESOURCE_TABLE = 2;
+const InspectorFilter filter;
+constexpr float DEFAULT_ICON_SIZE = 16.0f;
+constexpr float DEFAULT_FONT_SIZE = 16.0f;
+constexpr float DEFAULT_ICON_MIN_SIZE = 12.0f;
+constexpr float DEFAULT_FONT_MIN_SIZE = 12.0f;
+constexpr float DEFAULT_PADDING = 10.0f;
+constexpr float DEFAULT_BORDER_RADIUS = 1.0f;
+constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
+constexpr float DEFAULT_PADDING_WITHOUT_BG = 4.0f;
+constexpr float DEFAULT_BUTTON_SIZE = 20.0f;
+constexpr float MIN_SIZE = 1.0f;
+constexpr float ENLARGE_SIZE = 50.0f;
+const std::string DEFAULT_TEXT = "Add Security Component Buttom";
+constexpr int INDEX_ZERO = 0;
+constexpr int INDEX_ONE = 1;
+constexpr int INDEX_TWO = 2;
+constexpr int INDEX_SIZE = 3;
+constexpr int ICON_RESOURCE_TABLE = 2;
 }
 
 namespace {
@@ -580,6 +581,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest006,
     locationSc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
     locationSc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
     locationSc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -1656,16 +1658,20 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
 
     int32_t invalidId = -1;
     int32_t noExistId = 0;
-    ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(invalidFrameNode, scId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, noExistId), -1);
-    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(invalidId), -1);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(invalidId, frameNode, info), -1);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, invalidFrameNode, info), -1);
+    EXPECT_EQ(SecurityComponentHandler::RegisterSecurityComponent(invalidFrameNode, scId), -1);
+    EXPECT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, noExistId), -1);
+    EXPECT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(invalidId), -1);
+    EXPECT_EQ(
+        SecurityComponentHandler::ReportSecurityComponentClickEvent(invalidId, frameNode, info, [] (int32_t){}), -1);
+    EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, invalidFrameNode, info, [] (int32_t) {}), -1);
 
     KeyEvent key;
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, invalidFrameNode, key), -1);
+    EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, invalidFrameNode, key, [] (int32_t) {}), -1);
     key.enhanceData = { 0 };
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, invalidFrameNode, key), -1);
+    EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, invalidFrameNode, key, [] (int32_t) {}), -1);
 }
 
 /**
@@ -1685,7 +1691,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, frameNode, info, [] (int32_t) {}), -1);
 }
 
 /**
@@ -1705,7 +1712,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, frameNode, info, [] (int32_t) {}), -1);
 }
 
 /**
@@ -1725,7 +1733,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
-    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(noExistId, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, frameNode, info, [] (int32_t) {}), -1);
 }
 
 /**
@@ -1874,11 +1883,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateClipEdge(true);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 
     OffsetF invalidOffset(-100.0, -100.0);
     childFrameNode->geometryNode_->SetFrameOffset(invalidOffset);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 }
 
 /**
@@ -2152,18 +2161,18 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateOpacity(1);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
-    ASSERT_EQ(renderContext->GetOpacity().value(), 1.0f);
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_EQ(renderContext->GetOpacity().value(), 1.0f);
     renderContext->UpdateOpacity(2);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 
     parentFrameNode->tag_ = V2::MENU_WRAPPER_ETS_TAG;
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 
     // parent is not FrameNode
     RefPtr<TestNode> unFrameNode = AceType::MakeRefPtr<TestNode>(0);
     unFrameNode->AddChild(childFrameNode);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
 }
 
 /**
@@ -2176,8 +2185,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCalculateCurrentVisibleR
 {
     RectF invalidRect(-1.0, -1.0, -1.0, -1.0);
     RectF validRect(1.0, 1.0, 1.0, 1.0);
-    ASSERT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(invalidRect, validRect), 0.0);
-    ASSERT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(validRect, invalidRect), 0.0);
+    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(invalidRect, validRect), 0.0);
+    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(validRect, invalidRect), 0.0);
 }
 
 /**
@@ -2192,7 +2201,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitChildInfo001, TestSi
         AceType::MakeRefPtr<SecurityComponentPattern>();
     RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern, false);
     OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
-    ASSERT_FALSE(SecurityComponentHandler::InitChildInfo(buttonInfo, node));
+    EXPECT_FALSE(SecurityComponentHandler::InitChildInfo(buttonInfo, node));
 }
 
 /**
@@ -2208,7 +2217,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestS
     RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern, false);
     std::string compInfo;
     Security::SecurityComponent::SecCompType type;
-    ASSERT_FALSE(SecurityComponentHandler::InitButtonInfo(compInfo, node, type));
+    EXPECT_FALSE(SecurityComponentHandler::InitButtonInfo(compInfo, node, type));
 }
 
 /**
@@ -2566,7 +2575,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue001, T
         BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
     pattern.frameNode_ = frameNode;
     auto jsonNode = JsonUtil::Create(true);
-    pattern.ToJsonValue(jsonNode);
+    pattern.ToJsonValue(jsonNode, filter);
     ASSERT_EQ(jsonNode->GetString("type", ""), V2::LOCATION_BUTTON_ETS_TAG);
 }
 
@@ -2584,7 +2593,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue002, T
         0, 0, V2::LOCATION_BUTTON_ETS_TAG);
     pattern.frameNode_ = frameNode;
     auto jsonNode = JsonUtil::Create(true);
-    pattern.ToJsonValue(jsonNode);
+    pattern.ToJsonValue(jsonNode, filter);
     ASSERT_EQ(jsonNode->GetString("type", ""), V2::LOCATION_BUTTON_ETS_TAG);
 }
 
@@ -2602,7 +2611,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternToJsonValue003, T
         0, V2::LOCATION_BUTTON_ETS_TAG);
     pattern.frameNode_ = frameNode;
     auto jsonNode = JsonUtil::Create(true);
-    pattern.ToJsonValue(jsonNode);
+    pattern.ToJsonValue(jsonNode, filter);
     ASSERT_EQ(jsonNode->GetString("type", ""), V2::LOCATION_BUTTON_ETS_TAG);
 }
 

@@ -32,7 +32,6 @@ public:
         const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
     XComponentType GetType() override;
     std::string GetLibraryName() override;
-    void SetLibraryName(const std::string& libraryName) override;
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;
     void SetOnDestroy(DestroyEvent&& onDestroy) override;

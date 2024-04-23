@@ -31,4 +31,20 @@ RefPtr<SvgNode> SvgPattern::Create()
     return AceType::MakeRefPtr<SvgPattern>();
 }
 
+void SvgPattern::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
+{
+    auto declaration = AceType::DynamicCast<SvgPatternDeclaration>(declaration_);
+    CHECK_NULL_VOID(declaration);
+    auto patternUnits = declaration->GetPatternUnits();
+
+    auto scaleX = viewPort.Width() / declaration->GetWidth().ConvertToPx();
+    auto scaleY = viewPort.Height() / declaration->GetHeight().ConvertToPx();
+    canvas.Save();
+    canvas.Scale(scaleX, scaleY);
+}
+
+void SvgPattern::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
+{
+    canvas.Restore();
+}
 } // namespace OHOS::Ace::NG

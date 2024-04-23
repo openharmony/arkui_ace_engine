@@ -85,4 +85,9 @@ RefPtr<MockContainer> MockContainer::Current()
 {
     return container_;
 }
+
+RefPtr<Container> Container::GetContainer(int32_t containerId)
+{
+    return MockContainer::Current();
+}
 } // namespace OHOS::Ace

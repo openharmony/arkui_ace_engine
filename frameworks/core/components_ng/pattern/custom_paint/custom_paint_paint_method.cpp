@@ -179,6 +179,14 @@ void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
     RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
     CHECK_NULL_VOID(rsCanvas);
     rsCanvas->Save();
+    if (canvasCallback_) {
+        canvasCallback_(rsCanvas_.get(), width, height);
+    }
+}
+
+void CustomPaintPaintMethod::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+{
+    canvasCallback_ = callback;
 }
 
 bool CustomPaintPaintMethod::HasShadow() const
@@ -1911,16 +1919,11 @@ void CustomPaintPaintMethod::ResetStates()
     smoothingQuality_ = "low";
     filterParam_ = "";
     matrix_.reset();
-    PaintState fillState;
-    fillState_ = fillState;
-    StrokePaintState strokeState;
-    strokeState_ = strokeState;
-    GlobalPaintState globalState;
-    globalState_ = globalState;
-    Shadow shadow;
-    shadow_ = shadow;
-    RSBrush imageBrush;
-    imageBrush_ = imageBrush;
+    fillState_ = PaintState();
+    strokeState_ = StrokePaintState();
+    globalState_ = GlobalPaintState();
+    shadow_ = Shadow();
+    imageBrush_ = RSBrush();
     lastFilters_.clear();
     rsPath_.Reset();
     rsPath2d_.Reset();

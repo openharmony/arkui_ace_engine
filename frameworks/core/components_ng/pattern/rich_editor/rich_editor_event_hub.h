@@ -91,8 +91,8 @@ public:
     const std::string& GetValue() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
-    void SetFontFeature(const FONT_FEATURES_MAP& fontFeature);
-    const FONT_FEATURES_MAP& GetFontFeatures() const;
+    void SetFontFeature(const FONT_FEATURES_LIST& fontFeature);
+    const FONT_FEATURES_LIST& GetFontFeatures() const;
     void SetFontSize(double fontSize);
     double GetFontSize() const;
     void SetLineHeight(double lineHeight);
@@ -160,7 +160,7 @@ private:
     int32_t eraseLength_ = 0;
     std::string value_;
     std::string fontColor_;
-    FONT_FEATURES_MAP fontFeature_;
+    FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
     OHOS::Ace::FontStyle fontStyle_;
     int32_t fontWeigth_ = 0;
@@ -178,6 +178,7 @@ private:
 };
 
 enum class RichEditorDeleteDirection { BACKWARD = 0, FORWARD };
+enum class KeyboardType { NONE, VIRTUAL_KEYBOARD, EXTERNAL_KEYBOARD };
 
 class RichEditorDeleteValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorDeleteValue, BaseEventInfo)
@@ -192,11 +193,14 @@ public:
     int32_t GetLength() const;
     void SetRichEditorDeleteSpans(const RichEditorAbstractSpanResult& deleteSpan);
     const std::list<RichEditorAbstractSpanResult>& GetRichEditorDeleteSpans() const;
+    void SetKeyboardType(KeyboardType Keyboard);
+    KeyboardType GetKeyboardType() const;
 
 private:
     int32_t offset_ = 0;
     RichEditorDeleteDirection direction_;
     int32_t length_ = 0;
+    KeyboardType Keyboard_ = KeyboardType::NONE;
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };
 

@@ -24,18 +24,16 @@
 
 namespace OHOS::Ace::NG {
 
-using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
+class PipelineContext;
 
+using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
 using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 
 public:
-    FocusManager()
-    {
-        focusViewStack_.clear();
-    }
+    explicit FocusManager(const WeakPtr<PipelineContext>& pipeline) : pipeline_(pipeline) {}
     ~FocusManager() override = default;
 
     void FocusViewShow(const RefPtr<FocusView>& focusView);
@@ -67,13 +65,38 @@ public:
         }
     }
 
+    void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
+    {
+        lastFocusStateNode_ = AceType::WeakClaim(AceType::RawPtr(node));
+        isNeedTriggerScroll_ = true;
+    }
+    RefPtr<FocusHub> GetLastFocusStateNode() const
+    {
+        return lastFocusStateNode_.Upgrade();
+    }
+
+    void SetNeedTriggerScroll(bool isNeedTriggerScroll)
+    {
+        isNeedTriggerScroll_ = isNeedTriggerScroll;
+    }
+    bool GetNeedTriggerScroll() const
+    {
+        return isNeedTriggerScroll_;
+    }
+
+    void PaintFocusState();
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
 
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
+    const WeakPtr<PipelineContext> pipeline_;
 
     RequestFocusCallback requestCallback_;
+
+    WeakPtr<FocusHub> lastFocusStateNode_;
+    bool isNeedTriggerScroll_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

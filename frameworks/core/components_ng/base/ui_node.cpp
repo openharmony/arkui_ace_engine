@@ -1142,6 +1142,15 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
     }
 }
 
+void UINode::SetIsRootBuilderNode(bool isRootBuilderNode)
+{
+    isRootBuilderNode_ = isRootBuilderNode;
+}
+
+bool UINode::GetIsRootBuilderNode() const
+{
+    return isRootBuilderNode_;
+}
 
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
@@ -1205,4 +1214,15 @@ void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>
         DFSAllChild(child, res);
     }
 }
+
+bool UINode::IsContextTransparent()
+{
+    for (const auto& item : GetChildren()) {
+        if (!item->IsContextTransparent()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

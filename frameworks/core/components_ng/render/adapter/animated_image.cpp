@@ -121,7 +121,7 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
 AnimatedImage::~AnimatedImage()
 {
     // animator has to destruct on UI thread
-    ImageUtils::PostToUI([animator = animator_]() mutable { animator.Reset(); });
+    ImageUtils::PostToUI([animator = animator_]() mutable { animator.Reset(); }, "ArkUIImageResetAnimated");
 }
 
 void AnimatedImage::ControlAnimation(bool play)
@@ -138,7 +138,7 @@ void AnimatedImage::RenderFrame(uint32_t idx)
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->DecodeFrame(idx);
-    });
+    }, "ArkUIImageRenderAnimatedFrame");
 }
 
 // runs on Background threads
@@ -159,7 +159,7 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self && self->redraw_);
         self->redraw_();
-    });
+    }, "ArkUIImageDecodeAnimatedFrame");
 
     CacheFrame(cacheKey_ + std::to_string(idx));
     --queueSize_;

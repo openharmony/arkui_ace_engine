@@ -485,13 +485,21 @@ ArkUINativeModuleValue ImageBridge::SetColorFilter(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> jsObjArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     if (!jsObjArg->IsArray(vm) && !jsObjArg->IsObject()) {
         GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
             nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
         return panda::JSValueRef::Undefined(vm);
     }
     if (jsObjArg->IsObject() && !jsObjArg->IsArray(vm)) {
+#ifndef PREVIEW
+        auto drawingColorFilter = Ace::Framework::CreateDrawingColorFilter(info[1]);
+        if (drawingColorFilter) {
+            ImageModelNG::SetDrawingColorFilter(reinterpret_cast<FrameNode*>(nativeNode), drawingColorFilter);
+            return panda::JSValueRef::Undefined(vm);
+        }
+#endif
+
         SetColorFilterObject(vm, jsObjArg, nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

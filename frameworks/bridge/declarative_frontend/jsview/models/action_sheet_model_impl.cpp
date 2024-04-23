@@ -36,7 +36,7 @@ void ActionSheetModelImpl::ShowActionSheet(const DialogProperties& arg)
                         context->ShowDialog(arg, false, "ActionSheet");
                     }
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIDialogShowActionSheet");
         }
     }
 }

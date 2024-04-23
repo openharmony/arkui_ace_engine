@@ -16,6 +16,7 @@
 #include "navigator_event_hub.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
@@ -68,7 +69,7 @@ void NavigatorEventHub::SetActive(bool active)
                 CHECK_NULL_VOID(eventHub);
                 eventHub->NavigatePage();
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUINavigatorNavigatePage");
     }
     active_ = active;
 }
@@ -89,12 +90,12 @@ std::string NavigatorEventHub::GetNavigatorType() const
     }
 }
 
-void NavigatorEventHub::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void NavigatorEventHub::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("active", active_ ? "true" : "false");
-    json->Put("target", url_.c_str());
-    json->Put("type", GetNavigatorType().c_str());
-    json->Put("params", params_.c_str());
+    json->PutExtAttr("active", active_ ? "true" : "false", filter);
+    json->PutExtAttr("target", url_.c_str(), filter);
+    json->PutExtAttr("type", GetNavigatorType().c_str(), filter);
+    json->PutExtAttr("params", params_.c_str(), filter);
 }
 
 } // namespace OHOS::Ace::NG

@@ -83,6 +83,35 @@ class UIInspector {
     }
 }
 
+class ComponentSnapshot {
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_componentSnapshot = globalThis.requireNapi('arkui.componentSnapshot');
+    }
+    get(id, callback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof callback === 'undefined') {
+            let promise = this.ohos_componentSnapshot.get(id);
+            __JSScopeUtil__.restoreInstanceId();
+            return promise;
+        } else {
+            this.ohos_componentSnapshot.get(id, callback);
+            __JSScopeUtil__.restoreInstanceId();
+        }
+    }
+    createFromBuilder(builder, callback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof callback === 'undefined') {
+            let promise = this.ohos_componentSnapshot.createFromBuilder(builder);
+            __JSScopeUtil__.restoreInstanceId();
+            return promise;
+        } else {
+            this.ohos_componentSnapshot.createFromBuilder(builder, callback);
+            __JSScopeUtil__.restoreInstanceId();
+        }
+    }
+}
+
 class DragController {
     /**
      * Construct new instance of DragController.
@@ -221,6 +250,53 @@ class UIContext {
         return this.UIInspector_;
     }
 
+    getComponentSnapshot() {
+        this.ComponentSnapshot_ = new ComponentSnapshot(this.instanceId_);
+        return this.ComponentSnapshot_;
+    }
+
+    vp2px(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let vp2pxResult = globalThis.vp2px(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return vp2pxResult;
+    }
+
+    px2vp(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let px2vpResult = globalThis.px2vp(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return px2vpResult;
+    }
+
+    fp2px(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let fp2pxResult = globalThis.fp2px(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return fp2pxResult;
+    }
+
+    px2fp(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let px2fpResult = globalThis.px2fp(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return px2fpResult;
+    }
+
+    lpx2px(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let lpx2pxResult = globalThis.lpx2px(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return lpx2pxResult;
+    }
+
+    px2lpx(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let px2lpxResult = globalThis.px2lpx(value);
+        __JSScopeUtil__.restoreInstanceId();
+        return px2lpxResult;
+    }
+
     getComponentUtils() {
         if (this.componentUtils_ == null) {
             this.componentUtils_ = new ComponentUtils(this.instanceId_);
@@ -340,6 +416,10 @@ class UIContext {
     getFrameNodeById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        if (!nodePtr) {
+            __JSScopeUtil__.restoreInstanceId();
+            return null;
+        }
         let xNode = globalThis.requireNapi('arkui.node');
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
@@ -361,6 +441,22 @@ class UIContext {
         return node;
     }
 
+    getFrameNodeByUniqueId(uniqueId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let nodePtr = getUINativeModule().getFrameNodeByUniqueId(uniqueId);
+        if (nodePtr === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return null;
+        }
+        let xNode = globalThis.requireNapi('arkui.node');
+        let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+        if (!node) {
+            node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return node;
+    }
+
     getFocusController() {
         if (this.focusController_ == null) {
             this.focusController_ = new FocusController(this.instanceId_);
@@ -371,6 +467,9 @@ class UIContext {
     setDynamicDimming(id, number) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeByKey(id);
+        if (!nodePtr) {
+            return;
+        }
         Context.setDynamicDimming(nodePtr, number);
     }
 
@@ -386,6 +485,13 @@ class UIContext {
             this.contextMenuController_ = new ContextMenuController(this.instanceId_);
         }
         return this.contextMenuController_;
+    }
+
+    getWindowName() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const windowName = getUINativeModule().common.getWindowName();
+        __JSScopeUtil__.restoreInstanceId();
+        return windowName
     }
 }
 

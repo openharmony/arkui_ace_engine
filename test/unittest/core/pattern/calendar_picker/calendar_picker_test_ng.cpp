@@ -75,6 +75,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr Dimension TEST_SETTING_RADIUS = Dimension(10.0, DimensionUnit::VP);
 constexpr int32_t YEAR_INDEX = 0;
 constexpr int32_t MONTH_INDEX = 2;
@@ -143,7 +144,8 @@ RefPtr<FrameNode> CalendarPickerTestNg::CalendarDialogShow(RefPtr<FrameNode> ent
     settingData.entryNode = entryNode;
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto dialogNode = CalendarDialogView::Show(properties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     return dialogNode;
 }
 
@@ -1666,7 +1668,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     std::function<void()> task;
-    pickerPattern->PostTaskToUI(task);
+    pickerPattern->PostTaskToUI(task, "ArkUITask");
 }
 
 /**
@@ -1806,7 +1808,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest002, TestSize.Level1)
     settingData.dayRadius = TEST_SETTING_RADIUS;
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto dialogNode = calendarDialogView.Show(properties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -1863,7 +1866,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest004, TestSize.Level1)
     settingData.dayRadius = TEST_SETTING_RADIUS;
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto dialogNode = calendarDialogView.Show(properties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
 
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
@@ -1893,7 +1897,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest005, TestSize.Level1)
         V2::CALENDAR_ETS_TAG, calendarNodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
     ASSERT_NE(calendarNode, nullptr);
     DialogEvent event;
-    auto buttonConfirmNode = CalendarDialogView::CreateConfirmNode(calendarNode, event);
+    std::vector<ButtonInfo> buttonInfos;
+    auto buttonConfirmNode = CalendarDialogView::CreateConfirmNode(calendarNode, event, buttonInfos);
     ASSERT_NE(buttonConfirmNode, nullptr);
 
     auto gesture = buttonConfirmNode->GetOrCreateGestureEventHub();
@@ -2002,7 +2007,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest008, TestSize.Level1)
      * @tc.steps: step3. execute CalendarDialogView::Show.
      * @tc.expected: show successfully.
      */
-    auto dialogNode = CalendarDialogView::Show(properties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     /**
      * @tc.steps: step4. get dialogNode's grandsonNode.
      * @tc.expected: getNode successfully.
@@ -2829,7 +2835,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest018, TestSize.Level1)
     settingData.dayRadius = TEST_SETTING_RADIUS;
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto dialogNode = calendarDialogView.Show(properties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
@@ -2942,7 +2949,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest022, TestSize.Level1)
     settingData.dayRadius = TEST_SETTING_RADIUS;
     std::map<std::string, NG::DialogEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    auto dialogNode = calendarDialogView.Show(properties, settingData, dialogEvent, dialogCancelEvent);
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
     auto contentWrapper = dialogNode->GetChildAtIndex(0);
     ASSERT_NE(contentWrapper, nullptr);
@@ -3184,7 +3192,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest001, TestSize.Lev
     auto clone = layoutProperty->Clone();
 
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     layoutProperty->Reset();
     clone.Reset();
 
@@ -3211,11 +3219,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutPropertyTest002, TestSize.Lev
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
 
     layoutProperty->propDialogAlignType_ = CalendarEdgeAlign::EDGE_ALIGN_START;
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     layoutProperty->propDialogAlignType_ = CalendarEdgeAlign::EDGE_ALIGN_CENTER;
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
     layoutProperty->propDialogAlignType_ = CalendarEdgeAlign::EDGE_ALIGN_END;
-    layoutProperty->ToJsonValue(json);
+    layoutProperty->ToJsonValue(json, filter);
 }
 
 /**

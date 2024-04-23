@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
@@ -29,13 +30,15 @@ using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
 using ActionScrollBackwardImpl = ActionNoParam;
-using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end)>;
+using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end, bool isForward)>;
 using ActionCopyImpl = ActionNoParam;
 using ActionCutImpl = ActionNoParam;
 using ActionPasteImpl = ActionNoParam;
 using ActionSelectImpl = ActionNoParam;
 using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
+using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
+using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -117,9 +120,9 @@ public:
         return -1;
     }
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("scrollable", IsScrollable());
+        json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);
     }
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
@@ -189,6 +192,8 @@ public:
         return true;
     }
 
+    virtual float GetScrollOffSet() const;
+
     void AddSupportAction(AceAction action)
     {
         supportActions_ |= (1UL << static_cast<uint32_t>(action));
@@ -221,13 +226,40 @@ public:
         actionSetSelectionImpl_ = actionSetSelection;
     }
 
-    bool ActActionSetSelection(int32_t start, int32_t end)
+    bool ActActionSetSelection(int32_t start, int32_t end, bool isForward = false)
     {
         if (actionSetSelectionImpl_) {
-            actionSetSelectionImpl_(start, end);
+            actionSetSelectionImpl_(start, end, isForward);
             return true;
         }
         return false;
+    }
+
+    void SetActionSetIndex(const ActionSetCursorIndexImpl& actionSetCursorIndexImpl)
+    {
+        actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
+    }
+    
+    bool ActActionSetIndex(int32_t index)
+    {
+        if (actionSetCursorIndexImpl_) {
+            actionSetCursorIndexImpl_(index);
+            return true;
+        }
+        return false;
+    }
+
+    void SetActionGetIndex(const ActionGetCursorIndexImpl& actionGetCursorIndexImpl)
+    {
+        actionGetCursorIndexImpl_ = actionGetCursorIndexImpl;
+    }
+
+    int32_t ActActionGetIndex()
+    {
+        if (actionGetCursorIndexImpl_) {
+            return actionGetCursorIndexImpl_();
+        }
+        return -1;
     }
 
     void SetActionMoveText(const ActionMoveTextImpl& actionMoveText)
@@ -352,6 +384,11 @@ public:
         accessibilityText_ = text;
     }
 
+    void SetAccessibilityTextHint(const std::string& text)
+    {
+        textTypeHint_ = text;
+    }
+
     void SetAccessibilityDescription(const std::string& accessibilityDescription)
     {
         accessibilityDescription_ = accessibilityDescription;
@@ -382,6 +419,11 @@ public:
     std::string GetAccessibilityDescription() const
     {
         return accessibilityDescription_.value_or("");
+    }
+
+    std::string GetTextType() const
+    {
+        return textTypeHint_.value_or("");
     }
 
     class Level {
@@ -464,11 +506,6 @@ private:
 
     bool HasAction() const;
 
-    virtual float GetScrollOffSet()
-    {
-        return 0.0f;
-    }
-
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;
@@ -484,11 +521,14 @@ protected:
     ActionPasteImpl actionPasteImpl_;
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
+    ActionSetCursorIndexImpl actionSetCursorIndexImpl_;
+    ActionGetCursorIndexImpl actionGetCursorIndexImpl_;
     bool accessibilityGroup_ = false;
     RefPtr<UINode> accessibilityVirtualNode_;
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
+    std::optional<std::string> textTypeHint_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

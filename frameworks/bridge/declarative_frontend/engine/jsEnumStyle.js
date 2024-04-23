@@ -104,6 +104,13 @@ var EllipsisMode;
   EllipsisMode[EllipsisMode["END"] = 2] = "end";
 })(EllipsisMode || (EllipsisMode = {}));
 
+var LineBreakStrategy;
+(function (LineBreakStrategy) {
+  LineBreakStrategy[LineBreakStrategy["GREEDY"] = 0] = "greedy";
+  LineBreakStrategy[LineBreakStrategy["HIGH_QUALITY"] = 1] = "highquality";
+  LineBreakStrategy[LineBreakStrategy["BALANCED"] = 2] = "balanced";
+})(LineBreakStrategy || (LineBreakStrategy = {}));
+
 var Curve;
 (function (Curve) {
   Curve["Linear"] = "linear";
@@ -982,6 +989,7 @@ let DismissReason;
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
+  DismissReason[DismissReason.SLIDE_DOWN = 3] = "SLIDE_DOWN";
 })(DismissReason || (DismissReason = {}));
 
 var HoverEffect;
@@ -1402,6 +1410,11 @@ var FunctionKey;
   FunctionKey[FunctionKey["F10"] = 10] = "F10";
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
+  FunctionKey[FunctionKey["TAB"] = 13] = "TAB";
+  FunctionKey[FunctionKey["DPAD_UP"] = 14] = "DPAD_UP";
+  FunctionKey[FunctionKey["DPAD_DOWN"] = 15] = "DPAD_DOWN";
+  FunctionKey[FunctionKey["DPAD_LEFT"] = 16] = "DPAD_LEFT";
+  FunctionKey[FunctionKey["DPAD_RIGHT"] = 17] = "DPAD_RIGHT";
 })(FunctionKey || (FunctionKey = {}));
 
 var ContentType;
@@ -1815,10 +1828,12 @@ class NavPathStack {
     }
     return -1;
   }
-  initNavPathIndex() {
+  initNavPathIndex(pathName) {
     this.popArray = [];
-    for (let i = 0; i < this.pathArray.length; i++) {
-      this.pathArray[i].index = i;
+    for (let i = 0; i < this.pathArray.length && i < pathName.length; i++) {
+      if (pathName[i] === this.pathArray[i].name && this.isReplace !== 1) {
+        this.pathArray[i].index = i;
+      }
     }
   }
   getAllPathIndex() {
@@ -2306,7 +2321,97 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
+  }
+}
+
+class ChildrenMainSizeParamError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
+class ChildrenMainSize {
+
+  constructor(childDefaultSize) {
+    if (this.isInvalid(childDefaultSize)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = childDefaultSize;
+    this.sizeArray = [];
+    this.changeFlag = true;
+    // -1: represent newly created.
+    this.changeArray = [ { start: -1 } ];
+  }
+
+  set childDefaultSize(value) {
+    if (this.isInvalid(value)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    this.defaultMainSize = value;
+  }
+
+  get childDefaultSize() {
+    return this.defaultMainSize;
+  }
+
+  // splice(start: number, deleteCount?: number, childrenSize?: Array<number>);
+  splice(start, deleteCount, childrenSize) {
+    let paramCount = arguments.length;
+    if (this.isInvalid(start)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    }
+    let startValue = Math.trunc(start);
+    let deleteCountValue = deleteCount && !(this.isInvalid(deleteCount)) ? Math.trunc(deleteCount) : 0;
+    if (paramCount === 1) {
+      this.sizeArray.splice(startValue);
+      this.changeArray.push({ start: startValue });
+    } else if (paramCount === 2) {
+      this.sizeArray.splice(startValue, deleteCountValue);
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
+    } else if (paramCount === 3) {
+      let childrenSizeLength = childrenSize ? childrenSize.length : 0;
+      if (childrenSizeLength === 0) {
+        childrenSize = [];
+      }
+      for (let i = 0; i < childrenSizeLength; i++) {
+        if (this.isInvalid(childrenSize[i])) {
+          // -1: represent default size.
+          childrenSize[i] = -1;
+        }
+      }
+      while (startValue >= this.sizeArray.length) {
+        this.sizeArray.push(-1);
+      }
+      this.sizeArray.splice(startValue, deleteCountValue, ...childrenSize);
+      this.changeArray.push({ start: startValue, deleteCount: deleteCountValue, childrenSize: childrenSize });
+    }
+    this.changeFlag = !this.changeFlag;
+  }
+
+  update(index, childSize) {
+    if (this.isInvalid(index)) {
+      throw new ChildrenMainSizeParamError('The parameter check failed.', '401');
+    } else if (this.isInvalid(childSize)) {
+      // -1: represent default size.
+      childSize = -1;
+    }
+    let startValue = Math.trunc(index);
+    while (startValue >= this.sizeArray.length) {
+      this.sizeArray.push(-1);
+    }
+    this.sizeArray.splice(startValue, 1, childSize);
+    this.changeArray.push({ start: startValue, deleteCount: 1, childrenSize: [childSize] });
+    this.changeFlag = !this.changeFlag;
+  }
+
+  isInvalid(input) {
+    return !(Number.isFinite(input) && input >= 0);
+  }
+
+  clearChanges() {
+    this.changeArray.splice(0);
   }
 }
 
@@ -2402,6 +2507,7 @@ var SaveDescription;
   SaveDescription[SaveDescription["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
+  SaveDescription[SaveDescription["SAVE_TO_GALLERY"] = 8] = "SAVE_TO_GALLERY";
 })(SaveDescription || (SaveDescription = {}));
 
 var SaveButtonOnClickResult;
@@ -2557,12 +2663,25 @@ var ParticleEmitterShape;
   ParticleEmitterShape[ParticleEmitterShape["ELLIPSE"] = 2] = "ELLIPSE";
 })(ParticleEmitterShape || (ParticleEmitterShape = {}));
 
+var DistributionType;
+(function (DistributionType) {
+  DistributionType[DistributionType["UNIFORM"] = 0] = "UNIFORM";
+  DistributionType[DistributionType["GAUSSIAN"] = 1] = "GAUSSIAN";
+})(DistributionType || (DistributionType = {}));
+
 var ParticleUpdater;
 (function (ParticleUpdater) {
   ParticleUpdater[ParticleUpdater["NONE"] = 0] = "NONE";
   ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
+
+var DisturbanceFieldsShape;
+(function (DisturbanceFieldsShape) {
+  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {
@@ -2716,6 +2835,12 @@ let MarqueeState;
   MarqueeState[MarqueeState['FINISH'] = 2] = 'FINISH';
 })(MarqueeState || (MarqueeState = {}));
 
+let MarqueeStartPolicy;
+(function (MarqueeStartPolicy) {
+  MarqueeStartPolicy[MarqueeStartPolicy['DEFAULT'] = 0] = 'DEFAULT';
+  MarqueeStartPolicy[MarqueeStartPolicy['ON_FOCUS'] = 1] = 'ON_FOCUS';
+})(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus['CREATE'] = 0;
@@ -2770,7 +2895,8 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
   StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
   StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
-  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 5] = "PARAGRAPH_STYLE";
+  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
-  StyledStringKey[StyledStringKey["GESTURE"] = 7] = "GESTURE";
+  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
+  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
 })(StyledStringKey || (StyledStringKey = {}));

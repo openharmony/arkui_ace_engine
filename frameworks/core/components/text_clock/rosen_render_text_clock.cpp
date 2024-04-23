@@ -65,6 +65,6 @@ void RosenRenderTextClock::RequestRenderForNextSecond()
                 return;
             }
         },
-        TaskExecutor::TaskType::UI, delayTime);
+        TaskExecutor::TaskType::UI, delayTime, "ArkUITextClockRequestRender");
 }
 } // namespace OHOS::Ace

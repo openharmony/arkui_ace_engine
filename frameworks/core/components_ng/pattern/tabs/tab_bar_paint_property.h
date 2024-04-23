@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -50,14 +51,14 @@ public:
         ResetBarBackgroundColor();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
+        PaintProperty::ToJsonValue(json, filter);
         if (HasIndicator()) {
-            json->Put("indicator", GetIndicatorValue().ToString().c_str());
+            json->PutExtAttr("indicator", GetIndicatorValue().ToString().c_str(), filter);
         }
         if (HasFadingEdge()) {
-            json->Put("fadingEdge", GetFadingEdgeValue() ? "true" : "false");
+            json->PutExtAttr("fadingEdge", GetFadingEdgeValue() ? "true" : "false", filter);
         }
     }
 

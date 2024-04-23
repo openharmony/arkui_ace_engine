@@ -73,6 +73,7 @@ void RotationRecognizer::OnRejected()
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch down event, begin to detect rotation event");
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -80,7 +81,6 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch down event, begin to detect rotation event");
     if (!IsInAttachedNode(event)) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -149,6 +149,10 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives axis end event");
+    // if rotation recognizer received another axisEvent, no need to active.
+    if (!event.isRotationEvent) {
+        return;
+    }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -256,8 +260,10 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED) {
+    if (refereeState_ == RefereeState::SUCCEED &&
+        static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
         SendCancelMsg();
+        refereeState_ = RefereeState::READY;
     }
 }
 

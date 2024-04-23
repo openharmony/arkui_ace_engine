@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT GridLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(GridLayoutProperty, LayoutProperty);
 
@@ -61,7 +63,7 @@ public:
         ResetLayoutOptions();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool IsVertical() const
     {
@@ -78,6 +80,14 @@ public:
         bool verticalScrollable = (columnsTemplateSet && !rowsTemplateSet);
         bool horizontalScrollable = (!columnsTemplateSet && rowsTemplateSet);
         return verticalScrollable || horizontalScrollable;
+    }
+
+    bool IsReverse() const
+    {
+        bool columnsTemplateSet = !propColumnsTemplate_.value_or("").empty();
+        bool rowsTemplateSet = !propRowsTemplate_.value_or("").empty();
+        auto isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
+        return isRtl && !columnsTemplateSet && rowsTemplateSet;
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnsTemplate, std::string);

@@ -168,7 +168,7 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
 
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
 

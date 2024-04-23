@@ -30,7 +30,7 @@ public:
     const void* GetData() const override;
     std::shared_ptr<RSData> GetRSData() const;
     std::pair<SizeF, int32_t> Parse() const;
-    RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor);
+    RefPtr<SvgDomBase> MakeSvgDom(const ImageSourceInfo& src);
     std::string ToString() const override;
 
 private:

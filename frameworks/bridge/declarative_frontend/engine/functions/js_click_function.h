@@ -33,7 +33,7 @@ public:
     ~JsClickFunction() override {};
     void Execute() override;
     void Execute(const ClickInfo& info);
-    void Execute(const GestureEvent& info);
+    void Execute(GestureEvent& info);
     void Execute(MouseInfo& info);
 };
 

@@ -25,6 +25,7 @@
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -94,14 +95,16 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void DatePickerPattern::OnModifyDone()
 {
-    if (isFiredDateChange_ && !isForceUpdate_) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(datePickerRowLayoutProperty);
+    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false))) {
         isFiredDateChange_ = false;
         return;
     }
 
     isForceUpdate_ = false;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     InitDisabled();
     if (ShowMonthDays()) {
         FlushMonthDaysColumn();
@@ -2027,7 +2030,7 @@ const std::string DatePickerPattern::GetFormatString(PickerDateF date)
     return "";
 }
 
-void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto GetDateString = [](const PickerDate& pickerDate) {
         std::string ret;
@@ -2051,7 +2054,7 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonConstructor->Put("end", GetDateString(endDateSolar_).c_str());
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
     }
-    json->Put("constructor", jsonConstructor);
+    json->PutExtAttr("constructor", jsonConstructor, filter);
 }
 
 void DatePickerPattern::SetFocusDisable()

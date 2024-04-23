@@ -18,6 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 
@@ -46,16 +47,16 @@ public:
         ResetText();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("icon", propIcon_.value_or("").c_str());
-        json->Put("text", propText_.value_or("").c_str());
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("icon", propIcon_.value_or("").c_str(), filter);
+        json->PutExtAttr("text", propText_.value_or("").c_str(), filter);
 
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("icon", propIcon_.value_or("").c_str());
         jsonValue->Put("text", propText_.value_or("").c_str());
-        json->Put("tabBar", jsonValue->ToString().c_str());
+        json->PutExtAttr("tabBar", jsonValue->ToString().c_str(), filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

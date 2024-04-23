@@ -193,14 +193,10 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     } else if (type->IsNumber()) {
         xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
+
+    std::string libraryName = libraryNameValue->IsString() ? libraryNameValue->ToString() : "";
     XComponentModel::GetInstance()->Create(
-        id->ToString(), xcomponentType, libraryNameValue->ToString(), xcomponentController);
-
-    if (libraryNameValue->IsString()) {
-        auto libraryName = libraryNameValue->ToString();
-        XComponentModel::GetInstance()->SetLibraryName(libraryName);
-    }
-
+        id->ToString(), xcomponentType, libraryName, xcomponentController);
     if (libraryNameValue->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
         SetControllerCallback(controllerObj, info.GetExecutionContext());
     }
@@ -244,7 +240,7 @@ void* JSXComponent::Create(const XComponentParams& params)
             xcPattern->XComponentSizeInit();
             xcPattern->SetXcomponentInit(true);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentCreate");
 
     return jsXComponent;
 }

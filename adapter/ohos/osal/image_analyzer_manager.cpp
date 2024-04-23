@@ -60,10 +60,7 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     frameNode_->SetOverlayNode(overlayNode);
     overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode_)));
     overlayNode->SetActive(true);
-
-    if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        UpdateAnalyzerOverlayLayout();
-    }
+    UpdateAnalyzerOverlayLayout();
 
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -172,35 +169,42 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
     CHECK_NULL_VOID(overlayLayoutProperty);
     overlayLayoutProperty->UpdateMeasureType(NG::MeasureType::MATCH_PARENT);
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
-    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-
-    auto renderContext = overlayNode->GetRenderContext();
-    if (renderContext) {
+    if (holder_ == ImageAnalyzerHolder::IMAGE) {
+        overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()),
+                                                Dimension(padding.Offset().GetY()));
+        auto renderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
     }
+    overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     CHECK_NULL_VOID(geometryNode);
+    CHECK_NULL_VOID(frameNode_);
     bool isUIConfigUpdate = false;
 
-    if (analyzerUIConfig_.contentWidth != geometryNode->GetContentSize().Width() ||
-        analyzerUIConfig_.contentHeight != geometryNode->GetContentSize().Height()) {
-        analyzerUIConfig_.contentWidth = geometryNode->GetContentSize().Width();
-        analyzerUIConfig_.contentHeight = geometryNode->GetContentSize().Height();
-        isUIConfigUpdate = true;
-    }
-
-    CHECK_NULL_VOID(frameNode_);
+    float paddingWidth = 0.0f;
+    float paddingHeight = 0.0f;
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
         auto layoutProps = frameNode_->GetLayoutProperty<NG::ImageLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
+        auto padding = layoutProps->CreatePaddingAndBorder();
+        paddingWidth = padding.left.value_or(0) + padding.right.value_or(0);
+        paddingHeight = padding.top.value_or(0) + padding.bottom.value_or(0);
         if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
             analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
             isUIConfigUpdate = true;
         }
+    }
+
+    NG::SizeF frameSize = geometryNode->GetFrameSize();
+    if (analyzerUIConfig_.contentWidth != frameSize.Width() - paddingWidth ||
+        analyzerUIConfig_.contentHeight != frameSize.Height() - paddingHeight) {
+        analyzerUIConfig_.contentWidth = frameSize.Width() - paddingWidth;
+        analyzerUIConfig_.contentHeight = frameSize.Height()- paddingHeight;
+        isUIConfigUpdate = true;
     }
 
     auto renderContext = frameNode_->GetRenderContext();

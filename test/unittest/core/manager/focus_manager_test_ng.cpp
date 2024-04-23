@@ -60,7 +60,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. construct a FocusManager
      */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>();
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
     EXPECT_TRUE(focusManager->focusViewStack_.empty());
 
     /**
@@ -81,7 +81,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. construct a FocusManager and a FocusView
      */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>();
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
 
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
     auto rootFocusHub = rootNode->GetOrCreateFocusHub();
@@ -124,7 +124,7 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. construct a FocusManager.
      */
-    auto focusManager = AceType::MakeRefPtr<FocusManager>();
+    auto focusManager = AceType::MakeRefPtr<FocusManager>(nullptr);
 
     /**
      * @tc.steps: step2. call SetRequestFocusCallback and TriggerRequestFocusCallback.

@@ -177,6 +177,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_navigator_bridge.cpp",
       "nativeModule/arkts_native_node_container_bridge.cpp",
       "nativeModule/arkts_native_panel_bridge.cpp",
+      "nativeModule/arkts_native_particle_bridge.cpp",
       "nativeModule/arkts_native_path_bridge.cpp",
       "nativeModule/arkts_native_pattern_lock_bridge.cpp",
       "nativeModule/arkts_native_polygon_bridge.cpp",
@@ -215,10 +216,11 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
+      "nativeModule/ui_context_helper.cpp",
     ]
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
-    external_deps = []
+    external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

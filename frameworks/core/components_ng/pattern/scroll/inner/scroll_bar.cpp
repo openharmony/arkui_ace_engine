@@ -530,6 +530,9 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     if (frictionController_ && frictionController_->IsRunning()) {
         frictionController_->Stop();
     }
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR,"inner scrollBar drag start, localLocation: %{public}s, "
+        "globalLocation: %{public}s",
+        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
         if (dragFRCSceneCallback_) {
@@ -561,6 +564,9 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         dragFRCSceneCallback_(0, NG::SceneStatus::END);
     }
     auto velocity = info.GetMainVelocity();
+    TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag end, position is %{public}f and %{public}f, "
+        "velocity is %{public}f",
+        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), velocity);
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             scrollEndCallback_();
@@ -649,7 +655,8 @@ void ScrollBar::ScheduleDisappearDelayTask()
             CHECK_NULL_VOID(scrollBar);
             scrollBar->PlayScrollBarDisappearAnimation();
         });
-        taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);
+        taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION,
+            "ArkUIScrollBarDisappearAnimation");
     }
 }
 
@@ -717,6 +724,6 @@ void ScrollBar::ScheduleCaretLongPress()
             CHECK_NULL_VOID(pattern);
             pattern->HandleLongPress(true);
         },
-        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS);
+        TaskExecutor::TaskType::UI, LONG_PRESS_PAGE_INTERVAL_MS, "ArkUIScrollBarHandleLongPress");
 }
 } // namespace OHOS::Ace::NG

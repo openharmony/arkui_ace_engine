@@ -28,6 +28,7 @@
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -262,7 +263,7 @@ struct MeasureProperty {
         return str;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         // this may affect XTS, check later.
         auto context = PipelineBase::GetCurrentContext();
@@ -274,18 +275,18 @@ struct MeasureProperty {
             std::string height = selfIdealSize.has_value() ?
                 (selfIdealSize.value().Height().has_value() ? selfIdealSize.value().Height().value().ToString() : "-")
                 : "-";
-            json->Put("width", width.c_str());
-            json->Put("height", height.c_str());
+            json->PutExtAttr("width", width.c_str(), filter);
+            json->PutExtAttr("height", height.c_str(), filter);
 
             auto jsonSize = JsonUtil::Create(true);
             jsonSize->Put("width", width.c_str());
             jsonSize->Put("height", height.c_str());
-            json->Put("size", jsonSize);
+            json->PutExtAttr("size", jsonSize, filter);
 #else
-            ToJsonValue_GetJsonSize(json);
+            ToJsonValue_GetJsonSize(json, filter);
 #endif
         } else {
-            ToJsonValue_GetJsonSize(json);
+            ToJsonValue_GetJsonSize(json, filter);
         }
 
         auto jsonConstraintSize = JsonUtil::Create(true);
@@ -303,25 +304,25 @@ struct MeasureProperty {
                                                  .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
                                                  .ToString()
                                                  .c_str());
-        json->Put("constraintSize", jsonConstraintSize->ToString().c_str());
+        json->PutExtAttr("constraintSize", jsonConstraintSize->ToString().c_str(), filter);
     }
 
-    void ToJsonValue_GetJsonSize(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue_GetJsonSize(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         auto jsonSize = JsonUtil::Create(true);
         if (selfIdealSize.has_value()) {
             if (selfIdealSize.value().Width().has_value()) {
                 auto widthStr = selfIdealSize.value().Width().value().ToString();
-                json->Put("width", widthStr.c_str());
+                json->PutExtAttr("width", widthStr.c_str(), filter);
                 jsonSize->Put("width", widthStr.c_str());
             }
             if (selfIdealSize.value().Height().has_value()) {
                 auto heightStr = selfIdealSize.value().Height().value().ToString();
-                json->Put("height", heightStr.c_str());
+                json->PutExtAttr("height", heightStr.c_str(), filter);
                 jsonSize->Put("height", heightStr.c_str());
             }
         }
-        json->Put("size", jsonSize);
+        json->PutExtAttr("size", jsonSize, filter);
     }
 
     static MeasureProperty FromJson(const std::unique_ptr<JsonValue>& json)

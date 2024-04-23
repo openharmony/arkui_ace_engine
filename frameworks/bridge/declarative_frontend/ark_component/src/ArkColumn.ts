@@ -48,9 +48,35 @@ class ColumnJustifyContentModifier extends ModifierWithKey<number> {
   }
 }
 
+class ColumnSpaceModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
+  static identity:Symbol = Symbol('columnSpace');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().column.resetSpace(node);
+    }
+    else {
+      getUINativeModule().column.setSpace(node, this.value);
+    }
+  }
+  checkObjectDiff() : boolean {
+    return this.stageValue !== this.value;
+  }
+}
+interface ColumnParam {
+  space: string | number;
+}
 class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): ColumnAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ColumnSpaceModifier.identity, ColumnSpaceModifier, (value[0] as ColumnParam).space);
+    }
+    return this
   }
   alignItems(value: HorizontalAlign): ColumnAttribute {
     modifierWithKey(this._modifiersWithKeys, ColumnAlignItemsModifier.identity, ColumnAlignItemsModifier, value);

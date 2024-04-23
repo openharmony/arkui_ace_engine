@@ -27,7 +27,7 @@ public:
 
     ~ScrollableAccessibilityProperty() override = default;
 
-    float GetScrollOffSet() override;
+    float GetScrollOffSet() const override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ScrollableAccessibilityProperty);

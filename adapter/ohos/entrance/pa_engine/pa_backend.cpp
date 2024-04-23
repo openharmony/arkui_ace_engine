@@ -69,7 +69,7 @@ void PaBackend::UpdateState(Backend::State state)
                         auto jsBackendEngine = weakEngine.Upgrade();
                         CHECK_NULL_VOID(jsBackendEngine);
                         jsBackendEngine->DestroyApplication("pa");
-                    });
+                    }, "ArkUIPaBackendDestroyApplication");
             }
             break;
         default:
@@ -85,7 +85,7 @@ void PaBackend::OnCommand(const OHOS::AAFwk::Want& want, int startId)
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnCommand(want, startId);
-        });
+        }, "ArkUIPaBackendOnCommand");
 }
 
 void PaBackend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
@@ -107,7 +107,7 @@ int32_t PaBackend::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& v
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Insert(uri, value, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendInsert");
     return ret;
 }
 
@@ -124,7 +124,7 @@ std::shared_ptr<AppExecFwk::PacMap> PaBackend::Call(
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Call(method, arg, pacMap, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendCall");
     return ret;
 }
 
@@ -141,7 +141,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> PaBackend::Query(
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Query(uri, columns, predicates, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendQuery");
     return ret;
 }
 
@@ -158,7 +158,7 @@ int32_t PaBackend::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& v
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Update(uri, value, predicates, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendUpdate");
     return ret;
 }
 
@@ -174,7 +174,7 @@ int32_t PaBackend::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPred
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Delete(uri, predicates, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendDelete");
     return ret;
 }
 
@@ -190,7 +190,7 @@ int32_t PaBackend::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->BatchInsert(uri, values, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendBatchInsert");
     return ret;
 }
 
@@ -206,7 +206,7 @@ std::string PaBackend::GetType(const Uri& uri)
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->GetType(uri, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendGetType");
     return ret;
 }
 
@@ -222,7 +222,7 @@ std::vector<std::string> PaBackend::GetFileTypes(const Uri& uri, const std::stri
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->GetFileTypes(uri, mimeTypeFilter, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendGetFileTypes");
     return ret;
 }
 
@@ -238,7 +238,7 @@ int32_t PaBackend::OpenFile(const Uri& uri, const std::string& mode)
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OpenFile(uri, mode, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendOpenFile");
     return ret;
 }
 
@@ -254,7 +254,7 @@ int32_t PaBackend::OpenRawFile(const Uri& uri, const std::string& mode)
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OpenRawFile(uri, mode, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendOpenRawFile");
     return ret;
 }
 
@@ -270,7 +270,7 @@ Uri PaBackend::NormalizeUri(const Uri& uri)
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->NormalizeUri(uri, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendNormalizeUri");
     return ret;
 }
 
@@ -286,7 +286,7 @@ Uri PaBackend::DenormalizeUri(const Uri& uri)
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->DenormalizeUri(uri, callingInfo);
             }
-        });
+        }, "ArkUIPaBackendDenormalizeUri");
     return ret;
 }
 
@@ -326,14 +326,14 @@ void PaBackend::LoadPa(const std::string& url, const OHOS::AAFwk::Want& want)
                 auto jsBackendEngine = weak.Upgrade();
                 CHECK_NULL_VOID(jsBackendEngine);
                 jsBackendEngine->LoadJs(url, want);
-            });
+            }, "ArkUIPaBackendFormLoadPa");
     } else {
         jsBackendEngine_->PostTask(
             [weak = WeakPtr<JsBackendEngine>(jsBackendEngine_), url, want] {
                 auto jsBackendEngine = weak.Upgrade();
                 CHECK_NULL_VOID(jsBackendEngine);
                 jsBackendEngine->LoadJs(url, want);
-            });
+            }, "ArkUIPaBackendLoadPa");
     }
 }
 
@@ -353,7 +353,7 @@ void PaBackend::OnCreate(const OHOS::AAFwk::Want& want)
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnCreate(want);
-        });
+        }, "ArkUIPaBackendOnCreate");
 }
 
 void PaBackend::OnDelete(const int64_t formId)
@@ -364,7 +364,7 @@ void PaBackend::OnDelete(const int64_t formId)
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnDelete(formId);
-        });
+        }, "ArkUIPaBackendOnDelete");
 }
 
 void PaBackend::OnTriggerEvent(const int64_t formId, const std::string& message)
@@ -375,7 +375,7 @@ void PaBackend::OnTriggerEvent(const int64_t formId, const std::string& message)
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnTriggerEvent(formId, message);
-        });
+        }, "ArkUIPaBackendOnTriggerEvent");
 }
 
 void PaBackend::OnUpdate(const int64_t formId)
@@ -386,7 +386,7 @@ void PaBackend::OnUpdate(const int64_t formId)
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnUpdate(formId);
-        });
+        }, "ArkUIPaBackendOnUpdate");
 }
 
 void PaBackend::OnCastTemptoNormal(const int64_t formId)
@@ -397,7 +397,7 @@ void PaBackend::OnCastTemptoNormal(const int64_t formId)
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnCastTemptoNormal(formId);
-        });
+        }, "ArkUIPaBackendOnCastTempToNormal");
 }
 
 void PaBackend::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
@@ -408,7 +408,7 @@ void PaBackend::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEvents
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnVisibilityChanged(formEventsMap);
-        });
+        }, "ArkUIPaBackendOnVisibilityChanged");
 }
 
 int32_t PaBackend::OnAcquireFormState(const OHOS::AAFwk::Want& want)
@@ -421,7 +421,7 @@ int32_t PaBackend::OnAcquireFormState(const OHOS::AAFwk::Want& want)
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OnAcquireFormState(want);
             }
-        });
+        }, "ArkUIPaBackendOnAcquireFormState");
     return ret;
 }
 
@@ -435,7 +435,7 @@ sptr<IRemoteObject> PaBackend::OnConnect(const OHOS::AAFwk::Want& want)
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OnConnectService(want);
             }
-        });
+        }, "ArkUIPaBackendConnectService");
     return ret;
 }
 
@@ -447,7 +447,7 @@ void PaBackend::OnDisConnect(const OHOS::AAFwk::Want& want)
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnDisconnectService(want);
-        });
+        }, "ArkUIPaBackendDisconnectService");
 }
 
 bool PaBackend::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
@@ -460,7 +460,7 @@ bool PaBackend::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
             if (jsBackendEngine != nullptr) {
                 result = jsBackendEngine->OnShare(formId, wantParams);
             }
-        });
+        }, "ArkUIPaBackendOnShare");
     return result;
 }
 } // namespace OHOS::Ace
