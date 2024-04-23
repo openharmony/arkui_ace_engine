@@ -212,7 +212,8 @@ public:
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
     static void SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func);
-    static void SetInputFilter(FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);
+    static void SetInputFilter(FrameNode* frameNode, const std::string& value,
+        const std::function<void(const std::string&)>& onError);
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
 

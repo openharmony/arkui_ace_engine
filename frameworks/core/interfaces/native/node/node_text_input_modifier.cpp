@@ -1136,7 +1136,7 @@ void SetTextInputOnEditChange(ArkUINodeHandle node, void* callback)
     if (callback) {
         auto onEditChange = reinterpret_cast<std::function<void(bool)>*>(callback);
         TextFieldModelNG::SetOnEditChange(frameNode, std::move(*onEditChange));
-    } else{
+    } else {
         TextFieldModelNG::SetOnEditChange(frameNode, nullptr);
     }
 }
@@ -1287,7 +1287,8 @@ void SetTextInputOnPaste(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onPasteWithEvent = reinterpret_cast<std::function<void(const std::string&, NG::TextCommonEvent&)>*>(callback);
+        auto onPasteWithEvent = reinterpret_cast<std::function<void(
+                const std::string&, NG::TextCommonEvent&)>*>(callback);
         TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(*onPasteWithEvent));
     } else {
         TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
@@ -1337,7 +1338,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputTextOverflow, ResetTextInputTextOverflow, SetTextInputTextIndent, ResetTextInputTextIndent,
         SetTextInputSelectAll, ResetTextInputSelectAll, SetTextInputShowCounter, ResetTextInputShowCounter,
         SetTextInputOnEditChange, ResetTextInputOnEditChange, SetTextInputFilter, ResetTextInputFilter,
-        SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange, ResetTextInputOnChange, 
+        SetTextInputOnSubmitWithEvent, ResetTextInputOnSubmitWithEvent, SetTextInputOnChange, ResetTextInputOnChange,
         SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange, SetTextInputOnContentScroll,
         ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
         SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste };

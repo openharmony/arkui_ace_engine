@@ -1488,7 +1488,8 @@ void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(
     eventHub->SetOnEditChanged(std::move(func));
 }
 
-void TextFieldModelNG::SetInputFilter(FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError)
+void TextFieldModelNG::SetInputFilter(FrameNode* frameNode,
+    const std::string& value, const std::function<void(const std::string&)>& onError)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, InputFilter, value, frameNode);
