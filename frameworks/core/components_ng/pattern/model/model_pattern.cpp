@@ -28,10 +28,9 @@ void ModelPattern::OnRebuildFrame()
     modelAdapter_->OnRebuildFrame(context);
 }
 
-ModelPattern::ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
-    const std::string& moduleName) : key_(key)
+ModelPattern::ModelPattern(uint32_t key, const ModelViewContext& context) : key_(key)
 {
-    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, surfaceType, bundleName, moduleName);
+    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, context);
     modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
             auto model = weak.Upgrade();
             if (model) {
