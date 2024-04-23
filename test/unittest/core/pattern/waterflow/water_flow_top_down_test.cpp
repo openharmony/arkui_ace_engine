@@ -157,4 +157,39 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 5)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
 }
+
+/**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test the firstIndex and endIndex after UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.steps: step2. scroll up to a remote position
+     * @tc.expected: startIndex_ = 0 endIndex_ = 0.
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->firstIdx(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 0);
+
+    /**
+     * @tc.steps: step1. create waterFlow
+     * @tc.steps: step2. scroll down to a remote position
+     * @tc.expected: startIndex_ = TOTAL_LINE_NUMBER * 2 - 1, endIndex_ = TOTAL_LINE_NUMBER * 2 - 1.
+     */
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->UpdateCurrentOffset(-99999, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->firstIdx(), 19);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
+}
 } // namespace OHOS::Ace::NG

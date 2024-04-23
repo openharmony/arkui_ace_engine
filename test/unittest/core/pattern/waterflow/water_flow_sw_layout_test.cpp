@@ -82,11 +82,10 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[1].items_.size(), 2);
     EXPECT_EQ(info_->lanes_[1].items_.front().idx, 5);
     EXPECT_EQ(info_->lanes_[1].items_.back().idx, 9);
-    EXPECT_EQ(info_->lanes_[2].items_.size(), 1);
+    EXPECT_EQ(info_->lanes_[2].items_.size(), 2);
     EXPECT_TRUE(info_->itemEnd_);
     EXPECT_FALSE(info_->offsetEnd_);
-    // children in viewport are not always continuous
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 5)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 6)->IsActive());
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 9);
 }
 } // namespace OHOS::Ace::NG

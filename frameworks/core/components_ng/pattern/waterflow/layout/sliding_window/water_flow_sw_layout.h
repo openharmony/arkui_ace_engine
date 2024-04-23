@@ -65,6 +65,15 @@ private:
      * @param minChildIdx smallest item index to fill before stopping.
      */
     void FillFront(float viewportBound, int32_t idx, int32_t minChildIdx);
+    /**
+     * @brief fills the viewport backward with cached idx -> lane mapping.
+     */
+    void RecoverFront(float viewportBound, int32_t& idx, int32_t minChildIdx);
+    /**
+     * @brief Clear items above the viewport. 
+     * Iterate by index to keep item range continuous.
+     */
+    void ClearFront();
 
     /**
      * @brief fills the viewport forward until [viewportBound] is reached / idx > maxChildIdx.
@@ -74,11 +83,10 @@ private:
      * @param maxChildIdx greatest item index to fill before stopping.
      */
     void FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx);
-
     /**
-     * @brief Clear items above the viewport.
+     * @brief fills the viewport backward with cached idx -> lane mapping.
      */
-    void ClearFront();
+    void RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx);
     /**
      * @brief Clear items below the viewport.
      * 

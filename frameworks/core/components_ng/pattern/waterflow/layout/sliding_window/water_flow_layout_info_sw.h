@@ -51,13 +51,7 @@ public:
         delta_ = delta;
     }
 
-    int32_t GetCrossIndex(int32_t itemIndex) const override
-    {
-        if (idxToLane_.count(itemIndex)) {
-            return static_cast<int32_t>(idxToLane_.at(itemIndex));
-        }
-        return -1;
-    }
+    int32_t GetCrossIndex(int32_t itemIndex) const override;
 
     OverScrollOffset GetOverScrolledDelta(float delta) const override;
 
@@ -86,6 +80,13 @@ public:
 
     void Reset() override;
 
+    /**
+     * @brief reset layout data before performing a jump.
+     * 
+     * @param laneBasePos base value for lane's start&end position.
+     */
+    void ResetBeforeJump(float laneBasePos);
+
     void Sync(float mainSize, float mainGap);
 
     /**
@@ -107,8 +108,12 @@ public:
      */
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
 
-    int32_t MaxIdxInLanes() const;
-    int32_t MinIdxInLanes() const;
+    int32_t StartIndex() const;
+    int32_t EndIndex() const;
+    inline bool ItemInView(int32_t idx) const
+    {
+        return !lanes_.empty() && idx >= StartIndex() && idx <= EndIndex();
+    }
 
     /**
      * @return maximum end position of items in lanes_.
@@ -121,12 +126,13 @@ public:
 
     struct Lane;
     std::vector<Lane> lanes_;
-    // only contains items currently in lane.
+    // mapping of all items previously or currently in lanes_.
     std::unordered_map<size_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
     float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped
     float mainGap_ = 0.0f;     // update this at the end of a layout
+    bool synced_ = false;
 
     struct ItemInfo;
 };
