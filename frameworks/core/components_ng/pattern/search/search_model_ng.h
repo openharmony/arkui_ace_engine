@@ -78,6 +78,8 @@ public:
     void UpdateInspectorId(const std::string& key) override;
     void SetSelectedBackgroundColor(const Color& value) override;
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetInputFilter(
+        FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);

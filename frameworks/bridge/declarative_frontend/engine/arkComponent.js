@@ -6934,6 +6934,19 @@ class SearchTextIndentModifier extends ModifierWithKey {
     }
 }
 SearchTextIndentModifier.identity = Symbol('searchTextIndent');
+class SearchInputFilterModifier extends ModifierWithKey {
+    constructor(value) {
+        super(value);
+    }
+    applyPeer(node, reset) {
+        if (reset) {
+            getUINativeModule().search.resetInputFilter(node);
+        } else {
+            getUINativeModule().search.setInputFilter(node, this.value.value, this.value.error);
+        }
+    }
+}
+SearchInputFilterModifier.identity = Symbol('searchInputFilter');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7078,6 +7091,14 @@ class ArkSearchComponent extends ArkComponent {
   }
   textIndent(value) {
     modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
+    return this;
+  }
+  inputFilter(value, error) {
+    let searchInputFilter = new ArkSearchInputFilter();
+    searchInputFilter.value = value;
+    searchInputFilter.error = error;
+
+    modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
     return this;
   }
 }
@@ -9517,7 +9538,7 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaHeightAdaptivePolicyModifier.identity, TextAreaHeightAdaptivePolicyModifier, value);
     return this;
   }
-  SelectedBackgroundColor(value) {
+  selectedBackgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectedBackgroundColorModifier.identity, TextAreaSelectedBackgroundColorModifier, value);
     return this;
   }
@@ -11237,6 +11258,16 @@ class ArkSearchButton {
     return (this.value === another.value) &&
       (this.fontSize === another.fontSize) &&
       (this.fontColor === another.fontColor);
+  }
+}
+class ArkSearchInputFilter {
+  constructor() {
+    this.value = undefined;
+    this.error = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value) &&
+    (this.error === another.error);
   }
 }
 class ArkImageFrameInfoToArray {
