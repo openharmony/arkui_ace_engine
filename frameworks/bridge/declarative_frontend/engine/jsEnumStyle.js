@@ -71,6 +71,7 @@ var TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
   TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
   TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+  TextDataDetectorType[TextDataDetectorType["DATETIME"] = 4] = "DATETIME";
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;

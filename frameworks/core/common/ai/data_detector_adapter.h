@@ -106,6 +106,8 @@ private:
     CancelableCallback<void()> aiDetectDelayTask_;
     std::string uiExtensionBundleName_;
     std::string uiExtensionAbilityName_;
+    std::unordered_map<int32_t, std::string> entityJson_;
+    TimeStamp startDetectorTimeStamp_;
 };
 } // namespace OHOS::Ace
 

@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -329,9 +330,12 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
     TextStyle aiSpanTextStyle = textStyle;
-    aiSpanTextStyle.SetTextColor(Color::BLUE);
+    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(hyerlinkTheme);
+    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
+    aiSpanTextStyle.SetTextColor(hyerlinkColor);
     aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
+    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;

@@ -4480,7 +4480,7 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
             usingMouseRightButton_ = false;
             return;
         }
-        auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+        auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
         HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
