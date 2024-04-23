@@ -1470,6 +1470,40 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PreventDefault001
+ * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, PreventDefault001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    // add imageSpan
+    ClearSpan();
+    ImageSpanOptions imageSpanOptions;
+    GestureEventFunc callback2 = [](GestureEvent& info) {
+        info.SetPreventDefault(true);
+    };
+    imageSpanOptions.userGestureOption.onClick = callback2;
+    richEditorController->AddImageSpan(imageSpanOptions);
+
+    /**
+     * @tc.steps: step1. Click on imagespan
+     */
+    GestureEvent info2;
+    info2.localLocation_ = Offset(0, 0);
+    richEditorPattern->HandleClickEvent(info2);
+    EXPECT_FALSE(richEditorPattern->HasFocus());
+}
+
+/**
  * @tc.name: MoveCaretAfterTextChange001
  * @tc.desc: test move caret after text change
  * @tc.type: FUNC
