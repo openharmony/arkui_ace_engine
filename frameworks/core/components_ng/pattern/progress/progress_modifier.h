@@ -66,6 +66,7 @@ public:
     void SetIsItalic(bool isItalic);
     void SetSmoothEffect(bool value);
     void SetStrokeRadius(float strokeRaidus);
+    void SetUseContentModifier(bool useContentModifier);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -145,6 +146,7 @@ private:
     RefPtr<PropertyInt> progressStatus_;
     RefPtr<PropertyBool> isItalic_;
     RefPtr<PropertyBool> smoothEffect_;
+    RefPtr<PropertyBool> useContentModifier_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;

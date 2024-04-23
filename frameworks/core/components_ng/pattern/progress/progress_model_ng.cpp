@@ -571,4 +571,11 @@ NG::ProgressType ProgressModelNG::GetType(FrameNode* frameNode)
     return value;
 }
 
+void ProgressModelNG::SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
 } // namespace OHOS::Ace::NG

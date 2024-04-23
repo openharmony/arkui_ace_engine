@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
+#include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -41,6 +42,14 @@ ProgressLayoutAlgorithm::ProgressLayoutAlgorithm() = default;
 std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<ProgressPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
+        return std::nullopt;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
