@@ -3340,16 +3340,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     pipeline->SetContainerModalTitleHeight(0);
     pipeline->GetContainerModalTitleHeight();
     pipeline->SetAppBgColor(Color::BLACK);
-    pipeline->AddIsFocusActiveUpdateEvent(frameNode, formCallback);
-    pipeline->RemoveIsFocusActiveUpdateEvent(frameNode);
     auto frameNode1 = FrameNode::GetOrCreateFrameNode("test", 6, nullptr);
     pipeline->activeNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
     pipeline->GetCurrentExtraInfo();
-    pipeline->AddFormVisibleChangeNode(frameNode, formCallback);
-    EXPECT_EQ(pipeline->onFormVisibleChangeNodeIds_.size(), 1);
-    pipeline->HandleFormVisibleChangeEvent(false);
-    pipeline->RemoveFormVisibleChangeNode(frameNode->GetId());
-    EXPECT_EQ(pipeline->onFormVisibleChangeNodeIds_.size(), 0);
+    pipeline->AddIsFocusActiveUpdateEvent(frameNode, formCallback);
+    EXPECT_EQ(pipeline->isFocusActiveUpdateEvents_.size(), 1);
+    pipeline->RemoveIsFocusActiveUpdateEvent(frameNode);
+    EXPECT_EQ(pipeline->isFocusActiveUpdateEvents_.size(), 0);
 }
 
 /**
