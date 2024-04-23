@@ -189,7 +189,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
         }
         information += IsDefaultFocus() ? "[Default]" : "";
         if (!focusScopeId_.empty()) {
-            information += GetIsFocusGroup() ? " GroupId" : " ScopeId:";
+            information += GetIsFocusGroup() ? " GroupId:" : " ScopeId:";
             information += focusScopeId_;
         }
         DumpLog::GetInstance().Print(depth, information, static_cast<int32_t>(focusNodes.size()));
