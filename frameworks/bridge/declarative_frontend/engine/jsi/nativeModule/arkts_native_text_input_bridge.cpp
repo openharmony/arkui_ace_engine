@@ -33,6 +33,9 @@ constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
 constexpr int CALL_ARG_3 = 3;
 constexpr int CALL_ARG_4 = 4;
+constexpr int PARAM_ARR_LENGTH_1 = 1;
+constexpr int PARAM_ARR_LENGTH_2 = 2;
+constexpr int CALL_ARG_4 = 4;
 constexpr int32_t ARG_GROUP_LENGTH = 4;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr uint32_t ILLEGAL_VALUE = 0;
@@ -1282,8 +1285,8 @@ ArkUINativeModuleValue TextInputBridge::SetCancelButton(ArkUIRuntimeCallInfo* ru
     }
 
     struct ArkUISizeType size = {iconSize.Value(), static_cast<int8_t>(iconSize.Unit())};
-    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelButton(
-            nativeNode, style, &size, color, srcStr.c_str());
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelButton(nativeNode,
+        style, &size, color, srcStr.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1388,8 +1391,9 @@ ArkUINativeModuleValue TextInputBridge::SetOnEditChange(ArkUIRuntimeCallInfo* ru
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(bool)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](bool isInEditStatus) {
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, isInEditStatus) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::BooleanRef::New(vm, isInEditStatus) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnEditChange(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -1429,8 +1433,9 @@ ArkUINativeModuleValue TextInputBridge::SetInputFilter(ArkUIRuntimeCallInfo* run
         std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
                             const std::string& info) {
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-            panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, info.c_str()) };
-            func->Call(vm, func.ToLocal(), params, 1);
+            panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+                panda::StringRef::NewFromUtf8(vm, info.c_str()) };
+            func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
         };
         GetArkUINodeModifiers()->getTextInputModifier()->
             setTextInputFilter(nativeNode, inputFilter.c_str(), reinterpret_cast<void*>(&callback));
@@ -1472,9 +1477,9 @@ ArkUINativeModuleValue TextInputBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtim
         eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "keepEditableState"),
             panda::FunctionRef::New(vm, Framework::JSTextField::JsKeepEditableState));
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));
-        panda::Local<panda::JSValueRef> params[2] = { panda::IntegerRef::New(vm, key), eventObject };
-        int arrLength = sizeof (params) / sizeof (params[0]);
-        func->Call(vm, func.ToLocal(), params, arrLength);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::IntegerRef::New(vm, key), eventObject };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnSubmitWithEvent(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -1508,8 +1513,9 @@ ArkUINativeModuleValue TextInputBridge::SetOnChange(ArkUIRuntimeCallInfo* runtim
     std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
                         const std::string& changeValue) {
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, changeValue.c_str()) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::StringRef::NewFromUtf8(vm, changeValue.c_str()) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnChange(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -1545,9 +1551,8 @@ ArkUINativeModuleValue TextInputBridge::SetOnTextSelectionChange(ArkUIRuntimeCal
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::NumberRef> startParam = panda::NumberRef::New(vm, selectionStart);
         panda::Local<panda::NumberRef> endParam = panda::NumberRef::New(vm, selectionEnd);
-        panda::Local<panda::JSValueRef> params[2] = { startParam, endParam };
-        int arrLength = sizeof (params) / sizeof (params[0]);
-        func->Call(vm, func.ToLocal(), params, arrLength);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { startParam, endParam };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnTextSelectionChange(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -1581,10 +1586,9 @@ ArkUINativeModuleValue TextInputBridge::SetOnContentScroll(ArkUIRuntimeCallInfo*
     std::function<void(float, float)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
                         float totalOffsetX, float totalOffsetY) {
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, totalOffsetX),
-                                                panda::NumberRef::New(vm, totalOffsetY) };
-        int arrLength = sizeof (params) / sizeof (params[0]);
-        func->Call(vm, func.ToLocal(), params, arrLength);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::NumberRef::New(vm, totalOffsetX), panda::NumberRef::New(vm, totalOffsetY) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnContentScroll(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -1618,8 +1622,9 @@ ArkUINativeModuleValue TextInputBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeC
     std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
                         const std::string& copyStr) {
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, copyStr.c_str()) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::StringRef::NewFromUtf8(vm, copyStr.c_str()) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnCopy(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
@@ -1652,8 +1657,9 @@ ArkUINativeModuleValue TextInputBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCa
     std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
                         const std::string& cutStr) {
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, cutStr.c_str()) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
+            panda::StringRef::NewFromUtf8(vm, cutStr.c_str()) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnCut(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
@@ -1691,9 +1697,9 @@ ArkUINativeModuleValue TextInputBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtime
         eventObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
             panda::FunctionRef::New(vm, Framework::JsPreventDefault));
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&info));
-        panda::Local<panda::JSValueRef> params[2] = { panda::StringRef::NewFromUtf8(vm, val.c_str()), eventObject };
-        int arrLength = sizeof (params) / sizeof (params[0]);
-        func->Call(vm, func.ToLocal(), params, arrLength);
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
+            panda::StringRef::NewFromUtf8(vm, val.c_str()), eventObject };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnPaste(
         nativeNode, reinterpret_cast<void*>(&callback));
