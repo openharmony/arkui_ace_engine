@@ -324,8 +324,11 @@ public:
     void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,
         RefPtr<ListChildrenMainSize>& childrenSize)
     {
-        totalItemCount_ = layoutWrapper->GetTotalChildCount();
         childrenSize_ = childrenSize;
+        if (totalItemCount_ != layoutWrapper->GetTotalChildCount()) {
+            dirty_ |= LIST_UPDATE_ITEM_COUNT;
+            totalItemCount_ = layoutWrapper->GetTotalChildCount();
+        }
         if (lanes != lanes_) {
             dirty_ |= LIST_UPDATE_LANES;
             lanes_ = lanes;
@@ -350,9 +353,12 @@ public:
     void UpdateGroupPosMap(int32_t totalCount, int32_t lanes, float space,
         RefPtr<ListChildrenMainSize>& childrenSize, float headerSize, float footerSize)
     {
-        totalItemCount_ = totalCount;
         childrenSize_ = childrenSize;
         prevTotalHeight_ = totalHeight_;
+        if (totalCount != totalItemCount_) {
+            dirty_ |= LIST_UPDATE_ITEM_COUNT;
+            totalItemCount_ = totalCount;
+        }
         if (lanes != lanes_) {
             dirty_ |= LIST_UPDATE_LANES;
             lanes_ = lanes;
