@@ -55,6 +55,7 @@ namespace {
 constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
+constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
@@ -345,6 +346,33 @@ void FormPattern::DeleteImageNode()
     if (children.size() > 0 && child->GetTag() == V2::IMAGE_ETS_TAG) {
         host->RemoveChildAtIndex(children.size() - 1);
     }
+}
+
+void FormPattern::DeleteImageNodeAfterRecover()
+{
+    // delete image rs node
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto imageNode = GetImageNode();
+    CHECK_NULL_VOID(imageNode);
+    renderContext->RemoveChild(imageNode->GetRenderContext());
+
+    // delete image frame node
+    DeleteImageNode();
+
+    // set frs node non transparent
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+    renderContext->RequestNextFrame();
 }
 
 RefPtr<FrameNode> FormPattern::CreateImageNode()
@@ -917,7 +945,8 @@ void FormPattern::InitFormManagerDelegate()
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
-        [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic) {
+        [weak = WeakClaim(this), instanceID](
+            const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover) {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
@@ -925,11 +954,11 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(host);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic] {
+            uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic, isRecover] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
-                form->FireFormSurfaceNodeCallback(node, isDynamic);
+                form->FireFormSurfaceNodeCallback(node, isDynamic, isRecover);
             }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
@@ -996,7 +1025,8 @@ void FormPattern::InitFormManagerDelegate()
         });
 }
 
-void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic)
+void FormPattern::FireFormSurfaceNodeCallback(
+    const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic, bool isRecover)
 {
     CHECK_NULL_VOID(node);
     node->CreateNodeInRenderThread();
@@ -1018,9 +1048,13 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
         externalRenderContext->SetBounds(0, 0, cardInfo_.width.Value(), cardInfo_.height.Value());
     }
 
+    if (isRecover) {
+        externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+    }
+
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isDynamic) {
+    if (isDynamic && !isRecover) {
         renderContext->ClearChildren();
     }
     renderContext->AddChild(externalRenderContext, 0);
@@ -1035,7 +1069,13 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     isUnTrust_ = false;
     isFrsNodeDetached_ = false;
     isDynamic_ = isDynamic;
-    DeleteImageNode();
+
+    if (isRecover) {
+        DelayDeleteImageNode();
+    } else {
+        DeleteImageNode();
+    }
+
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
@@ -1043,6 +1083,23 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     parent->RebuildRenderContextTree();
     renderContext->RequestNextFrame();
     OnLoadEvent();
+}
+
+void FormPattern::DelayDeleteImageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->DeleteImageNodeAfterRecover();
+        },
+        DELAY_TIME_FOR_DELETE_IMAGE_NODE);
 }
 
 void FormPattern::FireFormSurfaceChangeCallback(float width, float height)
