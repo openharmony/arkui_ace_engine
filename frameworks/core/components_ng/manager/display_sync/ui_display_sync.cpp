@@ -294,7 +294,7 @@ int32_t UIDisplaySync::SearchMatchedRate(int32_t vsyncRate, int32_t iterCount)
         return FindMatchedRefreshRate(vsyncRate, data_->rateRange_->preferred_);
     }
 
-    if (iterCount == 0) {
+    if (iterCount == 0 || vsyncRate == 0) {
         return vsyncRate;
     }
 
