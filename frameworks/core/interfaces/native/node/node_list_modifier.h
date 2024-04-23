@@ -24,6 +24,7 @@ void SetOnListScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollStart(ArkUINodeHandle node, void* extraParam);
 void SetOnListScrollStop(ArkUINodeHandle node, void* extraParam);
+void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LIST_MODIFIER_H

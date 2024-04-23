@@ -1130,6 +1130,14 @@ void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selecti
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden, frameNode);
 }
 
+bool TextFieldModelNG::GetSelectionMenuHidden(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, SelectionMenuHidden, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules, frameNode);
@@ -1527,4 +1535,13 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Padding, paddings, frameNode);
 }
+
+void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditChanged(std::move(func));
+}
+
 } // namespace OHOS::Ace::NG

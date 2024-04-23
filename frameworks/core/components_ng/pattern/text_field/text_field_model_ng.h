@@ -131,6 +131,7 @@ public:
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
+    static bool GetSelectionMenuHidden(FrameNode* frameNode);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
     static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
@@ -214,7 +215,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void ResetTextInputPadding(FrameNode* frameNode);
-
+    static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

@@ -603,6 +603,7 @@ enum ArkUIEventSubKind {
     ON_LIST_SCROLL_START,
     ON_LIST_SCROLL_STOP,
     ON_LIST_SCROLL_FRAME_BEGIN,
+    ON_LIST_WILL_SCROLL,
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
@@ -2166,6 +2167,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaTextIndent)(ArkUINodeHandle node);
     void (*setTextAreaLineSpacing)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextAreaLineSpacing)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextAreaSelectionMenuHidden)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -2280,10 +2282,12 @@ struct ArkUITextInputModifier {
     void (*resetTextInputHeightAdaptivePolicy)(ArkUINodeHandle node);
     void (*setTextInputPlaceholderFontEnum)(ArkUINodeHandle node, const struct ArkUIResourceLength* size,
         ArkUI_Int32 weight, ArkUI_CharPtr family, ArkUI_Int32 style);
+
     void (*setTextInputTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextInputTextOverflow)(ArkUINodeHandle node);
     void (*setTextInputTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputTextIndent)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputSelectionMenuHidden)(ArkUINodeHandle node);
     void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
     void (*resetTextInputShowPassword)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
