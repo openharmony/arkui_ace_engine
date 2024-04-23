@@ -85,15 +85,13 @@ void TextPattern::OnAttachToFrameNode()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
         fontManager->AddFontNodeNG(host);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
             host->GetRenderContext()->UpdateClipEdge(true);
             host->GetRenderContext()->SetClipToFrame(true);
