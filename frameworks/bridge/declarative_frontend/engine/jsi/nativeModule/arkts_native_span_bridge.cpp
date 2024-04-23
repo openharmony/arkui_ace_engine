@@ -295,18 +295,21 @@ ArkUINativeModuleValue SpanBridge::SetDecoration(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t textDecoration = static_cast<int32_t>(TextDecoration::NONE);
     Color color = DEFAULT_DECORATION_COLOR;
-    uint32_t style = static_cast<uint32_t>(DEFAULT_DECORATION_STYLE);
+    int32_t style = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
     if (secondArg->IsInt()) {
         textDecoration = secondArg->Int32Value(vm);
     }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color)) {
         color = DEFAULT_DECORATION_COLOR;
     }
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanDecoration(
-        nativeNode, textDecoration, color.GetValue(), style);
+    if (fourthArg->IsInt()) {
+        style = fourthArg->Int32Value(vm);
+    }
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanDecoration(nativeNode, textDecoration, color.GetValue(), style);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -377,6 +380,37 @@ ArkUINativeModuleValue SpanBridge::ResetLetterSpacing(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSpanModifier()->resetSpanLetterSpacing(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::SetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    struct ArkUIStringAndFloat baselineOffsetValue = { 0.0, nullptr };
+    if (secondArg->IsNumber()) {
+        baselineOffsetValue.value = secondArg->ToNumber(vm)->Value();
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(nativeNode, &baselineOffsetValue);
+    } else if (secondArg->IsString()) {
+        std::string tempValueStr = secondArg->ToString(vm)->ToString();
+        baselineOffsetValue.valueStr = tempValueStr.c_str();
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(nativeNode, &baselineOffsetValue);
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanBaselineOffset(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::ResetBaselineOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSpanModifier()->resetSpanBaselineOffset(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

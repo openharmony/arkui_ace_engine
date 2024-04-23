@@ -92,7 +92,7 @@ void RichTextDelegate::Stop()
             if (delegate) {
                 delegate->UnregisterEvent();
             }
-        });
+        }, "ArkUIRichTextUnregisterEvent");
     }
 }
 
@@ -190,7 +190,7 @@ void RichTextDelegate::CreatePluginResource(
         delegate->RegisterWebEvent();
         delegate->BindPopPageSuccessMethod();
         delegate->BindIsPagePathInvalidMethod();
-    });
+    }, "ArkUIRichTextCreatePluginResource");
 }
 
 void RichTextDelegate::InitWebEvent()

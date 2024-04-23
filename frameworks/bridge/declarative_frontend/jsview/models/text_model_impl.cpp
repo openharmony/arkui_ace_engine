@@ -206,6 +206,8 @@ void TextModelImpl::SetLetterSpacing(const Dimension& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetLineSpacing(const Dimension& value) {}
+
 void TextModelImpl::SetAdaptMinFontSize(const Dimension& value)
 {
     auto component = GetComponent();

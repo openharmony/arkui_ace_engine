@@ -48,6 +48,23 @@ void BlankModelNG::Create()
     }
 }
 
+RefPtr<FrameNode> BlankModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
+    auto blankProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        frameNode->GetLayoutProperty<BlankLayoutProperty>()->UpdateFlexGrow(1.0f);
+        frameNode->GetLayoutProperty<BlankLayoutProperty>()->UpdateFlexShrink(0.0f);
+        frameNode->GetLayoutProperty<BlankLayoutProperty>()->UpdateAlignSelf(FlexAlign::STRETCH);
+        frameNode->GetLayoutProperty<BlankLayoutProperty>()->UpdateHeight(Dimension(0.0, DimensionUnit::VP));
+    } else if (blankProperty) {
+        blankProperty->ResetCalcMinSize();
+    }
+
+    return frameNode;
+}
+
 void BlankModelNG::SetBlankMin(const Dimension& blankMin)
 {
     auto blankNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -89,5 +106,20 @@ void BlankModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
     auto layoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateHeight(height);
+}
+
+void BlankModelNG::SetBlankMin(FrameNode* frameNode, const Dimension& blankMin)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto result = blankMin;
+    if (blankMin.IsNegative()) {
+        result = Dimension(0.0, DimensionUnit::VP);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -182,11 +182,14 @@ void AceEngine::TriggerGarbageCollection()
     }
 
     auto taskExecutor = copied.begin()->second->GetTaskExecutor();
-    taskExecutor->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::PLATFORM);
+    taskExecutor->PostTask([] { PurgeMallocCache(); },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIPurgeMallocCache");
 #if defined(OHOS_PLATFORM) && defined(ENABLE_NATIVE_VIEW)
     // GPU and IO thread is shared while enable native view
-    taskExecutor->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::GPU);
-    taskExecutor->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::IO);
+    taskExecutor->PostTask([] { PurgeMallocCache(); },
+        TaskExecutor::TaskType::GPU, "ArkUIPurgeMallocCache");
+    taskExecutor->PostTask([] { PurgeMallocCache(); },
+        TaskExecutor::TaskType::IO, "ArkUIPurgeMallocCache");
 #endif
 
     for (const auto& container : copied) {

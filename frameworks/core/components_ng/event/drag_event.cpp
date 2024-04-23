@@ -214,12 +214,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     gestureHub->SetIsTextDraggable(false);
                     return;
                 }
-                if (!gestureHub->GetIsTextDraggable()) {
-                    gestureHub->SetPixelMap(nullptr);
-                } else if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
+                if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
                     if (textDragCallback_) {
                         textDragCallback_(info.GetGlobalLocation());
                     }
+                } else if (!gestureHub->GetIsTextDraggable()) {
+                    gestureHub->SetPixelMap(nullptr);
                 }
             }
         }
@@ -532,7 +532,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                             CHECK_NULL_VOID(gestureHub);
                             gestureHub->SetPixelMap(customPixelMap);
                             gestureHub->SetDragPreviewPixelMap(customPixelMap);
-                            }, TaskExecutor::TaskType::UI);
+                            }, TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap");
                     }
                 };
 
@@ -1081,7 +1081,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 CHECK_NULL_VOID(callback);
                 callback(onPreDragStatus);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
     } else {
         onPreDragFunc(onPreDragStatus);
     }
@@ -1179,11 +1179,6 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto removeColumnNode = [id = Container::CurrentId(), startDrag, weakPattern = WeakPtr<TextDragBase>(pattern),
             weakEvent = gestureEventHub_, weakModifier = WeakPtr<TextDragOverlayModifier>(modifier)] {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->RemovePixelMap();
         if (!startDrag) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1193,6 +1188,11 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
                 pattern->ShowHandles();
             }
         }
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        manager->RemovePixelMap();
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);

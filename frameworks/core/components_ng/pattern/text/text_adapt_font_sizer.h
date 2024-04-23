@@ -38,6 +38,11 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    virtual bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    {
+        return false;
+    }
 
     static bool GetAdaptMaxMinFontSize(TextStyle& textStyle, double& maxFontSize, double& minFontSize,
         const LayoutConstraintF& contentConstraint);
@@ -46,7 +51,7 @@ public:
     static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
 private:
     bool DidExceedMaxLines(const SizeF& maxSize);
-    bool IsAdaptExceedLimit(const SizeF& maxSize);
+    virtual bool IsAdaptExceedLimit(const SizeF& maxSize);
 };
 } // namespace OHOS::Ace::NG
 

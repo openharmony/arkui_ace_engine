@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -83,6 +84,7 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -309,6 +311,9 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
         value = 0;
     }
     TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -317,6 +322,9 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
         value = 0;
     }
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
@@ -345,6 +353,19 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     TextModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSText::SetLineSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    JSRef<JSVal> args = info[0];
+    if (!ParseLengthMetricsToDimension(args, value)) {
+        value.Reset();
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextModel::GetInstance()->SetLineSpacing(value);
 }
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)
@@ -414,6 +435,9 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
         value = 0;
     }
     TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
@@ -460,6 +484,8 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     std::optional<TextDecorationStyle> textDecorationStyle;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+    } else {
+        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
@@ -472,6 +498,9 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+        if (!(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE))) {
+            return;
+        }
         value = 0;
     }
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
@@ -861,6 +890,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
+    JSClass<JSText>::StaticMethod("lineSpacing", &JSText::SetLineSpacing, opt);
     JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
     JSClass<JSText>::StaticMethod("minFontSize", &JSText::SetMinFontSize, opt);
     JSClass<JSText>::StaticMethod("maxFontSize", &JSText::SetMaxFontSize, opt);
@@ -984,6 +1014,12 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(args);
+    ParseMarqueeParam(paramObject, options);
+    TextModel::GetInstance()->SetMarqueeOptions(options);
+}
+
+void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options)
+{
     auto getStart = paramObject->GetProperty("start");
     if (getStart->IsBoolean()) {
         options.UpdateTextMarqueeStart(getStart->ToBoolean());
@@ -1009,7 +1045,7 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
     auto delay = paramObject->GetProperty("delay");
     if (delay->IsNumber()) {
         auto delayDouble = delay->ToNumber<double>();
-        int32_t delayValue = static_cast<int32_t>(delayDouble);
+        auto delayValue = static_cast<int32_t>(delayDouble);
         if (delayValue < 0) {
             delayValue = 0;
         }
@@ -1022,7 +1058,16 @@ void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
             getFromStart->ToBoolean() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
     }
 
-    TextModel::GetInstance()->SetMarqueeOptions(options);
+    auto getFadeout = paramObject->GetProperty("fadeout");
+    if (getFadeout->IsBoolean()) {
+        options.UpdateTextMarqueeFadeout(getFadeout->ToBoolean());
+    }
+
+    auto getStartPolicy = paramObject->GetProperty("marqueeStartPolicy");
+    if (getStartPolicy->IsNumber()) {
+        auto startPolicy = static_cast<MarqueeStartPolicy>(getStartPolicy->ToNumber<int32_t>());
+        options.UpdateTextMarqueeStartPolicy(startPolicy);
+    }
 }
 
 void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)

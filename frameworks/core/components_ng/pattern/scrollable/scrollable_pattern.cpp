@@ -2006,7 +2006,11 @@ void ScrollablePattern::Fling(double flingVelocity)
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     CHECK_NULL_VOID(scrollable);
-    scrollable->StartScrollAnimation(0.0, flingVelocity);
+    if (IsOutOfBoundary()) {
+        scrollable->HandleOverScroll(flingVelocity);
+    } else {
+        scrollable->StartScrollAnimation(0.0f, flingVelocity);
+    }
 }
 
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)

@@ -77,6 +77,9 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     visibleContentRect = GetVisibleContentRect();
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    if (IsSingleHandle()) {
+        return visibleContentRect.IsInRegion(bottomPoint);
+    }
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
@@ -109,7 +112,15 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     TextSelectOverlay::OnHandleMove(handleRect, isFirst);
     auto parentGlobalOffset = pattern->GetParentGlobalOffset();
     auto localOffset = handleRect.GetOffset() - parentGlobalOffset;
+    float x = std::clamp(localOffset.GetX(), 0.0f, pattern->GetContentRect().Width());
+    float y = std::clamp(localOffset.GetY(), 0.0f, pattern->GetContentRect().Height());
+    localOffset = OffsetF(x, y);
     pattern->magnifierController_->SetLocalOffset(localOffset);
+    if (isFirst) {
+        pattern->textSelector_.firstHandle.SetOffset(localOffset);
+    } else {
+        pattern->textSelector_.secondHandle.SetOffset(localOffset);
+    }
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
         .handleRect = handleRect,
         .isFirstHandle = isFirst,
@@ -267,13 +278,6 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     switch (id) {
         case OptionMenuActionId::COPY:
             pattern->HandleOnCopy();
-            CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
-            if (!usingMouse) {
-                if (!pattern->textDetectEnable_) {
-                    pattern->StartTwinkling();
-                }
-                pattern->ResetSelection();
-            }
             break;
         case OptionMenuActionId::CUT:
             pattern->HandleOnCut();

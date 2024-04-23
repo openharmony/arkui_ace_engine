@@ -308,8 +308,9 @@ struct GridLayoutInfo {
 
     // Grid has GridItem whose rowEnd - rowStart > 0
     bool hasMultiLineItem_;
+    // false when offset is updated but layout hasn't happened, so data is out of sync
+    bool synced_ = false;
 
-    bool offsetUpdated_ = false;
     std::optional<int32_t> targetIndex_;
 
 private:

@@ -637,6 +637,8 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
+    listLayoutAlgorithm->SetPrevContentStartOffset(contentStartOffset_);
+    listLayoutAlgorithm->SetPrevContentEndOffset(contentEndOffset_);
     if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
@@ -715,12 +717,19 @@ bool ListPattern::NeedScrollSnapAlignEffect() const
 
 bool ListPattern::IsAtTop() const
 {
-    return (startIndex_ == 0) && NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
+    bool groupAtStart = true;
+    bool groupAtEnd = true;
+    GetListItemGroupEdge(groupAtStart, groupAtEnd);
+    return (startIndex_ == 0 && groupAtStart) &&
+           NonNegative(startMainPos_ - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
 bool ListPattern::IsAtBottom() const
 {
-    return endIndex_ == maxListItemIndex_ &&
+    bool groupAtStart = true;
+    bool groupAtEnd = true;
+    GetListItemGroupEdge(groupAtStart, groupAtEnd);
+    return (endIndex_ == maxListItemIndex_ && groupAtEnd) &&
            LessOrEqual(endMainPos_ - currentDelta_ + GetChainDelta(endIndex_), contentMainSize_ - contentEndOffset_);
 }
 
@@ -787,52 +796,62 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     bool groupAtEnd = true;
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     if (startIndex_ == 0 && groupAtStart) {
-        auto startPos = startMainPos_ + GetChainDelta(0);
-        auto newStartPos = startPos + delta;
-        if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
-            offset.start = delta;
-        }
-        if (startPos > contentStartOffset_ && newStartPos <= contentStartOffset_) {
-            offset.start = contentStartOffset_ - startPos;
-        }
-        if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
-            offset.start = newStartPos - contentStartOffset_;
-        }
-        if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
-            float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-            if (newStartPos > (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f)) {
-                offset.start = newStartPos - (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f);
-            } else {
-                offset.start = 0.0;
-            }
-        }
+        offset.start = GetStartOverScrollOffset(delta);
     }
     if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
-        auto endPos = endMainPos_ + GetChainDelta(endIndex_);
-        auto contentEndPos = contentMainSize_ - contentEndOffset_;
-        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
-            endPos = startMainPos_ + contentEndPos;
-        }
-        auto newEndPos = endPos + delta;
-        if (endPos < contentEndPos && newEndPos < contentEndPos) {
-            offset.end = delta;
-        }
-        if (endPos < contentEndPos && newEndPos >= contentEndPos) {
-            offset.end = contentEndPos - endPos;
-        }
-        if (endPos >= contentEndPos && newEndPos < contentEndPos) {
-            offset.end = newEndPos - contentEndPos;
-        }
-        if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
-            float endItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-            if (newEndPos < (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f)) {
-                offset.end = newEndPos - (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f);
-            } else {
-                offset.end = 0.0;
-            }
-        }
+        offset.end = GetEndOverScrollOffset(delta);
     }
     return offset;
+}
+
+float ListPattern::GetStartOverScrollOffset(float offset) const
+{
+    float startOffset = 0.0f;
+    auto startPos = startMainPos_ + GetChainDelta(0);
+    auto newStartPos = startPos + offset;
+    if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
+        startOffset = offset;
+    }
+    if (startPos > contentStartOffset_ && newStartPos <= contentStartOffset_) {
+        startOffset = contentStartOffset_ - startPos;
+    }
+    if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
+        startOffset = newStartPos - contentStartOffset_;
+    }
+    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
+        float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        if (newStartPos > (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f)) {
+            startOffset = newStartPos - (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f);
+        }
+    }
+    return startOffset;
+}
+
+float ListPattern::GetEndOverScrollOffset(float offset) const
+{
+    float endOffset = 0.0f;
+    auto endPos = endMainPos_ + GetChainDelta(endIndex_);
+    auto contentEndPos = contentMainSize_ - contentEndOffset_;
+    if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
+        endPos = startMainPos_ + contentEndPos;
+    }
+    auto newEndPos = endPos + offset;
+    if (endPos < contentEndPos && newEndPos < contentEndPos) {
+        endOffset = offset;
+    }
+    if (endPos < contentEndPos && newEndPos >= contentEndPos) {
+        endOffset = contentEndPos - endPos;
+    }
+    if (endPos >= contentEndPos && newEndPos < contentEndPos) {
+        endOffset = newEndPos - contentEndPos;
+    }
+    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
+        float endItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        if (newEndPos < (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f)) {
+            endOffset = newEndPos - (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f);
+        }
+    }
+    return endOffset;
 }
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
@@ -1546,59 +1565,37 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
     CHECK_NULL_RETURN(groupNode, false);
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(groupPattern, false);
-
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, false);
     auto stickyStyle = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-
     auto itemsPosInGroup = groupPattern->GetItemPosition();
     auto it = itemsPosInGroup.find(indexInGroup);
     if (it == itemsPosInGroup.end()) {
         return false;
     }
-    auto groupStartPos = it->second.startPos;
-    auto groupEndPos = it->second.endPos;
     auto padding = groupWrapper->GetGeometryNode()->GetPadding()->top;
-    float paddingBeforeContent = 0.0f;
-    if (padding) {
-        paddingBeforeContent = padding.value();
-    }
-    switch (align) {
-        case ScrollAlign::START:
-        case ScrollAlign::NONE:
-            targetPos = paddingBeforeContent + startPos + groupStartPos;
-            if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
-                targetPos -= groupPattern->GetHeaderMainSize();
-            }
-            if (!IsScrollSnapAlignCenter() || childrenSize_) {
-                targetPos -= contentStartOffset_;
-            }
-            break;
-        case ScrollAlign::CENTER:
-            targetPos = paddingBeforeContent + startPos +
-                (groupStartPos + groupEndPos) / 2.0f -
-                contentMainSize_ / 2.0f;
-            break;
-        case ScrollAlign::END:
-            targetPos = paddingBeforeContent + startPos + groupEndPos - contentMainSize_;
-            if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
-                targetPos += groupPattern->GetFooterMainSize();
-            }
-            if (!IsScrollSnapAlignCenter() || childrenSize_) {
-                targetPos += contentEndOffset_;
-            }
-            break;
-        case ScrollAlign::AUTO:
-            float itemStartPos = paddingBeforeContent + startPos + groupStartPos;
-            float itemEndPos = paddingBeforeContent + startPos + groupEndPos;
-            if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
-                itemStartPos -= groupPattern->GetHeaderMainSize();
-            }
-            if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
-                itemEndPos += groupPattern->GetFooterMainSize();
-            }
+    float paddingBeforeContent = padding ? padding.value() : 0.0f;
+    if (align == ScrollAlign::CENTER) {
+        targetPos = paddingBeforeContent + startPos +
+            (it->second.startPos + it->second.endPos) / 2.0f - contentMainSize_ / 2.0f;
+    } else {
+        float itemStartPos = paddingBeforeContent + startPos + it->second.startPos;
+        float itemEndPos = paddingBeforeContent + startPos + it->second.endPos;
+        if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
+            itemStartPos -= groupPattern->GetHeaderMainSize();
+        }
+        if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
+            itemEndPos += groupPattern->GetFooterMainSize();
+        }
+        if (!IsScrollSnapAlignCenter() || childrenSize_) {
+            itemStartPos -= contentStartOffset_;
+            itemEndPos += contentEndOffset_;
+        }
+        if (align == ScrollAlign::AUTO) {
             targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
-            break;
+        } else {
+            targetPos = align == ScrollAlign::END ? itemEndPos - contentMainSize_ : itemStartPos;
+        }
     }
     return true;
 }

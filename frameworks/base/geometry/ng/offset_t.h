@@ -130,6 +130,11 @@ public:
         return GreatOrEqual(x_, 0) && GreatOrEqual(y_, 0);
     }
 
+    bool IsNegative() const
+    {
+        return LessNotEqual(x_, 0) && LessNotEqual(y_, 0);
+    }
+
     bool NonOffset() const
     {
         return NearZero(x_) && NearZero(y_);

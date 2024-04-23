@@ -162,10 +162,13 @@ std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetHandleInfo(HandleInde
     } else {
         handleRect = controller->GetCaretRect();
     }
+    auto localHandleRect = handleRect;
     SelectHandleInfo handleInfo;
-    handleRect.SetOffset(handleRect.GetOffset() + pattern->GetTextPaintOffset());
+    handleRect.SetOffset(handleRect.GetOffset() + GetPaintOffsetWithoutTransform());
     handleInfo.paintRect = handleRect;
     handleInfo.isShow = CheckHandleVisible(handleRect);
+
+    SetTransformPaintInfo(handleInfo, localHandleRect);
     return handleInfo;
 }
 
@@ -269,16 +272,25 @@ RectF TextFieldSelectOverlay::GetSelectArea()
     CHECK_NULL_RETURN(pattern, {});
     auto selectRects = pattern->GetTextBoxes();
     RectF res(pattern->GetCaretRect());
-    auto textPaintOffset = pattern->GetTextPaintOffset();
+    auto textPaintOffset = GetPaintOffsetWithoutTransform();
     if (selectRects.empty()) {
-        res.SetOffset(res.GetOffset() + textPaintOffset);
+        if (hasTransform_) {
+            GetGlobalRectWithTransform(res);
+        } else {
+            res.SetOffset(res.GetOffset() + textPaintOffset);
+        }
         return res;
     }
     auto contentRect = pattern->GetContentRect();
     auto textRect = pattern->GetTextRect();
     res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
     auto globalContentRect = GetVisibleContentRect();
-    return res.IntersectRectT(globalContentRect);
+    auto intersectRect = res.IntersectRectT(globalContentRect);
+    if (hasTransform_) {
+        intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
+        GetGlobalRectWithTransform(intersectRect);
+    }
+    return intersectRect;
 }
 
 std::string TextFieldSelectOverlay::GetSelectedText()
@@ -369,13 +381,16 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsOperation());
-    auto localOffset = handleRect.GetOffset() - pattern->GetTextPaintOffset();
+    auto localOffset = handleRect.GetOffset() - GetPaintOffsetWithoutTransform();
     auto selectController = pattern->GetTextSelectController();
     if (pattern->GetMagnifierController()) {
         auto movingCaretOffset =
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        GetLocalPointWithTransform(movingCaretOffset);
         pattern->SetMovingCaretOffset(movingCaretOffset);
-        pattern->GetMagnifierController()->SetLocalOffset(localOffset);
+        auto magnifierLocalOffset = localOffset;
+        GetLocalPointWithTransform(magnifierLocalOffset);
+        pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
     if (IsSingleHandle()) {
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));

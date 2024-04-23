@@ -165,6 +165,8 @@ private:
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void ClearFocus() override;
         void OutsideTouch() override;
+        void GetCursorPosition(const int64_t elementId, const int32_t requestId,
+            Accessibility::AccessibilityElementOperatorCallback &callback) override;
 
         void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
         {

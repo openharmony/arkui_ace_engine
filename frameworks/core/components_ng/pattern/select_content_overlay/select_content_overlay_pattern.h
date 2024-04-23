@@ -36,6 +36,17 @@ public:
     void CancelHiddenHandleTask();
     SelectMenuInfo GetSelectMenuInfo();
 
+protected:
+    void CheckHandleReverse() override;
+    void UpdateHandleHotZone() override;
+
+private:
+    bool UpdateHandleHotZoneWithPoint();
+    void UpdateHandleHotRegion(RectF& hotRegion, const OffsetF& offset);
+    DimensionRect ConvertToHotRect(const RectF& rect);
+    bool IsHandleInSameLine(const RectF& first, const RectF& second);
+    OffsetF GetHandleHotZoneOffset(bool isFirst, float raidus, bool handleOnTop);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SelectContentOverlayPattern);
 };

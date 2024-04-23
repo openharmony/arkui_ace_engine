@@ -50,7 +50,12 @@ void SwiperPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)
         { "EdgeEffect.None", EdgeEffect::NONE },
     };
     auto effectMode = json->GetString("effectMode");
-    UpdateEdgeEffect(uMap.count(effectMode) ? uMap.at(effectMode) : EdgeEffect::SPRING);
+    EdgeEffect edgeEffect = EdgeEffect::SPRING;
+    auto iter = uMap.find(effectMode);
+    if (iter != uMap.end()) {
+        edgeEffect = iter->second;
+    }
+    UpdateEdgeEffect(edgeEffect);
     PaintProperty::FromJson(json);
 }
 } // namespace OHOS::Ace::NG

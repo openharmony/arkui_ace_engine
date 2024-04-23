@@ -64,7 +64,7 @@ void XComponentResource::Release(const std::function<void(bool)>& onRelease)
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIXComponentRelease");
     }
 }
 
@@ -168,7 +168,7 @@ void XComponentResource::CallResRegisterMethod(const std::string& method,
         if (callback) {
             callback(result);
         }
-    });
+    }, "ArkUIXComponentCallResRegisterMethod");
 }
 
 std::string XComponentResource::GetStringParam(const std::string& param, const std::string& name) const

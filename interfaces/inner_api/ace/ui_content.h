@@ -24,6 +24,7 @@
 #include <vector>
 #include <list>
 
+#include "arkui_rect.h"
 #include "macros.h"
 #include "modal_ui_extension_config.h"
 #include "popup_ui_extension_config.h"
@@ -185,6 +186,7 @@ public:
     virtual void OnFormSurfaceChange(float width, float height) {}
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
+    virtual void SetFormRenderingMode(int8_t renderMode) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -392,6 +394,14 @@ public:
     virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) {};
 
     virtual void UpdateDecorVisible(bool visible, bool hasDeco = true) {};
+
+    virtual std::vector<Ace::RectF> GetOverlayNodePositions() const
+    {
+        return {};
+    };
+
+    virtual void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 };
 
 } // namespace OHOS::Ace

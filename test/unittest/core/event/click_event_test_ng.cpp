@@ -330,4 +330,30 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
         COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClearEvent);
     EXPECT_EQ(finalResultAfterClearEvent.size(), CLICK_TEST_RESULT_SIZE_0);
 }
+/**
+ * @tc.name: ClickEventActuatorTest006
+ * @tc.desc: test AddClickAfterEvent and ClearClickAfterEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+
+    /**
+     * @tc.steps: step2. Replace ClickEvent when userCallback_ is not nullptr.
+     * @tc.expected: userCallback_ will be reset and Make an new instance.
+     */
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    clickEventActuator.AddClickAfterEvent(clickEvent);
+    EXPECT_NE(clickEventActuator.clickAfterEvents_, nullptr);
+
+    clickEventActuator.ClearClickAfterEvent();
+    EXPECT_EQ(clickEventActuator.clickAfterEvents_, nullptr);
+}
 } // namespace OHOS::Ace::NG

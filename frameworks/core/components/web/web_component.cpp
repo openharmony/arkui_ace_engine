@@ -69,7 +69,7 @@ RefPtr<RenderNode> WebComponent::CreateRenderNode()
             if (renderWeb) {
                 renderWeb->Update(weakWeb.Upgrade());
             }
-        });
+        }, "ArkUIWebUpdateRenderNode");
     });
     renderWeb->SetDelegate(delegate_);
     return renderNode;

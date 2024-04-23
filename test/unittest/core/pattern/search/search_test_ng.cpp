@@ -75,8 +75,8 @@ constexpr int32_t BUTTON_INDEX = 4;
 const std::string EMPTY_VALUE;
 const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 const std::string SEARCH_SVG = "resource:///ohos_search.svg";
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 } // namespace
 
 class SearchTestNg : public testing::Test {
@@ -2808,6 +2808,65 @@ HWTEST_F(SearchTestNg, PackInnerRecognizerr001, TestSize.Level1)
     clickEventActuator->SetUserCallback(std::move(callback));
     searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
     searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
+}
+
+/**
+ * @tc.name: MinFontSize001
+ * @tc.desc: test search minFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, MinFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set minFontSize 1.0 fp.
+     */
+    searchModelInstance.SetAdaptMinFontSize(1.0_fp);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test minFontSize
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetAdaptMinFontSize(), 1.0_fp);
+}
+
+/**
+ * @tc.name: MaxFontSize001
+ * @tc.desc: test search maxFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, MaxFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set maxFontSize 2.0 fp.
+     */
+    searchModelInstance.SetAdaptMaxFontSize(2.0_fp);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test maxFontSize
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetAdaptMaxFontSize(), 2.0_fp);
 }
 
 /**

@@ -87,6 +87,7 @@ public:
     static bool IsSrcSvgImage(FrameNode* frameNode);
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
+    static void SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);

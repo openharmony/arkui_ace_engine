@@ -125,7 +125,7 @@ void MagnifierController::SetMagnifierRect(const RefPtr<Pattern>& childPattern)
     auto textBasepattern = DynamicCast<TextBase>(pattern_.Upgrade());
     CHECK_NULL_VOID(textBasepattern);
 
-    auto contentRect = textBasepattern->GetContentRect();
+    auto contentRect = textBasepattern->GetPaintContentRect();
     magnifierRect_.localOffset = localOffset_;
     magnifierRect_.cursorOffset = textBasepattern->GetCaretOffset();
     magnifierRect_.contentSize = SizeF(contentRect.Width(), contentRect.Height());

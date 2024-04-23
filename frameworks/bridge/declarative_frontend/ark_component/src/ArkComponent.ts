@@ -24,10 +24,68 @@ function getUINativeModule(): any {
 
 enum ModifierType {
   ORIGIN = 0,
-  STATE = 1
+  STATE = 1,
+  FRAME_NODE = 2
 }
 
 type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
+
+class ObservedMap {
+  private map_: Map<Symbol, AttributeModifierWithKey>;
+  private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
+
+  constructor() {
+    this.map_ = new Map();
+  }
+
+  public clear(): void {
+    this.map_.clear();
+  }
+
+  public delete(key: Symbol): boolean {
+    return this.map_.delete(key);
+  }
+
+  public forEach(callbackfn: (value: AttributeModifierWithKey, key: Symbol,
+    map: Map<Symbol, AttributeModifierWithKey>) => void, thisArg?: any): void {
+    this.map_.forEach(callbackfn, thisArg);
+  }
+  public get(key: Symbol): AttributeModifierWithKey | undefined {
+    return this.map_.get(key);
+  }
+  public has(key: Symbol): boolean {
+    return this.map_.has(key);
+  }
+  public set(key: Symbol, value: AttributeModifierWithKey): this {
+    const _a = this.changeCallback;
+    this.map_.set(key, value);
+    _a === null || _a === void 0 ? void 0 : _a(key, value);
+    return this;
+  }
+  public get size(): number {
+    return this.map_.size;
+  }
+  public entries(): IterableIterator<[Symbol, AttributeModifierWithKey]> {
+    return this.map_.entries();
+  }
+  public keys(): IterableIterator<Symbol> {
+    return this.map_.keys();
+  }
+  public values(): IterableIterator<AttributeModifierWithKey> {
+    return this.map_.values();
+  }
+  public [Symbol.iterator](): IterableIterator<[Symbol, AttributeModifierWithKey]> {
+    return this.map_.entries();
+  }
+  public get [Symbol.toStringTag](): string {
+    return 'ObservedMapTag';
+  }
+  public setOnChange(callback: (key: Symbol, value: AttributeModifierWithKey) => void): void {
+    if (this.changeCallback === undefined) {
+      this.changeCallback = callback;
+    }
+  }
+}
 
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
@@ -1732,6 +1790,20 @@ class MotionPathModifier extends ModifierWithKey<MotionPathOptions> {
   }
 }
 
+class MotionBlurModifier extends ModifierWithKey<MotionBlurOptions> {
+  constructor(value: MotionBlurOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('motionBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMotionBlur(node);
+    } else {
+      getUINativeModule().common.setMotionBlur(node, this.value.radius, this.value.anchor.x, this.value.anchor.y);
+    }
+  }
+}
+
 class GroupDefaultFocusModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -2210,6 +2282,50 @@ class BackgroundBrightnessModifier extends ModifierWithKey<BackgroundBrightnessO
   }
 }
 
+class BackgroundBrightnessInternalModifier extends ModifierWithKey<BrightnessOptions> {
+  constructor(params: BrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('backgroundBrightnessInternal');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundBrightnessInternal(node);
+    } else {
+      getUINativeModule().common.setBackgroundBrightnessInternal(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
+    }
+  }                       
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
+      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+  }
+}
+
+class ForegroundBrightnessModifier extends ModifierWithKey<BrightnessOptions> {
+  constructor(params: BrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('foregroundBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetForegroundBrightness(node);
+    } else {
+      getUINativeModule().common.setForegroundBrightness(node, this.value.rate, this.value.lightUpDegree, this.value.cubicCoeff, 
+        this.value.quadCoeff, this.value.saturation, this.value.posRGB, this.value.negRGB, this.value.fraction);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree
+      && this.value.cubicCoeff === this.stageValue.cubicCoeff && this.value.quadCoeff === this.stageValue.quadCoeff
+      && this.value.saturation === this.stageValue.saturation && this.value.posRGB === this.stageValue.posRGB 
+      && this.value.negRGB === this.stageValue.negRGB && this.value.fraction === this.stageValue.fraction);
+  }
+}
+
 class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
   constructor(value: DragPreviewOptions) {
     super(value);
@@ -2601,7 +2717,12 @@ const isUndefined = (val: basicType): boolean => typeof val === 'undefined';
 const isObject = (val: basicType): boolean => typeof val === 'object';
 const isFunction = (val: basicType): boolean => typeof val === 'function';
 const isLengthType = (val: any): boolean => typeof val === 'string' || typeof val === 'number';
-
+function parseWithDefaultNumber(val, defaultValue) {
+  if (isNumber(val)) {
+    return val;
+  }
+  else { return defaultValue; }
+}
 function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(
   modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>,
   modifierClass: new (value: T) => M,
@@ -2643,14 +2764,29 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this._modifiers = new Map();
-    this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    if (classType === ModifierType.FRAME_NODE) {
+      this._modifiersWithKeys = new ObservedMap();
+      (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
+        if (this.nativePtr === undefined) {
+          return;
+        }
+        value.applyStage(this.nativePtr);
+        getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+      })
+    } else {
+      this._modifiersWithKeys = new Map();
+    }
     if (classType === ModifierType.STATE) {
       this._weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(nativePtr);
     }
     this._nativePtrChanged = false;
+  }
+
+  setNodePtr(nodePtr: KNode) {
+    this.nativePtr = nodePtr;
   }
 
   getOrCreateGestureEvent() {
@@ -2787,6 +2923,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   backgroundBrightness(params: BackgroundBrightnessOptions): this {
     modifierWithKey(this._modifiersWithKeys, BackgroundBrightnessModifier.identity,
       BackgroundBrightnessModifier, params);
+    return this;
+  }
+
+  backgroundBrightnessInternal(params: BrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundBrightnessInternalModifier.identity,
+      BackgroundBrightnessInternalModifier, params);
+    return this;
+  }
+
+  foregroundBrightness(params: BrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ForegroundBrightnessModifier.identity,
+      ForegroundBrightnessModifier, params);
     return this;
   }
 
@@ -3604,6 +3752,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  motionPath(value: MotionBlurOptions): this {
+    modifierWithKey(this._modifiersWithKeys, MotionBlurModifier.identity, MotionBlurModifier, value);
+    return this;
+  }
+
   shadow(value: ShadowOptions | ShadowStyle): this {
     modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
     return this;
@@ -3894,11 +4047,15 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
     } else {
       modifier.attribute.applyStateUpdatePtr(component);
       modifier.attribute.applyNormalAttribute(component);
-      modifier.applyNormalAttribute(component);
+      if (modifier.applyNormalAttribute) {
+        modifier.applyNormalAttribute(component);
+      }
       component.applyModifierPatch();
     }
   } else {
-    modifier.applyNormalAttribute(component);
+    if (modifier.applyNormalAttribute) {
+      modifier.applyNormalAttribute(component);
+    }
     component.applyModifierPatch();
   }
 }

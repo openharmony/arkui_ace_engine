@@ -140,7 +140,11 @@ inline FlexDirection ConvertStringToFlexDirection(const std::string& str)
         { "FlexDirection.ColumnReverse", FlexDirection::COLUMN_REVERSE },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FlexDirection::ROW;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FlexDirection::ROW;
 }
 
 inline std::string ConvertWrapDirectionToStirng(WrapDirection direction)
@@ -190,7 +194,11 @@ inline FlexAlign ConvertStringToFlexAlign(const std::string& str)
         { "FlexAlign.SpaceEvenly", FlexAlign::SPACE_EVENLY },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FlexAlign::FLEX_START;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FlexAlign::FLEX_START;
 }
 
 inline std::string ConvertItemAlignToStirng(FlexAlign align)
@@ -223,7 +231,11 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
         { "ItemAlign.Stretch", FlexAlign::STRETCH },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FlexAlign::AUTO;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FlexAlign::AUTO;
 }
 
 inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
@@ -366,7 +378,11 @@ inline TextAlign ConvertWrapStringToTextAlign(const std::string& str)
         { "TextAlign.End", TextAlign::END },
     };
 
-    return uMap.count(str) ? uMap.at(str) : TextAlign::START;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return TextAlign::START;
 }
 
 inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
@@ -390,7 +406,11 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
         { "TextOverflow.None", TextOverflow::NONE },
     };
 
-    return uMap.count(str) ? uMap.at(str) : TextOverflow::CLIP;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return TextOverflow::CLIP;
 }
 
 inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
@@ -448,7 +468,11 @@ inline FontWeight ConvertWrapStringToFontWeight(const std::string& str)
         { "FontWeight.Regular", FontWeight::REGULAR },
     };
 
-    return uMap.count(str) ? uMap.at(str) : FontWeight::NORMAL;
+    auto iter = uMap.find(str);
+    if (iter != uMap.end()) {
+        return iter->second;
+    }
+    return FontWeight::NORMAL;
 }
 
 inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)

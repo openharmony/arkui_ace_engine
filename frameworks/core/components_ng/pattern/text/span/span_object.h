@@ -22,14 +22,16 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
 
 class AttachmentImage {};
 
-enum class SpanType { Font = 0, Decoration, BaselineOffset, LetterSpacing, TextShadow = 4, Gesture = 100 };
+enum class SpanType { Font = 0, Decoration, BaselineOffset, LetterSpacing, TextShadow = 4, Gesture = 100, Image = 300 };
 
 enum class SpanOperation {
     ADD = 0,
@@ -56,13 +58,14 @@ public:
     virtual RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) = 0;
     virtual SpanType GetSpanType() const = 0;
     virtual void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const = 0;
+    virtual std::string ToString() const = 0;
+
     int32_t GetStartIndex() const;
     int32_t GetEndIndex() const;
     void UpdateStartIndex(int32_t startIndex);
     void UpdateEndIndex(int32_t endIndex);
     int32_t GetLength() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
-    virtual std::string ToString() const = 0;
 
 private:
     int32_t start_ = 0;
@@ -96,10 +99,12 @@ class DecorationSpan : public SpanBase {
 
 public:
     DecorationSpan() = default;
-    explicit DecorationSpan(TextDecoration type, std::optional<Color> color);
-    DecorationSpan(TextDecoration type, std::optional<Color> color, int32_t start, int32_t end);
+    explicit DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style);
+    DecorationSpan(TextDecoration type, std::optional<Color> color, std::optional<TextDecorationStyle> style,
+        int32_t start, int32_t end);
     TextDecoration GetTextDecorationType() const;
     std::optional<Color> GetColor() const;
+    std::optional<TextDecorationStyle> GetTextDecorationStyle() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
@@ -112,6 +117,7 @@ private:
 
     TextDecoration type_;
     std::optional<Color> color_;
+    std::optional<TextDecorationStyle> style_;
 };
 
 class BaselineOffsetSpan : public SpanBase {
@@ -199,5 +205,21 @@ private:
     std::optional<std::vector<Shadow>> textShadow_ = std::nullopt;
 };
 
+class ImageSpan : public SpanBase {
+    DECLARE_ACE_TYPE(ImageSpan, SpanBase);
+public:
+    explicit ImageSpan(const ImageSpanOptions& options);
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    SpanType GetSpanType() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+    std::string ToString() const override;
+
+    const ImageSpanOptions& GetImageSpanOptions();
+    const std::optional<ImageSpanAttribute>& GetImageAttribute() const;
+
+private:
+    ImageSpanOptions imageOptions_;
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H

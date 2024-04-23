@@ -270,7 +270,14 @@ void ViewAbstract::SetBackgroundColor(const Color &color)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
+
+    Color updateColor = color;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline != nullptr) {
+        pipeline->CheckNeedUpdateBackgroundColor(updateColor);
+    }
+
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
 void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const Color &color)
@@ -282,6 +289,13 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo &src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline != nullptr) {
+        bool disableSetImage = pipeline->CheckNeedDisableUpdateBackgroundImage();
+        if (disableSetImage) {
+            return;
+        }
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
@@ -360,6 +374,14 @@ void ViewAbstract::SetForegroundEffect(float radius)
     if (target) {
         target->UpdateForegroundEffect(radius);
     }
+}
+
+void ViewAbstract::SetMotionBlur(const MotionBlurOption &motionBlurOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(MotionBlur, motionBlurOption);
 }
 
 void ViewAbstract::SetBackgroundEffect(const EffectOption &effectOption)
@@ -924,6 +946,10 @@ void ViewAbstract::SetOnClick(GestureEventFunc &&clickEventFunc)
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc));
+
+    auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
 }
 
 void ViewAbstract::SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc)
@@ -1742,6 +1768,22 @@ void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
     }
     ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpRate, rate);
     ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
+}
+
+void ViewAbstract::SetBgDynamicBrightness(const BrightnessOption& brightnessOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BgDynamicBrightnessOption, brightnessOption);
+}
+
+void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension &radius, const BlurOption &blurOption)
@@ -2989,6 +3031,11 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
+}
+
 void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3008,6 +3055,18 @@ void ViewAbstract::SetDynamicLightUp(FrameNode* frameNode, float rate, float lig
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpRate, rate, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree, frameNode);
+}
+
+void ViewAbstract::SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BgDynamicBrightnessOption, brightnessOption, frameNode);
+}
+
+void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
@@ -3199,6 +3258,10 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEven
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc));
+
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
 }
 
 void ViewAbstract::SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc)

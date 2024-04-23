@@ -108,7 +108,7 @@ UIContentErrorCode CardFrontend::RunPage(const std::string& url, const std::stri
                 frontend->LoadPage(urlPath, params);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUICardFrontendRunPage");
     
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -258,14 +258,14 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
                 }
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendPageLoaded");
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto frontend = weak.Upgrade();
             CHECK_NULL_VOID(frontend);
             frontend->FireFormVisiableCallback();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendFireFormVisiable");
 }
 
 void CardFrontend::UpdateData(const std::string& dataList)
@@ -277,7 +277,7 @@ void CardFrontend::UpdateData(const std::string& dataList)
                 frontend->UpdatePageData(dataList);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUICardFrontendUpdatePageData");
 }
 
 void CardFrontend::UpdatePageData(const std::string& dataList)
@@ -304,7 +304,7 @@ void CardFrontend::SetColorMode(ColorMode colorMode)
                 frontend->OnMediaFeatureUpdate();
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUICardFrontendSetColorMode");
 }
 
 void CardFrontend::RebuildAllPages()
@@ -321,7 +321,7 @@ void CardFrontend::RebuildAllPages()
             CHECK_NULL_VOID(rootNode);
             rootNode->UpdateStyleWithChildren();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendRebuildAllPages");
 }
 
 void CardFrontend::OnSurfaceChanged(int32_t width, int32_t height)
@@ -333,7 +333,7 @@ void CardFrontend::OnSurfaceChanged(int32_t width, int32_t height)
                 frontend->HandleSurfaceChanged(width, height);
             }
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUICardFrontendSurfaceChanged");
 }
 
 void CardFrontend::HandleSurfaceChanged(int32_t width, int32_t height)

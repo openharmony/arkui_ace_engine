@@ -74,6 +74,7 @@ public:
     ~TextPattern() override = default;
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
+    std::list<ResultObject> GetSpansInfoInStyledString(int32_t start, int32_t end);
 
     virtual int32_t GetTextContentLength();
 
@@ -404,6 +405,7 @@ public:
     virtual void CheckHandles(SelectHandleInfo& handleInfo) {};
     OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
+    void SetFadeout(const bool& left, const bool& right, const float& gradientPercent);
 
 #ifndef USE_GRAPHIC_TEXT_GINE
     static RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
@@ -558,6 +560,10 @@ protected:
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
+    void InitFocusEvent();
+    void InitHoverEvent();
+    void RecoverCopyOption();
+    void InitCopyOption();
     void RecoverSelection();
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
@@ -601,6 +607,8 @@ protected:
     bool panEventInitialized_ = false;
     bool clickEventInitialized_ = false;
     bool touchEventInitialized_ = false;
+    bool focusInitialized_ = false;
+    bool hoverInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -656,6 +664,7 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void InitSpanItem(std::stack<SpanNodeInfo> nodes);
+    void EnsureOverlayExists();
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void ProcessBoundRectByTextMarquee(RectF& rect);
@@ -664,6 +673,10 @@ private:
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    // SpanString
+    void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
+    ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
+    void ProcessSpanString();
     // to check if drag is in progress
     void SetCurrentDragTool(SourceTool tool)
     {
@@ -677,6 +690,7 @@ private:
 
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void ProcessOverlayAfterLayout();
+    Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -686,9 +700,13 @@ private:
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
     bool isSpanStringMode_ = false;
+    bool showSelected_ = false;
     int32_t clickedSpanPosition_ = -1;
     TimeStamp lastClickTimeStamp_;
-
+    bool leftFadeout_ = false;
+    bool rightFadeout_ = false;
+    float gradientPercent_ = 0.0;
+    bool isMarqueeRunning_ = false;
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeholderIndex_;

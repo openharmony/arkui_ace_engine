@@ -36,7 +36,6 @@ protected:
     static void AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
 
 private:
-    static float imageMaxTranslate;
     static float baseScale;
 };
 
