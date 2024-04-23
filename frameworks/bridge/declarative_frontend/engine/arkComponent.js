@@ -100,31 +100,6 @@ const SAFE_AREA_EDGE_ALL = 15;
 const SAFE_AREA_TYPE_LIMIT = 3;
 const SAFE_AREA_EDGE_LIMIT = 4;
 const DIRECTION_RANGE = 3;
-class Modifier {
-  constructor(value) {
-    this.stageValue = value;
-  }
-  applyStage(node) {
-    if (this.stageValue === this.value) {
-      if (this.value === undefined) {
-        this.applyPeer(node, true);
-      }
-      delete this.stageValue;
-      return;
-    }
-    if (typeof this.stageValue === 'object' && typeof this.value === 'object') {
-      if (this.stageValue.isEqual(this.value)) {
-        delete this.stageValue;
-        return;
-      }
-    }
-    this.value = this.stageValue;
-    delete this.stageValue;
-    this.applyPeer(node, this.value === undefined);
-    return (this.value === undefined);
-  }
-  applyPeer(node, reset) { }
-}
 class ModifierWithKey {
   constructor(value) {
     this.stageValue = value;
@@ -2606,16 +2581,6 @@ function parseWithDefaultNumber(val, defaultValue) {
   }
   else { return defaultValue; }
 }
-function modifier(modifiers, modifierClass, value) {
-  const identity = modifierClass['identity'];
-  const item = modifiers.get(identity);
-  if (item) {
-    item.stageValue = value;
-  }
-  else {
-    modifiers.set(identity, new modifierClass(value));
-  }
-}
 function modifierWithKey(modifiers, identity, modifierClass, value) {
   const item = modifiers.get(identity);
   if (item) {
@@ -2679,7 +2644,6 @@ class ObservedMap {
 
 class ArkComponent {
   constructor(nativePtr, classType) {
-    this._modifiers = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
@@ -2728,18 +2692,10 @@ class ArkComponent {
   applyModifierPatch() {
     let expiringItems = [];
     let expiringItemsWithKeys = [];
-    this._modifiers.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
-        expiringItems.push(key);
-      }
-    });
     this._modifiersWithKeys.forEach((value, key) => {
       if (value.applyStage(this.nativePtr)) {
         expiringItemsWithKeys.push(key);
       }
-    });
-    expiringItems.forEach(key => {
-      this._modifiers.delete(key);
     });
     expiringItemsWithKeys.forEach(key => {
       this._modifiersWithKeys.delete(key);
@@ -7422,7 +7378,6 @@ class SpanFontWeightModifier extends ModifierWithKey {
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
 class ArkSpanComponent {
   constructor(nativePtr, classType) {
-    this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
@@ -14096,7 +14051,7 @@ class ArkSliderComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   showSteps(value) {
-    modifier(this._modifiers, ShowStepsModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
     return this;
   }
   showTips(value, content) {
@@ -20946,7 +20901,7 @@ class BarWidthModifier extends ModifierWithKey {
   }
 }
 BarWidthModifier.identity = Symbol('barWidth');
-class BarAdaptiveHeightModifier extends Modifier {
+class BarAdaptiveHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -21080,7 +21035,7 @@ class BarPositionModifier extends ModifierWithKey {
   }
 }
 BarPositionModifier.identity = Symbol('barPosition');
-class TabsHideTitleBarModifier extends Modifier {
+class TabsHideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
