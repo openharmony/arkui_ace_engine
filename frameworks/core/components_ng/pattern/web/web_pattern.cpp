@@ -3751,10 +3751,18 @@ void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo&
     CHECK_NULL_VOID(host);
     auto offset = host->GetOffsetRelativeToWindow();
     TouchEventInfo tempTouchInfo = touchEventInfo_;
-    if ((touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) &&
-        !touchEventQueue_.empty()) {
-        tempTouchInfo = touchEventQueue_.front();
-        touchEventQueue_.pop();
+    if (touchEvent.type == TouchType::DOWN || touchEvent.type == TouchType::UP) {
+        while (!touchEventQueue_.empty()) {
+            if (touchEventQueue_.front().GetChangedTouches().front().GetFingerId() == touchEvent.id) {
+                tempTouchInfo = touchEventQueue_.front();
+            }
+            touchEventQueue_.pop();
+        }
+    }
+    if (touchEvent.type == TouchType::CANCEL) {
+        naitve_map_[touchEvent.id] = true;
+    } else {
+        naitve_map_[touchEvent.id] = false;
     }
     touchEventInfo.SetSourceDevice(tempTouchInfo.GetSourceDevice());
     touchEventInfo.SetTarget(tempTouchInfo.GetTarget());
@@ -3801,7 +3809,11 @@ void WebPattern::SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchL
             info.SetGlobalLocation(Offset(globalLocation.GetX() - scaleX, globalLocation.GetY() - scaleY));
             info.SetLocalLocation(Offset(localLocation.GetX() - scaleX, localLocation.GetY() - scaleY));
             info.SetScreenLocation(Offset(screenLocation.GetX() - scaleX, screenLocation.GetY() - scaleY));
-            info.SetTouchType(location.GetTouchType());
+            if (naitve_map_[location.GetFingerId()]) {
+                info.SetTouchType(TouchType::CANCEL);
+            } else {
+                info.SetTouchType(location.GetTouchType());
+            }
         }
         touchEventInfo.AddTouchLocationInfo(std::move(info));
     }

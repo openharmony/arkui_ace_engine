@@ -763,6 +763,7 @@ private:
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     double pinchValue_ = 1.0;
     std::queue<TouchEventInfo> touchEventQueue_;
+    std::unordered_map<int32_t, bool> naitve_map_;
 };
 } // namespace OHOS::Ace::NG
 
