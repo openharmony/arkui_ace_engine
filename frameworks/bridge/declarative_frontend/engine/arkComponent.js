@@ -12090,16 +12090,25 @@ class ArkLoadingProgressComponent extends ArkComponent {
     return this;
   }
   setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context, loadingProgressConfiguration) {
     loadingProgressConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.loadingProgressNode)) {
+    if (isUndefined(this.loadingProgressNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.loadingProgressNode = new xNode.BuilderNode(context);
       this.loadingProgressNode.build(this.builder, loadingProgressConfiguration);
+      this.needRebuild = false;
     } else {
       this.loadingProgressNode.update(loadingProgressConfiguration);
     }
