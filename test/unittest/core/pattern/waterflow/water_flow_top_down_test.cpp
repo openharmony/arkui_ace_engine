@@ -137,4 +137,24 @@ HWTEST_F(WaterFlowTestNg, WaterFlowLayoutInfoTest005, TestSize.Level1)
     EXPECT_EQ(position.crossIndex, crossIndex + 1);
     EXPECT_EQ(position.lastItemIndex, 1);
 }
+
+/**
+ * @tc.name: WaterFlowTest007
+ * @tc.desc: waterFlow with fixed column, scroll to index not fully showed at last line
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
+{
+    CreateWithItem([](WaterFlowModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(200.f));
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+    });
+    pattern_->UpdateStartIndex(8);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 5)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
+}
 } // namespace OHOS::Ace::NG

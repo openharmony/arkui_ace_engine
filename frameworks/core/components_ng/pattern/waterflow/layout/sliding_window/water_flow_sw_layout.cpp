@@ -30,7 +30,6 @@
 namespace OHOS::Ace::NG {
 void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
 {
-    LOGI("ZTE sw");
     wrapper_ = wrapper;
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
     axis_ = axis_ = props->GetAxis();
@@ -40,15 +39,15 @@ void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
     CheckReset();
 
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
-        MeasureOnJump(info_->jumpIndex_, info_->align_, mainSize_);
-        overScroll_ = false;
+        MeasureOnJump(info_->jumpIndex_, info_->align_);
+        if (!NearZero(info_->delta_)) {
+            overScroll_ = false;
+            MeasureOnOffset(info_->delta_);
+        }
     } else if (info_->targetIndex_) {
         MeasureToTarget(*info_->targetIndex_);
-    }
-    LOGI("ZTE delta = %f", info_->delta_);
-    ApplyOffset(mainSize_, info_->delta_);
-    if (!overScroll_) {
-        AdjustOverScroll(mainSize_);
+    } else {
+        MeasureOnOffset(info_->delta_);
     }
     // if (matchChildren) {
     //     PostMeasureSelf();
@@ -86,10 +85,18 @@ void WaterFlowSWLayout::Layout(LayoutWrapper* wrapper)
         crossPos += itemCrossSize_[i] + crossGap_;
     }
     wrapper->SetActiveChildRange(info_->startIndex_, info_->endIndex_);
+    for (int32_t i = info_->startIndex_; i <= info_->endIndex_; ++i) {
+        if (!info_->idxToLane_.count(i)) {
+            wrapper->RemoveChildInRenderTree(i);
+        }
+    }
 }
 
 void WaterFlowSWLayout::Init(const SizeF& frameSize)
 {
+    info_->footerIndex_ = 0;
+    info_->childrenCount_ = wrapper_->GetTotalChildCount();
+
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     auto scale = props->GetLayoutConstraint()->scaleProperty;
     auto rowsGap = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
@@ -116,7 +123,6 @@ void WaterFlowSWLayout::Init(const SizeF& frameSize)
     if (info_->lanes_.empty()) {
         info_->lanes_.resize(cross.first.size());
     }
-
     for (const auto& len : cross.first) {
         itemCrossSize_.push_back(static_cast<float>(len));
     }
@@ -136,53 +142,69 @@ void WaterFlowSWLayout::CheckReset()
     }
 }
 
-void WaterFlowSWLayout::ApplyOffset(float mainSize, float offset)
+void WaterFlowSWLayout::MeasureOnOffset(float delta)
 {
+    ApplyDelta(delta);
+    for (const auto& lane : info_->lanes_) {
+        std::cout << "after APPLY delta lane = " << lane.ToString() << std::endl;
+    }
+    if (!overScroll_) {
+        AdjustOverScroll();
+    }
+}
+
+void WaterFlowSWLayout::ApplyDelta(float delta)
+{
+    std::cout << "offset = " << delta << std::endl;
+    info_->totalOffset_ += delta;
     for (auto& lane : info_->lanes_) {
-        lane.startPos += offset;
-        lane.endPos += offset;
+        lane.startPos += delta;
+        lane.endPos += delta;
     }
 
     // clear out items outside viewport after position change
-    if (Positive(offset)) {
+    if (Positive(delta)) {
         // positive offset is scrolling upwards
-        ClearBack(mainSize);
-        FillFront(0.0f, 0);
+        FillFront(0.0f, info_->MinIdxInLanes() - 1, 0);
+        ClearBack(mainSize_);
     } else {
+        FillBack(mainSize_, info_->MaxIdxInLanes() + 1, info_->childrenCount_ - 1);
         ClearFront();
-        FillBack(mainSize, info_->childrenCount_ - 1);
     }
 }
 
 void WaterFlowSWLayout::MeasureToTarget(int32_t targetIdx)
 {
+    std::cout << "measure to target " << targetIdx << " start = " << info_->startIndex_ << " end " << info_->endIndex_
+              << std::endl;
     if (targetIdx < info_->startIndex_) {
-        FillFront(-FLT_MAX, targetIdx);
+        FillFront(-FLT_MAX, info_->startIndex_ - 1, targetIdx);
     } else if (targetIdx > info_->endIndex_) {
-        FillBack(FLT_MAX, targetIdx);
+        FillBack(FLT_MAX, info_->endIndex_ + 1, targetIdx);
     }
 }
 
+// [lane start/end position, lane index]
 using lanePos = std::pair<float, size_t>;
 
-void WaterFlowSWLayout::FillBack(float viewportBound, int32_t maxChildIdx)
+void WaterFlowSWLayout::FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx)
 {
     maxChildIdx = std::min(maxChildIdx, info_->childrenCount_ - 1);
-    std::priority_queue<lanePos> q;
+    std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>> q;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
+        std::cout << "Lane " << i << " = " << info_->lanes_[i].ToString() << std::endl;
         float endPos = info_->lanes_[i].endPos;
         if (LessNotEqual(endPos + mainGap_, viewportBound)) {
             q.push({ endPos, i });
         }
     }
 
-    int32_t idx = info_->endIndex_ + 1;
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     while (!q.empty() && idx <= maxChildIdx) {
         auto [endPos, laneIdx] = q.top();
         q.pop();
         float mainLen = MeasureChild(props, idx, laneIdx);
-        endPos += mainGap_ + mainLen;
+        endPos += mainLen + mainGap_;
 
         auto& lane = info_->lanes_[laneIdx];
         lane.endPos = endPos;
@@ -192,21 +214,31 @@ void WaterFlowSWLayout::FillBack(float viewportBound, int32_t maxChildIdx)
             q.push({ endPos, laneIdx });
         }
     }
-    LOGI("ZTE deque size = %d", info_->lanes_[0].items_.size());
 }
 
-void WaterFlowSWLayout::FillFront(float viewportBound, int32_t minChildIdx)
+namespace {
+// max heap but with smaller laneIdx at the top
+struct MaxHeapCmp {
+    bool operator()(const lanePos& left, const lanePos& right)
+    {
+        if (NearEqual(left.first, right.first)) {
+            return left.second > right.second;
+        }
+        return LessNotEqual(left.first, right.first);
+    }
+};
+} // namespace
+
+void WaterFlowSWLayout::FillFront(float viewportBound, int32_t idx, int32_t minChildIdx)
 {
     minChildIdx = std::max(minChildIdx, 0);
-    std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>> q;
+    std::priority_queue<lanePos, std::vector<lanePos>, MaxHeapCmp> q;
     for (size_t i = 0; i < info_->lanes_.size(); ++i) {
         float startPos = info_->lanes_[i].startPos;
         if (GreatNotEqual(startPos - mainGap_, viewportBound)) {
             q.push({ startPos, i });
         }
     }
-
-    int32_t idx = info_->startIndex_ - 1;
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     while (!q.empty() && idx >= minChildIdx) {
@@ -225,15 +257,17 @@ void WaterFlowSWLayout::FillFront(float viewportBound, int32_t minChildIdx)
     }
 }
 
-void WaterFlowSWLayout::ClearBack(float mainSize)
+void WaterFlowSWLayout::ClearBack(float bound)
 {
     for (auto& lane : info_->lanes_) {
         if (lane.items_.empty()) {
             continue;
         }
         float lastItemStartPos = lane.endPos - lane.items_.back().mainSize;
-        while (GreatNotEqual(lastItemStartPos, mainSize)) {
+        while (GreatOrEqual(lastItemStartPos, bound)) {
+            info_->idxToLane_.erase(lane.items_.back().idx);
             lane.items_.pop_back();
+            lane.endPos = lastItemStartPos - mainGap_;
             if (lane.items_.empty()) {
                 break;
             }
@@ -249,8 +283,10 @@ void WaterFlowSWLayout::ClearFront()
             continue;
         }
         float firstItemEndPos = lane.startPos + lane.items_.front().mainSize;
-        while (Negative(firstItemEndPos)) {
+        while (NonPositive(firstItemEndPos)) {
+            info_->idxToLane_.erase(lane.items_.front().idx);
             lane.items_.pop_front();
+            lane.startPos = firstItemEndPos + mainGap_;
             if (lane.items_.empty()) {
                 break;
             }
@@ -259,13 +295,13 @@ void WaterFlowSWLayout::ClearFront()
     }
 }
 
-ScrollAlign WaterFlowSWLayout::ParseAutoAlign(int32_t jumpIdx, float mainSize, bool inView)
+ScrollAlign WaterFlowSWLayout::ParseAutoAlign(int32_t jumpIdx, bool inView)
 {
     if (inView) {
         if (Negative(info_->DistanceToTop(jumpIdx, mainGap_))) {
             return ScrollAlign::START;
         }
-        if (Negative(info_->DistanceToBottom(jumpIdx, mainSize, mainGap_))) {
+        if (Negative(info_->DistanceToBottom(jumpIdx, mainSize_, mainGap_))) {
             return ScrollAlign::END;
         }
         // item is already fully in viewport
@@ -277,7 +313,7 @@ ScrollAlign WaterFlowSWLayout::ParseAutoAlign(int32_t jumpIdx, float mainSize, b
     return ScrollAlign::END;
 }
 
-void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float mainSize)
+void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
 {
     if (jumpIdx == -1) {
         jumpIdx = info_->childrenCount_ - 1;
@@ -285,11 +321,12 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
 
     bool inView = jumpIdx >= info_->startIndex_ && jumpIdx <= info_->endIndex_;
     if (align == ScrollAlign::AUTO) {
-        align = ParseAutoAlign(jumpIdx, mainSize, inView);
+        align = ParseAutoAlign(jumpIdx, inView);
     }
 
     // if the item is within 1 full-viewport distance (approximately), we consider it close
     int32_t cntInView = info_->endIndex_ - info_->startIndex_ + 1;
+    std::cout << "start " << info_->startIndex_ << " end = " << info_->endIndex_ << std::endl;
     bool closeToView =
         jumpIdx > info_->endIndex_ ? jumpIdx - info_->endIndex_ < cntInView : info_->startIndex_ - jumpIdx < cntInView;
     if (closeToView) {
@@ -298,55 +335,57 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
     switch (align) {
         case ScrollAlign::START: {
             if (inView || closeToView) {
-                ApplyOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_));
+                ApplyDelta(-info_->DistanceToTop(jumpIdx, mainGap_));
             } else {
                 std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [](auto& lane) {
                     lane.items_.clear();
                     lane.startPos = 0.0f;
                     lane.endPos = 0.0f;
                 });
+                info_->totalOffset_ = 0;
                 info_->idxToLane_.clear();
-                info_->endIndex_ = jumpIdx - 1;
-                FillBack(mainSize, info_->childrenCount_ - 1);
+                FillBack(mainSize_, jumpIdx, info_->childrenCount_ - 1);
             }
             break;
         }
         case ScrollAlign::CENTER: {
             auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
             if (inView || closeToView) {
-                std::cout << "jumpIdx = "
-                          << " map size = " << info_->idxToLane_.size() << " children size = " << info_->childrenCount_
-                          << std::endl;
+                std::cout << "jumpIdx = " << jumpIdx << " map size = " << info_->idxToLane_.size()
+                          << " children size = " << info_->childrenCount_ << std::endl;
                 float itemH = MeasureChild(props, jumpIdx, info_->idxToLane_.at(jumpIdx));
-                ApplyOffset(mainSize, -info_->DistanceToTop(jumpIdx, mainGap_) + (mainSize - itemH) / 2.0f);
+                ApplyDelta(-info_->DistanceToTop(jumpIdx, mainGap_) + (mainSize_ - itemH) / 2.0f);
             } else {
                 float itemH = MeasureChild(props, jumpIdx, 0);
-                std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize, itemH](auto& lane) {
+                std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize = mainSize_, itemH](auto& lane) {
                     lane.items_.clear();
                     lane.startPos = (mainSize - itemH) / 2.0f;
                     lane.endPos = (mainSize + itemH) / 2.0f;
                 });
+                info_->idxToLane_ = { { jumpIdx, 0 } };
                 auto& lane = info_->lanes_[0];
                 lane.items_.push_back({ jumpIdx, itemH });
-                info_->startIndex_ = info_->endIndex_ = jumpIdx;
+                info_->totalOffset_ = 0;
 
-                FillFront(0.0f, 0);
-                FillBack(mainSize, info_->childrenCount_ - 1);
+                FillFront(0.0f, jumpIdx - 1, 0);
+                FillBack(mainSize_, jumpIdx + 1, info_->childrenCount_ - 1);
             }
             break;
         }
         case ScrollAlign::END: {
             if (inView || closeToView) {
-                ApplyOffset(mainSize, info_->DistanceToBottom(jumpIdx, mainSize, mainGap_));
+                std::cout << "jumpIdx = " << jumpIdx
+                          << "dis to bot = " << info_->DistanceToBottom(jumpIdx, mainSize_, mainGap_) << std::endl;
+                ApplyDelta(info_->DistanceToBottom(jumpIdx, mainSize_, mainGap_));
             } else {
-                std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize](auto& lane) {
+                std::for_each(info_->lanes_.begin(), info_->lanes_.end(), [mainSize = mainSize_](auto& lane) {
                     lane.items_.clear();
                     lane.startPos = mainSize;
                     lane.endPos = mainSize;
                 });
+                info_->totalOffset_ = 0;
                 info_->idxToLane_.clear();
-                info_->startIndex_ = jumpIdx + 1;
-                FillFront(0.0f, 0);
+                FillFront(0.0f, jumpIdx, 0);
             }
             break;
         }
@@ -355,20 +394,23 @@ void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float 
     }
 }
 
-void WaterFlowSWLayout::AdjustOverScroll(float mainSize)
+void WaterFlowSWLayout::AdjustOverScroll()
 {
     if (info_->lanes_.empty()) {
         return;
     }
-    auto minStart = std::min_element(info_->lanes_.begin(), info_->lanes_.end(),
-        [](const auto& a, const auto& b) { return LessNotEqual(a.startPos, b.startPos); });
-    auto maxEnd = std::max_element(info_->lanes_.begin(), info_->lanes_.end(),
-        [](const auto& a, const auto& b) { return LessNotEqual(a.endPos, b.endPos); });
+    float maxEnd = info_->EndPos();
+    float minStart = info_->StartPos();
 
-    if (Positive(minStart->startPos)) {
-        ApplyOffset(mainSize, -minStart->startPos);
-    } else if (LessNotEqual(maxEnd->endPos, mainSize)) {
-        ApplyOffset(mainSize, mainSize - maxEnd->endPos);
+    if (Positive(minStart)) {
+        ApplyDelta(-minStart);
+    } else if (LessNotEqual(maxEnd, mainSize_)) {
+        bool reachedTop = info_->MinIdxInLanes() == 0 && NearZero(info_->DistanceToTop(0, mainGap_));
+        if (reachedTop) {
+            // no room to adjust
+            return;
+        }
+        ApplyDelta(mainSize_ - maxEnd);
     }
 }
 

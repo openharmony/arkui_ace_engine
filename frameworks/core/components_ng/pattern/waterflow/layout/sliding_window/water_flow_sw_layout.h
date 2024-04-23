@@ -39,7 +39,9 @@ public:
 private:
     void Init(const SizeF& frameSize);
 
-    void ApplyOffset(float mainSize, float offset);
+    void MeasureOnOffset(float delta);
+
+    void ApplyDelta(float delta);
 
     void MeasureToTarget(int32_t targetIdx);
 
@@ -51,30 +53,40 @@ private:
      * @param align ScrollAlign
      * @param mainSize of the viewport
      */
-    void MeasureOnJump(int32_t jumpIdx, ScrollAlign align, float mainSize);
+    void MeasureOnJump(int32_t jumpIdx, ScrollAlign align);
 
-    ScrollAlign ParseAutoAlign(int32_t jumpIdx, float mainSize, bool inView);
+    ScrollAlign ParseAutoAlign(int32_t jumpIdx, bool inView);
 
     /**
-     * @brief fills the viewport backward until either condition is not satisfied.
+     * @brief fills the viewport backward until [viewportBound] is reached / idx < minChildIdx.
      *
-     * @param viewportBound 
+     * @param viewportBound boundary to fill towards.
+     * @param idx first item index to fill with.
      * @param minChildIdx smallest item index to fill before stopping.
      */
-    void FillFront(float viewportBound, int32_t minChildIdx);
+    void FillFront(float viewportBound, int32_t idx, int32_t minChildIdx);
 
     /**
-     * @brief fills the viewport forward until either condition is not satisfied.
+     * @brief fills the viewport forward until [viewportBound] is reached / idx > maxChildIdx.
      *
-     * @param viewportBound 
+     * @param viewportBound boundary to fill towards.
+     * @param idx first item index to fill with.
      * @param maxChildIdx greatest item index to fill before stopping.
      */
-    void FillBack(float viewportBound, int32_t maxChildIdx);
+    void FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx);
 
+    /**
+     * @brief Clear items above the viewport.
+     */
     void ClearFront();
-    void ClearBack(float mainSize);
+    /**
+     * @brief Clear items below the viewport.
+     * 
+     * @param bound of the viewport
+     */
+    void ClearBack(float bound);
 
-    void AdjustOverScroll(float mainSize);
+    void AdjustOverScroll();
 
     float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
 

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_INFO_SW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_INFO_SW_H
 
+#include <algorithm>
 #include <deque>
 #include <vector>
 
@@ -36,7 +37,10 @@ public:
         return WaterFlowLayoutMode::SLIDING_WINDOW;
     }
 
-    float offset() const override;
+    float offset() const override
+    {
+        return totalOffset_;
+    }
     int32_t firstIdx() const override
     {
         return startIndex_;
@@ -71,7 +75,7 @@ public:
 
     float GetDelta(float prevPos) const override
     {
-        return offset() - prevPos;
+        return prevPos - totalOffset_;
     }
 
     int32_t GetMainCount() const override;
@@ -103,18 +107,28 @@ public:
      */
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;
 
+    int32_t MaxIdxInLanes() const;
+    int32_t MinIdxInLanes() const;
+
+    /**
+     * @return maximum end position of items in lanes_.
+     */
+    float EndPos() const;
+    /**
+     * @return minimum start position of items in lanes_.
+     */
+    float StartPos() const;
+
     struct Lane;
     std::vector<Lane> lanes_;
+    // only contains items currently in lane.
     std::unordered_map<size_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
-    float mainGap_ = 0.0f; // update this at the end of a layout
+    float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped
+    float mainGap_ = 0.0f;     // update this at the end of a layout
 
     struct ItemInfo;
-
-private:
-    inline float EndPos() const;
-    inline float StartPos() const;
 };
 
 struct WaterFlowLayoutInfoSW::ItemInfo {
@@ -123,6 +137,8 @@ struct WaterFlowLayoutInfoSW::ItemInfo {
 };
 
 struct WaterFlowLayoutInfoSW::Lane {
+    std::string ToString() const;
+
     float startPos = 0.0f;
     float endPos = 0.0f;
     std::deque<ItemInfo> items_;

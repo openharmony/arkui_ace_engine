@@ -243,6 +243,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_->UpdateStartIndex();
     prevOffset_ = layoutInfo_->offset();
+    layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+    layoutInfo_->targetIndex_.reset();
     UpdateScrollBarOffset();
     CheckScrollable();
 

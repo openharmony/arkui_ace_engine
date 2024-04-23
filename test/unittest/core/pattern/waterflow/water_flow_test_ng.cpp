@@ -24,6 +24,7 @@
 
 #include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/property/property.h"
 
 #define protected public
 #define private public
@@ -65,7 +66,6 @@
 #undef protected
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
 
 void WaterFlowTestNg::SetUpTestSuite()
 {
@@ -571,6 +571,9 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest003, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr");
     });
     FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 4);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 4)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 5)->IsActive());
@@ -634,26 +637,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest006, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 7)->IsActive());
-}
-
-/**
- * @tc.name: WaterFlowTest007
- * @tc.desc: waterFlow with fixed column, scroll to index not fully showed at last line
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
-{
-    CreateWithItem([](WaterFlowModelNG model) {
-        ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
-        ViewAbstract::SetHeight(CalcLength(200.f));
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-    });
-    pattern_->UpdateStartIndex(8);
-    FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 5)->IsActive());
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 6)->IsActive());
 }
 
 /**

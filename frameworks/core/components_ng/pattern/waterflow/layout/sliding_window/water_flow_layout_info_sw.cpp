@@ -22,12 +22,10 @@
 namespace OHOS::Ace::NG {
 void WaterFlowLayoutInfoSW::Sync(float mainSize, float mainGap)
 {
+    startIndex_ = MinIdxInLanes();
+    endIndex_ = MaxIdxInLanes();
     for (const auto& lane : lanes_) {
-        if (lane.items_.empty()) {
-            continue;
-        }
-        startIndex_ = std::min(startIndex_, lane.items_.front().idx);
-        endIndex_ = std::max(endIndex_, lane.items_.back().idx);
+        std::cout << "SYNC lane = " << lane.ToString() << std::endl;
     }
     delta_ = 0.0f;
     lastMainSize_ = mainSize;
@@ -35,7 +33,8 @@ void WaterFlowLayoutInfoSW::Sync(float mainSize, float mainGap)
 
     itemStart_ = startIndex_ == 0 && NonNegative(DistanceToTop(0, mainGap_));
     itemEnd_ = endIndex_ == childrenCount_ - 1;
-    offsetEnd_ = itemEnd_ && NonNegative(DistanceToBottom(endIndex_, mainSize, mainGap));
+    offsetEnd_ = itemEnd_ && std::all_of(lanes_.begin(), lanes_.end(),
+                                 [mainSize](const Lane& lane) { return LessOrEqual(lane.endPos, mainSize); });
 }
 
 float WaterFlowLayoutInfoSW::DistanceToTop(int32_t itemIdx, float mainGap) const
@@ -61,21 +60,13 @@ float WaterFlowLayoutInfoSW::DistanceToBottom(int32_t itemIdx, float mainSize, f
     }
     const auto& lane = lanes_[idxToLane_.at(itemIdx)];
     float dist = mainSize - lane.endPos;
-    for (const auto& item : lane.items_) {
-        if (item.idx == itemIdx) {
+    for (auto item = lane.items_.rbegin(); item != lane.items_.rend(); ++item) {
+        if (item->idx == itemIdx) {
             break;
         }
-        dist += item.mainSize + mainGap;
+        dist += item->mainSize + mainGap;
     }
     return dist;
-}
-
-float WaterFlowLayoutInfoSW::offset() const
-{
-    if (lanes_.empty()) {
-        return 0.0f;
-    }
-    return lanes_[0].startPos;
 }
 
 bool WaterFlowLayoutInfoSW::OutOfBounds() const
@@ -112,7 +103,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         }
     }
 
-    if (endIndex_ < childrenCount_ - 1) {
+    if (!itemEnd_) {
         return res;
     }
     float disToBot = EndPos() - lastMainSize_;
@@ -141,13 +132,13 @@ float WaterFlowLayoutInfoSW::CalcOverScroll(float mainSize, float delta) const
     return res;
 }
 
-inline float WaterFlowLayoutInfoSW::EndPos() const
+float WaterFlowLayoutInfoSW::EndPos() const
 {
     return std::max_element(lanes_.begin(), lanes_.end(), [](const Lane& left, const Lane& right) {
         return LessNotEqual(left.endPos, right.endPos);
     })->endPos;
 }
-inline float WaterFlowLayoutInfoSW::StartPos() const
+float WaterFlowLayoutInfoSW::StartPos() const
 {
     return std::min_element(lanes_.begin(), lanes_.end(), [](const Lane& left, const Lane& right) {
         return LessNotEqual(left.startPos, right.startPos);
@@ -197,6 +188,9 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
     const auto& lane = lanes_[idxToLane_.at(idx)];
     float pos = 0.0f; // main-axis position of the item's top edge relative to viewport top. Positive if below viewport
     float itemSize = 0.0f;
+    std::cout << "lane start pos: " << lane.startPos << " lane end pos: " << lane.endPos
+              << " item count = " << lane.items_.size() << " first item " << lane.items_.front().idx
+              << " back = " << lane.items_.back().idx << " lane indx = " << idxToLane_.at(idx) << std::endl;
     if (idx <= endIndex_) {
         pos = DistanceToTop(idx, mainGap_);
         auto it = std::find_if(
@@ -237,5 +231,45 @@ void WaterFlowLayoutInfoSW::Reset()
     delta_ = DistanceToTop(startIndex_, mainGap_);
     lanes_.clear();
     idxToLane_.clear();
+}
+
+int32_t WaterFlowLayoutInfoSW::MaxIdxInLanes() const
+{
+    int32_t maxIdx = -1;
+    for (const auto& lane : lanes_) {
+        if (lane.items_.empty()) {
+            continue;
+        }
+        maxIdx = std::max(maxIdx, lane.items_.back().idx);
+    }
+    return maxIdx;
+}
+
+int32_t WaterFlowLayoutInfoSW::MinIdxInLanes() const
+{
+    int32_t minIdx = childrenCount_;
+    for (const auto& lane : lanes_) {
+        if (lane.items_.empty()) {
+            continue;
+        }
+        minIdx = std::min(minIdx, lane.items_.front().idx);
+    }
+    return minIdx;
+}
+
+std::string WaterFlowLayoutInfoSW::Lane::ToString() const
+{
+    std::string res = "{StartPos: " + std::to_string(startPos) + " EndPos: " + std::to_string(endPos) + " ";
+    if (items_.empty()) {
+        res += "empty";
+    } else {
+        res += "Items [";
+        for (const auto& item : items_) {
+            res += std::to_string(item.idx) + " ";
+        }
+        res += "] ";
+    }
+    res += "}";
+    return res;
 }
 } // namespace OHOS::Ace::NG

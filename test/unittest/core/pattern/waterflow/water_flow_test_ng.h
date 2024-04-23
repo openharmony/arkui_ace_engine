@@ -52,7 +52,7 @@ protected:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
+    virtual void GetInstance();
 
     void Create(const std::function<void(WaterFlowModelNG)>& callback = nullptr, bool flushLayout = true);
     void CreateWithItem(const std::function<void(WaterFlowModelNG)>& callback = nullptr);

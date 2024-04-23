@@ -147,7 +147,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
-    // Set layout mode first because SetFooter is dependent to it
+    // set layout mode first. SetFooter is dependent to it
     using LayoutMode = NG::WaterFlowLayoutMode;
     auto mode = LayoutMode::SLIDING_WINDOW;
     auto jsMode = obj->GetProperty("layoutMode");
