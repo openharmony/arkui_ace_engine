@@ -198,8 +198,8 @@ class SpanLetterSpacingModifier extends ModifierWithKey<string> {
     }
   }
 }
-class SpanBaselineOffsetModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class SpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
     super(value);
   }
   static identity = Symbol('spanBaselineOffset');
@@ -904,7 +904,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
     return this;
   }
-  baselineOffset(value: number | string): SpanAttribute {
+  baselineOffset(value: LengthMetrics): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }

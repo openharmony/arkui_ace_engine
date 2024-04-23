@@ -6020,6 +6020,20 @@ class ImageSpanTextBackgroundStyleModifier extends ModifierWithKey {
   }
 }
 ImageSpanTextBackgroundStyleModifier.identity = Symbol('imageSpanTextBackgroundStyle');
+class ImageSpanBaselineOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetBaselineOffset(node);
+    }
+    else {
+      getUINativeModule().imageSpan.setBaselineOffset(node, this.value);
+    }
+  }
+}
+ImageSpanBaselineOffsetModifier.identity = Symbol('imagespanBaselineOffset');
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6040,6 +6054,10 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   textBackgroundStyle(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanTextBackgroundStyleModifier.identity, ImageSpanTextBackgroundStyleModifier, value);
+    return this;
+  }
+  baselineOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanBaselineOffsetModifier.identity, ImageSpanBaselineOffsetModifier, value);
     return this;
   }
 }
