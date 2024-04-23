@@ -2664,31 +2664,6 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     }
 }
 
-void PipelineContext::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
-{
-    CHECK_NULL_VOID(node);
-    onFormVisibleChangeNodeIds_.emplace(node->GetId());
-    onFormVisibleChangeEvents_.insert_or_assign(node->GetId(), callback);
-}
-
-void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
-{
-    onFormVisibleChangeNodeIds_.erase(nodeId);
-    auto iter = onFormVisibleChangeEvents_.find(nodeId);
-    if (iter != onFormVisibleChangeEvents_.end()) {
-        onFormVisibleChangeEvents_.erase(iter);
-    }
-}
-
-void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
-{
-    for (auto& pair : onFormVisibleChangeEvents_) {
-        if (pair.second) {
-            pair.second(isVisible);
-        }
-    }
-}
-
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.emplace(nodeId);

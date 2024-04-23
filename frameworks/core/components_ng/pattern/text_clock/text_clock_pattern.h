@@ -119,7 +119,6 @@ private:
     std::string GetCurrentFormatDateTime();
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
-    void OnFormVisibleChange(bool visible);
     static void UpdateTextLayoutProperty(
         RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     void ParseInputFormat(bool& is24H);
@@ -149,7 +148,6 @@ private:
     bool is24H_ = SystemProperties::Is24HourClock();
     bool isSetVisible_ = true;
     bool isInVisibleArea_ = true;
-    bool isFormVisible_ = true;
     bool isForm_ = false;
     std::string prevTime_;
     std::map<int32_t, TextClockFormatElement> formatElementMap;
