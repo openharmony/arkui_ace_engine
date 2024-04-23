@@ -82,6 +82,7 @@
       OHOS::Ace::UIDisplaySync::*;
       OHOS::Ace::Dimension::*;
       OHOS::Ace::Matrix4::*;
+      OHOS::Ace::NG::DragDropFuncWrapper::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 
