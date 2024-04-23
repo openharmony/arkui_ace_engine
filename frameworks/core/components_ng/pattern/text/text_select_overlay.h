@@ -55,6 +55,7 @@ public:
 
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
+    bool selectTextUseTopHandle = false;
 
 private:
     void RemoveAreaChangeInner();
