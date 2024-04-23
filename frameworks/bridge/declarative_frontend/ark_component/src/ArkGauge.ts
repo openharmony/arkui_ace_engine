@@ -15,6 +15,9 @@
 
 /// <reference path='./import.ts' />
 class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
+  builder: WrappedBuilder<Object[]> | null = null;
+  gaugeNode: BuilderNode<[GaugeConfiguration]> | null = null;
+  modifier: ContentModifier<GaugeConfiguration>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -48,6 +51,26 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
   indicator(value: GaugeIndicatorOptions): this {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<GaugeConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, gaugeConfiguration: GaugeConfiguration): FrameNode | null {
+    gaugeConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.gaugeNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.gaugeNode = new xNode.BuilderNode(context);
+      this.gaugeNode.build(this.builder, gaugeConfiguration);
+    } else {
+      this.gaugeNode.update(gaugeConfiguration);
+    }
+    return this.gaugeNode.getFrameNode();
   }
 }
 
@@ -163,4 +186,13 @@ globalThis.Gauge.attributeModifier = function (modifier: ArkComponent): void {
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.GaugeModifier(nativePtr, classType);
   });
+};
+// @ts-ignore
+globalThis.Gauge.contentModifier  = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkGaugeComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };
