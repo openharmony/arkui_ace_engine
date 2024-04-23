@@ -47,6 +47,41 @@ constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
 } // namespace
 
+namespace {
+void* UnwrapNapiValue(const JSRef<JSVal>& obj)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!obj->IsObject()) {
+        LOGE("info[0] is not an object when try CreateFromNapiValue");
+        return nullptr;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+#ifdef USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_unwrap(env, napiValue, &objectNapi);
+    return objectNapi;
+#else
+    return nullptr;
+#endif
+}
+} // namespace
+
 #if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 {
@@ -81,38 +116,6 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-namespace {
-void* UnwrapNapiValue(const JSRef<JSVal>& obj)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreateFromNapiValue");
-        return nullptr;
-    }
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    auto nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, nullptr);
-#ifdef USE_ARK_ENGINE
-    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
-#endif
-    JSValueWrapper valueWrapper = value;
-
-    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, napiValue, &valueType);
-    if (valueType != napi_object) {
-        LOGE("napiValue is not napi_object");
-        return nullptr;
-    }
-    void* objectNapi = nullptr;
-    napi_unwrap(env, napiValue, &objectNapi);
-    return objectNapi;
-}
-} // namespace
-
 bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<PixelMap>>& pixelMaps,
     int32_t& duration, int32_t& iterations)
 {
@@ -124,11 +127,6 @@ RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
     return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
 }
 
-RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
-{
-    return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
-}
-
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
 {
     auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(UnwrapNapiValue(obj));
@@ -136,11 +134,7 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
         return nullptr;
     }
     return *nodePtr;
-#else
-    return nullptr;
 }
-#endif
-} // namespace
 
 RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 {
@@ -162,8 +156,12 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     return WantWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
 }
-
 #endif
+
+RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
+{
+    return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
+}
 
 // When the api version >= 11, it is disable event version.
 bool IsDisableEventVersion()

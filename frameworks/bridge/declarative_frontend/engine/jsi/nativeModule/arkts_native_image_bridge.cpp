@@ -492,13 +492,11 @@ ArkUINativeModuleValue ImageBridge::SetColorFilter(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     if (jsObjArg->IsObject() && !jsObjArg->IsArray(vm)) {
-#ifndef PREVIEW
         auto drawingColorFilter = Ace::Framework::CreateDrawingColorFilter(info[1]);
         if (drawingColorFilter) {
             ImageModelNG::SetDrawingColorFilter(reinterpret_cast<FrameNode*>(nativeNode), drawingColorFilter);
             return panda::JSValueRef::Undefined(vm);
         }
-#endif
 
         SetColorFilterObject(vm, jsObjArg, nativeNode);
         return panda::JSValueRef::Undefined(vm);

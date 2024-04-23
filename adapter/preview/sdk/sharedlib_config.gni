@@ -441,6 +441,23 @@ napi_modules = [
     ]
   },
 ]
+
+if (defined(use_rosen_drawing) && use_rosen_drawing) {
+  napi_modules += [
+    {
+      prefix = "graphics"
+      shard_libs = [
+        {
+          label = "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi"
+          subsystem_name = "graphic"
+          part_name = "graphic_2d"
+          lib_names = [ "drawing_napi" ]
+        },
+      ]
+    },
+  ]
+}
+
 if (use_mac || use_mingw_win) {
   common_bin += [
     {
