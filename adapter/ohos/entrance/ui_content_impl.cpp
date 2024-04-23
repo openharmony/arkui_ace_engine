@@ -3094,4 +3094,24 @@ void UIContentImpl::RegisterOverlayNodePositionsUpdateCallback(
     CHECK_NULL_VOID(container);
     container->RegisterOverlayNodePositionsUpdateCallback(std::move(callback));
 }
+
+void UIContentImpl::SetContentNodeGrayScale(float grayscale)
+{
+    if (LessNotEqual(grayscale, 0.001f)) {
+        grayscale = 0.0f;
+    }
+    if (GreatNotEqual(grayscale, 1.0)) {
+        grayscale = 1.0f;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootElement = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto renderContext = rootElement->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateFrontGrayScale(Dimension(grayscale));
+}
 } // namespace OHOS::Ace

@@ -302,6 +302,8 @@ public:
 
     void SetFormRenderingMode(int8_t renderMode) override;
 
+    void SetContentNodeGrayScale(float grayscale) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
