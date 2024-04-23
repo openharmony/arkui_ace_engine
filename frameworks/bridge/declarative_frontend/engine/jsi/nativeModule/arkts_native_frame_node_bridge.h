@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 class FrameNodeBridge {
 public:
     static ArkUINodeHandle GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUI_Bool IsCustomFrameNode(FrameNode* node);
     static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const BaseEventInfo& info);
     static Local<panda::ObjectRef> CreateTouchInfo(
         EcmaVM* vm, const TouchLocationInfo& touchInfo, TouchEventInfo& info);
