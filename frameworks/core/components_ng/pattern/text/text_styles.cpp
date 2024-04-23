@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_styles.h"
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 
@@ -169,6 +170,18 @@ std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
     return text;
 }
 
+std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrategy>& value)
+{
+    std::string text;
+    if (value == LineBreakStrategy::HIGH_QUALITY) {
+        text = "HIGH_QUALITY";
+    } else if (value == LineBreakStrategy::BALANCED) {
+        text = "BALANCED";
+    } else {
+        text = "GREEDY";
+    }
+    return text;
+}
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value)
 {
     std::string text = "";
@@ -176,5 +189,4 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
         text = value.value().ToString();
     }
     return text;
-}
 } // namespace OHOS::Ace::NG

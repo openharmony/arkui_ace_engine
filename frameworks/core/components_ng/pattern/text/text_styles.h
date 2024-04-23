@@ -202,6 +202,7 @@ std::string GetFontWeightInJson(const std::optional<FontWeight>& value);
 std::string GetFontSizeInJson(const std::optional<Dimension>& value);
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value);
+std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrategy>& value);
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
 } // namespace OHOS::Ace::NG
 
