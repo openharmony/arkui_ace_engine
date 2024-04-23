@@ -543,6 +543,16 @@ public:
     void SetIsRootBuilderNode(bool isRootBuilderNode);
     bool GetIsRootBuilderNode() const;
 
+    bool IsArkTsFrameNode() const
+    {
+        return isArkTsFrameNode_;
+    }
+
+    void SetIsArkTsFrameNode(bool isArkTsFrameNode)
+    {
+        isArkTsFrameNode_ = isArkTsFrameNode;
+    }
+
     const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
     {
         return exportTextureInfo_;
@@ -669,6 +679,7 @@ private:
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
+    bool isArkTsFrameNode_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
