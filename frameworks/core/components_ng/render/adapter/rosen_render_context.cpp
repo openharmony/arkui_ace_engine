@@ -4574,9 +4574,10 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
-void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value)
+void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect)
 {
     useContentRectForRSFrame_ = value;
+    adjustRSFrameByContentRect_ = adjustRSFrameByContentRect;
 }
 
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
@@ -5406,13 +5407,21 @@ void RosenRenderContext::SetContentRectToFrame(RectF rect)
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto&& padding = host->GetGeometryNode()->GetPadding();
-    // minus padding to get contentRect
-    if (padding) {
-        rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
-        auto size = rect.GetSize();
-        MinusPaddingToSize(*padding, size);
-        rect.SetSize(size);
+    if (adjustRSFrameByContentRect_) {
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto contentRect = geometryNode->GetContentRect();
+        rect.SetOffset(rect.GetOffset() + contentRect.GetOffset());
+        rect.SetSize(contentRect.GetSize());
+    } else {
+        auto&& padding = host->GetGeometryNode()->GetPadding();
+        // minus padding to get contentRect
+        if (padding) {
+            rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
+            auto size = rect.GetSize();
+            MinusPaddingToSize(*padding, size);
+            rect.SetSize(size);
+        }
     }
     rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
 }

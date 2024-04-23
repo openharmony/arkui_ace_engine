@@ -328,7 +328,7 @@ public:
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
-    void SetUsingContentRectForRenderFrame(bool value) override;
+    void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
@@ -636,6 +636,7 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+    bool adjustRSFrameByContentRect_ = false;
 
     RectF paintRect_;
 

@@ -103,6 +103,7 @@ protected:
     virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
 
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper);
+    OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
 
     void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring textForAI,
         const TextStyle& textStyle, bool isDragging);
