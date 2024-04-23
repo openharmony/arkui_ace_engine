@@ -73,6 +73,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> temporary = obj->GetProperty("temporary");
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     JSRef<JSVal> renderingMode = obj->GetProperty("renderingMode");
+    JSRef<JSVal> shape = obj->GetProperty("shape");
     RequestFormInfo formInfo;
     if (id->IsString()) {
         if (!StringUtils::IsNumber(id->ToString())) {
@@ -102,6 +103,9 @@ void JSForm::Create(const JSCallbackInfo& info)
     }
     if (!renderingMode->IsNull() && !renderingMode->IsEmpty()) {
         formInfo.renderingMode = renderingMode->ToNumber<int32_t>();
+    }
+    if (!shape->IsNull() && !shape->IsEmpty()) {
+        formInfo.shape = shape->ToNumber<int32_t>();
     }
     FormModel::GetInstance()->Create(formInfo);
 }
