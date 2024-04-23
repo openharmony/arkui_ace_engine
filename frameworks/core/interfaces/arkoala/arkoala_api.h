@@ -2284,6 +2284,9 @@ struct ArkUITextInputModifier {
     void (*resetTextInputTextOverflow)(ArkUINodeHandle node);
     void (*setTextInputTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputTextIndent)(ArkUINodeHandle node);
+    void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
+    void (*resetTextInputShowPassword)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputShowPassword)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

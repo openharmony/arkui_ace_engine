@@ -71,6 +71,7 @@ public:
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
+    static void SetOnSecurityStateChange(const JSCallbackInfo& info);
     static void SetOnContentScroll(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
@@ -99,6 +100,7 @@ public:
     static void SetPasswordRules(const JSCallbackInfo& info);
     static void SetEnableAutoFill(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
+    static void ShowPasswordText(const JSCallbackInfo& info);
     static void SetSelectAllValue(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
