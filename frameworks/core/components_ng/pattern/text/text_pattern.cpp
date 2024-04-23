@@ -3112,8 +3112,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
         if (imgAttr.size.has_value()) {
-            imageLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(imgAttr.size.value().width), CalcLength(imgAttr.size.value().height)));
+            imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
         if (imgAttr.verticalAlign.has_value()) {
             imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());
