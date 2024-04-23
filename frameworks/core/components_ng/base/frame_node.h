@@ -389,7 +389,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter() const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
