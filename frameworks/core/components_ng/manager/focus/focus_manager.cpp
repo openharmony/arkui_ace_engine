@@ -68,6 +68,10 @@ void FocusManager::FocusViewClose(const RefPtr<FocusView>& focusView)
     for (auto iter = focusViewStack_.begin(); iter != focusViewStack_.end();) {
         auto view = (*iter).Upgrade();
         if (view && (view == focusView || view->IsChildFocusViewOf(focusView))) {
+        auto focusHub = view->GetFocusHub();
+        if (focusHub) {
+            focusHub->RemoveFocusScopeIdFromSet();
+        }
             iter = focusViewStack_.erase(iter);
         } else {
             ++iter;

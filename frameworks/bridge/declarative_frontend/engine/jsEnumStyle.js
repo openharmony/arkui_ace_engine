@@ -2895,3 +2895,9 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
 })(StyledStringKey || (StyledStringKey = {}));
+
+let FocusPriority;
+(function (FocusPriority) {
+  FocusPriority[FocusPriority["DEFAULT_FOCUS_PRIOITY"] = 0] = "DEFAULT_FOCUS_PRIOITY";
+  FocusPriority[FocusPriority["PRIOR_FOCUS_PRIOITY"] = 2000] = "PRIOR_FOCUS_PRIOITY";
+})(FocusPriority || (FocusPriority = {}));

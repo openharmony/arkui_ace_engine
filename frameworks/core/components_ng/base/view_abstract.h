@@ -640,6 +640,8 @@ public:
     static BlendApplyType GetBlendApplyType(FrameNode* frameNode);
     static void SetOnTouchIntercept(FrameNode* frameNode, TouchInterceptFunc &&touchInterceptFunc);
     static float GetLayoutWeight(FrameNode* frameNode);
+    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
 
 private:
     static void AddDragFrameNodeToManager();
