@@ -154,6 +154,7 @@ public:
     {
         if (!recreateGesture_) {
             gestures_.clear();
+            backupGestures_.clear();
         }
         gestures_.emplace_back(gesture);
         backupGestures_.emplace_back(gesture);
