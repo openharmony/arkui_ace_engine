@@ -3594,7 +3594,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0104, TestSize.Level1)
  * @tc.desc: Test the function IsInFocusGroup.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0104, TestSize.Level1)
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0105, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode.
