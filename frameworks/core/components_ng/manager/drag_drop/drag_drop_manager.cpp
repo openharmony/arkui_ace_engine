@@ -1784,8 +1784,16 @@ void DragDropManager::GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap)
 void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
 {
     for (auto gatherPixelMap : gatherPixelMaps_) {
-        gatherPixelMap->Scale(scale, scale, AceAntiAliasingOption::HIGH);
-        dragData.shadowInfos.push_back({gatherPixelMap, 0.0f, 0.0f});
+        RefPtr<PixelMap> pixelMapDuplicated = gatherPixelMap;
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixelMapDuplicated = PixelMap::CopyPixelMap(gatherPixelMap);
+        if (!pixelMapDuplicated) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Copy PixelMap is failure!");
+            pixelMapDuplicated = gatherPixelMap;
+        }
+#endif
+        pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
+        dragData.shadowInfos.push_back({pixelMapDuplicated, 0.0f, 0.0f});
     }
     gatherPixelMaps_.clear();
     return;
