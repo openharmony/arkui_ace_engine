@@ -412,7 +412,7 @@ private:
     void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
-        const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage);
+        const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

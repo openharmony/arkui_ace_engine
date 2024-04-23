@@ -152,11 +152,13 @@ public:
         });
     }
 
-    void FireOnDisappear() override
+    void FireDisappearCallback()
     {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to disappear state.", name_.c_str());
         EventHub::FireOnDisappear();
     }
+
+    void FireOnDisappear() override;
 
     void SetOnReady(const std::function<void(RefPtr<NavDestinationContext>)>& onReady)
     {
