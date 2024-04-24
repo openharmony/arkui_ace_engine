@@ -61,11 +61,13 @@
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
+#include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_counter.h"
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_drawing_rendering_context.h"
+#include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
@@ -101,7 +103,6 @@
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
-#include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
@@ -115,8 +116,8 @@
 #include "bridge/declarative_frontend/jsview/js_particle.h"
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
-#include "bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "bridge/declarative_frontend/jsview/js_path2d.h"
+#include "bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
@@ -124,8 +125,8 @@
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "bridge/declarative_frontend/jsview/js_radio.h"
-#include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
+#include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
@@ -820,6 +821,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__CircleShape__", JSCircleShape::JSBind },
     { "__EllipseShape__", JSEllipseShape::JSBind },
     { "__PathShape__", JSPathShape::JSBind },
+    { "ContentSlot", JSContentSlot::JSBind },
+    { "ArkUINativeNodeContent", JSNodeContent::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)

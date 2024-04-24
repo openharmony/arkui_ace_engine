@@ -185,22 +185,25 @@ void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>
     CHECK_NULL_VOID(frameNode_);
     bool isUIConfigUpdate = false;
 
-    NG::SizeF size;
+    float paddingWidth = 0.0f;
+    float paddingHeight = 0.0f;
     if (holder_ == ImageAnalyzerHolder::IMAGE) {
-        size = geometryNode->GetContentSize();
         auto layoutProps = frameNode_->GetLayoutProperty<NG::ImageLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
+        auto padding = layoutProps->CreatePaddingAndBorder();
+        paddingWidth = padding.left.value_or(0) + padding.right.value_or(0);
+        paddingHeight = padding.top.value_or(0) + padding.bottom.value_or(0);
         if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
             analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
             isUIConfigUpdate = true;
         }
-    } else {
-        size = geometryNode->GetFrameSize();
     }
 
-    if (analyzerUIConfig_.contentWidth != size.Width() || analyzerUIConfig_.contentHeight != size.Height()) {
-        analyzerUIConfig_.contentWidth = size.Width();
-        analyzerUIConfig_.contentHeight = size.Height();
+    NG::SizeF frameSize = geometryNode->GetFrameSize();
+    if (analyzerUIConfig_.contentWidth != frameSize.Width() - paddingWidth ||
+        analyzerUIConfig_.contentHeight != frameSize.Height() - paddingHeight) {
+        analyzerUIConfig_.contentWidth = frameSize.Width() - paddingWidth;
+        analyzerUIConfig_.contentHeight = frameSize.Height()- paddingHeight;
         isUIConfigUpdate = true;
     }
 

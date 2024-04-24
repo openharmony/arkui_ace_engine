@@ -1858,6 +1858,40 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
 }
 
+
+HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and geometryNode.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params;
+    SelectParam sparam_one;
+    sparam_one.first = "100";
+    sparam_one.second = "icon_one";
+    params.push_back(sparam_one);
+    selectModelNG.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    auto node = [params](MenuItemConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(params[0].first, config.value_);
+        EXPECT_EQ(params[0].second, config.icon_);
+    return nullptr;
+    };
+    selectModelNG.SetBuilderFunc(select, node);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    for (int i = 0; i < params.size(); i++) {
+        menuPattern->BuildContentModifierNode(i);
+    }
+}
+
 /**
  * @tc.name: SelectControlSizeTest001
  * @tc.desc: Test SelectPattern ControlSize.

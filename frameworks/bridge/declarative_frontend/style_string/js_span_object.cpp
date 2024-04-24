@@ -36,6 +36,25 @@
 
 namespace OHOS::Ace::Framework {
 
+CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
+{
+    auto value = 0.0;
+    auto valueObj = obj->GetProperty("value");
+    if (!valueObj->IsNull() && valueObj->IsNumber()) {
+        value = valueObj->ToNumber<float>();
+    }
+    auto unit = DimensionUnit::VP;
+    auto unitObj = obj->GetProperty("unit");
+    if (!unitObj->IsNull() && unitObj->IsNumber()) {
+        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
+    }
+    CalcDimension size = CalcDimension(value, unit);
+    if (withoutPercent && unit == DimensionUnit::PERCENT) {
+        size = CalcDimension(0, DimensionUnit::VP);
+    }
+    return size;
+}
+
 void JSFontSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSFontSpan>::Declare("TextStyle");
@@ -107,19 +126,9 @@ void JSFontSpan::ParseJsFontSize(const JSRef<JSObject>& obj, Font& font)
         auto fontSize = obj->GetProperty("fontSize");
         CalcDimension size = theme->GetTextStyle().GetFontSize();
         if (!fontSize->IsNull() && fontSize->IsObject()) {
-            auto fontSizeObj = JSRef<JSObject>::Cast(fontSize);
-            auto value = 0.0;
-            auto fontSizeVal = fontSizeObj->GetProperty("value");
-            if (!fontSizeVal->IsNull() && fontSizeVal->IsNumber()) {
-                value = fontSizeVal->ToNumber<float>();
-            }
-            auto unit = DimensionUnit::VP;
-            auto fontSizeUnit = fontSizeObj->GetProperty("unit");
-            if (!fontSizeUnit->IsNull() && fontSizeUnit->IsNumber()) {
-                unit = static_cast<DimensionUnit>(fontSizeUnit->ToNumber<int32_t>());
-            }
-            if (value >= 0 && unit != DimensionUnit::PERCENT) {
-                size = CalcDimension(value, unit);
+            auto sizeTmp = ParseLengthMetrics(fontSize, false);
+            if (sizeTmp.Value() >= 0 && sizeTmp.Unit() != DimensionUnit::PERCENT) {
+                size = sizeTmp;
             }
         }
         font.fontSize = size;
@@ -198,7 +207,7 @@ void JSFontSpan::GetFontSize(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontSize.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().fontSize.value().ToString())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(fontSpan_->GetFont().fontSize.value().ConvertToVp())));
     info.SetReturnValue(ret);
 }
 
@@ -210,8 +219,8 @@ void JSFontSpan::GetFontStyle(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontStyle.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value())))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value())))));
     info.SetReturnValue(ret);
 }
 
@@ -223,8 +232,8 @@ void JSFontSpan::GetFontWeight(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontWeight.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value())))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value())))));
     info.SetReturnValue(ret);
 }
 
@@ -384,23 +393,16 @@ void JSBaselineOffsetSpan::Destructor(JSBaselineOffsetSpan* baselineOffsetSpan)
 
 RefPtr<BaselineOffsetSpan> JSBaselineOffsetSpan::ParseJSBaselineOffsetSpan(const JSRef<JSObject>& obj)
 {
-    auto value = 0.0;
-    auto valueObj = obj->GetProperty("value");
-    if (!valueObj->IsNull() && valueObj->IsNumber()) {
-        value = valueObj->ToNumber<float>();
+    if (obj->IsUndefined()) {
+        return AceType::MakeRefPtr<BaselineOffsetSpan>(CalcDimension(0, DimensionUnit::VP));
     }
-    auto unit = DimensionUnit::VP;
-    auto unitObj = obj->GetProperty("unit");
-    if (!unitObj->IsNull() && unitObj->IsNumber()) {
-        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
-    }
-    return AceType::MakeRefPtr<BaselineOffsetSpan>(CalcDimension(value, unit));
+    return AceType::MakeRefPtr<BaselineOffsetSpan>(ParseLengthMetrics(obj));
 }
 
 void JSBaselineOffsetSpan::GetBaselineOffset(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(baselineOffsetSpan_);
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(baselineOffsetSpan_->GetBaselineOffset().ConvertToPx())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(baselineOffsetSpan_->GetBaselineOffset().ConvertToVp())));
     info.SetReturnValue(ret);
 }
 
@@ -448,23 +450,16 @@ void JSLetterSpacingSpan::Destructor(JSLetterSpacingSpan* letterSpacingSpan)
 
 RefPtr<LetterSpacingSpan> JSLetterSpacingSpan::ParseJSLetterSpacingSpan(const JSRef<JSObject>& obj)
 {
-    auto value = 0.0;
-    auto valueObj = obj->GetProperty("value");
-    if (!valueObj->IsNull() && valueObj->IsNumber()) {
-        value = valueObj->ToNumber<float>();
+    if (obj->IsUndefined()) {
+        return AceType::MakeRefPtr<LetterSpacingSpan>(CalcDimension(0, DimensionUnit::VP));
     }
-    auto unit = DimensionUnit::VP;
-    auto unitObj = obj->GetProperty("unit");
-    if (!unitObj->IsNull() && unitObj->IsNumber()) {
-        unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
-    }
-    return AceType::MakeRefPtr<LetterSpacingSpan>(CalcDimension(value, unit));
+    return AceType::MakeRefPtr<LetterSpacingSpan>(ParseLengthMetrics(obj));
 }
 
 void JSLetterSpacingSpan::GetLetterSpacing(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(letterSpacingSpan_);
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(letterSpacingSpan_->GetLetterSpacing().ConvertToPx())));
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(letterSpacingSpan_->GetLetterSpacing().ConvertToVp())));
     info.SetReturnValue(ret);
 }
 
@@ -559,8 +554,8 @@ void JSGestureSpan::SetGestureSpan(const RefPtr<GestureSpan>& gestureSpan)
 void JSTextShadowSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextShadowSpan>::Declare("TextShadowStyle");
-    JSClass<JSTextShadowSpan>::CustomProperty("textShadow", &JSTextShadowSpan::GetTextShadow,
-        &JSTextShadowSpan::SetTextShadow);
+    JSClass<JSTextShadowSpan>::CustomProperty(
+        "textShadow", &JSTextShadowSpan::GetTextShadow, &JSTextShadowSpan::SetTextShadow);
     JSClass<JSTextShadowSpan>::Bind(globalObj, JSTextShadowSpan::Constructor, JSTextShadowSpan::Destructor);
 }
 
@@ -790,8 +785,18 @@ void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
         return;
     }
     auto imageSize = JSRef<JSObject>::New();
-    imageSize->SetProperty<float>("width", imageAttr->size->width.ConvertToPx());
-    imageSize->SetProperty<float>("height", imageAttr->size->height.ConvertToPx());
+    auto size = imageAttr->size;
+    if (size->width.has_value()) {
+        imageSize->SetProperty<float>("width", size->width->ConvertToPx());
+    } else {
+        imageSize->SetProperty<float>("width", 0.0);
+    }
+
+    if (size->height.has_value()) {
+        imageSize->SetProperty<float>("height", size->height->ConvertToPx());
+    } else {
+        imageSize->SetProperty<float>("height", 0.0);
+    }
     info.SetReturnValue(imageSize);
 }
 

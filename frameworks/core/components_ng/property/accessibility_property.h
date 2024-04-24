@@ -43,7 +43,7 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
-class ACE_EXPORT AccessibilityProperty : public virtual AceType {
+class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
 public:

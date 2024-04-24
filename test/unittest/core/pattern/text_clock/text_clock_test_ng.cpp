@@ -733,22 +733,6 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
     pattern->OnVisibleChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_2);
-
-    /**
-     * @tc.steps: step6. form visible be changed, call the event entry function.
-     * @tc.expected: check whether the value is correct.
-     */
-    utc = UTC_1;
-    pattern->OnFormVisibleChange(false);
-    pattern->UpdateTimeText();
-    EXPECT_EQ(utc, UTC_1);
-    pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeText();
-    EXPECT_EQ(utc, UTC_1);
-    pattern->prevTime_ = "";
-    pattern->OnFormVisibleChange(true);
-    pattern->UpdateTimeText();
-    EXPECT_EQ(utc, UTC_2);
     MockPipelineContext::TearDown();
 }
 
@@ -845,17 +829,13 @@ HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level1)
 
     pattern->OnVisibleChange(false);
     pattern->OnVisibleAreaChange(false);
-    pattern->OnFormVisibleChange(false);
     EXPECT_FALSE(pattern->isSetVisible_);
     EXPECT_FALSE(pattern->isInVisibleArea_);
-    EXPECT_FALSE(pattern->isFormVisible_);
 
     pattern->OnVisibleChange(true);
     pattern->OnVisibleAreaChange(true);
-    pattern->OnFormVisibleChange(true);
     EXPECT_TRUE(pattern->isSetVisible_);
     EXPECT_TRUE(pattern->isInVisibleArea_);
-    EXPECT_TRUE(pattern->isFormVisible_);
 }
 
 /**

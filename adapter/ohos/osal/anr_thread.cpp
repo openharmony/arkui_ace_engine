@@ -20,7 +20,6 @@
 
 namespace OHOS::Ace {
 namespace  {
-const std::string ARKUI_WATCH_DOG("ArkUIWatchdog");
 constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 } // namespace
 
@@ -28,14 +27,14 @@ void AnrThread::Start() {}
 
 void AnrThread::Stop() {}
 
-bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
+bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string name)
 {
     CHECK_NULL_RETURN(task, false);
     if (delayTime > 0) {
         OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(
-            ARKUI_WATCH_DOG, std::move(task), delayTime * SECOND_TO_MILLISECOND);
+            name, std::move(task), delayTime * SECOND_TO_MILLISECOND);
     } else {
-        OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(ARKUI_WATCH_DOG, std::move(task));
+        OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(name, std::move(task));
     }
     return true;
 }

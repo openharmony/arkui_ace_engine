@@ -223,6 +223,8 @@ public:
 
     static RefPtr<ResourceAdapter> CreateNewResourceAdapter(
         const std::string& bundleName, const std::string& moduleName);
+
+    virtual void UpdateColorMode(ColorMode colorMode) {}
 };
 
 } // namespace OHOS::Ace

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_styles.h"
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 
@@ -65,6 +66,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
         UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
+        UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
         UPDATE_TEXT_STYLE(textLineStyle, LineBreakStrategy, SetLineBreakStrategy);
     }
     return textStyle;
@@ -103,6 +105,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
         UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
+        UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
     }
 }
 
@@ -167,6 +170,18 @@ std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
     return text;
 }
 
+std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrategy>& value)
+{
+    std::string text;
+    if (value == LineBreakStrategy::HIGH_QUALITY) {
+        text = "HIGH_QUALITY";
+    } else if (value == LineBreakStrategy::BALANCED) {
+        text = "BALANCED";
+    } else {
+        text = "GREEDY";
+    }
+    return text;
+}
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value)
 {
     std::string text = "";
@@ -174,5 +189,4 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
         text = value.value().ToString();
     }
     return text;
-}
 } // namespace OHOS::Ace::NG

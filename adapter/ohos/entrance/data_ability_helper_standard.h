@@ -43,7 +43,7 @@ class Uri;
 
 namespace OHOS::Ace {
 
-class DataAbilityHelperStandard : public DataAbilityHelper {
+class ACE_FORCE_EXPORT DataAbilityHelperStandard : public DataAbilityHelper {
     DECLARE_ACE_TYPE(DataAbilityHelperStandard, DataAbilityHelper)
 
 public:
@@ -53,6 +53,7 @@ public:
 
     int32_t OpenFile(const std::string& uriStr, const std::string& mode) override;
     void* QueryThumbnailResFromDataAbility(const std::string& uri) override;
+    int32_t ReadMovingPhotoVideo(const std::string &uri) override;
 
 private:
     int32_t OpenFileWithDataAbility(const std::string& uriStr, const std::string& mode);

@@ -3082,7 +3082,7 @@ void RenderSwiper::ResetRotationEndListener()
     auto context = GetContext().Upgrade();
     if (context) {
         auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        taskExecutor.PostDelayedTask(rotationTimer_, ROTATION_INTERVAL_MS);
+        taskExecutor.PostDelayedTask(rotationTimer_, ROTATION_INTERVAL_MS, "ArkUISwiperResetRotationEndListener");
     }
 }
 

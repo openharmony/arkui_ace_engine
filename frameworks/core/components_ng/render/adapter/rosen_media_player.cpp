@@ -118,6 +118,11 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
         LOGI("Source without fd, just return true.");
         return true;
     }
+    return SetSourceByFd(fd);
+}
+
+bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
+{
     if (fd >= 0) {
         // Get size of file.
         struct stat statBuf {};

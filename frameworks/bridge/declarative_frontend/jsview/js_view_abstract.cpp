@@ -53,6 +53,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -2414,7 +2416,8 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         visible = arg->ToNumber<int32_t>();
     }
 
-    if (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE))) {
         visible = 0;
     }
 
@@ -3071,6 +3074,15 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
     return params;
 }
 
+void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto borderRadiusValue = menuOptions->GetProperty("borderRadius");
+    NG::BorderRadiusProperty radius;
+    if (JSViewAbstract::ParseBorderRadius(borderRadiusValue, radius)) {
+        menuParam.borderRadius = radius;
+    }
+}
+
 void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto enableArrowValue = menuOptions->GetProperty("enableArrow");
@@ -3211,6 +3223,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         }
     }
     ParseMenuArrowParam(menuOptions, menuParam);
+    ParseMenuBorderRadius(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
@@ -4771,6 +4784,29 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimensi
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
 }
 
+bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
+        return true;
+    }
+    if (jsValue->IsString()) {
+        auto value = jsValue->ToString();
+        return StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::FP);
+    }
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        double value = jsObj->GetProperty("value")->ToNumber<double>();
+        if (LessNotEqual(value, 0.0f)) {
+            return false;
+        }
+        auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
+        result = CalcDimension(value, unit);
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
 {
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -5613,12 +5649,8 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
     ViewAbstractModel::GetInstance()->SetDraggable(draggable);
 }
 
-void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
+NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsSetDragPreviewOptions", info, checkList)) {
-        return;
-    }
     NG::DragPreviewOption previewOption;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
@@ -5655,6 +5687,19 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
     }
+    
+    JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
+
+    return previewOption;
+}
+
+void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsSetDragPreviewOptions", info, checkList)) {
+        return;
+    }
+    NG::DragPreviewOption previewOption = ParseDragPreviewOptions(info);
     ViewAbstractModel::GetInstance()->SetDragPreviewOptions(previewOption);
 }
 
@@ -6985,14 +7030,12 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     bool isShow = false;
     DoubleBindCallback callback = nullptr;
     ParseSheetIsShow(info, isShow, callback);
-    if (!info[1]->IsObject()) {
+    if (!info[1]->IsObject())
         return;
-    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
     auto builder = obj->GetProperty("builder");
-    if (!builder->IsFunction()) {
+    if (!builder->IsFunction())
         return;
-    }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -7008,28 +7051,30 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
-    std::function<void()> onShowCallback;
-    std::function<void()> onDismissCallback;
-    std::function<void()> onWillShowCallback;
-    std::function<void()> onWillDismissCallback;
+    std::function<void()> onAppearCallback;
+    std::function<void()> onDisappearCallback;
+    std::function<void()> onWillAppearCallback;
+    std::function<void()> onWillDisappearCallback  ;
     std::function<void()> shouldDismissFunc;
+    std::function<void(const int32_t)> onWillDismissCallback;
     std::function<void(const float)> onHeightDidChangeCallback;
     std::function<void(const float)> onDetentsDidChangeCallback;
     std::function<void(const float)> onWidthDidChangeCallback;
     std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
+    std::function<void()> sheetSpringBackFunc;
     if (info.Length() == PARAMETER_LENGTH_THIRD && info[SECOND_INDEX]->IsObject()) {
-        ParseSheetCallback(info[2], onShowCallback, onDismissCallback, shouldDismissFunc, onWillShowCallback,
-            onWillDismissCallback, onHeightDidChangeCallback, onDetentsDidChangeCallback,
-            onWidthDidChangeCallback, onTypeDidChangeCallback);
+        ParseSheetCallback(info[SECOND_INDEX], onAppearCallback, onDisappearCallback, shouldDismissFunc,
+            onWillDismissCallback, onWillAppearCallback, onWillDisappearCallback, onHeightDidChangeCallback,
+            onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback, sheetSpringBackFunc);
         ParseSheetStyle(info[2], sheetStyle);
         ParseSheetTitle(info[2], sheetStyle, titleBuilderFunction);
     }
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
-        std::move(titleBuilderFunction), sheetStyle, std::move(onShowCallback), std::move(onDismissCallback),
-        std::move(shouldDismissFunc), std::move(onWillShowCallback), std::move(onWillDismissCallback),
-        std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
-        std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback));
+        std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
+        std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
+        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
+        std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
 }
 
 void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
@@ -7278,27 +7323,49 @@ void JSViewAbstract::ParseCallback(const JSRef<JSObject>& paramObj,
     }
 }
 
+void JSViewAbstract::ParseLifeCycleCallback(const JSRef<JSObject>& paramObj,
+    std::function<void()>& lifeCycleCallBack, const char* prop)
+{
+    auto callback = paramObj->GetProperty(prop);
+    if (callback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(callback));
+        lifeCycleCallBack = [func = std::move(jsFunc)]() { func->Execute(); };
+    }
+}
+
+void JSViewAbstract::ParseSpringBackCallback(const JSRef<JSObject>& paramObj,
+    std::function<void()>& sheetSpringBack, const char* prop)
+{
+    auto sheetSpringBackCallback = paramObj->GetProperty(prop);
+    if (sheetSpringBackCallback->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(sheetSpringBackCallback));
+        sheetSpringBack = [func = std::move(jsFunc)]() {
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(1);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "springBack", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsSheetSpringBack));
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
+    }
+}
+
 void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::function<void()>& onAppear,
-    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss,
+    std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& onWillAppear,
     std::function<void()>& onWillDisappear, std::function<void(const float)>& onHeightDidChange,
     std::function<void(const float)>& onDetentsDidChange, std::function<void(const float)>& onWidthDidChange,
-    std::function<void(const float)>& onTypeDidChange)
+    std::function<void(const float)>& onTypeDidChange, std::function<void()>& sheetSpringBack)
 {
-    auto showCallback = paramObj->GetProperty("onAppear");
-    auto dismissCallback = paramObj->GetProperty("onDisappear");
     auto shouldDismissFunc = paramObj->GetProperty("shouldDismiss");
-    auto willShowCallback = paramObj->GetProperty("onWillAppear");
-    auto willDismissCallback = paramObj->GetProperty("onWillDisappear");
-    if (showCallback->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(showCallback));
-        onAppear = [func = std::move(jsFunc)]() { func->Execute(); };
-    }
-    if (dismissCallback->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(dismissCallback));
-        onDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
-    }
+    auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
+    ParseLifeCycleCallback(paramObj, onAppear, "onAppear");
+    ParseLifeCycleCallback(paramObj, onDisappear, "onDisappear");
+    ParseLifeCycleCallback(paramObj, onWillAppear, "onWillAppear");
+    ParseLifeCycleCallback(paramObj, onWillDisappear, "onWillDisappear");
     if (shouldDismissFunc->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(shouldDismissFunc));
@@ -7312,16 +7379,21 @@ void JSViewAbstract::ParseSheetCallback(const JSRef<JSObject>& paramObj, std::fu
             func->ExecuteJS(1, &newJSVal);
         };
     }
-    if (willShowCallback->IsFunction()) {
+    if (onWillDismissFunc->IsFunction()) {
         RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willShowCallback));
-        onWillAppear = [func = std::move(jsFunc)]() { func->Execute(); };
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        onWillDismiss = [func = std::move(jsFunc)](const int32_t info) {
+            JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+            objectTemplate->SetInternalFieldCount(1);
+            JSRef<JSObject> dismissObj = objectTemplate->NewInstance();
+            dismissObj->SetPropertyObject(
+                "dismiss", JSRef<JSFunc>::New<FunctionCallback>(JSViewAbstract::JsDismissSheet));
+            dismissObj->SetProperty<int32_t>("reason", info);
+            JSRef<JSVal> newJSVal = JSRef<JSObject>::Cast(dismissObj);
+            func->ExecuteJS(1, &newJSVal);
+        };
     }
-    if (willDismissCallback->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(willDismissCallback));
-        onWillDisappear = [func = std::move(jsFunc)]() { func->Execute(); };
-    }
+    ParseSpringBackCallback(paramObj, sheetSpringBack, "onWillSpringBackWhenDismiss");
     ParseCallback(paramObj, onHeightDidChange, "onHeightDidChange");
     ParseCallback(paramObj, onDetentsDidChange, "onDetentsDidChange");
     ParseCallback(paramObj, onWidthDidChange, "onWidthDidChange");
@@ -7365,6 +7437,12 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissSheet(panda::JsiRuntime
 panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissContentCover(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     ViewAbstractModel::GetInstance()->DismissContentCover();
+    return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+panda::Local<panda::JSValueRef> JSViewAbstract::JsSheetSpringBack(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ViewAbstractModel::GetInstance()->SheetSpringBack();
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 
@@ -9195,6 +9273,36 @@ bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiu
         return false;
     }
     return true;
+}
+
+void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& option)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyImageModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (globalFuncRef->IsFunction()) {
+        auto modifierObj = obj->GetProperty("modifier");
+        if (modifierObj->IsUndefined()) {
+            option.onApply = nullptr;
+        } else {
+            RefPtr<JsFunction> jsFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                               modifier = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto node = frameNode.Upgrade();
+                JSRef<JSVal> params[SECOND_INDEX];
+                params[0] = modifier;
+                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+                PipelineContext::SetCallBackNode(node);
+                func->ExecuteJS(SECOND_INDEX, params);
+            };
+            option.onApply = onApply;
+        }
+    }
 }
 
 void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties)

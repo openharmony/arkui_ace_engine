@@ -813,7 +813,7 @@ void DragDropManager::TryGetDataBackGround(
                         CHECK_NULL_VOID(dragDropManager);
                         dragDropManager->DoDropAction(dragFrameNode, point, result, udKey);
                     },
-                    TaskExecutor::TaskType::UI);
+                    TaskExecutor::TaskType::UI, "ArkUIDragDropAction");
             } else {
                 // first temp get udmfData failed, prepare to retryGetData.
                 taskScheduler->PostDelayedTask(
@@ -822,10 +822,10 @@ void DragDropManager::TryGetDataBackGround(
                         CHECK_NULL_VOID(dragDropManager);
                         dragDropManager->TryGetDataBackGround(dragFrameNode, point, udKey, count + 1);
                     },
-                    TaskExecutor::TaskType::UI, MAX_RETRY_DURATION);
+                    TaskExecutor::TaskType::UI, MAX_RETRY_DURATION, "ArkUIDragDropGetDataBackground");
             }
         },
-        TaskExecutor::TaskType::BACKGROUND);
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIDragDropGetDataBackground");
 }
 
 bool DragDropManager::CheckRemoteData(

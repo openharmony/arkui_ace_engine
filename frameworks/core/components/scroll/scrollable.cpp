@@ -726,7 +726,7 @@ void Scrollable::SetDelayedTask()
             drag->SetContinuousDragStatus(false);
         }
     });
-    taskExecutor.PostDelayedTask(task_, DRAG_INTERVAL_TIME);
+    taskExecutor.PostDelayedTask(task_, DRAG_INTERVAL_TIME, "ArkUIScrollDragInterval");
 }
 
 double Scrollable::ComputeCap(int dragCount)

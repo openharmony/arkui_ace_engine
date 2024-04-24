@@ -69,7 +69,7 @@ void NavigatorEventHub::SetActive(bool active)
                 CHECK_NULL_VOID(eventHub);
                 eventHub->NavigatePage();
             },
-            TaskExecutor::TaskType::JS);
+            TaskExecutor::TaskType::JS, "ArkUINavigatorNavigatePage");
     }
     active_ = active;
 }

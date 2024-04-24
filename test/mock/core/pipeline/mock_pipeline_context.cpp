@@ -399,6 +399,8 @@ void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 
 void PipelineContext::FlushPipelineImmediately() {}
 
+void PipelineContext::RebuildFontNode() {}
+
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t /* recvTime */, uint64_t /* timeStamp */)
 {
     return nullptr;
@@ -416,11 +418,7 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, co
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
-void PipelineContext::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
-{}
-void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId) {}
 void PipelineContext::HandleVisibleAreaChangeEvent() {}
-void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible) {}
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
 {
@@ -662,11 +660,13 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return 1;
 }
 
-void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostSyncEvent(
+    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {

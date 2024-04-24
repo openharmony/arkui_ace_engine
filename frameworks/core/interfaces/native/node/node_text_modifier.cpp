@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_LINE_HEIGHT = Dimension(0.0, DimensionUnit::PX);
+constexpr Dimension DEFAULT_LINE_SPACING = Dimension(0.0, DimensionUnit::PX);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -757,6 +758,27 @@ void ResetTextFontFeature(ArkUINodeHandle node)
     std::string strValue = "";
     TextModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
+
+void SetTextLineSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+}
+
+float GetTextLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return TextModelNG::GetLineSpacing(frameNode);
+}
+
+void ResetTextLineSpacing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -840,7 +862,10 @@ const ArkUITextModifier* GetTextModifier()
         GetTextWordBreak,
         GetTextEllipsisMode,
         SetTextFontFeature,
-        ResetTextFontFeature
+        ResetTextFontFeature,
+        SetTextLineSpacing,
+        GetTextLineSpacing,
+        ResetTextLineSpacing
     };
 
     return &modifier;

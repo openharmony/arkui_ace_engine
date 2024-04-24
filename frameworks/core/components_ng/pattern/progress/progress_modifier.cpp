@@ -1635,13 +1635,13 @@ Gradient ProgressModifier::CreateCapsuleGradient() const
     return gradient;
 }
 
-bool ProgressModifier::PostTask(const TaskExecutor::Task& task)
+bool ProgressModifier::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void ProgressModifier::SetStrokeRadius(float strokeRaidus)

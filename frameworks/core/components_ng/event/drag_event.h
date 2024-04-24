@@ -210,7 +210,11 @@ public:
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
     static RefPtr<FrameNode> CreateBadgeTextNode(
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
-    
+private:
+    void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
+    void ApplyNewestOptionExecutedFromModifierToNode(
+        const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode);
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     WeakPtr<FrameNode> itemFatherNode_;

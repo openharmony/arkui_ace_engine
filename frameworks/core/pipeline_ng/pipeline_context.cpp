@@ -875,6 +875,13 @@ void PipelineContext::FlushPipelineImmediately()
     FlushPipelineWithoutAnimation();
 }
 
+void PipelineContext::RebuildFontNode()
+{
+    if (fontManager_) {
+        fontManager_->RebuildFontNodeNG();
+    }
+}
+
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     ACE_FUNCTION_TRACE();
@@ -1149,7 +1156,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         callback();
         FlushBuild();
     } else {
-        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
+        taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUISurfaceChanged");
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
@@ -1735,7 +1742,7 @@ bool PipelineContext::OnBackPressed()
             hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
             hasOverlay |= overlay->RemoveOverlay(true);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
     if (hasOverlay) {
         LOGI("popup consumed backpressed event");
         return true;
@@ -1769,7 +1776,7 @@ bool PipelineContext::OnBackPressed()
                 result = true;
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIBackPressedFindNavigationGroup");
 
     if (result) {
         // user accept
@@ -1786,7 +1793,7 @@ bool PipelineContext::OnBackPressed()
             }
             result = frontend->OnBackPressed();
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIBackPressed");
 
     if (result) {
         // user accept
@@ -2654,31 +2661,6 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
         frameNode->TriggerVisibleAreaChangeCallback();
-    }
-}
-
-void PipelineContext::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
-{
-    CHECK_NULL_VOID(node);
-    onFormVisibleChangeNodeIds_.emplace(node->GetId());
-    onFormVisibleChangeEvents_.insert_or_assign(node->GetId(), callback);
-}
-
-void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
-{
-    onFormVisibleChangeNodeIds_.erase(nodeId);
-    auto iter = onFormVisibleChangeEvents_.find(nodeId);
-    if (iter != onFormVisibleChangeEvents_.end()) {
-        onFormVisibleChangeEvents_.erase(iter);
-    }
-}
-
-void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
-{
-    for (auto& pair : onFormVisibleChangeEvents_) {
-        if (pair.second) {
-            pair.second(isVisible);
-        }
     }
 }
 

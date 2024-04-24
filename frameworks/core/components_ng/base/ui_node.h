@@ -55,7 +55,7 @@ class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
 
 // UINode is the base class of FrameNode and SyntaxNode.
-class ACE_EXPORT UINode : public virtual AceType {
+class ACE_FORCE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
@@ -675,7 +675,6 @@ private:
     uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
-    static thread_local int64_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;

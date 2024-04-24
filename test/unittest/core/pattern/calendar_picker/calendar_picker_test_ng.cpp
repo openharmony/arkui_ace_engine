@@ -1668,7 +1668,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest045, TestSize.Level1)
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
     std::function<void()> task;
-    pickerPattern->PostTaskToUI(task);
+    pickerPattern->PostTaskToUI(task, "ArkUITask");
 }
 
 /**
@@ -3445,5 +3445,82 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerLayoutAlgorithmTest002, TestSize.Le
     EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
     calendarPickerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
+}
+/**
+ * @tc.name: CalendarPickerUpdateButtonStyles001
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerUpdateButtonStyles001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W100;
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval = buttonLayoutProperty->GetFontWeightValue();
+
+    EXPECT_EQ(testval, FontWeight::W100);
+}
+/**
+ * @tc.name: CalendarDialogViewTest0050
+ * @tc.desc: Show Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest0050, TestSize.Level1)
+{
+    CalendarPickerTestNg::SetUpTestCase();
+
+    CalendarDialogView calendarDialogView;
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W100;
+    buttonInfos.push_back(info1);
+
+    auto dialogNode = calendarDialogView.Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -77,6 +77,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
+const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
+    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
@@ -321,6 +323,24 @@ void JSTextField::SetTextAlign(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
         TextFieldModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     }
+}
+
+void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(LINE_BREAK_STRATEGY_TYPES.size())) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetLineBreakStrategy(LINE_BREAK_STRATEGY_TYPES[index]);
 }
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
@@ -580,6 +600,18 @@ void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 
     bool isShowPasswordIcon = jsValue->ToBoolean();
     TextFieldModel::GetInstance()->SetShowPasswordIcon(isShowPasswordIcon);
+}
+
+void JSTextField::ShowPasswordText(const JSCallbackInfo& info)
+{
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetShowPasswordText(false);
+        return;
+    }
+
+    bool showPassword = tmpInfo->ToBoolean();
+    TextFieldModel::GetInstance()->SetShowPasswordText(showPassword);
 }
 
 void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
@@ -911,6 +943,14 @@ void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
     CHECK_NULL_VOID(jsValue->IsFunction());
     JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
+void JSTextField::SetOnSecurityStateChange(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    JsEventCallback<void(bool)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+    TextFieldModel::GetInstance()->SetOnSecurityStateChange(std::move(callback));
 }
 
 void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
@@ -1510,6 +1550,18 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     TextFieldModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!ParseLengthMetricsToDimension(info[0], value)) {
+        value.Reset();
+    }
+    if (value.IsNegative()) {
+        value.Reset();
+    }
+    TextFieldModel::GetInstance()->SetLineSpacing(value);
 }
 
 void JSTextField::SetFontFeature(const JSCallbackInfo& info)

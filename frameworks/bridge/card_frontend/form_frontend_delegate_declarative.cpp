@@ -52,7 +52,7 @@ UIContentErrorCode FormFrontendDelegateDeclarative::RunCard(const std::string& u
             CHECK_NULL_VOID(pageRouterManager);
             pageRouterManager->RunCard(url, params, cardId, entryPoint);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIFormFrontendRunCard");
     return UIContentErrorCode::NO_ERRORS;
 #endif
 }
@@ -72,6 +72,6 @@ void FormFrontendDelegateDeclarative::FireCardAction(const std::string& action)
                 context->OnActionEvent(action);
             }
         },
-        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+        TaskExecutor::TaskType::UI, "ArkUIFormFrontendFireAction"); // eTSCard UI == Main JS/UI/PLATFORM
 }
 } // namespace OHOS::Ace::Framework

@@ -161,7 +161,7 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
     auto spaceX = viewBox.Width() - realSize.Width() * scaleValue;
     auto spaceY = viewBox.Height() - realSize.Height() * scaleValue;
     auto offsetX = viewBox.Left() + spaceX * 0.5f; // 0.5f Align Center
-    auto offsetY = viewBox.Right() + spaceY * 0.5f; // 0.5f Align Center
+    auto offsetY = viewBox.Top() + spaceY * 0.5f; // 0.5f Align Center
     return RSRect(offsetX, offsetY, realSize.Width() * scaleValue + offsetX, realSize.Height() * scaleValue + offsetY);
 }
 } // namespace OHOS::Ace::NG

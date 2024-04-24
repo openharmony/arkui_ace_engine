@@ -227,6 +227,21 @@ void FontManager::UnRegisterCallback(const WeakPtr<RenderNode>& node)
     }
 }
 
+void FontManager::RebuildFontNodeNG()
+{
+    for (auto iter = fontNodesNG_.begin(); iter != fontNodesNG_.end();) {
+        auto fontNode = iter->Upgrade();
+        CHECK_NULL_VOID(fontNode);
+        auto uiNode = DynamicCast<NG::UINode>(fontNode);
+        if (uiNode) {
+            uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
+            ++iter;
+        } else {
+            iter = fontNodesNG_.erase(iter);
+        }
+    }
+}
+
 void FontManager::UpdateFontWeightScale()
 {
     float fontWeightScale = SystemProperties::GetFontWeightScale();

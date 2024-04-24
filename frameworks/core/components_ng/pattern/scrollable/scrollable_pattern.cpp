@@ -465,6 +465,12 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
+    scrollable->SetOnContinuousSliding([weak = WeakClaim(this)]() -> double {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        return pattern->GetMainContentSize();
+    });
+
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);

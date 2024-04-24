@@ -392,6 +392,16 @@ public:
         hasHeightOverride_ = hasHeightOverride;
     }
 
+    const Dimension& GetLineSpacing() const
+    {
+        return lineSpacing_;
+    }
+
+    void SetLineSpacing(const Dimension& lineSpacing)
+    {
+        lineSpacing_ = lineSpacing;
+    }
+
     bool HasHeightOverride() const
     {
         return hasHeightOverride_;
@@ -666,6 +676,7 @@ public:
         JSON_STRING_PUT_STRINGABLE(jsonValue, wordSpacing_);
         JSON_STRING_PUT_STRINGABLE(jsonValue, textIndent_);
         JSON_STRING_PUT_STRINGABLE(jsonValue, letterSpacing_);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, lineSpacing_);
 
         JSON_STRING_PUT_INT(jsonValue, fontWeight_);
         JSON_STRING_PUT_INT(jsonValue, fontStyle_);
@@ -707,6 +718,7 @@ private:
     Dimension wordSpacing_;
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
     Dimension letterSpacing_;
+    Dimension lineSpacing_;
     FontWeight fontWeight_ { FontWeight::NORMAL };
     FontStyle fontStyle_ { FontStyle::NORMAL };
     TextBaseline textBaseline_ { TextBaseline::ALPHABETIC };
