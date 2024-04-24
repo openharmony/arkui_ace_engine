@@ -96,7 +96,7 @@ public:
         makeFunc_ = std::move(makeFunc);
     }
 
-    bool UseContentModifier()
+    bool UseContentModifier() const
     {
         return contentModifierNode_ != nullptr;
     }
