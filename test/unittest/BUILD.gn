@@ -22,6 +22,7 @@ group("unittest") {
     deps += [
       ":linux_unittest",
       "base:base_unittest",
+      "bridge:bridge_unittest",
       "core:core_unittest",
       "interfaces:interfaces_unittest",
     ]
