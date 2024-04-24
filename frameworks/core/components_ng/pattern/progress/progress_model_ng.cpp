@@ -37,7 +37,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
