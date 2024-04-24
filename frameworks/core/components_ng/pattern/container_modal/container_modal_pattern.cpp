@@ -288,7 +288,6 @@ void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& control
         CHECK_NULL_VOID(pipeline);
         auto windowManager = pipeline->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
-
         // touch the title to move the floating window
         auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent&) {
             auto windowManager = wk.Upgrade();
