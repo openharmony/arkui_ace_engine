@@ -37,6 +37,7 @@ ArkUINodeHandle CreateFrameNode()
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     node->SetExclusiveEventForChild(true);
+    node->SetIsArkTsFrameNode(true);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
