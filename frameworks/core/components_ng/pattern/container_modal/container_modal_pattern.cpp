@@ -38,13 +38,13 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
-void UpdateRowHeight(const RefPtr<FrameNode>& row, int height)
+void UpdateRowHeight(const RefPtr<FrameNode>& row, Dimension height)
 {
     CHECK_NULL_VOID(row);
     auto layoutProperty = row->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height, DimensionUnit::PX)));
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
     row->MarkModifyDone();
     row->MarkDirtyNode();
 }
@@ -554,22 +554,18 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (height < 0) {
         height = 0;
     }
     titleHeight_ = Dimension(Dimension(height, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
-    auto column = host->GetChildAtIndex(0);
-    CHECK_NULL_VOID(column);
     auto customTitleRow = GetCustomTitleRow();
-    UpdateRowHeight(customTitleRow, height);
+    UpdateRowHeight(customTitleRow, titleHeight_);
     auto floatingTitleRow = GetFloatingTitleRow();
-    UpdateRowHeight(floatingTitleRow, height);
+    UpdateRowHeight(floatingTitleRow, titleHeight_);
     auto controlButtonsRow = GetControlButtonRow();
-    UpdateRowHeight(controlButtonsRow, height);
+    UpdateRowHeight(controlButtonsRow, titleHeight_);
     auto gestureRow = GetGestureRow();
-    UpdateRowHeight(gestureRow, height);
+    UpdateRowHeight(gestureRow, titleHeight_);
     CallButtonsRectChange();
 }
 
