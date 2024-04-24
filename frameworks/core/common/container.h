@@ -500,6 +500,8 @@ public:
         return appBar_;
     }
 
+    virtual void TerminateUIExtension() {}
+
     template<ContainerType type>
     static int32_t GenerateId();
 
