@@ -342,6 +342,32 @@ class LocalStorage extends NativeLocalStorage {
         return true;
     }
     /**
+     * Obtain a handle or an alias to LocalStorage property with given name.
+     *
+     * @param propName LocalStorage property name
+     * @returns AbstractProperty object is property with given name exists
+     * undefined otherwise
+     */
+    ref(propName) {
+        return this.storage_.get(propName);
+    }
+    /**
+     * Obtain a handle or an alias to LocalStorage property with given name.
+     *
+     * If property does not exist in LocalStorage, create it with given default value.
+     *
+     * @param propName LocalStorage property name
+     * @param defaultValue If property does not exist in LocalStorage,
+     *        create it with given default value.
+     * @returns AbstractProperty object
+     */
+    setAndRef(propName, defaultValue) {
+        if (!this.has(propName)) {
+            this.addNewPropertyInternal(propName, defaultValue);
+        }
+        return this.storage_.get(propName);
+    }
+    /**
      * Internal use helper function to create and initialize a new property.
      * caller needs to be all the checking beforehand
      * @param propName
@@ -642,6 +668,33 @@ class AppStorage extends LocalStorage {
         else {
             stateMgmtConsole.error("AppStorage.createNewInstance(..): instance exists already, internal error!");
         }
+    }
+    /**
+     * Obtain a handle or an alias to AppStorage property with given name.
+     *
+     * @param propName AppStorage property name
+     * @returns AbstractProperty object is property with given name exists
+     * undefined otherwise
+     *
+     * @since 12
+     */
+    static ref(propName) {
+        return AppStorage.getOrCreate().ref(propName);
+    }
+    /**
+     * Obtain a handle or an alias to AppStorage property with given name.
+     *
+     * If property does not exist in AppStorage, create it with given default value.
+     *
+     * @param propName LocalStorage property name
+     * @param defaultValue If property does not exist in AppStorage,
+     *        create it with given default value.
+     * @returns AbstractProperty object
+     *
+     * @since 12
+     */
+    static setAndRef(propName, defaultValue) {
+        return AppStorage.getOrCreate().setAndRef(propName, defaultValue);
     }
     /**
     * create and return a two-way sync "(link") to named property
