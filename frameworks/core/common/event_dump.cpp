@@ -49,6 +49,7 @@ TouchPointSnapshot::TouchPointSnapshot(const TouchEvent& event)
     screenPoint = OffsetF(event.screenX, event.screenY);
     type = event.type;
     timestamp = GetCurrentTimestamp();
+    isInjected = event.isInjected;
 }
 
 void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -58,7 +59,8 @@ void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLi
         << "point: " << point.ToString() << ", "
         << "screenPoint: " << screenPoint.ToString() << ", "
         << "type: " << GestureSnapshot::TransTouchType(type) << ", "
-        << "timestamp: " << ConvertTimestampToStr(timestamp);
+        << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
+        << "isInjected: " << isInjected;
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 
