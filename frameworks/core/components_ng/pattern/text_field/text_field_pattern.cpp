@@ -6020,7 +6020,7 @@ std::optional<bool> TextFieldPattern::IsShowPasswordText() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowPasswordTextValue();
+    return layoutProperty->GetShowPasswordText();
 }
 
 bool TextFieldPattern::IsShowCancelButtonMode() const
