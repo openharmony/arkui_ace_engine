@@ -3453,6 +3453,7 @@ void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, 
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+    customTitleSettedShow_ = customTitleSettedShow;
 }
 
 void PipelineContext::SetContainerModalTitleHeight(int32_t height)
@@ -3606,4 +3607,10 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
     return true;
 }
 
+bool PipelineContext::IsContainerModalVisible()
+{
+    auto windowManager = GetWindowManager();
+    bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    return isFloatingWindow && customTitleSettedShow_;
+}
 } // namespace OHOS::Ace::NG
