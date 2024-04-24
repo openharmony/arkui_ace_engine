@@ -616,8 +616,8 @@ bool MarqueePattern::IsRunMarquee()
     float padding = 0.0f;
     if (layoutProperty->GetPaddingProperty()) {
         const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-        padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().Value() +
-            paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().Value();
+        padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
+            paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
     }
     return GreatOrEqual(textWidth + padding, marqueeSize.Width());
 }
