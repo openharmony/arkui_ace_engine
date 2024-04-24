@@ -49,12 +49,16 @@ void RosenRenderParticle::updateEmitterPosition(
     auto renderContext = frameNode->GetRenderContext();
     auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
     CHECK_NULL_VOID(rsNode);
+    std::vector<std::shared_ptr<Rosen::EmitterUpdater>> emitUpdater;
     for (const auto& prop : props) {
         std::shared_ptr<Rosen::EmitterUpdater> updater = std::make_shared<Rosen::EmitterUpdater>(prop.index,
             prop.position ? std::optional<Rosen::Vector2f>({ prop.position->x, prop.position->y }) : std::nullopt,
             prop.size ? std::optional<Rosen::Vector2f>({ prop.size->x, prop.size->y }) : std::nullopt,
             prop.emitRate ? prop.emitRate : std::nullopt);
-        rsNode->SetEmitterUpdater(updater);
+        emitUpdater.push_back(updater);
+    }
+    if (!emitUpdater.empty()) {
+        rsNode->SetEmitterUpdater(emitUpdater);
     }
 }
 } // namespace OHOS::Ace::NG
