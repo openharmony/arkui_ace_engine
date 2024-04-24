@@ -18,6 +18,7 @@
 #include "jsnapi_expo.h"
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
@@ -26,6 +27,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
+#include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
@@ -1072,4 +1074,44 @@ ArkUINativeModuleValue FrameNodeBridge::MarkDirty(ArkUIRuntimeCallInfo* runtimeC
     GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, dirtyFlag);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue FrameNodeBridge::CreateNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto content = Referenced::MakeRefPtr<NodeContent>();
+    return NativeUtilsBridge::CreateStrongRef(vm, content);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::AddFrameNodeToNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->addChild(nativeContent, nativeNode);
+    GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
+    if (result != ERROR_CODE_NO_ERROR) {
+        LOGW("AddFrameNodeToNodeContent failed error:%{public}d", result);
+    }
+    return panda::BooleanRef::New(vm, !result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::RemoveFrameNodeFromNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
+    GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->removeChild(nativeContent, nativeNode);
+    if (result != ERROR_CODE_NO_ERROR) {
+        LOGW("RemoveFrameNodeFromNodeContent failed error:%{public}d", result);
+    }
+    return panda::BooleanRef::New(vm, !result);
+}
+
 } // namespace OHOS::Ace::NG

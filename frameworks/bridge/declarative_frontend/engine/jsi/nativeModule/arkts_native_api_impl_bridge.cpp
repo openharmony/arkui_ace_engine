@@ -2591,6 +2591,12 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RegisterFrameCallback));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "markDirty"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::MarkDirty));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNodeContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateNodeContent));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "addFrameNodeToNodeContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AddFrameNodeToNodeContent));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeFrameNodeFromNodeContent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveFrameNodeFromNodeContent));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 
