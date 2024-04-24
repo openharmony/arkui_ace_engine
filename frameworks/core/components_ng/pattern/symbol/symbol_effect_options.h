@@ -74,13 +74,13 @@ public:
 
     void SetTriggerNum(uint32_t triggerNum)
     {
-        if(!triggerNum_.has_value()) {
+        if (!triggerNum_.has_value()) {
             isTriggerNumChanged_ = true;
-        }else{
-            uint32_t lastTriggerNum = triggerNum_.Value();
+        } else {
+            uint32_t lastTriggerNum = triggerNum_.value();
             if (triggerNum != lastTriggerNum){
                 isTriggerNumChanged_ = true;
-            }else{
+            } else {
                 isTriggerNumChanged_ = false;
             }
         }
@@ -120,7 +120,7 @@ public:
     std::optional<bool> GetIsActive() const
     {
         return isActive_;
-    }   
+    }
     
     bool GetIsTxtActive() const
     {
@@ -148,7 +148,9 @@ public:
         json->Put("commonSubType", static_cast<int32_t>(commonSubType_.value_or(CommonSubType::DOWN)));
         json->Put("fillStyle", static_cast<int32_t>(fillStyle_.value_or(FillStyle::CUMULATIVE)));
         json->Put("repeatCount", repeatCount_);
-        json->Put("isActive", isActive_);
+        json->Put("isTxtActive", isTxtActive_);
+        json->Put("isTriggerNumChanged", isTriggerNumChanged_.value_or(false));
+        json->Put("isActive", isActive_.value_or(false));
         return json->ToString();
     }
 

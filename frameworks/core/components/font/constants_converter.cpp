@@ -36,6 +36,8 @@ namespace OHOS::Ace::Constants {
 namespace {
 const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
+constexpr uint32_t SCALE_EFFECT = 2; 
+constexpr uint32_t NONE_EFFECT = 0; 
 } // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -538,8 +540,8 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle)
         txtStyle.symbol.SetRepeatCount(options.GetRepeatCount());
     } else {
         auto effectStrategy = textStyle.GetEffectStrategy();
-        if (effectStrategy < 0 || effectStrategy > 2) {
-            effectStrategy = 0;
+        if (effectStrategy < NONE_EFFECT || effectStrategy > SCALE_EFFECT) {
+            effectStrategy = NONE_EFFECT;
         }
         txtStyle.symbol.SetSymbolEffect(effectStrategy);
         txtStyle.symbol.SetAnimationStart(true);
@@ -776,8 +778,8 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
     } else {
         auto effectStrategyValue = textStyle.GetEffectStrategy();
-        if (effectStrategyValue < 0 || effectStrategyValue > 2) {
-            effectStrategyValue = 0;
+        if (effectStrategyValue < NONE_EFFECT || effectStrategyValue > SCALE_EFFECT) {
+            effectStrategyValue = NONE_EFFECT;
         }
         txtStyle.symbol.SetSymbolEffect(effectStrategyValue);
         txtStyle.symbol.SetAnimationStart(true);

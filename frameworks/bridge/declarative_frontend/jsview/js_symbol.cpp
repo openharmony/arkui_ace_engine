@@ -150,7 +150,7 @@ void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
     parseSymbolEffect(symbolEffectObj, symbolEffectOptions);
 
     if (info.Length() > 1 && !info[1]->IsUndefined) {
-        parseSymbolSwitch(info[1],symbolEffectOptions);
+        parseSymbolSwitch(info[1], symbolEffectOptions);
     }
 
     setDefaultOptions(symbolEffectOptions);
@@ -211,28 +211,28 @@ void JSSymbol::parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptio
         auto isActive = symbolEffectOptions.GetIsActive();
         if (symbolEffectOptions.IsTriggerChanged().has_value()) {
             auto isTriggerChanged = symbolEffectOptions.IsTriggerChanged().value();
-            if(isActive && isTriggerChanged) {
+            if (isActive && isTriggerChanged) {
                 // isActive=true &&  triggerChanged = true
                 symbolEffectOptions.SetIsTxtActive(true);
                 symbolEffectOptions.SetRepeatCount(-1);
-            }else if(!isActive && isTriggerChanged) {
+            } else if(!isActive && isTriggerChanged) {
                 // isActive=false &&  triggerChanged = true
                 symbolEffectOptions.SetIsTxtActive(true);
                 symbolEffectOptions.SetRepeatCount(1);
-            }else{
+            } else {
                 // sActive=false/true &&  triggerChanged = false
                 symbolEffectOptions.SetIsTxtActive(false);
             }
-        }else{
+        } else {
            // 只设isActive = true/false
             symbolEffectOptions.SetIsTxtActive(isActive);
             symbolEffectOptions.SetRepeatCount(-1);
         }
-    }else if (symbolEffectOptions.GetTriggerNum().has_value()) {
+    } else if (symbolEffectOptions.GetTriggerNum().has_value()) {
         // 只设triggerValue
         symbolEffectOptions.SetIsTxtActive(symbolEffectOptions.IsTriggerChanged().value_or(false));
         symbolEffectOptions.SetRepeatCount(1);
-    }else{
+    } else {
         // isActive && triggerValue未设置,默认不播放
         symbolEffectOptions.SetIsTxtActive(false);
     }
