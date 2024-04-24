@@ -24,17 +24,26 @@ void SwiperTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
-
+    // set button theme
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
-
-    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    // set swiper indicator theme
+    auto resAdapter = RefPtr<ResourceAdapter>();
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
+    std::unordered_map<std::string, ResValueWrapper> attributes;
+    ResValueWrapper resValueWrapper;
+    resValueWrapper.type = ThemeConstantsType::THEME;
+    resValueWrapper.value = AceType::MakeRefPtr<ThemeStyle>();
+    attributes.insert(std::pair<std::string, ResValueWrapper>(THEME_PATTERN_SWIPER, resValueWrapper));
+    themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
+    themeConstants->currentThemeStyle_->SetAttributes(attributes);
+    // call Builder::Build to trigger ParsePattern to return error themeValue
+    auto swiperIndicatorTheme = SwiperIndicatorTheme::Builder().Build(themeConstants);
     swiperIndicatorTheme->color_ = Color::FromString("#182431");
     swiperIndicatorTheme->selectedColor_ = Color::FromString("#007DFF");
     swiperIndicatorTheme->hoverArrowBackgroundColor_ = HOVER_ARROW_COLOR;
     swiperIndicatorTheme->clickArrowBackgroundColor_ = CLICK_ARROW_COLOR;
     swiperIndicatorTheme->arrowDisabledAlpha_ = ARROW_DISABLED_ALPHA;
-    swiperIndicatorTheme->indicatorPaddingDot_ = INDICATOR_PADDING_HOVER;
     swiperIndicatorTheme->size_ = Dimension(6.f);
     TextStyle textStyle;
     textStyle.SetTextColor(INDICATOR_TEXT_FONT_COLOR);
