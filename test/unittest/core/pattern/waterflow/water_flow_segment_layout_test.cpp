@@ -1139,15 +1139,14 @@ HWTEST_F(WaterFlowSegmentTest, Segmented007, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_4);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.0f/3, 100)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(400.0f/3*2, 0, 400.0f/3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, 400.0f / 3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(400.0f / 3 * 2, 0, 400.0f / 3, 100)));
 
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(400.0f/3*2, 0, 400.0f/3, 100)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0, 0, 400.0f/3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(400.0f / 3 * 2, 0, 400.0f / 3, 100)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(0, 0, 400.0f / 3, 100)));
 }
-
 
 /**
  * @tc.name: CheckHeight001
@@ -1635,10 +1634,109 @@ HWTEST_F(WaterFlowSegmentTest, Replace002, TestSize.Level1)
     secObj->ChangeData(0, 3, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    
+
     EXPECT_EQ(info.currentOffset_, -300.0f);
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.storedOffset_, -95);
+}
+
+/**
+ * @tc.name: Replace003
+ * @tc.desc: Layout WaterFlow and then add item in last section.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Replace003, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+    UpdateCurrentOffset(-2000.0f);
+    EXPECT_EQ(info.segmentStartPos_[2], 613.0f);
+    EXPECT_EQ(info.currentOffset_, -2000.0f);
+    EXPECT_EQ(info.startIndex_, 20);
+    EXPECT_EQ(info.endIndex_, 26);
+    EXPECT_EQ(info.itemInfos_.size(), 27);
+    EXPECT_EQ(info.endPosArray_.size(), 26);
+
+    AddItems(10);
+    frameNode_->ChildrenUpdatedFrom(37);
+    std::vector<WaterFlowSections::Section> newSection { SECTION_7[2] };
+    newSection[0].itemsCount = 40;
+    secObj->ChangeData(2, 1, newSection);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    EXPECT_EQ(info.itemInfos_.size(), 27);
+    EXPECT_EQ(info.items_[2].at(0).size(), 20);
+    EXPECT_EQ(info.endPosArray_.size(), 26);
+    EXPECT_EQ(info.segmentStartPos_[2], 613.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 3);
+    EXPECT_EQ(info.segmentTails_.size(), 3);
+    EXPECT_EQ(info.segmentTails_[2], 46);
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.currentOffset_, -2000.0f);
+    EXPECT_EQ(info.startIndex_, 20);
+}
+
+/**
+ * @tc.name: Replace004
+ * @tc.desc: Layout WaterFlow and then add item in last section.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Replace004, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(6);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_9);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+
+    AddItems(10);
+    frameNode_->ChildrenUpdatedFrom(6);
+    std::vector<WaterFlowSections::Section> newSection { SECTION_9[0] };
+    newSection[0].itemsCount = 16;
+    secObj->ChangeData(0, 1, newSection);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    EXPECT_EQ(info.itemInfos_.size(), 6);
+    EXPECT_EQ(info.items_[0].at(0).size(), 2);
+    EXPECT_EQ(info.endPosArray_.size(), 2);
+    EXPECT_EQ(info.segmentStartPos_[0], 0.0f);
+    EXPECT_EQ(info.segmentStartPos_.size(), 1);
+    EXPECT_EQ(info.segmentTails_.size(), 1);
+    EXPECT_EQ(info.segmentTails_[0], 15);
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.endIndex_, 15);
+    EXPECT_EQ(info.items_[0].at(0).size(), 6);
+
+    for (int i = 0; i < 6; ++i) {
+        frameNode_->RemoveChildAtIndex(10);
+    }
+    frameNode_->ChildrenUpdatedFrom(10);
+    newSection[0].itemsCount = 10;
+    secObj->ChangeData(0, 1, newSection);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    EXPECT_EQ(info.segmentTails_[0], 9);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.currentOffset_, 0.0f);
+    EXPECT_EQ(info.endIndex_, 9);
+    EXPECT_EQ(info.items_[0].at(0).size(), 4);
 }
 
 /**
