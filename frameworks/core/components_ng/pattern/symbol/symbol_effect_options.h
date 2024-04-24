@@ -121,7 +121,7 @@ public:
     {
         return isActive_;
     }
-    
+
     bool GetIsTxtActive() const
     {
         return isTxtActive_;
