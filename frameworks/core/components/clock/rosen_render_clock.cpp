@@ -150,7 +150,7 @@ void RosenRenderClockHand::RequestRenderForNextSecond()
                     return;
                 }
             },
-            TaskExecutor::TaskType::UI, delayTime);
+            TaskExecutor::TaskType::UI, delayTime, "ArkUIRenderClockForNextSecond");
         return;
     }
     pipelineContext->AddNodesToNotifyOnPreDraw(Claim(this));

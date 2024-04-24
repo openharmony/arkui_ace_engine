@@ -68,7 +68,7 @@ void PressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             }
         });
         auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        taskExecutor.PostDelayedTask(deadlineTimer_, PRESS_TIMEOUT);
+        taskExecutor.PostDelayedTask(deadlineTimer_, PRESS_TIMEOUT, "ArkUIGesturePressDeadlineTimer");
     } else {
         LOGW("the state is not ready for detecting press gesture");
     }

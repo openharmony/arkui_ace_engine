@@ -101,7 +101,7 @@ struct VisibleCallbackInfo {
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public PipelineBase {
+class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(PipelineContext, PipelineBase);
 
 public:

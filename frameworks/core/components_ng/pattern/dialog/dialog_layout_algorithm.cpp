@@ -117,22 +117,13 @@ void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayou
     auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
     auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
     auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
-    auto realWidth = GetRealSize(dialogWidth, static_cast<double>(childLayoutConstraint.maxSize.Width()));
-    auto realHeight = GetRealSize(dialogHeight, static_cast<double>(childLayoutConstraint.maxSize.Height()));
-    if (Positive(realHeight)) {
-        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(realHeight)));
+    if (NonNegative(dialogHeight.Value())) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
     }
-    if (Positive(realWidth)) {
-        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(realWidth), std::nullopt));
+    if (NonNegative(dialogWidth.Value())) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
     }
-    childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(realWidth, realHeight));
-}
-
-double DialogLayoutAlgorithm::GetRealSize(Dimension dialogFrame, double size)
-{
-    auto val = dialogFrame.Unit() == DimensionUnit::PERCENT ? dialogFrame.ConvertToPxWithSize(size)
-                                                            : dialogFrame.ConvertToPx();
-    return std::min(val, size);
+    childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(dialogWidth.Value(), dialogHeight.Value()));
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)

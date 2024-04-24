@@ -62,7 +62,7 @@ void FormManagerResource::Release(const std::function<void(bool)>& onRelease)
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIFormResourceRelease");
     }
 }
 
@@ -94,7 +94,7 @@ void FormManagerResource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    });
+    }, "ArkUIFormCallResRegister");
 }
 
 int32_t FormManagerResource::GetIntParam(const std::string& param, const std::string& name) const

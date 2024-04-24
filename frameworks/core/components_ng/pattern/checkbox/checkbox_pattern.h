@@ -218,6 +218,7 @@ public:
     void OnColorConfigurationUpdate() override;
     void OnAttachToMainTree() override;
     void StartCustomNodeAnimation(bool select);
+    RefPtr<GroupManager> GetGroupManager();
 
 private:
     void OnAttachToFrameNode() override;
@@ -270,9 +271,9 @@ private:
     RefPtr<FrameNode> contentModifierNode_;
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
-    std::string navId_ = "";
     int32_t prePageId_ = 0;
     bool lastSelect_ = false;
+    std::optional<std::string> currentNavId_ = std::nullopt;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;

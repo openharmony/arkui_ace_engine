@@ -22,4 +22,5 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

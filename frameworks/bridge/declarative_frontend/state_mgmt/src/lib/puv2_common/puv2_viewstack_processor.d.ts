@@ -81,5 +81,5 @@ declare class ViewStackProcessor {
   // Gets the framenode with tag and elmtId then pushes to the view stack.
   public static GetAndPushFrameNode(tag: string, elmtId: number): void;
   /** move deleted elmtIds from ElementRegistery in C++ to the caller */
-  public static moveDeletedElmtIds(elmtIds : Array<RemovedElementInfo>);
+  public static moveDeletedElmtIds(elmtIds : Array<number>);
 }

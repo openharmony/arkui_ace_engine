@@ -314,7 +314,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
         auto func = [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(id);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIGetContainerInstanceInitialize");
         };
         director->SetUITaskRunner(func, id);
         director->Init();
@@ -358,7 +358,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
             CHECK_NULL_VOID(pipelineContext);
             bgColor = pipelineContext->GetAppBgColor().GetValue();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGetAppBackgroundColor");
 
     return bgColor;
 }
@@ -377,7 +377,7 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(Color(bgColor));
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISetAppBackgroundColor");
 }
 
 bool UIContentImpl::ProcessBackPressed()

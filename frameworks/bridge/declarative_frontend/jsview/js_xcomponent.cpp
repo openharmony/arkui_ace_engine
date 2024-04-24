@@ -240,7 +240,7 @@ void* JSXComponent::Create(const XComponentParams& params)
             xcPattern->XComponentSizeInit();
             xcPattern->SetXcomponentInit(true);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIXComponentCreate");
 
     return jsXComponent;
 }

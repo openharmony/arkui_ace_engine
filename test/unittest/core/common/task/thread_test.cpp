@@ -290,7 +290,7 @@ HWTEST_F(ThreadTest, Task_Executor_ImplTest09, TestSize.Level1)
      */
     for (int32_t id = 0; id < 7; id++) {
         auto taskType = static_cast<TaskExecutor::TaskType>(id);
-        auto result = taskExecutorImpl_->OnPostTask(callBack, taskType, 1, {});
+        auto result = taskExecutorImpl_->OnPostTask(callBack, taskType, 1, "ArkUITask");
         switch (taskType) {
             case TaskExecutor::TaskType::PLATFORM:
             case TaskExecutor::TaskType::UI:
@@ -328,7 +328,7 @@ HWTEST_F(ThreadTest, Task_Executor_ImplTest10, TestSize.Level1)
      * @tc.expected: task gets executed.
      */
     Container::UpdateCurrent(-1);
-    taskExecutorImpl_->OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2, {});
+    taskExecutorImpl_->OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2, "ArkUITask");
     EXPECT_EQ(backgroudTask, "");
     sleep(2);
     EXPECT_EQ(backgroudTask, BACKGROUNDSYNCTASK);

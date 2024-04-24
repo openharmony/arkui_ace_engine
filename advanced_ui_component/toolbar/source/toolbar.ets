@@ -62,11 +62,12 @@ export struct ToolBar {
         .fillColor($r('sys.color.ohos_id_color_toolbar_icon'))
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
+        .bindMenu(this.menuContent, { offset: { x: 5, y : -10 } })
       Text(this.moreText)
         .fontColor($r('sys.color.ohos_id_color_toolbar_text'))
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
         .fontWeight(FontWeight.Medium)
-    }.width('100%').height('100%').bindMenu(this.menuContent, { offset: { x: 5, y : -10}})
+    }.width('100%').height('100%')
     .padding({left: 4, right: 4})
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
   }

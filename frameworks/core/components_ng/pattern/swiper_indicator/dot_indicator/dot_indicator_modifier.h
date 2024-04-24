@@ -292,6 +292,8 @@ private:
         TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
     void PlayOpacityAnimation();
     std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
+    int32_t GetLoopTranslateDuration() const;
+    int32_t GetLoopOpacityDuration() const;
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;

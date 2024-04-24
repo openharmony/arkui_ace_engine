@@ -37,7 +37,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, type);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
@@ -569,6 +569,13 @@ NG::ProgressType ProgressModelNG::GetType(FrameNode* frameNode)
     NG::ProgressType value = ProgressType::LINEAR;
     ACE_GET_NODE_PAINT_PROPERTY(ProgressPaintProperty, ProgressType, value, frameNode);
     return value;
+}
+
+void ProgressModelNG::SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
 }
 
 } // namespace OHOS::Ace::NG

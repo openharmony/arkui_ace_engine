@@ -74,7 +74,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     } else {
         dialogLayoutProp->UpdateGridCount(param.gridCount);
     }
-    if (param.height.has_value()) {
+    if (param.height.has_value() && NonNegative(param.height.value().Value())) {
         dialogLayoutProp->UpdateHeight(param.height.value());
     }
     // create gray background

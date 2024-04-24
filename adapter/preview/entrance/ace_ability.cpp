@@ -230,7 +230,7 @@ void AceAbility::InitEnv()
         auto func = [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(id);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIInitEnv");
         };
         director->SetUITaskRunner(func, id);
         director->Init();
@@ -456,7 +456,7 @@ std::string AceAbility::GetJSONTree()
     CHECK_NULL_RETURN(taskExecutor, "");
     taskExecutor->PostSyncTask(
         [&jsonTreeStr] { OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleJSONTreeStr(jsonTreeStr); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGetJsonTreeStr");
     LOGI("Inspector end");
     return jsonTreeStr;
 }
@@ -472,7 +472,7 @@ std::string AceAbility::GetDefaultJSONTree()
         [&defaultJsonTreeStr] {
             OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleDefaultJSONTreeStr(defaultJsonTreeStr);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGetDefaultJsonTreeStr");
     return defaultJsonTreeStr;
 }
 
@@ -503,7 +503,7 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
                 OHOS::Ace::Framework::InspectorClient::GetInstance().CallFastPreviewErrorCallback(attrsJson);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIOperateComponent");
     LOGI("Fast Preview end");
     return true;
 }

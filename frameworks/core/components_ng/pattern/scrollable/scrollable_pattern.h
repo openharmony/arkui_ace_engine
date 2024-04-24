@@ -517,6 +517,9 @@ public:
 
     void CheckRestartSpring(bool sizeDiminished);
 
+    void HandleMoveEventInComp(const PointF& point);
+    void HandleLeaveHotzoneEvent();
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -753,8 +756,6 @@ private:
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleMoveEventInComp(const PointF& point);
-    void HandleLeaveHotzoneEvent();
     bool isVertical() const;
     void AddHotZoneSenceInterface(SceneStatus scene);
     RefPtr<InputEvent> mouseEvent_;

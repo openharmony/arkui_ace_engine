@@ -71,6 +71,7 @@ var TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
   TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
   TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+  TextDataDetectorType[TextDataDetectorType["DATETIME"] = 4] = "DATETIME";
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
@@ -662,6 +663,12 @@ var FormDimension;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
+var FormShape;
+(function (FormShape) {
+  FormShape["RECT"] = 1;
+  FormShape["CIRCLE"] = 2;
+})(FormShape || (FormShape = {}));
+
 let FormRenderingMode;
 (function (FormRenderingMode) {
   FormRenderingMode.FULL_COLOR = 0;
@@ -989,6 +996,7 @@ let DismissReason;
   DismissReason[DismissReason.PRESS_BACK = 0] = "PRESS_BACK";
   DismissReason[DismissReason.TOUCH_OUTSIDE = 1] = "TOUCH_OUTSIDE";
   DismissReason[DismissReason.CLOSE_BUTTON = 2] = "CLOSE_BUTTON";
+  DismissReason[DismissReason.SLIDE_DOWN = 3] = "SLIDE_DOWN";
 })(DismissReason || (DismissReason = {}));
 
 var HoverEffect;
@@ -2320,7 +2328,7 @@ class WaterFlowSections {
   }
 
   clearChanges() {
-    this.changeArray = [];
+    this.changeArray.splice(0);
   }
 }
 
@@ -2370,7 +2378,10 @@ class ChildrenMainSize {
       this.sizeArray.splice(startValue, deleteCountValue);
       this.changeArray.push({ start: startValue, deleteCount: deleteCountValue });
     } else if (paramCount === 3) {
-      let childrenSizeLength = childrenSize.length;
+      let childrenSizeLength = childrenSize ? childrenSize.length : 0;
+      if (childrenSizeLength === 0) {
+        childrenSize = [];
+      }
       for (let i = 0; i < childrenSizeLength; i++) {
         if (this.isInvalid(childrenSize[i])) {
           // -1: represent default size.
@@ -2672,12 +2683,12 @@ var ParticleUpdater;
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
 
-var DisturbanceFieldsShape;
-(function (DisturbanceFieldsShape) {
-  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
-})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
+var DisturbanceFieldShape;
+(function (DisturbanceFieldShape) {
+  DisturbanceFieldShape[DisturbanceFieldShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldShape[DisturbanceFieldShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldShape[DisturbanceFieldShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldShape || (DisturbanceFieldShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {

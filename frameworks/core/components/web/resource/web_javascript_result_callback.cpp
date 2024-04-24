@@ -177,7 +177,7 @@ std::shared_ptr<NWebValue> WebJavaScriptResultCallBack::GetJavaScriptResult(
                 result = webJSCallBack->javaScriptCallBackImpl_(object_name, method, jsArgs);
             }
         },
-        OHOS::Ace::TaskExecutor::TaskType::JS);
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebGetJavaScriptResult");
 
     return GetWebViewValue(result);
 }

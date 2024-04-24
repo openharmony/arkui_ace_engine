@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -301,7 +302,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                                 builder, targetNode, menuPosition, previewBuildFunc, menuParam);
                         }
                     },
-                    TaskExecutor::TaskType::PLATFORM);
+                    TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
             };
             auto inputHub = targetNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(inputHub);
@@ -342,7 +343,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         NG::ViewAbstractModelNG::CreateCustomMenu(
                             builder, targetNode, menuPosition, previewBuildFunc, menuParam);
                     },
-                    TaskExecutor::TaskType::PLATFORM);
+                    TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
             ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
@@ -455,12 +456,28 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent), OnKeyEventType::CONTEXT_MENU);
 }
 
+RefPtr<PipelineContext> ViewAbstractModelNG::GetSheetContext(NG::SheetStyle& sheetStyle)
+{
+    RefPtr<PipelineContext> context;
+    if (sheetStyle.instanceId.has_value()) {
+        auto container = AceEngine::Get().GetContainer(sheetStyle.instanceId.value());
+        CHECK_NULL_RETURN(container, nullptr);
+        auto contextBase = container->GetPipelineContext();
+        CHECK_NULL_RETURN(contextBase, nullptr);
+        context = AceType::DynamicCast<PipelineContext>(contextBase);
+    } else {
+        context = PipelineContext::GetCurrentContext();
+    }
+    return context;
+}
+
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
-    std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange)
+    std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
@@ -477,7 +494,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetSheetContext(sheetStyle);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     if (sheetStyle.showInPage.value_or(false)) {
@@ -486,25 +503,28 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    auto destructor = [id = targetNode->GetId(), pageLevelId = targetNode->GetPageLevelNodeId(),
-                          isNav = targetNode->PageLevelIsNavDestination(),
-                          showInPage = sheetStyle.showInPage.value_or(false)]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        if (showInPage) {
-            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-            overlayManager = GetOverlayFromPage(pageLevelId, isNav);
-        }
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteModal(id);
-    };
+    auto destructor =
+        [id = targetNode->GetId(), pageLevelId = targetNode->GetPageLevelNodeId(),
+            isNav = targetNode->PageLevelIsNavDestination(), showInPage = sheetStyle.showInPage.value_or(false),
+            instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            if (showInPage) {
+                TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
+                overlayManager = GetOverlayFromPage(pageLevelId, isNav);
+            }
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteModal(id);
+        };
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
-        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillAppear),
-        std::move(onWillDisappear), std::move(onHeightDidChange), std::move(onDetentsDidChange),
-        std::move(onWidthDidChange), std::move(onTypeDidChange), targetNode);
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), targetNode);
 }
 
 void ViewAbstractModelNG::DismissSheet()
@@ -523,6 +543,15 @@ void ViewAbstractModelNG::DismissContentCover()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DismissContentCover();
+}
+
+void ViewAbstractModelNG::SheetSpringBack()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SheetSpringBack();
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)

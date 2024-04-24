@@ -131,7 +131,7 @@ public:
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard() const;
     // apply keyboard avoidance on content rootNodes
-    void AvoidKeyboard(bool isFocusOnPageOrOverlay = true);
+    void AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
     void ExpandSafeArea(bool isFocusOnPage = true);
 

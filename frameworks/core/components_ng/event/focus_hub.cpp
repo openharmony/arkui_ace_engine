@@ -1297,6 +1297,10 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return false;
     }
 
+    if (focusStyleType_ == FocusStyleType::FORCE_NONE) {
+        return true;
+    }
+
     if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
         CHECK_NULL_RETURN(getInnerFocusRectFunc_, false);
         RoundRect focusRectInner;
@@ -1357,6 +1361,9 @@ bool FocusHub::PaintAllFocusState()
 
     if (PaintFocusState()) {
         focusManager->SetLastFocusStateNode(AceType::Claim(this));
+        if (onPaintFocusStateCallback_) {
+            return onPaintFocusStateCallback_();
+        }
         return !isFocusActiveWhenFocused_;
     }
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();

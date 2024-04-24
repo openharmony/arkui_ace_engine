@@ -101,6 +101,7 @@ public:
     void RemoveFontNode(const WeakPtr<RenderNode>& node);
     void SetFontFamily(const char* familyName, const char* familySrc);
     void RebuildFontNode();
+    void RebuildFontNodeNG();
     void UpdateFontWeightScale();
     void AddVariationNode(const WeakPtr<RenderNode>& node);
     void RemoveVariationNode(const WeakPtr<RenderNode>& node);

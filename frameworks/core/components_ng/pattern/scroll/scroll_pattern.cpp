@@ -1042,8 +1042,8 @@ void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 {
     ScrollablePattern::ToJsonValue(json, filter);
     auto initialOffset = JsonUtil::Create(true);
-    initialOffset->Put("xOffset", initialOffset_.GetX().ToString().c_str());
-    initialOffset->Put("yOffset", initialOffset_.GetY().ToString().c_str());
+    initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
+    initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
     json->PutExtAttr("initialOffset", initialOffset, filter);
 }
 } // namespace OHOS::Ace::NG

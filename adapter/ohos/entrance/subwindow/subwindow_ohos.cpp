@@ -337,9 +337,12 @@ void SubwindowOhos::ShowWindow(bool needFocus)
         return;
     }
     // Set min window hot area so that sub window can transparent event.
-    std::vector<Rect> rects;
-    rects.emplace_back(MIN_WINDOW_HOT_AREA);
-    SetHotAreas(rects, -1);
+    std::vector<Rosen::Rect> hotAreas;
+    Rosen::Rect rosenRect {};
+    RectConverter(MIN_WINDOW_HOT_AREA, rosenRect);
+    hotAreas.emplace_back(rosenRect);
+    window_->SetTouchHotAreas(hotAreas);
+
     window_->SetNeedDefaultAnimation(false);
     auto ret = window_->SetFocusable(needFocus);
     if (ret != OHOS::Rosen::WMError::WM_OK) {

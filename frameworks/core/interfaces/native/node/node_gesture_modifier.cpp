@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/node_gesture_modifier.h"
+
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/components_ng/gestures/pan_gesture.h"
@@ -21,9 +22,12 @@
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/node/touch_event_convertor.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+    constexpr int32_t MAX_POINTS = 10;
+}
 ArkUIGesture* createPanGesture(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance)
 {
     PanDirection panDirection;
@@ -149,9 +153,73 @@ void dispose(ArkUIGesture* recognizer)
     gestureRef->DecRefCount();
 }
 
-ArkUIAPIEventGestureAsyncEvent getGestureEvent(GestureEvent& info)
+void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& touchPointes,
+    std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
-    ArkUIAPIEventGestureAsyncEvent ret;
+    if (touchPointes.empty()) {
+        return;
+    }
+    size_t i = 0;
+    for (auto& touchPoint : touchPointes) {
+        if (i >= MAX_POINTS) {
+            break;
+        }
+        points[i].id = touchPoint.id;
+        double density = PipelineBase::GetCurrentDensity();
+        points[i].nodeX = NearEqual(density, 0.0) ? 0.0f :
+            info.GetLocalLocation().GetX() / density;
+        points[i].nodeY = NearEqual(density, 0.0) ? 0.0f :
+            info.GetLocalLocation().GetY() / density;
+        points[i].windowX = NearEqual(density, 0.0) ? 0.0f :
+            info.GetGlobalLocation().GetX() / density;
+        points[i].windowY = NearEqual(density, 0.0) ? 0.0f :
+            info.GetGlobalLocation().GetY() / density;
+        points[i].screenX = NearEqual(density, 0.0) ? 0.0f :
+            info.GetScreenLocation().GetX() / density;
+        points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
+            info.GetScreenLocation().GetY() / density;
+        points[i].contactAreaWidth = touchPoint.size;
+        points[i].contactAreaHeight = touchPoint.size;
+        points[i].pressure = touchPoint.force;
+        points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
+        points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
+        points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
+        i++;
+    }
+}
+
+void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent,
+    std::array<ArkUITouchPoint, MAX_POINTS>& points)
+{
+    auto tempTouchEvent = NG::ConvertToTouchEvent(info.GetPointerEvent());
+    touchEvent.action = static_cast<int32_t>(tempTouchEvent.type);
+    touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
+    touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
+    double density = PipelineBase::GetCurrentDensity();
+    touchEvent.actionTouchPoint.nodeX = NearEqual(density, 0.0) ? 0.0f :
+        info.GetLocalLocation().GetX() / density;
+    touchEvent.actionTouchPoint.nodeY = NearEqual(density, 0.0) ? 0.0f :
+        info.GetLocalLocation().GetY() / density;
+    touchEvent.actionTouchPoint.windowX = NearEqual(density, 0.0) ? 0.0f :
+        info.GetGlobalLocation().GetX() / density;
+    touchEvent.actionTouchPoint.windowY = NearEqual(density, 0.0) ? 0.0f :
+        info.GetGlobalLocation().GetY() / density;
+    touchEvent.actionTouchPoint.screenX = NearEqual(density, 0.0) ? 0.0f :
+        info.GetScreenLocation().GetX() / density;
+    touchEvent.actionTouchPoint.screenY = NearEqual(density, 0.0) ? 0.0f :
+        info.GetScreenLocation().GetY() / density;
+    touchEvent.actionTouchPoint.pressure = tempTouchEvent.force;
+    ConvertTouchPointsToPoints(info, tempTouchEvent.pointers, points);
+    if (tempTouchEvent.pointers.size() > 0) {
+        touchEvent.touchPointes = &(points[0]);
+    }
+    touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
+    tempTouchEvent.pointers.size() : MAX_POINTS;
+}
+
+void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
+{
     ret.repeat = info.GetRepeat();
     ret.velocityX = info.GetVelocity().GetVelocityX();
     ret.velocityY = info.GetVelocity().GetVelocityY();
@@ -162,7 +230,6 @@ ArkUIAPIEventGestureAsyncEvent getGestureEvent(GestureEvent& info)
     ret.scale = info.GetScale();
     ret.pinchCenterX = info.GetPinchCenter().GetX();
     ret.pinchCenterY = info.GetPinchCenter().GetY();
-    return ret;
 }
 
 void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
@@ -187,8 +254,12 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
             eventData->kind = GESTURE_ASYNC_EVENT;
             eventData->nodeId = 0;
             eventData->extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
-            eventData->gestureAsyncEvent = getGestureEvent(info);
             eventData->gestureAsyncEvent.subKind = ON_ACTION_START;
+            GetGestureEvent(eventData->gestureAsyncEvent, info);
+            ArkUITouchEvent rawInputEvent;
+            std::array<ArkUITouchPoint, MAX_POINTS> points;
+            ConvertIMMEventToTouchEvent(info, rawInputEvent, points);
+            eventData->gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
             SendArkUIAsyncEvent(eventData);
         };
         gestureRef->SetOnActionId(onActionAccept);
@@ -200,8 +271,12 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
             eventData->kind = GESTURE_ASYNC_EVENT;
             eventData->nodeId = 0;
             eventData->extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
-            eventData->gestureAsyncEvent = getGestureEvent(info);
             eventData->gestureAsyncEvent.subKind = ON_ACTION_UPDATE;
+            GetGestureEvent(eventData->gestureAsyncEvent, info);
+            ArkUITouchEvent rawInputEvent;
+            std::array<ArkUITouchPoint, MAX_POINTS> points;
+            ConvertIMMEventToTouchEvent(info, rawInputEvent, points);
+            eventData->gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
             SendArkUIAsyncEvent(eventData);
         };
         gestureRef->SetOnActionUpdateId(onActionUpdate);
@@ -212,8 +287,12 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
             eventData->kind = GESTURE_ASYNC_EVENT;
             eventData->nodeId = 0;
             eventData->extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
-            eventData->gestureAsyncEvent = getGestureEvent(info);
             eventData->gestureAsyncEvent.subKind = ON_ACTION_END;
+            GetGestureEvent(eventData->gestureAsyncEvent, info);
+            ArkUITouchEvent rawInputEvent;
+            std::array<ArkUITouchPoint, MAX_POINTS> points;
+            ConvertIMMEventToTouchEvent(info, rawInputEvent, points);
+            eventData->gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
             SendArkUIAsyncEvent(eventData);
         };
         gestureRef->SetOnActionEndId(onActionEnd);

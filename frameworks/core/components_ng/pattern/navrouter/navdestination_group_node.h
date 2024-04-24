@@ -135,6 +135,16 @@ public:
         return isCacheNode_;
     }
 
+    void SetIsAnimated(const bool isAnimated)
+    {
+        isAnimated_ = isAnimated;
+    }
+
+    bool GetIsAnimated() const
+    {
+        return isAnimated_;
+    }
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -144,6 +154,7 @@ private:
     PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
+    bool isAnimated_ = false;
 };
 
 } // namespace OHOS::Ace::NG

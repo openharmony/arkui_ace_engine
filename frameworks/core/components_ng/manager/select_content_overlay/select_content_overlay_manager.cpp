@@ -325,7 +325,7 @@ void SelectContentOverlayManager::CreateSelectOverlay(SelectOverlayInfo& info, b
             CHECK_NULL_VOID(manager);
             manager->CreateAndMountNode(node, animation);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate");
 }
 
 void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& overlayNode, bool animation)

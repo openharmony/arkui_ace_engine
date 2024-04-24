@@ -265,4 +265,8 @@ class AttributeUpdater {
   }
 
   initializeModifier(instance: ArkComponent): void {}
+
+  updateConstructorParams(...args: Object[]): void {
+    this._attribute.initialize(args);
+  }
 }

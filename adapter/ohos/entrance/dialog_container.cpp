@@ -60,7 +60,7 @@ void DialogContainer::InitializeTouchEventCallback()
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDialogTouchEvent");
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 }
@@ -78,7 +78,7 @@ void DialogContainer::InitializeMouseEventCallback()
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDialogMouseEvent");
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 }
@@ -96,7 +96,7 @@ void DialogContainer::InitializeAxisEventCallback()
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDialogAxisEvent");
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 }
@@ -108,7 +108,8 @@ void DialogContainer::InitializeKeyEventCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); }, TaskExecutor::TaskType::UI);
+            [context, event, &result]() { result = context->OnKeyEvent(event); },
+            TaskExecutor::TaskType::UI, "ArkUIDialogKeyEvent");
         return result;
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
@@ -121,7 +122,8 @@ void DialogContainer::InitializeRotationEventCallback()
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnRotationEvent(event); }, TaskExecutor::TaskType::UI);
+            [context, event, &result]() { result = context->OnRotationEvent(event); },
+            TaskExecutor::TaskType::UI, "ArkUIDialogRotationEvent");
         return result;
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
@@ -139,7 +141,7 @@ void DialogContainer::InitializeViewChangeCallback()
             [context, width, height, type, rsTransaction]() {
                 context->OnSurfaceChanged(width, height, type, rsTransaction);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceChanged");
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 }
@@ -151,7 +153,8 @@ void DialogContainer::InitializeDensityChangeCallback()
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
         context->GetTaskExecutor()->PostTask(
-            [context, density]() { context->OnSurfaceDensityChanged(density); }, TaskExecutor::TaskType::UI);
+            [context, density]() { context->OnSurfaceDensityChanged(density); },
+            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceDensityChanged");
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 }
@@ -165,7 +168,7 @@ void DialogContainer::InitializeSystemBarHeightChangeCallback()
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
             [context, statusBar, navigationBar]() { context->OnSystemBarHeightChanged(statusBar, navigationBar); },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDialogSystemBarHeightChanged");
     };
     aceView_->RegisterSystemBarHeightChangeCallback(systemBarHeightChangeCallback);
 }
@@ -176,7 +179,8 @@ void DialogContainer::InitializeSurfaceDestroyCallback()
     auto&& surfaceDestroyCallback = [context = pipelineContext_, id = instanceId_]() {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI);
+            [context]() { context->OnSurfaceDestroyed(); },
+            TaskExecutor::TaskType::UI, "ArkUIDialogSurfaceDestroyed");
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 }
@@ -189,7 +193,7 @@ void DialogContainer::InitializeDragEventCallback()
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDialogDragEvent");
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);
 }
@@ -226,9 +230,11 @@ void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<v
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
-        [] { TAG_LOGI(AceLogTag::ACE_DIALOG,  "Wait UI thread..."); }, TaskExecutor::TaskType::UI);
+        [] { TAG_LOGI(AceLogTag::ACE_DIALOG,  "Wait UI thread..."); },
+        TaskExecutor::TaskType::UI, "ArkUIDialogWaitLog");
     taskExecutor->PostSyncTask(
-        [] { TAG_LOGI(AceLogTag::ACE_DIALOG,  "Wait JS thread..."); }, TaskExecutor::TaskType::JS);
+        [] { TAG_LOGI(AceLogTag::ACE_DIALOG,  "Wait JS thread..."); },
+        TaskExecutor::TaskType::JS, "ArkUIDialogWaitLog");
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     taskExecutor->PostTask(
         [instanceId, destroyCallback] {
@@ -238,7 +244,7 @@ void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<v
             CHECK_NULL_VOID(destroyCallback);
             destroyCallback();
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUIDialogContainerDestroy");
 }
 
 void DialogContainer::Destroy()
@@ -251,7 +257,8 @@ void DialogContainer::Destroy()
         if (GetSettings().usePlatformAsUIThread) {
             context->Destroy();
         } else {
-            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+            taskExecutor_->PostTask([context]() { context->Destroy(); },
+                TaskExecutor::TaskType::UI, "ArkUIDialogDestoryPipeline");
         }
         // 2. Destroy Frontend on JS thread.
         RefPtr<Frontend>& frontend = frontend_;
@@ -264,7 +271,7 @@ void DialogContainer::Destroy()
                     frontend->UpdateState(Frontend::State::ON_DESTROY);
                     frontend->Destroy();
                 },
-                TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS, "ArkUIDialogFrontendDestroy");
         }
     }
     resRegister_.Reset();
@@ -335,7 +342,8 @@ void DialogContainer::AttachView(
     InitPipelineContext(std::move(window), instanceId, density, width, height, windowId);
     InitializeCallback();
 
-    taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI);
+    taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); },
+        TaskExecutor::TaskType::UI, "ArkUIDialogFrameReportInit");
     ThemeConstants::InitDeviceType();
     // Load custom style at UI thread before frontend attach, to make sure style can be loaded before building dom tree.
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
@@ -351,7 +359,7 @@ void DialogContainer::AttachView(
                 themeManager->LoadCustomTheme(assetManager);
                 themeManager->LoadResourceThemes();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIDialogLoadTheme");
     }
     aceView_->Launch();
     // Only MainWindow instance will be registered to watch dog.
@@ -410,7 +418,7 @@ void DialogContainer::DumpHeapSnapshot(bool isPrivate)
             CHECK_NULL_VOID(sp);
             sp->DumpHeapSnapshot(isPrivate);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIDialogDumpHeapSnapshot");
 }
 void DialogContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window>& uiWindow)
 {

@@ -326,7 +326,7 @@ void ImagePattern::OnImageLoadSuccess()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
-    });
+    }, "ArkUIImageCreateAnalyzerOverlay");
     host->MarkNeedRenderOnly();
 }
 
@@ -565,7 +565,7 @@ void ImagePattern::LoadImageDataIfNeed()
                 auto host = pattern->GetHost();
                 pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
             }
-        });
+        }, "ArkUIImageUpdateAnalyzerUIConfig");
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
@@ -874,6 +874,14 @@ void ImagePattern::OnVisibleChange(bool visible)
 {
     if (!visible) {
         CloseSelectOverlay();
+    }
+    // control pixelMap List
+    if (isAnimation_) {
+        if (visible) {
+            animator_->Forward();
+        } else {
+            animator_->Pause();
+        }
     }
     // control svg / gif animation
     if (image_) {

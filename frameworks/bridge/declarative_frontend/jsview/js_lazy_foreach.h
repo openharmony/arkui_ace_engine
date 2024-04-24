@@ -26,6 +26,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void Pop();
+    static void OnMove(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

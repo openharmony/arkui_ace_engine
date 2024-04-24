@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 
 namespace OHOS::Ace::NG {
     
@@ -22,6 +23,13 @@ LoadingProgressLayoutAlgorithm::LoadingProgressLayoutAlgorithm() = default;
 std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        return std::nullopt;
+    }
     float height_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
                                                                : contentConstraint.percentReference.Height();
     float width_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()

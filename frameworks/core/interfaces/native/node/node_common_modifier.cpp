@@ -18,9 +18,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#ifndef PREVIEW
-#include "adapter/ohos/entrance/mmi_event_convertor.h"
-#endif
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
 #include "base/log/log_wrapper.h"
@@ -47,6 +44,7 @@
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
@@ -5115,13 +5113,20 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         if (i >= MAX_POINTS) {
             break;
         }
+        double density = PipelineBase::GetCurrentDensity();
         points[i].id = touchPoint.id;
-        points[i].nodeX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetLocalLocation().GetX());
-        points[i].nodeY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetLocalLocation().GetY());
-        points[i].windowX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetX());
-        points[i].windowY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetGlobalLocation().GetY());
-        points[i].screenX = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetScreenLocation().GetX());
-        points[i].screenY = PipelineBase::Px2VpWithCurrentDensity(historyLoaction.GetScreenLocation().GetY());
+        points[i].nodeX = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetLocalLocation().GetX() / density;
+        points[i].nodeY = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetLocalLocation().GetY() / density;
+        points[i].windowX = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetGlobalLocation().GetX() / density;
+        points[i].windowY = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetGlobalLocation().GetY() / density;
+        points[i].screenX = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetScreenLocation().GetX() / density;
+        points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
+            historyLoaction.GetScreenLocation().GetY() / density;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
@@ -5181,33 +5186,29 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                     historyMMIPointerEventIterator++;
                     continue;
                 }
-                #if !defined(PREVIEW)
-                    auto tempTouchEvent = Platform::ConvertTouchEvent((*historyMMIPointerEventIterator));
-                    allHistoryEvents[i].action = static_cast<int32_t>(tempTouchEvent.type);
-                    allHistoryEvents[i].sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
-                    allHistoryEvents[i].timeStamp = tempTouchEvent.time.time_since_epoch().count();
-                    allHistoryEvents[i].actionTouchPoint.nodeX = PipelineBase::Px2VpWithCurrentDensity(
-                        (*historyLoacationIterator).GetLocalLocation().GetX());
-                    allHistoryEvents[i].actionTouchPoint.nodeY = PipelineBase::Px2VpWithCurrentDensity(
-                        (*historyLoacationIterator).GetLocalLocation().GetY());
-                    allHistoryEvents[i].actionTouchPoint.windowX = PipelineBase::Px2VpWithCurrentDensity(
-                        (*historyLoacationIterator).GetGlobalLocation().GetX());
-                    allHistoryEvents[i].actionTouchPoint.windowY = PipelineBase::Px2VpWithCurrentDensity(
-                        (*historyLoacationIterator).GetGlobalLocation().GetY());
-                    allHistoryEvents[i].actionTouchPoint.screenX = tempTouchEvent.screenX;
-                    allHistoryEvents[i].actionTouchPoint.screenY = tempTouchEvent.screenY;
-                    allHistoryEvents[i].actionTouchPoint.pressure = tempTouchEvent.force;
-                    ConvertTouchPointsToPoints(tempTouchEvent.pointers, allHistoryPoints[i],
-                        *historyLoacationIterator);
-                    if (tempTouchEvent.pointers.size() > 0) {
-                        allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
-                    }
-                    allHistoryEvents[i].touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
-                    tempTouchEvent.pointers.size() : MAX_POINTS;
-                #else
+                auto tempTouchEvent = NG::ConvertToTouchEvent((*historyMMIPointerEventIterator));
+                allHistoryEvents[i].action = static_cast<int32_t>(tempTouchEvent.type);
+                allHistoryEvents[i].sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
+                allHistoryEvents[i].timeStamp = tempTouchEvent.time.time_since_epoch().count();
+                double density = PipelineBase::GetCurrentDensity();
+                allHistoryEvents[i].actionTouchPoint.nodeX = NearEqual(density, 0.0) ? 0.0f :
+                    (*historyLoacationIterator).GetLocalLocation().GetX() / density;
+                allHistoryEvents[i].actionTouchPoint.nodeY = NearEqual(density, 0.0) ? 0.0f :
+                    (*historyLoacationIterator).GetLocalLocation().GetY() / density;
+                allHistoryEvents[i].actionTouchPoint.windowX = NearEqual(density, 0.0) ? 0.0f :
+                    (*historyLoacationIterator).GetGlobalLocation().GetX() / density;
+                allHistoryEvents[i].actionTouchPoint.windowY = NearEqual(density, 0.0) ? 0.0f :
+                    (*historyLoacationIterator).GetGlobalLocation().GetY() / density;
+                allHistoryEvents[i].actionTouchPoint.screenX = tempTouchEvent.screenX;
+                allHistoryEvents[i].actionTouchPoint.screenY = tempTouchEvent.screenY;
+                allHistoryEvents[i].actionTouchPoint.pressure = tempTouchEvent.force;
+                ConvertTouchPointsToPoints(tempTouchEvent.pointers, allHistoryPoints[i],
+                    *historyLoacationIterator);
+                if (tempTouchEvent.pointers.size() > 0) {
                     allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
-                    allHistoryEvents[i].touchPointSize = MAX_POINTS;
-                #endif
+                }
+                allHistoryEvents[i].touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
+                tempTouchEvent.pointers.size() : MAX_POINTS;
                 historyLoacationIterator++;
                 historyMMIPointerEventIterator++;
             }

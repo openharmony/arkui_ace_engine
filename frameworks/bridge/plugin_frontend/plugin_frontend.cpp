@@ -185,7 +185,7 @@ bool PluginFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& t
             CHECK_NULL_VOID(jsEngine);
             jsEngine->Initialize(delegate);
         },
-        TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS, "ArkUIPluginInitialize");
 
     return true;
 }
@@ -721,7 +721,8 @@ void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
     std::string param = eventMarker.GetData().GetEventParam();
     if (eventMarker.GetData().isDeclarativeUi) {
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([eventMarker] { eventMarker.CallUiFunction(); });
+            delegate_->GetUiTask().PostTask(
+                [eventMarker] { eventMarker.CallUiFunction(); }, "ArkUIPluginCallUiFunction");
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param.append("null"), std::string(""));
@@ -754,7 +755,8 @@ void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const 
     if (eventMarker.GetData().isDeclarativeUi) {
         if (delegate_) {
             auto cinfo = CopyEventInfo(info);
-            delegate_->GetUiTask().PostTask([eventMarker, cinfo] { eventMarker.CallUiArgFunction(cinfo.get()); });
+            delegate_->GetUiTask().PostTask(
+                [eventMarker, cinfo] { eventMarker.CallUiArgFunction(cinfo.get()); }, "ArkUIPluginCallUiArgFunction");
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");
@@ -770,7 +772,8 @@ void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const 
 {
     if (eventMarker.GetData().isDeclarativeUi) {
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
+            delegate_->GetUiTask().PostTask(
+                [eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); }, "ArkUIPluginCallUiArgFunction");
         }
     }
 }
@@ -827,7 +830,8 @@ void PluginEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const 
             fixParam = fixParam.substr(startPos, endPos - startPos + 1);
         }
         if (delegate_) {
-            delegate_->GetUiTask().PostTask([eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); });
+            delegate_->GetUiTask().PostTask(
+                [eventMarker, fixParam] { eventMarker.CallUiStrFunction(fixParam); }, "ArkUIPluginCallUiStrFunction");
         }
     } else {
         delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");
@@ -851,7 +855,8 @@ void PluginEventHandler::HandleSyncEvent(const EventMarker& eventMarker, bool& r
 void PluginEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const std::shared_ptr<BaseEventInfo>& info)
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->GetUiTask().PostSyncTask([eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); });
+    delegate_->GetUiTask().PostSyncTask(
+        [eventMarker, info] { eventMarker.CallUiArgFunction(info.get()); }, "ArkUIPluginCallUiArgFunction");
 }
 
 void PluginEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result)

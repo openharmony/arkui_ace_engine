@@ -1449,6 +1449,17 @@ typedef enum {
      */
     NODE_TEXT_LINE_HEIGHT,
     /**
+     * @brief Defines the text line spacing attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: line spacing, in fp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: line spacing, in fp.\n
+     *
+     */
+    NODE_TEXT_LINE_SPACING,
+    /**
      * @brief Defines the text decoration style and color.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2128,6 +2139,18 @@ typedef enum {
     NODE_TEXT_INPUT_TEXT_SELECTION,
 
     /**
+     * @brief 设置长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单，支持属性设置，属性重置和属性获取接口。
+     * 
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。\n
+     *
+     */
+    NODE_TEXT_INPUT_SELECTION_MENU_HIDDEN,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2254,6 +2277,18 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_SHOW_COUNTER,
+
+    /**
+     * @brief 设置长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单，支持属性设置，属性重置和属性获取接口。
+     * 
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。\n
+     *
+     */
+    NODE_TEXT_AREA_SELECTION_MENU_HIDDEN,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -3330,7 +3365,6 @@ typedef enum {
      */
     NODE_LIST_SPACE,
 
-
     /**
     * @brief Defines the list adapter. The attribute can be set, reset, and obtained as required through APIs.
     *
@@ -3347,6 +3381,18 @@ typedef enum {
     * .value[0].i32: number of cached items in the list adapter. \n
     */
     NODE_LIST_CACHED_COUNT,
+
+    /**
+    * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
+    * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign} \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign}  \n
+    */
+    NODE_LIST_ALIGN_LIST_ITEM,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -4055,6 +4101,17 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE,
+
+    /**
+     * @brief 输入状态变化时，触发该回调。
+     *
+     * 触发该事件的条件：输入状态变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示true表示正在输入。\n
+     *
+     */
+    NODE_TEXT_INPUT_ON_EDIT_CHANGE,
     /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
@@ -4090,6 +4147,17 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE,
+
+    /**
+     * @brief 输入状态变化时，触发该回调。
+     *
+     * 触发该事件的条件：输入状态变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示true表示正在输入。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_EDIT_CHANGE,
 
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
@@ -5177,6 +5245,85 @@ ArkUI_NodeHandle OH_ArkUI_NodeCustomEvent_GetNodeHandle(ArkUI_NodeCustomEvent* e
 * @since 12
 */
 ArkUI_NodeCustomEventType OH_ArkUI_NodeCustomEvent_GetEventType(ArkUI_NodeCustomEvent* event);
+
+/**
+ * @brief Adds a component to a node content.
+ *
+ * @param handle Indicates the pointer to the node content instance.
+ * @param node Indicates the pointer to the node.
+ * @return Returns 0 if success.
+ *         Returns 401 if a parameter exception occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+
+/**
+ * @brief Adds a component to a node content.
+ *
+ * @param handle Indicates the pointer to the node content instance.
+ * @param node Indicates the pointer to the node.
+ * @return Returns 0 if success.
+ *         Returns 401 if a parameter exception occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node, int32_t position);
+
+/**
+ * @brief Removes a component from a node content.
+ *
+ * @param handle Indicates the pointer to the node content.
+ * @param node Indicates the pointer to the node.
+ * @return Returns 0 if success.
+ *         Returns 401 if a parameter exception occurs.
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle handle, ArkUI_NodeHandle node);
+
+/**
+ * @brief Defines the node content event type.
+ *
+ * @since 12
+ */
+typedef enum {
+    /** Defines the mount event. */
+    NODE_CONTENT_EVENT_ON_ATTACH_TO_WINDOW = 0,
+    /** Defines the unmount event. */
+    NODE_CONTENT_EVENT_ON_DETACH_FROM_WINDOW = 1,
+} ArkUI_NodeContentEventType;
+
+/**
+ * @brief Defines the general structure of a node content event.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_NodeContentEvent ArkUI_NodeContentEvent;
+
+/**
+  * @brief Defines the node content event callback function.
+  *
+  * @since 12
+  */
+typedef void (*ArkUI_NodeContentCallback)(ArkUI_NodeContentEvent* event);
+
+/**
+ * @brief Register a callback for this <b>ArkUI_NodeContentHandle</b> instance.
+ *
+ * @param handle Indicates the <b>ArkUI_NodeContentHandle</b> instance.
+ * @param callback Indicates the callback of <b>ArkUI_NodeContentHandle</b> 
+ * @return Returns the status code 
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeContent_RegisterCallback(
+    ArkUI_NodeContentHandle handle, ArkUI_NodeContentCallback callback);
+
+/**
+ * @brief Obtains the type of a node content.
+ *
+ * @param event Indicates the pointer to the node content.
+ * @return Returns the type of the node content.
+ * @since 12
+ */
+ArkUI_NodeContentEventType OH_ArkUI_NodeContentEvent_GetEventType(ArkUI_NodeContentEvent* event);
 
 #ifdef __cplusplus
 };

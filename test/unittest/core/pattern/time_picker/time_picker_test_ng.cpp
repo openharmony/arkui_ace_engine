@@ -2711,4 +2711,88 @@ HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1
     pickerPattern->OnColorConfigurationUpdate();
     ASSERT_EQ(Color::BLACK, dialogTheme->GetBackgroundColor());
 }
+/**
+ * @tc.name: TimePickerDialogView001
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogView001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.type = std::make_optional<ButtonType>(ButtonType::CAPSULE);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TimePickerDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    auto testval = buttonLayoutProperty->GetTypeValue();
+    EXPECT_EQ(testval, ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow003
+ * @tc.desc: Test TimePickerDialogViewShow Show.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow003, TestSize.Level1)
+{
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.type = std::make_optional<ButtonType>(ButtonType::CAPSULE);
+    buttonInfos.push_back(info1);
+
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

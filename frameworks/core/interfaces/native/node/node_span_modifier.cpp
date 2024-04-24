@@ -285,17 +285,11 @@ void ResetSpanLetterSpacing(ArkUINodeHandle node)
     SpanModelNG::SetLetterSpacing(uiNode, DEFAULT_LETTER_SPACING_VALUE);
 }
 
-void SetSpanBaselineOffset(ArkUINodeHandle node, const struct ArkUIStringAndFloat* baselineOffsetValue)
+void SetSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    Dimension result;
-    if (baselineOffsetValue->valueStr != nullptr) {
-        result = StringUtils::StringToDimensionWithUnit(std::string(baselineOffsetValue->valueStr), DimensionUnit::FP);
-    } else {
-        result = Dimension(baselineOffsetValue->value, DimensionUnit::FP);
-    }
-    SpanModelNG::SetBaselineOffset(uiNode, result);
+    SpanModelNG::SetBaselineOffset(uiNode, CalcDimension(value, (DimensionUnit)unit));
 }
 
 float GetSpanBaselineOffset(ArkUINodeHandle node)

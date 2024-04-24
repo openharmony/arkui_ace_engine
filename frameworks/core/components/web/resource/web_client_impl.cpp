@@ -115,7 +115,7 @@ bool OnJsCommonDialog(
             jsResult = delegate->OnCommonDialog(param, dialogEventType);
         }
         },
-        OHOS::Ace::TaskExecutor::TaskType::JS);
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientCommonDialogEvent");
     return jsResult;
 }
 
@@ -186,7 +186,7 @@ bool WebClientImpl::OnConsoleLog(const std::shared_ptr<OHOS::NWeb::NWebConsoleLo
             jsMessage = delegate->OnConsoleLog(message);
         }
         },
-        OHOS::Ace::TaskExecutor::TaskType::JS);
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebConsoleLog");
 
     return jsMessage;
 }
@@ -297,11 +297,22 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
     ContainerScope scope(instanceId_);
-    auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
         return;
     }
-    delegate->OnHttpErrorReceive(request, response);
+    std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
+    task->PostTask([webClient = webClientWeak, request, response] {
+        auto webClientUpgrade = webClient.lock();
+        if (webClientUpgrade == nullptr) {
+            return;
+        }
+        auto delegate = webClientUpgrade->GetWebDelegate();
+        if (delegate) {
+            delegate->OnHttpErrorReceive(request, response);
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebHttpError");
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
@@ -358,7 +369,7 @@ bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrl
     }
     task->PostSyncTask([&delegate, &webResponse, &param] {
             webResponse = delegate->OnInterceptRequest(param);
-        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebInterceptRequest");
     if (webResponse == nullptr) {
         return false;
     }
@@ -456,7 +467,7 @@ bool WebClientImpl::OnFileSelectorShow(
             jsResult = delegate->OnFileSelectorShow(param);
         }
         },
-        OHOS::Ace::TaskExecutor::TaskType::JS);
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebFileSelectorShow");
     return jsResult;
 }
 
@@ -478,7 +489,7 @@ void WebClientImpl::OnResource(const std::string& url)
             delegate->OnResourceLoad(url);
         }
         },
-        OHOS::Ace::TaskExecutor::TaskType::JS);
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebResourceLoad");
 }
 
 void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
@@ -520,7 +531,7 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
             if (delegate) {
                 jsResult = delegate->OnHttpAuthRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebHttpAuthRequest");
     return jsResult;
 }
 
@@ -543,7 +554,7 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
             if (delegate) {
                 jsResult = delegate->OnSslErrorRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebSslErrorRequest");
     return jsResult;
 }
 
@@ -572,7 +583,7 @@ bool WebClientImpl::OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslE
             if (delegate) {
                 jsResult = delegate->OnAllSslErrorRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebAllSslErrorRequest");
     return jsResult;
 }
 
@@ -601,7 +612,7 @@ bool WebClientImpl::OnSslSelectCertRequestByJS(
             if (delegate) {
                 jsResult = delegate->OnSslSelectCertRequest(param);
             }
-        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebSslSelectCertRequest");
 
     return jsResult;
 }
@@ -643,7 +654,7 @@ bool WebClientImpl::RunContextMenu(
             jsResult = delegate->OnContextMenuShow(param);
         }
         },
-        OHOS::Ace::TaskExecutor::TaskType::JS);
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebRunContextMenu");
     return jsResult;
 }
 
@@ -795,7 +806,7 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
     delegate->OnTouchIconUrl(icon_url, precomposed);
 }
 
-bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
+bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, std::shared_ptr<NWeb::NWebCursorInfo> info)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();

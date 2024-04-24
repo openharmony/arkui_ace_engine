@@ -98,12 +98,29 @@ frameworks/core/components_ng/pattern/loading_progress/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/marquee/  @liyujie43
 frameworks/core/components_ng/pattern/menu/  @Armstrong15
 frameworks/core/components_ng/pattern/model/  @
-frameworks/core/components_ng/pattern/navigation/  @tsj_2020
-frameworks/core/components_ng/pattern/navigator/  @tsj_2020
-frameworks/core/components_ng/pattern/navrouter/  @tsj_2020
-frameworks/core/components_ng/pattern/option/  @cheng-feiwang
+frameworks/core/components_ng/pattern/navigation/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components_ng/pattern/navigator/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components_ng/pattern/navrouter/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components_ng/pattern/option/  @Armstrong15
 frameworks/core/components_ng/pattern/overlay/  @cheng-feiwang
-frameworks/core/components_ng/pattern/panel/  @Armstrong15
+frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/modal_style.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_property.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_pattern.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_presentation_property.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_style.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_theme.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_view.cpp  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/overlay/sheet_view.h  @cheng-feiwang @raulnaruto_admin
+frameworks/core/components_ng/pattern/panel/  @cheng-feiwang @raulnaruto_admin
 frameworks/core/components_ng/pattern/patternlock/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/picker/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/plugin/  @wangchensu1 @keerecles @ZhangYu-Home
@@ -127,11 +144,11 @@ frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @fredtt
 frameworks/core/components_ng/pattern/select_overlay/  @luckclover
 frameworks/core/components_ng/pattern/shape/  @sunbees
-frameworks/core/components_ng/pattern/side_bar/  @tsj_2020
+frameworks/core/components_ng/pattern/side_bar/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components_ng/pattern/slider/  @fredtt
 frameworks/core/components_ng/pattern/stack/  @xiexiyun
 frameworks/core/components_ng/pattern/stage/  @yan-shuifeng
-frameworks/core/components_ng/pattern/stepper/  @tsj_2020
+frameworks/core/components_ng/pattern/stepper/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components_ng/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan
 frameworks/core/components_ng/pattern/tabs/  @xuzhidan
@@ -200,8 +217,8 @@ frameworks/core/components/marquee/  @liyujie43
 frameworks/core/components/menu/  @Armstrong15
 frameworks/core/components/mouse_listener/  @catpoison
 frameworks/core/components/multimodal/  @
-frameworks/core/components/navigation_bar/  @tsj_2020
-frameworks/core/components/navigator/  @tsj_2020
+frameworks/core/components/navigation_bar/  @tsj_2020 @raulnaruto_admin
+frameworks/core/components/navigator/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components/option/  @cheng-feiwang
 frameworks/core/components/overlay/  @yangfan229
 frameworks/core/components/padding/  @yangfan229
@@ -234,12 +251,12 @@ frameworks/core/components/shadow/  @
 frameworks/core/components/shape/  @sunbees
 frameworks/core/components/shared_transition/  @hehongyang9
 frameworks/core/components/sheet/  @cheng-feiwang
-frameworks/core/components/side_bar/  @tsj_2020
+frameworks/core/components/side_bar/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components/slider/  @fredtt
 frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
-frameworks/core/components/stepper/  @tsj_2020
+frameworks/core/components/stepper/  @tsj_2020 @raulnaruto_admin
 frameworks/core/components/svg/  @wu-yinxiao
 frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
@@ -295,6 +312,21 @@ frameworks/core/components_ng/svg/  @wu-yinxiao
 
 [Advanced UI Components]
 advanced_ui_component/ @youzhi92
+advanced_ui_component/composelistitem/ @hanyujia1
+advanced_ui_component/composetitlebar/ @hanyujia1
+advanced_ui_component/dialog/ @hanyujia1
+advanced_ui_component/editabletitlebar/ @hanyujia1
+advanced_ui_component/exceptionprompt/ @hanyujia1
+advanced_ui_component/filter/ @hanyujia1
+advanced_ui_component/gridobjectsortcomponent/ @hanyujia1
+advanced_ui_component/progressbutton/ @hanyujia1
+advanced_ui_component/selecttitlebar/ @hanyujia1
+advanced_ui_component/subheader/ @hanyujia1
+advanced_ui_component/swiperefresher/ @hanyujia1
+advanced_ui_component/tabtitlebar/ @hanyujia1
+advanced_ui_component/toolbar/ @hanyujia1
+advanced_ui_component/treeview/ @hanyujia1
+advanced_ui_component/splitlayout/ @hanyujia1
 
 [Build configs]
 build/ @sunfei2021

@@ -186,7 +186,7 @@ void RenderIndexer::UpdateSection(int32_t index)
                 indexer->MoveSection(index);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIIndexerUpdateSection");
 }
 
 void RenderIndexer::InitIndexTable()

@@ -51,7 +51,7 @@ public:
         };
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent(task, TaskExecutor::TaskType::UI);
+        context->PostAsyncEvent(task, "ArkUIToggleUpdateChangeEvent", TaskExecutor::TaskType::UI);
 
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;

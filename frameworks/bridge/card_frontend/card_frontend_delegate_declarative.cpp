@@ -52,7 +52,7 @@ UIContentErrorCode CardFrontendDelegateDeclarative::RunCard(
             container->SetCardPipeline(weakCardPipeline, cardId);
             pageRouterManager->RunCard(url, params, cardId);
         },
-        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendRunCard"); // eTSCard UI == Main JS/UI/PLATFORM
 
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -72,7 +72,7 @@ void CardFrontendDelegateDeclarative::FireCardAction(const std::string& action)
                 context->OnActionEvent(action);
             }
         },
-        TaskExecutor::TaskType::UI); // eTSCard UI == Main JS/UI/PLATFORM
+        TaskExecutor::TaskType::UI, "ArkUICardFrontendFireAction"); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
 double CardFrontendDelegateDeclarative::MeasureText(const MeasureContext& context)

@@ -531,7 +531,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                         CHECK_NULL_VOID(pipelineContext);
                         AnimateToForStageMode(pipelineContext, option, func, onFinishEvent, immediately);
                     },
-                    TaskExecutor::TaskType::UI);
+                    TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode");
                 return;
             }
             AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);

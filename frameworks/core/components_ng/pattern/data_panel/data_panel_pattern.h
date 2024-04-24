@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_method.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -50,10 +51,29 @@ public:
 
     void OnModifyDone() override;
 
+    void SetBuilderFunc(DataPanelMakeCallback&& makeFunc)
+    {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            OnModifyDone();
+            return;
+        }
+        makeFunc_ = std::move(makeFunc);
+    }
+
+    bool UseContentModifier()
+    {
+        return contentModifierNode_ != nullptr;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    void FireBuilder();
+    RefPtr<FrameNode> BuildContentModifierNode();
 
+    std::optional<DataPanelMakeCallback> makeFunc_;
+    RefPtr<FrameNode> contentModifierNode_;
     RefPtr<DataPanelModifier> dataPanelModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(DataPanelPattern);
 };
