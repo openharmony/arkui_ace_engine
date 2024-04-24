@@ -720,11 +720,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     } else {
         auto geometryNode = frameNode->GetGeometryNode();
         if (geometryNode) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-                frameNodeSize_ = geometryNode->GetFrameSize();
-            } else {
-                frameNodeSize_ = (geometryNode->GetFrameSize()) * DEFALUT_DRAG_PPIXELMAP_SCALE;
-            }
+            frameNodeSize_ = geometryNode->GetFrameSize();
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }

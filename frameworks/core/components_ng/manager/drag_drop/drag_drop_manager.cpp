@@ -52,7 +52,7 @@ constexpr int32_t MAX_RETRY_DURATION = 800;
 constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
 constexpr int64_t MOVE_TIME_LIMIT = 6L;
 constexpr int64_t DRAG_MOVE_TIME_THRESHOLD = 16 * 1000 * 1000;
-constexpr float MAX_DISTANCE_TO_PRE_POINTER = 20.0f;
+constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 } // namespace
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
