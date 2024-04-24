@@ -44,6 +44,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
@@ -2249,6 +2250,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+    } else if (params[0] == "-allelements") {
+        AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto rootNode = pipeline->GetRootElement();
+            if (rootNode) {
+                DumpLog::GetInstance().Print(0, "ContainerId: " + std::to_string(Container::CurrentId()));
+                rootNode->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+        });
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
