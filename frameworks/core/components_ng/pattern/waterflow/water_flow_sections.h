@@ -46,8 +46,8 @@ public:
     }
 
     /**
-     * @brief check if the last update is a special case where the user is only adding / deleting items to the last section.
-     * 
+     * @brief check if last update was a special case where only itemCount in the last section is modified.
+     *
      * @return true only if itemCount in the last section has changed and everything else remains the same.
      */
     bool IsSpecialUpdate() const;
