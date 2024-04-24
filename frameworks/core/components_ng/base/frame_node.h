@@ -429,6 +429,11 @@ public:
         destroyCallbacks_.emplace_back(callback);
     }
 
+    void SetColorModeUpdateCallback(const std::function<void()>&& callback)
+    {
+        colorModeUpdateCallback_ = callback;
+    }
+
     bool MarkRemoving() override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
@@ -895,6 +900,7 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
+    std::function<void()> colorModeUpdateCallback_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
