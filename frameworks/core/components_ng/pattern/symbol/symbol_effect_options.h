@@ -147,10 +147,10 @@ public:
         json->Put("scopeType", static_cast<int32_t>(scopeType_.value_or(ScopeType::LAYER)));
         json->Put("commonSubType", static_cast<int32_t>(commonSubType_.value_or(CommonSubType::DOWN)));
         json->Put("fillStyle", static_cast<int32_t>(fillStyle_.value_or(FillStyle::CUMULATIVE)));
-        json->Put("repeatCount", repeatCount_);
         json->Put("isTxtActive", isTxtActive_);
         json->Put("isTriggerNumChanged", isTriggerNumChanged_.value_or(false));
         json->Put("isActive", isActive_.value_or(false));
+        json->Put("repeatCount", repeatCount_);
         return json->ToString();
     }
 
