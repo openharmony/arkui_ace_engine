@@ -1472,6 +1472,20 @@ typedef enum {
 } ArkUI_FinishCallbackType;
 
 /**
+ * @brief 交叉轴方向的布局方式。
+  *
+ * @since 12
+ */
+typedef enum {
+     /** ListItem在List中，交叉轴方向首部对齐。 */
+    ARKUI_LIST_ITEM_ALIGN_START = 0,
+    /** ListItem在List中，交叉轴方向居中对齐。*/
+    ARKUI_LIST_ITEM_ALIGN_CENTER,
+    /** ListItem在List中，交叉轴方向尾部对齐。*/
+    ARKUI_LIST_ITEM_ALIGN_END,
+} ArkUI_ListItemAlign;
+
+/**
  * @brief Enumerates the component units.
  *
  * @since 12
