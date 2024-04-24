@@ -2110,6 +2110,14 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
 }
 
+void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect)
+{
+    auto isAccessibilityFocus = GetAccessibilityFocus().value_or(false);
+    if (isAccessibilityFocus) {
+        PaintAccessibilityFocus();
+    }
+}
+
 void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -2140,14 +2148,19 @@ void RosenRenderContext::PaintAccessibilityFocus()
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
     frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
+    RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
+    if (localRect != RectT<int32_t>()) {
+        RectF globalRect = frameRect.GetRect();
+        globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
+            localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
+        frameRect.SetRect(globalRect);
+    }
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
 void RosenRenderContext::ClearAccessibilityFocus()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(accessibilityFocusStateModifier_);
     rsNode_->RemoveModifier(accessibilityFocusStateModifier_);
     RequestNextFrame();

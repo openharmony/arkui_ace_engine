@@ -29,6 +29,7 @@
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -4625,9 +4626,21 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto accessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
+        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
+        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, true);
+    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
+        webPattern->UpdateFocusedAccessibilityId();
+        accessibilityManager->UpdateAccessibilityFocusId(context, accessibilityId, false);
+    } else if (eventType == AccessibilityEventType::CHANGE) {
+        auto accessibilityId = accessibilityManager->GetAccessibilityFocusId();
+        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
+    }
     if (accessibilityId <= 0) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
         auto webNode = webPattern->GetHost();
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();

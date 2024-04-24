@@ -134,6 +134,9 @@ public:
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<NG::PipelineContext>& ngPipeline);
     void SetWebAccessibilityState(bool state);
+    void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
+        bool isFocus) override;
+    int64_t GetAccessibilityFocusId() const override;
 #endif
     void GetResultOfFocusMoveSearchNG(
         int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);

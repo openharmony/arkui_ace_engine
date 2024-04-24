@@ -3458,13 +3458,25 @@ bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType ac
     auto webPattern = webNode->GetPattern<NG::WebPattern>();
     CHECK_NULL_RETURN(webPattern, false);
     webPattern->ExecuteAction(elementId, ConvertAccessibilityAction(action));
-    if (action == ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS) {
+    return true;
+}
+
+int64_t JsAccessibilityManager::GetAccessibilityFocusId() const
+{
+    return currentFocusNodeId_;
+}
+
+void JsAccessibilityManager::UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
+    bool isFocus)
+{
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+    if (isFocus) {
         Framework::ClearAccessibilityFocus(ngPipeline->GetRootElement(), currentFocusNodeId_);
-        currentFocusNodeId_ = frameNode->GetAccessibilityId();
-    } else if (action == ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS) {
+        currentFocusNodeId_ = accessibilityId;
+    } else {
         currentFocusNodeId_ = -1;
     }
-    return true;
 }
 #endif
 

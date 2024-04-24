@@ -106,15 +106,6 @@ public:
         VK_HIDE
     };
 
-    std::optional<RenderContext::ContextParam> GetContextParam() const override
-    {
-        if (renderMode_ == RenderMode::SYNC_RENDER) {
-            return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
-        } else {
-            return RenderContext::ContextParam { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
-        }
-    }
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool IsAtomicNode() const override
@@ -475,6 +466,7 @@ public:
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
     void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
+    void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
 
@@ -629,6 +621,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
     OffsetF GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound);
     void SetSelfAsParentOfWebCoreNode(std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info) const;
+    bool GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const;
     void SetTouchLocationInfo(const TouchEvent& touchEvent, const TouchLocationInfo& changedInfo,
         const TouchEventInfo& tempTouchInfo, TouchEventInfo& touchEventInfo);
     struct TouchInfo {
@@ -673,6 +666,7 @@ private:
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
+    RefPtr<RenderContext> renderContextForSurface_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
