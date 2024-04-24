@@ -486,6 +486,7 @@ build_component_ng("pattern_ng") {
     "text_picker/textpicker_dialog_view.cpp",
     "text_picker/textpicker_layout_algorithm.cpp",
     "text_picker/textpicker_model_ng.cpp",
+    "text_picker/textpicker_overscroll.cpp",
     "text_picker/textpicker_paint_method.cpp",
     "text_picker/textpicker_pattern.cpp",
     "text_picker/textpicker_row_accessibility_property.cpp",
