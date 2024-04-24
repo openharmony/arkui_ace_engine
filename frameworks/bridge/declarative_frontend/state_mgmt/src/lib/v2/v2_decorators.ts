@@ -262,7 +262,7 @@ interface IMonitor {
    *
    */
 const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor): void => {
-  stateMgmtConsole.debug(`@computed ${propertyKey}`);
+  stateMgmtConsole.debug(`@Computed ${propertyKey}`);
   let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + target.constructor.name);
   const computeFunction = descriptor.get;
   target[watchProp] ? target[watchProp][propertyKey] = computeFunction

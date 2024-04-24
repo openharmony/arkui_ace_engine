@@ -311,6 +311,7 @@ class __RepeatV2<T> implements RepeatAPI<T> {
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
+
 class __RepeatPU<T> extends __RepeatV2<T> implements RepeatAPI<T> {
     private owningView_ : ViewPU;
 

@@ -15,11 +15,50 @@
 
 
 /**
- * 
- * This file includes only framework internal classes and functions 
+ *
+ * This file includes only framework internal classes and functions
  * non are part of SDK. Do not access from app.
- * 
+ *
+ *
+ * ObserveV2 is the singleton object for observing state variable access and
+ * change
  */
+
+// in the case of ForEach, Repeat, AND If, two or more UINodes / elmtIds can render at the same time
+// e.g. ForEach -> ForEach child Text, Repeat -> Nested Repeat, child Text
+// Therefore, ObserveV2 needs to keep a strack of currently renderign ids / components
+// in the same way as thsi is also done for PU stateMgmt with ViewPU.currentlyRenderedElmtIdStack_
+class StackOfRenderedComponents {
+  private stack_: Array<StackOfRenderedComponentsItem> = new Array<StackOfRenderedComponentsItem>();
+
+  public push(id: number, cmp: IView | MonitorV2 | ComputedV2): void {
+    this.stack_.push(new StackOfRenderedComponentsItem(id, cmp));
+  }
+
+  public pop(): [id: number, cmp: IView | MonitorV2 | ComputedV2] | undefined {
+    const item = this.stack_.pop();
+    return item ? [item.id_, item.cmp_] : undefined;
+  }
+
+  public top(): [id: number, cmp: IView | MonitorV2 | ComputedV2] | undefined {
+    if (this.stack_.length) {
+      const item = this.stack_[this.stack_.length - 1];
+      return [item.id_, item.cmp_];
+    } else {
+      return undefined;
+    }
+  }
+}
+
+class StackOfRenderedComponentsItem {
+  public id_ : number;
+  public cmp_ : IView | MonitorV2 | ComputedV2;
+
+  constructor(id : number, cmp : IView | MonitorV2 | ComputedV2) {
+    this.id_= id;
+    this.cmp_= cmp;
+  }
+}
 
 class ObserveV2 {
   // meta data about decorated variable inside prototype
@@ -42,10 +81,9 @@ class ObserveV2 {
 
   // see MonitorV2.observeObjectAccess: bindCmp is the MonitorV2
   // see modified ViewV2 and ViewPU observeComponentCreation, bindCmp is the ViewV2 or ViewPU
-  private bindCmp_: IView | MonitorV2 | ComputedV2 | null = null;
 
   // bindId: UINode elmtId or watchId, depending on what is being observed
-  private bindId_: number = UINodeRegisterProxy.notRecordingDependencies;
+  private stackOfRenderedComponents_ : StackOfRenderedComponents = new StackOfRenderedComponents();
 
   // Map bindId to WeakRef<ViewPU> | MonitorV2
   private id2cmp_: { number: WeakRef<Object> } = {} as { number: WeakRef<Object> };
@@ -88,15 +126,30 @@ class ObserveV2 {
 
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
-  public startBind(cmp: IView | MonitorV2 | ComputedV2 | null, id: number): void {
-    this.bindCmp_ = cmp;
-    this.bindId_ = id;
+  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2, id: number): void {
     if (cmp != null) {
       this.clearBinding(id);
-      this.id2cmp_[id] = new WeakRef<Object>(cmp);
+      this.stackOfRenderedComponents_.push(id, cmp);
     }
   }
 
+    // At the start of observeComponentCreation or
+  // MonitorV2 observeObjectAccess
+  public stopRecordDependencies(): void {
+    const bound = this.stackOfRenderedComponents_.pop();
+    if (bound === undefined) {
+      stateMgmtConsole.error("stopRecordDependencies finds empty stack. Internal error!");
+      return;
+    }
+    let targetsSet: Set<WeakRef<Object>>;
+    if ((targetsSet = this.id2targets_[bound[0]]) !== undefined && targetsSet.size) {
+      // only add IView | MonitorV2 | ComputedV2 if at least one dependency was
+      // recorded when rendering this ViewPU/ViewV2/Monitor/ComputedV2
+      // ViewPU is the likely case where no dependecy gets recorded
+      // for others no dependencies are unlikely to happen
+      this.id2cmp_[bound[0]] = new WeakRef<Object>(bound[1]);
+    }
+  }
 
   // clear any previously created dependency view model object to elmtId
   // find these view model objects with the reverse map id2targets_
@@ -127,30 +180,30 @@ class ObserveV2 {
   }
 
   /**
-   * 
+   *
    * this cleanUpId2CmpDeadReferences()
    * id2cmp is a 'map' object id => WeakRef<Object> where object is ViewV2, ViewPU, MonitorV2 or ComputedV2
-   * This method iterates over the object entries and deleted all those entries whose value can no longer 
+   * This method iterates over the object entries and deleted all those entries whose value can no longer
    * be deref'ed.
-   * 
+   *
    * cleanUpId2TargetsDeadReferences()
    * is2targets is a 'map' object id => Set<WeakRef<Object>>
-   * the method traverses over the object entries and for each value of type 
+   * the method traverses over the object entries and for each value of type
    * Set<WeakRef<Object>> removes all those items from the set that can no longer be deref'ed.
-   * 
+   *
    * According to JS specifications, it is up to ArlTS runtime GC implementation when to collect unreferences objects.
-   * Parameters such as available memory, ArkTS processing load, number and size of all JS objects for GC collection 
+   * Parameters such as available memory, ArkTS processing load, number and size of all JS objects for GC collection
    * can impact the time delay between an object loosing last reference and GC collecting this object.
-   * 
+   *
    * WeakRef deref() returns the object until GC has collected it.
-   * The id2cmp and is2targets cleanup herein depends on WeakRef.deref() to return undefined, i.e. it depends on GC 
+   * The id2cmp and is2targets cleanup herein depends on WeakRef.deref() to return undefined, i.e. it depends on GC
    * collecting 'cmp' or 'target' objects. Only then the algorithm can remove the entry from id2cmp / from id2target.
-   * It is therefore to be expected behavior that these map objects grow and they a contain a larger number of 
-   * MonitorV2, ComputedV2, and/or view model @Observed class objects that are no longer used / referenced by the application. 
+   * It is therefore to be expected behavior that these map objects grow and they a contain a larger number of
+   * MonitorV2, ComputedV2, and/or view model @Observed class objects that are no longer used / referenced by the application.
    * Only after ArkTS runtime GC has collected them, this function is able to clean up the id2cmp and is2targets.
-   * 
+   *
    * This cleanUpDeadReferences() function gets called from UINodeRegisterProxy.uiNodeCleanUpIdleTask()
-   * 
+   *
    */
   public cleanUpDeadReferences(): void {
     this.cleanUpId2CmpDeadReferences();
@@ -183,7 +236,7 @@ class ObserveV2 {
     } // for id2targets_
   }
 
-  /** 
+  /**
    * counts number of WeakRef<Object> entries in id2cmp_ 'map' object
    * @returns total count and count of WeakRefs that can be deref'ed
    * Methods only for testing
@@ -226,17 +279,18 @@ class ObserveV2 {
   // add dependency view model object 'target' property 'attrName'
   // to current this.bindId
   public addRef(target: object, attrName: string): void {
-    if (this.bindCmp_ === null) {
+    const bound = this.stackOfRenderedComponents_.top();
+    if (!bound) {
       return;
     }
-    if (this.bindId_ === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
+    if (bound[0] === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
       const error = `${attrName}: ObserveV2.addRef: trying to use V3 state '${attrName}' to init/update child V2 @Component. Application error`;
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }
 
-    stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${this.bindId_}...`);
-    const id = this.bindId_;
+    stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
+    const id = bound[0];
 
     // Map: attribute/symbol -> dependent id
     const symRefs = target[ObserveV2.SYMBOL_REFS] ??= {};
@@ -256,11 +310,11 @@ class ObserveV2 {
   }
 
   /**
-   * 
+   *
    * @param target set tracked attribute to new value without notifying the change
    *               !! use with caution !!
-   * @param attrName 
-   * @param newValue 
+   * @param attrName
+   * @param newValue
    */
   public setUnmonitored<Z>(target: object, attrName: string, newValue: Z): void {
     const storeProp = ObserveV2.OB_PREFIX + attrName;
@@ -277,11 +331,11 @@ class ObserveV2 {
 
   /**
    * Execute given task while state change observation is disabled
-   * A state mutation caused by the task will NOT trigger UI rerender 
-   * and @monitor function execution. 
-   * 
+   * A state mutation caused by the task will NOT trigger UI rerender
+   * and @monitor function execution.
+   *
    * !!! Use with Caution !!!
-   * 
+   *
    * @param task a function to execute without monitoring state changes
    * @returns task function return value
    */
@@ -310,8 +364,10 @@ class ObserveV2 {
       return;
     }
 
+    const bound = this.stackOfRenderedComponents_.top();
     if (this.calculatingComputedProp_) {
-      const error = `Usage of ILLEGAL @computed function detected for ${(this.bindCmp_ as ComputedV2).getProp()}! The @computed function MUST NOT change the state of any observed state variable!`;
+      const prop = bound ? (bound[1] as ComputedV2).getProp() : "unknown computed property";
+      const error = `Usage of ILLEGAL @Computed function detected for ${prop}! The @Computed function MUST NOT change the state of any observed state variable!`;
       stateMgmtConsole.applicationError(error);
       throw new Error(error);
     }
@@ -324,13 +380,14 @@ class ObserveV2 {
     }
 
     stateMgmtConsole.propertyAccess(`ObserveV2.fireChange '${attrName}' dependent ids: ${JSON.stringify(Array.from(changedIdSet))}  ...`);
+
     for (const id of changedIdSet) {
       // Cannot fireChange the object that is being created.
-      if (id === this.bindId_) {
+      if (bound && id === bound[0]) {
         continue;
       }
 
-      // if this is the first id to be added to any Set of changed ids, 
+      // if this is the first id to be added to any Set of changed ids,
       // schedule an 'updateDirty' task
       // that will run after the current call stack has unwound.
       // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
@@ -360,12 +417,12 @@ class ObserveV2 {
   private updateDirty2(): void {
     aceTrace.begin('updateDirty2');
     stateMgmtConsole.debug(`ObservedV3.updateDirty2 ... `);
-    // obtain and unregister the removed elmtIds 
+    // obtain and unregister the removed elmtIds
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
 
     // priority order of processing:
-    // 1- update computed properties until no more need computed props update 
+    // 1- update computed properties until no more need computed props update
     // 2- update monitors until no more monitors and no more computed props
     // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
     // FIXME prevent infinite loops
@@ -373,7 +430,7 @@ class ObserveV2 {
       do {
         while (this.computedPropIdsChanged_.size) {
           //  sort the ids and update in ascending order
-          // If a @computed property depends on other @computed properties, their
+          // If a @Computed property depends on other @Computed properties, their
           // ids will be smaller as they are defined first.
           const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1 - id2);
           this.computedPropIdsChanged_ = new Set<number>();
@@ -397,8 +454,8 @@ class ObserveV2 {
   }
 
   private updateDirtyComputedProps(computed: Array<number>): void {
-    stateMgmtConsole.debug(`ObservedV3.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
-    aceTrace.begin(`ObservedV3.updateDirtyComputedProps ${computed.length} @computed`);
+    stateMgmtConsole.debug(`ObservedV2.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
+    aceTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
     computed.forEach((id) => {
       let comp: ComputedV2 | undefined;
       let weakComp: WeakRef<ComputedV2 | undefined> = this.id2cmp_[id];
@@ -439,10 +496,10 @@ class ObserveV2 {
 
   /**
    * This version of UpdateUINodes does not wait for VSYNC, violates rules
-   * calls UpdateElement, thereby avoids the long and frequent code path from 
+   * calls UpdateElement, thereby avoids the long and frequent code path from
    * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
    * Code left here to reproduce benchmark measurements, compare with future optimisation
-   * @param elmtIds 
+   * @param elmtIds
    */
   private updateUINodesWithoutVSync(elmtIds: Array<number>): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodes: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
@@ -506,7 +563,7 @@ class ObserveV2 {
     const watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + name);
     if (target && (typeof target === 'object') && target[watchProp]) {
       Object.entries(target[watchProp]).forEach(([propertyName, computeFunc]) => {
-        stateMgmtConsole.debug(`constructComputed: in ${target?.constructor?.name} found @computed ${propertyName}`);
+        stateMgmtConsole.debug(`constructComputed: in ${target?.constructor?.name} found @Computed ${propertyName}`);
         new ComputedV2(target, propertyName, computeFunc as unknown as () => any).InitRun();
       });
     }
@@ -532,7 +589,7 @@ class ObserveV2 {
       val = target[key];
     }
 
-    // If the return value is an Array, Set, Map 
+    // If the return value is an Array, Set, Map
     if (!(val instanceof Date)) {
       ObserveV2.getObserve().addRef(val, ObserveV2.OB_LENGTH);
     }
@@ -718,7 +775,7 @@ class ObserveV2 {
 
   /**
    * Helper function to add meta data about decorator to ViewPU or ViewV2
-   * @param proto prototype object of application class derived from  ViewPU or ViewV2 
+   * @param proto prototype object of application class derived from  ViewPU or ViewV2
    * @param varName decorated variable
    * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
    */
@@ -728,7 +785,7 @@ class ObserveV2 {
     meta[varName] = {};
     meta[varName].deco = deco;
 
-    // FIXME 
+    // FIXME
     // when splitting ViewPU and ViewV3
     // use instanceOf. Until then, this is a workaround.
     // any @state, @track, etc V3 event handles this function to return false
@@ -744,14 +801,14 @@ class ObserveV2 {
     // add decorator meta data
     const meta = proto[ObserveV2.V2_DECO_META] ??= {};
     meta[varName] ??= {};
-    if (deco) { 
+    if (deco) {
       meta[varName].deco = deco;
     }
-    if (deco2) { 
+    if (deco2) {
       meta[varName].deco2 = deco2;
     }
-    
-    // FIXME 
+
+    // FIXME
     // when splitting ViewPU and ViewV3
     // use instanceOf. Until then, this is a workaround.
     // any @state, @track, etc V3 event handles this function to return false
@@ -795,7 +852,7 @@ const trackInternal = (
     },
     enumerable: true
   });
-  // this marks the proto as having at least one @track property inside 
+  // this marks the proto as having at least one @track property inside
   // used by IsObservedObjectV2
   target[ObserveV2.V2_DECO_META] ??= {};
 }; // trackInternal
