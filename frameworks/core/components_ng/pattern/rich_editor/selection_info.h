@@ -21,10 +21,15 @@
 #include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
+
+namespace OHOS::Ace::NG {
+struct SpanItem;
+}
 namespace OHOS::Ace {
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 enum GetSpansMethod : int32_t {
@@ -106,6 +111,7 @@ struct ResultObject {
     ImageStyleResult imageStyle;
     SymbolSpanStyle symbolSpanStyle;
     RefPtr<ResourceObject> valueResource;
+    WeakPtr<NG::SpanItem> span;
     bool isDraggable = true;
     bool isInit = false;
 };

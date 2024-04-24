@@ -42,11 +42,11 @@ struct ImageSpanSize {
     {
         std::optional<NG::CalcLength> tmpWidth = std::nullopt;
         if (width.has_value()) {
-            tmpWidth = NG::CalcLength(width->Value());
+            tmpWidth = NG::CalcLength(width->ConvertToPx());
         }
         std::optional<NG::CalcLength> tmpHeight = std::nullopt;
         if (height.has_value()) {
-            tmpHeight = NG::CalcLength(height->Value());
+            tmpHeight = NG::CalcLength(height->ConvertToPx());
         }
         return {tmpWidth, tmpHeight};
     }
