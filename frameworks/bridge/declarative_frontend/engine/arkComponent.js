@@ -17044,16 +17044,21 @@ class ArkGaugeComponent extends ArkComponent {
       getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context, gaugeConfiguration) {
     gaugeConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.gaugeNode)) {
+    if (isUndefined(this.gaugeNode) || this.needRebuild) {
       let xNode = globalThis.requireNapi('arkui.node');
       this.gaugeNode = new xNode.BuilderNode(context);
       this.gaugeNode.build(this.builder, gaugeConfiguration);
+      this.needRebuild = false;
     } else {
       this.gaugeNode.update(gaugeConfiguration);
     }
