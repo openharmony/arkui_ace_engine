@@ -764,6 +764,10 @@ void PipelineContext::FlushModifier()
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
+    if (IsFreezeFlushMessage()) {
+        SetIsFreezeFlushMessage(false);
+        return;
+    }
     window_->FlushTasks();
 }
 

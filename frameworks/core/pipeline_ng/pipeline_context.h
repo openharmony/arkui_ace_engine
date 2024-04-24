@@ -692,9 +692,9 @@ public:
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
     void CheckNeedUpdateBackgroundColor(Color& color);
+
     bool CheckNeedDisableUpdateBackgroundImage();
 
-    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
@@ -705,6 +705,16 @@ public:
     {
         ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
         return colorMode;
+    }
+
+    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
+    {
+        isFreezeFlushMessage_ = isFreezeFlushMessage;
+    }
+
+    bool IsFreezeFlushMessage() const
+    {
+        return isFreezeFlushMessage_;
     }
 
 protected:
@@ -888,6 +898,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
+    bool isFreezeFlushMessage_ = true;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
