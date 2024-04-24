@@ -442,7 +442,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->SetBadgeNumber(badgeNumber.value());
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
-        actuator->SetFilter(actuator);
+        bool isBindMenuPreview = gestureHub->GetPreviewMode() != MenuPreviewMode::NONE;
+        if (!isBindMenuPreview) {
+            actuator->SetFilter(actuator);
+        }
         auto manager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(manager);
         actuator->SetIsNotInPreviewState(false);
@@ -456,7 +459,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        if (gestureHub->GetPreviewMode() == MenuPreviewMode::NONE) {
+        if (!isBindMenuPreview) {
             if (actuator->IsNeedGather()) {
                 DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
                 actuator->ShowPreviewBadgeAnimation(actuator, manager);
