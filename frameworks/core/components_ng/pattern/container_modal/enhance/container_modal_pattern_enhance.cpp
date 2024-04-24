@@ -117,7 +117,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
     AddOrRemovePanEvent(customTitleRow);
-    AddOrRemovePanEvent(floatingTitleRow);
     AddOrRemovePanEvent(gestureRow);
     gestureRow->GetLayoutProperty()->UpdateVisibility(
         (isShow && customTitleSettedShow_) ? VisibleType::GONE : VisibleType::VISIBLE);
