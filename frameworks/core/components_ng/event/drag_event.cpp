@@ -132,6 +132,49 @@ void DragEventActuator::CancelDragForWeb()
     }
 }
 
+/**
+ * Do some nessessary check before returning the gesture recognizer collection result
+ * to parent during the hittest process. For example, if there is one drag operation
+ * already in our system, it is not allowed to start new interation for drag operation.
+ */
+bool DragEventActuator::IsGlobalStatusSuitableForDragging()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, false);
+    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "No need to collect drag gestures result, dragging is %{public}d,"
+            "MSDP dragging is %{public}d",
+            dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * check the current node's status to decide if it can initiate one drag operation
+ */
+bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
+    const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_RETURN(gestureHub, false);
+    if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
+        IsBelongToMultiItemNode(frameNode) || touchRestrict.inputEventType == InputEventType::AXIS) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "No need to collect drag gestures result, drag forbidden set is %{public}d,"
+            "frameNode draggable is %{public}d, custom set is %{public}d",
+            gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
+        return false;
+    }
+
+    return true;
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
@@ -146,16 +189,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetPrepareDragFrameNode(nullptr);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, dragging is %{public}d,"
-            "MSDP dragging is %{public}d", dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
-        return;
-    }
-    if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        IsBelongToMultiItemNode(frameNode) || touchRestrict.inputEventType == InputEventType::AXIS) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d", gestureHub->IsDragForbidden(),
-            frameNode->IsDraggable(), frameNode->IsCustomerSet());
+    if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
         return;
     }
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
