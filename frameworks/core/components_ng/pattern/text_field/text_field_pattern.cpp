@@ -5487,8 +5487,29 @@ void TextFieldPattern::SetAccessibilityAction()
         pattern->CloseSelectOverlay(true);
         pattern->StartTwinkling();
     });
+    SetAccessibilityActionGetAndSetCaretPosition();
     SetAccessibilityScrollAction();
     SetAccessibilityMoveTextAction();
+}
+
+void TextFieldPattern::SetAccessibilityActionGetAndSetCaretPosition()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSetIndex([weakPtr = WeakClaim(this)](int32_t index) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCaretPosition(index);
+    });
+
+    accessibilityProperty->SetActionGetIndex([weakPtr = WeakClaim(this)]() -> int32_t {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_RETURN(pattern, -1);
+        auto index = pattern->selectController_->GetCaretIndex();
+        return index;
+    });
 }
 
 void TextFieldPattern::SetAccessibilityMoveTextAction()
