@@ -286,12 +286,11 @@ void SwiperPattern::ResetOnForceMeasure()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    for (const auto& child : host->GetChildren()) {
-        if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
-            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
-            CHECK_NULL_VOID(lazyForEachNode);
-            lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
-        }
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -576,12 +575,11 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->MarkDirtyNodeSelf();
                 auto swiperNode = swiper->GetHost();
                 CHECK_NULL_VOID(swiperNode);
-                for (const auto& child : swiperNode->GetChildren()) {
-                    if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
-                        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
-                        CHECK_NULL_VOID(lazyForEachNode);
-                        lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
-                    }
+                auto targetNode = swiper->FindLazyForEachNode(swiperNode);
+                if (targetNode.has_value()) {
+                    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+                    CHECK_NULL_VOID(lazyForEachNode);
+                    lazyForEachNode->SetFlagForGeneratedItem(PROPERTY_UPDATE_MEASURE);
                 }
             });
         UpdateSurfaceChangedCallbackId(callbackId);
@@ -1595,22 +1593,27 @@ void SwiperPattern::DoPreloadItems(const std::set<int32_t>& indexSet, int32_t er
         CHECK_NULL_VOID(swiperPattern);
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
+        auto targetNode = swiperPattern->FindLazyForEachNode(host);
+        if (targetNode.has_value()) {
+            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+            CHECK_NULL_VOID(lazyForEachNode);
+            for (auto index : indexSet) {
+                if (lazyForEachNode) {
+                    lazyForEachNode->GetFrameChildByIndex(index, true);
+                }
+            }
+        }
         const auto& children = host->GetChildren();
         for (const auto& child : children) {
-            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG && child->GetTag() != V2::JS_LAZY_FOR_EACH_ETS_TAG) {
+            if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
                 continue;
             }
 
             auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
-            auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
             for (auto index : indexSet) {
                 if (forEachNode && forEachNode->GetChildAtIndex(index)) {
                     forEachNode->GetChildAtIndex(index)->Build(nullptr);
                     continue;
-                }
-
-                if (lazyForEachNode) {
-                    lazyForEachNode->GetFrameChildByIndex(index, true);
                 }
             }
         }
@@ -3994,12 +3997,11 @@ void SwiperPattern::SetLazyForEachLongPredict(bool useLazyLoad) const
     // lazyBuild feature.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto&& child : children) {
-        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
-        if (lazyForEach) {
-            lazyForEach->SetRequestLongPredict(useLazyLoad);
-        }
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetRequestLongPredict(useLazyLoad);
     }
 }
 
@@ -4007,12 +4009,11 @@ void SwiperPattern::SetLazyLoadIsLoop() const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    for (auto&& child : children) {
-        auto lazyForEach = DynamicCast<LazyForEachNode>(child);
-        if (lazyForEach) {
-            lazyForEach->SetIsLoop(IsLoop());
-        }
+    auto targetNode = FindLazyForEachNode(host);
+    if (targetNode.has_value()) {
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetIsLoop(IsLoop());
     }
 }
 
@@ -5146,5 +5147,22 @@ void SwiperPattern::SetOnHiddenChangeForParent()
         CHECK_NULL_VOID(navDestinationEventHub);
         navDestinationEventHub->SetOnHiddenChange(std::move(onHiddenChange));
     }
+}
+
+std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode) const
+{
+    if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
+        return baseNode;
+    }
+    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
+        return std::nullopt;
+    }
+    for (const auto& child : baseNode->GetChildren()) {
+        auto targetNode = FindLazyForEachNode(child, false);
+        if (targetNode.has_value()) {
+            return targetNode;
+        }
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG
