@@ -1207,23 +1207,23 @@ var SymbolEffectStrategy;
   SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
 })(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
 
-var DirectionType;
-(function (DirectionType) {
-  DirectionType[DirectionType["DOWN"] = 0] = "DOWN";
-  DirectionType[DirectionType["UP"] = 1] = "UP";
-})(DirectionType || (DirectionType = {}));
+var EffectDirection;
+(function (EffectDirection) {
+  EffectDirection[EffectDirection["DOWN"] = 0] = "DOWN";
+  EffectDirection[EffectDirection["UP"] = 1] = "UP";
+})(EffectDirection || (EffectDirection = {}));
 
-var ScopeType;
-(function (ScopeType) {
-  ScopeType[ScopeType["LAYER"] = 0] = "LAYER";
-  ScopeType[ScopeType["WHOLE"] = 1] = "WHOLE";
-})(ScopeType || (ScopeType = {}));
+var EffectScope;
+(function (EffectScope) {
+  EffectScope[EffectScope["LAYER"] = 0] = "LAYER";
+  EffectScope[EffectScope["WHOLE"] = 1] = "WHOLE";
+})(EffectScope || (EffectScope = {}));
 
-var FillStyle;
-(function (FillStyle) {
-  FillStyle[FillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
-  FillStyle[FillStyle["ITERATIVE"] = 1] = "ITERATIVE";
-})(FillStyle || (FillStyle = {}));
+var EffectFillStyle;
+(function (EffectFillStyle) {
+  EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
+  EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
+})(EffectFillStyle || (EffectFillStyle = {}));
 
 class SymbolEffect {
 }
@@ -1309,15 +1309,6 @@ class PulseSymbolEffect extends SymbolEffect {
   constructor() {
     super();
     this.type = "PulseSymbolEffect";
-  }
-}
-
-class EffectOptions {
-  constructor() {
-  }
-  isActive(value) {
-    this.isActive = value;
-    return this;
   }
 }
 

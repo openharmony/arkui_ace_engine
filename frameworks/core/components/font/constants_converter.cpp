@@ -537,7 +537,6 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle)
                                                              : Rosen::Drawing::DrawingCommonSubType::DOWN);
         }
         txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
-        txtStyle.symbol.SetRepeatCount(options.GetRepeatCount());
     } else {
         auto effectStrategy = textStyle.GetEffectStrategy();
         if (effectStrategy < NONE_EFFECT || effectStrategy > SCALE_EFFECT) {
@@ -796,6 +795,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         auto options = textStyle.GetSymbolEffectOptions().value();
         auto effectType = options.GetEffectType();
         txtStyle.symbol.SetSymbolEffect(static_cast<uint32_t>(effectType));
+        txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
         if (options.GetCommonSubType().has_value()) {
             auto commonType = static_cast<uint16_t>(options.GetCommonSubType().value());
             txtStyle.symbol.SetCommonSubType(commonType == 1 ? Rosen::Drawing::DrawingCommonSubType::UP
@@ -808,8 +808,6 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
                 txtStyle.symbol.SetAnimationMode(static_cast<uint16_t>(options.GetScopeType().value()));
             }
         }
-        txtStyle.symbol.SetRepeatCount(options.GetRepeatCount());
-        txtStyle.symbol.SetAnimationStart(options.GetIsTxtActive());
     } else {
         auto effectStrategyValue = textStyle.GetEffectStrategy();
         if (effectStrategyValue < NONE_EFFECT || effectStrategyValue > SCALE_EFFECT) {
