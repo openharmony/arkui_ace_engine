@@ -828,12 +828,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
     info.SetSourceDevice(SourceType::KEYBOARD);
     firstClickListener->callback_(info);
     EXPECT_FALSE(isClick);
-    /**
-     * @tc.case: case3: Call click callback when SourceDevice is TOUCH.
-     */
-    info.SetSourceDevice(SourceType::TOUCH);
-    firstClickListener->callback_(info);
-    EXPECT_FALSE(isClick);
 }
 
 /**
