@@ -93,7 +93,7 @@ public:
      *
      * @param idx item's index.
      * @param crossIdx item's cross-axis lane index.
-     * @return position
+     * @return absolute position to scroll to.
      */
     virtual float CalcTargetPosition(int32_t idx, int32_t crossIdx) const = 0;
 

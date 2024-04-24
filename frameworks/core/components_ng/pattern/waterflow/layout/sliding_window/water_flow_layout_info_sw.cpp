@@ -195,7 +195,7 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
     std::cout << "lane start pos: " << lane.startPos << " lane end pos: " << lane.endPos
               << " item count = " << lane.items_.size() << " first item " << lane.items_.front().idx
               << " back = " << lane.items_.back().idx << " lane indx = " << idxToLane_.at(idx) << std::endl;
-    if (idx <= endIndex_) {
+    if (idx < endIndex_) {
         pos = DistanceToTop(idx, mainGap_);
         auto it = std::find_if(
             lane.items_.begin(), lane.items_.end(), [idx](const ItemInfo& item) { return item.idx == idx; });
@@ -204,29 +204,36 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
         }
         itemSize = it->mainSize;
     } else {
-        pos = -DistanceToBottom(idx, lastMainSize_, mainGap_) - lastMainSize_;
         if (lane.items_.back().idx != idx) {
             std::abort();
         }
         itemSize = lane.items_.back().mainSize;
+        pos = lane.endPos - itemSize;
     }
     switch (align_) {
         case ScrollAlign::START:
-            return pos;
+            break;
         case ScrollAlign::END:
-            return pos - lastMainSize_ + itemSize;
+            pos = pos - lastMainSize_ + itemSize;
+            break;
         case ScrollAlign::AUTO:
             if (Negative(pos)) {
-                return pos;
+                /* */
             } else if (GreatNotEqual(pos + itemSize, lastMainSize_)) {
-                return pos - lastMainSize_ + itemSize;
+                pos = pos - lastMainSize_ + itemSize;
+            } else {
+                pos = 0.0f; // already in viewport, no movement needed
             }
-            return 0.0f; // already in viewport, no movement needed
+            break;
         case ScrollAlign::CENTER:
-            return pos - (lastMainSize_ - itemSize) / 2;
+            pos = pos - (lastMainSize_ - itemSize) / 2;
+            break;
         default:
-            return 0.0f;
+            pos = 0.0f;
+            break;
     }
+    // convert to absolute position
+    return pos - totalOffset_;
 }
 
 void WaterFlowLayoutInfoSW::Reset()
@@ -235,6 +242,7 @@ void WaterFlowLayoutInfoSW::Reset()
     delta_ = DistanceToTop(startIndex_, mainGap_);
     lanes_.clear();
     idxToLane_.clear();
+    synced_ = false;
 }
 
 int32_t WaterFlowLayoutInfoSW::EndIndex() const
@@ -284,6 +292,7 @@ void WaterFlowLayoutInfoSW::ResetBeforeJump(float laneBasePos)
     });
     totalOffset_ = 0;
     idxToLane_.clear();
+    synced_ = false;
 }
 
 std::string WaterFlowLayoutInfoSW::Lane::ToString() const

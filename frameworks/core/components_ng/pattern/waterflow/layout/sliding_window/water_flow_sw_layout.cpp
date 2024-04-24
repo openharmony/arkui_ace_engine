@@ -262,7 +262,6 @@ void WaterFlowSWLayout::FillFront(float viewportBound, int32_t idx, int32_t minC
 float WaterFlowSWLayout::FillBackHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx)
 {
     float mainLen = MeasureChild(props, idx, laneIdx);
-    std::cout << "mainLen = " << mainLen << " idx = " << idx << std::endl;
     auto& lane = info_->lanes_[laneIdx];
     lane.endPos += mainGap_ + mainLen;
     if (lane.items_.empty()) {

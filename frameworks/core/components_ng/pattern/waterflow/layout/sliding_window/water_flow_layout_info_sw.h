@@ -49,6 +49,7 @@ public:
     void UpdateOffset(float delta) override
     {
         delta_ = delta;
+        synced_ = false;
     }
 
     int32_t GetCrossIndex(int32_t itemIndex) const override;
