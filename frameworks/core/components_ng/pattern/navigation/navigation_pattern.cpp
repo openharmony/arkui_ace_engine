@@ -1391,16 +1391,20 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
                 return;
             }
+            // recover event hub
+            auto eventHub = node->GetEventHub<EventHub>();
+            if (eventHub) {
+                eventHub->SetEnabledInternal(true);
+            }
+            bool isDialog = newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
+            if (isDialog) {
+                return;
+            }
             auto property = node->GetLayoutProperty();
             property->UpdateVisibility(VisibleType::INVISIBLE);
             node->SetJSViewActive(false);
             if (!preTopNavDestination) {
                 hostNode->NotifyPageHide();
-            }
-            // recover event hub
-            auto eventHub = node->GetEventHub<EventHub>();
-            if (eventHub) {
-                eventHub->SetEnabledInternal(true);
             }
         }
     } while (0);
