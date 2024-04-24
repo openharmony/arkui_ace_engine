@@ -516,7 +516,11 @@ float MarqueePattern::CalculateEnd()
 
 void MarqueePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    measureChanged_ = true;
+    if (width != lastWindowWidth_ || height != lastWindowHeight_) {
+        measureChanged_ = true;
+    }
+    lastWindowHeight_ = height;
+    lastWindowWidth_ = width;
 }
 
 void MarqueePattern::RegistOritationListener()
