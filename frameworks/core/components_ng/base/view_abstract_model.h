@@ -363,9 +363,6 @@ public:
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
 
-    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {};
-    virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {};
-
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;

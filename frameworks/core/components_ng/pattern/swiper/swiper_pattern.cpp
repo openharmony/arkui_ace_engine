@@ -632,9 +632,6 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     if (swiperFocusHub->IsCurrentFocus()) {
         needFocusNode->RequestFocusImmediately();
     } else {
-        if (swiperFocusHub->AcceptFocusOfPriorityChild()) {
-            return;
-        }
         swiperFocusHub->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(needFocusNode)));
     }
 }

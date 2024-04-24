@@ -575,8 +575,6 @@ public:
 
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);
-    static void JsFocusScopeId(const JSCallbackInfo& info);
-    static void JsFocusScopePriority(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

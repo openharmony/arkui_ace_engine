@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_FOCUS_FOCUS_MANAGER_H
 
 #include <list>
-#include <set>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -87,25 +86,6 @@ public:
 
     void PaintFocusState();
 
-    void AddFocusScopeId(const std::string& focusScopeId)
-    {
-        focusScopeIdSet.insert(focusScopeId);
-    }
-
-    void RemoveFocusScopeId(const std::string& focusScopeId)
-    {
-        focusScopeIdSet.erase(focusScopeId);
-    }
-
-    bool IsFocusScopeIdExist(const std::string& focusScopeId)
-    {
-        auto iter = focusScopeIdSet.find(focusScopeId);
-        if (iter != focusScopeIdSet.end()) {
-            return true;
-        }
-        return false;
-    }
-
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
 
@@ -117,7 +97,6 @@ private:
 
     WeakPtr<FocusHub> lastFocusStateNode_;
     bool isNeedTriggerScroll_ = false;
-    std::set<std::string> focusScopeIdSet;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };
