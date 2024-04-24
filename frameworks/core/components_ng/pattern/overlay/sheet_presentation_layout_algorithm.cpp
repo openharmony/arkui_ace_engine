@@ -216,13 +216,9 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
 
 float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, .0f);
-    auto safeAreaInsets = pipeline->GetSafeAreaWithoutProcess();
     float height = 0.0f;
     if (sheetStyle_.height.has_value()) {
-        auto maxHeight = std::min(sheetMaxHeight_ - safeAreaInsets.top_.Length() - safeAreaInsets.bottom_.Length(),
-            sheetMaxWidth_ - safeAreaInsets.top_.Length() - safeAreaInsets.bottom_.Length()) * POPUP_LARGE_SIZE;
+        auto maxHeight = std::min(sheetMaxHeight_, sheetMaxWidth_) * POPUP_LARGE_SIZE;
         if (sheetStyle_.height->Unit() == DimensionUnit::PERCENT) {
             height = sheetStyle_.height->ConvertToPxWithSize(maxHeight);
         } else {
