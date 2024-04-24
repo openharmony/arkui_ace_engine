@@ -688,7 +688,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModel001, TestSize.Level1)
         auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
         TabContentModelNG tabContentModel;
         tabContentModel.Create();
-        tabContentModel.SetTabBar("", "", nullptr, true); // SetTabBar without builder
+        tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true); // SetTabBar without builder
         ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
         auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();

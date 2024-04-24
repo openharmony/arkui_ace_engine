@@ -139,7 +139,7 @@ void TabsTestNg::CreateItem(int32_t itemNumber, const std::function<void(TabCont
         TabContentModelNG model;
         model.Create();
         auto tabBarItemFunc = TabBarItemBuilder();
-        model.SetTabBar("", "", std::move(tabBarItemFunc), true);
+        model.SetTabBar("", "", std::nullopt, std::move(tabBarItemFunc), true);
         ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
         if (callback) {
@@ -162,7 +162,7 @@ void TabsTestNg::CreateSingleItem(const std::function<void(TabContentModelNG)>& 
     TabContentModelNG model;
     model.Create();
     auto tabBarItemFunc = TabBarItemBuilder();
-    model.SetTabBar("", "", std::move(tabBarItemFunc), true);
+    model.SetTabBar("", "", std::nullopt, std::move(tabBarItemFunc), true);
     if (callback) {
         callback(model);
     }
@@ -182,7 +182,7 @@ void TabsTestNg::CreateSingleItemWithoutBuilder(const std::function<void(TabCont
     auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
     TabContentModelNG model;
     model.Create();
-    model.SetTabBar("", "", nullptr, true);
+    model.SetTabBar("", "", std::nullopt, nullptr, true);
     if (callback) {
         callback(model);
     }

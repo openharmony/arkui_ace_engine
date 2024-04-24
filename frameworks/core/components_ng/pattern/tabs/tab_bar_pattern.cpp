@@ -39,7 +39,10 @@
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/symbol/constants.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -806,6 +809,7 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
     AnimationUtils::CloseImplicitAnimation();
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
     UpdateImageColor(index);
+    UpdateSymbolStats(index, preIndex);
     if (preIndex != index && (tabBarStyles_[preIndex] == TabBarStyle::BOTTOMTABBATSTYLE ||
                                    tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
         int32_t selectedIndex = -1;
@@ -861,7 +865,7 @@ void TabBarPattern::HandleBottomTabBarClick(int32_t selectedIndex, int32_t unsel
     ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, FULL_OPACITY,
         FULL_MASK_RADIUS_RATIO, false);
 
-    host->MarkDirtyNode();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
 }
@@ -1483,7 +1487,10 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         CHECK_NULL_VOID(columnNode);
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
-
+        if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
+            index++;
+            continue;
+        }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto isSelected = columnNode->GetId() == selectedColumnId;
@@ -1506,6 +1513,75 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         index++;
     }
     SetImageColorOnIndex(indicator);
+}
+
+void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    if (tabBarPattern->IsContainsBuilder()) {
+        return;
+    }
+    std::vector<int32_t> indexes = {index, preIndex};
+    for (uint32_t i = 0; i < indexes.size(); i++) {
+        auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indexes[i]));
+        CHECK_NULL_VOID(columnNode);
+        auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+        CHECK_NULL_VOID(symbolNode);
+        if (symbolNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+            continue;
+        }
+        auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        TabContentModelNG::UpdateDefaultSymbol(tabTheme, symbolLayoutProperty);
+        if (i == 0) {
+            auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+            symbolEffectOptions.SetIsTxtActive(true);
+            symbolEffectOptions.SetIsTxtActiveSource(0);
+            symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOn()});
+            auto modifierOnApply = symbolArray_[indexes[i]].onApply;
+            if (symbolArray_[indexes[i]].selectedFlag && modifierOnApply != nullptr) {
+                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
+                    "selected");
+            }
+        } else {
+            symbolLayoutProperty->UpdateSymbolColorList({tabTheme->GetBottomTabIconOff()});
+            auto modifierOnApply = symbolArray_[indexes[i]].onApply;
+            if (modifierOnApply != nullptr) {
+                modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)),
+                    "normal");
+            }
+        }
+        symbolNode->MarkModifyDone();
+        symbolNode->MarkDirtyNode();
+    }
+}
+
+void TabBarPattern::UpdateSymbolEffect(int32_t index)
+{
+    if (index != GetImageColorOnIndex().value_or(indicator_)) {
+        return;
+    }
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+    CHECK_NULL_VOID(columnNode);
+    auto symbolNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(symbolNode);
+    if (symbolNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetIsTxtActive(false);
+        symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    }
 }
 
 void TabBarPattern::UpdateSubTabBoard()

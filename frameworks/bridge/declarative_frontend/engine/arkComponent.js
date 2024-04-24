@@ -4200,6 +4200,12 @@ if (globalThis.Blank !== undefined) {
   };
 }
 
+globalThis.applySymbolGlyphModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkSymbolGlyphComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
+
 globalThis.applyImageModifierToNode = function (modifier, nodePtr) {
   let component = new ArkImageComponent(nodePtr);
   applyUIAttributes(modifier, nodePtr, component);

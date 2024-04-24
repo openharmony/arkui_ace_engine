@@ -5284,6 +5284,43 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     return false;
 }
 
+void JSViewAbstract::SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabBarSymbol& symbolApply,
+    const JSRef<JSVal>& modifierNormalObj, const JSRef<JSVal>& modifierSelectedObj)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        return;
+    }
+    if (modifierNormalObj->IsUndefined()) {
+        symbolApply.onApply = nullptr;
+    } else {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                            modifierNormal = std::move(modifierNormalObj),
+                            modifierSelected = std::move(modifierSelectedObj)](
+                            WeakPtr<NG::FrameNode> frameNode, std::string type) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            JSRef<JSVal> params[SECOND_INDEX];
+            if (type == "normal") {
+                params[0] = modifierNormal;
+            } else if (!modifierSelected->IsUndefined()) {
+                params[0] = modifierSelected;
+            }
+            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(SECOND_INDEX, params);
+        };
+        symbolApply.onApply = onApply;
+    }
+}
+
 bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
 {
     if (!jsValue->IsBoolean() && !jsValue->IsObject()) {
