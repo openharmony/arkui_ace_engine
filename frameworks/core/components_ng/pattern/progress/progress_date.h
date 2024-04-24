@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/base/common_configuration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -92,6 +93,14 @@ struct ProgressStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Color, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Type, ProgressType);
+};
+
+class ProgressConfiguration : public CommonConfiguration {
+    public:
+        ProgressConfiguration(float value, float total, bool enabled)
+            : CommonConfiguration(enabled), value_(value), total_(total) {}
+        float value_ = 0.0f;
+        float total_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

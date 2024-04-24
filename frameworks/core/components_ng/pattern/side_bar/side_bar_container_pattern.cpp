@@ -104,13 +104,6 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     }
 
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto sideBarNode = GetSideBarNode(host);
-    CHECK_NULL_VOID(sideBarNode);
-    if (!newShowSideBar && sideBarNode->IsFirstBuilding()) {
-        SetSideBarActive(false, false);
-    }
     if (newShowSideBar == showSideBar_) {
         return;
     }
@@ -122,6 +115,13 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
 
     SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
     UpdateControlButtonIcon();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sideBarNode = GetSideBarNode(host);
+    CHECK_NULL_VOID(sideBarNode);
+    if (!newShowSideBar && sideBarNode->IsFirstBuilding()) {
+        SetSideBarActive(false, false);
+    }
 }
 
 void SideBarContainerPattern::OnUpdateShowControlButton(

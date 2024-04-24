@@ -39,6 +39,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
     textPattern->CalculateHandleOffsetAndShowOverlay();
+    selectTextUseTopHandle = true;
     return true;
 }
 
@@ -124,9 +125,11 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = textPattern->GetTextPaintOffset() + contentRect.GetOffset();
     auto handleOffset = handleRect.GetOffset();
-    bool isUseHandleTop = (isFirst != IsHandleReverse());
-    handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
-    
+    if (!selectTextUseTopHandle) {
+        bool isUseHandleTop = (isFirst != IsHandleReverse());
+        handleOffset.SetY(handleOffset.GetY() + (isUseHandleTop ? 0 : handleRect.Height()));
+    }
+
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -293,9 +296,11 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
+    if (IsTouchUp(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
         textPattern->ResetSelection();
+    } else if (IsMouseClickDown(sourceType, touchType)) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
@@ -204,6 +205,21 @@ public:
     float GetEstimateHeight(float estimateHeight, Axis axis) const;
     bool ClickJudge(const PointF& localPoint);
 
+    void InitDragManager(RefPtr<ForEachBaseNode> forEach)
+    {
+        if (!dragManager_) {
+            dragManager_ = MakeRefPtr<ListItemDragManager>(GetHost(), forEach);
+            dragManager_->InitDragDropEvent();
+        }
+    }
+    void DeInitDragManager()
+    {
+        if (dragManager_) {
+            dragManager_->DeInitDragDropEvent();
+            dragManager_ = nullptr;
+        }
+    }
+
 protected:
     void OnModifyDone() override;
 
@@ -269,6 +285,9 @@ private:
     // selectable
     bool selectable_ = true;
     bool isSelected_ = false;
+
+    // drag sort
+    RefPtr<ListItemDragManager> dragManager_;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchListener_;

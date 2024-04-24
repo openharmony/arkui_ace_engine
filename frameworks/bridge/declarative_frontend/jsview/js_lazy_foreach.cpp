@@ -162,6 +162,7 @@ void JSLazyForEach::JSBind(BindingTarget globalObj)
     JSClass<JSLazyForEach>::Declare("LazyForEach");
     JSClass<JSLazyForEach>::StaticMethod("create", &JSLazyForEach::Create);
     JSClass<JSLazyForEach>::StaticMethod("pop", &JSLazyForEach::Pop);
+    JSClass<JSLazyForEach>::StaticMethod("onMove", &JSLazyForEach::OnMove);
     JSClass<JSLazyForEach>::Bind(globalObj);
 
     JSDataChangeListener::JSBind(globalObj);
@@ -215,4 +216,17 @@ void JSLazyForEach::Pop()
     ViewStackModel::GetInstance()->PopContainer();
 }
 
+void JSLazyForEach::OnMove(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])]
+            (int32_t from, int32_t to) {
+                auto params = ConvertToJSValues(from, to);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+            };
+        LazyForEachModel::GetInstance()->OnMove(std::move(onMove));
+    } else {
+        LazyForEachModel::GetInstance()->OnMove(nullptr);
+    }
+}
 } // namespace OHOS::Ace::Framework

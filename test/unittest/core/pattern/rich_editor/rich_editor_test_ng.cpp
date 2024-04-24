@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -136,6 +137,7 @@ constexpr Color SYSTEM_CARET_COLOR = Color(0xff007dff);
 constexpr Color SYSTEM_SELECT_BACKGROUND_COLOR = Color(0x33007dff);
 constexpr float CONTEXT_WIDTH_VALUE = 300.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
+const Color DEFAULT_TEXT_COLOR_VALUE = Color::FromARGB(229, 0, 0, 0);
 
 struct TestCursorItem {
     int32_t index;
@@ -939,6 +941,83 @@ HWTEST_F(RichEditorTestNg, RichEditorModel014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel015
+ * @tc.desc: test textstyle Color
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel015, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    richEditorTheme->textStyle_.SetTextColor(DEFAULT_TEXT_COLOR_VALUE);
+    richEditorTheme->textStyle_.SetTextDecorationColor(DEFAULT_TEXT_COLOR_VALUE);
+
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(textOptions);
+    auto info1 = richEditorController->GetSpansInfo(1, 3);
+    TextStyleResult textStyle1 = info1.selection_.resultObjects.front().textStyle;
+    EXPECT_EQ(textStyle1.fontSize, 16);
+    EXPECT_EQ(Color::FromString(textStyle1.fontColor), DEFAULT_TEXT_COLOR_VALUE);
+    EXPECT_EQ(Color::FromString(textStyle1.decorationColor), DEFAULT_TEXT_COLOR_VALUE);
+
+    ClearSpan();
+    richEditorPattern->InsertValue(INIT_VALUE_2);
+    auto info2 = richEditorController->GetSpansInfo(1, 2);
+    TextStyleResult textStyle2 = info2.selection_.resultObjects.front().textStyle;
+    EXPECT_EQ(Color::FromString(textStyle2.fontColor), DEFAULT_TEXT_COLOR_VALUE);
+    EXPECT_EQ(Color::FromString(textStyle2.decorationColor), DEFAULT_TEXT_COLOR_VALUE);
+}
+
+/**
+ * @tc.name: RichEditorModel016
+ * @tc.desc: test paragraph style linebreakstrategy attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel016, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+
+    // test paragraph  style linebreakstrategy default value
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::GREEDY);
+
+    // test paragraph style linebreakstrategy value of LineBreakStrategy.GREEDY
+    struct UpdateParagraphStyle style;
+    style.lineBreakStrategy = LineBreakStrategy::GREEDY;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::GREEDY);
+
+    // test paragraph style linebreakstrategy value of LineBreakStrategy.HIGH_QUALITY
+    style.lineBreakStrategy = LineBreakStrategy::HIGH_QUALITY;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::HIGH_QUALITY);
+
+    // test paragraph style linebreakstrategy value of LineBreakStrategy.BALANCED
+    style.lineBreakStrategy = LineBreakStrategy::BALANCED;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::BALANCED);
+}
+
+/**
  * @tc.name: RichEditorInsertValue001
  * @tc.desc: test calc insert value object
  * @tc.type: FUNC
@@ -957,7 +1036,6 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue001, TestSize.Level1)
     richEditorPattern->CalcInsertValueObj(info);
     EXPECT_EQ(info.GetSpanIndex(), 1);
     EXPECT_EQ(info.GetOffsetInSpan(), 0);
-    
 }
 
 /**
@@ -1118,6 +1196,49 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
         richEditorPattern->spans_.pop_back();
     }
     richEditorPattern->DeleteBackward(1, false);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: RichEditorDeleteBackwardImage001
+ * @tc.desc: test delete image backward by diffKeyBoard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDeleteBackwardImage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. add image
+     */
+    AddImageSpan();
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    /**
+     * @tc.steps: step3. delete image by softKeyBoard first
+     */
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->DeleteBackward(1, false);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    /**
+     * @tc.steps: step4. delete image by softKeyBoard second
+     */
+    richEditorPattern->DeleteBackward(1, false);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    /**
+     * @tc.steps: step5. delete image backward by externalkeyboard
+     */
+    AddImageSpan();
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->HandleOnDelete(true);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 

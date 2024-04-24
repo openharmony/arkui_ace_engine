@@ -12089,6 +12089,22 @@ class ArkLoadingProgressComponent extends ArkComponent {
       LoadingProgressForegroundColorModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().loadingProgress.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, loadingProgressConfiguration) {
+    loadingProgressConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.loadingProgressNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.loadingProgressNode = new xNode.BuilderNode(context);
+      this.loadingProgressNode.build(this.builder, loadingProgressConfiguration);
+    } else {
+      this.loadingProgressNode.update(loadingProgressConfiguration);
+    }
+    return this.loadingProgressNode.getFrameNode();
+  }
 }
 class LoadingProgressColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -12148,6 +12164,15 @@ if (globalThis.LoadingProgress !== undefined) {
     });
   };
 }
+
+globalThis.LoadingProgress.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkLoadingProgressComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
+};
 
 /// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent {
@@ -17728,6 +17753,27 @@ class ArkProgressComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, this);
+    return this;
+  }
+  makeContentModifierNode(context, progressConfig) {
+    progressConfig.contentModifier = this.modifier;
+    if (isUndefined(this.progressNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.progressNode = new xNode.BuilderNode(context);
+      this.progressNode.build(this.builder, progressConfig);
+    } else {
+      this.progressNode.update(progressConfig);
+    }
+    return this.progressNode.getFrameNode();
+  }
 }
 class ProgressValueModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -17819,6 +17865,18 @@ if (globalThis.Progress !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ProgressModifier(nativePtr, classType);
     });
+  };
+}
+
+// @ts-ignore
+if (globalThis.Progress !== undefined) {
+  globalThis.Progress.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkProgressComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 
@@ -18216,6 +18274,26 @@ class ArkTextTimerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextTimerFormatModifier.identity, TextTimerFormatModifier, value);
     return this;
   }
+  setContentModifier(modifier) {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().textTimer.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context, textTimerConfiguration) {
+    textTimerConfiguration.contentModifier = this.modifier;
+    if (isUndefined(this.textTimerNode)) {
+      let xNode = globalThis.requireNapi('arkui.node');
+      this.textTimerNode = new xNode.BuilderNode(context);
+      this.textTimerNode.build(this.builder, textTimerConfiguration);
+    } else {
+      this.textTimerNode.update(textTimerConfiguration);
+    }
+    return this.textTimerNode.getFrameNode();
+  }
   onTimer(event) {
     throw new Error('Method not implemented.');
   }
@@ -18306,6 +18384,14 @@ if (globalThis.TextTimer !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.TextTimerModifier(nativePtr, classType);
     });
+  };
+  globalThis.TextTimer.contentModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkTextTimerComponent(nativeNode);
+    });
+    component.setContentModifier(modifier);
   };
 }
 

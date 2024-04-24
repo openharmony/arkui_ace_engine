@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 using namespace OHOS::Ace::Framework;
 
@@ -21,6 +23,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
+const char* LOADINGPROGRESS_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace
 ArkUINativeModuleValue LoadingProgressBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -101,6 +104,52 @@ ArkUINativeModuleValue LoadingProgressBridge::ResetForegroundColor(ArkUIRuntimeC
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     GetArkUINodeModifiers()->getLoadingProgressModifier()->resetForegroundColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LoadingProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        LoadingProgressModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    LoadingProgressModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
+            LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
+            const char* keysOfLoadingprogress[] = { "enableloading", "enabled"};
+            Local<JSValueRef> valuesOfLoadingprogress[] = { panda::BooleanRef::New(vm, config.enableloading_),
+                panda::BooleanRef::New(vm, config.enabled_)};
+            auto loadingprogress = panda::ObjectRef::NewWithNamedProperties(vm,
+                ArraySize(keysOfLoadingprogress), keysOfLoadingprogress, valuesOfLoadingprogress);
+            loadingprogress->SetNativePointerFieldCount(vm, 1);
+            loadingprogress->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[2] = { context, loadingprogress };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = obj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, 2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr =
+                resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, LOADINGPROGRESS_NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
