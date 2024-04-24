@@ -307,7 +307,7 @@ typedef enum {
      * @brief Sets the saturation attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
-     * .value[0].f32: saturation value. The default value is <b>1.0</b>, and the recommended value range is [0, FLT_MAX]. \n
+     * .value[0].f32: saturation value. The default value is <b>1.0</b>, and the recommended value range is [0, 50]. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .value[0].f32: saturation value. \n
@@ -1678,6 +1678,17 @@ typedef enum {
      *
      */
     NODE_TEXT_ELLIPSIS_MODE,
+    /**
+     * @brief 设置文本特性效果，支持属性设置，属性重置，属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .string 符合文本特性格式的字符串，格式为<string> [ <integer> | on | off ], 多个文本特性之间使用逗号分隔。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .string 表示文本特性的内容，多个文本特性之间使用逗号分隔。\n
+     *
+     */
+    NODE_FONT_FEATURE,
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -3827,6 +3838,8 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: gap between lines, in vp.\n
+     * .value[1].f32: gap between lines, in vp.\n
      * .object: {@ArkUI_WaterFlowSectionOption} object.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
@@ -3851,6 +3864,23 @@ typedef enum {
     * .value[0].i32: number of cached items in the water flowadapter. \n
     */
     NODE_WATER_FLOW_CACHED_COUNT,
+    /**
+    * @brief 设置当前瀑布流子组件的约束尺寸属性，组件布局时，进行尺寸范围限制，支持属性设置，属性重置和属性获取接口。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+    * .value[0].f32：最小宽度，单位vp； \n
+    * .value[1].f32：最大宽度，单位vp； \n
+    * .value[2].f32：最小高度，单位vp； \n
+    * .value[3].f32：最大高度，单位vp； \n
+    * \n
+    * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+    * .value[0].f32：最小宽度，单位vp； \n
+    * .value[1].f32：最大宽度，单位vp； \n
+    * .value[2].f32：最小高度，单位vp； \n
+    * .value[3].f32：最大高度，单位vp； \n
+    *
+    */
+    NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12

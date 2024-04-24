@@ -20,6 +20,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
@@ -779,6 +780,14 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
 }
+
+ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = UnParseFontFeatureSetting(TextModelNG::GetFontFeature(frameNode));
+    return g_strValue.c_str();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -865,7 +874,8 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextFontFeature,
         SetTextLineSpacing,
         GetTextLineSpacing,
-        ResetTextLineSpacing
+        ResetTextLineSpacing,
+        GetTextFontFeature
     };
 
     return &modifier;

@@ -14,9 +14,14 @@
  */
 #include "core/interfaces/native/node/water_flow_modifier.h"
 
+#include "interfaces/native/node/waterflow_section_option.h"
+
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
@@ -26,6 +31,9 @@ constexpr ArkUI_Float64 FRICTION_DEFAULT = -1.0;
 constexpr ArkUI_Float64 DIMENSION_DEFAULT = 0.0;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
+constexpr int32_t INDEX_0 = 0;
+constexpr int32_t INDEX_1 = 1;
+constexpr int32_t INDEX_2 = 2;
 std::string g_strValue;
 
 void ResetColumnsTemplate(ArkUINodeHandle node)
@@ -216,14 +224,14 @@ void ResetWaterFlowNestedScroll(ArkUINodeHandle node)
 
 void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, friction);
 }
 
 void ResetWaterFlowFriction(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
 }
@@ -333,49 +341,201 @@ ArkUI_Int32 GetCachedCount(ArkUINodeHandle node)
     return WaterFlowModelNG::GetCachedCount(frameNode);
 }
 
+void SetWaterFlowScrollBar(ArkUINodeHandle node, ArkUI_Int32 barState)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetScrollBarMode(frameNode, static_cast<DisplayMode>(barState));
+}
+
+void ResetWaterFlowScrollBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetScrollBarMode(frameNode, DisplayMode::AUTO);
+}
+
+ArkUI_Int32 GetWaterFlowScrollBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return WaterFlowModelNG::GetScrollBarMode(frameNode);
+}
+
+void SetWaterFlowBarWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    CHECK_NULL_VOID(value);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetScrollBarWidth(frameNode, value);
+}
+
+void ResetWaterFlowBarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetScrollBarWidth(frameNode, "0vp");
+}
+
+ArkUI_Float32 GetWaterFlowBarWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return WaterFlowModelNG::GetScrollBarWidth(frameNode);
+}
+
+void SetWaterFlowScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    CHECK_NULL_VOID(value);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetScrollBarColor(frameNode, value);
+}
+
+void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetScrollBarColor(frameNode, "#FF000000");
+}
+
+ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return WaterFlowModelNG::GetScrollBarColor(frameNode);
+}
+
+ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    values[INDEX_0] = WaterFlowModelNG::GetEdgeEffect(frameNode);
+    values[INDEX_1] = WaterFlowModelNG::GetEdgeEffectAlways(frameNode);
+    return INDEX_2;
+}
+
+void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWaterFlowSectionOption option)
+{
+    CHECK_NULL_VOID(option);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto waterFlowSections = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);  
+  
+    const auto& sectionArray = option->sections;  
+    const auto sectionsCount = sectionArray.size();  
+  
+    std::vector<WaterFlowSections::Section> newSections(sectionsCount); 
+  
+    for (size_t i = 0; i < sectionsCount; ++i) {  
+        const auto& sectionData = sectionArray[i];  
+        WaterFlowSections::Section& section = newSections[i];  
+  
+        section.itemsCount = sectionData.itemsCount;  
+        section.crossCount = sectionData.crossCount;  
+        section.columnsGap = Dimension(sectionData.columnsGap);  
+        section.rowsGap = Dimension(sectionData.rowsGap);  
+  
+        NG::PaddingProperty paddings;  
+        paddings.top = std::optional<CalcLength>(sectionData.margin[0]);  
+        paddings.bottom = std::optional<CalcLength>(sectionData.margin[1]);  
+        paddings.left = std::optional<CalcLength>(sectionData.margin[2]);  
+        paddings.right = std::optional<CalcLength>(sectionData.margin[3]);  
+    }  
+  
+    waterFlowSections->ChangeData(start, 0, newSections);  
+}
+
+void ResetWaterFlowSectionOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::ResetSections(frameNode);
+}
+
+void GetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUIWaterFlowSectionOption option)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto newSection = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode)->GetSectionInfo();
+    CHECK_NULL_VOID(frameNode);
+    auto sectionsCount = newSection.size();
+    option->sections.resize(sectionsCount);
+    for (size_t i = 0; i < sectionsCount; ++i) {
+        option->sections[i].itemsCount = newSection[i].itemsCount ? newSection[i].itemsCount : 0;
+        option->sections[i].crossCount = newSection[i].crossCount.has_value() ? newSection[i].crossCount.value() : 0;
+        option->sections[i].columnsGap =
+            newSection[i].columnsGap.has_value() ? newSection[i].columnsGap->Value() : 0.0f;
+        option->sections[i].rowsGap = newSection[i].rowsGap.has_value() ? newSection[i].rowsGap->Value() : 0.0f;
+        option->sections[i].margin[0] =
+            newSection[i].margin->top.has_value() ? newSection[i].margin->top->GetDimension().Value() : 0.0f;
+        option->sections[i].margin[1] =
+            newSection[i].margin->right.has_value() ? newSection[i].margin->right->GetDimension().Value() : 0.0f;
+        option->sections[i].margin[2] =
+            newSection[i].margin->bottom.has_value() ? newSection[i].margin->bottom->GetDimension().Value() : 0.0f;
+        option->sections[i].margin[3] =
+            newSection[i].margin->left.has_value() ? newSection[i].margin->left->GetDimension().Value() : 0.0f;
+    }
+}
+
+ArkUI_Float32 GetItemMinWidth(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetItemMinWidth(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Float32 GetItemMaxWidth(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetItemMaxWidth(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Float32 GetItemMinHeight(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetItemMinHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Float32 GetItemMaxHeight(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetItemMaxHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Int32 GetWaterFlowEnableScrollInteraction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetScrollEnabled(frameNode);
+}
+
+ArkUI_Float32 GetWaterFlowFriction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 1);
+    return WaterFlowModelNG::GetFriction(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
     static const ArkUIWaterFlowModifier modifier = {
-        ResetColumnsTemplate,
-        SetColumnsTemplate,
-        ResetRowsTemplate,
-        SetRowsTemplate,
-        ResetWaterFlowEnableScrollInteraction,
-        SetWaterFlowEnableScrollInteraction,
-        SetColumnsGap,
-        ResetColumnsGap,
-        SetRowsGap,
-        ResetRowsGap,
-        SetItemMinWidth,
-        ResetItemMinWidth,
-        SetItemMaxWidth,
-        ResetItemMaxWidth,
-        SetItemMinHeight,
-        ResetItemMinHeight,
-        SetItemMaxHeight,
-        ResetItemMaxHeight,
-        SetLayoutDirection,
-        ResetLayoutDirection,
-        SetWaterFlowNestedScroll,
-        ResetWaterFlowNestedScroll,
-        SetWaterFlowFriction,
-        ResetWaterFlowFriction,
-        GetLayoutDirection,
-        GetColumnsTemplate,
-        GetRowsTemplate,
-        GetColumnsGap,
-        GetRowsGap,
-        GetWaterFlowNestedScroll,
-        SetNodeAdapter,
-        ResetNodeAdapter,
-        GetNodeAdapter,
-        SetCachedCount,
-        ResetCachedCount,
-        GetCachedCount,
-        SetEdgeEffect,
-        ResetEdgeEffect,
+        ResetColumnsTemplate, SetColumnsTemplate, ResetRowsTemplate, SetRowsTemplate,
+        ResetWaterFlowEnableScrollInteraction, SetWaterFlowEnableScrollInteraction, SetColumnsGap, ResetColumnsGap,
+        SetRowsGap, ResetRowsGap, SetItemMinWidth, ResetItemMinWidth, SetItemMaxWidth, ResetItemMaxWidth,
+        SetItemMinHeight, ResetItemMinHeight, SetItemMaxHeight, ResetItemMaxHeight, SetLayoutDirection,
+        ResetLayoutDirection, SetWaterFlowNestedScroll, ResetWaterFlowNestedScroll, SetWaterFlowFriction,
+        ResetWaterFlowFriction, GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetColumnsGap, GetRowsGap,
+        GetWaterFlowNestedScroll, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount, ResetCachedCount,
+        GetCachedCount, SetEdgeEffect, ResetEdgeEffect, SetWaterFlowScrollBar, ResetWaterFlowScrollBar,
+        GetWaterFlowScrollBar, SetWaterFlowBarWidth, ResetWaterFlowBarWidth, GetWaterFlowBarWidth,
+        SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor, GetEdgeEffect,
+        SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions, GetItemMinWidth,
+        GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction, GetWaterFlowFriction
     };
     return &modifier;
 }

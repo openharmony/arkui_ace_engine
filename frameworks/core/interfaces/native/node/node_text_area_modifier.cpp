@@ -46,6 +46,7 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
+const float ERROR_FLOAT_CODE = -1.0f;
 std::string g_strValue;
 
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
@@ -823,35 +824,72 @@ void ResetTextAreaLineSpacing(ArkUINodeHandle node)
     value.Reset();
     TextFieldModelNG::SetLineSpacing(frameNode, value);
 }
+
+ArkUI_CharPtr GetTextAreaFontFeature(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = UnParseFontFeatureSetting(TextFieldModelNG::GetFontFeature(frameNode));
+    return g_strValue.c_str();
+}
+
+ArkUI_Float32 GetTextAreaAdaptMinFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMinFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextAreaAdaptMaxFontSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetAdaptMaxFontSize(frameNode).Value();
+}
+
+ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return TextFieldModelNG::GetLineHeight(frameNode).Value();
+}
+
+ArkUI_Int32 GetgetTextAreaMaxLines(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+     return TextFieldModelNG::GetMaxLines(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUITextAreaModifier* GetTextAreaModifier()
 {
-    static const ArkUITextAreaModifier modifier = { SetTextAreaStyle, ResetTextAreaStyle,
-        SetTextAreaSelectionMenuHidden, ResetTextAreaSelectionMenuHidden, SetTextAreaMaxLines, ResetTextAreaMaxLines,
-        SetTextAreaCopyOption, ResetTextAreaCopyOption, SetTextAreaPlaceholderColor, ResetTextAreaPlaceholderColor,
-        SetTextAreaTextAlign, ResetTextAreaTextAlign, SetTextAreaPlaceholderFont, ResetTextAreaPlaceholderFont,
-        SetTextAreaBarState, ResetTextAreaBarState, SetTextAreaEnableKeyboardOnFocus,
-        ResetTextAreaEnableKeyboardOnFocus, SetTextAreaFontFamily, ResetTextAreaFontFamily, SetTextAreaShowCounter,
-        ResetTextAreaShowCounter, SetTextAreaCaretColor, ResetTextAreaCaretColor, SetTextAreaMaxLength,
-        ResetTextAreaMaxLength, SetTextAreaFontColor, ResetTextAreaFontColor, SetTextAreaFontStyle,
-        ResetTextAreaFontStyle, SetTextAreaFontWeight, ResetTextAreaFontWeight, SetTextAreaFontSize,
-        ResetTextAreaFontSize, SetCounterType, SetTextAreaPlaceholderString, SetTextAreaTextString,
-        StopTextAreaTextEditing, SetTextAreaFontWeightStr, SetTextAreaPlaceholderFontEnum, GetTextAreaPlaceholder,
-        GetTextAreaText, GetTextAreaCaretColor, GetTextAreaMaxLength, GetTextAreaPlaceholderColor,
-        GetTextAreaPlaceholderFont, GetTextAreaEditing, SetTextAreaBackgroundColor, ResetTextAreaBackgroundColor,
-        SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
-        ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration,
-        ResetTextAreaDecoration, SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight,
-        ResetTextAreaLineHeight, SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak,
-        ResetTextAreaWordBreak, SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize,
-        SetTextAreaAdaptMaxFontSize, ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy,
-        ResetTextAreaHeightAdaptivePolicy, SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor,
-        SetTextAreaCaretStyle, ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow,
-        SetTextAreaTextIndent, ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing,
-        GetTextAreaSelectionMenuHidden };
-    return &modifier;
+     static const ArkUITextAreaModifier modifier = { SetTextAreaStyle, ResetTextAreaStyle,
+         SetTextAreaSelectionMenuHidden, ResetTextAreaSelectionMenuHidden, SetTextAreaMaxLines, ResetTextAreaMaxLines,
+         SetTextAreaCopyOption, ResetTextAreaCopyOption, SetTextAreaPlaceholderColor, ResetTextAreaPlaceholderColor,
+         SetTextAreaTextAlign, ResetTextAreaTextAlign, SetTextAreaPlaceholderFont, ResetTextAreaPlaceholderFont,
+         SetTextAreaBarState, ResetTextAreaBarState, SetTextAreaEnableKeyboardOnFocus,
+         ResetTextAreaEnableKeyboardOnFocus, SetTextAreaFontFamily, ResetTextAreaFontFamily, SetTextAreaShowCounter,
+         ResetTextAreaShowCounter, SetTextAreaCaretColor, ResetTextAreaCaretColor, SetTextAreaMaxLength,
+         ResetTextAreaMaxLength, SetTextAreaFontColor, ResetTextAreaFontColor, SetTextAreaFontStyle,
+         ResetTextAreaFontStyle, SetTextAreaFontWeight, ResetTextAreaFontWeight, SetTextAreaFontSize,
+         ResetTextAreaFontSize, SetCounterType, SetTextAreaPlaceholderString, SetTextAreaTextString,
+         StopTextAreaTextEditing, SetTextAreaFontWeightStr, SetTextAreaPlaceholderFontEnum, GetTextAreaPlaceholder,
+         GetTextAreaText, GetTextAreaCaretColor, GetTextAreaMaxLength, GetTextAreaPlaceholderColor,
+         GetTextAreaPlaceholderFont, GetTextAreaEditing, SetTextAreaBackgroundColor, ResetTextAreaBackgroundColor,
+         SetTextAreaType, ResetTextAreaType, GetTextAreaType, GetTextAreaTextAlign, SetTextAreaShowCounterOptions,
+         ResetTextAreaShowCounterOptions, GetTextAreaShowCounterOptions, SetTextAreaDecoration, ResetTextAreaDecoration,
+         SetTextAreaLetterSpacing, ResetTextAreaLetterSpacing, SetTextAreaLineHeight, ResetTextAreaLineHeight,
+         SetTextAreaFontFeature, ResetTextAreaFontFeature, SetTextAreaWordBreak, ResetTextAreaWordBreak,
+         SetTextAreaAdaptMinFontSize, ResetTextAreaAdaptMinFontSize, SetTextAreaAdaptMaxFontSize,
+         ResetTextAreaAdaptMaxFontSize, SetTextAreaHeightAdaptivePolicy, ResetTextAreaHeightAdaptivePolicy,
+         SetTextAreaSelectedBackgroundColor, ResetTextAreaSelectedBackgroundColor, SetTextAreaCaretStyle,
+         ResetTextAreaCaretStyle, SetTextAreaTextOverflow, ResetTextAreaTextOverflow, SetTextAreaTextIndent,
+         ResetTextAreaTextIndent, SetTextAreaLineSpacing, ResetTextAreaLineSpacing, GetTextAreaSelectionMenuHidden,
+         GetTextAreaFontFeature, GetTextAreaAdaptMinFontSize, GetTextAreaAdaptMaxFontSize, GetTextAreaLineHeight,
+         GetgetTextAreaMaxLines };
+     return &modifier;
 }
 
 void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam)

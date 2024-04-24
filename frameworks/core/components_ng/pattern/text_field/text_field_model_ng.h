@@ -217,6 +217,11 @@ public:
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
+    static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
+    static Dimension GetLineHeight(FrameNode* frameNode);
+    static uint32_t GetMaxLines(FrameNode* frameNode);     
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

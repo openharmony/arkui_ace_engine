@@ -17,6 +17,7 @@
 
 #include <cstddef>
 
+#include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -1550,4 +1551,40 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
     eventHub->SetOnEditChanged(std::move(func));
 }
 
+FONT_FEATURES_LIST TextFieldModelNG::GetFontFeature(FrameNode* frameNode){
+    FONT_FEATURES_LIST value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontFeature, value, frameNode, value);
+    return value;    
+}
+
+Dimension TextFieldModelNG::GetAdaptMinFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode, value);
+    return value;
+}
+
+Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, AdaptMaxFontSize, value, frameNode, value);
+    return value;
+}
+
+Dimension TextFieldModelNG::GetLineHeight(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, LineHeight, value, frameNode, value);
+    return value;
+}
+
+uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
+{
+    uint32_t value = 0;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, MaxLines, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

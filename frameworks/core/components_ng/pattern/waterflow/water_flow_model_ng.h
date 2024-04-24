@@ -84,6 +84,22 @@ public:
     static void SetCachedCount(FrameNode* frameNode, int32_t value);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static float GetFriction(FrameNode* frameNode);
+    static void SetScrollBarMode(FrameNode* frameNode, DisplayMode value);
+    static int32_t GetScrollBarMode(FrameNode* frameNode);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
+    static uint32_t GetScrollBarColor(FrameNode* frameNode);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
+    static float GetScrollBarWidth(FrameNode* frameNode);
+    static int32_t GetEdgeEffect(FrameNode* frameNode);
+    static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
+    static Dimension GetItemMinWidth(FrameNode* frameNode);
+    static Dimension GetItemMaxWidth(FrameNode* frameNode);
+    static Dimension GetItemMinHeight(FrameNode* frameNode);
+    static Dimension GetItemMaxHeight(FrameNode* frameNode);
+    static RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections(FrameNode* frameNode);
+    static void ResetSections(FrameNode* frameNode);
+    static bool GetScrollEnabled(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -864,5 +865,11 @@ EllipsisMode TextModelNG::GetEllipsisMode(FrameNode* frameNode)
     EllipsisMode value = EllipsisMode::TAIL;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, EllipsisMode, value, frameNode, value);
     return value;
+}
+
+FONT_FEATURES_MAP TextModelNG::GetFontFeature(FrameNode* frameNode){
+    FONT_FEATURES_MAP value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFeature, value, frameNode, value);
+    return value;    
 }
 } // namespace OHOS::Ace::NG
