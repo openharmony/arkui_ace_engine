@@ -231,7 +231,7 @@ void ListItemPattern::SetSwiperItemForList()
         CHECK_NULL_VOID(scrollableEvent);
         auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
             auto item = weak.Upgrade();
-            CHECK_NULL_RETURN(item, true);
+            CHECK_NULL_RETURN(item, false);
             return item->ClickJudge(localPoint);
         };
         scrollableEvent->SetClickJudgeCallback(clickJudgeCallback);
@@ -1002,15 +1002,15 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
 bool ListItemPattern::ClickJudge(const PointF& localPoint)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
+    CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, true);
+    CHECK_NULL_RETURN(geometryNode, false);
     auto offset = geometryNode->GetFrameOffset();
     if (indexInListItemGroup_ != -1) {
         auto parentFrameNode = GetParentFrameNode();
-        CHECK_NULL_RETURN(parentFrameNode, true);
+        CHECK_NULL_RETURN(parentFrameNode, false);
         auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-        CHECK_NULL_RETURN(parentGeometryNode, true);
+        CHECK_NULL_RETURN(parentGeometryNode, false);
         auto parentOffset = parentGeometryNode->GetFrameOffset();
         offset = offset + parentOffset;
     }
