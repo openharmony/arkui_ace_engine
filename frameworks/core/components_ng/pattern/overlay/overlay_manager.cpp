@@ -1189,6 +1189,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         CHECK_NULL_VOID(popupPattern);
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
         popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+        popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
         rootNode->RemoveChild(popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         overlayManager->ErasePopupInfo(targetId);
