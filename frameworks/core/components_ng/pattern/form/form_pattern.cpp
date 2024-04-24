@@ -1099,7 +1099,7 @@ void FormPattern::DelayDeleteImageNode()
             CHECK_NULL_VOID(pattern);
             pattern->DeleteImageNodeAfterRecover();
         },
-        DELAY_TIME_FOR_DELETE_IMAGE_NODE);
+        DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover");
 }
 
 void FormPattern::FireFormSurfaceChangeCallback(float width, float height)
