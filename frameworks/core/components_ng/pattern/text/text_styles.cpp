@@ -182,6 +182,7 @@ std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrateg
     }
     return text;
 }
+
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value)
 {
     std::string text = "";
@@ -189,4 +190,5 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
         text = value.value().ToString();
     }
     return text;
+}
 } // namespace OHOS::Ace::NG

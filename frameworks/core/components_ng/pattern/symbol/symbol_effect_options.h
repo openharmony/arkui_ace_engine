@@ -78,7 +78,7 @@ public:
             isTriggerNumChanged_ = true;
         } else {
             uint32_t lastTriggerNum = triggerNum_.value();
-            if (triggerNum != lastTriggerNum){
+            if (triggerNum != lastTriggerNum) {
                 isTriggerNumChanged_ = true;
             } else {
                 isTriggerNumChanged_ = false;

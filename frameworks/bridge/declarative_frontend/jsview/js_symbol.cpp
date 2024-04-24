@@ -139,6 +139,7 @@ void JSSymbol::JsClip(const JSCallbackInfo& info)
     }
 }
 
+
 void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -198,7 +199,7 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
 void JSSymbol::parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptions& symbolEffectOptions)
 {
     if (jsVal->IsBoolean()) {
-        symbolEffectOptions.SetIsActive(jsVal->IsBoolean());
+        symbolEffectOptions.SetIsActive(jsVal->ToBoolean());
     }
     if (jsVal->IsNumber()) {
         uint32_t triggerValue = -1;
@@ -209,7 +210,7 @@ void JSSymbol::parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptio
     if (symbolEffectOptions.GetTriggerNum().has_value()) {
         // 只要设置了TriggerNum => triggerChanged
         symbolEffectOptions.SetIsTxtActive(symbolEffectOptions.IsTriggerChanged().value_or(false));
-    } else if(symbolEffectOptions.GetIsActive().has_value()) {
+    } else if (symbolEffectOptions.GetIsActive().has_value()) {
         // 只设isActive => isActive
         symbolEffectOptions.SetIsTxtActive(symbolEffectOptions.GetIsActive().value());
     } else {
