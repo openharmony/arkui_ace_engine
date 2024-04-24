@@ -6697,6 +6697,7 @@ class ViewPU extends PUV2ViewBase {
                 case '-profiler':
                     view.printDFXHeader('Profiler Info', command);
                     view.dumpReport();
+                    this.sendStateInfo('{}');
                     break;
                 default:
                     DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
@@ -7796,7 +7797,7 @@ class ProvideConsumeUtilV3 {
         // prefix to avoid name collisions with variable of same name as the alias!
         const aliasProp = ProvideConsumeUtilV3.ALIAS_PREFIX + aliasName;
         meta[aliasProp] = { 'varName': varName, 'deco': deco };
-        // FIXME 
+        // FIXME
         // when splitting ViewPU and ViewV2
         // use instanceOf. Until then, this is a workaround.
         // any @state, @track, etc V3 event handles this function to return false
@@ -7908,23 +7909,49 @@ class ProvideConsumeUtilV3 {
     }
 }
 ProvideConsumeUtilV3.ALIAS_PREFIX = '___pc_alias_';
-// The prop parameter is not carried when the component is updated.
-// FIXME what is the purpose of this ?
 /*
-let updateChild = ViewPU.prototype["updateStateVarsOfChildByElmtId"];
-ViewPU.prototype["updateStateVarsOfChildByElmtId"] = function (elmtId, params) {
-  updateChild?.call(this, elmtId, params);
-  let child = this.getChildById(elmtId);
-  if (child) {
-    let realParams = child.paramsGenerator_ ? child.paramsGenerator_() : params
-    for (let k in realParams) {
-      if (ObserveV2.OB_PREFIX + k in child) {
-        child[k] = realParams[k];
-      }
-    }
-  }
-}
+  Internal decorator for @Trace without usingV2ObservedTrack call.
+  Real @Trace decorator function is in v2_decorators.ts
 */
+const Trace_Internal = (target, propertyKey) => {
+    return trackInternal(target, propertyKey);
+};
+/*
+  Internal decorator for @ObservedV2 without usingV2ObservedTrack call.
+  Real @ObservedV2 decorator function is in v2_decorators.ts
+*/
+function ObservedV2_Internal(BaseClass) {
+    return observedV2Internal(BaseClass);
+}
+/*
+  @ObservedV2 decorator function uses this in v2_decorators.ts
+*/
+function observedV2Internal(BaseClass) {
+    // prevent @Track inside @observed class
+    if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
+        const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+    }
+    if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
+        // not an error, suspicious of developer oversight
+        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is this intended? Check our application.`);
+    }
+    // Use ID_REFS only if number of observed attrs is significant
+    const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
+    const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
+    if (count > 5) {
+        
+        BaseClass.prototype[ObserveV2.ID_REFS] = {};
+    }
+    return class extends BaseClass {
+        constructor(...args) {
+            super(...args);
+            AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
+            AsyncAddComputedV2.addComputed(this, BaseClass.name);
+        }
+    };
+}
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -8525,30 +8552,7 @@ class ViewV2 extends PUV2ViewBase {
  */
 function ObservedV2(BaseClass) {
     ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
-    // prevent @Track inside @observed class
-    if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-        const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
-        stateMgmtConsole.applicationError(error);
-        throw new Error(error);
-    }
-    if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
-        // not an error, suspicious of developer oversight
-        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is this intended? Check our application.`);
-    }
-    // Use ID_REFS only if number of observed attrs is significant
-    const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
-    const count = attrList.filter(attr => attr.startsWith(ObserveV2.OB_PREFIX)).length;
-    if (count > 5) {
-        
-        BaseClass.prototype[ObserveV2.ID_REFS] = {};
-    }
-    return class extends BaseClass {
-        constructor(...args) {
-            super(...args);
-            AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
-            AsyncAddComputedV2.addComputed(this, BaseClass.name);
-        }
-    };
+    return observedV2Internal(BaseClass);
 }
 /**
  * @Trace class property decorator, property inside @ObservedV2 class
@@ -8798,8 +8802,8 @@ class __RepeatItemPU {
         }
     }
 }
-// framework internal, deep observation 
-// implementation for deep observation 
+// Framework internal, deep observation
+// Using @ObservedV2_Internal instead of @ObservedV2 to avoid forcing V2 usage.
 let __RepeatItemV2 = class __RepeatItemV2 {
     constructor(initialItem, initialIndex) {
         this.item = initialItem;
@@ -8815,13 +8819,13 @@ let __RepeatItemV2 = class __RepeatItemV2 {
     }
 };
 __decorate([
-    Trace
+    Trace_Internal
 ], __RepeatItemV2.prototype, "item", void 0);
 __decorate([
-    Trace
+    Trace_Internal
 ], __RepeatItemV2.prototype, "index", void 0);
 __RepeatItemV2 = __decorate([
-    ObservedV2
+    ObservedV2_Internal
 ], __RepeatItemV2);
 // helper
 class __RepeatDefaultKeyGen {
@@ -8900,8 +8904,7 @@ class __RepeatV2 {
             throw new Error(`itemGen function undefined. Usage error`);
         }
         if (this.isVirtualScroll) {
-            // TODO haoyu: add render for LazyforEach with child update
-            // there might not any rerender , I am not sure.
+            // TODO: Add render for LazyforEach with child update.
             throw new Error("TODO virtual code path");
         }
         else {
@@ -8926,7 +8929,7 @@ class __RepeatV2 {
     rerenderNoneVirtual() {
         const oldKey2Item = this.key2Item_;
         this.key2Item_ = this.genKeys();
-        // identify array items that have been deleted 
+        // identify array items that have been deleted
         // these are candidates for re-use
         const deletedKeysAndIndex = new Array();
         for (const [key, feInfo] of oldKey2Item) {
@@ -8952,7 +8955,7 @@ class __RepeatV2 {
             }
             else if (deletedKeysAndIndex.length) {
                 // case #2:
-                // new array item, there is an deleted array items whose 
+                // new array item, there is an deleted array items whose
                 // UINode children cab re-used
                 const oldItemInfo = deletedKeysAndIndex.pop();
                 const reuseKey = oldItemInfo.key;
@@ -8977,7 +8980,7 @@ class __RepeatV2 {
             index++;
         });
         // keep  this.id2item_. by removing all entries for remaining
-        // deleted items 
+        // deleted items
         deletedKeysAndIndex.forEach(delItem => {
             this.key2Item_.delete(delItem.key);
         });
