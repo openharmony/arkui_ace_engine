@@ -36,8 +36,8 @@ namespace OHOS::Ace::Constants {
 namespace {
 const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
-constexpr uint32_t SCALE_EFFECT = 2; 
-constexpr uint32_t NONE_EFFECT = 0; 
+constexpr uint32_t SCALE_EFFECT = 2;
+constexpr uint32_t NONE_EFFECT = 0;
 } // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
