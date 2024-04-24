@@ -188,7 +188,7 @@ globalThis.Gauge.attributeModifier = function (modifier: ArkComponent): void {
   });
 };
 // @ts-ignore
-globalThis.Gauge.contentModifier  = function (modifier) {
+globalThis.Gauge.contentModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
