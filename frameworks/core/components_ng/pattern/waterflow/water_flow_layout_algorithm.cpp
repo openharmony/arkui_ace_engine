@@ -354,7 +354,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     auto maxItemHeight = layoutInfo_->GetMaxMainHeight();
     if (layoutInfo_->footerIndex_ >= 0) {
         footerMainStartPos_ = maxItemHeight;
-        footerMainSize_ = MeasureFooter(layoutWrapper);
+        footerMainSize_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
         maxItemHeight += footerMainSize_;
     }
     layoutInfo_->maxHeight_ = maxItemHeight;
@@ -388,16 +388,5 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     } else {
         layoutInfo_->offsetEnd_ = false;
     }
-}
-
-float WaterFlowLayoutAlgorithm::MeasureFooter(LayoutWrapper* layoutWrapper)
-{
-    auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_->footerIndex_);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    auto footerConstraint = layoutProperty->CreateChildConstraint();
-    footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    footer->Measure(footerConstraint);
-    auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
-    return GetMainAxisSize(itemSize, axis_);
 }
 } // namespace OHOS::Ace::NG

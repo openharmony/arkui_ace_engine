@@ -131,4 +131,15 @@ std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapp
     wrapper->GetGeometryNode()->SetContentSize(size);
     return { size, matchChildren };
 }
+
+float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
+{
+    auto footer = wrapper->GetOrCreateChildByIndex(0);
+    auto layoutProperty = wrapper->GetLayoutProperty();
+    auto footerConstraint = layoutProperty->CreateChildConstraint();
+    footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    footer->Measure(footerConstraint);
+    auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
+    return GetMainAxisSize(itemSize, axis);
+}
 } // namespace OHOS::Ace::NG

@@ -40,6 +40,13 @@ public:
      * @return [idealSize given by parent, whether measure is successful (need to adapt to children size if not)].
      */
     static std::pair<SizeF, bool> PreMeasureSelf(LayoutWrapper* wrapper, Axis axis);
+
+    /**
+     * @brief Helper to measure the footer node.
+     * REQUIRES: footer resides at index 0.
+     * @return main length of the footer node.
+     */
+    static float MeasureFooter(LayoutWrapper* layoutWrapper, Axis axis);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H

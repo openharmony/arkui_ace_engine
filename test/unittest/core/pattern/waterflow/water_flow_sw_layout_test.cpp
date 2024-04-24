@@ -69,9 +69,6 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 9);
-    for (auto& lane : info_->lanes_) {
-        std::cout << "Lane = " << lane.ToString() << std::endl;
-    }
     EXPECT_EQ(info_->idxToLane_.at(8), 2);
     EXPECT_EQ(info_->lanes_[0].endPos, 200.0f);
     EXPECT_EQ(info_->lanes_[1].startPos, -100.0f);

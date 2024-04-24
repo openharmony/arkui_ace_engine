@@ -24,9 +24,6 @@ void WaterFlowLayoutInfoSW::Sync(float mainSize, float mainGap)
 {
     startIndex_ = StartIndex();
     endIndex_ = EndIndex();
-    for (const auto& lane : lanes_) {
-        std::cout << "SYNC lane = " << lane.ToString() << std::endl;
-    }
     if (startIndex_ <= endIndex_) {
         storedOffset_ = lanes_[idxToLane_.at(startIndex_)].startPos;
     }
@@ -192,9 +189,6 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
     const auto& lane = lanes_[idxToLane_.at(idx)];
     float pos = 0.0f; // main-axis position of the item's top edge relative to viewport top. Positive if below viewport
     float itemSize = 0.0f;
-    std::cout << "lane start pos: " << lane.startPos << " lane end pos: " << lane.endPos
-              << " item count = " << lane.items_.size() << " first item " << lane.items_.front().idx
-              << " back = " << lane.items_.back().idx << " lane indx = " << idxToLane_.at(idx) << std::endl;
     if (idx < endIndex_) {
         pos = DistanceToTop(idx, mainGap_);
         auto it = std::find_if(

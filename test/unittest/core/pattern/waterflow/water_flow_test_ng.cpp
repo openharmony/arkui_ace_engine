@@ -108,15 +108,15 @@ void WaterFlowTestNg::Create(const std::function<void(WaterFlowModelNG)>& callba
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.Create();
+#ifdef TEST_WATER_FLOW_SW
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+#endif
     ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
     ViewAbstract::SetHeight(CalcLength(WATERFLOW_HEIGHT));
     model.SetScroller(positionController, scrollBarProxy);
     if (callback) {
         callback(model);
     }
-#ifdef TEST_WATER_FLOW_SW
-    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
-#endif
     GetInstance();
     if (flushLayout) {
         FlushLayoutTask(frameNode_);
@@ -702,9 +702,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest010, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
 {
-    CreateWithItem([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr");
-    });
+    CreateWithItem([](WaterFlowModelNG model) { model.SetColumnsTemplate("1fr"); });
 
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { ITEM_HEIGHT, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
@@ -719,7 +717,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest011, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(ITEM_HEIGHT), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(0.f), { 0, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-ITEM_HEIGHT), { 0, -ITEM_HEIGHT }));
-    
+
     // enable overScroll
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->animateOverScroll_ = true;

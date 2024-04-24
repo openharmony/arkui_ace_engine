@@ -133,6 +133,7 @@ public:
     float delta_ = 0.0f;
     float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped
     float mainGap_ = 0.0f;     // update this at the end of a layout
+
     bool synced_ = false;
 
     struct ItemInfo;

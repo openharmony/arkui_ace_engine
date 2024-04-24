@@ -38,6 +38,7 @@ public:
 
 private:
     void Init(const SizeF& frameSize);
+    void CheckReset();
 
     void MeasureOnOffset(float delta);
 
@@ -55,6 +56,19 @@ private:
      */
     void MeasureOnJump(int32_t jumpIdx, ScrollAlign align);
 
+    /**
+     * @brief Helper to perform jumping to an item.
+     *
+     * @param noSkip true if we can directly apply offset to reach the target.
+     */
+    void Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip);
+
+    /**
+     * @brief convert Auto align to other Align types.
+     *
+     * @param inView true if item is between startIndex and endIndex.
+     * @return converted ScrollAlign type.
+     */
     ScrollAlign ParseAutoAlign(int32_t jumpIdx, bool inView);
 
     /**
@@ -104,16 +118,24 @@ private:
 
     void AdjustOverScroll();
 
+    /**
+     * @brief If need to match children size, adjust self size after measuring children.
+     */
+    void PostMeasureSelf(float selfCrossLen);
+
     float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
 
-    void CheckReset();
+    void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
+
+    // convert FlowItem's index to children node index.
+    inline int32_t nodeIdx(int32_t idx) const;
 
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutInfoSW> info_;
 
     Axis axis_ {};
     std::vector<float> itemCrossSize_;
-    float mainSize_ = 0.0f;
+    float mainLen_ = 0.0f;
     float mainGap_ = 0.0f;
     float crossGap_ = 0.0f;
 

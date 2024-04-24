@@ -49,7 +49,6 @@ private:
     {
         return index + layoutInfo_->footerIndex_ + 1;
     }
-    float MeasureFooter(LayoutWrapper* layoutWrapper);
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
 
     std::map<int32_t, float> itemsCrossSize_;

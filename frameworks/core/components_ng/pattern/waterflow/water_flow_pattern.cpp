@@ -565,11 +565,11 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     CHECK_NULL_VOID(host);
     auto prevFooter = footer_.Upgrade();
     if (!prevFooter) {
-        layoutInfo_->footerIndex_ = 0;
         host->AddChild(footer);
     } else {
         host->ReplaceChild(prevFooter, footer);
     }
+    layoutInfo_->footerIndex_ = 0;
     footer_ = footer;
     footer->SetActive(false);
 }
