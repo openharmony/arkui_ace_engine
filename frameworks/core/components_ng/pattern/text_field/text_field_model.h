@@ -136,6 +136,12 @@ enum class CleanNodeStyle {
     INPUT,
 };
 
+enum class CancelButtonStyle {
+    CONSTANT,
+    INVISIBLE,
+    INPUT,
+};
+
 enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
 
 struct SelectionOptions {
