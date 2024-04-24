@@ -978,6 +978,46 @@ HWTEST_F(RichEditorTestNg, RichEditorModel015, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorModel016
+ * @tc.desc: test paragraph style linebreakstrategy attribute
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorModel016, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+
+    // test paragraph  style linebreakstrategy default value
+    richEditorController->AddTextSpan(options);
+    auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::GREEDY);
+
+    // test paragraph style linebreakstrategy value of LineBreakStrategy.GREEDY
+    struct UpdateParagraphStyle style;
+    style.lineBreakStrategy = LineBreakStrategy::GREEDY;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::GREEDY);
+
+    // test paragraph style linebreakstrategy value of LineBreakStrategy.HIGH_QUALITY
+    style.lineBreakStrategy = LineBreakStrategy::HIGH_QUALITY;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::HIGH_QUALITY);
+
+    // test paragraph style linebreakstrategy value of LineBreakStrategy.BALANCED
+    style.lineBreakStrategy = LineBreakStrategy::BALANCED;
+    richEditorController->UpdateParagraphStyle(1, sizeof(INIT_VALUE_1), style);
+    info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    EXPECT_EQ(static_cast<LineBreakStrategy>(info[0].lineBreakStrategy), LineBreakStrategy::BALANCED);
+}
+
+/**
  * @tc.name: RichEditorInsertValue001
  * @tc.desc: test calc insert value object
  * @tc.type: FUNC
