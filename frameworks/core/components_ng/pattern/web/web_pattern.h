@@ -471,6 +471,14 @@ public:
     {
         return rootLayerHeight_;
     }
+    Size GetDrawSize() const
+    {
+        return drawSize_;
+    }
+    bool IsVirtualKeyBoardShow() const
+    {
+        return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
+    }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
@@ -486,7 +494,7 @@ private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
-    void UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
+    void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
