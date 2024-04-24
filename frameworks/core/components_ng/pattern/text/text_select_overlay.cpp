@@ -49,7 +49,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     CHECK_NULL_RETURN(textPattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = textPattern->GetTextSelector().firstHandle;
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
@@ -63,12 +63,43 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     CHECK_NULL_RETURN(textPattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = textPattern->GetTextSelector().secondHandle;
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     SetTransformPaintInfo(handleInfo, localPaintRect);
     return handleInfo;
+}
+
+bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto clip = false;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        clip = true;
+    }
+    if (!renderContext->GetClipEdge().value_or(clip)) {
+        return true;
+    }
+    auto contentRect = textPattern->GetTextContentRect();
+    RectF visibleContentRect(contentRect.GetOffset() + textPattern->GetTextPaintOffset(), contentRect.GetSize());
+    visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);
+    bool topInRegion = visibleContentRect.IsInRegion(topPoint);
+    if (!bottomInRegion && topInRegion) {
+        paintRect.SetHeight(visibleContentRect.Bottom() - paintRect.Top());
+    } else if (bottomInRegion && !topInRegion) {
+        paintRect.SetHeight(paintRect.Bottom() - visibleContentRect.Top());
+        paintRect.SetTop(visibleContentRect.Top());
+    }
+    return bottomInRegion || topInRegion;
 }
 
 bool TextSelectOverlay::CheckHandleVisible(const RectF& paintRect)
