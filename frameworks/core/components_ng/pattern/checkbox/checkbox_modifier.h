@@ -222,6 +222,7 @@ private:
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
+    Dimension defaultPaddingSize_;
     Dimension shadowWidth_;
     Dimension focusBoardSize_;
     float hoverDuration_ = 0.0f;

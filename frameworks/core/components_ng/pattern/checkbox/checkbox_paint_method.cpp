@@ -105,6 +105,7 @@ void CheckBoxModifier::InitializeParam()
     hoverRadius_ = checkBoxTheme->GetHoverRadius();
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    defaultPaddingSize_ = checkBoxTheme->GetDefaultPaddingSize();
     shadowWidth_ = checkBoxTheme->GetShadowWidth();
     userActiveColor_ = activeColor_;
     hoverDuration_ = checkBoxTheme->GetHoverDuration();
@@ -200,10 +201,21 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
-    float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
-    float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
-    float endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
+    float originX;
+    float originY;
+    float endX;
+    float endY;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        originX = offset.GetX() - defaultPaddingSize_.ConvertToPx();
+        originY = offset.GetY() - defaultPaddingSize_.ConvertToPx();
+        endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
+        endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
+    } else {
+        originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
+        originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
+        endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * hotZoneHorizontalPadding_.ConvertToPx();
+        endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
+    }
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     DrawRectOrCircle(canvas, rrect);
