@@ -1022,7 +1022,7 @@ void InnerMenuPattern::RecordItemsAndGroups()
         }
         isMenu = false;
         // skip other type UiNode, such as ForEachNode
-        for (int32_t index = currentNode->GetChildren().size() - 1; index >= 0; index--) {
+        for (int32_t index = static_cast<int32_t>(currentNode->GetChildren().size()) - 1; index >= 0; index--) {
             nodeStack.push(currentNode->GetChildAtIndex(index));
         }
     }

@@ -394,7 +394,7 @@ public:
             SelectProperties selectProperty;
             selectProperty.value = params[i].first;
             selectProperty.icon = params[i].second;
-            selectProperty.index = i;
+            selectProperty.index = static_cast<int>(i);
             if (i < list.size()) {
                 selectProperty.selected = list[i].selected;
                 selectProperty.selectEnable = list[i].selectEnable;
