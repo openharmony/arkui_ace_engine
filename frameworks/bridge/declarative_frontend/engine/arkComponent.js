@@ -17758,6 +17758,10 @@ class ArkProgressComponent extends ArkComponent {
       getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, this);
@@ -17765,10 +17769,11 @@ class ArkProgressComponent extends ArkComponent {
   }
   makeContentModifierNode(context, progressConfig) {
     progressConfig.contentModifier = this.modifier;
-    if (isUndefined(this.progressNode)) {
+    if (isUndefined(this.progressNode) || this.needRebuild) {
       let xNode = globalThis.requireNapi('arkui.node');
       this.progressNode = new xNode.BuilderNode(context);
       this.progressNode.build(this.builder, progressConfig);
+      this.needRebuild = false;
     } else {
       this.progressNode.update(progressConfig);
     }
