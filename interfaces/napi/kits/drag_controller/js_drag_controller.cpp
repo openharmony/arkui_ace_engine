@@ -46,6 +46,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/event/ace_events.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/base/json/json_util.h"
 #include "drag_preview.h"
 #endif
 namespace OHOS::Ace::Napi {
@@ -693,7 +694,10 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         recordSize = badgeNumber.value();
     }
     auto windowId = container->GetWindowId();
-    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    double opacity = asyncCtx->dragPreviewOption.options.opacity;
+    arkExtraInfoJson->Put("dip_opacity", opacity);
+    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
         recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
         asyncCtx->displayId, windowId, true, false, summary };
 }
@@ -1120,6 +1124,62 @@ bool ParseDragParam(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
     return ParseDragItemInfoParam(asyncCtx, errMsg);
 }
 
+bool ApplyPreviewOptionsFromModifier(
+    DragControllerAsyncCtx* asyncCtx, napi_value modifierObj, NG::DragPreviewOption& option)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(asyncCtx->env, modifierObj, &valueType);
+    if (valueType != napi_object) {
+        return false;
+    }
+
+    napi_value globalObj = nullptr;
+    napi_get_global(asyncCtx->env, &globalObj);
+    napi_value globalFunc = nullptr;
+    napi_get_named_property(asyncCtx->env, globalObj, "applyImageModifierToNode", &globalFunc);
+    napi_typeof(asyncCtx->env, globalFunc, &valueType);
+    if (globalFunc == nullptr || valueType != napi_function) {
+        return false;
+    }
+
+    auto applyOnNodeSync =
+        [modifierObj, globalFunc, asyncCtx](WeakPtr<NG::FrameNode> frameNode) {
+            // convert nodeptr to js value
+            auto nodePtr = frameNode.Upgrade();
+            const size_t size = 64; // fake size for gc
+            napi_value nodeJsValue = nullptr;
+            napi_create_external_with_size(
+                asyncCtx->env, static_cast<void*>(AceType::RawPtr(nodePtr)),
+                [](napi_env env, void* data, void* hint) {}, static_cast<void*>(AceType::RawPtr(nodePtr)),
+                &nodeJsValue, size);
+            if (nodeJsValue == nullptr) {
+                return;
+            }
+            // apply modifier
+            napi_value ret;
+            napi_value params[2];
+            params[0] = modifierObj;
+            params[1] = nodeJsValue;
+            napi_call_function(asyncCtx->env, nullptr, globalFunc, 2, params, &ret);
+        };
+
+    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
+    return true;
+}
+
+bool GetNamedPropertyModifier(
+    DragControllerAsyncCtx* asyncCtx, napi_value previewOptionsNApi, std::string& errMsg)
+{
+    napi_value modifierObj = nullptr;
+    napi_get_named_property(asyncCtx->env, previewOptionsNApi, "modifier", &modifierObj);
+    if (!ApplyPreviewOptionsFromModifier(asyncCtx, modifierObj, asyncCtx->dragPreviewOption)) {
+        errMsg = "apply modifier failed.";
+        return false;
+    }
+    return true;
+}
+
 bool ParsePreviewOptions(
     DragControllerAsyncCtx* asyncCtx, napi_valuetype& valueType, std::string& errMsg)
 {
@@ -1156,6 +1216,11 @@ bool ParsePreviewOptions(
             napi_get_value_bool(asyncCtx->env, numberBadgeNApi, &asyncCtx->dragPreviewOption.isShowBadge);
         } else if (valueType != napi_undefined) {
             errMsg = "numberBadge type is wrong.";
+            napi_close_handle_scope(asyncCtx->env, scope);
+            return false;
+        }
+
+        if (!(GetNamedPropertyModifier(asyncCtx, previewOptionsNApi, errMsg))) {
             napi_close_handle_scope(asyncCtx->env, scope);
             return false;
         }

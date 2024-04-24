@@ -18,13 +18,21 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/gesture_info.h"
+
 namespace OHOS::Ace::NG {
 /* DragDropFuncWrapper as a utility class, all function calls must use containerId. */
+class FrameNode;
 class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
     static void DecideWhetherToStopDragging(const PointerEvent& pointerEvent,
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
+    static void UpdateDragPreviewOptionsFromModifier(
+        std::function<void(WeakPtr<FrameNode>)> applyOnNodeSync, DragPreviewOption& options);
 };
 } // namespace OHOS::Ace::NG
 
