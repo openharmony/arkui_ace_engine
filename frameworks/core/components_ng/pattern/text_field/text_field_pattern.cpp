@@ -2168,7 +2168,8 @@ void TextFieldPattern::ProcessCounter()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() && !IsInPasswordMode()) {
+    if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() &&
+        !IsNormalInlineState() && !IsInPasswordMode()) {
         AddCounterNode();
     } else {
         CleanCounterNode();
