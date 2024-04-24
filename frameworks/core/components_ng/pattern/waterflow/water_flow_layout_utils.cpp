@@ -42,7 +42,8 @@ std::string WaterFlowLayoutUtils::PreParseArgs(const std::string& args)
     return rowsArgs;
 }
 
-FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(const RefPtr<WaterFlowLayoutInfo>& info, int32_t index, float mainGap)
+FlowItemPosition WaterFlowLayoutUtils::GetItemPosition(
+    const RefPtr<WaterFlowLayoutInfo>& info, int32_t index, float mainGap)
 {
     auto crossIndex = info->GetCrossIndex(index);
     // already in layoutInfo

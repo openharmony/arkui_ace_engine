@@ -83,7 +83,7 @@ public:
 
     /**
      * @brief reset layout data before performing a jump.
-     * 
+     *
      * @param laneBasePos base value for lane's start&end position.
      */
     void ResetBeforeJump(float laneBasePos);
@@ -92,19 +92,17 @@ public:
 
     /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
-     * 
-     * @param item idx
-     * @param mainGap 
+     *
+     * @param item index
      * @return positive result when item's top edge is below viewport.
      */
     float DistanceToTop(int32_t item, float mainGap) const;
 
     /**
      * @brief Calculates distance from the item's bottom edge to the bottom of the viewport.
-     * 
-     * @param item idx
+     *
+     * @param item index
      * @param mainSize of the viewport
-     * @param mainGap 
      * @return positive result when item's bottom edge is above viewport.
      */
     float DistanceToBottom(int32_t item, float mainSize, float mainGap) const;

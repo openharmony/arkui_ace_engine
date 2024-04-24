@@ -220,7 +220,7 @@ float WaterFlowLayoutInfoSW::CalcTargetPosition(int32_t idx, int32_t /* crossIdx
             }
             break;
         case ScrollAlign::CENTER:
-            pos = pos - (lastMainSize_ - itemSize) / 2;
+            pos = pos - (lastMainSize_ - itemSize) / 2.0f;
             break;
         default:
             pos = 0.0f;

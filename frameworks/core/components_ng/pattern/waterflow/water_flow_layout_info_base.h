@@ -64,7 +64,7 @@ public:
     virtual float CalcOverScroll(float mainSize, float delta) const = 0;
 
     /**
-     * @brief Check if WaterFlow just reached content top from the recent layout by comparing current position to [prevPos].
+     * @brief Check if WaterFlow just reached content top from the recent layout.
      * For triggering events.
      *
      * @param prevPos previous layout position.
@@ -73,7 +73,7 @@ public:
      */
     virtual bool ReachStart(float prevPos, bool firstLayout) const = 0;
     /**
-     * @brief Check if WaterFlow just reached content bottom from the recent layout by comparing current position to [prevPos].
+     * @brief Check if WaterFlow just reached content bottom from the recent layout.
      * For triggering events.
      *
      * @param prevPos previous layout position.

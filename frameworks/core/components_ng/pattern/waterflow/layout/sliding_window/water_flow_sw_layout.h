@@ -48,7 +48,7 @@ private:
 
     /**
      * @brief When the item is within or close to viewport, layout is preserved and we merely apply an offset.
-     * But when jumping to an item further away, the current layout would be reset, and a new layout happens from that index.
+     * When jumping to an item further away, the current layout would be reset for better layout performance.
      *
      * @param jumpIdx
      * @param align ScrollAlign
