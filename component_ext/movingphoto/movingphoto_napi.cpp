@@ -244,14 +244,9 @@ napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info inf
     if (controller == nullptr) {
         return ExtNapiUtils::CreateNull(env);
     }
-    controller->IncRefCount();
     napi_wrap(
         env, thisVar, controller,
-        [](napi_env env, void* data, void* hint) {
-            auto* controller = reinterpret_cast<NG::MovingPhotoController*>(data);
-            delete controller;
-            controller = nullptr;
-        },
+        [](napi_env env, void* data, void* hint) {},
         nullptr, nullptr);
     return thisVar;
 }
