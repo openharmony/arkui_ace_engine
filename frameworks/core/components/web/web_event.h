@@ -129,6 +129,7 @@ enum class WebResponseDataType : int32_t {
     STRING_TYPE,
     FILE_TYPE,
     RESOURCE_URL_TYPE,
+    BUFFER_TYPE,
 };
 
 class WebResponseAsyncHandle : public AceType {
@@ -221,6 +222,23 @@ public:
         fd_ = 0;
     }
 
+    void SetBuffer(char* buffer, size_t size)
+    {
+        buffer_ = buffer;
+        dataType_ = WebResponseDataType::BUFFER_TYPE;
+        bufferSize_ = size;
+    }
+
+    char* GetBuffer() const
+    {
+        return buffer_;
+    }
+
+    size_t GetBufferSize() const
+    {
+        return bufferSize_;
+    }
+
     void SetFileHandle(int32_t fd)
     {
         fd_ = fd;
@@ -301,6 +319,8 @@ private:
     int32_t statusCode_;
     bool isReady_ = true;
     std::shared_ptr<WebResponseAsyncHandle> handle_;
+    char* buffer_ = nullptr;
+    uint64_t bufferSize_ = 0;
 };
 
 class ACE_EXPORT WebRequest : public AceType {
