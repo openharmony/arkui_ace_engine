@@ -50,8 +50,11 @@ void RichEditorDragPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper
     modifier->SetInnerHandleColor(textOverlayTheme->GetHandleColorInner());
     auto pattern = DynamicCast<TextDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    RectF boundsRect(-handleDiameter, -handleDiameter, pattern->GetFrameWidth() + handleDiameter * CONSTANT_DOUBLE,
-        pattern->GetFrameHeight() + handleDiameter * CONSTANT_DOUBLE);
+    auto screenWdith = SystemProperties::GetDevicePhysicalWidth();
+    auto screenHeight = SystemProperties::GetDevicePhysicalHeight();
+    RectF boundsRect(-handleDiameter - screenWdith, -handleDiameter - screenHeight,
+        pattern->GetFrameWidth() + (screenWdith + handleDiameter) * CONSTANT_DOUBLE,
+        pattern->GetFrameHeight() + (screenHeight + handleDiameter) * CONSTANT_DOUBLE);
     modifier->SetBoundsRect(boundsRect);
     CHECK_NULL_VOID(paintWrapper);
     auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();

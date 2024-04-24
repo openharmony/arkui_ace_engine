@@ -18,10 +18,8 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-#include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components_ng/image_provider/svg_image_object.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
@@ -95,6 +93,7 @@ JSRenderImage::JSRenderImage() {}
 
 napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     size_t argc = 0;
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, &thisVar, nullptr));
@@ -263,10 +262,7 @@ void JSRenderImage::OnImageLoadSuccess()
     imageObj_ = loadingCtx_->MoveImageObject();
     CHECK_NULL_VOID(imageObj_);
     pixelMap_ = image_->GetPixelMap();
-    auto svgImageObj = AceType::DynamicCast<NG::SvgImageObject>(imageObj_);
-    if (svgImageObj) {
-        svgDom_ = svgImageObj->MakeSvgDom(svgImageObj->GetSvgImageData(), svgImageObj->GetSourceInfo());
-    }
+    svgDom_ = imageObj_->GetSVGDom();
     imageFit_ = loadingCtx_->GetImageFit();
     imageSize_ = loadingCtx_->GetImageSize();
 }

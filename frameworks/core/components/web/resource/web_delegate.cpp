@@ -4702,23 +4702,14 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), request, response]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            auto onHttpErrorReceiveV2 = delegate->onHttpErrorReceiveV2_;
-            if (onHttpErrorReceiveV2) {
-                onHttpErrorReceiveV2(std::make_shared<ReceivedHttpErrorEvent>(
-                    AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
-                        request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
-                    AceType::MakeRefPtr<WebResponse>(response->ResponseHeaders(), response->ResponseData(),
-                        response->ResponseEncoding(), response->ResponseMimeType(), response->ResponseStatus(),
-                        response->ResponseStatusCode())));
-            }
-        },
-        TaskExecutor::TaskType::JS, "ArkUIWebHttpErrorReceive");
+    if (onHttpErrorReceiveV2_) {
+        onHttpErrorReceiveV2_(std::make_shared<ReceivedHttpErrorEvent>(
+            AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(), request->Method(), request->Url(),
+                request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect()),
+            AceType::MakeRefPtr<WebResponse>(response->ResponseHeaders(), response->ResponseData(),
+                response->ResponseEncoding(), response->ResponseMimeType(), response->ResponseStatus(),
+                response->ResponseStatusCode())));
+    }
 }
 
 bool WebDelegate::IsEmptyOnInterceptRequest()
@@ -5478,7 +5469,7 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
 #endif
 }
 
-bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
 #ifdef NG_BUILD
     auto webPattern = webPattern_.Upgrade();

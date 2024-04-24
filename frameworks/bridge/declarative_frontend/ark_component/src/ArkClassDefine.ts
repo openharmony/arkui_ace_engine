@@ -795,6 +795,18 @@ class ArkSearchButton {
       (this.fontColor === another.fontColor);
   }
 }
+
+class ArkSearchInputFilter {
+  value: ResourceStr | undefined;
+  error?: (value: string) => void;
+  constructor() {
+    this.value = undefined;
+    this.error = undefined;
+  }
+  isEqual(another: ArkSearchInputFilter): boolean {
+    return (this.value === another.value);
+  }
+}
 class ArkImageFrameInfoToArray {
   arrSrc: Array<string> | undefined;
   arrWidth: Array<number | string> | undefined;
@@ -1179,5 +1191,18 @@ class ArkTextBackGroundStyle {
       }
     }
     return true;
+  }
+}
+
+class ArkWaterFlowEdgeEffect {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkWaterFlowEdgeEffect): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
   }
 }

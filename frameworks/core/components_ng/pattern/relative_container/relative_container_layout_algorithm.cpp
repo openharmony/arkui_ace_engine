@@ -542,7 +542,7 @@ void RelativeContainerLayoutAlgorithm::CheckChain(LayoutWrapper* layoutWrapper)
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(childLayoutProperty);
         const auto& flexItem = childLayoutProperty->GetFlexItemProperty();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             continue;
         }
 
@@ -1024,7 +1024,7 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
         auto childWrapper = mapItem.second.layoutWrapper;
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         auto childHostNode = childWrapper->GetHostNode();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             continue;
         }
         for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
@@ -1106,7 +1106,7 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
         auto childWrapper = mapItem.second.layoutWrapper;
         auto childHostNode = childWrapper->GetHostNode();
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
-        if (!flexItem) {
+        if (!flexItem || !flexItem->HasAlignRules()) {
             visitedNode.push(mapItem.first);
             layoutQueue.push(mapItem.second.id);
             continue;

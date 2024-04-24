@@ -87,8 +87,8 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
-constexpr uint32_t POPUPSIZE_HEIGHT = 200;
-constexpr uint32_t POPUPSIZE_WIDTH = 400;
+constexpr uint32_t POPUPSIZE_HEIGHT = 0;
+constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 
 #ifdef _ARM64_

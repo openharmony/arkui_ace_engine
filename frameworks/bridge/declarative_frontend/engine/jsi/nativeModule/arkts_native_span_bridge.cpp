@@ -390,14 +390,11 @@ ArkUINativeModuleValue SpanBridge::SetBaselineOffset(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    struct ArkUIStringAndFloat baselineOffsetValue = { 0.0, nullptr };
-    if (secondArg->IsNumber()) {
-        baselineOffsetValue.value = secondArg->ToNumber(vm)->Value();
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(nativeNode, &baselineOffsetValue);
-    } else if (secondArg->IsString()) {
-        std::string tempValueStr = secondArg->ToString(vm)->ToString();
-        baselineOffsetValue.valueStr = tempValueStr.c_str();
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(nativeNode, &baselineOffsetValue);
+    CalcDimension result;
+    if (secondArg->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, result) &&
+        result.Unit() != DimensionUnit::PERCENT && !std::isnan(result.Value())) {
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(
+            nativeNode, result.Value(), static_cast<int8_t>(result.Unit()));
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanBaselineOffset(nativeNode);
     }

@@ -61,7 +61,7 @@ using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
-class RenderContext : public virtual AceType {
+class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType)
 
 public:
@@ -594,7 +594,7 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
         return std::vector<double>();

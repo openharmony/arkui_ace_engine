@@ -189,6 +189,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_rect_bridge.cpp",
       "nativeModule/arkts_native_refresh_bridge.cpp",
       "nativeModule/arkts_native_render_node_bridge.cpp",
+      "nativeModule/arkts_native_resource_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_row_split_bridge.cpp",

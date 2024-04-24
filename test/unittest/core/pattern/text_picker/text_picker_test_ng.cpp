@@ -6464,4 +6464,74 @@ HWTEST_F(TextPickerTestNg, FlushAnimationTextProperties001, TestSize.Level1)
     result = columnPattern->animationProperties_[0].fontSize;
     EXPECT_EQ(Dimension(FONT_SIZE_20), result);
 }
+/**
+ * @tc.name: TextPickerDialogViewUpdateButtonStyles001
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewUpdateButtonStyles001, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W100;
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    
+    auto renderContext = buttonNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
+    auto testval = layoutProperty->GetFontWeightValue();
+    EXPECT_EQ(testval, FontWeight::W100);
+}
+
+ /**
+ * @tc.name: TextPickerDialogViewShow0012
+ * @tc.desc: Test TextPickerDialogView Show(column kind is invalid).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewShow0012, TestSize.Level1)
+{
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    TextPickerSettingData settingData;
+    memset_s(&settingData, sizeof(TextPickerSettingData), 0x00, sizeof(TextPickerSettingData));
+    settingData.columnKind = 0;
+    settingData.height = Dimension(FONT_SIZE_10);
+    settingData.rangeVector = { { "", "1" }, { "", "2" }, { "", "3" } };
+    settingData.selected = 0;
+
+    DialogProperties dialogProperties;
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(0);
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W100;
+    buttonInfos.push_back(info1);
+
+    auto frameNode =
+        TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(frameNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

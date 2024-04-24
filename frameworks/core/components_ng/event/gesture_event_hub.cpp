@@ -17,6 +17,8 @@
 
 #include <cstdint>
 #include <list>
+#include <memory>
+#include <string>
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -41,6 +43,7 @@
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -60,6 +63,7 @@ namespace OHOS::Ace::NG {
 namespace {
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
+constexpr int32_t MAX_BUILDER_DEPTH = 5;
 #endif
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
 } // namespace
@@ -777,6 +781,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
+        bool hasImageNode = false;
+        std::list<RefPtr<FrameNode>> imageNodes;
+        PrintBuilderNode(dragPreviewInfo.customNode, hasImageNode, imageNodes);
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
                             frameNode, dragDropInfo, event](
                             std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
@@ -795,6 +802,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
         NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+        CheckImageDecode(imageNodes);
+        imageNodes.clear();
         return;
     }
 #endif
@@ -932,6 +941,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto arkExtraInfoJson = JsonUtil::Create(true);
     auto dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dipScale);
+    UpdateExtraInfo(frameNode, arkExtraInfoJson);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
@@ -1005,6 +1015,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->OnDragEnd(
             PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
     }
+}
+
+void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson)
+{
+    double opacity = frameNode->GetDragPreviewOption().options.opacity;
+    arkExtraInfoJson->Put("dip_opacity", opacity);
 }
 
 int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>& context)
@@ -1701,4 +1717,59 @@ void GestureEventHub::ClearModifierGesture()
     recreateGesture_ = true;
     OnModifyDone();
 }
+
+#if defined(PIXEL_MAP_SUPPORTED)
+void GestureEventHub::PrintBuilderNode(
+    const RefPtr<UINode>& customNode, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes)
+{
+    CHECK_NULL_VOID(customNode);
+    
+    int32_t depth = 1;
+    PrintIfImageNode(customNode, depth, hasImageNode, imageNodes);
+}
+
+void GestureEventHub::PrintIfImageNode(
+    const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(builderNode);
+    CHECK_NULL_VOID(frameNode);
+    if (depth > MAX_BUILDER_DEPTH) {
+        return;
+    }
+    if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto pattern = frameNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        hasImageNode = true;
+        imageNodes.push_back(frameNode);
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "customNode has ImageNode, nodeId: %{public}d, syncLoad: %{public}d, decode complete: %{public}d",
+            frameNode->GetId(), pattern->GetSyncLoad(), pattern->GetCanvasImage() != nullptr);
+    }
+
+    auto children = frameNode->GetChildren();
+    for (const auto& child : children) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        if (node) {
+            PrintIfImageNode(node, depth + 1, hasImageNode, imageNodes);
+        }
+    }
+}
+
+void GestureEventHub::CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes)
+{
+    if (imageNodes.empty()) {
+        return;
+    }
+
+    for (const auto& imageNode : imageNodes) {
+        auto node = AceType::DynamicCast<FrameNode>(imageNode);
+        CHECK_NULL_VOID(node);
+        auto pattern = node->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->GetCanvasImage()) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "ImageNode did not complete decoding, nodeId: %{public}d", node->GetId());
+        }
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

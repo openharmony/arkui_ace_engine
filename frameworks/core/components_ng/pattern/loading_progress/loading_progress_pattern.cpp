@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_event_hub.h"
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 
@@ -59,6 +60,7 @@ void LoadingProgressPattern::OnModifyDone()
     CHECK_NULL_VOID(paintProperty);
     enableLoading_ = paintProperty->GetEnableLoadingValue(true);
     enableLoading_ ? StartAnimation() : StopAnimation();
+    FireBuilder();
 }
 
 void LoadingProgressPattern::OnVisibleChange(bool isVisible)
@@ -129,5 +131,36 @@ void LoadingProgressPattern::OnWindowShow()
 {
     isShow_ = true;
     StartAnimation();
+}
+
+void LoadingProgressPattern::FireBuilder()
+{
+    if (!makeFunc_.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    auto enableLoading = paintProperty->GetEnableLoadingValue(true);
+    LoadingProgressConfiguration loadingProgressConfiguration(enableLoading, enabled);
+    return (makeFunc_.value())(loadingProgressConfiguration);
 }
 } // namespace OHOS::Ace::NG

@@ -44,6 +44,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
@@ -764,6 +765,10 @@ void PipelineContext::FlushModifier()
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
+    if (IsFreezeFlushMessage()) {
+        SetIsFreezeFlushMessage(false);
+        return;
+    }
     window_->FlushTasks();
 }
 
@@ -2245,6 +2250,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+    } else if (params[0] == "-allelements") {
+        AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto rootNode = pipeline->GetRootElement();
+            if (rootNode) {
+                DumpLog::GetInstance().Print(0, "ContainerId: " + std::to_string(Container::CurrentId()));
+                rootNode->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+        });
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
@@ -2661,31 +2676,6 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
         frameNode->TriggerVisibleAreaChangeCallback();
-    }
-}
-
-void PipelineContext::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
-{
-    CHECK_NULL_VOID(node);
-    onFormVisibleChangeNodeIds_.emplace(node->GetId());
-    onFormVisibleChangeEvents_.insert_or_assign(node->GetId(), callback);
-}
-
-void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
-{
-    onFormVisibleChangeNodeIds_.erase(nodeId);
-    auto iter = onFormVisibleChangeEvents_.find(nodeId);
-    if (iter != onFormVisibleChangeEvents_.end()) {
-        onFormVisibleChangeEvents_.erase(iter);
-    }
-}
-
-void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
-{
-    for (auto& pair : onFormVisibleChangeEvents_) {
-        if (pair.second) {
-            pair.second(isVisible);
-        }
     }
 }
 

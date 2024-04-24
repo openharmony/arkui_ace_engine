@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <optional>
+#include <ratio>
 #include <regex>
 #include <string>
 #include <utility>
@@ -2324,7 +2325,8 @@ void TextFieldPattern::AutoFillValueChanged()
     auto autoContentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END) {
+    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END
+        && CheckAutoFill()) {
         container->UpdatePopupUIExtension(host);
     }
 }
@@ -2333,7 +2335,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    AutoFillValueChanged();
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2353,6 +2354,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     }
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
+    AutoFillValueChanged();
     eventHub->FireOnChange(contentController_->GetTextValue());
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
@@ -2524,11 +2526,7 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
 {
-    auto newRequest = request;
-    auto needAvoid = CaretAvoidSoftKeyboard();
-    // Avoid menu that appear and then close immediately.
-    newRequest.menuIsShow = newRequest.menuIsShow && !needAvoid;
-    selectOverlay_->ProcessOverlay(newRequest);
+    selectOverlay_->ProcessOverlay(request);
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
@@ -3459,6 +3457,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = textStyle.GetFontSize().ConvertToPx() };
     paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
@@ -5927,6 +5926,11 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
     selectController_->UpdateCaretIndex(static_cast<int32_t>(contentController_->GetWideText().length()));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (obscuredChange_) {
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnSecurityStateChanged(!isObscured);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -6008,11 +6012,29 @@ bool TextFieldPattern::IsShowPasswordIcon() const
     return layoutProperty->GetShowPasswordIconValue(isShowPasswordIcon) && IsInPasswordMode();
 }
 
+std::optional<bool> TextFieldPattern::IsShowPasswordText() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetShowPasswordText();
+}
+
 bool TextFieldPattern::IsShowCancelButtonMode() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return !IsNormalInlineState() && !IsTextArea() && layoutProperty->GetIsShowCancelButton().value_or(false);
+}
+
+void TextFieldPattern::CheckPasswordAreaState()
+{
+    auto showPasswordState = IsShowPasswordText();
+    if (!showPasswordState.has_value()) {
+        return;
+    }
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordArea);
+    passwordArea->SetObscured(!showPasswordState.value());
 }
 
 void TextFieldPattern::ProcessResponseArea()
@@ -6034,15 +6056,25 @@ void TextFieldPattern::ProcessResponseArea()
             cleanNodeResponseArea_.Reset();
         }
     }
-
-    if (IsShowPasswordIcon()) {
+    if (IsInPasswordMode()) {
         auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
         if (passwordArea) {
-            passwordArea->Refresh();
+            if (IsShowPasswordIcon()) {
+                passwordArea->Refresh();
+            } else {
+                passwordArea->ClearArea();
+            }
+            CheckPasswordAreaState();
             return;
         }
+        // responseArea_ may not be a password area.
         responseArea_ = AceType::MakeRefPtr<PasswordResponseArea>(WeakClaim(this), GetTextObscured());
-        responseArea_->InitResponseArea();
+        if (IsShowPasswordIcon()) {
+            responseArea_->InitResponseArea();
+        } else {
+            responseArea_->ClearArea();
+        }
+        CheckPasswordAreaState();
         return;
     }
 

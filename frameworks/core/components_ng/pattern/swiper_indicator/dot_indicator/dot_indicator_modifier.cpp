@@ -23,9 +23,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
-constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr int32_t POINT_HOVER_ANIMATION_DURATION = 100;
 constexpr int32_t COMPONENT_DILATE_ANIMATION_DURATION = 250;
 constexpr int32_t COMPONENT_SHRINK_ANIMATION_DURATION = 300;
@@ -46,8 +43,10 @@ constexpr float TOUCH_BOTTOM_CURVE_DAMPING = 1.0f;
 constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
 constexpr float TOUCH_BOTTOM_BACKGROUND_HEIGHT_MULTIPLE = 0.8f;
 constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
-constexpr int32_t TOUCH_BOTTOM_ANIMATION_DURATION = 200;
-constexpr int32_t OPACITY_ANIMATION_DURATION = 100;
+constexpr int32_t DEFAULT_TOUCH_BOTTOM_ANIMATION_DURATION = 200;
+constexpr int32_t DEFAULT_OPACITY_ANIMATION_DURATION = 100;
+constexpr float LOOP_TRANSLATE_DURATION_PERCENT = 0.5f;
+constexpr float LOOP_OPACITY_DURATION_PERCENT = 0.25f;
 constexpr uint8_t TARGET_ALPHA = 255;
 constexpr int32_t BLACK_POINT_DURATION = 400;
 } // namespace
@@ -318,8 +317,10 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set(margin);
-    indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
-
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    indicatorPadding_->Set(static_cast<float>(paddingSide.ConvertToPx()));
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
         longPointLeftCenterX_->Set(longPointCenterX.first);
@@ -339,8 +340,10 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
     const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set({ 0, 0 });
-    indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()));
-
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    Dimension paddingSide = swiperTheme->GetIndicatorPaddingDot();
+    indicatorPadding_->Set(static_cast<float>(paddingSide.ConvertToPx()));
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftCenterX_->Set(longPointCenterX.first);
@@ -478,7 +481,10 @@ void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [&]() { normalToHoverPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE); });
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    float scaleIndicator = swiperTheme->GetScaleSwiper();
+    AnimationUtils::Animate(option, [&]() { normalToHoverPointDilateRatio_->Set(scaleIndicator); });
 }
 
 void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
@@ -495,8 +501,11 @@ void DotIndicatorModifier::UpdateLongPointDilateRatio()
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    float scaleIndicator = swiperTheme->GetScaleSwiper();
     if (longPointIsHover_) {
-        AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE); });
+        AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(scaleIndicator); });
     } else {
         AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(1.0f); });
     }
@@ -606,7 +615,7 @@ void DotIndicatorModifier::PlayOpacityAnimation()
     AnimationOption optionOpacity;
     // x0:0.33, y0:0, x1:0.67, y1:1
     optionOpacity.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
-    optionOpacity.SetDuration(OPACITY_ANIMATION_DURATION);
+    optionOpacity.SetDuration(GetLoopOpacityDuration());
     isSelectedColorAnimEnd_ = false;
     isTouchBottomLoop_ = true;
     selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(0.0f)));
@@ -628,6 +637,24 @@ void DotIndicatorModifier::PlayOpacityAnimation()
         });
 }
 
+int32_t DotIndicatorModifier::GetLoopTranslateDuration() const
+{
+    if (InstanceOf<InterpolatingSpring>(headCurve_)) {
+        return DEFAULT_TOUCH_BOTTOM_ANIMATION_DURATION;
+    }
+
+    return static_cast<int32_t>(static_cast<float>(animationDuration_) * LOOP_TRANSLATE_DURATION_PERCENT);
+}
+
+int32_t DotIndicatorModifier::GetLoopOpacityDuration() const
+{
+    if (InstanceOf<InterpolatingSpring>(headCurve_)) {
+        return DEFAULT_OPACITY_ANIMATION_DURATION;
+    }
+
+    return static_cast<int32_t>(static_cast<float>(animationDuration_) * LOOP_OPACITY_DURATION_PERCENT);
+}
+
 void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
     TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX)
 {
@@ -638,7 +665,7 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
     AnimationOption optionBottom;
     // x0:0.33, y0:0, x1:0.67, y1:1
     optionBottom.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
-    optionBottom.SetDuration(TOUCH_BOTTOM_ANIMATION_DURATION);
+    optionBottom.SetDuration(GetLoopTranslateDuration());
 
     auto weak = WeakClaim(this);
     FinishCallback bottomFinishCallback = [weak, optionBottom, longPointCenterX, vectorBlackPointCenterX,

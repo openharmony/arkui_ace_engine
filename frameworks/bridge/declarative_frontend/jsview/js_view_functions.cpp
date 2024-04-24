@@ -70,7 +70,7 @@ void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
 
     auto selfLayoutInfo = jsParam->GetSelfLayoutInfo();
     auto childArray = jsParam->GetChildArray();
-    auto constraint = jsParam->GetConstraint();
+    auto constraint = jsParam->GetPlaceChildrenConstraint();
 
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
     jsPlaceChildrenFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */

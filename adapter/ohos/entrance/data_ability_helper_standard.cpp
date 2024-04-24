@@ -101,4 +101,13 @@ int32_t DataAbilityHelperStandard::OpenFileWithDataShare(const std::string& uriS
     return dataShareHelper_->OpenFile(uri, mode);
 }
 
+int32_t DataAbilityHelperStandard::ReadMovingPhotoVideo(const std::string &uri)
+{
+#ifdef MEDIA_LIBRARY_EXISTS
+    return mgr_.ReadMovingPhotoVideo(uri);
+#else
+    return -1;
+#endif
+}
+
 } // namespace OHOS::Ace

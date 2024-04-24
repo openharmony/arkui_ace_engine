@@ -476,10 +476,9 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         MouseInfo info;
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
         if (!isHover) {
-            OHOS::NWeb::NWebCursorInfo cursorInfo;
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "Set cursor to pointer when mouse pointer is leave.");
-            pattern->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, cursorInfo);
+            pattern->OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         }
         pattern->WebOnMouseEvent(info);
     };
@@ -2199,7 +2198,6 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
         y = y - edgeHeight;
     }
 
-    x = x - SelectHandleInfo::GetDefaultLineWidth().ConvertToPx() / 2;
     paintRect.SetOffset({ x, y });
     paintRect.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), edgeHeight });
     return paintRect;
@@ -2526,6 +2524,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
             selectInfo.menuInfo.menuDisable = true;
             selectInfo.menuInfo.menuIsShow = false;
             selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
+            selectInfo.isHandleLineShow = false;
             RegisterSelectOverlayEvent(selectInfo);
             selectOverlayProxy_ =
                 pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this));
@@ -2542,7 +2541,7 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     }
 }
 
-bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2587,16 +2586,28 @@ void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::Curs
     }
 }
 
-void WebPattern::UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCursorInfo& info)
+void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    uint8_t *buff = nullptr;
+    if (info) {
+        x = info->GetX();
+        y = info->GetY();
+        buff = info->GetBuff();
+        width = info->GetWidth();
+        height = info->GetHeight();
+    }
     Media::InitializationOptions opt;
-    opt.size.width = info.width;
-    opt.size.height = info.height;
+    opt.size.width = width;
+    opt.size.height = height;
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     CHECK_NULL_VOID(pixelMap);
-    uint64_t bufferSize = info.width * info.height * IMAGE_POINTER_CUSTOM_CHANNEL;
-    uint32_t status = pixelMap->WritePixels(static_cast<const uint8_t*>(info.buff), bufferSize);
+    uint64_t bufferSize = width * height * IMAGE_POINTER_CUSTOM_CHANNEL;
+    uint32_t status = pixelMap->WritePixels(static_cast<const uint8_t*>(buff), bufferSize);
     if (status != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "write pixel map failed %{public}u", status);
         return;
@@ -2605,7 +2616,7 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, const OHOS::NWeb::NWebCurs
     CHECK_NULL_VOID(cursorPixelMap);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
-    mouseStyle->SetCustomCursor(windowId, info.x, info.y, cursorPixelMap);
+    mouseStyle->SetCustomCursor(windowId, x, y, cursorPixelMap);
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> WebPattern::CreatePixelMapFromString(const std::string& filePath)

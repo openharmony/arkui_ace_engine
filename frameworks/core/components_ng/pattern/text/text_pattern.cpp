@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
 
@@ -85,17 +86,20 @@ void TextPattern::OnAttachToFrameNode()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        auto host = GetHost();
         fontManager->AddFontNodeNG(host);
     }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
             host->GetRenderContext()->UpdateClipEdge(true);
+            host->GetRenderContext()->SetClipToFrame(true);
         }
+    }
+    if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
+        host->GetRenderContext()->SetUsingContentRectForRenderFrame(true, true);
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
@@ -2566,6 +2570,8 @@ void TextPattern::DumpInfo()
             .append(
                 (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(16.0, DimensionUnit::FP)).ToString()));
     DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
 }
 
 void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
@@ -3126,8 +3132,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
         if (imgAttr.size.has_value()) {
-            imageLayoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(imgAttr.size.value().width), CalcLength(imgAttr.size.value().height)));
+            imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
         if (imgAttr.verticalAlign.has_value()) {
             imageLayoutProperty->UpdateVerticalAlign(imgAttr.verticalAlign.value());

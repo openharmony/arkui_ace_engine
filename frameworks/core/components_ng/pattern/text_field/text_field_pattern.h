@@ -1033,8 +1033,10 @@ public:
 
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
+    std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
     bool IsShowCancelButtonMode() const;
+    void CheckPasswordAreaState();
 
     bool GetShowSelect() const
     {

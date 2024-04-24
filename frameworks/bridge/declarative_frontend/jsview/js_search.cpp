@@ -24,10 +24,12 @@
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/search/search_theme.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components/common/properties/text_style_parser.h"
@@ -109,6 +111,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
+    JSClass<JSSearch>::StaticMethod("dragPreviewOptions", &JSSearch::SetDragPreviewOptions);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -136,6 +139,12 @@ void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& chan
     JsEventCallback<void(const std::string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     SearchModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void JSSearch::SetDragPreviewOptions(const JSCallbackInfo& info)
+{
+    NG::DragPreviewOption option = JSViewAbstract::ParseDragPreviewOptions(info);
+    SearchModel::GetInstance()->SetDragPreviewOptions(option);
 }
 
 void JSSearch::SetFontFeature(const JSCallbackInfo& info)

@@ -222,6 +222,7 @@ void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 
 void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     if (info.Length() == 0) {
         return;
     }

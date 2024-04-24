@@ -124,6 +124,17 @@ public:
         cache_.clear();
     }
 
+    void UpdateColorMode(ColorMode colorMode)
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
+            iter->second->UpdateColorMode(colorMode);
+        }
+        for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
+            iter->cacheObj->UpdateColorMode(colorMode);
+        }
+    }
+
 private:
     ResourceManager() = default;
 
