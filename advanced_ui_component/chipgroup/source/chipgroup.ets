@@ -17,10 +17,8 @@ import { Chip, ChipSize } from '@ohos.arkui.advanced.Chip'
 
 
 interface ChipGroupTheme {
-  itemStyle: ChipItemStyle;
+  itemStyle: ChipGroupStyleTheme;
   chipGroupSpace: ChipGroupSpaceOptions;
-  leftPadding: number;
-  rightPadding: number;
 }
 
 const noop = (selectedIndexes: Array<number>) => {
@@ -33,10 +31,10 @@ const defaultTheme: ChipGroupTheme = {
     fontColor: $r('sys.color.ohos_id_color_text_primary'),
     selectedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     selectedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
+    fillColor: $r('sys.color.ohos_id_color_secondary'),
+    selectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
   },
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
-  leftPadding: 16,
-  rightPadding: 16,
 }
 
 const iconGroupSuffixTheme: IconGroupSuffixTheme = {
@@ -54,6 +52,16 @@ const iconGroupSuffixTheme: IconGroupSuffixTheme = {
 interface IconOptions {
   src: ResourceStr;
   size?: SizeOptions;
+}
+
+interface ChipGroupStyleTheme {
+  size: ChipSize | SizeOptions;
+  backgroundColor: ResourceColor;
+  fontColor: ResourceColor;
+  selectedFontColor: ResourceColor;
+  selectedBackgroundColor: ResourceColor;
+  fillColor: ResourceColor;
+  selectedFillColor: ResourceColor;
 }
 
 
@@ -175,7 +183,7 @@ export struct IconGroupSuffix {
 
   build() {
     Row() {
-      ForEach(this.items, (suffixItem: IconItemOptions) => {
+      ForEach(this.items || [], (suffixItem: IconItemOptions) => {
         Button() {
           Image(suffixItem.icon.src)
             .fillColor(iconGroupSuffixTheme.fillColor)
@@ -213,7 +221,6 @@ export struct ChipGroup {
   public onChange: Callback<Array<number>> = noop;
   private scroller: Scroller = new Scroller();
   @State isReachEnd: boolean = this.scroller.isAtEnd();
-  private chipCount: number = this.items.length;
 
   itemStyleOnChange() {
     this.chipSize = this.getChipSize();
@@ -244,6 +251,20 @@ export struct ChipGroup {
     return defaultTheme.itemStyle.selectedFontColor;
   }
 
+  private getFillColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.fontColor) {
+      return this.itemStyle.fontColor
+    }
+    return defaultTheme.itemStyle.fillColor;
+  }
+
+  private getSelectedFillColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedFontColor) {
+      return this.itemStyle.selectedFontColor
+    }
+    return defaultTheme.itemStyle.selectedFillColor;
+  }
+
   private getBackgroundColor(): ResourceColor {
     if (this.itemStyle && this.itemStyle.backgroundColor) {
       return this.itemStyle.backgroundColor
@@ -266,7 +287,11 @@ export struct ChipGroup {
     let temp: number[] = [];
     temp = (this.selectedIndexes ?? [0]).filter(
       (element, index, array) => {
-        return (element >= 0 && element % 1 == 0 && element <= this.chipCount);
+        return (
+          element >= 0 &&
+            element % 1 == 0 &&
+            array.indexOf(element) === index &&
+            element < (this.items || []).length);
       });
     return temp;
   }
@@ -328,6 +353,8 @@ export struct ChipGroup {
                   prefixIcon: {
                     src: chipItem.prefixIcon?.src ?? "",
                     size: chipItem.prefixIcon?.size ?? undefined,
+                    fillColor: this.getFillColor(),
+                    activatedFillColor: this.getSelectedFillColor()
                   },
                   label: {
                     text: chipItem?.label?.text ?? " ",
@@ -337,6 +364,8 @@ export struct ChipGroup {
                   suffixIcon: {
                     src: chipItem.suffixIcon?.src ?? "",
                     size: chipItem.suffixIcon?.size ?? undefined,
+                    fillColor: this.getFillColor(),
+                    activatedFillColor: this.getSelectedFillColor()
                   },
                   allowClose: chipItem.allowClose ?? false,
                   enabled: true,
@@ -374,7 +403,10 @@ export struct ChipGroup {
         if (this.suffix && !this.isReachEnd) {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
-            .height(this.getChipSize() === ChipSize.SMALL ? iconGroupSuffixTheme.smallBackgroundSize : iconGroupSuffixTheme.normalBackgroundSize)
+            .height(
+              this.getChipSize() === ChipSize.SMALL ? 
+              iconGroupSuffixTheme.smallBackgroundSize : 
+              iconGroupSuffixTheme.normalBackgroundSize)
             .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
