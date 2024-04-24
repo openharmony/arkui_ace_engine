@@ -4482,13 +4482,13 @@ ArkUI_Int32 GetHitTestBehavior(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ViewAbstract::GetHitTestBehavior(frameNode));
 }
 
-void GetPosition(ArkUINodeHandle node, ArkUIPositionOptions* values)
+void GetPosition(ArkUINodeHandle node, ArkUIPositionOptions* values, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto positions = ViewAbstract::GetPosition(frameNode);
-    values->x = positions.GetX().Value();
-    values->y = positions.GetY().Value();
+    values->x = positions.GetX().GetNativeValue(static_cast<DimensionUnit>(unit));
+    values->y = positions.GetY().GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 ArkUI_Int32 GetShadow(ArkUINodeHandle node)

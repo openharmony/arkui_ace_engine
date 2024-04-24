@@ -1588,11 +1588,9 @@ int32_t SetPosition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    float positions[ALLOW_SIZE_4] = { 0, 1, 0, 1 };
-    positions[NUM_0] = item->value[0].f32;
-    positions[NUM_2] = item->value[1].f32;
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
     fullImpl->getNodeModifiers()->getCommonModifier()->setPosition(
-        node->uiNodeHandle, positions[NUM_0], positions[NUM_1], positions[NUM_2], positions[NUM_3]);
+        node->uiNodeHandle, item->value[0].f32, unit, item->value[1].f32, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1605,7 +1603,8 @@ void ResetPosition(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetPosition(ArkUI_NodeHandle node)
 {
     ArkUIPositionOptions options;
-    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getPosition(node->uiNodeHandle, &options);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getPosition(node->uiNodeHandle, &options, unit);
     g_numberValues[NUM_0].f32 = options.x;
     g_numberValues[NUM_1].f32 = options.y;
     return &g_attributeItem;

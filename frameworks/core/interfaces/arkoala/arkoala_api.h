@@ -1188,7 +1188,7 @@ struct ArkUICommonModifier {
     void (*getClipShape)(ArkUINodeHandle node, ArkUIClipShapeOptions* options);
     void (*getTransform)(ArkUINodeHandle node, ArkUI_Float32* values);
     ArkUI_Int32 (*getHitTestBehavior)(ArkUINodeHandle node);
-    void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions* options);
+    void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions* options, ArkUI_Int32 unit);
     ArkUI_Int32 (*getShadow)(ArkUINodeHandle node);
     void (*getCustomShadow)(ArkUINodeHandle node, ArkUICustomShadowOptions* options);
     ArkUI_Int32 (*getSweepGradient)(
