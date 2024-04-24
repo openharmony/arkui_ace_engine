@@ -566,10 +566,10 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     auto prevFooter = footer_.Upgrade();
     if (!prevFooter) {
         host->AddChild(footer);
+        layoutInfo_->footerIndex_ = 0;
     } else {
         host->ReplaceChild(prevFooter, footer);
     }
-    layoutInfo_->footerIndex_ = 0;
     footer_ = footer;
     footer->SetActive(false);
 }
@@ -580,6 +580,10 @@ void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 
     if (!layoutInfo_ || mode != layoutInfo_->mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
+    }
+    // footer index only set during first AddFooter call
+    if (footer_.Upgrade()) {
+        layoutInfo_->footerIndex_ = 0;
     }
 }
 } // namespace OHOS::Ace::NG
