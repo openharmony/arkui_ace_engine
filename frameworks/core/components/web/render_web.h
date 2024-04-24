@@ -110,7 +110,7 @@ public:
     bool TextOverlayMenuShouldShow() const;
     bool GetShowStartTouchHandle() const;
     bool GetShowEndTouchHandle() const;
-    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     void OnSelectPopupMenu(
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);

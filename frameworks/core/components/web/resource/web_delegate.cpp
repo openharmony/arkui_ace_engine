@@ -5469,7 +5469,7 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
 #endif
 }
 
-bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
+bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
 #ifdef NG_BUILD
     auto webPattern = webPattern_.Upgrade();
