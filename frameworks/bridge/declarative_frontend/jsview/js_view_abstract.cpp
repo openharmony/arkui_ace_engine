@@ -7604,37 +7604,47 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
+void ParseJSLightSource(JSRef<JSObject>& lightSource)
+{
+    if (lightSource->IsUndefined()) {
+        return;
+    }
+    JSRef<JSVal> positionX = lightSource->GetProperty("positionX");
+    JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
+    JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
+    JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
+    JSRef<JSVal> color = lightSource->GetProperty("color");
+
+    CalcDimension dimPositionX;
+    CalcDimension dimPositionY;
+    CalcDimension dimPositionZ;
+    if (JSViewAbstract::ParseJsDimensionVp(positionX, dimPositionX) &&
+        JSViewAbstract::ParseJsDimensionVp(positionY, dimPositionY) &&
+        JSViewAbstract::ParseJsDimensionVp(positionZ, dimPositionZ)) {
+        ViewAbstractModel::GetInstance()->SetLightPosition(dimPositionX, dimPositionY, dimPositionZ);
+    }
+
+    if (intensity->IsNumber()) {
+        float intensityValue = intensity->ToNumber<float>();
+        ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
+    }
+
+    Color lightColor;
+    if (JSViewAbstract::ParseJsColor(color, lightColor)) {
+        ViewAbstractModel::GetInstance()->SetLightColor(lightColor);
+    }
+}
+
 void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
 {
+#ifdef POINT_LIGHT_ENABLE
     if (!info[0]->IsObject()) {
         return;
     }
 
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSObject> lightSource = object->GetProperty("lightSource");
-    if (!lightSource->IsUndefined()) {
-        JSRef<JSVal> positionX = lightSource->GetProperty("positionX");
-        JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
-        JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
-        JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
-        JSRef<JSVal> color = lightSource->GetProperty("color");
-
-        CalcDimension dimPositionX, dimPositionY, dimPositionZ;
-        if (ParseJsDimensionVp(positionX, dimPositionX) && ParseJsDimensionVp(positionY, dimPositionY) &&
-            ParseJsDimensionVp(positionZ, dimPositionZ)) {
-            ViewAbstractModel::GetInstance()->SetLightPosition(dimPositionX, dimPositionY, dimPositionZ);
-        }
-
-        if (intensity->IsNumber()) {
-            float intensityValue = intensity->ToNumber<float>();
-            ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
-        }
-
-        Color lightColor;
-        if (ParseJsColor(color, lightColor)) {
-            ViewAbstractModel::GetInstance()->SetLightColor(lightColor);
-        }
-    }
+    ParseJSLightSource(lightSource);
 
     auto resourceWrapper = CreateResourceWrapper();
     if (!resourceWrapper) {
@@ -7662,6 +7672,7 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         std::vector<Shadow> shadows { shadow };
         ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
     }
+#endif
 }
 
 void JSViewAbstract::JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info)
