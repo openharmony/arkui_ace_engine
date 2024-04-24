@@ -22,10 +22,11 @@
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_CACHED_COUNT = 1;
@@ -626,7 +627,7 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
-        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        event.componentAsyncEvent.data[1].i32 = static_cast<int32_t>(state);
         SendArkUIAsyncEvent(&event);
     };
     ScrollableModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_text_area_modifier.h"
+#include <cstdint>
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -908,7 +909,7 @@ void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TEXTAREA_EDIT_CHANGE;
-        event.componentAsyncEvent.data[0].i32 = static_cast<int>(isEditing);
+        event.componentAsyncEvent.data[0].i32 = static_cast<int32_t>(isEditing);
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
