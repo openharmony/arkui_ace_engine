@@ -923,6 +923,10 @@ ArkUINativeModuleValue SearchBridge::SetInputFilter(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     std::string inputFilter;
+    if (valueArg->IsUndefined() || valueArg->IsNull()) {
+        SearchModelNG::SetInputFilter(frameNode, inputFilter, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (ArkTSUtils::ParseJsString(vm, valueArg, inputFilter)) {
         if (!Framework::CheckRegexValid(inputFilter)) {
             inputFilter = "";
@@ -943,7 +947,7 @@ ArkUINativeModuleValue SearchBridge::SetInputFilter(ArkUIRuntimeCallInfo* runtim
             panda::Local<panda::JSValueRef> params[1] = { eventObj };
             func->Call(vm, func.ToLocal(), params, 1);
         };
-        NG::SearchModelNG::SetInputFilter(frameNode, inputFilter, std::move(onError));
+        SearchModelNG::SetInputFilter(frameNode, inputFilter, std::move(onError));
     }
     return panda::JSValueRef::Undefined(vm);
 }
