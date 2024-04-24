@@ -16,9 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_MODEL_NG_H
 
+#include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/gauge/gauge_model.h"
 
 namespace OHOS::Ace::NG {
+class GaugeConfiguration : public CommonConfiguration {
+    public:
+        GaugeConfiguration(float value, float min, float max, bool enabled)
+            : CommonConfiguration(enabled), value_(value), min_(min), max_(max)
+        {}
+        float value_;
+        float min_;
+        float max_;
+};
+using GaugeMakeCallback =
+    std::function<RefPtr<FrameNode>(const GaugeConfiguration& gaugeConfiguration)>;
 class ACE_EXPORT GaugeModelNG : public OHOS::Ace::GaugeModel {
 public:
     void Create(float values, float min, float max) override;
@@ -60,6 +72,7 @@ public:
     static void SetGradientColors(FrameNode* frameNode, const std::vector<ColorStopArray>& colors,
         const std::vector<float>& values, const GaugeType& type);
     static void ResetGradientColors(FrameNode* frameNode);
+    static void SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& jsMake);
 };
 } // namespace OHOS::Ace::NG
 

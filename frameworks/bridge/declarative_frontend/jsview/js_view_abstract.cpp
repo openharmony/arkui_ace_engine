@@ -2416,7 +2416,8 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         visible = arg->ToNumber<int32_t>();
     }
 
-    if (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE))) {
         visible = 0;
     }
 
@@ -7088,7 +7089,14 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
-
+    auto uiContextObj = paramObj->GetProperty("uiContext");
+    if (uiContextObj->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
+        auto prop = obj->GetProperty("instanceId_");
+        if (prop->IsNumber()) {
+            sheetStyle.instanceId = prop->ToNumber<int32_t>();
+        }
+    }
     NG::SheetLevel sheetLevel = NG::SheetLevel::OVERLAY;
     ParseSheetLevel(showMode, sheetLevel);
     sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);

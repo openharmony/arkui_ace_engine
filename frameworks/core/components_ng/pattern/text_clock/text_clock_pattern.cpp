@@ -99,7 +99,6 @@ void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
-    pipeline->RemoveFormVisibleChangeNode(frameNode->GetId());
 }
 
 void TextClockPattern::UpdateTextLayoutProperty(
@@ -191,20 +190,6 @@ void TextClockPattern::OnVisibleAreaChange(bool visible)
     }
 }
 
-void TextClockPattern::OnFormVisibleChange(bool visible)
-{
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
-        "Form is %{public}s and clock %{public}s running",
-        visible ? "visible" : "invisible", visible ? "starts" : "stops");
-    if (visible && !isFormVisible_) {
-        isFormVisible_ = visible;
-        UpdateTimeText();
-    } else if (!visible) {
-        isFormVisible_ = visible;
-        delayTask_.Cancel();
-    }
-}
-
 void TextClockPattern::RegistVisibleAreaChangeCallback()
 {
     auto host = GetHost();
@@ -220,16 +205,6 @@ void TextClockPattern::RegistVisibleAreaChangeCallback()
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, areaCallback, false);
-
-    if (isForm_) {
-        pipeline->RemoveFormVisibleChangeNode(host->GetId());
-        auto formCallback = [weak = WeakClaim(this)](bool visible) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnFormVisibleChange(visible);
-        };
-        pipeline->AddFormVisibleChangeNode(host, formCallback);
-    }
 }
 
 void TextClockPattern::InitUpdateTimeTextCallBack()
@@ -245,7 +220,7 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
 
 void TextClockPattern::UpdateTimeText(bool isTimeChange)
 {
-    if (!isStart_ || (!isTimeChange && (!isSetVisible_ || !isInVisibleArea_ || !isFormVisible_))) {
+    if (!isStart_ || (!isTimeChange && (!isSetVisible_ || !isInVisibleArea_))) {
         return;
     }
     FireBuilder();

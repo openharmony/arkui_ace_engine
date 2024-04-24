@@ -1233,11 +1233,10 @@ void JSRichEditorController::ParseJsTextStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
-        updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
@@ -1284,11 +1283,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
-        updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, true);
@@ -1352,7 +1350,7 @@ void JSRichEditorController::ParseTextDecoration(
             updateSpanStyle.hasResourceDecorationColor = color->IsObject();
         }
     }
-    if (!updateSpanStyle.updateTextDecorationColor.has_value()) {
+    if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
         updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
         style.SetTextDecorationColor(style.GetTextColor());
     }

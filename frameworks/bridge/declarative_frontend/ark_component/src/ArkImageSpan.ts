@@ -76,6 +76,19 @@ class ImageSpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroun
     }
   }
 }
+class ImageSpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity = Symbol('imageSpanBaselineOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.resetBaselineOffset(node);
+    } else {
+      getUINativeModule().imageSpan.setBaselineOffset(node, this.value!);
+    }
+  }
+}
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -96,6 +109,10 @@ class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   }
   textBackgroundStyle(value: TextBackgroundStyle): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanTextBackgroundStyleModifier.identity, ImageSpanTextBackgroundStyleModifier, value);
+    return this;
+  }
+  baselineOffset(value: LengthMetrics): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanBaselineOffsetModifier.identity, ImageSpanBaselineOffsetModifier, value);
     return this;
   }
 }

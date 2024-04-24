@@ -143,6 +143,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* ru
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
     node->SetExclusiveEventForChild(true);
+    node->SetIsArkTsFrameNode(true);
     AddAttachFuncCallback(vm, node);
     FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
     const char* keys[] = { "nodeId", "nativeStrongRef" };
@@ -170,7 +171,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
             node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
             node->DecRefCount();
             if (node) {
-                node->SetExclusiveEventForChild(true);
+                node->SetIsArkTsFrameNode(true);
                 AddAttachFuncCallback(vm, node);
             }
         }

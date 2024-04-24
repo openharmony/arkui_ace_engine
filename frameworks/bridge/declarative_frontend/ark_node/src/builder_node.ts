@@ -39,6 +39,9 @@ class BuilderNode {
   public getFrameNode(): FrameNode {
     return this._JSBuilderNode.getFrameNode();
   }
+  public getFrameNodeWithoutCheck(): FrameNode | null {
+    return this._JSBuilderNode.getFrameNodeWithoutCheck();
+  }
   public postTouchEvent(touchEvent: TouchEvent): boolean {
     return this._JSBuilderNode.postTouchEvent(touchEvent);
   }
@@ -158,6 +161,10 @@ class JSBuilderNode extends BaseNode {
       return this.frameNode_;
     }
     return null;
+  }
+
+  public getFrameNodeWithoutCheck(): FrameNode | null | undefined {
+    return this.frameNode_;
   }
 
   public observeComponentCreation(func: (arg0: number, arg1: boolean) => void) {

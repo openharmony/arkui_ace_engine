@@ -198,8 +198,8 @@ class SpanLetterSpacingModifier extends ModifierWithKey<string> {
     }
   }
 }
-class SpanBaselineOffsetModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class SpanBaselineOffsetModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
     super(value);
   }
   static identity = Symbol('spanBaselineOffset');
@@ -283,7 +283,6 @@ class SpanFontWeightModifier extends ModifierWithKey<string> {
 }
 
 class ArkSpanComponent implements CommonMethod<SpanAttribute> {
-  _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
@@ -292,7 +291,6 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   _nativePtrChanged: boolean;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
-    this._modifiers = new Map();
     this._modifiersWithKeys = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
@@ -904,7 +902,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     modifierWithKey(this._modifiersWithKeys, SpanLetterSpacingModifier.identity, SpanLetterSpacingModifier, value);
     return this;
   }
-  baselineOffset(value: number | string): SpanAttribute {
+  baselineOffset(value: LengthMetrics): SpanAttribute {
     modifierWithKey(this._modifiersWithKeys, SpanBaselineOffsetModifier.identity, SpanBaselineOffsetModifier, value);
     return this;
   }

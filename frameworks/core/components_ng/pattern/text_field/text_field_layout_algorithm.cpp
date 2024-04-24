@@ -20,10 +20,12 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
@@ -203,7 +205,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(double width)
     } else {
         indentValue = width * textIndent_.Value();
     }
-    float indent_ = static_cast<float>(indentValue);
+    indent_ = static_cast<float>(indentValue);
     std::vector<float> indents;
     // only indent first line
     indents.emplace_back(indent_);
@@ -315,7 +317,7 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
             longestLine = longestLine + letterSpacing;
         }
     }
-    paragraph_->Layout(std::ceil(longestLine)); // paragraph_->GetLongestLine()));
+    paragraph_->Layout(std::ceil(longestLine) + indent_); // paragraph_->GetLongestLine()));
 
     auto contentWidth = contentConstraint.maxSize.Width() - imageWidth;
     CounterNodeMeasure(contentWidth, layoutWrapper);
@@ -339,7 +341,7 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
-    textRect_.SetSize(SizeF(std::max(0.0f, longestLine), paragraph_->GetHeight()));
+    textRect_.SetSize(SizeF(std::max(0.0f, longestLine) + indent_, paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
 }
 
@@ -474,6 +476,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     }
     textStyle.SetFontSize(fontSize);
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
+    textStyle.SetLineBreakStrategy(layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
     textStyle.SetFontWeight(
         layoutProperty->GetFontWeightValue(theme ? theme->GetFontWeight() : textStyle.GetFontWeight()));
     if (isDisabled) {
@@ -628,6 +631,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& text
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = textStyle.GetFontSize().ConvertToPx() };
 }
@@ -666,6 +670,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
         .fontSize = style->GetFontSize().ConvertToPx() };
     if (!disableTextAlign) {
@@ -740,6 +745,20 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
 const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
 {
     return paragraph_;
+}
+
+void TextFieldLayoutAlgorithm::GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
+    if (pattern->HasFocus() && pattern->IsInlineMode()) {
+        maxSize.SetWidth(maxSize.Width() - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
+    }
 }
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
@@ -848,6 +867,7 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
     int32_t right = length - 1;
     float fontSize = 0.0f;
     auto maxSize = GetMaxMeasureSize(contentConstraint);
+    GetSuitableSize(maxSize, layoutWrapper);
     while (left <= right) {
         int32_t mid = left + (right - left) / 2;
         fontSize = static_cast<float>((mid == length - 1) ? (maxFontSize) : (minFontSize + stepSize * mid));

@@ -1023,6 +1023,13 @@ void SetTextInputHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
 
 void ResetTextInputHeightAdaptivePolicy(ArkUINodeHandle node) {}
 
+ArkUI_Bool GetTextInputSelectionMenuHidden(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TextFieldModelNG::GetSelectionMenuHidden(frameNode);
+}
+
 void SetTextInputPlaceholderFontEnum(ArkUINodeHandle node, const struct ArkUIResourceLength* size, ArkUI_Int32 weight,
     ArkUI_CharPtr family, ArkUI_Int32 style)
 {
@@ -1363,7 +1370,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         SetTextInputOnTextSelectionChange, ResetTextInputOnTextSelectionChange, SetTextInputOnContentScroll,
         ResetTextInputOnContentScroll, SetTextInputOnCopy, ResetTextInputOnCopy,
         SetTextInputOnCut, ResetTextInputOnCut, SetTextInputOnPaste, ResetTextInputOnPaste,
-        SetTextInputShowPassword, ResetTextInputShowPassword, GetTextInputShowPassword };
+        GetTextInputSelectionMenuHidden, SetTextInputShowPassword, ResetTextInputShowPassword,
+        GetTextInputShowPassword };
     return &modifier;
 }
 
@@ -1441,6 +1449,21 @@ void SetOnTextInputSelectionChange(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onSelectionChange));
+}
+
+void SetOnTextInputEditChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [node, extraParam](bool isEditing) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_TEXT_INPUT_EDIT_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(isEditing);
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnEditChanged(frameNode, std::move(onChange));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

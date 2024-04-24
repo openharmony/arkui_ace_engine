@@ -65,11 +65,22 @@ public:
         return actionCancel_;
     }
 
+    const GestureEventFunc& GetLongPressEventFunc() const
+    {
+        return actionLongPress_;
+    }
+
+    void SetLongPressEventFunc(GestureEventFunc&& actionLongPress)
+    {
+        actionLongPress_ = std::move(actionLongPress);
+    }
+
 private:
     GestureEventFunc actionStart_;
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
+    GestureEventFunc actionLongPress_;
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {

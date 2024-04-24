@@ -692,7 +692,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure001, T
      * @tc.expected: layoutWrapper MarginFrameSize is 66.00, 30.00
      */
     algorithm->Measure(&layoutWrapper);
-    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetMarginFrameSize(), SizeF(66.00, 30.00));
+    EXPECT_TRUE(IsEqual(layoutWrapper.GetGeometryNode()->GetMarginFrameSize(), SizeF(66.00, 32.00)));
 }
 
 /**

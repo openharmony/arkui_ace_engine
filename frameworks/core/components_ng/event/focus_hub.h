@@ -80,6 +80,7 @@ enum class FocusStyleType : int32_t {
     CUSTOM_BORDER = 2,
     CUSTOM_REGION = 3,
     FORCE_BORDER = 4,
+    FORCE_NONE = 5,
 };
 
 enum class OnKeyEventType : int32_t {

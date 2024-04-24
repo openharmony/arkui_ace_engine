@@ -81,7 +81,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
     //set initial offset
-    if (!scrollPattern->IsInitialized()) {
+    if (scrollPattern->NeedSetInitialOffset()) {
         auto initialOffset = scrollPattern->GetInitialOffset();
         if (axis == Axis::VERTICAL) {
             auto offset = initialOffset.GetY();

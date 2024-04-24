@@ -2325,7 +2325,8 @@ void TextFieldPattern::AutoFillValueChanged()
     auto autoContentType = layoutProperty->GetTextContentTypeValue(TextContentType::UNSPECIFIED);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END) {
+    if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END
+        && CheckAutoFill()) {
         container->UpdatePopupUIExtension(host);
     }
 }
@@ -2334,7 +2335,6 @@ bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    AutoFillValueChanged();
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -2354,6 +2354,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     }
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
+    AutoFillValueChanged();
     eventHub->FireOnChange(contentController_->GetTextValue());
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
@@ -3460,6 +3461,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = textStyle.GetFontSize().ConvertToPx() };
     paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
@@ -6018,7 +6020,7 @@ std::optional<bool> TextFieldPattern::IsShowPasswordText() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowPasswordTextValue();
+    return layoutProperty->GetShowPasswordText();
 }
 
 bool TextFieldPattern::IsShowCancelButtonMode() const

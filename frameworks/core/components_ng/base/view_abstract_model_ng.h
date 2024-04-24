@@ -1091,7 +1091,7 @@ public:
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override;
-    
+    RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
     void DismissContentCover() override;
     void SheetSpringBack() override;

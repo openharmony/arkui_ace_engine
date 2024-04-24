@@ -3064,11 +3064,12 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange,
-    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
-    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
-    const RefPtr<FrameNode>& targetNode)
+    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode)
 {
+    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    ContainerScope scope(instanceId);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto bindSheetTask = [weak = AceType::WeakClaim(this), isShow, callback = std::move(callback),
@@ -3076,13 +3077,13 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                              buildtitleNodeFunc = std::move(buildtitleNodeFunc), sheetStyle,
                              onAppear = std::move(onAppear), onDisappear = std::move(onDisappear),
                              shouldDismiss = std::move(shouldDismiss), onWillDismiss = std::move(onWillDismiss),
-                             onWillAppear = std::move(onWillAppear),
-                             onWillDisappear = std::move(onWillDisappear),
+                             onWillAppear = std::move(onWillAppear), onWillDisappear = std::move(onWillDisappear),
                              onHeightDidChange = std::move(onHeightDidChange),
-                             onDetentsDidChange  = std::move(onDetentsDidChange),
-                             onWidthDidChange  = std::move(onWidthDidChange),
-                             onTypeDidChange  = std::move(onTypeDidChange),
-                             sheetSpringBack  = std::move(sheetSpringBack), targetNode]() mutable {
+                             onDetentsDidChange = std::move(onDetentsDidChange),
+                             onWidthDidChange = std::move(onWidthDidChange),
+                             onTypeDidChange = std::move(onTypeDidChange), sheetSpringBack = std::move(sheetSpringBack),
+                             targetNode, instanceId]() mutable {
+        ContainerScope scope(instanceId);
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildtitleNodeFunc),
@@ -3136,6 +3137,11 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             if (sheetStyle.borderWidth.has_value()) {
                 layoutProperty->UpdateBorderWidth(sheetStyle.borderWidth.value());
                 topModalRenderContext->UpdateBorderWidth(sheetStyle.borderWidth.value());
+            } else {
+                BorderWidthProperty borderWidth;
+                borderWidth.SetBorderWidth(0.0_vp);
+                layoutProperty->UpdateBorderWidth(borderWidth);
+                topModalRenderContext->UpdateBorderWidth(borderWidth);
             }
             if (sheetStyle.borderStyle.has_value()) {
                 topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());

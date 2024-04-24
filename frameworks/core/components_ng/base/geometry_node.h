@@ -75,6 +75,17 @@ public:
         return offset;
     }
 
+    RectF GetMarginFrameRect() const
+    {
+        auto offset = frame_.rect_.GetOffset();
+        auto size = frame_.rect_.GetSize();
+        if (margin_) {
+            offset -= OffsetF(margin_->left.value_or(0), margin_->top.value_or(0));
+            AddPaddingToSize(*margin_, size);
+        }
+        return RectF(offset, size);
+    }
+
     void SetMarginFrameOffset(const OffsetF& translate)
     {
         OffsetF offset;

@@ -77,6 +77,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
+const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
+    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
@@ -321,6 +323,24 @@ void JSTextField::SetTextAlign(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
         TextFieldModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     }
+}
+
+void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(LINE_BREAK_STRATEGY_TYPES.size())) {
+        TextFieldModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetLineBreakStrategy(LINE_BREAK_STRATEGY_TYPES[index]);
 }
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
@@ -1562,12 +1582,18 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
         auto tmpInfo = info[0];
-        if (info.Length() < 1 || !tmpInfo->IsNumber() || tmpInfo->IsUndefined()) {
+        int32_t overflow = 0;
+        if (info.Length() < 1) {
             break;
         }
-        auto overflow = tmpInfo->ToNumber<int32_t>();
-        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        if (!tmpInfo->IsNumber() && !tmpInfo->IsUndefined()) {
             break;
+        }
+        if (!tmpInfo->IsUndefined()) {
+            overflow = tmpInfo->ToNumber<int32_t>();
+            if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+                break;
+            }
         }
         TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
     } while (false);

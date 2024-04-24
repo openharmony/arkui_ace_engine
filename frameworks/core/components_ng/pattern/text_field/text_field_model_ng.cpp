@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -325,6 +326,11 @@ void TextFieldModelNG::SetTextAlign(TextAlign value)
         layoutProperty->UpdateTextAlignChanged(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue);
+}
+
+void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineBreakStrategy, value);
 }
 
 void TextFieldModelNG::SetMaxLength(uint32_t value)
@@ -1130,6 +1136,14 @@ void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selecti
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden, frameNode);
 }
 
+bool TextFieldModelNG::GetSelectionMenuHidden(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, SelectionMenuHidden, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PasswordRules, passwordRules, frameNode);
@@ -1566,4 +1580,13 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Padding, paddings, frameNode);
 }
+
+void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditChanged(std::move(func));
+}
+
 } // namespace OHOS::Ace::NG

@@ -27,8 +27,8 @@ class ComponentContent extends Content {
     this.builderNode_.update(params);
   }
 
-  public getFrameNode(): FrameNode {
-    return this.builderNode_.getFrameNode();
+  public getFrameNode(): FrameNode | null | undefined {
+    return this.builderNode_.getFrameNodeWithoutCheck();
   }
   public getNodePtr(): NodePtr {
     return this.builderNode_.getNodePtr();

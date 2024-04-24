@@ -2601,22 +2601,6 @@ bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewD
     return pipelineContext->DumpPageViewData(node, viewDataWrap);
 }
 
-void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
-{
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId_);
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, isVisible]() {
-            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_VOID(pipeline);
-            pipeline->HandleFormVisibleChangeEvent(isVisible);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIFormVisibleChangeEvent");
-}
-
 void UIContentImpl::SearchElementInfoByAccessibilityId(
     int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
@@ -3093,5 +3077,25 @@ void UIContentImpl::RegisterOverlayNodePositionsUpdateCallback(
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(container);
     container->RegisterOverlayNodePositionsUpdateCallback(std::move(callback));
+}
+
+void UIContentImpl::SetContentNodeGrayScale(float grayscale)
+{
+    if (LessNotEqual(grayscale, 0.001f)) {
+        grayscale = 0.0f;
+    }
+    if (GreatNotEqual(grayscale, 1.0)) {
+        grayscale = 1.0f;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootElement = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto renderContext = rootElement->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateFrontGrayScale(Dimension(grayscale));
 }
 } // namespace OHOS::Ace

@@ -160,10 +160,7 @@ public:
         uiStatus_ = UIStatus::UNSELECTED;
     }
 
-    RefPtr<GroupManager> GetGroupManager() const
-    {
-        return groupManager_.Upgrade();
-    }
+    RefPtr<GroupManager> GetGroupManager();
 
     FocusPattern GetFocusPattern() const override;
     void UpdateUIStatus(bool check);
@@ -230,7 +227,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool initSelected_ = false;
-    std::string navId_ = "";
+    std::optional<std::string> currentNavId_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

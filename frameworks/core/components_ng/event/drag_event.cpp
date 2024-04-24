@@ -373,6 +373,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
+        if (actuator->userCallback_) {
+            auto customLongPress = actuator->userCallback_->GetLongPressEventFunc();
+            if (customLongPress) {
+                customLongPress(info);
+            }
+        }
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
@@ -436,7 +442,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->SetBadgeNumber(badgeNumber.value());
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
-        actuator->SetFilter(actuator);
+        bool isBindMenuPreview = gestureHub->GetPreviewMode() != MenuPreviewMode::NONE;
+        if (!isBindMenuPreview) {
+            actuator->SetFilter(actuator);
+        }
         auto manager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(manager);
         actuator->SetIsNotInPreviewState(false);
@@ -450,7 +459,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        if (gestureHub->GetPreviewMode() == MenuPreviewMode::NONE) {
+        if (!isBindMenuPreview) {
             if (actuator->IsNeedGather()) {
                 DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
                 actuator->ShowPreviewBadgeAnimation(actuator, manager);
@@ -529,6 +538,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(PIXEL_MAP_SUPPORTED)
+                bool hasImageNode = false;
+                std::list<RefPtr<FrameNode>> imageNodes;
+                gestureHub->PrintBuilderNode(dragPreviewInfo.customNode, hasImageNode, imageNodes);
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
                     (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
                     ContainerScope scope(id);
@@ -546,6 +558,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 
                 OHOS::Ace::NG::ComponentSnapshot::Create(
                     dragPreviewInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+                gestureHub->CheckImageDecode(imageNodes);
+                imageNodes.clear();
 #endif
             } else {
                 auto context = frameNode->GetRenderContext();

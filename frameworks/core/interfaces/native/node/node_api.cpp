@@ -266,7 +266,7 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
-    nullptr,
+    NodeModifier::SetOnTextInputEditChange,
     NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
     NodeModifier::SetOnTextInputCut,
@@ -275,7 +275,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
-    nullptr,
+    NodeModifier::SetOnTextAreaEditChange,
     nullptr,
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
@@ -338,6 +338,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListScrollStart,
     NodeModifier::SetOnListScrollStop,
     NodeModifier::SetOnListScrollFrameBegin,
+    NodeModifier::SetOnListWillScroll,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {

@@ -32,6 +32,14 @@ public:
         Create(builder);
     }
 
+    void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override
+    {
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto node = AceType::DynamicCast<LazyForEachNode>(stack->GetMainElementNode());
+        CHECK_NULL_VOID(node);
+        node->SetOnMove(std::move(onMove));
+    }
+
 private:
     void Create(const RefPtr<LazyForEachBuilder>& forEachBuilder)
     {

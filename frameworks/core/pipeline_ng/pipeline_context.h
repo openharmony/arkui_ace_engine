@@ -59,7 +59,7 @@ namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public PipelineBase {
+class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
@@ -199,11 +199,7 @@ public:
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
-    void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);
-    void RemoveFormVisibleChangeNode(int32_t nodeId);
-
     void HandleVisibleAreaChangeEvent();
-    void HandleFormVisibleChangeEvent(bool isVisible);
 
     void HandleSubwindow(bool isShow);
 
@@ -692,6 +688,7 @@ public:
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
     void CheckNeedUpdateBackgroundColor(Color& color);
+
     bool CheckNeedDisableUpdateBackgroundImage();
 
     void SetLocalColorMode(ColorMode colorMode)
@@ -704,6 +701,16 @@ public:
     {
         ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
         return colorMode;
+    }
+
+    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
+    {
+        isFreezeFlushMessage_ = isFreezeFlushMessage;
+    }
+
+    bool IsFreezeFlushMessage() const
+    {
+        return isFreezeFlushMessage_;
     }
 
 protected:
@@ -847,7 +854,6 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
-    std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -887,6 +893,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
+    bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -907,7 +914,6 @@ private:
     std::list<std::function<void()>> animationClosuresList_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
-    std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;

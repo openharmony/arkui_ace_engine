@@ -28,7 +28,7 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-class ImageSourceInfo {
+class ACE_FORCE_EXPORT ImageSourceInfo {
 public:
     // add constructor method for decompressed hap
     ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName,

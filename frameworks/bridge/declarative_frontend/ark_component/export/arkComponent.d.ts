@@ -25,13 +25,6 @@ interface Equable {
     isEqual(value: Equable): boolean;
 }
 declare type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
-declare class Modifier<T extends number | string | boolean | Equable | Resource | object> {
-    stageValue?: T;
-    value?: T;
-    constructor(value: T);
-    applyStage(node: KNode): boolean;
-    applyPeer(node: KNode, reset: boolean): void;
-}
 declare class ModifierWithKey<T extends number | string | boolean | object> {
     stageValue?: T;
     value?: T;
@@ -42,7 +35,6 @@ declare class ModifierWithKey<T extends number | string | boolean | object> {
 }
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;
-    _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
     nativePtr: KNode;
     _weakPtr: JsPointerClass;
@@ -461,7 +453,6 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     _changed: boolean;
-    _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
     nativePtr: KNode;
     _weakPtr: JsPointerClass;
@@ -1851,6 +1842,7 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
         offsetRemain: number;
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

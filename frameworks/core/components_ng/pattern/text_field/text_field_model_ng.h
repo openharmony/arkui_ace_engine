@@ -40,6 +40,7 @@ public:
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
     void SetTextAlign(TextAlign value) override;
+    void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
@@ -131,6 +132,7 @@ public:
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
+    static bool GetSelectionMenuHidden(FrameNode* frameNode);
     static void SetPasswordRules(FrameNode* frameNode, const std::string& passwordRules);
     static void SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFill);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
@@ -220,7 +222,7 @@ public:
         const std::function<void(const std::string&)>& onError);
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
-
+    static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

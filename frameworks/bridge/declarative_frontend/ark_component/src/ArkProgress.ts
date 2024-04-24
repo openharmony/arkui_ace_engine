@@ -18,6 +18,10 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  builder: WrappedBuilder<Object[]> | null = null;
+  modifier: ContentModifier<ProgressConfiguration> | null = null;
+  progressNode: BuilderNode<[ProgressConfiguration]> | null = null;
+
   value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
   ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
   CapsuleStyleOptions> {
@@ -40,6 +44,26 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
   backgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
     return this;
+  }
+  setContentModifier(modifier: ContentModifier<ProgressConfiguration>): this {
+    if (modifier === undefined || modifier === null) {
+      getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, false);
+      return;
+    }
+    this.builder = modifier.applyContent();
+    this.modifier = modifier;
+    getUINativeModule().progress.setContentModifierBuilder(this.nativePtr, this);
+  }
+  makeContentModifierNode(context: UIContext, progressConfig: ProgressConfiguration): FrameNode | null {
+    progressConfig.contentModifier = this.modifier;
+    if (isUndefined(this.progressNode)) {
+      const xNode = globalThis.requireNapi('arkui.node');
+      this.progressNode = new xNode.BuilderNode(context);
+      this.progressNode.build(this.builder, progressConfig);
+    } else {
+      this.progressNode.update(progressConfig);
+    }
+    return this.progressNode.getFrameNode();
   }
 }
 
@@ -136,4 +160,14 @@ globalThis.Progress.attributeModifier = function (modifier: ArkComponent): void 
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
     return new modifierJS.ProgressModifier(nativePtr, classType);
   });
+};
+
+// @ts-ignore
+globalThis.Progress.contentModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkProgressComponent(nativeNode);
+  });
+  component.setContentModifier(modifier);
 };

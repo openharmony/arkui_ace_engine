@@ -593,4 +593,8 @@ const char RENDER_NODE_ETS_TAG[] = "RenderNode";
 
 //CustomFrameNode
 const char CUSTOM_FRAME_NODE_ETS_TAG[] = "CustomFrameNode";
+
+// MovingPhoto
+const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
+const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 } // namespace OHOS::Ace::V2

@@ -17,8 +17,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
+#include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 
@@ -43,6 +45,8 @@ constexpr int32_t ARG_NUM_STYLE_SHADOW = 15;
 constexpr int32_t ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAGE = 14;
 constexpr int32_t ARG_NUM_STYLE_FONT_FAMILY = 10;
 constexpr int32_t ARG_NUM_STYLE_STROKE_RADIUS = 17;
+constexpr int32_t ARG_SECOND = 2;
+const char* PROGRESS_NODEPTR_OF_UINODE = "nodePtr_";
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
 constexpr double DEFAULT_STROKE_WIDTH = 4;
 constexpr double DEFAULT_BORDER_WIDTH = 1;
@@ -562,6 +566,55 @@ ArkUINativeModuleValue ProgressBridge::ResetProgressBackgroundColor(ArkUIRuntime
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getProgressModifier()->resetProgressBackgroundColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        ProgressModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    ProgressModelNG::SetBuilderFunc(frameNode, [vm, frameNode, obj = std::move(obj),
+        containerId = Container::CurrentId()](ProgressConfiguration config) -> RefPtr<FrameNode> {
+        ContainerScope scope(containerId);
+        auto context = ArkTSUtils::GetContext(vm);
+        CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
+        const char* keysOfProgress[] = { "value", "total", "enabled"};
+        Local<JSValueRef> valuesOfProgress[] = { panda::NumberRef::New(vm, config.value_),
+            panda::NumberRef::New(vm, config.total_), panda::BooleanRef::New(vm, config.enabled_)};
+        auto progress = panda::ObjectRef::NewWithNamedProperties(vm,
+            ArraySize(keysOfProgress), keysOfProgress, valuesOfProgress);
+        progress->SetNativePointerFieldCount(vm, 1);
+        progress->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+        panda::Local<panda::JSValueRef> params[ARG_SECOND] = { context, progress };
+        LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        auto jsObject = obj.ToLocal();
+        auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+        CHECK_NULL_RETURN(makeFunc->IsFunction(), nullptr);
+        panda::Local<panda::FunctionRef> func = makeFunc;
+        auto result = func->Call(vm, jsObject, params, 2);
+        JSNApi::ExecutePendingJob(vm);
+        if (result.IsEmpty() || trycatch.HasCaught() || !result->IsObject()) {
+            return nullptr;
+        }
+        auto resultObj = result->ToObject(vm);
+        panda::Local<panda::JSValueRef> nodeptr = resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm,
+            PROGRESS_NODEPTR_OF_UINODE));
+        if (nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull()) {
+            return nullptr;
+        }
+        auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return AceType::Claim(frameNode);
+    });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
