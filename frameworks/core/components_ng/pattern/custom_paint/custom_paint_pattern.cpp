@@ -130,6 +130,7 @@ void CustomPaintPattern::SetAntiAlias(bool isEnabled)
 
 void CustomPaintPattern::FillRect(const Rect& rect)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fillRect(%{public}s)' is being executed.", rect.ToString().c_str());
     auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.FillRect(paintWrapper, rect);
     };
@@ -152,6 +153,7 @@ void CustomPaintPattern::StrokeRect(const Rect& rect)
 
 void CustomPaintPattern::ClearRect(const Rect& rect)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clearRect(%{public}s)' is being executed.", rect.ToString().c_str());
     auto task = [rect](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.ClearRect(paintWrapper, rect);
     };
@@ -164,6 +166,7 @@ void CustomPaintPattern::ClearRect(const Rect& rect)
 
 void CustomPaintPattern::Fill()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fill' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Fill(paintWrapper);
     };
@@ -175,6 +178,7 @@ void CustomPaintPattern::Fill()
 
 void CustomPaintPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'fill' whit path is pending execution.");
     auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Fill(paintWrapper, path);
     };
@@ -186,6 +190,7 @@ void CustomPaintPattern::Fill(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPattern::Stroke()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'stroke' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Stroke(paintWrapper);
     };
@@ -197,6 +202,7 @@ void CustomPaintPattern::Stroke()
 
 void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'stroke' whit path is pending execution.");
     auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Stroke(paintWrapper, path);
     };
@@ -208,6 +214,7 @@ void CustomPaintPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPattern::Clip()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clip' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Clip();
     };
@@ -219,6 +226,7 @@ void CustomPaintPattern::Clip()
 
 void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'clip' whit path is pending execution.");
     auto task = [path](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Clip(path);
     };
@@ -230,6 +238,7 @@ void CustomPaintPattern::Clip(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPattern::BeginPath()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'beginPath' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.BeginPath();
     };
@@ -241,6 +250,7 @@ void CustomPaintPattern::BeginPath()
 
 void CustomPaintPattern::ClosePath()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'closePath' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.ClosePath();
     };
@@ -252,6 +262,7 @@ void CustomPaintPattern::ClosePath()
 
 void CustomPaintPattern::MoveTo(double x, double y)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'moveTo(%{public}lf, %{public}lf)' is pending execution.", x, y);
     auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.MoveTo(paintWrapper, x, y);
     };
@@ -263,6 +274,7 @@ void CustomPaintPattern::MoveTo(double x, double y)
 
 void CustomPaintPattern::LineTo(double x, double y)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'lineTo(%{public}lf, %{public}lf)' is pending execution.", x, y);
     auto task = [x, y](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.LineTo(paintWrapper, x, y);
     };
@@ -318,6 +330,7 @@ void CustomPaintPattern::Ellipse(const EllipseParam& param)
 
 void CustomPaintPattern::BezierCurveTo(const BezierCurveParam& param)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'bezierCurveTo' is pending execution.");
     auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.BezierCurveTo(paintWrapper, param);
     };
@@ -377,6 +390,7 @@ TextMetrics CustomPaintPattern::MeasureTextMetrics(const std::string& text, cons
 
 void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'drawImage(%{public}f, %{public}f)' is being executed.", width, height);
     auto task = [image, width, height](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.DrawImage(paintWrapper, image, width, height);
     };
@@ -411,6 +425,8 @@ void CustomPaintPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canv
 
 std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, double top, double width, double height)
 {
+    TAG_LOGD(
+        AceLogTag::ACE_CANVAS, "Area: [%{public}lf, %{public}lf, %{public}lf, %{public}lf].", left, top, width, height);
     if (!paintMethod_) {
         std::unique_ptr<Ace::ImageData> data = std::make_unique<Ace::ImageData>();
         data->dirtyWidth = width;
@@ -773,6 +789,7 @@ LineDashParam CustomPaintPattern::GetLineDash() const
 
 void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'setLineDash' with %{public}zu parameters is executed.", segments.size());
     auto task = [segments](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetLineDash(segments);
     };
@@ -784,6 +801,7 @@ void CustomPaintPattern::UpdateLineDash(const std::vector<double>& segments)
 
 void CustomPaintPattern::Save()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'save' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Save();
     };
@@ -796,6 +814,7 @@ void CustomPaintPattern::Save()
 
 void CustomPaintPattern::Restore()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'restore' is pending execution.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Restore();
     };
@@ -832,6 +851,7 @@ void CustomPaintPattern::Rotate(double angle)
 
 void CustomPaintPattern::SetTransform(const TransformParam& param)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'setTransform' is pending execution.");
     auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SetTransform(param);
     };
@@ -856,6 +876,7 @@ void CustomPaintPattern::ResetTransform()
 
 void CustomPaintPattern::Transform(const TransformParam& param)
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'transform' is pending execution.");
     auto task = [param](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.Transform(param);
     };
@@ -961,6 +982,7 @@ TransformParam CustomPaintPattern::GetTransform() const
 
 void CustomPaintPattern::SaveLayer()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'SaveLayer' is being executed.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.SaveLayer();
     };
@@ -972,6 +994,7 @@ void CustomPaintPattern::SaveLayer()
 
 void CustomPaintPattern::RestoreLayer()
 {
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "The 'RestoreLayer' is being executed.");
     auto task = [](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
         paintMethod.RestoreLayer();
     };
