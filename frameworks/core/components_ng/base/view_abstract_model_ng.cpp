@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -455,6 +456,21 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent), OnKeyEventType::CONTEXT_MENU);
 }
 
+RefPtr<PipelineContext> ViewAbstractModelNG::GetSheetContext(NG::SheetStyle& sheetStyle)
+{
+    RefPtr<PipelineContext> context;
+    if (sheetStyle.instanceId.has_value()) {
+        auto container = AceEngine::Get().GetContainer(sheetStyle.instanceId.value());
+        CHECK_NULL_RETURN(container, nullptr);
+        auto contextBase = container->GetPipelineContext();
+        CHECK_NULL_RETURN(contextBase, nullptr);
+        context = AceType::DynamicCast<PipelineContext>(contextBase);
+    } else {
+        context = PipelineContext::GetCurrentContext();
+    }
+    return context;
+}
+
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
     std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
@@ -478,7 +494,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetSheetContext(sheetStyle);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     if (sheetStyle.showInPage.value_or(false)) {
@@ -487,19 +503,21 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    auto destructor = [id = targetNode->GetId(), pageLevelId = targetNode->GetPageLevelNodeId(),
-                          isNav = targetNode->PageLevelIsNavDestination(),
-                          showInPage = sheetStyle.showInPage.value_or(false)]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        if (showInPage) {
-            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-            overlayManager = GetOverlayFromPage(pageLevelId, isNav);
-        }
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteModal(id);
-    };
+    auto destructor =
+        [id = targetNode->GetId(), pageLevelId = targetNode->GetPageLevelNodeId(),
+            isNav = targetNode->PageLevelIsNavDestination(), showInPage = sheetStyle.showInPage.value_or(false),
+            instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId()]() {
+            ContainerScope scope(instanceId);
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            if (showInPage) {
+                TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
+                overlayManager = GetOverlayFromPage(pageLevelId, isNav);
+            }
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteModal(id);
+        };
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
