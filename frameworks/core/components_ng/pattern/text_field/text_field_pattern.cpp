@@ -2526,11 +2526,7 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
 {
-    auto newRequest = request;
-    auto needAvoid = CaretAvoidSoftKeyboard();
-    // Avoid menu that appear and then close immediately.
-    newRequest.menuIsShow = newRequest.menuIsShow && !needAvoid;
-    selectOverlay_->ProcessOverlay(newRequest);
+    selectOverlay_->ProcessOverlay(request);
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
