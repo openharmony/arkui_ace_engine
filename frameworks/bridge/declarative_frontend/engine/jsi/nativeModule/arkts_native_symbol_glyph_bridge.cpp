@@ -64,7 +64,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
     for (uint32_t index = 0; index < length; index) {
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         Color color;
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, value, color)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, value, color)) {
             colorArray.emplace_back(color.GetValue());
         } else {
             colorArray.clear();
@@ -73,7 +73,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
     }
     if (static_cast<uint32_t>(length) == colorArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (uint32_t i = 0; i < length; i) {
-            colorArray.emplace_back(colorArray[i]);
+            colorArray.emplace_back(color[i]);
         }
     }
     GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColor(nativeNode, colorArray.data(), colorArray.size());
