@@ -74,6 +74,9 @@ void TextFieldModelNG::CreateNode(
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     SetCaretColor(textFieldTheme->GetCursorColor());
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
+    SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
