@@ -449,8 +449,7 @@ void UIObserver::UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_valu
         holder.end());
 }
 
-void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
-    const std::string& name, const std::string& path, NG::RouterPageState state)
+void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo)
 {
     for (auto listenerPair : abilityContextRouterPageListeners_) {
         auto ref = listenerPair.first;
@@ -460,9 +459,11 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
             napi_value abilityContext = nullptr;
             napi_get_reference_value(env, ref, &abilityContext);
 
+            NG::RouterPageInfoNG abilityPageInfo(
+                abilityContext, pageInfo.index, pageInfo.name, pageInfo.path, pageInfo.state, pageInfo.pageId);
             auto& holder = abilityContextRouterPageListeners_[ref];
             for (const auto& listener : holder) {
-                listener->OnRouterPageStateChange(abilityContext, index, name, path, state);
+                listener->OnRouterPageStateChange(abilityPageInfo);
             }
             break;
         }
@@ -475,7 +476,7 @@ void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_
     }
     auto& holder = iter->second;
     for (const auto& listener : holder) {
-        listener->OnRouterPageStateChange(context, index, name, path, state);
+        listener->OnRouterPageStateChange(pageInfo);
     }
 }
 

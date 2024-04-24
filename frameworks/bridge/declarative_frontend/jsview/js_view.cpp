@@ -540,6 +540,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         }
     };
 
+    auto didBuildFunc = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        if (jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteDidBuild();
+        }
+    };
+
     auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<AceType> {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
@@ -657,6 +666,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
     };
 
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
+        .didBuildFunc = std::move(didBuildFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
         .removeFunc = std::move(removeFunction),
@@ -909,6 +919,22 @@ void JSViewPartialUpdate::JSGetNavDestinationInfo(const JSCallbackInfo& info)
     }
 }
 
+void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
+{
+    auto result = NG::UIObserverHandler::GetInstance().GetRouterPageState(GetViewNode());
+    if (result) {
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        auto jsContext = JsConverter::ConvertNapiValueToJsVal(result->context);
+        obj->SetPropertyObject("context", jsContext);
+        obj->SetProperty<int32_t>("index", result->index);
+        obj->SetProperty<std::string>("name", result->name);
+        obj->SetProperty<std::string>("path", result->path);
+        obj->SetProperty<int32_t>("state", static_cast<int32_t>(result->state));
+        obj->SetProperty<std::string>("pageId", result->pageId);
+        info.SetReturnValue(obj);
+    }
+}
+
 void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -978,6 +1004,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
         "queryNavDestinationInfo", &JSViewPartialUpdate::JSGetNavDestinationInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "queryNavigationInfo", &JSViewPartialUpdate::JSGetNavigationInfo);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "queryRouterPageInfo", &JSViewPartialUpdate::JSGetRouterPageInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
