@@ -631,7 +631,7 @@ void TextContentModifier::SetFontSize(const Dimension& value)
     float fontSizeValue;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(value);
+        fontSizeValue = value.ConvertToPx();
     } else {
         fontSizeValue = value.Value();
     }
