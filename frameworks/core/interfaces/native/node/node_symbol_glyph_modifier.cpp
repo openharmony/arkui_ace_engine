@@ -38,8 +38,8 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32* color, int32_t size)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Color> colorArray;
-    for (int32_t i = 0; i < size; i) {
-        colorArray.emplace_back(Color(colorArray[i]));
+    for (int32_t i = 0; i < size; i++) {
+        colorArray.emplace_back(Color(color[i]));
     }
     SymbolModelNG::SetFontColor(frameNode, colorArray);
 }
