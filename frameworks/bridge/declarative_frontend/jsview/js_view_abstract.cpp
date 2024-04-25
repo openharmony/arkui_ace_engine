@@ -491,6 +491,26 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     return true;
 }
 
+bool CheckLengthMetrics(const JSRef<JSObject>& object)
+{
+    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+        return true;
+    }
+    if (object->HasProperty(TOP_PROPERTY) && object->GetProperty(TOP_PROPERTY)->IsObject()) {
+        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_PROPERTY));
+        if (topObj->HasProperty("value")) {
+            return true;
+        }
+    }
+    if (object->HasProperty(BOTTOM_PROPERTY) && object->GetProperty(BOTTOM_PROPERTY)->IsObject()) {
+        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_PROPERTY));
+        if (bottomObj->HasProperty("value")) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ParseLocalizedEdges(const JSCallbackInfo& info, EdgesParam& edges)
 {
     JSRef<JSVal> arg = info[0];
@@ -1456,7 +1476,7 @@ void ParseLocalizedEdgeWidthsProps(const JSRef<JSObject>& object, LocalizedCalcD
 
 void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidths(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -1471,7 +1491,7 @@ void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
 
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidthsProps(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -3501,7 +3521,7 @@ void JSViewAbstract::ParseLocalizedMarginOrLocalizedPaddingCorner(
 void JSViewAbstract::ParseCommonMarginOrPaddingCorner(
     const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedMarginOrLocalizedPaddingCorner(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
