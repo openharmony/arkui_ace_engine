@@ -63,8 +63,8 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+class TextInputDecorationModifier  extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity: Symbol = Symbol('textInputDecoration');
@@ -72,12 +72,12 @@ class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecoration
     if (reset) {
       getUINativeModule().textInput.resetDecoration(node);
     } else {
-      getUINativeModule().textInput.setDecoration(node, this.value!.type, this.value!.color);
+      getUINativeModule().textInput.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {

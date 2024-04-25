@@ -6790,31 +6790,31 @@ class SearchIdModifier extends ModifierWithKey {
 }
 SearchIdModifier.identity = Symbol('searchId');
 class SearchDecorationModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetDecoration(node);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().search.resetDecoration(node);
-        }
-        else {
-            getUINativeModule().search.setDecoration(node, this.value.type, this.value.color);
-        }
+    else {
+      getUINativeModule().search.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
-    checkObjectDiff() {
-        if (this.stageValue.type !== this.value.type) {
-            return true;
-        }
-        if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-            return !isResourceEqual(this.stageValue.color, this.value.color);
-        }
-        else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
-            return !(this.stageValue.color === this.value.color);
-        }
-        else {
-            return true;
-        }
+  }
+  checkObjectDiff() {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+      return true;
     }
+    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
+      return !isResourceEqual(this.stageValue.color, this.value.color);
+    }
+    else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+      return !(this.stageValue.color === this.value.color);
+    }
+    else {
+      return true;
+    }
+  }
 }
 SearchDecorationModifier.identity = Symbol('searchDecoration');
 class SearchLetterSpacingModifier extends ModifierWithKey {
@@ -8919,31 +8919,31 @@ class TextAreaFontStyleModifier extends ModifierWithKey {
 }
 TextAreaFontStyleModifier.identity = Symbol('textAreaFontStyle');
 class TextAreaDecorationModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetDecoration(node);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().textArea.resetDecoration(node);
-        }
-        else {
-            getUINativeModule().textArea.setDecoration(node, this.value.type, this.value.color);
-        }
+    else {
+      getUINativeModule().textArea.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
-    checkObjectDiff() {
-        if (this.stageValue.type !== this.value.type) {
-            return true;
-        }
-        if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-            return !isResourceEqual(this.stageValue.color, this.value.color);
-        }
-        else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
-            return !(this.stageValue.color === this.value.color);
-        }
-        else {
-            return true;
-        }
+  }
+  checkObjectDiff() {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+      return true;
     }
+    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
+      return !isResourceEqual(this.stageValue.color, this.value.color);
+    }
+    else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+      return !(this.stageValue.color === this.value.color);
+    }
+    else {
+      return true;
+    }
+  }
 }
 TextAreaDecorationModifier.identity = Symbol('textAreaDecoration');
 class TextAreaLetterSpacingModifier extends ModifierWithKey {
@@ -9650,31 +9650,31 @@ class TextInputMaxLinesModifier extends ModifierWithKey {
 }
 TextInputMaxLinesModifier.identity = Symbol('textInputMaxLines');
 class TextInputDecorationModifier extends ModifierWithKey {
-    constructor(value) {
-        super(value);
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetDecoration(node);
     }
-    applyPeer(node, reset) {
-        if (reset) {
-            getUINativeModule().textInput.resetDecoration(node);
-        }
-        else {
-            getUINativeModule().textInput.setDecoration(node, this.value.type, this.value.color);
-        }
+    else {
+      getUINativeModule().textInput.setDecoration(node, this.value.type, this.value.color, this.value.style);
     }
-    checkObjectDiff() {
-        if (this.stageValue.type !== this.value.type) {
-            return true;
-        }
-        if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-            return !isResourceEqual(this.stageValue.color, this.value.color);
-        }
-        else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
-            return !(this.stageValue.color === this.value.color);
-        }
-        else {
-            return true;
-        }
+  }
+  checkObjectDiff() {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
+      return true;
     }
+    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
+      return !isResourceEqual(this.stageValue.color, this.value.color);
+    }
+    else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+      return !(this.stageValue.color === this.value.color);
+    }
+    else {
+      return true;
+    }
+  }
 }
 TextInputDecorationModifier.identity = Symbol('textInputDecoration');
 class TextInputLetterSpacingModifier extends ModifierWithKey {
