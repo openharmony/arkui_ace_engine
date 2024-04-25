@@ -342,6 +342,27 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeLineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeLineContext);
+    auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(menuTheme->GetBorderColor());
+        renderContext->UpdateBorderColor(borderColorProperty);
+    }
+
+    if (!renderContext->HasBorderWidth()) {
+        auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+        BorderWidthProperty widthProp;
+        widthProp.SetBorderWidth(menuTheme->GetBorderWidth());
+        layoutProperty->UpdateBorderWidth(widthProp);
+        renderContext->UpdateBorderWidth(widthProp);
+    }
 }
 
 // close menu on touch up
