@@ -115,6 +115,7 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 
     rsCanvas_->Scale(viewScale, viewScale);
+    TAG_LOGD(AceLogTag::ACE_CANVAS, "There are %{public}zu tasks will be run.", tasks_.size());
     for (const auto& task : tasks_) {
         task(*this, paintWrapper);
     }
