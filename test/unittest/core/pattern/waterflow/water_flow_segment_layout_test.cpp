@@ -1706,10 +1706,10 @@ HWTEST_F(WaterFlowSegmentTest, Replace004, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     auto& info = pattern_->layoutInfo_;
 
-    AddItems(10);
+    AddItems(100);
     frameNode_->ChildrenUpdatedFrom(6);
     std::vector<WaterFlowSections::Section> newSection { SECTION_9[0] };
-    newSection[0].itemsCount = 16;
+    newSection[0].itemsCount = 106;
     secObj->ChangeData(0, 1, newSection);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info.itemInfos_.size(), 6);
@@ -1718,14 +1718,15 @@ HWTEST_F(WaterFlowSegmentTest, Replace004, TestSize.Level1)
     EXPECT_EQ(info.segmentStartPos_[0], 0.0f);
     EXPECT_EQ(info.segmentStartPos_.size(), 1);
     EXPECT_EQ(info.segmentTails_.size(), 1);
-    EXPECT_EQ(info.segmentTails_[0], 15);
+    EXPECT_EQ(info.segmentTails_[0], 105);
 
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.currentOffset_, 0.0f);
-    EXPECT_EQ(info.endIndex_, 15);
+    EXPECT_EQ(info.endIndex_, 17);
     EXPECT_EQ(info.items_[0].at(0).size(), 6);
-
-    for (int i = 0; i < 6; ++i) {
+    UpdateCurrentOffset(-10000.0f);
+    EXPECT_EQ(info.currentOffset_, -3000.0f);
+    for (int i = 0; i < 100; ++i) {
         frameNode_->RemoveChildAtIndex(10);
     }
     frameNode_->ChildrenUpdatedFrom(10);

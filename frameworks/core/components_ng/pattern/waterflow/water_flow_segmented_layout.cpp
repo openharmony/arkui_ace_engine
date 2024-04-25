@@ -128,7 +128,7 @@ float PrepareJump(WaterFlowLayoutInfo& info)
         // implies that LayoutInfo has already been reset, no need to jump
         return 0.0f;
     }
-    info.jumpIndex_ = info.startIndex_;
+    info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
     info.align_ = ScrollAlign::START;
     float itemOffset = (info.itemInfos_.size() <= static_cast<size_t>(info.startIndex_))
                            ? info.storedOffset_
