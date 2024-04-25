@@ -298,10 +298,8 @@ void JSXComponentController::SetXComponentSurfaceRotation(const JSCallbackInfo& 
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    bool lock;
-    if (!ConvertFromJSValue(obj->GetProperty("lock"), lock)) {
-        lock = false;
-    }
+    bool lock = false;
+    ConvertFromJSValue(obj->GetProperty("lock"), lock);
     xcomponentController_->SetSurfaceRotation(lock);
 }
 
