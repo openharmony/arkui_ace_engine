@@ -3321,4 +3321,51 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetOnSizeChangeByFrameNodeTest, TestSiz
     auto& callback = eventHub->onSizeChanged_;
     EXPECT_NE(callback, nullptr);
 }
+
+/**
+ * @tc.name: MotionBlur001
+ * @tc.desc: SetMotionBlur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, MotionBlur001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and put mainNode, then build some necessary params.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+
+    /**
+     * @tc.steps: step2. get node in ViewStackProcessor.
+     * @tc.expected: node is not null.
+     */
+    auto rootFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(rootFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use ViewAbstract::SetMotionBlur.
+     * @tc.expected: success set render property motionBlur value.
+     */
+    MotionBlurOption motionBlurOption;
+    CalcDimension radius(5, DimensionUnit::VP);
+    motionBlurOption.radius = radius;
+    motionBlurOption.anchor.x = 0.5;
+    motionBlurOption.anchor.y = 0.5;
+    ViewAbstract::SetMotionBlur(motionBlurOption);
+    /**
+     * @tc.steps: step4. get propMotionBlur value of the node.
+     * @tc.expected: anchor.x = 0.5, anchor.y = 0.5, radius = 5.
+     */
+    EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOrCreateForeground()->propMotionBlur->anchor.x, 0.5);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOrCreateForeground()->propMotionBlur->anchor.y, 0.5);
+    EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
+                  ->GetOrCreateForeground()->propMotionBlur->radius.Value(), 5);
+
+    /**
+     * @tc.steps: step5. finish view stack.
+     */
+    ViewStackProcessor::GetInstance()->Finish();
+}
 } // namespace OHOS::Ace::NG
