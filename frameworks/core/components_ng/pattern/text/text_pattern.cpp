@@ -46,6 +46,7 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -224,8 +225,13 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 std::list<ResultObject> TextPattern::GetSpansInfoInStyledString(int32_t start, int32_t end)
 {
     std::list<ResultObject> resultObjects;
+    int32_t imageIndex = 0;
     for (const auto& item : spans_) {
         auto obj = item->GetSpanResultObject(start, end);
+        if (obj.type == SelectSpanType::TYPEIMAGE) {
+            obj.spanPosition.spanIndex = imageIndex;
+            ++imageIndex;
+        }
         if (obj.isInit) {
             resultObjects.emplace_back(obj);
         }
@@ -1450,6 +1456,10 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
         auto spanItem = *it;
         CHECK_NULL_VOID(spanItem);
         if (resultObj.type == SelectSpanType::TYPESPAN) {
+            if (pattern->isSpanStringMode_) {
+                spanItem = resultObj.span.Upgrade();
+                CHECK_NULL_VOID(spanItem);
+            }
             if (isDragging) {
                 spanItem->StartDrag(resultObj.offsetInSpan[RichEditorSpanRange::RANGESTART],
                     resultObj.offsetInSpan[RichEditorSpanRange::RANGEEND]);
@@ -1555,7 +1565,7 @@ void TextPattern::InitDragEvent()
         auto eventHub = pattern->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, itemInfo);
         pattern->SetCurrentDragTool(event->GetSourceTool());
-        if (pattern->spans_.empty() || pattern->isSpanStringMode_) {
+        if (pattern->spans_.empty() && !pattern->isSpanStringMode_) {
             return pattern->OnDragStartNoChild(event, extraParams);
         }
         return pattern->OnDragStart(event, extraParams);
@@ -2306,7 +2316,10 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (!isSpanStringMode_) {
         PreCreateLayoutWrapper();
     } else {
-        ProcessSpanString();
+        // mark content dirty
+        if (contentMod_) {
+            contentMod_->ContentChange();
+        }
     }
 }
 
@@ -3111,6 +3124,7 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     spans_ = value->GetSpanItems();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ProcessSpanString();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -3219,11 +3233,6 @@ void TextPattern::ProcessSpanString()
     }
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->StartAITask();
-    }
-
-    // mark content dirty
-    if (contentMod_) {
-        contentMod_->ContentChange();
     }
 }
 

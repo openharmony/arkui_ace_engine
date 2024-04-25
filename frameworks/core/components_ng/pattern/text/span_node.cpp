@@ -573,6 +573,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
+        resultObject.span = WeakClaim(this);
         resultObject.valueString = content;
         resultObject.isInit = true;
     }
@@ -785,12 +786,12 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
 
     int32_t endPosition = interval.second;
     int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEIMAGE;
     if ((start <= startPosition) && (end >= endPosition)) {
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
-        resultObject.type = SelectSpanType::TYPEIMAGE;
         if (options.image.has_value()) {
             resultObject.valueString = options.image.value();
         }
