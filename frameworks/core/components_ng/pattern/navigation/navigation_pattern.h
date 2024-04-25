@@ -72,6 +72,8 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -453,6 +455,7 @@ private:
     RefPtr<NavDestinationContext> preContext_;
     WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
+    bool isRightToLeft_ = false;
 };
 
 } // namespace OHOS::Ace::NG

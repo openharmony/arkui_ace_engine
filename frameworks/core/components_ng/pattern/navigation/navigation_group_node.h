@@ -171,6 +171,8 @@ public:
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
 
+    float CheckLanguageDirection();
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);

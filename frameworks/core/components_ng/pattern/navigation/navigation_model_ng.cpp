@@ -559,7 +559,12 @@ void BuildToolbarMoreMenuNodeAction(
         CHECK_NULL_VOID(menuPattern);
         menuPattern->SetIsSelectMenu(true);
 
-        imgOffset.SetX(imgOffset.GetX());
+        bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRightToLeft) {
+            imgOffset.SetX(imgOffset.GetX() + imageSize.Width());
+        } else {
+            imgOffset.SetX(imgOffset.GetX());
+        }
         imgOffset.SetY(imgOffset.GetY() - imageSize.Height());
         overlayManager->ShowMenu(id, imgOffset, menu);
     };
