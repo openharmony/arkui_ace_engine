@@ -4498,8 +4498,8 @@ HWTEST_F(RichEditorTestNg, GetImageSpansInfo, TestSize.Level1)
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
     auto imageStyleout = info.selection_.resultObjects.begin()->imageStyle;
     EXPECT_EQ(imageStyleout.borderRadius,
-        "{\"topLeft\":\"10.00\",\"topRight\":\"10.00\",\"bottomLeft\":\"10.00\",\"bottomRight\":\"10.00\"}");
-    EXPECT_EQ(imageStyleout.margin, "left: [10.00]right: [10.00]top: [10.00]bottom: [10.00]");
+        "{\"topLeft\":\"10.00px\",\"topRight\":\"10.00px\",\"bottomLeft\":\"10.00px\",\"bottomRight\":\"10.00px\"}");
+    EXPECT_EQ(imageStyleout.margin, "left: [10.00px]right: [10.00px]top: [10.00px]bottom: [10.00px]");
     ClearSpan();
 }
 
@@ -4630,9 +4630,9 @@ HWTEST_F(RichEditorTestNg, DeleteValueSetImageSpan, TestSize.Level1)
     spanResult.SetSpanIndex(0);
     auto spanItem = richEditorPattern->spans_.front();
     richEditorPattern->DeleteValueSetImageSpan(spanItem, spanResult);
-    EXPECT_EQ(spanResult.GetMargin(), "left: [10.00]right: [10.00]top: [10.00]bottom: [10.00]");
+    EXPECT_EQ(spanResult.GetMargin(), "left: [10.00px]right: [10.00px]top: [10.00px]bottom: [10.00px]");
     EXPECT_EQ(spanResult.GetBorderRadius(),
-        "{\"topLeft\":\"10.00\",\"topRight\":\"10.00\",\"bottomLeft\":\"10.00\",\"bottomRight\":\"10.00\"}");
+        "{\"topLeft\":\"10.00px\",\"topRight\":\"10.00px\",\"bottomLeft\":\"10.00px\",\"bottomRight\":\"10.00px\"}");
 
     ClearSpan();
 }
