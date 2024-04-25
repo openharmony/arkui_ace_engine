@@ -714,7 +714,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
 OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap)
 {
     CHECK_NULL_RETURN(frameNode, OffsetF());
-    auto centerPosition = frameNode->GetPaintRectCenter();
+    auto centerPosition = frameNode->GetPaintRectCenter(true);
     float width = 0.0f;
     float height = 0.0f;
     if (pixelMap) {
