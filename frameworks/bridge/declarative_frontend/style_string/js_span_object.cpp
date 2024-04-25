@@ -787,13 +787,13 @@ void JSImageAttachment::GetImageSize(const JSCallbackInfo& info)
     auto imageSize = JSRef<JSObject>::New();
     auto size = imageAttr->size;
     if (size->width.has_value()) {
-        imageSize->SetProperty<float>("width", size->width->ConvertToPx());
+        imageSize->SetProperty<float>("width", size->width->ConvertToVp());
     } else {
         imageSize->SetProperty<float>("width", 0.0);
     }
 
     if (size->height.has_value()) {
-        imageSize->SetProperty<float>("height", size->height->ConvertToPx());
+        imageSize->SetProperty<float>("height", size->height->ConvertToVp());
     } else {
         imageSize->SetProperty<float>("height", 0.0);
     }
