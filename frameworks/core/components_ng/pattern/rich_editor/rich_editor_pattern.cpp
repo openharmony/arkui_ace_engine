@@ -6544,7 +6544,7 @@ void RichEditorPattern::GetReplacedSpanFission(RichEditorChangeValue& changeValu
         if (offsetInSpan != static_cast<int32_t>(textBefore.length())) {
             CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, textBefore.length(),
                 StringUtils::ToString(textBefore), style);
-            innerPosition += textBefore.length();
+            innerPosition += textBefore.length() - offsetInSpan;
         }
         wContent = textAfter;
         index = wContent.find(lineSeparator);
