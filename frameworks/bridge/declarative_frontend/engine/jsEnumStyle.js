@@ -2906,4 +2906,9 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
+  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
 })(StyledStringKey || (StyledStringKey = {}));
+
+class CustomSpan {
+  type_ = "CustomSpan"
+}

@@ -18,10 +18,11 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-
 namespace OHOS::Ace::Framework {
 
 class JSFontSpan : public virtual AceType {
@@ -159,6 +160,7 @@ public:
 
     RefPtr<TextShadowSpan>& GetTextShadowSpan();
     void SetTextShadowSpan(const RefPtr<TextShadowSpan>& textShadowSpan);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSTextShadowSpan);
     RefPtr<TextShadowSpan> textShadowSpan_;
@@ -170,20 +172,20 @@ class JSImageAttachment : public virtual AceType {
 public:
     JSImageAttachment() = default;
     ~JSImageAttachment() override = default;
-    static void Constructor(const JSCallbackInfo &args);
-    static void Destructor(JSImageAttachment *imageSpan);
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSImageAttachment* imageSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<ImageSpan> ParseJsImageSpan(const JSRef<JSObject> &obj);
-    void GetImageSrc(const JSCallbackInfo &info);
-    void SetImageSrc(const JSCallbackInfo &info) {}
-    void GetImageSize(const JSCallbackInfo &info);
-    void SetImageSize(const JSCallbackInfo &info) {}
-    void GetImageVerticalAlign(const JSCallbackInfo &info);
-    void SetImageVerticalAlign(const JSCallbackInfo &info) {}
-    void GetImageObjectFit(const JSCallbackInfo &info);
-    void SetImageObjectFit(const JSCallbackInfo &info) {}
-    void GetImageLayoutStyle(const JSCallbackInfo &info);
-    void SetImageLayoutStyle(const JSCallbackInfo &info) {}
+    static RefPtr<ImageSpan> ParseJsImageSpan(const JSRef<JSObject>& obj);
+    void GetImageSrc(const JSCallbackInfo& info);
+    void SetImageSrc(const JSCallbackInfo& info) {}
+    void GetImageSize(const JSCallbackInfo& info);
+    void SetImageSize(const JSCallbackInfo& info) {}
+    void GetImageVerticalAlign(const JSCallbackInfo& info);
+    void SetImageVerticalAlign(const JSCallbackInfo& info) {}
+    void GetImageObjectFit(const JSCallbackInfo& info);
+    void SetImageObjectFit(const JSCallbackInfo& info) {}
+    void GetImageLayoutStyle(const JSCallbackInfo& info);
+    void SetImageLayoutStyle(const JSCallbackInfo& info) {}
 
     const RefPtr<ImageSpan>& GetImageSpan();
     void SetImageSpan(const RefPtr<ImageSpan>& imageSpan);
@@ -197,6 +199,31 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(JSImageAttachment);
     RefPtr<ImageSpan> imageSpan_;
+};
+
+class JSCustomSpan : public CustomSpan {
+    DECLARE_ACE_TYPE(JSCustomSpan, CustomSpan)
+
+public:
+    JSCustomSpan() = default;
+    JSCustomSpan(JSRef<JSObject> customSpanObj, const JSCallbackInfo& args);
+    JSCustomSpan(JSRef<JSObject> customSpanObj,
+        std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+        std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end);
+    ~JSCustomSpan() override = default;
+    static std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> ParseOnMeasureFunc(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+    static std::function<void(NG::DrawingContext&, CustomSpanOptions)> ParseOnDrawFunc(
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    void SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj);
+    JSRef<JSObject>& GetJsCustomSpanObject();
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSCustomSpan);
+    JSRef<JSObject> customSpanObj_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

@@ -27,6 +27,17 @@
 
 namespace OHOS::Ace::NG {
 
+struct LineMetrics {
+    float ascender;
+    float descender;
+    float capHeight;
+    float xHeight;
+    float width;
+    float height;
+    float x;
+    float y;
+};
+
 struct LeadingMargin {
     SizeF size;
     RefPtr<PixelMap> pixmap;
@@ -138,6 +149,7 @@ public:
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
     virtual void SetParagraphId(uint32_t id) = 0;
+    virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
 };
 } // namespace OHOS::Ace::NG
 

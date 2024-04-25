@@ -825,6 +825,14 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     return index;
 }
 
+RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
+{
+    auto sameSpan = MakeRefPtr<CustomSpanItem>();
+    sameSpan->onMeasure = onMeasure;
+    sameSpan->onDraw = onDraw;
+    return sameSpan;
+}
+
 void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 {
     textBackgroundStyle_ = style;

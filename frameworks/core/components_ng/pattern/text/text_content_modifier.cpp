@@ -255,12 +255,13 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
         CHECK_NULL_VOID(pattern);
         size_t index = 0;
         auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+        auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
         for (const auto& imageWeak : imageNodeList_) {
             auto imageChild = imageWeak.Upgrade();
             if (!imageChild) {
                 continue;
             }
-            auto rect = rectsForPlaceholders.at(index);
+            auto rect = rectsForPlaceholders.at(placeHolderIndexVector.at(index));
             auto imagePattern = DynamicCast<ImagePattern>(imageChild->GetPattern());
             if (!imagePattern) {
                 continue;
@@ -297,6 +298,29 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
     }
 }
 
+void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
+{
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    size_t index = 0;
+    size_t indexTmp = 0;
+    auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+    auto customSpanIndex = pattern->GetCustomSpanIndex();
+    auto onDraws = pattern->GetOnDrawList();
+    for (auto onDraw : onDraws) {
+        indexTmp = customSpanIndex.at(index);
+        index++;
+        auto rect = rectsForPlaceholders.at(indexTmp);
+        auto lineMetrics = paragraph_->GetLineMetricsByRectF(rect);
+        CustomSpanOptions customSpanOptions;
+        customSpanOptions.x = static_cast<double>(rect.Left());
+        customSpanOptions.lineTop = lineMetrics.y;
+        customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height;
+        customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender;
+        onDraw(drawingContext, customSpanOptions);
+    }
+}
+
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     ACE_SCOPED_TRACE("Text::onDraw");
@@ -328,6 +352,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     } else {
         DrawObscuration(drawingContext);
     }
+    PaintCustomSpan(drawingContext);
 }
 
 void TextContentModifier::UpdateFadeout(const DrawingContext& drawingContext)

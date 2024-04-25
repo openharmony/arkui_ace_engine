@@ -449,7 +449,8 @@ void GestureSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 TextShadowSpan::TextShadowSpan(std::vector<Shadow> textShadow) : SpanBase(0, 0), textShadow_(std::move(textShadow)) {}
 
 TextShadowSpan::TextShadowSpan(std::vector<Shadow> textShadow, int32_t start, int32_t end)
-    : SpanBase(start, end), textShadow_(std::move(textShadow)) {}
+    : SpanBase(start, end), textShadow_(std::move(textShadow))
+{}
 
 void TextShadowSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
 {
@@ -581,5 +582,87 @@ const ImageSpanOptions& ImageSpan::GetImageSpanOptions()
 const std::optional<ImageSpanAttribute>& ImageSpan::GetImageAttribute() const
 {
     return imageOptions_.imageAttribute;
+}
+
+// CustomSpan
+CustomSpan::CustomSpan() : SpanBase(0, 1) {}
+
+CustomSpan::CustomSpan(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw)
+    : SpanBase(0, 1), onMeasure_(std::move(onMeasure)), onDraw_(std::move(onDraw))
+{}
+
+CustomSpan::CustomSpan(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end)
+    : SpanBase(start, end), onMeasure_(std::move(onMeasure)), onDraw_(std::move(onDraw))
+{}
+
+void CustomSpan::SetOnMeasure(std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> onMeasure)
+{
+    onMeasure_ = onMeasure;
+}
+
+void CustomSpan::SetOnDraw(std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw)
+{
+    onDraw_ = onDraw;
+}
+
+std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> CustomSpan::GetOnMeasure()
+{
+    return onMeasure_;
+}
+
+std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> CustomSpan::GetOnDraw()
+{
+    return onDraw_;
+}
+
+RefPtr<SpanBase> CustomSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    if (end - start > 1) {
+        return nullptr;
+    }
+    RefPtr<SpanBase> spanBase = MakeRefPtr<CustomSpan>(onMeasure_, onDraw_, start, end);
+    return spanBase;
+}
+
+SpanType CustomSpan::GetSpanType() const
+{
+    return SpanType::CustomSpan;
+}
+
+void CustomSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    auto imageItem = DynamicCast<NG::CustomSpanItem>(spanItem);
+    if (!imageItem) {
+        return;
+    }
+
+    switch (operation) {
+        case SpanOperation::ADD:
+            imageItem->onMeasure = onMeasure_;
+            imageItem->onDraw = onDraw_;
+            break;
+        case SpanOperation::REMOVE:
+            imageItem->onMeasure = std::nullopt;
+            imageItem->onDraw = std::nullopt;
+    }
+}
+
+std::string CustomSpan::ToString() const
+{
+    std::stringstream str;
+    str << "CustomSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    std::string output = str.str();
+    return output;
+}
+
+bool CustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    return false;
 }
 } // namespace OHOS::Ace
