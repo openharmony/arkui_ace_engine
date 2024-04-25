@@ -86,6 +86,7 @@ build_component_ng("pattern_ng") {
     "custom/custom_title_node.cpp",
     "custom_paint/canvas_model_ng.cpp",
     "custom_paint/canvas_paint_method.cpp",
+    "custom_paint/canvas_paint_op.cpp",
     "custom_paint/custom_paint_layout_algorithm.cpp",
     "custom_paint/custom_paint_paint_method.cpp",
     "custom_paint/custom_paint_pattern.cpp",
