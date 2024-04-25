@@ -280,6 +280,7 @@ void SwiperPattern::ResetOnForceMeasure()
     StopIndicatorAnimation();
     currentOffset_ = 0.0f;
     mainSizeIsMeasured_ = false;
+    currentDelta_ = 0.0f;
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
     jumpIndex_ = currentIndex_;
