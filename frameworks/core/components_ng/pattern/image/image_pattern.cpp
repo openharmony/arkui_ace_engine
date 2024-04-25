@@ -1376,7 +1376,7 @@ void ImagePattern::SetImageAnalyzerConfig(void* config)
 bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
-    return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() == 1 &&
+    return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() <= 1 &&
         imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
