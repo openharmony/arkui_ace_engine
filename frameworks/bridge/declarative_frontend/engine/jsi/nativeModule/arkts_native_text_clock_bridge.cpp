@@ -25,9 +25,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
 const std::string DEFAULT_STR = "-1";
 const char* TEXTCLOCK_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace

@@ -31,9 +31,9 @@ const char* DATA_PANEL_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
 
 void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
 {

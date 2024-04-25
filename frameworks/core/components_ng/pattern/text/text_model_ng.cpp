@@ -315,8 +315,7 @@ void TextModelNG::SetTextDetectEnable(bool value)
     textPattern->SetTextDetectEnable(value);
 }
 
-void TextModelNG::SetTextDetectConfig(const std::string& value,
-    std::function<void(const std::string&)>&& onResult)
+void TextModelNG::SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -867,9 +866,10 @@ EllipsisMode TextModelNG::GetEllipsisMode(FrameNode* frameNode)
     return value;
 }
 
-FONT_FEATURES_MAP TextModelNG::GetFontFeature(FrameNode* frameNode){
-    FONT_FEATURES_MAP value;
+FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
+{
+    FONT_FEATURES_LIST value;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontFeature, value, frameNode, value);
-    return value;    
+    return value;
 }
 } // namespace OHOS::Ace::NG

@@ -358,7 +358,7 @@ void RatingPattern::HandleDragUpdate(const GestureEvent& info)
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), true);
 }
 
-void RatingPattern::FireChangeEvent() const
+void RatingPattern::FireChangeEvent()
 {
     auto ratingEventHub = GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(ratingEventHub);
@@ -368,6 +368,7 @@ void RatingPattern::FireChangeEvent() const
     ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "rating score %{public}s", ss.str().c_str());
     ratingEventHub->FireChangeEvent(ss.str());
+    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;

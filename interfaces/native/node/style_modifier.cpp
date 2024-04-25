@@ -1598,11 +1598,9 @@ int32_t SetPosition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    float positions[ALLOW_SIZE_4] = { 0, 1, 0, 1 };
-    positions[NUM_0] = item->value[0].f32;
-    positions[NUM_2] = item->value[1].f32;
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
     fullImpl->getNodeModifiers()->getCommonModifier()->setPosition(
-        node->uiNodeHandle, positions[NUM_0], positions[NUM_1], positions[NUM_2], positions[NUM_3]);
+        node->uiNodeHandle, item->value[0].f32, unit, item->value[1].f32, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1615,7 +1613,8 @@ void ResetPosition(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetPosition(ArkUI_NodeHandle node)
 {
     ArkUIPositionOptions options;
-    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getPosition(node->uiNodeHandle, &options);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    GetFullImpl()->getNodeModifiers()->getCommonModifier()->getPosition(node->uiNodeHandle, &options, unit);
     g_numberValues[NUM_0].f32 = options.x;
     g_numberValues[NUM_1].f32 = options.y;
     return &g_attributeItem;
@@ -3681,7 +3680,7 @@ const ArkUI_AttributeItem* GetScrollScrollBarWidth(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         g_numberValues[0].f32 =
             GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowScrollBarWidth(node->uiNodeHandle);
-    } 
+    }
     return &g_attributeItem;
 }
 
@@ -3701,7 +3700,7 @@ int32_t SetScrollScrollBarWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarWidth(
             node->uiNodeHandle, attrVal, unit);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
-        auto width = std::to_string(attrVal) + "vp";
+        auto width = std::to_string(attrVal) + LENGTH_METRIC_UNIT[unit];
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidth(node->uiNodeHandle, width.c_str());
     }
     return ERROR_CODE_NO_ERROR;
@@ -3750,7 +3749,8 @@ int32_t SetScrollScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarColor(node->uiNodeHandle, color);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         auto value = Color(color).ColorToString();
-        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(node->uiNodeHandle, value.c_str());
+        fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(
+            node->uiNodeHandle, value.c_str());
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -3869,7 +3869,8 @@ const ArkUI_AttributeItem* GetScrollEnableScrollInteraction(ArkUI_NodeHandle nod
             GetFullImpl()->getNodeModifiers()->getScrollModifier()->getEnableScrollInteraction(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         g_numberValues[0].i32 =
-            GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowEnableScrollInteraction(node->uiNodeHandle);
+            GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowEnableScrollInteraction(
+                node->uiNodeHandle);
     }
     return &g_attributeItem;
 }
@@ -3923,6 +3924,8 @@ int32_t SetScrollNestedScroll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowNestedScroll(
             node->uiNodeHandle, first, second);
+    } else if (node->type == ARKUI_NODE_LIST) {
+        fullImpl->getNodeModifiers()->getListModifier()->setListNestedScroll(node->uiNodeHandle, first, second);
     } else {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollNestedScroll(node->uiNodeHandle, first, second);
     }
@@ -3934,10 +3937,11 @@ const ArkUI_AttributeItem* GetScrollNestedScroll(ArkUI_NodeHandle node)
     ArkUI_Int32 values[2];
     if (node->type == ARKUI_NODE_WATER_FLOW) {
         GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowNestedScroll(node->uiNodeHandle, values);
+    } else if (node->type == ARKUI_NODE_LIST) {
+        GetFullImpl()->getNodeModifiers()->getListModifier()->getListNestedScroll(node->uiNodeHandle, values);
     } else {
         GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollNestedScroll(node->uiNodeHandle, values);
     }
-
     //size index
     g_numberValues[0].i32 = values[0];
     g_numberValues[1].i32 = values[1];
@@ -3950,6 +3954,8 @@ void ResetScrollNestedScroll(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowNestedScroll(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_LIST) {
+        GetFullImpl()->getNodeModifiers()->getListModifier()->resetListNestedScroll(node->uiNodeHandle);
     } else {
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollNestedScroll(node->uiNodeHandle);
     }
@@ -7214,7 +7220,7 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     int radiusUnits[ALLOW_SIZE_4] = { unit, unit, unit, unit };
 
     if (item->size == ALLOW_SIZE_2) {
-        if (LessNotEqual(item->value[0].f32, 0.0f)) {
+        if (LessNotEqual(item->value[NUM_1].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
         for (int i = 0; i < ALLOW_SIZE_4; ++i) {
@@ -7225,7 +7231,7 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
             if (LessNotEqual(item->value[i + NUM_1].f32, 0.0f)) {
                 return ERROR_CODE_PARAM_INVALID;
             } else {
-                radiusVals[i + NUM_1] = item->value[i + NUM_1].f32;
+                radiusVals[i] = item->value[i + NUM_1].f32;
             }
         }
     } else {
@@ -9126,7 +9132,8 @@ int32_t SetWaterFlowSectionOption(ArkUI_NodeHandle node, const ArkUI_AttributeIt
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* waterFlowSectionOption = reinterpret_cast<ArkUIWaterFlowSectionOption>(item->object);
-    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setSectionOption(node->uiNodeHandle, item->value[0].i32, waterFlowSectionOption);
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setSectionOption(
+        node->uiNodeHandle, item->value[0].i32, waterFlowSectionOption);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -9197,7 +9204,7 @@ void ResetItemConstraintSize(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMinWidth(node->uiNodeHandle);
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMaxWidth(node->uiNodeHandle);
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMinHeight(node->uiNodeHandle);
-    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMaxHeight(node->uiNodeHandle);            
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMaxHeight(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetItemConstraintSize(ArkUI_NodeHandle node)

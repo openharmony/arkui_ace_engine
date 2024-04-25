@@ -420,30 +420,30 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
     CHECK_NULL_VOID(option);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto waterFlowSections = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);  
-  
-    const auto& sectionArray = option->sections;  
-    const auto sectionsCount = sectionArray.size();  
-  
-    std::vector<WaterFlowSections::Section> newSections(sectionsCount); 
-  
-    for (size_t i = 0; i < sectionsCount; ++i) {  
-        const auto& sectionData = sectionArray[i];  
-        WaterFlowSections::Section& section = newSections[i];  
-  
-        section.itemsCount = sectionData.itemsCount;  
-        section.crossCount = sectionData.crossCount;  
-        section.columnsGap = Dimension(sectionData.columnsGap);  
-        section.rowsGap = Dimension(sectionData.rowsGap);  
-  
-        NG::PaddingProperty paddings;  
-        paddings.top = std::optional<CalcLength>(sectionData.margin[0]);  
-        paddings.bottom = std::optional<CalcLength>(sectionData.margin[1]);  
-        paddings.left = std::optional<CalcLength>(sectionData.margin[2]);  
-        paddings.right = std::optional<CalcLength>(sectionData.margin[3]);  
-    }  
-  
-    waterFlowSections->ChangeData(start, 0, newSections);  
+    auto waterFlowSections = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
+
+    const auto& sectionArray = option->sections;
+    const auto sectionsCount = sectionArray.size();
+
+    std::vector<WaterFlowSections::Section> newSections(sectionsCount);
+
+    for (size_t i = 0; i < sectionsCount; ++i) {
+        const auto& sectionData = sectionArray[i];
+        WaterFlowSections::Section& section = newSections[i];
+
+        section.itemsCount = sectionData.itemsCount;
+        section.crossCount = sectionData.crossCount;
+        section.columnsGap = Dimension(sectionData.columnsGap);
+        section.rowsGap = Dimension(sectionData.rowsGap);
+
+        NG::PaddingProperty paddings;
+        paddings.top = std::optional<CalcLength>(sectionData.margin[0]);
+        paddings.bottom = std::optional<CalcLength>(sectionData.margin[1]);
+        paddings.left = std::optional<CalcLength>(sectionData.margin[2]);
+        paddings.right = std::optional<CalcLength>(sectionData.margin[3]);
+    }
+
+    waterFlowSections->ChangeData(start, 0, newSections);
 }
 
 void ResetWaterFlowSectionOptions(ArkUINodeHandle node)
@@ -523,20 +523,19 @@ ArkUI_Float32 GetWaterFlowFriction(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
-    static const ArkUIWaterFlowModifier modifier = {
-        ResetColumnsTemplate, SetColumnsTemplate, ResetRowsTemplate, SetRowsTemplate,
-        ResetWaterFlowEnableScrollInteraction, SetWaterFlowEnableScrollInteraction, SetColumnsGap, ResetColumnsGap,
-        SetRowsGap, ResetRowsGap, SetItemMinWidth, ResetItemMinWidth, SetItemMaxWidth, ResetItemMaxWidth,
-        SetItemMinHeight, ResetItemMinHeight, SetItemMaxHeight, ResetItemMaxHeight, SetLayoutDirection,
-        ResetLayoutDirection, SetWaterFlowNestedScroll, ResetWaterFlowNestedScroll, SetWaterFlowFriction,
-        ResetWaterFlowFriction, GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetColumnsGap, GetRowsGap,
-        GetWaterFlowNestedScroll, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount, ResetCachedCount,
-        GetCachedCount, SetEdgeEffect, ResetEdgeEffect, SetWaterFlowScrollBar, ResetWaterFlowScrollBar,
-        GetWaterFlowScrollBar, SetWaterFlowBarWidth, ResetWaterFlowBarWidth, GetWaterFlowBarWidth,
-        SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor, GetEdgeEffect,
-        SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions, GetItemMinWidth,
-        GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction, GetWaterFlowFriction
-    };
+    static const ArkUIWaterFlowModifier modifier = { ResetColumnsTemplate, SetColumnsTemplate, ResetRowsTemplate,
+        SetRowsTemplate, ResetWaterFlowEnableScrollInteraction, SetWaterFlowEnableScrollInteraction, SetColumnsGap,
+        ResetColumnsGap, SetRowsGap, ResetRowsGap, SetItemMinWidth, ResetItemMinWidth, SetItemMaxWidth,
+        ResetItemMaxWidth, SetItemMinHeight, ResetItemMinHeight, SetItemMaxHeight, ResetItemMaxHeight,
+        SetLayoutDirection, ResetLayoutDirection, SetWaterFlowNestedScroll, ResetWaterFlowNestedScroll,
+        SetWaterFlowFriction, ResetWaterFlowFriction, GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate,
+        GetColumnsGap, GetRowsGap, GetWaterFlowNestedScroll, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter,
+        SetCachedCount, ResetCachedCount, GetCachedCount, SetEdgeEffect, ResetEdgeEffect, SetWaterFlowScrollBar,
+        ResetWaterFlowScrollBar, GetWaterFlowScrollBar, SetWaterFlowBarWidth, ResetWaterFlowBarWidth,
+        GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
+        GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
+        GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
+        GetWaterFlowFriction };
     return &modifier;
 }
 
@@ -569,6 +568,107 @@ void SetOnReachEnd(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ScrollableModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
+}
+
+void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto SetOnDidScroll = [nodeId, node, extraParam](const Dimension& offset, const ScrollState& state) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        SendArkUIAsyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(SetOnDidScroll));
+}
+
+void SetOnWaterFlowScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScroll = [node, extraParam](Dimension scrollOffset, ScrollState scrollState) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(scrollOffset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(scrollState);
+        SendArkUIAsyncEvent(&event);
+    };
+    WaterFlowModelNG::SetOnScroll(frameNode, std::move(onScroll));
+}
+
+void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollStart = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_START;
+        SendArkUIAsyncEvent(&event);
+    };
+    WaterFlowModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
+}
+
+void SetOnWaterFlowScrollStop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollStop = [nodeId, node, extraParam]() -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_STOP;
+        SendArkUIAsyncEvent(&event);
+    };
+    WaterFlowModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+}
+
+void SetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollFrameBegin = [nodeId, node, extraParam](
+                                  const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+        ScrollFrameResult scrollRes { .offset = offset };
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_FRAME_BEGIN;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
+        SendArkUIAsyncEvent(&event);
+        scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
+        return scrollRes;
+    };
+    WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+}
+
+void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onScrollIndex = [nodeId, node, extraParam](int32_t first, int32_t last) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_INDEX;
+        event.componentAsyncEvent.data[0].i32 = first;
+        event.componentAsyncEvent.data[1].i32 = last;
+        SendArkUIAsyncEvent(&event);
+    };
+    WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

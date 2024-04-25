@@ -765,8 +765,56 @@ void TextFieldPattern::HandleFocusEvent()
         underlineColor_ = userUnderlineColor_.typing.value_or(textFieldTheme->GetUnderlineTypingColor());
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
+    SetFocusStyle();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::SetFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+
+    if (!paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetFocusBgColor());
+    }
+
+    auto defaultTextColor = textFieldTheme->GetTextColor();
+    if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor) {
+        layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
+        isFocusTextColorSet_ = true;
+    }
+}
+
+void TextFieldPattern::ClearFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+
+    if (!paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
+
+    if (isFocusTextColorSet_) {
+        layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
+        isFocusTextColorSet_ = false;
+    }
 }
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
@@ -1065,6 +1113,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (!eventHub->HasOnAreaChanged()) {
         context->RemoveOnAreaChangeNode(host->GetId());
     }
+    ClearFocusStyle();
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
@@ -2168,7 +2217,8 @@ void TextFieldPattern::ProcessCounter()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() && !IsInPasswordMode()) {
+    if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() &&
+        !IsNormalInlineState() && !IsInPasswordMode()) {
         AddCounterNode();
     } else {
         CleanCounterNode();
@@ -2526,11 +2576,7 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 
 void TextFieldPattern::ProcessOverlay(const OverlayRequest& request)
 {
-    auto newRequest = request;
-    auto needAvoid = CaretAvoidSoftKeyboard();
-    // Avoid menu that appear and then close immediately.
-    newRequest.menuIsShow = newRequest.menuIsShow && !needAvoid;
-    selectOverlay_->ProcessOverlay(newRequest);
+    selectOverlay_->ProcessOverlay(request);
 }
 
 void TextFieldPattern::DelayProcessOverlay(const OverlayRequest& request)
@@ -4542,9 +4588,9 @@ void TextFieldPattern::SetSelectionFlag(
         CloseSelectOverlay(true);
     } else {
         if (options.has_value()) {
-            if (options.value().menuPolicy == MenuPolicy::NEVER) {
+            if (options.value().menuPolicy == MenuPolicy::HIDE) {
                 isShowMenu = false;
-            } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+            } else if (options.value().menuPolicy == MenuPolicy::SHOW) {
                 isShowMenu = true;
             }
         } else {

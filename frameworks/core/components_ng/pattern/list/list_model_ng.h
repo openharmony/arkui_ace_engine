@@ -116,7 +116,8 @@ public:
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
-
+    static void SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
+    static NestedScrollOptions GetListNestedScroll(FrameNode* frameNode);
 private:
     void AddDragFrameNodeToManager() const;
 };

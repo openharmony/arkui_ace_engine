@@ -73,7 +73,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     NG::MovingPhotoModelNG::GetInstance()->Create(Referenced::Claim(controller));
 
     napi_value jsData = nullptr;
-    napi_get_named_property(env, argv[0], "data", &jsData);
+    napi_get_named_property(env, argv[0], "movingPhoto", &jsData);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, jsData, napi_object)) {
         return ExtNapiUtils::CreateNull(env);
     }

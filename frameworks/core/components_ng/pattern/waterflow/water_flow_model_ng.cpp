@@ -192,9 +192,19 @@ void WaterFlowModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFra
     ScrollableModelNG::SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
 }
 
+void WaterFlowModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin)
+{
+    ScrollableModelNG::SetOnScrollFrameBegin(frameNode, std::move(ScrollFrameBegin));
+}
+
 void WaterFlowModelNG::SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll)
 {
     ScrollableModelNG::SetOnScroll(std::move(onScroll));
+}
+
+void WaterFlowModelNG::SetOnScroll(FrameNode* frameNode, std::function<void(Dimension, ScrollState)>&& onScroll)
+{
+    ScrollableModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
 
 void WaterFlowModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
@@ -202,14 +212,32 @@ void WaterFlowModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
     ScrollableModelNG::SetOnScrollStart(std::move(onScrollStart));
 }
 
+void WaterFlowModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
+{
+    ScrollableModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
+}
+
 void WaterFlowModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
 {
     ScrollableModelNG::SetOnScrollStop(std::move(onScrollStop));
 }
 
+void WaterFlowModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
+{
+    ScrollableModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
+}
+
 void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
+}
+
+void WaterFlowModelNG::SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);

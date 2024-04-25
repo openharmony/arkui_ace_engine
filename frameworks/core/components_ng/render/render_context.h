@@ -410,6 +410,7 @@ public:
     virtual void ClearAccessibilityFocus() {};
 
     virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
@@ -578,6 +579,7 @@ public:
 
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);

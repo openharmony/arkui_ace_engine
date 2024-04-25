@@ -1247,12 +1247,12 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ItemAlign}. The default value is <b>ARKUI_ITEM_ALIGN_AUTO</b>. \n
+     * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
+     * The parameter type is {@link ArkUI_ItemAlignment}. The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: alignment mode of the child components along the cross axis of the parent container.\n
-     * The parameter type is {@link ArkUI_ItemAlign}. The default value is <b>ARKUI_ITEM_ALIGN_AUTO</b>. \n
+     * .value[0].i32: alignment mode of the child components along the cross axis of the parent container.\n
+     * The parameter type is {@link ArkUI_ArkUI_ItemAlignment}. The default value is <b>ARKUI_ITEM_ALIGNMENT_AUTO</b>. \n
      *
      */
     NODE_ALIGN_SELF,
@@ -4380,7 +4380,18 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: edge (top, bottom, left, or right) that the scrolling reaches. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_EDGE,
-
+    /**
+     * @brief 定义ARKUI_NODE_LIST有子组件划入或划出List显示区域时触发事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 列表初始化时会触发一次，List显示区域内第一个子组件的索引值或最后一个子组件的索引值有变化时会触发。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含3个参数: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: List显示区域内第一个子组件的索引值. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: List显示区域内最后一个子组件的索引值. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].i32</b>: List显示区域内中间位置子组件的索引值. \n     
+     */
+    NODE_LIST_ON_SCROLL_INDEX = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
     /**
      * @brief Defines the event triggered when the refresh state of the <b>ARKUI_NODE_REFRESH</b> object changes.
      *
@@ -4423,6 +4434,30 @@ typedef enum {
      * {@link ArkUI_NodeComponentEvent} does not contain parameters. \n
      */
     NODE_ON_REACH_END,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滑动时触发事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件触发滚动时触发，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用。\n
+     * 3、越界回弹。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含2个参数: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: 每帧滚动的偏移量，内容向上滚动时偏移量为正，向下滚动时偏移量为负. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: 当前滑动状态. \n
+     */
+    NODE_ON_DID_SCROLL,
+    /**
+     * @brief 定义ARKUI_NODE_WATER_FLOW当前瀑布流显示的起始位置/终止位置的子组件发生变化时触发事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 瀑布流显示区域上第一个子组件/最后一个组件的索引值有变化就会触发。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含3个参数: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: 当前显示的WaterFlow起始位置的索引值. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: 当前显示的瀑布流终止位置的索引值. \n
+     */
+    NODE_WATER_FLOW_ON_SCROLL_INDEX,
 } ArkUI_NodeEventType;
 
 /**

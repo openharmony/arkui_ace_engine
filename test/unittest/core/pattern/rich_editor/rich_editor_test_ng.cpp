@@ -3175,7 +3175,7 @@ HWTEST_F(RichEditorTestNg, Selection005, TestSize.Level1)
     int32_t start = 0;
     int32_t end = 1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::NEVER;
+    options.menuPolicy = MenuPolicy::HIDE;
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
@@ -3221,7 +3221,7 @@ HWTEST_F(RichEditorTestNg, Selection006, TestSize.Level1)
     int32_t start = -1;
     int32_t end = -1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::NEVER;
+    options.menuPolicy = MenuPolicy::HIDE;
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
@@ -3256,7 +3256,7 @@ HWTEST_F(RichEditorTestNg, Selection007, TestSize.Level1)
     int32_t start = 0;
     int32_t end = 1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::ALWAYS;
+    options.menuPolicy = MenuPolicy::SHOW;
     richEditorPattern->OnModifyDone();
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
@@ -3302,7 +3302,7 @@ HWTEST_F(RichEditorTestNg, Selection008, TestSize.Level1)
     int32_t start = -1;
     int32_t end = -1;
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::ALWAYS;
+    options.menuPolicy = MenuPolicy::SHOW;
     richEditorPattern->SetSelection(start, end, options);
     ClearSpan();
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());

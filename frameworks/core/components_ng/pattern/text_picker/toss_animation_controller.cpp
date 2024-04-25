@@ -98,12 +98,13 @@ void TextPickerTossAnimationController::StartSpringMotion()
     auto optionProperties = column->GetMidShiftDistance();
     auto midShiftDistance =
         (speed) < 0.0 ? optionProperties[midIndex].prevDistance : optionProperties[midIndex].nextDistance;
-    column->SetYLast(0.0);
+    column->SetYLast(0);
     end_ = midShiftDistance * showCount_ - offset;
     AnimationOption option = AnimationOption();
     option.SetCurve(springCurve);
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
+    property_->Set(0);
     renderContext->AttachNodeAnimatableProperty(property_);
     property_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     auto finishCallback = [weak, column]() {
@@ -181,25 +182,6 @@ void TextPickerTossAnimationController::CreatePropertyCallback()
             return;
         }
         column->UpdateToss(static_cast<int>(position));
-        auto ref = weak.Upgrade();
-        CHECK_NULL_VOID(ref);
-        if (position > 0.0f) {
-            if (static_cast<int>(ref->end_) == std::ceil(position)) {
-                column->UpdateFinishToss(std::ceil(position));
-            } else if (static_cast<int>(ref->end_) < std::ceil(position)) {
-                return;
-            } else {
-                column->UpdateToss(std::ceil(position));
-            }
-        } else {
-            if (static_cast<int>(ref->end_) == std::floor(position)) {
-                column->UpdateFinishToss(std::floor(position));
-            } else if (static_cast<int>(ref->end_) > std::floor(position)) {
-                return;
-            } else {
-                column->UpdateToss(std::floor(position));
-            }
-        }
         column->SetTossStatus(true);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, std::move(propertyCallback));

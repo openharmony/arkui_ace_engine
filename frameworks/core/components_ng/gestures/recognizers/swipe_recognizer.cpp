@@ -36,6 +36,7 @@ constexpr int32_t RATIO_MS_TO_S = 1000;
 constexpr int32_t RATIO_US_TO_MS = 1000;
 constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr double RIGHT_ANGLE = 90.0;
+constexpr double SWIPE_MOVE_LIMITED = 3.0;
 
 double Atan2ToAtan(double angle)
 {
@@ -242,6 +243,10 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     Offset moveDistance(curLocalPoint.GetX() - lastLocalPoint.GetX(), curLocalPoint.GetY() - lastLocalPoint.GetY());
     touchPoints_[event.id] = event;
     if (NearZero(moveDistance.GetX()) && NearZero(moveDistance.GetY())) {
+        return;
+    }
+    if (moveDistance.GetDistance() < SWIPE_MOVE_LIMITED) {
+        // if move distance is smaller than MOVE_LIMITED, no need to calculate Angle.
         return;
     }
     double newAngle = ComputeAngle(moveDistance.GetX(), moveDistance.GetY());

@@ -76,7 +76,11 @@ void TextFieldModelNG::CreateNode(
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     SetCaretColor(textFieldTheme->GetCursorColor());
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
+    SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node");
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipeline->GetDraggable<TextFieldTheme>();
         SetDraggable(draggable);
@@ -96,8 +100,6 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "new text:%{public}s, old text:%{public}s", value.value_or("NA").c_str(),
-        textValue.c_str());
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
     }
@@ -114,6 +116,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
     ProcessDefaultStyleAndBehaviors(frameNode);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
 }
 
@@ -1525,6 +1528,45 @@ void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace:
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
 }
 
+void TextFieldModelNG::SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue, frameNode);
+}
+
+void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditChanged(std::move(func));
+}
+
+void TextFieldModelNG::SetInputFilter(FrameNode* frameNode,
+    const std::string& value, const std::function<void(const std::string&)>& onError)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, InputFilter, value, frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInputFilterError(onError);
+}
+
+void TextFieldModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
 void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1551,39 +1593,37 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
     eventHub->SetOnEditChanged(std::move(func));
 }
 
-FONT_FEATURES_LIST TextFieldModelNG::GetFontFeature(FrameNode* frameNode){
+FONT_FEATURES_LIST TextFieldModelNG::GetFontFeature(FrameNode* frameNode)
+{
     FONT_FEATURES_LIST value;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, FontFeature, value, frameNode, value);
-    return value;    
+    return value;
 }
 
 Dimension TextFieldModelNG::GetAdaptMinFontSize(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode, value);
     return value;
 }
 
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextFieldLayoutProperty, AdaptMaxFontSize, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, AdaptMaxFontSize, value, frameNode, value);
     return value;
 }
 
 Dimension TextFieldModelNG::GetLineHeight(FrameNode* frameNode)
 {
     Dimension value;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextFieldLayoutProperty, LineHeight, value, frameNode, value);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, LineHeight, value, frameNode, value);
     return value;
 }
 
 uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
 {
-    uint32_t value = 0;
+    uint32_t value = 3;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, MaxLines, value, frameNode, value);
     return value;
 }

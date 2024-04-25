@@ -121,21 +121,29 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
         case NODE_SCROLL_EVENT_ON_SCROLL:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_SCROLL;
             }
             return ON_SCROLL;
         case NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL_FRAME_BEGIN;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_SCROLL_FRAME_BEGIN;
             }
             return ON_SCROLL_FRAME_BEGIN;
         case NODE_SCROLL_EVENT_ON_SCROLL_START:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL_START;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_SCROLL_START;
             }
             return ON_SCROLL_START;
         case NODE_SCROLL_EVENT_ON_SCROLL_STOP:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL_STOP;
+            } else if (arkUINodeType == ARKUI_NODE_WATER_FLOW) {
+                return ON_WATER_FLOW_SCROLL_STOP;
             }
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
@@ -213,6 +221,15 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TOUCH_INTERCEPT;
         case NODE_ON_REACH_END:
             return ON_REACH_END;
+        case NODE_ON_DID_SCROLL:
+            if (arkUINodeType == ARKUI_NODE_LIST) {
+                return ON_LIST_DID_SCROLL;
+            }
+            return ON_DID_SCROLL;
+        case NODE_LIST_ON_SCROLL_INDEX:
+            return ON_LIST_SCROLL_INDEX;
+        case NODE_WATER_FLOW_ON_SCROLL_INDEX:
+            return ON_WATER_FLOW_SCROLL_INDEX;
         default:
             return -1;
     }
@@ -313,6 +330,22 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_TOUCH_INTERCEPT;
         case ON_REACH_END:
             return NODE_ON_REACH_END;
+        case ON_DID_SCROLL:
+            return NODE_ON_DID_SCROLL;
+        case ON_WATER_FLOW_SCROLL:
+            return NODE_SCROLL_EVENT_ON_SCROLL;
+        case ON_WATER_FLOW_SCROLL_FRAME_BEGIN:
+            return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
+        case ON_WATER_FLOW_SCROLL_START:
+            return NODE_SCROLL_EVENT_ON_SCROLL_START;
+        case ON_WATER_FLOW_SCROLL_STOP:
+            return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
+        case ON_LIST_SCROLL_INDEX:
+            return NODE_LIST_ON_SCROLL_INDEX;
+        case ON_LIST_DID_SCROLL:
+            return NODE_ON_DID_SCROLL;
+        case ON_WATER_FLOW_SCROLL_INDEX:
+            return NODE_WATER_FLOW_ON_SCROLL_INDEX;
         default:
             return -1;
     }

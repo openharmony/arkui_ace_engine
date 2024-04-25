@@ -1957,7 +1957,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 currentIndex++;
             }
         }
-        CompeleteItemCrossPosition(layoutWrapper, line->second);
+        CompleteItemCrossPosition(layoutWrapper, line->second);
         for (const auto& elem : line->second) {
             if (elem.second > gridLayoutInfo_.endIndex_) {
                 gridLayoutInfo_.endIndex_ = elem.second;
@@ -2050,17 +2050,18 @@ int32_t GridScrollLayoutAlgorithm::MeasureCachedChild(const SizeF& frameSize, in
     return crossSpan;
 }
 
-void GridScrollLayoutAlgorithm::CompeleteItemCrossPosition(
+void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
     LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items)
 {
     for (auto item : items) {
         auto currentIndex = item.second;
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
-        if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-            for (auto i = item.first; i < crossCount_; ++i) {
-                predictBuildList_.emplace_back(currentIndex++);
+        if (!itemWrapper) {
+            if (predictBuildList_.back() < currentIndex) {
+                predictBuildList_.push_front(currentIndex);
+            } else if (predictBuildList_.front() > currentIndex) {
+                predictBuildList_.emplace_back(currentIndex);
             }
-            break;
         }
         itemsCrossPosition_.try_emplace(currentIndex, ComputeItemCrossPosition(layoutWrapper, item.first));
     }

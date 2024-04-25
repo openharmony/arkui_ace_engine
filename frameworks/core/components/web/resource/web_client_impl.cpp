@@ -658,6 +658,14 @@ bool WebClientImpl::RunContextMenu(
     return jsResult;
 }
 
+void WebClientImpl::UpdateClippedSelectionBounds(int x, int y, int w, int h)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->UpdateClippedSelectionBounds(x, y, w, h);
+}
+
 bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
                                  std::shared_ptr<NWeb::NWebQuickMenuCallback> callback)
 {

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
+
 #include "movingphoto_pattern.h"
 #include "movingphoto_layout_property.h"
 #include "movingphoto_node.h"
@@ -303,7 +305,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     auto movingPhotoPattern = WeakClaim(this);
 
     auto&& positionUpdatedEvent = [movingPhotoPattern, uiTaskExecutor](uint32_t currentPos) {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern, currentPos] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern, currentPos] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -312,7 +314,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& stateChangedEvent = [movingPhotoPattern, uiTaskExecutor](PlaybackStatus status) {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern, status] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern, status] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -321,7 +323,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& errorEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([&movingPhotoPattern] {
+        uiTaskExecutor.PostTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -330,7 +332,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& resolutionChangeEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -339,7 +341,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -846,5 +848,12 @@ void MovingPhotoPattern::OnWindowHide()
     rsContext->UpdateOpacity(1.0);
     image->MarkModifyDone();
     isShowVideo_ = false;
+}
+
+MovingPhotoPattern::~MovingPhotoPattern()
+{
+    if (fd_ > 0) {
+        close(fd_);
+    }
 }
 } // namespace OHOS::Ace::NG

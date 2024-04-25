@@ -606,6 +606,7 @@ enum ArkUIEventSubKind {
     ON_LIST_SCROLL_STOP,
     ON_LIST_SCROLL_FRAME_BEGIN,
     ON_LIST_WILL_SCROLL,
+    ON_LIST_DID_SCROLL,
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
@@ -661,7 +662,13 @@ enum ArkUIEventSubKind {
     ON_CALENDAR_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_CALENDAR_PICKER,
     ON_WILL_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_WATER_FLOW,
     ON_REACH_END,
-
+    ON_DID_SCROLL,
+    ON_WATER_FLOW_SCROLL,
+    ON_WATER_FLOW_SCROLL_START,
+    ON_WATER_FLOW_SCROLL_STOP,
+    ON_WATER_FLOW_SCROLL_FRAME_BEGIN,
+    ON_WATER_FLOW_SCROLL_INDEX,
+    
     ON_ALPHABET_INDEXER_SELECTED = ARKUI_MAX_EVENT_NUM * ARKUI_ALPHABET_INDEXER,
     ON_ALPHABET_INDEXER_REQUEST_POPUP_DATA,
     ON_ALPHABET_INDEXER_POPUP_SELECTED,
@@ -1207,7 +1214,7 @@ struct ArkUICommonModifier {
     void (*getClipShape)(ArkUINodeHandle node, ArkUIClipShapeOptions* options);
     void (*getTransform)(ArkUINodeHandle node, ArkUI_Float32* values);
     ArkUI_Int32 (*getHitTestBehavior)(ArkUINodeHandle node);
-    void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions* options);
+    void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions* options, ArkUI_Int32 unit);
     ArkUI_Int32 (*getShadow)(ArkUINodeHandle node);
     void (*getCustomShadow)(ArkUINodeHandle node, ArkUICustomShadowOptions* options);
     ArkUI_Int32 (*getSweepGradient)(
@@ -1597,7 +1604,7 @@ struct ArkUIListModifier {
     ArkUI_Float32 (*getListFriction)(ArkUINodeHandle node);
     void (*setListFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
     void (*resetListFriction)(ArkUINodeHandle node);
-    ArkUI_Int32 (*getListNestedScroll)(ArkUINodeHandle node);
+    void (*getListNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*setListNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 forward, ArkUI_Int32 backward);
     void (*resetListNestedScroll)(ArkUINodeHandle node);
     ArkUI_Int32 (*getListScrollBar)(ArkUINodeHandle node);
@@ -2295,6 +2302,29 @@ struct ArkUITextInputModifier {
     void (*resetTextInputTextOverflow)(ArkUINodeHandle node);
     void (*setTextInputTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputTextIndent)(ArkUINodeHandle node);
+    void (*setTextInputSelectAll)(ArkUINodeHandle node, ArkUI_Uint32 enableSelectAll);
+    void (*resetTextInputSelectAll)(ArkUINodeHandle node);
+    void (*setTextInputShowCounter)(
+        ArkUINodeHandle node, ArkUI_Uint32 open, ArkUI_Int32 thresholdPercentage, ArkUI_Uint32 highlightBorder);
+    void (*resetTextInputShowCounter)(ArkUINodeHandle node);
+    void (*setTextInputOnEditChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnEditChange)(ArkUINodeHandle node);
+    void (*setTextInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);
+    void (*resetTextInputFilter)(ArkUINodeHandle node);
+    void (*setTextInputOnSubmitWithEvent)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnSubmitWithEvent)(ArkUINodeHandle node);
+    void (*setTextInputOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnChange)(ArkUINodeHandle node);
+    void (*setTextInputOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setTextInputOnContentScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnContentScroll)(ArkUINodeHandle node);
+    void (*setTextInputOnCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnCopy)(ArkUINodeHandle node);
+    void (*setTextInputOnCut)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnCut)(ArkUINodeHandle node);
+    void (*setTextInputOnPaste)(ArkUINodeHandle node, void* callback);
+    void (*resetTextInputOnPaste)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputSelectionMenuHidden)(ArkUINodeHandle node);
     void (*setTextInputShowPassword)(ArkUINodeHandle node, ArkUI_Uint32 showPassword);
     void (*resetTextInputShowPassword)(ArkUINodeHandle node);
@@ -3561,6 +3591,8 @@ struct ArkUIBasicAPI {
     // the flag can combine different flag like ARKUI_DIRTY_FLAG_MEASURE | ARKUI_DIRTY_FLAG_RENDER
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
     ArkUI_Bool (*isBuilderNode)(ArkUINodeHandle node);
+
+    ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
 };
 
 struct ArkUIDialogAPI {

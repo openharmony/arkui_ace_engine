@@ -512,6 +512,9 @@ class SelectItem extends ViewPU {
                         y: this.zoomScaleArray[this.selectedIndexes[0]]
                     });
                     Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
+                    Stack.pixelRound({
+                        top: PixelRoundCalcPolicy.FORCE_FLOOR
+                    });
                     e || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));

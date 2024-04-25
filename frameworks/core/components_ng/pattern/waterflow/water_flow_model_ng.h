@@ -100,6 +100,11 @@ public:
     static RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections(FrameNode* frameNode);
     static void ResetSections(FrameNode* frameNode);
     static bool GetScrollEnabled(FrameNode* frameNode);
+    static void SetOnScroll(FrameNode* frameNode, std::function<void(Dimension, ScrollState)>&& onScroll);
+    static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
+    static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H
