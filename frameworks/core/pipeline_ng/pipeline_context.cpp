@@ -665,7 +665,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushMessages();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
-    if (!isFormRender_ && onShow_ && onFocus_) {
+    if (!isFormRender_ && onShow_ && onFocus_ && isWindowHasFocused_) {
         FlushFocusView();
         FlushFocus();
         FlushFocusScroll();
@@ -2771,6 +2771,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
+        isWindowHasFocused_ = true;
         auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
         auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
         if (!curFocusViewHub) {
