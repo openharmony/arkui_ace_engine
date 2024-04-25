@@ -29,8 +29,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DELAY = 300;
-constexpr int32_t ANIMATION_DURATION_100 = 100;
-constexpr int32_t ANIMATION_DURATION_200 = 200;
+constexpr int32_t ANIMATION_DURATION_300 = 300;
+constexpr int32_t ANIMATION_DURATION_400 = 400;
 constexpr float NORMAL_SCALE = 1.0f;
 constexpr float ZOOM_IN_SCALE = 1.1f;
 constexpr double NORMAL_PLAY_SPEED = 1.0;
@@ -658,7 +658,7 @@ void MovingPhotoPattern::StartAnimation()
     videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
 
     AnimationOption opacityOption;
-    opacityOption.SetDuration(ANIMATION_DURATION_100);
+    opacityOption.SetDuration(ANIMATION_DURATION_400);
     opacityOption.SetCurve(Curves::FRICTION);
     opacityOption.SetOnFinishEvent([this]() {
         isShowVideo_ = true;
@@ -669,7 +669,7 @@ void MovingPhotoPattern::StartAnimation()
          }, opacityOption.GetOnFinishEvent());
 
     AnimationOption scaleOption;
-    scaleOption.SetDuration(ANIMATION_DURATION_200);
+    scaleOption.SetDuration(ANIMATION_DURATION_400);
     scaleOption.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(scaleOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
@@ -711,7 +711,7 @@ void MovingPhotoPattern::StopAnimation()
     video->MarkModifyDone();
 
     AnimationOption option;
-    option.SetDuration(ANIMATION_DURATION_200);
+    option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
     option.SetOnFinishEvent([this]() {
         isShowVideo_ = false;
