@@ -438,8 +438,16 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t childUpdateIdx = host->GetChildrenUpdated();
+    if (childUpdateIdx > -1 && layoutInfo_.GetSegment(childUpdateIdx) == start && sections_->IsSpecialUpdate()) {
+        // optimize adding or removing children in the last section. Prevent complete reset of that section.
+        ++start;
+    }
     layoutInfo_.InitSegments(sections_->GetSectionInfo(), start);
     layoutInfo_.margins_.clear();
+
     MarkDirtyNodeSelf();
 }
 
