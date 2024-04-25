@@ -282,7 +282,7 @@ void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
         pointerEvent->MarkProcessed();
         return;
     }
-    OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node);
+    OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node, nullptr, true);
 }
 
 bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
