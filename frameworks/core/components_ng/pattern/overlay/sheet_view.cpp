@@ -84,7 +84,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     layoutProps->UpdateMargin(margin);
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (sheetStyle.isTitleBuilder.has_value()) {
+    if (sheetStyle.isTitleBuilder.has_value() && LessNotEqual(pipeline->GetFontScale(), SHEET_MAX_SCALE)) {
         layoutProps->UpdateUserDefinedIdealSize(
             CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
@@ -204,7 +204,11 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     auto titleProp = sheetTitle->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(titleProp, nullptr);
-    titleProp->UpdateMaxLines(1);
+    if (LessNotEqual(pipeline->GetFontScale(), SHEET_MAX_SCALE)) {
+        titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
+    } else {
+        titleProp->UpdateMaxLines(SHEET_AGING_MAX_LINES);
+    }
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateAdaptMaxFontSize(sheetTheme->GetTitleTextFontSize());
     titleProp->UpdateAdaptMinFontSize(sheetTheme->GetTitleTextFontSize());
@@ -241,7 +245,11 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(sheetSubtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
-    titleProp->UpdateMaxLines(1);
+    if (LessNotEqual(pipeline->GetFontScale(), SHEET_MAX_SCALE)) {
+        titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
+    } else {
+        titleProp->UpdateMaxLines(SHEET_AGING_MAX_LINES);
+    }
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateAdaptMaxFontSize(sheetTheme->GetSubtitleTextFontSize());
     titleProp->UpdateAdaptMinFontSize(sheetTheme->GetSubtitleTextFontSize());
@@ -273,8 +281,12 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(titleColumn, nullptr);
     auto layoutProperty = titleColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+    if (LessNotEqual(pipeline->GetFontScale(), SHEET_MAX_SCALE)) {
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+    }
     MarginProperty margin;
     margin.top = CalcLength(SHEET_TITLE_AERA_MARGIN);
     layoutProperty->UpdateMargin(margin);
@@ -293,8 +305,10 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             auto subtitleRow = BuildSubTitle(sheetNode, sheetStyle);
             CHECK_NULL_RETURN(subtitleRow, nullptr);
             subtitleRow->MountToParent(titleColumn);
-            layoutProperty->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
+            if (LessNotEqual(pipeline->GetFontScale(), SHEET_MAX_SCALE)) {
+                layoutProperty->UpdateUserDefinedIdealSize(
+                    CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
+            }
             MarginProperty margin;
             margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_PADDING);
             layoutProperty->UpdateMargin(margin);
