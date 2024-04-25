@@ -152,7 +152,7 @@ void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
     if (info.Length() > 1 && !info[1]->IsUndefined()) {
         parseSymbolSwitch(info[1], symbolEffectOptions);
     }
-    
+
     SymbolModel::GetInstance()->SetSymbolEffectOptions(symbolEffectOptions);
 }
 
@@ -206,6 +206,5 @@ void JSSymbol::parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptio
         ParseJsInteger(jsVal, triggerValue);
         symbolEffectOptions.SetTriggerNum(triggerValue);
     }
-
 }
 } // namespace OHOS::Ace::Framework
