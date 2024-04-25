@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include <numeric>
 
 #include "base/utils/utils.h"
 
@@ -719,5 +720,26 @@ MatIter GridLayoutInfo::FindStartLineInMatrix(MatIter iter, int32_t index) const
         --iter;
     }
     return ++iter;
+}
+
+float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const
+{
+    float totalHeight = 0.0f;
+    auto endIt = lineHeightMap_.find(endLine);
+    for (auto it = lineHeightMap_.find(startLine); it != endIt; ++it) {
+        totalHeight += it->second + mainGap;
+    }
+    return totalHeight;
+}
+
+bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
+{
+    for (auto it : lineHeightMap_) {
+        other -= it.second + mainGap;
+        if (NonPositive(other)) {
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
