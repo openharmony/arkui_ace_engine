@@ -197,6 +197,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
 
     if (isScrollEnd_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         // AccessibilityEventType::SCROLL_END
         isScrollEnd_ = false;
     }
