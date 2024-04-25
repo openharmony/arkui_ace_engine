@@ -211,7 +211,7 @@ public:
 
     void SetSurfaceRotation(bool isLock);
 
-    const bool& GetSurfaceRotation()
+    bool GetSurfaceRotation()
     {
         return isSurfaceLock_;
     }

@@ -187,10 +187,10 @@ void XComponentControllerNG::SetSurfaceRotation(bool isLock)
     pattern->SetSurfaceRotation(isLock);
 }
 
-void XComponentControllerNG::GetSurfaceRotation(bool& isLock)
+bool XComponentControllerNG::GetSurfaceRotation()
 {
     auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    isLock = pattern->GetSurfaceRotation();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSurfaceRotation();
 }
 } // namespace OHOS::Ace::NG

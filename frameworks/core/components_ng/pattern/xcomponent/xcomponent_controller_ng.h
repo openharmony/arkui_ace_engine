@@ -62,7 +62,7 @@ public:
 
     void SetSurfaceRotation(bool isLock) override;
 
-    void GetSurfaceRotation(bool& isLock) override;
+    bool GetSurfaceRotation() override;
 
 private:
     WeakPtr<XComponentPattern> pattern_;

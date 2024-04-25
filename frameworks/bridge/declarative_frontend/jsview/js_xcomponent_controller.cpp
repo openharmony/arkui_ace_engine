@@ -304,9 +304,8 @@ void JSXComponentController::SetXComponentSurfaceRotation(const JSCallbackInfo& 
 void JSXComponentController::GetXComponentSurfaceRotation(const JSCallbackInfo& args)
 {
     auto retObj = JSRef<JSObject>::New();
-    bool lock = false;
     CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->GetSurfaceRotation(lock);
+    bool lock = xcomponentController_->GetSurfaceRotation();
     retObj->SetProperty("lock", lock);
     args.SetReturnValue(retObj);
 }
