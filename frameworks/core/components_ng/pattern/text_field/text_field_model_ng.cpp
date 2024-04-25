@@ -75,6 +75,9 @@ void TextFieldModelNG::CreateNode(
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     SetCaretColor(textFieldTheme->GetCursorColor());
+    CaretStyle caretStyle;
+    caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
+    SetCaretStyle(caretStyle);
     AddDragFrameNodeToManager();
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node");
     if (frameNode->IsFirstBuilding()) {
