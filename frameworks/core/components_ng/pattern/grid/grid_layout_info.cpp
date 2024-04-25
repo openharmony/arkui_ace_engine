@@ -658,15 +658,17 @@ void GridLayoutInfo::ClearMatrixToEnd(int32_t idx, int32_t lineIdx)
 float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) const
 {
     float len = 0.0f;
-    float offset = currentOffset_;
-
-    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
-    for (auto it = lineHeightMap_.find(startMainLineIndex_); it != endIt; ++it) {
+    auto it = lineHeightMap_.find(startMainLineIndex_);
+    if (!regular) {
         // skip adding starting lines that are outside viewport in LayoutIrregular
-        if (!regular && Negative(it->second + offset + mainGap)) {
+        float offset = currentOffset_;
+        while (it != lineHeightMap_.end() && Negative(it->second + offset + mainGap)) {
             offset += it->second + mainGap;
-            continue;
+            ++it;
         }
+    }
+    auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
+    for (; it != endIt; ++it) {
         len += it->second + mainGap;
     }
     return len - mainGap;
