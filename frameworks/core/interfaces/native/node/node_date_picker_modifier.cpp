@@ -54,7 +54,7 @@ ArkUI_CharPtr GetSelectedTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -124,7 +124,7 @@ ArkUI_CharPtr GetDatePickerTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -195,7 +195,7 @@ ArkUI_CharPtr GetDisappearTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -368,6 +368,7 @@ void ResetSelectedDate(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     time_t now = time(nullptr);
     auto currentTm = localtime(&now);
+    CHECK_NULL_VOID(currentTm);
     PickerDate pickerDate(currentTm->tm_year + 1900, currentTm->tm_mon + 1, currentTm->tm_mday);
 
     DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);
