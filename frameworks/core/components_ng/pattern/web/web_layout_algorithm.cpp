@@ -52,6 +52,9 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, renderMode) &&
         IsValidRootLayer(rootLayerHeight, renderMode)) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(rootLayerWidth, rootLayerHeight));
+    } else if (pattern->IsVirtualKeyBoardShow()) {
+        Size drawSize = pattern->GetDrawSize();
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(drawSize.Width(), drawSize.Height()));
     } else {
         BoxLayoutAlgorithm::Measure(layoutWrapper);
     }
