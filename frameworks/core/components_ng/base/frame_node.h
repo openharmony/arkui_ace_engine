@@ -383,6 +383,14 @@ public:
 
     OffsetF GetOffsetRelativeToWindow() const;
 
+    OffsetF GetPositionToScreen();
+
+    OffsetF GetPositionToParentWithTransform() const;
+
+    OffsetF GetPositionToScreenWithTransform();
+
+    OffsetF GetPositionToWindowWithTransform() const;
+
     OffsetF GetTransformRelativeOffset() const;
 
     RectF GetTransformRectRelativeToWindow() const;

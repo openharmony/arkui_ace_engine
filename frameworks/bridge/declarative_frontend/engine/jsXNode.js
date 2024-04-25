@@ -671,8 +671,24 @@ class FrameNode {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
+    getPositionToScreen() {
+        const position = getUINativeModule().frameNode.getPositionToScreen(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
     getPositionToWindow() {
         const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToParentWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToScreenWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToScreenWithTransform(this.getNodePtr());
+        return { x: position[0], y: position[1] };
+    }
+    getPositionToWindowWithTransform() {
+        const position = getUINativeModule().frameNode.getPositionToWindowWithTransform(this.getNodePtr());
         return { x: position[0], y: position[1] };
     }
     getMeasuredSize() {
