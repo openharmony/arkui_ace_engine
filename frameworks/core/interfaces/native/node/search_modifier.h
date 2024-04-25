@@ -20,6 +20,11 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISearchModifier* GetSearchModifier();
+void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam);
+void SetOnSearchChange(ArkUINodeHandle node, void* extraParam);
+void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam);
+void SetOnSearchCut(ArkUINodeHandle node, void* extraParam);
+void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SEARCH_MODIFIER_H
