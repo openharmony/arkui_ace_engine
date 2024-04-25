@@ -240,13 +240,17 @@ napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info inf
 {
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-    auto controller = new (std::nothrow) NG::MovingPhotoController();
+    auto controller = AceType::MakeRefPtr<NG::MovingPhotoController>();
     if (controller == nullptr) {
         return ExtNapiUtils::CreateNull(env);
     }
+    controller->IncRefCount();
     napi_wrap(
-        env, thisVar, controller,
-        [](napi_env env, void* data, void* hint) {},
+        env, thisVar, AceType::RawPtr(controller),
+        [](napi_env env, void* data, void* hint) {
+            auto* controller = reinterpret_cast<NG::MovingPhotoController*>(data);
+            controller->DecRefCount();
+        },
         nullptr, nullptr);
     return thisVar;
 }
