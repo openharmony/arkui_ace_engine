@@ -48,7 +48,7 @@ ArkUINativeModuleValue ParticleBridge::SetDisturbanceField(ArkUIRuntimeCallInfo*
         dataVector[index * 10 + 2].i32 = sizeWidthValue;
         Local<JSValueRef> sizeHeight = panda::ArrayRef::GetValueAt(vm, array, index * 10 + 3);
         int32_t sizeHeightValue = 0;
-        ArkTSUtils::ParseJsInteger(vm, sizeHeight, sizeWidthValue);
+        ArkTSUtils::ParseJsInteger(vm, sizeHeight, sizeHeightValue);
         dataVector[index * 10 + 3].i32 = sizeHeightValue;
         Local<JSValueRef> positionX = panda::ArrayRef::GetValueAt(vm, array, index * 10 + 4);
         int32_t positionXValue = 0;
