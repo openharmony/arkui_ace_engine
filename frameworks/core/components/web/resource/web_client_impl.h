@@ -177,6 +177,7 @@ public:
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
+    void UpdateClippedSelectionBounds(int x, int y, int w, int h) override;
     bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
                       std::shared_ptr<NWeb::NWebQuickMenuCallback> callback) override;
     void OnQuickMenuDismissed() override;
