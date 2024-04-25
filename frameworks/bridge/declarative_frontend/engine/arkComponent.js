@@ -5562,6 +5562,40 @@ class ImageeResizableModifier extends ModifierWithKey {
   }
 }
 ImageeResizableModifier.identity = Symbol('resizable');
+class ImageDynamicRangeModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetDynamicRangeMode(node);
+    }
+    else {
+      getUINativeModule().image.setDynamicRangeMode(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageDynamicRangeModeModifier.identity = Symbol('dynamicRangeMode');
+class ImageEnhancedImageQualityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetEnhancedImageQuality(node);
+    }
+    else {
+      getUINativeModule().image.setEnhancedImageQuality(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageObjectFitModifier.identity = Symbol('enhancedImageQuality');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -5653,6 +5687,16 @@ class ArkImageComponent extends ArkComponent {
   }
   transition(value) {
     modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+    return this;
+  }
+  dynamicRangeMode(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  enhancedImageQuality(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageEnhancedImageQualityModifier.identity, ImageEnhancedImageQualityModifier, value);
     return this;
   }
 }

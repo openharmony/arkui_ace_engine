@@ -522,6 +522,42 @@ void ResetResizable(ArkUINodeHandle node)
     ImageModelNG::SetResizableSlice(frameNode, DEFAULT_IMAGE_SLICE);
 }
 
+void SetDynamicRangeMode(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DynamicRangeMode dynamicRangeModeValue = static_cast<DynamicRangeMode>(dynamicRangeMode);
+    if (dynamicRangeModeValue < DynamicRangeMode::HIGH || dynamicRangeModeValue > DynamicRangeMode::STANDARD) {
+        dynamicRangeModeValue = DynamicRangeMode::STANDARD;
+    }
+    ImageModelNG::SetDynamicRangeMode(frameNode, dynamicRangeModeValue);
+}
+
+void ResetDynamicRangeMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetDynamicRangeMode(frameNode, DynamicRangeMode::STANDARD);
+}
+
+void SetEnhancedImageQuality(ArkUINodeHandle node, ArkUI_Int32 imageQuality)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    AIImageQuality imageQualityValue = static_cast<AIImageQuality>(imageQuality);
+    if (imageQualityValue < AIImageQuality::NONE || imageQualityValue > AIImageQuality::HIGH) {
+        imageQualityValue = AIImageQuality::NONE;
+    }
+    ImageModelNG::SetEnhancedImageQuality(frameNode, imageQualityValue);
+}
+
+void ResetEnhancedImageQuality(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetEnhancedImageQuality(frameNode, AIImageQuality::NONE);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -535,8 +571,9 @@ const ArkUIImageModifier* GetImageModifier()
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
         ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
-        ResetResizable, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation,
-        GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode };
+        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality, ResetEnhancedImageQuality,
+        GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
+        GetImageDraggable, GetRenderMode };
     return &modifier;
 }
 
