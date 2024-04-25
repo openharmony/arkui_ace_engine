@@ -240,6 +240,7 @@ public:
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
+    void SetSurfaceRotation(bool isLock) override;
 
     RectF GetPaintRectWithTransform() override;
 

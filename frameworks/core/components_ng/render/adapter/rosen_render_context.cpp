@@ -4620,6 +4620,15 @@ bool RosenRenderContext::StopTextureExport()
     return true;
 }
 
+void RosenRenderContext::SetSurfaceRotation(bool isLock)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    if (rsSurfaceNode) {
+        rsSurfaceNode->SetForceHardwareAndFixRotation(isLock);
+    }
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
