@@ -7891,6 +7891,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
+    JSClass<JSViewAbstract>::StaticMethod("customProperty", &JSViewAbstract::JsCustomProperty);
     JSClass<JSViewAbstract>::StaticMethod("gestureModifier", &JSViewAbstract::JsGestureModifier);
 
     JSClass<JSViewAbstract>::StaticMethod(
@@ -9425,6 +9426,47 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
         }
     };
     return drawCallback;
+}
+
+void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
+{
+    if (info[0]->GetLocalHandle()->IsUndefined()) {
+        return;
+    }
+
+    auto* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
+    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction()) {
+        return;
+    }
+    auto obj = setCustomProperty->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto thisObj = info.This()->GetLocalHandle();
+    auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+    auto nodeId = frameNode->GetId();
+    panda::Local<panda::JSValueRef> params[3] = { panda::NumberRef::New(vm, nodeId), info[0]->GetLocalHandle(),
+        info[1]->GetLocalHandle()
+    };
+    auto customPropertyExisted = func->Call(vm, thisObj, params, 3)->ToBoolean(vm)->Value();
+    if (customPropertyExisted) {
+        frameNode->SetRemoveCustomProperties([vm, thisObj, nodeId]()->void {
+            CHECK_NULL_VOID(vm);
+            panda::LocalScope scope(vm);
+            auto global = JSNApi::GetGlobalObject(vm);
+            auto removeCustomProperty = global->Get(vm,
+                panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
+            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction()) {
+                return;
+            }
+
+            auto obj = removeCustomProperty->ToObject(vm);
+            panda::Local<panda::FunctionRef> func = obj;
+            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, thisObj, params, 1);
+        });
+    }
 }
 
 void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)

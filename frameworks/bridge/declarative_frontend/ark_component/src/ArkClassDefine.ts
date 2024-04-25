@@ -863,6 +863,16 @@ class ArkKeyBoardShortCut {
   }
 }
 
+class ArkCustomProperty {
+  key: string;
+  value: object;
+
+  constructor() {
+    this.key = undefined;
+    this.value = undefined;
+  }
+}
+
 class ArkBlendMode {
   blendMode: number;
   blendApplyType: number;

@@ -2507,6 +2507,23 @@ class KeyBoardShortCutModifier extends ModifierWithKey {
   }
 }
 KeyBoardShortCutModifier.identity = Symbol('keyboardShortcut');
+
+class CustomPropertyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    const nodeId = getUINativeModule().frameNode.getIdByNodePtr(node);
+    if (reset) {
+      __removeCustomProperty__(nodeId, this.value.key);
+    }
+    else {
+      __setValidCustomProperty__(nodeId, this.value.key, this.value.value);
+    }
+  }
+}
+CustomPropertyModifier.identity = Symbol('customProperty');
+
 class TransitionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3665,6 +3682,13 @@ class ArkComponent {
   attributeModifier(modifier) {
     return this;
   }
+  customProperty(key, value) {
+    const property = new ArkCustomProperty();
+    property.key = key;
+    property.value = value;
+    modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    return this;
+  }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
@@ -4140,6 +4164,58 @@ function __gestureModifier__(modifier) {
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = new ArkComponent(nativeNode);
   applyGesture(modifier, component);
+}
+
+const __elementIdToCustomProperties__ = new Map();
+
+function __setValidCustomProperty__(nodeId, key, value) {
+  if (!__elementIdToCustomProperties__.has(nodeId)) {
+    __elementIdToCustomProperties__.set(nodeId, new Map());
+  }
+
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+  if (customProperties) {
+    customProperties.set(key, value);
+  }
+}
+
+function __removeCustomProperty__(nodeId, key) {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      customProperties.delete(key);
+      return customProperties.size > 0;
+    }
+  }
+
+  return false;
+}
+
+function __removeCustomProperties__(nodeId) {
+  __elementIdToCustomProperties__.delete(nodeId);
+}
+
+function getCustomProperty(nodeId, key) {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      return customProperties.get(key);
+    }
+  }
+
+  return undefined;
+}
+
+function __setCustomProperty__(nodeId, key, value) {
+  if (value !== undefined) {
+    __setValidCustomProperty__(nodeId, key, value);
+    return true;
+  } else {
+    return __removeCustomProperty__(nodeId, key);
+  }
 }
 
 /// <reference path='./import.ts' />
@@ -11561,6 +11637,14 @@ class ArkKeyBoardShortCut {
       (this.action === another.action);
   }
 }
+
+class ArkCustomProperty {
+  constructor() {
+    this.key = undefined;
+    this.value = undefined;
+  }
+}
+
 class ArkBlendMode {
   constructor() {
     this.blendMode = undefined;

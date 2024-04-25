@@ -720,6 +720,9 @@ class FrameNode {
     getId() {
         return getUINativeModule().frameNode.getId(this.getNodePtr());
     }
+    getUniqueId() {
+        return getUINativeModule().frameNode.getIdByNodePtr(this.getNodePtr());
+    }
     getNodeType() {
         return getUINativeModule().frameNode.getNodeType(this.getNodePtr());
     }
@@ -739,6 +742,9 @@ class FrameNode {
         const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
         const inspectorInfo = JSON.parse(inspectorInfoStr);
         return inspectorInfo;
+    }
+    getCustomProperty(key) {
+        return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
     }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
