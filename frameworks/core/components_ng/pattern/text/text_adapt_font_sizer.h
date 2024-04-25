@@ -52,7 +52,7 @@ public:
     static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
 private:
     bool DidExceedMaxLines(const SizeF& maxSize);
-    virtual bool IsAdaptExceedLimit(const SizeF& maxSize);
+    bool IsAdaptExceedLimit(const SizeF& maxSize);
 };
 } // namespace OHOS::Ace::NG
 

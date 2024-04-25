@@ -1003,13 +1003,4 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
         placeholderTextStyle.SetLineSpacing(layoutProperty->GetLineSpacing().value());
     }
 }
-
-bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
-{
-    auto paragraph = GetParagraph();
-    CHECK_NULL_RETURN(paragraph, false);
-    return (paragraph->GetLineCount() > 1) || paragraph->DidExceedMaxLines() ||
-        GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
-        GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
-}
 } // namespace OHOS::Ace::NG
