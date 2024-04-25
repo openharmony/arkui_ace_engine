@@ -28,6 +28,7 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
@@ -58,7 +59,7 @@ namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public PipelineBase {
+class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
@@ -198,11 +199,7 @@ public:
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
-    void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);
-    void RemoveFormVisibleChangeNode(int32_t nodeId);
-
     void HandleVisibleAreaChangeEvent();
-    void HandleFormVisibleChangeEvent(bool isVisible);
 
     void HandleSubwindow(bool isShow);
 
@@ -343,6 +340,7 @@ public:
     void FlushBuild() override;
 
     void FlushPipelineImmediately() override;
+    void RebuildFontNode() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 
@@ -690,7 +688,30 @@ public:
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
     void CheckNeedUpdateBackgroundColor(Color& color);
+
     bool CheckNeedDisableUpdateBackgroundImage();
+
+    void SetLocalColorMode(ColorMode colorMode)
+    {
+        auto localColorModeValue = static_cast<int32_t>(colorMode);
+        localColorMode_ = localColorModeValue;
+    }
+
+    ColorMode GetLocalColorMode() const
+    {
+        ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
+        return colorMode;
+    }
+
+    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
+    {
+        isFreezeFlushMessage_ = isFreezeFlushMessage;
+    }
+
+    bool IsFreezeFlushMessage() const
+    {
+        return isFreezeFlushMessage_;
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -833,7 +854,6 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
-    std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -873,6 +893,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
+    bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -893,7 +914,6 @@ private:
     std::list<std::function<void()>> animationClosuresList_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
-    std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
@@ -911,6 +931,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
 };
 } // namespace OHOS::Ace::NG
 

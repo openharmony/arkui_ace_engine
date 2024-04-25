@@ -3411,7 +3411,7 @@ HWTEST_F(NavigationTestNg, NavigationNewStackTest001, TestSize.Level1)
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     stateChangedCallback();
     ASSERT_TRUE(navigationPattern->NeedSyncWithJsStackMarked());
-    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     ASSERT_EQ(mockStack->Size(), 1);
 
@@ -3424,7 +3424,7 @@ HWTEST_F(NavigationTestNg, NavigationNewStackTest001, TestSize.Level1)
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     stateChangedCallback();
     ASSERT_TRUE(navigationPattern->NeedSyncWithJsStackMarked());
-    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     ASSERT_EQ(mockStack->Size(), 1);
 
@@ -3435,7 +3435,7 @@ HWTEST_F(NavigationTestNg, NavigationNewStackTest001, TestSize.Level1)
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     stateChangedCallback();
     ASSERT_TRUE(navigationPattern->NeedSyncWithJsStackMarked());
-    MockPipelineContext::GetCurrent()->GetNavigationManager()->FireNavigationUpdateCallback();
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     ASSERT_FALSE(navigationPattern->NeedSyncWithJsStackMarked());
     ASSERT_EQ(mockStack->Size(), 2);
 }

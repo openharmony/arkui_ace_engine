@@ -76,6 +76,26 @@ class TextAreaLetterSpacingModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class TextAreaLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
+  constructor(value: LengthMetrics) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaLineSpacing');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetLineSpacing(node);
+    } else {
+      getUINativeModule().textArea.setLineSpacing(node, this.value.value, this.value.unit);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaLineHeightModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -653,6 +673,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  lineSpacing(value: LengthMetrics): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaLineSpacingModifier.identity, TextAreaLineSpacingModifier, value);
+    return this;
+  }
   wordBreak(value: WordBreak): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
     return this;
@@ -669,7 +693,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaHeightAdaptivePolicyModifier.identity, TextAreaHeightAdaptivePolicyModifier, value);
     return this;
   }
-  SelectedBackgroundColor(value: ResourceColor): this {
+  selectedBackgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectedBackgroundColorModifier.identity, TextAreaSelectedBackgroundColorModifier, value);
     return this;
   }

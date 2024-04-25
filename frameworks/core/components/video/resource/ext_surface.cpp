@@ -56,7 +56,7 @@ ExtSurface::~ExtSurface()
             auto resRegister = weak.Upgrade();
             CHECK_NULL_VOID(resRegister);
             resRegister->UnregisterEvent(eventHash);
-        });
+        }, "ArkUIVideoUnregisterEvent");
     }
 }
 
@@ -71,7 +71,7 @@ void ExtSurface::Create(const std::function<void(int64_t)>& onCreate)
         if (surface) {
             surface->CreateExtSurface(onCreate);
         }
-    });
+    }, "ArkUIVideoCreateExtSurface");
 }
 
 void ExtSurface::CreateExtSurface(const std::function<void(int64_t)>& onCreate)

@@ -82,12 +82,12 @@ void MagnifierPainter::PaintMagnifier(RSCanvas& canvas)
     magnifierPaintConfig.scaleY_ = magnifierGain;
     pixelMapImage.SetPaintConfig(magnifierPaintConfig);
 
-    auto cursorOffsetY = magnifierRect_.cursorOffset.GetY();
+    auto localOffsetY = magnifierRect_.localOffset.GetY();
     auto localOffsetX = magnifierRect_.localOffset.GetX();
     auto textPaintOffset = textBasePattern->GetTextPaintOffset();
     RectF dstRect;
     dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain - textPaintOffset.GetX() * magnifierGain,
-        magnifierRect_.startY - textPaintOffset.GetY() * magnifierGain - cursorOffsetY * magnifierGain +
+        magnifierRect_.startY - textPaintOffset.GetY() * magnifierGain - localOffsetY * magnifierGain +
             pixelMapImageOffset,
         pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
     pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
@@ -99,8 +99,8 @@ void MagnifierPainter::PaintMagnifier(RSCanvas& canvas)
 bool MagnifierPainter::GetMagnifierRect(MagnifierRect& rect)
 {
     auto localOffsetX = magnifierRect_.localOffset.GetX();
-    auto cursorOffsetY = magnifierRect_.cursorOffset.GetY();
-    return GetMagnifierRect(rect.startX, rect.startY, rect.endX, rect.endY, localOffsetX, cursorOffsetY);
+    auto localOffsetY = magnifierRect_.localOffset.GetY();
+    return GetMagnifierRect(rect.startX, rect.startY, rect.endX, rect.endY, localOffsetX, localOffsetY);
 }
 
 bool MagnifierPainter::GetMagnifierRect(
@@ -128,11 +128,6 @@ bool MagnifierPainter::GetMagnifierRect(
         localOffsetY < firstHandleOffsetY + textDragBasePattern->GetLineHeight() &&
         localOffsetY < secondHandleOffsetY + textDragBasePattern->GetLineHeight()) {
         cursorOffsetY = std::min(firstHandleOffsetY, secondHandleOffsetY);
-        if (!textBasePattern->GetTextSelector().MoveSelectionLeft()) {
-            auto OffsetY =
-                std::max(firstHandleOffsetY, secondHandleOffsetY) - std::min(firstHandleOffsetY, secondHandleOffsetY);
-            magnifierRect_.cursorOffset.SetY(magnifierRect_.cursorOffset.GetY() - OffsetY);
-        }
     }
     startY = cursorOffsetY - magnifierHeight - magnifierOffsetY;
     if ((textDragBasePattern->GetParentGlobalOffset().GetY() + startY) < DEFAULT_STATUS_BAR_HEIGHT.ConvertToPx()) {

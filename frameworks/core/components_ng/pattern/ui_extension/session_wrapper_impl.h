@@ -106,12 +106,13 @@ private:
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
     sptr<Rosen::ExtensionSession> session_;
-    bool isNotifyOccupiedAreaChange_ = false;
+    bool isNotifyOccupiedAreaChange_ = true;
     RectF displayArea_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> destructionCallback_;
+    std::weak_ptr<Rosen::RSTransaction> transaction_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_IMPL_H

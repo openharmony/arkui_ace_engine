@@ -423,6 +423,20 @@ class SearchSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColo
   }
 }
 
+class SearchInputFilterModifier extends ModifierWithKey<ArkSearchInputFilter> {
+  constructor(value: ArkSearchInputFilter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchInputFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetInputFilter(node);
+    } else {
+      getUINativeModule().search.setInputFilter(node, this.value.value, this.value.error);
+    }
+  }
+}
+
 class SearchTextIndentModifier extends ModifierWithKey<Dimension> {
   constructor(value: Dimension) {
     super(value);
@@ -585,6 +599,13 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   textIndent(value: Dimension): this {
     modifierWithKey(this._modifiersWithKeys, SearchTextIndentModifier.identity, SearchTextIndentModifier, value);
+    return this;
+  }
+  inputFilter(value: ResourceStr, error?: (value: string) => void): this {
+    let searchInputFilter = new ArkSearchInputFilter();
+    searchInputFilter.value = value;
+    searchInputFilter.error = error;
+    modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
     return this;
   }
 }

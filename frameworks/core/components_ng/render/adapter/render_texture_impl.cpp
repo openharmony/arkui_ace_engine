@@ -34,8 +34,10 @@ void RenderTextureImpl::InitSurface()
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto uiTaskExecutor = SingleTaskExecutor::Make(container->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    auto errorCallback = [weak = WeakClaim(this), uiTaskExecutor](const std::string& errorId,
-                             const std::string& param) { uiTaskExecutor.PostTask([weak, errorId, param] {}); };
+    auto errorCallback = [weak = WeakClaim(this), uiTaskExecutor](
+        const std::string& errorId, const std::string& param) {
+            uiTaskExecutor.PostTask([weak, errorId, param] {}, "ArkUIInitSurfaceError");
+        };
     extTexture_ = AceType::MakeRefPtr<ExtTexture>(container->GetPipelineContext(), errorCallback);
 
     extTexture_->Create([weak = WeakClaim(this), errorCallback](int64_t id) mutable {
@@ -112,7 +114,7 @@ void RenderTextureImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
                 surface->SetSize(id, width, height);
             }
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISetExtSurfaceBounds");
 }
 
 void RenderTextureImpl::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)

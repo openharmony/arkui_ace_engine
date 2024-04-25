@@ -102,7 +102,7 @@ bool TextInputClientMgr::UpdateEditingValue(const std::shared_ptr<TextEditingVal
                 client->UpdateEditingValue(value, needFireChangeEvent);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIUpdateTextEditingValue");
     return true;
 #endif
 }
@@ -125,7 +125,7 @@ bool TextInputClientMgr::PerformAction(const TextInputAction action)
                 client->PerformAction(action);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIPerformTextInputAction");
     return true;
 }
 

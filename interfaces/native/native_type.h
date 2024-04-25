@@ -99,6 +99,13 @@ struct ArkUI_Context;
 typedef struct ArkUI_Context* ArkUI_ContextHandle;
 
 /**
+ * @brief Defines the pointer type of the ArkUI native node content object.
+ *
+ * @since 12
+ */
+typedef struct ArkUI_NodeContent* ArkUI_NodeContentHandle;
+
+/**
  * @brief Defines the event callback type.
  *
  * @since 12
@@ -1463,6 +1470,20 @@ typedef enum {
       * long tail state. */
     ARKUI_FINISH_CALLBACK_LOGICALLY,
 } ArkUI_FinishCallbackType;
+
+/**
+ * @brief 交叉轴方向的布局方式。
+  *
+ * @since 12
+ */
+typedef enum {
+     /** ListItem在List中，交叉轴方向首部对齐。 */
+    ARKUI_LIST_ITEM_ALIGN_START = 0,
+    /** ListItem在List中，交叉轴方向居中对齐。*/
+    ARKUI_LIST_ITEM_ALIGN_CENTER,
+    /** ListItem在List中，交叉轴方向尾部对齐。*/
+    ARKUI_LIST_ITEM_ALIGN_END,
+} ArkUI_ListItemAlign;
 
 /**
  * @brief Enumerates the component units.

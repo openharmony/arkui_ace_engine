@@ -24,13 +24,14 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LazyForEachNode : public UINode, public V2::DataChangeListener {
-    DECLARE_ACE_TYPE(LazyForEachNode, UINode, DataChangeListener);
+class ACE_EXPORT LazyForEachNode : public ForEachBaseNode, public V2::DataChangeListener {
+    DECLARE_ACE_TYPE(LazyForEachNode, ForEachBaseNode, DataChangeListener);
 
 public:
     static RefPtr<LazyForEachNode> GetOrCreateLazyForEachNode(
@@ -40,7 +41,7 @@ public:
         int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder);
 
     LazyForEachNode(int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
-        : UINode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder)
+        : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder)
     {}
 
     ~LazyForEachNode() {
@@ -146,6 +147,12 @@ public:
         return builder_;
     }
 
+    void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void MoveData(int32_t from, int32_t to) override;
+    RefPtr<FrameNode> GetFrameNode(int32_t index) override;
+    int32_t GetFrameNodeIndex(RefPtr<FrameNode> node) override;
+    void InitDragManager(const RefPtr<FrameNode>& childNode);
+    void InitAllChilrenDragManager(bool init);
 private:
     void OnAttachToMainTree(bool recursive) override
     {

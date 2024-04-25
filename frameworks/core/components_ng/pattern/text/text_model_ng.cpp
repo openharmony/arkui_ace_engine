@@ -185,6 +185,11 @@ void TextModelNG::SetWordBreak(Ace::WordBreak value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value);
 }
 
+void TextModelNG::SetLineBreakStrategy(Ace::LineBreakStrategy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value);
+}
+
 void TextModelNG::SetEllipsisMode(EllipsisMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value);
@@ -228,6 +233,16 @@ void TextModelNG::SetLineHeight(const Dimension& value)
 void TextModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value, frameNode);
+}
+
+void TextModelNG::SetLineSpacing(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value);
+}
+
+void TextModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value, frameNode);
 }
 
 void TextModelNG::SetTextDecoration(Ace::TextDecoration value)
@@ -525,10 +540,11 @@ RefPtr<TextControllerBase> TextModelNG::GetTextController()
     return pattern->GetTextController();
 }
 
-void TextModelNG::SetClipEdge()
+void TextModelNG::SetClipEdge(bool clip)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    frameNode->GetRenderContext()->SetClipToFrame(clip);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -612,6 +628,16 @@ float TextModelNG::GetLineHeight(FrameNode* frameNode)
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
     Dimension defaultLineHeight(0);
     auto value = layoutProperty->GetLineHeight().value_or(defaultLineHeight);
+    return static_cast<float>(value.Value());
+}
+
+float TextModelNG::GetLineSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineSpacing(0);
+    auto value = layoutProperty->GetLineSpacing().value_or(defaultLineSpacing);
     return static_cast<float>(value.Value());
 }
 

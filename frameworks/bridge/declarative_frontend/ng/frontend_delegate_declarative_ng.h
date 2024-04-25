@@ -126,7 +126,7 @@ public:
 
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override {}
 
-    void PostJsTask(std::function<void()>&& task) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
     const std::string& GetVersionName() const override;
@@ -172,7 +172,7 @@ public:
     void AddTaskObserver(std::function<void()>&& task) override {}
     void RemoveTaskObserver() override {}
     void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override {}
-    void PostSyncTaskToPage(std::function<void()>&& task) override;
+    void PostSyncTaskToPage(std::function<void()>&& task, const std::string& name) override;
     void SetCallBackResult(const std::string& callBackId, const std::string& result) override {}
     bool GetAssetContent(const std::string& url, std::string& content) override;
     bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) override;

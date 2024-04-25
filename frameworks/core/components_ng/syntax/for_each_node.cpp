@@ -17,7 +17,9 @@
 
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,18 +35,6 @@ void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std
         ++nodeIter;
     }
 }
-
-// find the nearest FrameNode parent
-RefPtr<FrameNode> GetParentFrameNode(const RefPtr<UINode>& node)
-{
-    for (auto parent = node; parent; parent = parent->GetParent()) {
-        if (auto frameNode = AceType::DynamicCast<FrameNode>(parent)) {
-            return frameNode;
-        }
-    }
-    return nullptr;
-}
-
 } // namespace
 
 RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
@@ -117,6 +107,7 @@ void ForEachNode::CompareAndUpdateChildren()
                 // Call AddChild to execute AttachToMainTree of new child.
                 // Allow adding default transition.
                 AddChild(*newCompsIter, DEFAULT_NODE_SLOT, false, true);
+                InitDragManager(*newCompsIter);
             }
         } else {
             auto iter = oldNodeByIdMap.find(newId);
@@ -155,7 +146,7 @@ void ForEachNode::CompareAndUpdateChildren()
 
     tempChildren_.clear();
 
-    if (auto frameNode = GetParentFrameNode(GetParent())) {
+    if (auto frameNode = GetParentFrameNode()) {
         frameNode->ChildrenUpdatedFrom(0);
     }
 }
@@ -206,7 +197,7 @@ void ForEachNode::FinishRepeatRender(std::list<int32_t>& removedElmtId)
     tempChildren_.clear();
     tempChildrenOfRepeat_.clear();
 
-    if (auto frameNode = GetParentFrameNode(GetParent())) {
+    if (auto frameNode = GetParentFrameNode()) {
         frameNode->ChildrenUpdatedFrom(0);
     }
 
@@ -223,4 +214,95 @@ void ForEachNode::MoveChild(uint32_t fromIndex)
     }
 }
 
+void ForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
+{
+    if (onMove && !onMoveEvent_) {
+        auto parentNode = GetParentFrameNode();
+        if (parentNode) {
+            InitAllChildrenDragManager(true);
+        } else {
+            auto piplineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(piplineContext);
+            auto taskExecutor = piplineContext->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weak = WeakClaim(this)]() mutable {
+                    auto forEach = weak.Upgrade();
+                    CHECK_NULL_VOID(forEach);
+                    forEach->InitAllChildrenDragManager(true);
+                },
+                TaskExecutor::TaskType::UI, "ArkUIInitAllChildrenDragManager");
+        }
+    } else if (!onMove && onMoveEvent_) {
+        InitAllChildrenDragManager(false);
+    }
+    onMoveEvent_ = onMove;
+}
+
+void ForEachNode::MoveData(int32_t from, int32_t to)
+{
+    if (from == to) {
+        return;
+    }
+    auto& children = ModifyChildren();
+    auto fromIter = children.begin();
+    std::advance(fromIter, from);
+    auto child = *fromIter;
+    children.erase(fromIter);
+    auto toIter = children.begin();
+    std::advance(toIter, to);
+    children.insert(toIter, child);
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+RefPtr<FrameNode> ForEachNode::GetFrameNode(int32_t index)
+{
+    return AceType::DynamicCast<FrameNode>(GetFrameChildByIndex(index, false, false));
+}
+
+void ForEachNode::InitDragManager(const RefPtr<UINode>& child)
+{
+    CHECK_NULL_VOID(onMoveEvent_);
+    CHECK_NULL_VOID(child);
+    auto childNode = AceType::DynamicCast<FrameNode>(child->GetFrameChildByIndex(0, false));
+    CHECK_NULL_VOID(childNode);
+    auto parentNode = GetParentFrameNode();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+        return;
+    }
+    auto pattern = childNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitDragManager(AceType::Claim(this));
+}
+
+void ForEachNode::InitAllChildrenDragManager(bool init)
+{
+    auto parentNode = GetParentFrameNode();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+        onMoveEvent_ = nullptr;
+        return;
+    }
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        if (!child || (child->GetChildren().size() != 1)) {
+            continue;
+        }
+        auto listItem = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
+        if (!listItem) {
+            continue;
+        }
+        auto pattern = listItem->GetPattern<ListItemPattern>();
+        if (!pattern) {
+            continue;
+        }
+        if (init) {
+            pattern->InitDragManager(AceType::Claim(this));
+        } else {
+            pattern->DeInitDragManager();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

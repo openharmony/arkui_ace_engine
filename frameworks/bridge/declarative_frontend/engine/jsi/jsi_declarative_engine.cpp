@@ -847,7 +847,8 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
     return retVal;
 }
 
-void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task)
+void JsiDeclarativeEngineInstance::PostJsTask(
+    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name)
 {
     if (runtime == nullptr) {
         return;
@@ -856,7 +857,7 @@ void JsiDeclarativeEngineInstance::PostJsTask(const shared_ptr<JsRuntime>& runti
     if (engineInstance == nullptr) {
         return;
     }
-    engineInstance->GetDelegate()->PostJsTask(std::move(task));
+    engineInstance->GetDelegate()->PostJsTask(std::move(task), name);
 }
 
 void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>& runtime)
@@ -899,7 +900,7 @@ void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
         if (delegate == nullptr) {
             return;
         }
-        delegate->PostJsTask(std::move(task));
+        delegate->PostJsTask(std::move(task), "ArkUIDebuggerTask");
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -1082,7 +1083,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             }
             ContainerScope scope(id);
             nativeEngine->Loop(LOOP_NOWAIT, needSync);
-        });
+            }, "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -1830,7 +1831,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
             if (!delegate) {
                 return;
             }
-            delegate->PostSyncTaskToPage(task);
+            delegate->PostSyncTaskToPage(task, "ArkUINativeXComponentInit");
         }
         return;
     }
@@ -1915,7 +1916,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     if (!delegate) {
         return;
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUINativeXComponentInit");
 #endif
 }
 

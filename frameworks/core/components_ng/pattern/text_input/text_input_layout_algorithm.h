@@ -33,6 +33,8 @@ public:
 protected:
     bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+    LayoutConstraintF BuildLayoutConstraintWithoutResponseArea(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper);
 };
 } // namespace OHOS::Ace::NG
 

@@ -33,11 +33,17 @@ public:
     virtual bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) = 0;
     virtual const RefPtr<Paragraph>& GetParagraph() const = 0;
+    virtual void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) = 0;
 
     bool AdaptMaxFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    virtual bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    {
+        return false;
+    }
 
     static bool GetAdaptMaxMinFontSize(TextStyle& textStyle, double& maxFontSize, double& minFontSize,
         const LayoutConstraintF& contentConstraint);

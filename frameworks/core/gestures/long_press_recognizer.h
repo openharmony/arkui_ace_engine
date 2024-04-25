@@ -34,7 +34,7 @@ using OnLongPress = std::function<void(const LongPressInfo&)>;
 using LongPressCallback = std::function<void(const GestureEvent&)>;
 using LongPressNoParamCallback = std::function<void()>;
 
-class LongPressRecognizer : public MultiFingersRecognizer {
+class ACE_FORCE_EXPORT LongPressRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(LongPressRecognizer, MultiFingersRecognizer);
 
 public:

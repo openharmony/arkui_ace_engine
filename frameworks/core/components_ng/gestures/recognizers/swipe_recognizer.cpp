@@ -364,6 +364,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
+        info.SetPointerEvent(lastTouchEvent_.pointerEvent);
         if (prevAngle_) {
             info.SetAngle(prevAngle_.value());
         }

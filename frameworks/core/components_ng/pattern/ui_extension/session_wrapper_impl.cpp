@@ -138,7 +138,7 @@ void SessionWrapperImpl::InitAllCallback()
                     CHECK_NULL_VOID(pattern);
                     pattern->FireOnErrorCallback(static_cast<int32_t>(errcode), START_FAIL_NAME, START_FAIL_MESSAGE);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIUIExtensionForegroundError");
         }
     };
     backgroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_](OHOS::Rosen::WSError errcode) {
@@ -150,7 +150,7 @@ void SessionWrapperImpl::InitAllCallback()
                     pattern->FireOnErrorCallback(
                         static_cast<int32_t>(errcode), BACKGROUND_FAIL_NAME, BACKGROUND_FAIL_MESSAGE);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIUIExtensionBackgroundError");
         }
     };
     destructionCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_](OHOS::Rosen::WSError errcode) {
@@ -162,7 +162,7 @@ void SessionWrapperImpl::InitAllCallback()
                     pattern->FireOnErrorCallback(
                         static_cast<int32_t>(errcode), TERMINATE_FAIL_NAME, TERMINATE_FAIL_MESSAGE);
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIUIExtensionDestructionError");
         }
     };
     sessionCallbacks->transferAbilityResultFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_,
@@ -178,7 +178,7 @@ void SessionWrapperImpl::InitAllCallback()
                     pattern->FireOnTerminatedCallback(code, MakeRefPtr<WantWrapOhos>(want));
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionTransferAbilityResult");
     };
     sessionCallbacks->transferExtensionDataFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_](
                                                        const AAFwk::WantParams& params) {
@@ -188,7 +188,7 @@ void SessionWrapperImpl::InitAllCallback()
                 CHECK_NULL_VOID(pattern);
                 pattern->FireOnReceiveCallback(params);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionReceiveCallback");
     };
     sessionCallbacks->notifyRemoteReadyFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
         taskExecutor->PostTask(
@@ -197,7 +197,7 @@ void SessionWrapperImpl::InitAllCallback()
                 CHECK_NULL_VOID(pattern);
                 pattern->FireOnRemoteReadyCallback();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionRemoteReadyCallback");
     };
     sessionCallbacks->notifySyncOnFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
         taskExecutor->PostTask(
@@ -206,7 +206,7 @@ void SessionWrapperImpl::InitAllCallback()
                 CHECK_NULL_VOID(pattern);
                 pattern->FireSyncCallbacks();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionSyncCallbacks");
     };
     sessionCallbacks->notifyAsyncOnFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
         taskExecutor->PostTask(
@@ -215,7 +215,7 @@ void SessionWrapperImpl::InitAllCallback()
                 CHECK_NULL_VOID(pattern);
                 pattern->FireAsyncCallbacks();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionAsyncCallbacks");
     };
     sessionCallbacks->notifyBindModalFunc_ = [weak = hostPattern_, taskExecutor = taskExecutor_]() {
         taskExecutor->PostSyncTask(
@@ -224,7 +224,7 @@ void SessionWrapperImpl::InitAllCallback()
                 CHECK_NULL_VOID(pattern);
                 pattern->FireBindModalCallback();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionBindModalCallback");
     };
     sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [instanceId = instanceId_](
                                                           Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
@@ -269,7 +269,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModa
         WantParams wantParams;
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
-    isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, false);
+    isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo = {
@@ -446,7 +446,7 @@ void SessionWrapperImpl::OnConnect()
                 wrapper->session_->SetParentSession(hostPattern->GetSession());
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionConnect");
 }
 
 void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
@@ -467,7 +467,7 @@ void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
                 pattern->FireOnTerminatedCallback(0, nullptr);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionSessionDisconnect");
 }
 
 void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
@@ -479,7 +479,7 @@ void SessionWrapperImpl::OnExtensionTimeout(int32_t /* errorCode */)
             pattern->FireOnErrorCallback(
                 ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT, LIFECYCLE_TIMEOUT_NAME, LIFECYCLE_TIMEOUT_MESSAGE);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionTimeout");
 }
 
 void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset)
@@ -490,7 +490,7 @@ void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::Accessibility
             CHECK_NULL_VOID(pattern);
             pattern->OnAccessibilityEvent(info, offset);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionAccessibilityEvent");
 }
 /************************************************** End: The interface for responsing provider ************************/
 
@@ -557,12 +557,14 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     if (reason == Rosen::SizeChangeReason::ROTATION) {
-        if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+        if (transaction_.lock()) {
+            transaction = transaction_.lock();
+            transaction_.reset();
+        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            if (transaction && parentSession && pipelineContext) {
-                transaction->SetDuration(pipelineContext->GetSyncAnimationOption().GetDuration());
-            }
+        }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
@@ -576,7 +578,7 @@ void SessionWrapperImpl::NotifySizeChangeReason(
     auto reason = static_cast<Rosen::SizeChangeReason>(type);
     session_->UpdateSizeChangeReason(reason);
     if (rsTransaction && (type == WindowSizeChangeReason::ROTATION)) {
-        session_->UpdateRect(session_->GetSessionRect(), reason, rsTransaction);
+        transaction_ = rsTransaction;
     }
 }
 

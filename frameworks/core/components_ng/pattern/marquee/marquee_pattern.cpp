@@ -223,7 +223,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 onFinish();
                 return;
             }
-            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI, "ArkUIMarqueePlayAnimation");
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -265,7 +265,7 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
                     pattern->StartMarqueeAnimation();
                 }
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIMarqueeStartAnimation");
     } else {
         lastAnimationParam_.lastStartMilliseconds = ANIMATION_INITIAL_TIME;
         lastAnimationParam_.lastAnimationPosition = 0.0f;
@@ -616,8 +616,8 @@ bool MarqueePattern::IsRunMarquee()
     float padding = 0.0f;
     if (layoutProperty->GetPaddingProperty()) {
         const auto& paddingProperty = layoutProperty->GetPaddingProperty();
-        padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().Value() +
-            paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().Value();
+        padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
+            paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
     }
     return GreatOrEqual(textWidth + padding, marqueeSize.Width());
 }

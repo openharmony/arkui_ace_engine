@@ -277,6 +277,22 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class TextInputShowPasswordModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputShowPassword');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetShowPassword(node);
+    } else {
+      getUINativeModule().textInput.setShowPassword(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 class TextInputTextAlignModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -830,6 +846,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   showPasswordIcon(value: boolean): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordIconModifier.identity,
       TextInputShowPasswordIconModifier, value);
+    return this;
+  }
+  showPassword(value: boolean): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordModifier.identity,
+      TextInputShowPasswordModifier, value);
     return this;
   }
   textAlign(value: TextAlign): TextInputAttribute {

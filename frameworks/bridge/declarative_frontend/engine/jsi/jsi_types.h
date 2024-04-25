@@ -286,6 +286,12 @@ public:
         return size_;
     }
 
+    template<typename T>
+    T* UnwrapArg(size_t index) const;
+    bool GetBooleanArg(size_t index, bool& value) const;
+    bool GetDoubleArg(size_t index, double& value) const;
+    bool GetStringArg(size_t index, std::string& value) const;
+
 private:
     mutable size_t size_ = 0;
     panda::JsiRuntimeCallInfo* info_ = nullptr;

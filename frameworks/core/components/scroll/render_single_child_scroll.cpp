@@ -313,7 +313,7 @@ void RenderSingleChildScroll::PostForceMakeNeedLayout()
             }
             scroll->MarkNeedLayout(false, true);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIScrollForceMakeNeedLayout");
 }
 
 void RenderSingleChildScroll::UpdateAccessibilityAttr()

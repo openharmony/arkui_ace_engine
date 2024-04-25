@@ -166,8 +166,7 @@ void SystemWindowScene::RegisterEventCallback()
                 return;
             }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
-            },
-                TaskExecutor::TaskType::UI);
+            }, "ArkUIWindowInjectPointerEvent", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
 
@@ -234,12 +233,24 @@ void SystemWindowScene::RegisterFocusCallback()
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
             self->FocusViewShow();
-        },
-            TaskExecutor::TaskType::UI);
+        }, "ArkUIWindowFocusViewShow", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
-    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {};
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            CHECK_NULL_VOID(self->GetSession());
+            pipeline->RestoreDefault(self->GetSession()->GetPersistentId());
+        },
+            "ArkUIWindowUnfocus", TaskExecutor::TaskType::UI);
+    };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
 
@@ -276,7 +287,8 @@ void SystemWindowScene::PostCheckContextTransparentTask()
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(std::move(checkContextTransparentTask_), TaskExecutor::TaskType::UI, DELAY_TIME);
+    taskExecutor->PostDelayedTask(std::move(checkContextTransparentTask_), TaskExecutor::TaskType::UI,
+        DELAY_TIME, "ArkUIWindowCheckContextTransparent");
 }
 
 void SystemWindowScene::PostFaultInjectTask()
@@ -295,6 +307,7 @@ void SystemWindowScene::PostFaultInjectTask()
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME);
+    taskExecutor->PostDelayedTask(
+        std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ArkUIWindowFaultInject");
 }
 } // namespace OHOS::Ace::NG

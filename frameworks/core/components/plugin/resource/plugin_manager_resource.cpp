@@ -58,7 +58,7 @@ void PluginManagerResource::Release(const std::function<void(bool)>& onRelease)
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         releaseTask();
     } else {
-        platformTaskExecutor.PostTask(releaseTask);
+        platformTaskExecutor.PostTask(releaseTask, "ArkUIPluginRelease");
     }
 }
 
@@ -88,7 +88,7 @@ void PluginManagerResource::CallResRegisterMethod(
         if (callback) {
             callback(result);
         }
-    });
+    }, "ArkUIPluginCallResRegister");
 }
 
 int32_t PluginManagerResource::GetIntParam(const std::string& param, const std::string& name) const

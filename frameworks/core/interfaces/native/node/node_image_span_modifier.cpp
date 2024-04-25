@@ -30,6 +30,7 @@ constexpr int NUM_3 = 3;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr VerticalAlign DEFAULT_VERTICAL_ALIGN = VerticalAlign::BOTTOM;
 constexpr ImageFit DEFAULT_OBJECT_FIT = ImageFit::COVER;
+constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
 
 void SetImageSpanVerticalAlign(ArkUINodeHandle node, int32_t value)
 {
@@ -121,6 +122,20 @@ void GetImageSpanTextBackgroundStyle(ArkUINodeHandle node, ArkUITextBackgroundSt
     options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
     options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
 }
+
+void SetImageSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::SetBaselineOffset(frameNode, CalcDimension(value, (DimensionUnit)unit));
+}
+
+void ResetImageSpanBaselineOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -128,7 +143,8 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
 {
     static const ArkUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
         SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
-        SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle};
+        SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
+        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset};
     return &modifier;
 }
 } // namespace NodeModifier

@@ -30,7 +30,7 @@ RefPtr<TextInputConnection> TextInputImpl::Attach(const WeakPtr<TextInputClient>
         [clientId = connection->GetClientId(), config, instanceId] {
             TextInputClientMgr::GetInstance().SetClientId(clientId);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUITextEditingSetClientId");
     return connection;
 }
 

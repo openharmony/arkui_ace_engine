@@ -116,7 +116,7 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
     };
     thumbnailTimer_.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(thumbnailTimer_, time);
+    taskExecutor.PostDelayedTask(thumbnailTimer_, time, "ArkUIGestureLongPressThumbnailTimer");
 }
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
@@ -289,7 +289,7 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
     };
     deadlineTimer_.Reset(flushCallback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(deadlineTimer_, time);
+    taskExecutor.PostDelayedTask(deadlineTimer_, time, "ArkUIGestureLongPressDeadlineTimer");
 }
 
 void LongPressRecognizer::DoRepeat()
@@ -316,7 +316,7 @@ void LongPressRecognizer::StartRepeatTimer()
     };
     timer_.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(timer_, duration_);
+    taskExecutor.PostDelayedTask(timer_, duration_, "ArkUIGestureLongPressRepeatTimer");
 }
 
 double LongPressRecognizer::ConvertPxToVp(double offset) const
@@ -355,6 +355,7 @@ void LongPressRecognizer::SendCallbackMsg(
             info.SetTiltY(trackPoint.tiltY.value());
         }
         info.SetSourceTool(trackPoint.sourceTool);
+        info.SetPointerEvent(trackPoint.pointerEvent);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

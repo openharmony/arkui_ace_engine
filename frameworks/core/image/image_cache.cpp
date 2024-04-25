@@ -100,29 +100,36 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageDa
     }
     std::scoped_lock lock(dataCacheMutex_);
     auto dataSize = imageData->GetSize();
-    if (dataSize > (dataSizeLimit_ >> 1)) { // if data is longer than half limit, do not cache it.
+    auto iter = imageDataCache_.find(key);
+    bool inCache = (iter != imageDataCache_.end());
+    bool largerHalfSize = dataSize > (dataSizeLimit_ >> 1);
+    size_t oldSize = inCache ? 0 : iter->second->cacheObj->GetSize();
+    if (largerHalfSize && inCache) {
+        // if data is longer than half limit, do not cache it.
+        // and if the key is in Cache, erase it.
+        curDataSize_ -= oldSize;
+        dataCacheList_.erase(iter->second);
+        imageDataCache_.erase(key);
         TAG_LOGW(AceLogTag::ACE_IMAGE, "data is %{public}d, bigger than half limit %{public}d, do not cache it",
             static_cast<int32_t>(dataSize), static_cast<int32_t>(dataSizeLimit_ >> 1));
-        return;
-    }
-    auto iter = imageDataCache_.find(key);
-    if (iter == imageDataCache_.end()) {
-        if (!ProcessImageDataCacheInner(dataSize)) {
-            return;
-        }
+    } else if (!largerHalfSize && !inCache && ProcessImageDataCacheInner(dataSize)) {
         dataCacheList_.emplace_front(key, imageData);
         imageDataCache_.emplace(key, dataCacheList_.begin());
-    } else {
-        auto oldSize = iter->second->cacheObj->GetSize();
-        if (oldSize != dataSize) {
-            curDataSize_ -= oldSize;
-            if (!ProcessImageDataCacheInner(dataSize)) {
-                return;
-            }
-        }
+    } else if (!largerHalfSize && inCache && oldSize >= dataSize) {
+        // if the image is in the cache, and dataSize <= oldSize, we can replace the imageData in cache.
+        curDataSize_ += (dataSize - oldSize);
         iter->second->cacheObj = imageData;
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
         iter->second = dataCacheList_.begin();
+    } else if (!largerHalfSize && inCache && oldSize < dataSize) {
+        // if the image is in the cache, and dataSize > oldSize, we erase the old one, the try to cache the new image.
+        curDataSize_ -= oldSize;
+        dataCacheList_.erase(iter->second);
+        imageDataCache_.erase(key);
+        if (ProcessImageDataCacheInner(dataSize)) {
+            dataCacheList_.emplace_front(key, imageData);
+            imageDataCache_.emplace(key, dataCacheList_.begin());
+        }
     }
 }
 

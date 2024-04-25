@@ -335,4 +335,42 @@ ArkUINativeModuleValue WaterFlowBridge::ResetFriction(ArkUIRuntimeCallInfo *runt
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFriction(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue WaterFlowBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> argEdgeEffect = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> argEdgeEffectOptions = runtimeCallInfo->GetCallArgRef(NUM_2);
+
+    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
+    int32_t effect = static_cast<int32_t>(EdgeEffect::NONE);
+    if (!argEdgeEffect->IsUndefined() && !argEdgeEffect->IsNull()) {
+        effect = argEdgeEffect->Int32Value(vm);
+    }
+
+    if (effect != static_cast<int32_t>(EdgeEffect::SPRING) && effect != static_cast<int32_t>(EdgeEffect::NONE) &&
+        effect != static_cast<int32_t>(EdgeEffect::FADE)) {
+        effect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
+
+    if (argEdgeEffectOptions->IsNull() || argEdgeEffectOptions->IsUndefined()) {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setEdgeEffect(nativeNode, effect, false);
+    } else {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setEdgeEffect(
+            nativeNode, effect, argEdgeEffectOptions->ToBoolean(vm)->Value());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WaterFlowBridge::ResetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetEdgeEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

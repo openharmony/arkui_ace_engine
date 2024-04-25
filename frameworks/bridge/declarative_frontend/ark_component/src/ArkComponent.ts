@@ -175,36 +175,6 @@ interface Equable {
   isEqual(value: Equable): boolean;
 }
 
-class Modifier<T extends number | string | boolean | Equable | Resource | object> {
-  stageValue?: T;
-  value?: T;
-  constructor(value: T) {
-    this.stageValue = value;
-  }
-
-  applyStage(node: KNode): boolean {
-    if (this.stageValue === this.value) {
-      if (this.value === undefined) {
-        this.applyPeer(node, true);
-      }
-      delete this.stageValue;
-      return;
-    }
-    if (typeof this.stageValue === 'object' && typeof this.value === 'object') {
-      if ((this.stageValue as Equable).isEqual(this.value as Equable)) {
-        delete this.stageValue;
-        return;
-      }
-    }
-    this.value = this.stageValue;
-    delete this.stageValue;
-    this.applyPeer(node, this.value === undefined);
-    return (this.value === undefined);
-  }
-
-  applyPeer(node: KNode, reset: boolean): void { }
-}
-
 class ModifierWithKey<T extends number | string | boolean | object | Function> {
   stageValue?: T;
   value?: T;
@@ -2723,19 +2693,6 @@ function parseWithDefaultNumber(val, defaultValue) {
   }
   else { return defaultValue; }
 }
-function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(
-  modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>,
-  modifierClass: new (value: T) => M,
-  value: T
-) {
-  const identity: Symbol = (modifierClass as any)['identity'];
-  const item = modifiers.get(identity);
-  if (item) {
-    item.stageValue = value;
-  } else {
-    modifiers.set(identity, new modifierClass(value));
-  }
-}
 
 function modifierWithKey<T extends number | string | boolean | object, M extends ModifierWithKey<T>>(
   modifiers: Map<Symbol, AttributeModifierWithKey>,
@@ -2753,7 +2710,6 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
 }
 
 class ArkComponent implements CommonMethod<CommonAttribute> {
-  _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
@@ -2763,7 +2719,6 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _gestureEvent: UIGestureEvent;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
-    this._modifiers = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
@@ -2817,18 +2772,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   applyModifierPatch(): void {
     let expiringItems = [];
     let expiringItemsWithKeys = [];
-    this._modifiers.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
-        expiringItems.push(key);
-      }
-    });
     this._modifiersWithKeys.forEach((value, key) => {
       if (value.applyStage(this.nativePtr)) {
         expiringItemsWithKeys.push(key);
       }
-    });
-    expiringItems.forEach(key => {
-      this._modifiers.delete(key);
     });
     expiringItemsWithKeys.forEach(key => {
       this._modifiersWithKeys.delete(key);
@@ -4047,11 +3994,15 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
     } else {
       modifier.attribute.applyStateUpdatePtr(component);
       modifier.attribute.applyNormalAttribute(component);
-      modifier.applyNormalAttribute(component);
+      if (modifier.applyNormalAttribute) {
+        modifier.applyNormalAttribute(component);
+      }
       component.applyModifierPatch();
     }
   } else {
-    modifier.applyNormalAttribute(component);
+    if (modifier.applyNormalAttribute) {
+      modifier.applyNormalAttribute(component);
+    }
     component.applyModifierPatch();
   }
 }
