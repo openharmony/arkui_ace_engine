@@ -6708,11 +6708,12 @@ bool RichEditorPattern::BeforeChangeText(RichEditorChangeValue& changeValue, con
         textStyle = options.style;
     }
     if (options.offset.has_value()) {
-        if (spans_.empty()) {
+        if (spans_.empty() || options.offset.value() < 0) {
             innerPosition = 0;
+        } else if (options.offset.value() > GetTextContentLength()) {
+            innerPosition = GetTextContentLength();
         } else {
-            auto positionInfo = GetSpanPositionInfo(options.offset.value());
-            innerPosition = positionInfo.spanStart_;
+            innerPosition = options.offset.value();
         }
     } else {
         innerPosition = GetTextContentLength();
