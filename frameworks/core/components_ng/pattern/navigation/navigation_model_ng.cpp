@@ -623,16 +623,6 @@ bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNod
 
 bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>& navBarNode)
 {
-    // titleBar node
-    if (!navBarNode->GetTitleBarNode()) {
-        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
-        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-        navBarNode->AddChild(titleBarNode);
-        navBarNode->SetTitleBarNode(titleBarNode);
-    }
-
     // navBar content node
     if (!navBarNode->GetNavBarContentNode()) {
         int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -649,6 +639,16 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
             SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
+    }
+
+    // titleBar node
+    if (!navBarNode->GetTitleBarNode()) {
+        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
+        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+        navBarNode->AddChild(titleBarNode);
+        navBarNode->SetTitleBarNode(titleBarNode);
     }
 
     // toolBar node
@@ -927,44 +927,68 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
     auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
+    auto theme = NavigationGetTheme();
     buttonPattern->SetSkipColorConfigurationUpdate();
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    }
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
-    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
-    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto backButtonWidth = BACK_BUTTON_SIZE;
+    auto backButtonHeight = BACK_BUTTON_SIZE;
+    auto backButtonRadiusSize = BUTTON_RADIUS_SIZE;
+    auto backButtonPadding = BUTTON_PADDING;
+    auto backButtonColor = Color::TRANSPARENT;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        backButtonWidth = theme->GetIconBackgroundWidth();
+        backButtonHeight = theme->GetIconBackgroundHeight();
+        backButtonRadiusSize = theme->GetCornerRadius();
+        backButtonPadding = MENU_BUTTON_PADDING;
+        backButtonColor = theme->GetCompBackgroundColor();
+    }
+    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
+    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
+    renderContext->UpdateBackgroundColor(backButtonColor);
+    PaddingProperty padding;
+    padding.SetEdges(CalcLength(backButtonPadding));
+    backButtonLayoutProperty->UpdatePadding(padding);
+    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     auto eventHub = backButtonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
 
-    PaddingProperty padding;
-    padding.left = CalcLength(BUTTON_PADDING);
-    padding.right = CalcLength(BUTTON_PADDING);
-    padding.top = CalcLength(BUTTON_PADDING);
-    padding.bottom = CalcLength(BUTTON_PADDING);
-    backButtonLayoutProperty->UpdatePadding(padding);
-
     auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(backButtonImageNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
 
+    ImageSourceInfo imageSourceInfo;
+    auto iconColor = theme->GetBackButtonIconColor();
+    auto backReourceId = theme->GetBackResourceId();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        iconColor = theme->GetIconColor();
+        backReourceId = theme->GetBackBtnResourceId();
+        auto iconWidth = theme->GetIconWidth();
+        auto iconHeight = theme->GetIconHeight();
+        backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconWidth),
+            CalcLength(iconHeight)));
+    }
+    imageSourceInfo.SetResourceId(backReourceId);
     auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(navigationEventHub);
     if (!navigationEventHub->IsEnabled()) {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+        imageSourceInfo.SetFillColor(iconColor.BlendOpacity(theme->GetAlphaDisabled()));
     } else {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+        imageSourceInfo.SetFillColor(iconColor);
     }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);

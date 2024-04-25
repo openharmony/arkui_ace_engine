@@ -177,6 +177,11 @@ enum class ChildNodeOperation {
     NONE
 };
 
+enum class BarStyle {
+    STANDARD = 0,
+    STACK,
+};
+
 enum class TitleBarParentType { NAVBAR, NAV_DESTINATION };
 
 enum class NavRouteMode {
