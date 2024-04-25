@@ -576,7 +576,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdSafely();
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subwindow = GetOrCreateSubWindow();
@@ -585,7 +585,8 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
         subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
     } else {
         // for ability
-        auto taskExecutor = Container::CurrentTaskExecutor();
+        auto container = Container::CurrentSafely();
+        auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [containerId, message, duration, bottom, showMode, alignment,  offset] {
