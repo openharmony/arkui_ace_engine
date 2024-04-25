@@ -61,7 +61,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
     auto length = array->Length(vm);
 
     std::vector<ArkUI_Uint32> colorArray;
-    for (uint32_t index = 0; index < length; index) {
+    for (uint32_t index = 0; index < length; index++) {
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         Color color;
         if (ArkTSUtils::ParseJsColorAlpha(vm, value, color)) {
@@ -72,7 +72,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
         }
     }
     if (static_cast<uint32_t>(length) == colorArray.size() && (static_cast<uint32_t>(length) & 1)) {
-        for (uint32_t i = 0; i < length; i) {
+        for (uint32_t i = 0; i < length; i++) {
             colorArray.emplace_back(color[i]);
         }
     }

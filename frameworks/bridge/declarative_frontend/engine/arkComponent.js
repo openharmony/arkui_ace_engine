@@ -22329,10 +22329,10 @@ SymbolContentModifier.identity = Symbol('symbolContent');
 class ArkSymbolGlyphComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
-    initialize(value) {
+  }
+  initialize(value) {
       modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value);
       return this;
-    }
   }
   fontColor(value) {
     modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
