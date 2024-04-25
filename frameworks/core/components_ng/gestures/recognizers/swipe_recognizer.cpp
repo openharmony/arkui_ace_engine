@@ -165,7 +165,7 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         // nanoseconds duration to seconds.
         std::chrono::duration<double> duration = event.time - touchDownTime_;
         auto seconds = duration.count();
-        resultSpeed_ = offset.GetDistance() / seconds;
+        resultSpeed_ = LessOrEqual(seconds, 0.0) ? 0.0 : offset.GetDistance() / seconds;
         if (resultSpeed_ < speed_) {
             if (currentFingers_ - 1 + static_cast<int32_t>(matchedTouch_.size()) < fingers_) {
                 TAG_LOGI(AceLogTag::ACE_GESTURE, "The result speed %{public}f is less than duration %{public}f",
@@ -211,7 +211,9 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         auto duration = event.time - touchDownTime_;
         auto duration_ms =
             std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, RATIO_US_TO_MS>>>(duration);
-        resultSpeed_ = axisOffset_.GetDistance() / duration_ms.count() * RATIO_MS_TO_S;
+        resultSpeed_ = LessOrEqual(duration_ms.count(), 0.0)
+                           ? 0.0
+                           : axisOffset_.GetDistance() / duration_ms.count() * RATIO_MS_TO_S;
         if (resultSpeed_ < speed_) {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         } else {
