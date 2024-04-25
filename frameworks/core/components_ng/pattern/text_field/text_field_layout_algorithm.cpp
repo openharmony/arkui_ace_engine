@@ -363,20 +363,12 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
-    std::string counterText = "";
-    TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
+    std::string counterText;
+    TextStyle countTextStyle =
+        pattern->GetShowCounterStyleValue() ? theme->GetOverCountTextStyle() : theme->GetCountTextStyle();
     auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    uint32_t limitsize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
-    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != DEFAULT_MODE)) {
-        countTextStyle = theme->GetOverCountTextStyle();
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        countTextStyle.SetTextColor(theme->GetOverCounterColor());
-        pattern->SetCounterState(false);
-    } else if ((textLength >= limitsize) && (counterType != DEFAULT_MODE)) {
-        countTextStyle = theme->GetCountTextStyle();
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        countTextStyle.SetTextColor(theme->GetDefaultCounterColor());
-    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == DEFAULT_MODE) {
+    auto limitSize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
+    if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     }
     textLayoutProperty->UpdateContent(counterText);
