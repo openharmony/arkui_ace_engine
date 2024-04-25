@@ -432,7 +432,7 @@ void XComponentPattern::SetRotation()
         rotation_ = dmRotation;
         CHECK_NULL_VOID(renderSurface_);
         renderSurface_->SetTransformHint(dmRotation);
-    }    
+    }
 }
 
 void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
