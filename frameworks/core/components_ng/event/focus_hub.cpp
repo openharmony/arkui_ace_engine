@@ -881,10 +881,23 @@ bool FocusHub::OnClick(const KeyEvent& event)
         auto geometryNode = GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);
         auto rect = geometryNode->GetFrameRect();
-        info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
-        info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
+        auto centerToWindow = Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2);
+        auto centerToNode = Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2);
+        info.SetGlobalLocation(centerToWindow);
+        info.SetLocalLocation(Offset(centerToNode));
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;
+            info.SetScreenLocation(windowOffset);
+        }
+        info.SetSourceTool(SourceTool::UNKNOWN);
+        auto eventHub = eventHub_.Upgrade();
+        if (eventHub) {
+            auto targetImpl = eventHub->CreateGetEventTargetImpl();
+            info.SetTarget(targetImpl().value_or(EventTarget()));
+        }
         onClickCallback(info);
         return true;
     }
