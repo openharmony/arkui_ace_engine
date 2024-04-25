@@ -1409,6 +1409,12 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
     }
 }
 
+void PipelineContext::CheckAndUpdateKeyboardInset()
+{
+    uint32_t keyboardHeight = safeAreaManager_->GetKeyboardInset().Length();
+    safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
+}
+
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
