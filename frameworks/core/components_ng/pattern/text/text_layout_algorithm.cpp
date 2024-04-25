@@ -424,6 +424,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
         symbolTextStyle.SetEffectStrategy(
             symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
+        symbolTextStyle.SetFontFamilies({"HM Symbol"});
         paragraph_->PushStyle(symbolTextStyle);
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
         symbolEffectOptions.Reset();
