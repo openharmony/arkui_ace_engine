@@ -492,6 +492,12 @@ public:
     bool CheckPageNeedAvoidKeyboard() const;
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
     void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
+    void EraseMenuInfo(int32_t targetId)
+    {
+        if (menuMap_.find(targetId) != menuMap_.end()) {
+            menuMap_.erase(targetId);
+        }
+    }
 
 private:
     void PopToast(int32_t targetId);
