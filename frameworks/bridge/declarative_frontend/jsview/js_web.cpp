@@ -1657,6 +1657,54 @@ private:
     RefPtr<ContextMenuResult> result_;
 };
 
+class JSWebAppLinkCallback : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebAppLinkCallback>::Declare("WebAppLinkCallback");
+        JSClass<JSWebAppLinkCallback>::CustomMethod("continueLoad", &JSWebAppLinkCallback::ContinueLoad);
+        JSClass<JSWebAppLinkCallback>::CustomMethod("cancelLoad", &JSWebAppLinkCallback::CancelLoad);
+        JSClass<JSWebAppLinkCallback>::Bind(
+            globalObj, &JSWebAppLinkCallback::Constructor, &JSWebAppLinkCallback::Destructor);
+    }
+
+    void SetEvent(const WebAppLinkEvent& eventInfo)
+    {
+        callback_ = eventInfo.GetCallback();
+    }
+
+    void ContinueLoad(const JSCallbackInfo& args)
+    {
+        if (callback_) {
+            callback_->ContinueLoad();
+        }
+    }
+
+    void CancelLoad(const JSCallbackInfo& args)
+    {
+        if (callback_) {
+            callback_->CancelLoad();
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebAppLinkCallback = Referenced::MakeRefPtr<JSWebAppLinkCallback>();
+        jsWebAppLinkCallback->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebAppLinkCallback));
+    }
+
+    static void Destructor(JSWebAppLinkCallback* jsWebAppLinkCallback)
+    {
+        if (jsWebAppLinkCallback != nullptr) {
+            jsWebAppLinkCallback->DecRefCount();
+        }
+    }
+
+    RefPtr<WebAppLinkCallback> callback_;
+};
+
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
@@ -1806,6 +1854,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSDataResubmitted::JSBind(globalObj);
     JSScreenCaptureRequest::JSBind(globalObj);
     JSNativeEmbedGestureRequest::JSBind(globalObj);
+    JSWebAppLinkCallback::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -2133,6 +2182,25 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     auto result = func->Call(webviewController, 1, argv);
             };
         }
+
+        auto setOpenAppLinkFunction = controller->GetProperty("openAppLink");
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)> openAppLinkCallback = nullptr;
+        if (setOpenAppLinkFunction->IsFunction()) {
+            openAppLinkCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(setOpenAppLinkFunction)]
+                (const std::shared_ptr<BaseEventInfo>& info) {
+                    auto* eventInfo = TypeInfoHelper::DynamicCast<WebAppLinkEvent>(info.get());
+                    JSRef<JSObject> obj = JSRef<JSObject>::New();
+                    JSRef<JSObject> callbackObj = JSClass<JSWebAppLinkCallback>::NewInstance();
+                    auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebAppLinkCallback>());
+                    callbackEvent->SetEvent(*eventInfo);
+                    obj->SetPropertyObject("result", callbackObj);
+                    JSRef<JSVal> urlVal = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetUrl()));
+                    obj->SetPropertyObject("url", urlVal);
+                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                    auto result = func->Call(webviewController, 1, argv);
+            };
+        }
         
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
@@ -2142,6 +2210,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
             incognitoMode);
 
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
+        WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {

@@ -686,6 +686,17 @@ public:
     virtual int32_t GetParentNWebId() const = 0;
 };
 
+class ACE_EXPORT WebAppLinkCallback : public AceType {
+    DECLARE_ACE_TYPE(WebAppLinkCallback, AceType)
+
+public:
+    WebAppLinkCallback() = default;
+    ~WebAppLinkCallback() = default;
+
+    virtual void ContinueLoad() = 0;
+    virtual void CancelLoad() = 0;
+};
+
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
@@ -879,6 +890,31 @@ public:
 
 private:
     RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT WebAppLinkEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebAppLinkEvent, BaseEventInfo);
+
+public:
+    explicit WebAppLinkEvent(
+        const std::string& url,
+        const RefPtr<WebAppLinkCallback>& callback) :
+        BaseEventInfo("WebAppLinkEvent"), url_(url), callback_(callback) {}
+    ~WebAppLinkEvent() = default;
+
+    const RefPtr<WebAppLinkCallback>& GetCallback() const
+    {
+        return callback_;
+    }
+
+    const std::string& GetUrl() const
+    {
+        return url_;
+    }
+
+private:
+    std::string url_;
+    RefPtr<WebAppLinkCallback> callback_;
 };
 
 class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
