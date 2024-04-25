@@ -42,10 +42,10 @@ bool SymbolEffectOptions::operator==(const SymbolEffectOptions& other) const
     if (isActive_ != other.GetIsActive()) {
         return false;
     }
-    if (isActive_ != other.GetIsTxtActive()) {
+    if (isTxtActive_ != other.GetIsTxtActive()) {
         return false;
     }
-    if (isActive_ != other.GetTriggerNum()) {
+    if (triggerNum_ != other.GetTriggerNum()) {
         return false;
     }
     return true;

@@ -139,7 +139,6 @@ void JSSymbol::JsClip(const JSCallbackInfo& info)
     }
 }
 
-
 void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -153,7 +152,7 @@ void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
     if (info.Length() > 1 && !info[1]->IsUndefined()) {
         parseSymbolSwitch(info[1], symbolEffectOptions);
     }
-
+    
     SymbolModel::GetInstance()->SetSymbolEffectOptions(symbolEffectOptions);
 }
 
@@ -201,21 +200,12 @@ void JSSymbol::parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptio
     if (jsVal->IsBoolean()) {
         symbolEffectOptions.SetIsActive(jsVal->ToBoolean());
     }
+
     if (jsVal->IsNumber()) {
-        uint32_t triggerValue = -1;
+        int32_t triggerValue = -1;
         ParseJsInteger(jsVal, triggerValue);
         symbolEffectOptions.SetTriggerNum(triggerValue);
     }
 
-    if (symbolEffectOptions.GetTriggerNum().has_value()) {
-        // 只要设置了TriggerNum => triggerChanged
-        symbolEffectOptions.SetIsTxtActive(symbolEffectOptions.IsTriggerChanged().value_or(false));
-    } else if (symbolEffectOptions.GetIsActive().has_value()) {
-        // 只设isActive => isActive
-        symbolEffectOptions.SetIsTxtActive(symbolEffectOptions.GetIsActive().value());
-    } else {
-        // isActive && triggerValue都未设置 => false
-        symbolEffectOptions.SetIsTxtActive(false);
-    }
 }
 } // namespace OHOS::Ace::Framework

@@ -30,7 +30,7 @@ public:
     void SetFontColor(std::vector<Color>& symbolColor) override;
     void SetSymbolEffect(const std::uint32_t effectStrategy) override;
     void SetClipEdge() override;
-    void SetSymbolEffectOptions(const NG::SymbolEffectOptions& symbolEffectOptions) override;
+    void SetSymbolEffectOptions(NG::SymbolEffectOptions& symbolEffectOptions) override;
 };
 } // namespace OHOS::Ace::NG
 

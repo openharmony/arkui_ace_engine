@@ -424,8 +424,14 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
         symbolTextStyle.SetEffectStrategy(
             symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
-        symbolTextStyle.SetFontFamilies({"HM Symbol"});
         paragraph_->PushStyle(symbolTextStyle);
+        auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.Reset();
+        layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+        if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
+            auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
+            symboloptiOns.Reset();
+        }
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
         paragraph_->Build();

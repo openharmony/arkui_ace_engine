@@ -65,8 +65,13 @@ void SymbolModelNG::SetClipEdge()
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void SymbolModelNG::SetSymbolEffectOptions(const SymbolEffectOptions& symbolEffectOptions)
+void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOptions)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.updateFlags(lastSymbolEffectOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
 }
 } // namespace OHOS::Ace::NG

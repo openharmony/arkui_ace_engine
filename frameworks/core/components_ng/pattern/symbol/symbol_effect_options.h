@@ -72,24 +72,58 @@ public:
         isActive_ = isActive;
     }
 
-    void SetTriggerNum(uint32_t triggerNum)
+    void Reset()
     {
-        if (!triggerNum_.has_value()) {
-            isTriggerNumChanged_ = true;
-        } else {
-            uint32_t lastTriggerNum = triggerNum_.value();
-            if (triggerNum != lastTriggerNum) {
-                isTriggerNumChanged_ = true;
-            } else {
-                isTriggerNumChanged_ = false;
-            }
+        if (isTxtActiveSource_ == 1) {
+            isTxtActive_ = false;
         }
+    }
+
+    void SetTriggerNum(int32_t triggerNum)
+    {
         triggerNum_ = triggerNum;
+    }
+
+    void updateFlags(const SymbolEffectOptions& lastOptions)
+    {
+        bool isCurTriggerSetted = triggerNum_.has_value();
+        bool isCurActiveSetted = isActive_.has_value();
+
+        if (isCurTriggerSetted) {
+            // 本次设置了triggerValue, 比较两次的TriggerNum值
+            isTxtActiveSource_ = 1;
+            if (!lastOptions.GetTriggerNum().has_value()) {
+                // 上次无值
+                if (triggerNum_ == -1) {
+                    isTxtActive_ = false;
+                } else {
+                    isTxtActive_ = true;
+                }
+            } else {
+                // 上次有值
+                int32_t lastTriggerNum = lastOptions.GetTriggerNum().value();
+                int32_t curTriggerNum = triggerNum_.value();
+                isTxtActive_ = curTriggerNum != lastTriggerNum;
+            }
+        } else if (isCurActiveSetted) {
+            // 只设isActive => isActive
+            isTxtActiveSource_ = 0;
+            isTxtActive_ = isActive_.value();
+        } else {
+            // isActive && triggerValue都未设置 => false
+            isTxtActiveSource_ = -1;
+            isTxtActive_ = false;
+        }
     }
 
     void SetIsTxtActive(bool isTxtActive)
     {
         isTxtActive_ = isTxtActive;
+    }
+
+    void SetIsTxtActiveSource(int16_t isTxtActiveSource)
+    {
+        isTxtActiveSource_ = isTxtActiveSource;
     }
 
     SymbolEffectType GetEffectType() const
@@ -132,7 +166,7 @@ public:
         return isTriggerNumChanged_;
     }
 
-    std::optional<uint32_t> GetTriggerNum() const
+    std::optional<int32_t> GetTriggerNum() const
     {
         return triggerNum_;
     }
@@ -148,9 +182,15 @@ public:
         json->Put("commonSubType", static_cast<int32_t>(commonSubType_.value_or(CommonSubType::DOWN)));
         json->Put("fillStyle", static_cast<int32_t>(fillStyle_.value_or(FillStyle::CUMULATIVE)));
         json->Put("isTxtActive", isTxtActive_);
-        json->Put("isTriggerNumChanged", isTriggerNumChanged_.value_or(false));
-        json->Put("isActive", isActive_.value_or(false));
-        json->Put("repeatCount", repeatCount_);
+        if (triggerNum_.has_value()) {
+            json->Put("triggerNum", triggerNum_.value());
+        }
+        if (isTriggerNumChanged_.has_value()) {
+            json->Put("isTriggerNumChanged", isTriggerNumChanged_.value());
+        }
+        if (isActive_.has_value()) {
+            json->Put("isActive", isActive_.value());
+        }
         return json->ToString();
     }
 
@@ -160,12 +200,12 @@ private:
     std::optional<CommonSubType> commonSubType_;
     std::optional<FillStyle> fillStyle_;
     std::optional<bool> isActive_;
-    std::optional<uint32_t> triggerNum_;
+    std::optional<int32_t> triggerNum_;
     std::optional<bool> isTriggerNumChanged_;
     bool isTxtActive_ = false;
+    int16_t isTxtActiveSource_ = -1; // -2:内部的trigger,    -1:未设置开关   0:isActive   1:用户js接口的Trigger
     int32_t repeatCount_ = 1;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SYMBOL_SYMBOL_SOURCE_INFO_H
