@@ -1082,8 +1082,7 @@ void TextFieldPattern::HandleBlurEvent()
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
-    auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && IsUnderlineMode()) {
+    if (!IsShowError() && IsUnderlineMode()) {
         underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
         underlineWidth_ = UNDERLINE_WIDTH;
     }
