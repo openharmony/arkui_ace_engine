@@ -421,16 +421,18 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
-void XComponentPattern::BeforeCreateLayoutWrapper()
+void XComponentPattern::SetRotation()
 {
-    Pattern::BeforeCreateLayoutWrapper();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
     auto dmRotation = displayInfo->GetRotation();
-    CHECK_NULL_VOID(renderSurface_);
-    renderSurface_->SetTransformHint(dmRotation);
+    if (rotation_ != dmRotation) {
+        rotation_ = dmRotation;
+        CHECK_NULL_VOID(renderSurface_);
+        renderSurface_->SetTransformHint(dmRotation);
+    }
 }
 
 void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
@@ -482,6 +484,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         AddAfterLayoutTaskForExportTexture();
     }
     host->MarkNeedSyncRenderTree();
+    AddAfterLayoutTaskForRotation();
 }
 
 void XComponentPattern::DumpInfo()
@@ -1173,6 +1176,17 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->DoTextureExport();
+    });
+}
+
+void XComponentPattern::AddAfterLayoutTaskForRotation()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetRotation();
     });
 }
 

@@ -288,7 +288,6 @@ private:
     void NativeSurfaceHide();
     void NativeSurfaceShow();
     void OnModifyDone() override;
-    void BeforeCreateLayoutWrapper() override;
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
 
@@ -317,6 +316,7 @@ private:
     void HandleUnregisterOnFrameEvent();
     bool ExportTextureAvailable();
     void AddAfterLayoutTaskForExportTexture();
+    void AddAfterLayoutTaskForRotation();
     bool DoTextureExport();
     bool StopTextureExport();
     void InitializeRenderContext();
@@ -327,6 +327,7 @@ private:
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
+    void SetRotation();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -379,6 +380,7 @@ private:
     bool hasReleasedSurface_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
+    Rotation rotation_ = Rotation::ROTATION_0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
