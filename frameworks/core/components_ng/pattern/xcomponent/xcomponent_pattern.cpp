@@ -484,7 +484,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         AddAfterLayoutTaskForExportTexture();
     }
     host->MarkNeedSyncRenderTree();
-    SetRotation();
+    AddAfterLayoutTaskForRotation();
 }
 
 void XComponentPattern::DumpInfo()
@@ -1173,6 +1173,17 @@ void XComponentPattern::AddAfterLayoutTaskForExportTexture()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->DoTextureExport();
+    });
+}
+
+void XComponentPattern::AddAfterLayoutTaskForRotation()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetRotation();
     });
 }
 
