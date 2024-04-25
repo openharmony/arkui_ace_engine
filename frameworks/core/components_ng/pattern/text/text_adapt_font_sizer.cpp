@@ -70,6 +70,8 @@ bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::strin
         }
     }
     fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
+    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
+    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
     textStyle.SetFontSize(Dimension(fontSize));
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }
@@ -110,6 +112,8 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
         }
     }
     fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
+    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
+    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
     textStyle.SetFontSize(Dimension(fontSize));
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }
