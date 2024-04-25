@@ -290,27 +290,22 @@ void JSXComponentController::StopImageAnalyzer(const JSCallbackInfo& args)
 
 void JSXComponentController::SetXComponentSurfaceRotation(const JSCallbackInfo& args)
 {
-    if (!xcomponentController_) {
-        return;
-    }
-    if (args.Length() < 1 || !args[0]->IsObject()) {
+    if (!args[0]->IsObject()) {
         return;
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     bool lock = false;
     ConvertFromJSValue(obj->GetProperty("lock"), lock);
+    CHECK_NULL_VOID(xcomponentController_);
     xcomponentController_->SetSurfaceRotation(lock);
 }
 
 void JSXComponentController::GetXComponentSurfaceRotation(const JSCallbackInfo& args)
 {
-    if (!xcomponentController_) {
-        return;
-    }
-
     auto retObj = JSRef<JSObject>::New();
     bool lock = false;
+    CHECK_NULL_VOID(xcomponentController_);
     xcomponentController_->GetSurfaceRotation(lock);
     retObj->SetProperty("lock", lock);
     args.SetReturnValue(retObj);
