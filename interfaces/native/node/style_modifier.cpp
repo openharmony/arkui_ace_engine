@@ -7033,7 +7033,7 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     int radiusUnits[ALLOW_SIZE_4] = { unit, unit, unit, unit };
 
     if (item->size == ALLOW_SIZE_2) {
-        if (LessNotEqual(item->value[0].f32, 0.0f)) {
+        if (LessNotEqual(item->value[NUM_1].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
         for (int i = 0; i < ALLOW_SIZE_4; ++i) {
@@ -7044,7 +7044,7 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
             if (LessNotEqual(item->value[i + NUM_1].f32, 0.0f)) {
                 return ERROR_CODE_PARAM_INVALID;
             } else {
-                radiusVals[i + NUM_1] = item->value[i + NUM_1].f32;
+                radiusVals[i] = item->value[i + NUM_1].f32;
             }
         }
     } else {

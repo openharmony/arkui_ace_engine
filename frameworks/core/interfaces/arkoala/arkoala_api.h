@@ -3554,6 +3554,8 @@ struct ArkUIBasicAPI {
     // the flag can combine different flag like ARKUI_DIRTY_FLAG_MEASURE | ARKUI_DIRTY_FLAG_RENDER
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUI_Uint32 dirtyFlag);
     ArkUI_Bool (*isBuilderNode)(ArkUINodeHandle node);
+
+    ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
 };
 
 struct ArkUIDialogAPI {

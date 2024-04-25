@@ -208,6 +208,12 @@ ArkUI_Bool IsBuilderNode(ArkUINodeHandle node)
     return ViewModel::IsBuilderNode(node);
 }
 
+ArkUI_Float64 ConvertLengthMetricsUnit(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit)
+{
+    Dimension lengthMetric(value, static_cast<DimensionUnit>(originUnit));
+    return lengthMetric.GetNativeValue(static_cast<DimensionUnit>(targetUnit));
+}
+
 ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
@@ -841,6 +847,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         ApplyModifierFinish,
         MarkDirty,
         IsBuilderNode,
+        ConvertLengthMetricsUnit,
     };
     /* clang-format on */
 
