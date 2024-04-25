@@ -162,22 +162,25 @@ public:
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode, bool isRightToLeft = false);
     void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
-    void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
+    void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+        std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
     void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
     void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
-        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent,
-        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {});
+        std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent = {},
+        const std::vector<ButtonInfo>& buttonInfos = std::vector<ButtonInfo>({}));
     void PopModalDialog(int32_t maskId);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
