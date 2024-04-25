@@ -203,6 +203,9 @@ void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
 
 void JSButton::GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters)
 {
+    if (font->IsNull() || !font->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
     CalcDimension fontSize;
@@ -300,9 +303,7 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> font = obj->GetProperty("font");
-    if (!font->IsNull() && font->IsObject()) {
-        GetFontContent(font, buttonParameters);
-    }
+    GetFontContent(font, buttonParameters);
 
     CompleteParameters(buttonParameters);
     ButtonModel::GetInstance()->SetLabelStyle(buttonParameters);
