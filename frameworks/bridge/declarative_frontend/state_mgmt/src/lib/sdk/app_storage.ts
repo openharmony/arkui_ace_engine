@@ -43,6 +43,37 @@ class AppStorage extends LocalStorage {
 
 
     /**
+     * Obtain a handle or an alias to AppStorage property with given name.
+     *
+     * @param propName AppStorage property name
+     * @returns AbstractProperty object is property with given name exists
+     * undefined otherwise
+     *
+     * @since 12
+     */
+    public static ref<T>(propName: string): AbstractProperty<T> | undefined {
+        return AppStorage.getOrCreate().ref(propName);
+    }
+
+
+    /**
+     * Obtain a handle or an alias to AppStorage property with given name.
+     *
+     * If property does not exist in AppStorage, create it with given default value.
+     *
+     * @param propName LocalStorage property name
+     * @param defaultValue If property does not exist in AppStorage,
+     *        create it with given default value.
+     * @returns AbstractProperty object
+     *
+     * @since 12
+     */
+    public static setAndRef<T>(propName: string, defaultValue: T): AbstractProperty<T> {
+        return AppStorage.getOrCreate().setAndRef(propName, defaultValue);
+    }
+
+
+    /**
     * create and return a two-way sync "(link") to named property
     * 
     * Same as @see LocalStorage.link() 
