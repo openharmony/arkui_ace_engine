@@ -4445,7 +4445,7 @@ HWTEST_F(RichEditorTestNg, GetTextSpansInfo, TestSize.Level1)
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    style1.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
 
     auto info = richEditorController->GetSpansInfo(0, 6);
@@ -4454,8 +4454,8 @@ HWTEST_F(RichEditorTestNg, GetTextSpansInfo, TestSize.Level1)
     auto textStyle = info.selection_.resultObjects.begin()->textStyle;
 
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
-    EXPECT_EQ(textStyle.leadingMarginSize[0], 5.0);
-    EXPECT_EQ(textStyle.leadingMarginSize[1], 10.0);
+    EXPECT_EQ(textStyle.leadingMarginSize[0], "5.00px");
+    EXPECT_EQ(textStyle.leadingMarginSize[1], "10.00px");
 
     ClearSpan();
 }
@@ -4526,7 +4526,7 @@ HWTEST_F(RichEditorTestNg, DeleteValueSetTextSpan, TestSize.Level1)
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    style1.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
     auto info = richEditorController->GetSpansInfo(0, 6);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
@@ -4541,8 +4541,8 @@ HWTEST_F(RichEditorTestNg, DeleteValueSetTextSpan, TestSize.Level1)
     richEditorPattern->DeleteValueSetTextSpan(spanItem, 0, 1, spanResult);
 
     EXPECT_EQ(spanResult.GetTextStyle().textAlign, int(TextAlign::END));
-    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[0], 5.0);
-    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[1], 10.0);
+    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[0], "5.00px");
+    EXPECT_EQ(spanResult.GetTextStyle().leadingMarginSize[1], "10.00px");
 
     ClearSpan();
 }
@@ -4570,7 +4570,7 @@ HWTEST_F(RichEditorTestNg, onIMEInputComplete, TestSize.Level1)
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    style1.leadingMargin->size = NG::SizeF(5.0, 10.0);
+    style1.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
     richEditorPattern->UpdateParagraphStyle(0, 6, style1);
     auto info = richEditorController->GetSpansInfo(0, 6);
     EXPECT_EQ(info.selection_.resultObjects.size(), 1);
@@ -4583,8 +4583,8 @@ HWTEST_F(RichEditorTestNg, onIMEInputComplete, TestSize.Level1)
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
     richEditorPattern->AfterIMEInsertValue(it1, 1, false);
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
-    EXPECT_EQ(textStyle.leadingMarginSize[0], 5.0);
-    EXPECT_EQ(textStyle.leadingMarginSize[1], 10.0);
+    EXPECT_EQ(textStyle.leadingMarginSize[0], "5.00px");
+    EXPECT_EQ(textStyle.leadingMarginSize[1], "10.00px");
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
