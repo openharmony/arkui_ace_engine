@@ -1225,6 +1225,9 @@ void CompleteResourceObjectFromParams(
     }
 
     JSRef<JSVal> args = jsObj->GetProperty("params");
+    if (!args->IsArray()) {
+        return;
+    }
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     if (resId != UNKNOWN_RESOURCE_ID) {
         return;
@@ -1519,7 +1522,9 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
         bundleName = bundle->ToString();
         moduleName = module->ToString();
     }
-
+    if (!args->IsArray()) {
+        return nullptr;
+    }
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     std::vector<ResourceObjectParams> resObjParamsList;
     auto size = static_cast<int32_t>(params->Length());
@@ -1861,7 +1866,11 @@ NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSObject>& j
 
 RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return nullptr;
+    }
+    auto obj = JSRef<JSObject>::Cast(arg);
     auto transitionVal = obj->GetProperty("transition");
     if (!transitionVal->IsObject()) {
         return nullptr;
@@ -2156,7 +2165,11 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
         return;
     }
     uint8_t value = 0;
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(arg);
     JSRef<JSVal> jsStartValue = object->GetProperty("start");
     if (jsStartValue->IsNumber()) {
         int32_t startValue = jsStartValue->ToNumber<int32_t>();
@@ -3061,7 +3074,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 
 std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
 {
-    auto paramArray = JSRef<JSArray>::Cast(info[optionIndex]);
+    JSRef<JSVal> arg = info[optionIndex];
+    if (!arg->IsArray()) {
+        return std::vector<NG::OptionParam>();
+    }
+    auto paramArray = JSRef<JSArray>::Cast(arg);
     std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     for (size_t i = 0; i < paramArray->Length(); ++i) {
@@ -3297,6 +3314,9 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
 void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
     std::function<void()>& previewBuildFunc)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     auto menuContentOptions = JSRef<JSObject>::Cast(args);
     ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
@@ -3370,7 +3390,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
                 ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
-        } else {
+        } else if (info[0]->IsObject()) {
             JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
             menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
             auto isShowObj = callbackObj->GetProperty("value");
@@ -3811,6 +3831,9 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderImageDimension(
     const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
     if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
         LocalizedCalcDimension localizedCalcDimension;
@@ -4951,6 +4974,9 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
 
 bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result)
 {
+    if (!jsValue->IsObject()) {
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -5057,6 +5083,9 @@ bool JSViewAbstract::ParseJsSymbolId(
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
         symbolId = 0;
+        return false;
+    }
+    if (!jsValue->IsObject()) {
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -6000,6 +6029,9 @@ void JSViewAbstract::SetPopupDismiss(
 PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
+    if (!onWillDismissFunc->IsFunction()) {
+        return PopupOnWillDismiss();
+    }
     RefPtr<JsFunction> jsFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -6142,7 +6174,11 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(arg);
     newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
     // center
     JSRef<JSVal> center = jsObj->GetProperty("center");
@@ -6196,7 +6232,11 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(arg);
     newGradient.CreateGradientWithType(NG::GradientType::SWEEP);
     // center
     JSRef<JSVal> center = jsObj->GetProperty("center");
@@ -6846,15 +6886,16 @@ void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto builder = obj->GetProperty("builder");
-
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_VOID(builderFunc);
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("AccessibilityVirtualNode");
-        func->Execute();
-    };
-    NG::ViewAbstractModelNG::GetInstance()->SetAccessibilityVirtualNode(std::move(buildFunc));
+    if (builder->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_VOID(builderFunc);
+        auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("AccessibilityVirtualNode");
+            func->Execute();
+        };
+        NG::ViewAbstractModelNG::GetInstance()->SetAccessibilityVirtualNode(std::move(buildFunc));
+    }
 }
 
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
@@ -8358,6 +8399,9 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         auto style = static_cast<ShadowStyle>(shadowStyle);
         return GetShadowFromTheme(style, shadow);
     }
+    if (!jsValue->IsObject()) {
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     double radius = 0.0;
     ParseJsDouble(jsObj->GetProperty("radius"), radius);
@@ -8450,7 +8494,11 @@ bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension&
 bool JSViewAbstract::ParseDataDetectorConfig(
     const JSCallbackInfo& info, std::string& types, std::function<void(const std::string&)>& onResult)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg);
     JSRef<JSVal> typeValue = obj->GetProperty("types");
     if (!typeValue->IsArray()) {
         return false;
@@ -8848,8 +8896,12 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined() || arg->IsNull()) {
         ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::UNDEFINED, DEFAULT_SCALE_LIGHT);
+        return;
+    }
+    if (!arg->IsObject()) {
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -8933,7 +8985,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
         return;
     }
 
@@ -9457,6 +9509,9 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         return;
     }
     auto sliceValue = resizableObject->GetProperty("slice");
+    if (!sliceValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
     if (sliceObj->IsEmpty()) {
         ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
