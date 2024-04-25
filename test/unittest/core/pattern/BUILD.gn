@@ -51,6 +51,7 @@ group("core_pattern_unittest") {
     "loading_progress:loading_progress_test_ng",
     "marquee:marquee_test_ng",
     "menu:menu_test_ng",
+    "navigation:navigation_test_ng",
     "navigator:navigator_test_ng",
     "navrouter:navrouter_test_ng",
     "node_container:node_container_test_ng",
