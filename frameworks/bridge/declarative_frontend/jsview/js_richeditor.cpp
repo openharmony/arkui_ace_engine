@@ -1812,7 +1812,7 @@ void JSRichEditorController::ParseJsSelectionOptions(
     JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
     double tempPolicy = 0.0;
     if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
-        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:NEVER, 2:ALWAYS
+        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:HIDE, 2:SHOW
             optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
             options = optionTemp;
         }

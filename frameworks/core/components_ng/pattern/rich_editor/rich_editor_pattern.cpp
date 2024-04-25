@@ -5036,7 +5036,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
 
 void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& options)
 {
-    if (options.menuPolicy == MenuPolicy::ALWAYS) {
+    if (options.menuPolicy == MenuPolicy::SHOW) {
         if (isMousePressed_ || sourceType_ == SourceType::MOUSE) {
             selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
         }
@@ -5045,7 +5045,7 @@ void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& o
         } else {
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll());
         }
-    } else if (options.menuPolicy == MenuPolicy::NEVER) {
+    } else if (options.menuPolicy == MenuPolicy::HIDE) {
         if (SelectOverlayIsOn()) {
             CloseSelectOverlay();
         }

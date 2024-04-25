@@ -142,7 +142,7 @@ enum class CancelButtonStyle {
     INPUT,
 };
 
-enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
+enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;

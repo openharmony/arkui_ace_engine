@@ -4538,9 +4538,9 @@ void TextFieldPattern::SetSelectionFlag(
         CloseSelectOverlay(true);
     } else {
         if (options.has_value()) {
-            if (options.value().menuPolicy == MenuPolicy::NEVER) {
+            if (options.value().menuPolicy == MenuPolicy::HIDE) {
                 isShowMenu = false;
-            } else if (options.value().menuPolicy == MenuPolicy::ALWAYS) {
+            } else if (options.value().menuPolicy == MenuPolicy::SHOW) {
                 isShowMenu = true;
             }
         } else {
