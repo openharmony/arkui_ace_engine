@@ -14,10 +14,19 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1701,6 +1710,34 @@ HWTEST_F(GridLayoutTestNg, GetEndOffset003, TestSize.Level1)
     });
     pattern_->SetEdgeEffect(EdgeEffect::SPRING, true);
     EXPECT_EQ(pattern_->GetEndOffset(), 0.f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::GetEndOffset004
+ * @tc.desc: test EndOffset when content < viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetEndOffset004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions({ .irregularIndexes = { 1, 5 } });
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 5.0f });
+        CreateFixedHeightItems(6, 100.0f);
+        model.SetEdgeEffect(EdgeEffect::SPRING, true);
+        // make content smaller than viewport
+        ViewAbstract::SetHeight(CalcLength(700.0f));
+    });
+    auto& info = pattern_->gridLayoutInfo_;
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    // line height + gap = 105
+    for (int i = 0; i < 160; ++i) {
+        UpdateCurrentOffset(-50.0f);
+        EXPECT_EQ(pattern_->GetEndOffset(), info.startMainLineIndex_ * 105.0f);
+    }
+    EXPECT_LE(info.currentOffset_, -1000.0f);
+    EXPECT_GE(info.startMainLineIndex_, 3);
 }
 
 /**

@@ -14,8 +14,16 @@
  */
 
 #include "grid_test_ng.h"
+
+#include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"
@@ -90,7 +98,6 @@ void GridTestNg::CreateItem(int32_t itemNumber, float width, float height, GridI
     for (int32_t i = 0; i < itemNumber; i++) {
         GridItemModelNG itemModel;
         itemModel.Create(gridItemStyle);
-        // -2 corresponds to 100%
         if (width == -2) {
             ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
         } else if (width != NULL_VALUE) {
@@ -108,10 +115,14 @@ void GridTestNg::CreateItem(int32_t itemNumber, float width, float height, GridI
     }
 }
 
-void GridTestNg::CreateFixedItem(
-    int32_t itemNumber, GridItemStyle gridItemStyle)
+void GridTestNg::CreateFixedItem(int32_t itemNumber, GridItemStyle gridItemStyle)
 {
     CreateItem(itemNumber, ITEM_WIDTH, ITEM_HEIGHT, gridItemStyle);
+}
+
+void GridTestNg::CreateFixedHeightItems(int32_t itemNumber, float height, GridItemStyle gridItemStyle)
+{
+    CreateItem(itemNumber, -2, height, gridItemStyle);
 }
 
 void GridTestNg::CreateBigItem(

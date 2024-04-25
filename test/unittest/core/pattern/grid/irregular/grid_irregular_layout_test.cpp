@@ -13,16 +13,11 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include "irregular_matrices.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
-#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutTest : public GridTestNg {};
@@ -1567,10 +1562,10 @@ HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo13());
         model.SetColumnsGap(Dimension { 5.0f });
-        CreateItem(1, -2, 300.0f);
-        CreateItem(1, -2, 100.0f);
-        CreateItem(1, -2, 200.0f);
-        CreateItem(1, -2, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 100.0f);
+        CreateFixedHeightItems(1, 200.0f);
+        CreateFixedHeightItems(1, 600.0f);
         CreateItem(5, -2, 100.0f);
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
         ViewAbstract::SetHeight(CalcLength(300.0f));
@@ -1610,10 +1605,10 @@ HWTEST_F(GridIrregularLayoutTest, GetOverScrollOffset001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo13());
         model.SetColumnsGap(Dimension { 5.0f });
-        CreateItem(1, -2, 300.0f);
-        CreateItem(1, -2, 100.0f);
-        CreateItem(1, -2, 200.0f);
-        CreateItem(1, -2, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 100.0f);
+        CreateFixedHeightItems(1, 200.0f);
+        CreateFixedHeightItems(1, 600.0f);
         CreateItem(5, -2, 100.0f);
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
         ViewAbstract::SetHeight(CalcLength(300.0f));
@@ -1708,9 +1703,9 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll001, TestSize.Level1)
         model.SetLayoutOptions(GetOptionDemo12());
         model.SetColumnsGap(Dimension { 1.0f });
         model.SetEdgeEffect(EdgeEffect::NONE, true);
-        CreateItem(1, -2, 600.0f);
-        CreateItem(1, -2, 300.0f);
-        CreateItem(1, -2, 1800.0f);
+        CreateFixedHeightItems(1, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 1800.0f);
         CreateItem(4, -2, 300.0f);
     });
 
@@ -1756,10 +1751,10 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll002, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo13());
         model.SetColumnsGap(Dimension { 5.0f });
-        CreateItem(1, -2, 300.0f);
-        CreateItem(1, -2, 100.0f);
-        CreateItem(1, -2, 200.0f);
-        CreateItem(1, -2, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 100.0f);
+        CreateFixedHeightItems(1, 200.0f);
+        CreateFixedHeightItems(1, 600.0f);
         CreateItem(5, -2, 100.0f);
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
         ViewAbstract::SetHeight(CalcLength(300.0f));
@@ -1784,10 +1779,10 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll003, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
         model.SetLayoutOptions(GetOptionDemo13());
         model.SetColumnsGap(Dimension { 5.0f });
-        CreateItem(1, -2, 300.0f);
-        CreateItem(1, -2, 100.0f);
-        CreateItem(1, -2, 200.0f);
-        CreateItem(1, -2, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 100.0f);
+        CreateFixedHeightItems(1, 200.0f);
+        CreateFixedHeightItems(1, 600.0f);
         CreateItem(5, -2, 100.0f);
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
         ViewAbstract::SetHeight(CalcLength(300.0f));

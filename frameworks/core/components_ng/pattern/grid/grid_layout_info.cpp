@@ -734,6 +734,7 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
 
 bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
 {
+    other += mainGap;
     for (auto it : lineHeightMap_) {
         other -= it.second + mainGap;
         if (NonPositive(other)) {
