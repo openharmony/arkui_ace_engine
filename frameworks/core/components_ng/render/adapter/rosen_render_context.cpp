@@ -1380,6 +1380,15 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode)
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+    CHECK_NULL_VOID(rsCanvasDrawingNode);
+    if (dynamicRangeMode < DynamicRangeMode::STANDARD) {
+        rsCanvasDrawingNode->SetHDRPresent(true);
+    }
+}
+
 void RosenRenderContext::SetAlphaOffscreen(bool isOffScreen)
 {
     CHECK_NULL_VOID(rsNode_);

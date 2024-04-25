@@ -96,6 +96,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.imageInterpolation_ = intepolation;
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
+    config.dynamicMode = renderProps->GetDynamicModeValue(DynamicRangeMode::STANDARD);
     if (renderProps) {
         config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
     }

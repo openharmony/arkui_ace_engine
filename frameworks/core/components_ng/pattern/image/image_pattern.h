@@ -118,6 +118,16 @@ public:
         return true;
     }
 
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -392,6 +402,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
