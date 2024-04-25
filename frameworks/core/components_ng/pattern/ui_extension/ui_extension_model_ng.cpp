@@ -62,6 +62,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     pattern->SetOnReceiveCallback(std::move(callbacks.onReceive));
     pattern->SetModalOnRemoteReadyCallback(std::move(callbacks.onRemoteReady));
     pattern->SetModalOnDestroy(std::move(callbacks.onDestroy));
+    pattern->SetIsModalState(true);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, frameNode);
     dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));

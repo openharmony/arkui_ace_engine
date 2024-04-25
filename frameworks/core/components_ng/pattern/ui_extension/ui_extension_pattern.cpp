@@ -569,7 +569,13 @@ void UIExtensionPattern::DispatchKeyEvent(const KeyEvent& event)
 
 bool UIExtensionPattern::DispatchKeyEventSync(const KeyEvent& event)
 {
-    return sessionWrapper_ && sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    if (isModalState_) {
+        sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
+        return true;
+    }
+
+    return sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
 }
 
 void UIExtensionPattern::DispatchFocusActiveEvent(bool isFocusActive)
