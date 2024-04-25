@@ -27,6 +27,7 @@
 #include "core/gestures/gesture_type.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
+#include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,17 +36,21 @@ class NGGestureRecognizer;
 enum class DragPreviewMode : int32_t {
     AUTO = 1,
     DISABLE_SCALE = 2,
+    ENABLE_DEFAULT_SHADOW = 3,
 };
 
 typedef struct {
     double opacity;
+    std::optional<Shadow> shadow;
+    std::string shadowPath;
 } OptionsAfterApplied;
 
 struct DragPreviewOption {
-    DragPreviewMode mode = DragPreviewMode::AUTO;
+    bool isScaleEnabled = true;
     bool defaultAnimationBeforeLifting = false;
     bool isMultiSelectionEnabled = false;
     bool isNumber = false;
+    bool isDefaultShadowEnabled = false;
     union {
         int32_t badgeNumber;
         bool isShowBadge;
@@ -61,6 +66,11 @@ struct DragPreviewOption {
     }
     std::function<void(WeakPtr<NG::FrameNode>)> onApply;
     OptionsAfterApplied options; // options from modifier after applied
+    void ResetDragPreviewMode()
+    {
+        isScaleEnabled = true;
+        isDefaultShadowEnabled = false;
+    }
 };
 
 class ACE_EXPORT Gesture : public virtual AceType {

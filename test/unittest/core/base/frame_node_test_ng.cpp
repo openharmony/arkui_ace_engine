@@ -2297,7 +2297,7 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
      */
     auto geometryNode = frameNode->GetGeometryNode();
     geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
-    NG::DragPreviewOption option { static_cast<NG::DragPreviewMode>(NG::DragPreviewMode::DISABLE_SCALE) };
+    NG::DragPreviewOption option { false };
     frameNode->SetDragPreviewOptions(option);
     EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
 
@@ -2305,7 +2305,7 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
      * @tc.steps: step3. set set drag preview options to auto and call GetPreviewScaleVal.
      * @tc.expected: expect GetPreviewScaleVal return scale value.
      */
-    option = { static_cast<NG::DragPreviewMode>(NG::DragPreviewMode::AUTO) };
+    option = { true };
     frameNode->SetDragPreviewOptions(option);
     EXPECT_LT(frameNode->GetPreviewScaleVal(), 1.0f);
 }

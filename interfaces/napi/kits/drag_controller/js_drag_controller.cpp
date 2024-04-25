@@ -1134,7 +1134,8 @@ bool ParsePreviewOptions(
         if (valueType == napi_number) {
             int32_t dragPreviewMode = 0;
             napi_get_value_int32(asyncCtx->env, modeNApi, &dragPreviewMode);
-            asyncCtx->dragPreviewOption.mode = static_cast<NG::DragPreviewMode>(dragPreviewMode);
+            auto mode = static_cast<NG::DragPreviewMode>(dragPreviewMode);
+            asyncCtx->dragPreviewOption.isScaleEnabled = mode == NG::DragPreviewMode::AUTO ? true : false;
         } else if (valueType != napi_undefined) {
             errMsg = "mode type is wrong";
             napi_close_handle_scope(asyncCtx->env, scope);

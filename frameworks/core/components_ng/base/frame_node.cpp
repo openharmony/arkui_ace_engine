@@ -605,9 +605,6 @@ void FrameNode::DumpDragInfo()
     dragPreviewStr.append(" extraInfo: ").append(dragPreviewInfo_.extraInfo.c_str());
     dragPreviewStr.append(" inspectorId: ").append(dragPreviewInfo_.inspectorId.c_str());
     DumpLog::GetInstance().AddDesc(dragPreviewStr);
-    DumpLog::GetInstance().AddDesc(
-        std::string("DragPreviewMode: ")
-            .append(previewOption_.mode == DragPreviewMode::DISABLE_SCALE ? "DISABLE_SCALE" : "AUTO"));
     auto eventHub = GetEventHub<EventHub>();
     DumpLog::GetInstance().AddDesc(std::string("Event: ")
                                         .append("OnDragStart: ")
@@ -2745,8 +2742,7 @@ double FrameNode::GetPreviewScaleVal() const
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, scale);
     auto width = geometryNode->GetFrameRect().Width();
-    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth &&
-        previewOption_.mode != DragPreviewMode::DISABLE_SCALE) {
+    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption_.isScaleEnabled) {
         scale = maxWidth / width;
     }
     return scale;
