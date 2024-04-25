@@ -133,6 +133,7 @@ private:
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutInfoSW> info_;
 
+    int32_t itemCnt_ = 0;
     Axis axis_ {};
     std::vector<float> itemCrossSize_;
     float mainLen_ = 0.0f;

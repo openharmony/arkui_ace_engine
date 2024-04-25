@@ -88,7 +88,7 @@ public:
      */
     void ResetBeforeJump(float laneBasePos);
 
-    void Sync(float mainSize, float mainGap);
+    void Sync(int32_t itemCnt, float mainSize, float mainGap);
 
     /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.

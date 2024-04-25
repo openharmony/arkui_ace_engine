@@ -86,10 +86,7 @@ public:
         return layoutInfo_->endIndex_;
     }
 
-    int32_t GetChildrenCount() const
-    {
-        return layoutInfo_->childrenCount_;
-    }
+    int32_t GetChildrenCount() const;
 
     float GetTotalOffset() const override
     {

@@ -125,7 +125,6 @@ public:
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
     int32_t footerIndex_ = -1;
-    int32_t childrenCount_ = 0;
 
     float lastMainSize_ = 0.0f;
 

@@ -586,4 +586,13 @@ void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
         layoutInfo_->footerIndex_ = 0;
     }
 }
+
+int32_t WaterFlowPattern::GetChildrenCount() const
+{
+    auto host = GetHost();
+    if (host) {
+        return host->GetTotalChildCount();
+    }
+    return 0;
+}
 } // namespace OHOS::Ace::NG

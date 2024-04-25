@@ -51,7 +51,7 @@ void WaterFlowSWLayout::Measure(LayoutWrapper* wrapper)
         PostMeasureSelf(size.CrossSize(axis_));
     }
 
-    info_->Sync(mainLen_, mainGap_);
+    info_->Sync(itemCnt_, mainLen_, mainGap_);
     wrapper->SetCacheCount(props->GetCachedCountValue(1));
 }
 
@@ -107,7 +107,7 @@ void WaterFlowSWLayout::Layout(LayoutWrapper* wrapper)
 void WaterFlowSWLayout::Init(const SizeF& frameSize)
 {
     // omit footer from children count
-    info_->childrenCount_ = wrapper_->GetTotalChildCount() - info_->footerIndex_ - 1;
+    itemCnt_ = wrapper_->GetTotalChildCount() - info_->footerIndex_ - 1;
 
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     auto scale = props->GetLayoutConstraint()->scaleProperty;
@@ -122,11 +122,9 @@ void WaterFlowSWLayout::Init(const SizeF& frameSize)
     auto rowsTemplate = props->GetRowsTemplate().value_or("1fr");
     auto columnsTemplate = props->GetColumnsTemplate().value_or("1fr");
     if (axis_ == Axis::VERTICAL) {
-        cross = ParseTemplateArgs(
-            WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, info_->childrenCount_);
+        cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(columnsTemplate), crossSize, crossGap_, itemCnt_);
     } else {
-        cross = ParseTemplateArgs(
-            WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, info_->childrenCount_);
+        cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(rowsTemplate), crossSize, crossGap_, itemCnt_);
     }
     if (cross.second) {
         crossGap_ = 0.0f;
@@ -153,7 +151,7 @@ void WaterFlowSWLayout::CheckReset()
     if (updateIdx != -1) {
         if (info_->ItemInView(updateIdx)) {
             info_->align_ = ScrollAlign::START;
-            info_->jumpIndex_ = info_->startIndex_;
+            info_->jumpIndex_ = std::min(info_->startIndex_, itemCnt_ - 1);
         } else {
             // this can disable RecoverBack / RecoverFront when the updated item is encountered
             info_->idxToLane_.erase(updateIdx);
@@ -186,12 +184,15 @@ void WaterFlowSWLayout::ApplyDelta(float delta)
         // positive offset is scrolling upwards
         FillFront(0.0f, info_->StartIndex() - 1, 0);
     } else {
-        FillBack(mainLen_, info_->EndIndex() + 1, info_->childrenCount_ - 1);
+        FillBack(mainLen_, info_->EndIndex() + 1, itemCnt_ - 1);
     }
 }
 
 void WaterFlowSWLayout::MeasureToTarget(int32_t targetIdx)
 {
+    if (itemCnt_ == 0) {
+        return;
+    }
     if (targetIdx < info_->startIndex_) {
         FillFront(-FLT_MAX, info_->startIndex_ - 1, targetIdx);
     } else if (targetIdx > info_->endIndex_) {
@@ -203,7 +204,8 @@ void WaterFlowSWLayout::MeasureToTarget(int32_t targetIdx)
 using lanePos = std::pair<float, size_t>;
 void WaterFlowSWLayout::FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx)
 {
-    maxChildIdx = std::min(maxChildIdx, info_->childrenCount_ - 1);
+    idx = std::max(idx, 0);
+    maxChildIdx = std::min(maxChildIdx, itemCnt_ - 1);
     if (info_->idxToLane_.count(idx)) {
         RecoverBack(viewportBound, idx, maxChildIdx);
     }
@@ -241,6 +243,7 @@ struct MaxHeapCmp {
 } // namespace
 void WaterFlowSWLayout::FillFront(float viewportBound, int32_t idx, int32_t minChildIdx)
 {
+    idx = std::min(itemCnt_ - 1, idx);
     minChildIdx = std::max(minChildIdx, 0);
     if (info_->idxToLane_.count(idx)) {
         RecoverFront(viewportBound, idx, minChildIdx);
@@ -383,8 +386,8 @@ ScrollAlign WaterFlowSWLayout::ParseAutoAlign(int32_t jumpIdx, bool inView)
 
 void WaterFlowSWLayout::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
 {
-    if (jumpIdx == -1) {
-        jumpIdx = info_->childrenCount_ - 1;
+    if (jumpIdx == LAST_ITEM) {
+        jumpIdx = itemCnt_ - 1;
     }
     overScroll_ = false;
 
@@ -420,7 +423,7 @@ void WaterFlowSWLayout::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
                 ApplyDelta(-info_->DistanceToTop(jumpIdx, mainGap_));
             } else {
                 info_->ResetBeforeJump(0.0f);
-                FillBack(mainLen_, jumpIdx, info_->childrenCount_ - 1);
+                FillBack(mainLen_, jumpIdx, itemCnt_ - 1);
             }
             break;
         }
@@ -439,7 +442,7 @@ void WaterFlowSWLayout::Jump(int32_t jumpIdx, ScrollAlign align, bool noSkip)
                 lane.items_.push_back({ jumpIdx, itemH });
 
                 FillFront(0.0f, jumpIdx - 1, 0);
-                FillBack(mainLen_, jumpIdx + 1, info_->childrenCount_ - 1);
+                FillBack(mainLen_, jumpIdx + 1, itemCnt_ - 1);
             }
             break;
         }
