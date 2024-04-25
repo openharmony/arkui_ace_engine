@@ -35,8 +35,7 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize =
-        CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+    auto idealSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         LOGW("Size is infinity.");
         geometryNode->SetFrameSize(SizeF());
@@ -212,6 +211,13 @@ void StepperLayoutAlgorithm::LayoutLeftButton(LayoutWrapper* layoutWrapper)
     const auto& stepperPadding = layoutProperty->CreatePaddingAndBorder();
     buttonOffset += OffsetF(stepperPadding.left.value_or(0.0), -stepperPadding.bottom.value_or(0.0));
     auto geometryNode = leftButtonWrapper->GetGeometryNode();
+    
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRightToLeft) {
+        auto frameWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+        auto offsetX = frameWidth - geometryNode->GetFrameSize().Width() - buttonOffset.GetX();
+        buttonOffset.SetX(offsetX);
+    }
     geometryNode->SetMarginFrameOffset(buttonOffset);
     leftButtonWrapper->Layout();
 }
@@ -241,6 +247,12 @@ void StepperLayoutAlgorithm::LayoutRightButton(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     const auto& stepperPadding = layoutProperty->CreatePaddingAndBorder();
     buttonOffset -= OffsetF(stepperPadding.right.value_or(0.0), stepperPadding.bottom.value_or(0.0));
+ 
+    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRightToLeft) {
+        auto offsetX = frameSizeWidth - rightButtonWidth - buttonOffset.GetX();
+        buttonOffset.SetX(offsetX);
+    }
     rightButtonWrapper->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     rightButtonWrapper->Layout();
 }
