@@ -391,8 +391,13 @@ void WindowScene::OnDisconnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         if (!self->snapshotNode_ && !self->startingNode_) {
-            self->CreateSnapshotNode(snapshot);
-            host->AddChild(self->snapshotNode_);
+            if (snapshot) {
+                self->CreateSnapshotNode(snapshot);
+                host->AddChild(self->snapshotNode_);
+            } else {
+                self->CreateStartingNode();
+                host->AddChild(self->startingNode_);
+            }
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
