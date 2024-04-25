@@ -927,9 +927,17 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Start drag, animation is %{public}d, pixelMap scale is %{public}f",
         overlayManager->GetIsOnAnimation(), scale);
-    pixelMap->Scale(scale, scale, AceAntiAliasingOption::HIGH);
-    auto width = pixelMap->GetWidth();
-    auto height = pixelMap->GetHeight();
+    RefPtr<PixelMap> pixelMapDuplicated = pixelMap;
+#if defined(PIXEL_MAP_SUPPORTED)
+    pixelMapDuplicated = PixelMap::CopyPixelMap(pixelMap);
+    if (!pixelMapDuplicated) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Copy PixelMap is failure!");
+        pixelMapDuplicated = pixelMap;
+    }
+#endif
+    pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
+    auto width = pixelMapDuplicated->GetWidth();
+    auto height = pixelMapDuplicated->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale,
         !NearEqual(scale, windowScale * defaultPixelMapScale));
     windowScale = NearZero(windowScale) ? 1.0f : windowScale;
@@ -945,7 +953,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto windowId = container->GetWindowId();
-    ShadowInfoCore shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
+    ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
