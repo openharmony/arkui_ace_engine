@@ -387,7 +387,7 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
 }
 int32_t DialogLayoutAlgorithm::GetDeviceColumn(GridSizeType type)
 {
-    int32_t columnNum = 0;
+    int32_t columnNum = 16;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, columnNum);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
