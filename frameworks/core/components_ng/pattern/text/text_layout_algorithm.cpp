@@ -635,7 +635,46 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
-    return AdaptMinFontSize(textStyle, content, 1.0_fp, contentConstraint, layoutWrapper);
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
+        return false;
+    }
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
+        return false;
+    }
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
+            return false;
+        }
+        return true;
+    }
+    constexpr Dimension ADAPT_UNIT = 1.0_fp;
+    Dimension step = ADAPT_UNIT;
+    if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
+        step = textStyle.GetAdaptFontSizeStep();
+    }
+    double stepSize = 0.0;
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(),
+            contentConstraint.maxSize.Height(), stepSize)) {
+        return false;
+    }
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    while (GreatOrEqual(maxFontSize, minFontSize)) {
+        textStyle.SetFontSize(Dimension(maxFontSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
+            return false;
+        }
+        if (!DidExceedMaxLines(maxSize)) {
+            break;
+        }
+        maxFontSize -= stepSize;
+    }
+    return true;
 }
 
 bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
