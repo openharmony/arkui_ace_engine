@@ -94,7 +94,9 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    }
     UpdateBackgroundStyle(renderContext, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
         auto contentRow =
