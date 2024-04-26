@@ -766,11 +766,13 @@ void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gest
             const TouchEventInfo& touchEvent) -> HitTestMode {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
-            CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, NG::HitTestMode::HTMDEFAULT);
+            auto hostNode = pattern->GetHost();
+            CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
+            CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
+            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+            CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
             auto event = touchEvent.ConvertToTouchEvent();
             ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
-            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
-            CHECK_NULL_RETURN(onTouchInterceptCallback, NG::HitTestMode::HTMDEFAULT);
             return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
         });
 }
