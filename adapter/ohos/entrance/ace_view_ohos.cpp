@@ -111,8 +111,17 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback, bool isInjected)
 {
-    CHECK_NULL_VOID(view);
-    CHECK_NULL_VOID(pointerEvent);
+    if (!pointerEvent) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "DispatchTouchEvent pointerEvent is null return.");
+        return;
+    }
+    if (!view) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "DispatchTouchEvent eventId:%{public}d aceView is null return.",
+            pointerEvent->GetId());
+        return;
+    }
     auto instanceId = view->GetInstanceId();
     LogPointInfo(pointerEvent, instanceId);
     DispatchEventToPerf(pointerEvent);
@@ -268,7 +277,10 @@ void AceViewOhos::Launch()
 void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback, bool isInjected)
 {
-    CHECK_NULL_VOID(pointerEvent);
+    if (!pointerEvent) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "ProcessTouchEvent pointerEvent is null return.");
+        return;
+    }
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     touchPoint.SetIsInjected(isInjected);
     if (SystemProperties::GetDebugEnabled()) {
