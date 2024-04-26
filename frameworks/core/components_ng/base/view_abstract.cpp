@@ -4133,4 +4133,18 @@ float ViewAbstract::GetLayoutWeight(FrameNode* frameNode)
     }
     return layoutWeight;
 }
+
+void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
 } // namespace OHOS::Ace::NG

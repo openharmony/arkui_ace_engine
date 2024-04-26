@@ -2912,3 +2912,10 @@ var StyledStringKey;
 class CustomSpan {
   type_ = "CustomSpan"
 }
+
+let FocusPriority;
+(function (FocusPriority) {
+  FocusPriority[FocusPriority["AUTO"] = 0] = "AUTO";
+  FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
+  FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
+})(FocusPriority || (FocusPriority = {}));

@@ -94,6 +94,12 @@ enum class FocusDependence : int32_t {
     AUTO = 2,
 };
 
+enum class FocusPriority : int32_t {
+    AUTO = 0,
+    PRIOR = 2000,
+    PREVIOUS = 3000,
+};
+
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
     DECLARE_ACE_TYPE(FocusPaintParam, AceType)
 
@@ -943,6 +949,25 @@ public:
 
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
+    void RemoveFocusScopeIdAndPriority();
+    bool AcceptFocusOfPriorityChild();
+    bool GetIsFocusGroup() const
+    {
+        return isGroup_;
+    }
+
+    bool GetIsFocusScope() const
+    {
+        return isFocusScope_;
+    }
+
+    std::string GetFocusScopeId() const
+    {
+        return focusScopeId_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -994,6 +1019,12 @@ private:
 
     bool UpdateFocusView();
 
+    WeakPtr<FocusHub> GetChildPriorfocusNode(const std::string& focusScopeId);
+    bool RequestFocusByPriorityInScope();
+    bool IsInFocusGroup();
+    bool IsNestingFocusGroup();
+    void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1031,6 +1062,11 @@ private:
     ScopeFocusAlgorithm focusAlgorithm_;
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     FocusDependence focusDepend_ = FocusDependence::CHILD;
+
+    std::string focusScopeId_;
+    bool isFocusScope_ { false };
+    bool isGroup_ { false };
+    FocusPriority focusPriority_ = FocusPriority::AUTO;
 };
 } // namespace OHOS::Ace::NG
 

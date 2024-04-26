@@ -7955,6 +7955,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod(
         "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
 
+    JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
+    JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);
+
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
 
@@ -9562,5 +9565,43 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+}
+
+void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
+        return;
+    }
+
+    std::string focusScopeId = info[0]->ToString();
+
+    bool isGroup = false;
+    if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
+        info[1]->IsBoolean()) {
+        isGroup = info[1]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+
+    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
+        return;
+    }
+    std::string focusScopeId = info[0]->ToString();
+
+    int32_t focusPriority = 0;
+    if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
+        info[1]->IsNumber()) {
+        focusPriority = info[1]->ToNumber<int32_t>();
+    }
+    ViewAbstractModel::GetInstance()->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 } // namespace OHOS::Ace::Framework
