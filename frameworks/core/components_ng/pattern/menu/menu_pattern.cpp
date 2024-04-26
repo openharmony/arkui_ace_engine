@@ -550,6 +550,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch) const
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
+    overlayManager->EraseMenuInfo(targetId_);
 }
 
 void MenuPattern::HideSubMenu()
