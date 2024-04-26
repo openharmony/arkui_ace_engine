@@ -758,8 +758,7 @@ void TextFieldPattern::HandleFocusEvent()
         StartTwinkling();
     }
     NotifyOnEditChanged(true);
-    auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && IsUnderlineMode()) {
+    if (!IsShowError() && IsUnderlineMode()) {
         auto renderContext = host->GetRenderContext();
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
@@ -3329,7 +3328,7 @@ void TextFieldPattern::UpdateCounterMargin()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() &&
-        !IsShowPasswordIcon()) {
+        !IsInPasswordMode()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
         if (!getMargin || GetMarginBottom() == MARGIN_ZERO) {
@@ -6367,7 +6366,7 @@ bool TextFieldPattern::IsShowCount()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() && !IsShowPasswordIcon() &&
+    return layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() && !IsInPasswordMode() &&
            layoutProperty->HasMaxLength();
 }
 
