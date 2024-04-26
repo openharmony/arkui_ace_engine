@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ABILITY_COMPONENT_RENDER_PROPERTY_H
 
 #include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/components_ng/base/inspector_filter.h"
 #include "frameworks/core/components_ng/layout/layout_property.h"
 #include "frameworks/core/components_ng/property/property.h"
 #include "frameworks/core/components_ng/render/paint_property.h"
@@ -45,10 +46,10 @@ public:
         ResetWant();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put("want", propWant_->c_str());
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("want", propWant_->c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Want, std::string, PROPERTY_UPDATE_RENDER);

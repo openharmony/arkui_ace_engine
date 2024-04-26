@@ -29,6 +29,7 @@
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
@@ -42,9 +43,13 @@
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/util_modifier.h"
+#include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -204,6 +209,12 @@ ArkUI_Bool IsBuilderNode(ArkUINodeHandle node)
     return ViewModel::IsBuilderNode(node);
 }
 
+ArkUI_Float64 ConvertLengthMetricsUnit(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit)
+{
+    Dimension lengthMetric(value, static_cast<DimensionUnit>(originUnit));
+    return lengthMetric.GetNativeValue(static_cast<DimensionUnit>(targetUnit));
+}
+
 ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling)
 {
     auto* nodeAdapter = NodeAdapter::GetNodeAdapterAPI()->getNodeAdapter(parent);
@@ -250,6 +261,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     NodeModifier::SetOnFocus,
+    NodeModifier::SetOnTouchIntercept,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -261,7 +273,7 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
-    nullptr,
+    NodeModifier::SetOnTextInputEditChange,
     NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
     NodeModifier::SetOnTextInputCut,
@@ -270,7 +282,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
-    nullptr,
+    NodeModifier::SetOnTextAreaEditChange,
     nullptr,
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
@@ -289,6 +301,7 @@ const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
 const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnComplete,
     NodeModifier::SetImageOnError,
+    NodeModifier::SetImageOnSvgPlayFinish,
 };
 
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -297,6 +310,10 @@ const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTimePickerOnChange,
+};
+
+const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetTextPickerOnChange,
 };
 
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -328,10 +345,35 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListScrollStart,
     NodeModifier::SetOnListScrollStop,
     NodeModifier::SetOnListScrollFrameBegin,
+    NodeModifier::SetOnListWillScroll,
 };
 
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
+    NodeModifier::SetOnReachEnd,
+};
+
+const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::SetOnGridScrollIndex,
+};
+
+const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnIndexerSelected,
+    NodeModifier::SetOnIndexerRequestPopupData,
+    NodeModifier::SetOnIndexerPopupSelected,
+    NodeModifier::SetIndexerChangeEvent,
+    NodeModifier::SetIndexerCreatChangeEvent,
+};
+
+const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnSearchSubmit,
+    NodeModifier::SetOnSearchChange,
+    NodeModifier::SetOnSearchCopy,
+    NodeModifier::SetOnSearchCut,
+    NodeModifier::SetOnSearchPaste,
 };
 
 /* clang-format on */
@@ -421,6 +463,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_TEXT_PICKER: {
+            if (subKind >= sizeof(TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;            
+        }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
             if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -481,6 +531,33 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_GRID: {
+            // grid event type.
+            if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = GRID_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_ALPHABET_INDEXER: {
+            // alphabet indexer event type.
+            if (subKind >= sizeof(ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SEARCH: {
+            // search event type.
+            if (subKind >= sizeof(SEARCH_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SEARCH_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -788,6 +865,7 @@ const ArkUIBasicAPI* GetBasicAPI()
         ApplyModifierFinish,
         MarkDirty,
         IsBuilderNode,
+        ConvertLengthMetricsUnit,
     };
     /* clang-format on */
 
@@ -1006,12 +1084,18 @@ const ArkUIGraphicsAPI* GetGraphicsAPI()
     return &api;
 }
 
+void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void* event, void* user)
+{
+    ViewAnimate::AnimateTo(context, option, reinterpret_cast<void (*)(void*)>(event), user);
+}
+
 const ArkUIAnimation* GetAnimationAPI()
 {
     static const ArkUIAnimation modifier = {
         nullptr,
         nullptr,
         nullptr,
+        AnimateTo,
     };
     return &modifier;
 }

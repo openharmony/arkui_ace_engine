@@ -106,6 +106,20 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     panGestureOption_->SetOnPanDistanceId(onChangeDistance_);
 }
 
+inline void ReportSlideOn()
+{
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
+}
+
+inline void ReportSlideOff()
+{
+#ifdef OHOS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
+}
+
 void PanRecognizer::OnAccepted()
 {
     int64_t acceptTime = GetSysTimestamp();
@@ -122,6 +136,7 @@ void PanRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
+    ReportSlideOn();
     SendCallbackMsg(onActionStart_);
     SendCallbackMsg(onActionUpdate_);
 }
@@ -281,7 +296,8 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         UpdateTouchPointInVelocityTracker(event, true);
     }
 
-    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+    if ((currentFingers_ <= fingers_) &&
+        (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
             (*onActionCancel_)();
@@ -293,17 +309,10 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         if (currentFingers_  == fingers_) {
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
+            ReportSlideOff();
             averageDistance_.Reset();
-            int64_t overTime = GetSysTimestamp();
-            int64_t inputTime = overTime;
-            if (firstInputTime_.has_value()) {
-                inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-            }
-            if (SystemProperties::GetTraceInputEventEnabled()) {
-                ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
-                    static_cast<long long>(inputTime), static_cast<long long>(overTime));
-            }
-            firstInputTime_.reset();
+            AddOverTimeTrace();
+            refereeState_ = RefereeState::READY;
         }
     }
 
@@ -338,16 +347,8 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (refereeState_ == RefereeState::SUCCEED) {
         // AxisEvent is single one.
         SendCallbackMsg(onActionEnd_);
-        int64_t overTime = GetSysTimestamp();
-        int64_t inputTime = overTime;
-        if (firstInputTime_.has_value()) {
-            inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
-        }
-        if (SystemProperties::GetTraceInputEventEnabled()) {
-            ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
-                static_cast<long long>(inputTime), static_cast<long long>(overTime));
-        }
-        firstInputTime_.reset();
+        ReportSlideOff();
+        AddOverTimeTrace();
     }
 }
 
@@ -493,7 +494,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /*event*/)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         // AxisEvent is single one.
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
@@ -639,6 +640,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
+        info.SetPointerEvent(lastTouchEvent_.pointerEvent);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -866,4 +868,17 @@ bool PanRecognizer::AboutToAddCurrentFingers(int32_t touchId)
     return true;
 }
 
+void PanRecognizer::AddOverTimeTrace()
+{
+    int64_t overTime = GetSysTimestamp();
+    int64_t inputTime = overTime;
+    if (firstInputTime_.has_value()) {
+        inputTime = static_cast<int64_t>(firstInputTime_.value().time_since_epoch().count());
+    }
+    if (SystemProperties::GetTraceInputEventEnabled()) {
+        ACE_SCOPED_TRACE("UserEvent InputTime:%lld OverTime:%lld InputType:PanGesture",
+            static_cast<long long>(inputTime), static_cast<long long>(overTime));
+    }
+    firstInputTime_.reset();
+}
 } // namespace OHOS::Ace::NG

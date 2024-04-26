@@ -45,6 +45,30 @@ extern "C" {
 
 int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkUI_NodeHandle* handle);
 
+/**
+ * @brief 获取ArkTS侧创建的UIContext对象映射到native侧的ArkUI_ContextHandle。
+ *
+ * @param env napi的环境指针。
+ * @param value ArkTS侧创建的context对象。
+ * @param context ArkUI_ContextHandle指针。
+ * @return 0 - 成功。
+ *         401 - 函数参数异常。
+ * @since 12
+ */
+int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_ContextHandle* context);
+
+/**
+ * @brief 获取ArkTS侧创建的NodeContent对象映射到native侧的ArkUI_NodeContentHandle。
+ *
+ * @param env napi的环境指针。
+ * @param value ArkTS侧创建的NodeContent对象。
+ * @param context ArkUI_NodeContentHandle指针。
+ * @return 0 - 成功。
+ *         401 - 函数参数异常。
+ * @since 12
+ */
+int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, ArkUI_NodeContentHandle* content);
+
 #ifdef __cplusplus
 };
 #endif

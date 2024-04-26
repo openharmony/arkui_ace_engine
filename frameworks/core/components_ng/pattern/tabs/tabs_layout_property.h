@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/property/property.h"
@@ -64,13 +65,14 @@ public:
         ResetBarOverlap();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("vertical", propAxis_.value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL ? "false" : "true");
-        json->Put("barPosition", propTabBarPosition_.value_or(BarPosition::START) == BarPosition::START
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("vertical", propAxis_.value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL ?
+            "false" : "true", filter);
+        json->PutExtAttr("barPosition", propTabBarPosition_.value_or(BarPosition::START) == BarPosition::START
                                      ? "BarPosition.Start"
-                                     : "BarPosition.End");
+                                     : "BarPosition.End", filter);
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
             if (!propDivider_.value().isNull) {
@@ -88,12 +90,12 @@ public:
                 divider->Put("endMargin", emptyDivider.endMargin.ToString().c_str());
                 divider->Put("color", emptyDivider.color.ColorToString().c_str());
             }
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         } else {
             auto divider = JsonUtil::Create(true);
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         }
-        json->Put("barOverlap", propBarOverlap_.value_or(false) ? "true" : "false");
+        json->PutExtAttr("barOverlap", propBarOverlap_.value_or(false) ? "true" : "false", filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -105,7 +107,12 @@ public:
 
         UpdateAxis(json->GetBool("vertical") ? Axis::VERTICAL : Axis::HORIZONTAL);
         auto barPosition = json->GetString("barPosition");
-        UpdateTabBarPosition(uMap.count(barPosition) ? uMap.at(barPosition) : BarPosition::START);
+        BarPosition barPositionEnum = BarPosition::START;
+        auto iter = uMap.find(barPosition);
+        if (iter != uMap.end()) {
+            barPositionEnum = iter->second;
+        }
+        UpdateTabBarPosition(barPositionEnum);
         LayoutProperty::FromJson(json);
     }
 

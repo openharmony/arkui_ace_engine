@@ -45,6 +45,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 std::vector<std::string> CREATE_ARRAY = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
     "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
 std::vector<std::string> CREATE_ARRAY_1 = { "A", "B", "C", "D", "E", "F", "G", "H", "I"};
@@ -890,7 +891,7 @@ HWTEST_F(IndexerTestNg, IndexerModelNGTest002, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetFontSizeValue(), Dimension(24));
     EXPECT_EQ(layoutProperty_->GetFontWeightValue(), FontWeight::MEDIUM);
     auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
+    layoutProperty_->ToJsonValue(json, filter);
     EXPECT_NE(json, nullptr);
 }
 

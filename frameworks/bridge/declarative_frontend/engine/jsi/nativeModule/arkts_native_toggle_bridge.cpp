@@ -30,7 +30,7 @@ const char* TOGGLE_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsToggleChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     auto vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }

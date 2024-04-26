@@ -35,6 +35,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 struct ListItemGroupPara {
     int32_t lanes = -1;
     int32_t itemEndIndex = -1;
@@ -75,7 +77,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -100,7 +102,7 @@ public:
 
     bool IsScrollable() const override
     {
-        return scrollable_;
+        return isScrollable_;
     }
 
     bool IsAtTop() const override;
@@ -166,7 +168,11 @@ public:
     float GetMainContentSize() const override
     {
         return contentMainSize_;
-    };
+    }
+    int32_t GetLanes() const
+    {
+        return lanes_;
+    }
 
     void UpdatePosMapStart(float delta);
     void UpdatePosMapEnd();
@@ -297,7 +303,6 @@ private:
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     bool OnScrollCallback(float offset, int32_t source) override;
-    void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
@@ -331,10 +336,13 @@ private:
     void UpdateFrameSizeToWeb();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
+    float GetStartOverScrollOffset(float offset) const;
+    float GetEndOverScrollOffset(float offset) const;
     RefPtr<ListContentModifier> listContentModifier_;
     std::vector<std::shared_ptr<ISlideUpdateCallback>> listenerVector_;
 
     void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
+    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint);
     bool isFadingEdge_ = false;
     bool isTopEdgeFading_ = false;
     bool isLowerEdgeFading_ = false;
@@ -364,7 +372,7 @@ private:
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
-    bool scrollable_ = true;
+    bool isScrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
     bool isNeedCheckOffset_ = false;
@@ -392,7 +400,7 @@ private:
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
-    RefPtr<Scrollable> scrollableTouchEvent_;
+    RefPtr<Scrollable> scrollable_;
 
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;

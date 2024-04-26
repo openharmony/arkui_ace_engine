@@ -74,6 +74,7 @@ public:
     static void SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
+    static void SetDrawingColorFilter(FrameNode *frameNode, RefPtr<DrawingColorFilter> &colorFilter);
     static void SetFitOriginSize(FrameNode *framNode, bool value);
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
@@ -86,6 +87,7 @@ public:
     static bool IsSrcSvgImage(FrameNode* frameNode);
     static void SetOnComplete(FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback);
     static void SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback);
+    static void SetOnSvgPlayFinish(FrameNode* frameNode, std::function<void()>&& callback);
     static ImageSourceInfo GetSrc(FrameNode* frameNode);
     static ImageFit GetObjectFit(FrameNode* frameNode);
     static ImageInterpolation GetInterpolation(FrameNode* frameNode);

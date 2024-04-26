@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -240,6 +241,10 @@ void ImageAnimatorPattern::GenerateCachedImages()
     }
     while (cacheImages_.size() < cacheImageNum) {
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(imageNode);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetImageAnimator(true);
         auto imageLayoutProperty = imageNode->GetLayoutProperty();
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         imageLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
@@ -357,19 +362,19 @@ void ImageAnimatorPattern::UpdateEventCallback()
     }
 }
 
-void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    Pattern::ToJsonValue(json);
+    Pattern::ToJsonValue(json, filter);
     static const char* STATUS_MODE[] = { "AnimationStatus.Initial", "AnimationStatus.Running", "AnimationStatus.Paused",
         "AnimationStatus.Stopped" };
-    json->Put("state", STATUS_MODE[static_cast<int32_t>(status_)]);
-    json->Put("duration", std::to_string(animator_->GetDuration()).c_str());
-    json->Put("reverse", isReverse_ ? "true" : "false");
-    json->Put("fixedSize", fixedSize_ ? "true" : "false");
+    json->PutExtAttr("state", STATUS_MODE[static_cast<int32_t>(status_)], filter);
+    json->PutExtAttr("duration", std::to_string(animator_->GetDuration()).c_str(), filter);
+    json->PutExtAttr("reverse", isReverse_ ? "true" : "false", filter);
+    json->PutExtAttr("fixedSize", fixedSize_ ? "true" : "false", filter);
     static const char* FILL_MODE[] = { "FillMode.None", "FillMode.Forwards", "FillMode.Backwards", "FillMode.Both" };
-    json->Put("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())]);
-    json->Put("iterations", std::to_string(animator_->GetIteration()).c_str());
-    json->Put("images", ImagesToString().c_str());
+    json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())], filter);
+    json->PutExtAttr("iterations", std::to_string(animator_->GetIteration()).c_str(), filter);
+    json->PutExtAttr("images", ImagesToString().c_str(), filter);
 }
 
 std::string ImageAnimatorPattern::ImagesToString() const
@@ -547,12 +552,6 @@ void ImageAnimatorPattern::SetIteration(int32_t iteration)
 
 void ImageAnimatorPattern::SetDuration(int32_t duration)
 {
-    if (durationTotal_ == 0) {
-        for (int i = 0; i < images_.size(); i++) {
-            images_[i].duration = duration / images_.size();
-            durationTotal_ += images_[i].duration;
-        }
-    }
     int32_t finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
     if (IsFormRender()) {
         finalDuration = finalDuration < DEFAULT_DURATION ? finalDuration : DEFAULT_DURATION;

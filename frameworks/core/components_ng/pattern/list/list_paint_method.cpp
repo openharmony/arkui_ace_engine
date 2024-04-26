@@ -200,7 +200,7 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
 void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)
 {
-    if ((!isFadingTop_ && !isFadingBottom_) || Negative(percentFading_)) {
+    if (Negative(percentFading_)) {
         return;
     }
     CHECK_NULL_VOID(listRenderContext);
@@ -224,7 +224,11 @@ void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRend
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
     overlayRenderContext_->UpdateLinearGradient(gradient);
-    overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
+    if (!isFadingTop_ && !isFadingBottom_) {
+        overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    } else {
+        overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
+    }
     overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 } // namespace OHOS::Ace::NG

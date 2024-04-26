@@ -307,7 +307,6 @@ void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
 
     if (!info[0]->IsObject()) {
         GaugeModel::GetInstance()->ResetShadowOptions();
-        GaugeModel::GetInstance()->SetIsShowIndicator(true);
         return;
     }
 

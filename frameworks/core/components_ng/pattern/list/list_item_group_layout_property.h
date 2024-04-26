@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/list/list_properties.h"
@@ -48,20 +49,20 @@ public:
         ResetDivider();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         if (propDivider_.has_value()) {
             auto divider = JsonUtil::Create(true);
             divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
             divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
             divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
             divider->Put("color", propDivider_.value().color.ColorToString().c_str());
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         } else {
             auto divider = JsonUtil::Create(true);
-            json->Put("divider", divider);
+            json->PutExtAttr("divider", divider, filter);
         }
     }
 

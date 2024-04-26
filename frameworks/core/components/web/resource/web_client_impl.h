@@ -177,6 +177,7 @@ public:
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
+    void UpdateClippedSelectionBounds(int x, int y, int w, int h) override;
     bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
                       std::shared_ptr<NWeb::NWebQuickMenuCallback> callback) override;
     void OnQuickMenuDismissed() override;
@@ -203,7 +204,7 @@ public:
         NWeb::ImageColorType colorType,
         NWeb::ImageAlphaType alphaType) override;
     void OnDesktopIconUrl(const std::string& icon_url, bool precomposed) override;
-    bool OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info) override;
+    bool OnCursorChange(const NWeb::CursorType& type, std::shared_ptr<NWeb::NWebCursorInfo> info) override;
     void OnSelectPopupMenu(std::shared_ptr<NWeb::NWebSelectPopupMenuParam> params,
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
@@ -243,6 +244,8 @@ public:
     {
         return webDelegate_.Upgrade();
     }
+
+    std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
 
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;

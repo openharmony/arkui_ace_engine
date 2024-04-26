@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace {
@@ -32,6 +33,7 @@ public:
         std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
+    virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
@@ -39,11 +41,16 @@ public:
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
     virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
+    virtual void SetOnWillAppear(std::function<void()>&& willAppear) = 0;
+    virtual void SetOnWillShow(std::function<void()>&& willShow) = 0;
+    virtual void SetOnWillHide(std::function<void()>&& willHide) = 0;
+    virtual void SetOnWillDisAppear(std::function<void()>&& willDisAppear) = 0;
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
     virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
+    virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;

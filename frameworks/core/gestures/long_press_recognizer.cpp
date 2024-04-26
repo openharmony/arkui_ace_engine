@@ -192,7 +192,7 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isAccept)
     };
     deadlineTimer_.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(deadlineTimer_, time);
+    taskExecutor.PostDelayedTask(deadlineTimer_, time, "ArkUIGestureLongPressDeadlineTimer");
 }
 
 void LongPressRecognizer::DoRepeat()
@@ -218,7 +218,7 @@ void LongPressRecognizer::StartRepeatTimer()
     };
     timer_.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(timer_, duration_);
+    taskExecutor.PostDelayedTask(timer_, duration_, "ArkUIGestureLongPressRepeatTimer");
 }
 
 double LongPressRecognizer::ConvertPxToVp(double offset) const

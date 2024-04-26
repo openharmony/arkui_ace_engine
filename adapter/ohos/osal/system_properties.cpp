@@ -62,6 +62,7 @@ std::shared_mutex mutex_;
 constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
+constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 
 using RsOrientation = Rosen::DisplayOrientation;
 
@@ -120,6 +121,11 @@ bool IsStateManagerEnable()
 bool IsBuildTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
+}
+
+bool IsSyncDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.sync.debug.enabled", "false") == "true");
 }
 
 bool IsDeveloperModeOn()
@@ -257,6 +263,11 @@ bool GetImageFileCacheConvertToAstcEnabled()
     return system::GetParameter("persist.image.filecache.astc.enable", "false") == "true";
 }
 
+int32_t GetImageFileCacheConvertAstcThresholdProp()
+{
+    return system::GetIntParameter<int>("persist.image.filecache.astc.threshold", CONVERT_ASTC_THRESHOLD);
+}
+
 bool IsUseMemoryMonitor()
 {
     return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
@@ -288,6 +299,19 @@ bool IsAcePerformanceMonitorEnabled()
 }
 } // namespace
 
+bool IsFaultInjectEnabled()
+{
+    return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
+}
+
+std::vector<double> GetPercent()
+{
+    std::vector<double> result;
+    StringUtils::StringSplitter(
+        system::GetParameter("const.ark.darkModeAppBGColorBrightness", "0.10,0.05"), ',', result);
+    return result;
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
@@ -295,6 +319,7 @@ bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && developerM
 bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -331,14 +356,17 @@ bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 bool SystemProperties::imageFileCacheConvertAstc_ = GetImageFileCacheConvertToAstcEnabled();
+int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = GetImageFileCacheConvertAstcThresholdProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
+std::vector<double> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -452,7 +480,7 @@ void SystemProperties::InitDeviceInfo(
     apiVersion_ = std::to_string(::GetSdkApiVersion());
     releaseType_ = ::GetOsReleaseType();
     paramDeviceType_ = ::GetDeviceType();
-
+    brightUpPercent_ = GetPercent();
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
@@ -460,6 +488,7 @@ void SystemProperties::InitDeviceInfo(
     traceInputEventEnable_ = IsTraceInputEventEnabled() && developerModeOn_;
     stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+    syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -469,12 +498,11 @@ void SystemProperties::InitDeviceInfo(
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
-
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
-
+    faultInjectEnabled_  = IsFaultInjectEnabled();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -504,7 +532,15 @@ ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
     // Default value of font weight scale is 1.0.
     std::string prop =
         "persist.sys.font_wght_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return std::stof(system::GetParameter(prop, "1.0"));
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+}
+
+ACE_WEAK_SYM float SystemProperties::GetFontScale()
+{
+    // Default value of font size scale is 1.0.
+    std::string prop =
+        "persist.sys.font_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
+    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)

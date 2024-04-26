@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
@@ -29,6 +30,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 enum class ListItemSwipeIndex {
     SWIPER_END = -1,
@@ -88,7 +90,7 @@ public:
         return MakeRefPtr<ListItemEventHub>();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void SetStartNode(const RefPtr<NG::UINode>& startNode);
 
@@ -203,6 +205,21 @@ public:
     float GetEstimateHeight(float estimateHeight, Axis axis) const;
     bool ClickJudge(const PointF& localPoint);
 
+    void InitDragManager(RefPtr<ForEachBaseNode> forEach)
+    {
+        if (!dragManager_) {
+            dragManager_ = MakeRefPtr<ListItemDragManager>(GetHost(), forEach);
+            dragManager_->InitDragDropEvent();
+        }
+    }
+    void DeInitDragManager()
+    {
+        if (dragManager_) {
+            dragManager_->DeInitDragDropEvent();
+            dragManager_ = nullptr;
+        }
+    }
+
 protected:
     void OnModifyDone() override;
 
@@ -268,6 +285,9 @@ private:
     // selectable
     bool selectable_ = true;
     bool isSelected_ = false;
+
+    // drag sort
+    RefPtr<ListItemDragManager> dragManager_;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchListener_;

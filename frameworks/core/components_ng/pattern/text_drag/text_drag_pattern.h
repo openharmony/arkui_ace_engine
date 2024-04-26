@@ -34,10 +34,18 @@ struct SelectPositionInfo {
         : startX_(startX), startY_(startY), endX_(endX), endY_(endY)
     {}
 
+    void InitGlobalInfo(float globalX, float globalY)
+    {
+        globalX_ = globalX;
+        globalY_ = globalY;
+    }
+
     float startX_ = 0;
     float startY_ = 0;
     float endX_ = 0;
     float endY_ = 0;
+    float globalX_ = 0;
+    float globalY_ = 0;
 };
 
 struct TextDragData {
@@ -143,7 +151,17 @@ public:
         return backGroundPath_;
     }
 
+    const std::shared_ptr<RSPath>& GetSelBackgroundPath()
+    {
+        if (!selBackGroundPath_) {
+            selBackGroundPath_ = GenerateSelBackgroundPath(0.0);
+        }
+        return selBackGroundPath_;
+    }
+
     std::shared_ptr<RSPath> GenerateBackgroundPath(float offset);
+
+    std::shared_ptr<RSPath> GenerateSelBackgroundPath(float offset);
 
     void SetImageChildren(const std::list<RefPtr<FrameNode>>& imageChildren)
     {
@@ -178,11 +196,13 @@ public:
     }
 
 protected:
-    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<FrameNode>& dragContext);
+    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragContext,
+        float selectedWidth = 0.0);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
-    void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset);
+    void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
+    void CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
 
     void SetLastLineHeight(float lineHeight)
     {
@@ -199,6 +219,7 @@ private:
     ParagraphT paragraph_;
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;
+    std::shared_ptr<RSPath> selBackGroundPath_;
     std::list<RefPtr<FrameNode>> imageChildren_;
     std::vector<RectF> rectsForPlaceholders_;
 

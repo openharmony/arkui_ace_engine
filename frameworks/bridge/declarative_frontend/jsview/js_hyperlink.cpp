@@ -15,16 +15,15 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model.h"
-#include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
-
+#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
+#include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model.h"
+#include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 
 namespace OHOS::Ace {
 
@@ -62,6 +61,12 @@ void JSHyperlink::JSBind(BindingTarget globalObj)
     JSClass<JSHyperlink>::StaticMethod("create", &JSHyperlink::Create, opt);
     JSClass<JSHyperlink>::StaticMethod("color", &JSHyperlink::SetColor, opt);
     JSClass<JSHyperlink>::StaticMethod("pop", &JSHyperlink::Pop);
+    JSClass<JSHyperlink>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSHyperlink>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSHyperlink>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSHyperlink>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSHyperlink>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSHyperlink>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
 
     JSClass<JSHyperlink>::StaticMethod("draggable", &JSHyperlink::JsSetDraggable);
     JSClass<JSHyperlink>::Inherit<JSInteractableView>();

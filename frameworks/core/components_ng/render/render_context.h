@@ -53,6 +53,7 @@ namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class InspectorFilter;
 class Modifier;
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
@@ -60,7 +61,7 @@ using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
-class RenderContext : public virtual AceType {
+class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType)
 
 public:
@@ -258,6 +259,7 @@ public:
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
     virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
@@ -349,7 +351,7 @@ public:
 
     virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
@@ -359,7 +361,7 @@ public:
 
     virtual void DumpAdvanceInfo() {}
 
-    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option);
     const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const;
@@ -408,12 +410,14 @@ public:
     virtual void ClearAccessibilityFocus() {};
 
     virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
 
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnPositionEdgesUpdate(const EdgesParam& value) {}
+    virtual void RecalculatePosition() {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
@@ -506,6 +510,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BgDynamicBrightnessOption, BrightnessOption);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FgDynamicBrightnessOption, BrightnessOption);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
@@ -573,6 +579,7 @@ public:
 
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
@@ -589,7 +596,7 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
         return std::vector<double>();
@@ -616,6 +623,8 @@ public:
     {
         return false;
     }
+
+    virtual void SetSurfaceRotation(bool isLock) {}
 
 protected:
     RenderContext() = default;
@@ -690,6 +699,8 @@ protected:
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
+    virtual void OnBgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
+    virtual void OnFgDynamicBrightnessOptionUpdate(const BrightnessOption& brightnessOption) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
     virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
     virtual void OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType) {}

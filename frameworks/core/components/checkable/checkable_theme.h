@@ -181,6 +181,16 @@ public:
         return dotResourceId_;
     }
 
+    const Color& GetFocusedBgColor() const
+    {
+        return focusedBgColor_;
+    }
+
+    const Dimension& GetSizeFocusBg() const
+    {
+        return sizeFocusBg_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -195,6 +205,8 @@ protected:
     Color focusBoardColor_;
     Color borderFocusedColor_;
     Color focusedBGColorUnselected_;
+    Color focusedBgColor_;
+    Dimension sizeFocusBg_;
     Dimension width_;
     Dimension height_;
     Dimension hotZoneHorizontalPadding_;
@@ -388,7 +400,12 @@ public:
             theme->touchDuration_ = switchPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = switchPattern->GetAttr<double>("color_animation_duration", 0.0);
             theme->pointAnimationDuration_ = switchPattern->GetAttr<double>("point_animation_duration", 0.0);
-
+            theme->focusBoardWidth_ = switchPattern->GetAttr<Dimension>("switch_focus_board_width", 0.0_vp);
+            theme->focusBoardHeight_ = switchPattern->GetAttr<Dimension>("switch_focus_board_height", 0.0_vp);
+            theme->focusBoardRadius_ = switchPattern->GetAttr<Dimension>("switch_focus_board_radius", 0.0_vp);
+            theme->focusBoardColor_ = switchPattern->GetAttr<Color>("switch_focus_board_color", Color());
+            theme->borderWidthFocus_ = switchPattern->GetAttr<Dimension>("switch_focus_width_border", Dimension());
+            theme->borderColorFocus_ = switchPattern->GetAttr<Color>("switch_focus_color_border", Color());
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -399,6 +416,31 @@ public:
             theme->hotZoneVerticalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_VERTICAL_PADDING, 13.0_vp);
         }
     };
+
+    const Dimension& GetBorderWidthFocus() const
+    {
+        return borderWidthFocus_;
+    }
+
+    const Color& GetBorderColorFocus() const
+    {
+        return borderColorFocus_;
+    }
+
+    const Dimension& GetFocusBoardWidth() const
+    {
+        return focusBoardWidth_;
+    }
+
+    const Dimension& GetFocusBoardHeight() const
+    {
+        return focusBoardHeight_;
+    }
+
+    const Dimension& GetFocusBoardRadius() const
+    {
+        return focusBoardRadius_;
+    }
 
     float GetRatio() const
     {
@@ -418,6 +460,11 @@ public:
 private:
     double colorAnimationDuration_ = 0.0;
     double pointAnimationDuration_ = 0.0;
+    Color borderColorFocus_;
+    Dimension borderWidthFocus_;
+    Dimension focusBoardWidth_;
+    Dimension focusBoardHeight_;
+    Dimension focusBoardRadius_;
 };
 
 class RadioTheme : public CheckableTheme {
@@ -435,6 +482,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            ParseNewPattern(themeConstants, theme);
             ParsePattern(themeConstants, theme);
             return theme;
         }
@@ -500,6 +548,17 @@ public:
                     radioPattern->GetAttr<Dimension>("radio_hotzone_padding_api_twelve", 2.0_vp);
                 theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
             }
+        }
+
+        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+            if (!radioPattern) {
+                LOGW("find pattern of radio fail");
+                return;
+            }
+            theme->focusedBgColor_ = radioPattern->GetAttr<Color>("color_focused_bg", Color::RED);
+            theme->sizeFocusBg_ = radioPattern->GetAttr<Dimension>("size_focused_bg", 0.0_vp);
         }
     };
 };

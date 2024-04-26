@@ -108,6 +108,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     SizeF res;
     int32_t lastPlaceholderIndex = 0;
     float textHeight = 0.0f;
+    uint32_t paragraphId = 0;
     for (auto&& group : spans_) {
         // layout each paragraph
         ACE_SCOPED_TRACE("LayoutEachParagraph");
@@ -124,6 +125,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         if (!paragraph) {
             continue;
         }
+        paragraph->SetParagraphId(paragraphId++);
         float shadowOffset = GetShadowOffset(group);
         res.AddHeight(shadowOffset);
         textHeight += paragraph->GetHeight();
@@ -233,7 +235,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
-    auto contentOffset = TextLayoutAlgorithm::GetContentOffset(layoutWrapper);
+    auto contentOffset = TextLayoutAlgorithm::SetContentOffset(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, contentOffset);
     auto pattern = host->GetPattern<RichEditorPattern>();
@@ -266,9 +268,14 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     if (lineStyle->propWordBreak) {
         style.wordBreak = *(lineStyle->propWordBreak);
     }
+    if (lineStyle->propLineBreakStrategy) {
+        style.lineBreakStrategy = *(lineStyle->propLineBreakStrategy);
+    }
     if (lineStyle->propTextIndent) {
         style.leadingMargin = std::make_optional<LeadingMargin>();
-        style.leadingMargin->size = SizeF(lineStyle->propTextIndent->ConvertToPx(), 0.0f);
+        style.leadingMargin->size =
+            NG::LeadingMarginSize(Dimension(lineStyle->propTextIndent->Value(), lineStyle->propTextIndent->Unit()),
+                Dimension(0.0f, lineStyle->propTextIndent->Unit()));
     }
     if (lineStyle->propLeadingMargin) {
         if (!style.leadingMargin) {

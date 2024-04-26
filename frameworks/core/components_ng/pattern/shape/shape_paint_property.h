@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
@@ -76,13 +77,15 @@ public:
         ResetStrokeOpacity();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        PaintProperty::ToJsonValue(json);
-        json->Put("stroke", propStroke_.value_or(Color::BLACK).ColorToString().c_str());
-        json->Put("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToPx());
-        json->Put("strokeOpacity", std::to_string(propStrokeOpacity_.value_or(STROKE_OPACITY_DEFAULT)).c_str());
-        json->Put("strokeDashOffset", propStrokeDashOffset_.value_or(Dimension()).ToString().c_str());
+        PaintProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("stroke", propStroke_.value_or(Color::BLACK).ColorToString().c_str(), filter);
+        json->PutExtAttr("strokeWidth", propStrokeWidth_.value_or(Dimension()).ConvertToPx(), filter);
+        json->PutExtAttr("strokeOpacity",
+            std::to_string(propStrokeOpacity_.value_or(STROKE_OPACITY_DEFAULT)).c_str(), filter);
+        json->PutExtAttr("strokeDashOffset",
+            propStrokeDashOffset_.value_or(Dimension()).ToString().c_str(), filter);
 
         auto jsonDashArray = JsonUtil::CreateArray(true);
         std::vector<Dimension> array = propStrokeDashArray_.value_or(std::vector<Dimension>());
@@ -91,17 +94,18 @@ public:
             auto value = array[i].ToString();
             jsonDashArray->Put(index.c_str(), value.c_str());
         }
-        json->Put("strokeDashArray", jsonDashArray);
+        json->PutExtAttr("strokeDashArray", jsonDashArray, filter);
 
         std::array<std::string, 3> lineCap = { "LineCapStyle.Butt", "LineCapStyle.Round", "LineCapStyle.Square" };
-        json->Put("strokeLineCap", lineCap.at(propStrokeLineCap_.value_or(0) % 3).c_str());
+        json->PutExtAttr("strokeLineCap", lineCap.at(propStrokeLineCap_.value_or(0) % 3).c_str(), filter);
         std::array<std::string, 3> lineJoin = { "LineJoinStyle.Miter", "LineJoinStyle.Round", "LineJoinStyle.Bevel" };
-        json->Put("strokeLineJoin", lineJoin.at(propStrokeLineJoin_.value_or(0) % 3).c_str());
-        json->Put("strokeMiterLimit",
-            std::to_string(propStrokeMiterLimit_.value_or(STROKE_MITERLIMIT_DEFAULT)).c_str());
-        json->Put("fill", propFill_.value_or(Color::BLACK).ColorToString().c_str());
-        json->Put("fillOpacity", std::to_string(propFillOpacity_.value_or(FILL_OPACITY_DEFAULT)).c_str());
-        json->Put("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT) ? "true" : "false");
+        json->PutExtAttr("strokeLineJoin", lineJoin.at(propStrokeLineJoin_.value_or(0) % 3).c_str(), filter);
+        json->PutExtAttr("strokeMiterLimit",
+            std::to_string(propStrokeMiterLimit_.value_or(STROKE_MITERLIMIT_DEFAULT)).c_str(), filter);
+        json->PutExtAttr("fill", propFill_.value_or(Color::BLACK).ColorToString().c_str(), filter);
+        json->PutExtAttr("fillOpacity",
+            std::to_string(propFillOpacity_.value_or(FILL_OPACITY_DEFAULT)).c_str(), filter);
+        json->PutExtAttr("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT) ? "true" : "false", filter);
     }
 
     void UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target);

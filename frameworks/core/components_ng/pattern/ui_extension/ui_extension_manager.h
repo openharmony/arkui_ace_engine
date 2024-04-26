@@ -82,6 +82,13 @@ public:
     void RemoveDestroyedUIExtension(int32_t nodeId);
 
     /**
+     * @brief Check whether UIExtensionComponent Node is showing placeholder
+     *
+     * @param nodeId The UIExtensionComponent Id
+     */
+    bool IsShowPlaceholder(int32_t nodeId);
+
+    /**
      * @brief Transfer the original avoid area and avoid area type to the UIExtensionAbility
      *
      * @param avoidArea The original avoid area

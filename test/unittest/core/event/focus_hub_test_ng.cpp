@@ -619,7 +619,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0015, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
@@ -1107,7 +1109,7 @@ HWTEST_F(FocusHubTestNg, FocusHubRemoveChildTest001, TestSize.Level1)
      */
     parent->currentFocus_ = true;
     parent->RemoveChild(focusHub);
-    EXPECT_EQ(parent->blurReason_, BlurReason::FRAME_DESTROY);
+    EXPECT_EQ(parent->blurReason_, BlurReason::FOCUS_SWITCH);
     EXPECT_EQ(focusHub->blurReason_, BlurReason::FRAME_DESTROY);
 }
 
@@ -1259,7 +1261,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
     auto lastFocusNode = focusHub->lastWeakFocusNode_.Upgrade();
     lastFocusNode->currentFocus_ = true;
     lastFocusNode->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
 
     /**
      * @tc.steps7: call the function OnKeyEvent with FocusType::SCOPE.
@@ -1505,7 +1507,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableBlur001, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
@@ -1550,7 +1554,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableKey001, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
@@ -2063,7 +2069,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     EXPECT_TRUE(focusHub->CalculatePosition());
     focusHub1->focusType_ = FocusType::NODE;
-    EXPECT_FALSE(focusHub->PaintAllFocusState());
+    EXPECT_TRUE(focusHub->PaintAllFocusState());
     EXPECT_TRUE(focusHub->CalculatePosition());
 }
 

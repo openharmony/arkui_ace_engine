@@ -94,6 +94,7 @@ void UITaskScheduler::ExpandSafeArea()
 
 void UITaskScheduler::FlushSyncGeometryNodeTasks()
 {
+    ACE_LAYOUT_SCOPED_TRACE("FlushSyncGeometryNodeTasks");
     ExpandSafeArea();
     auto tasks = std::move(syncGeometryNodeTasks_);
     for (auto& task : tasks) {

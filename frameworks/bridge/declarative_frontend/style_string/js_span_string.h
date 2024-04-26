@@ -22,10 +22,10 @@
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/style_string/js_span_object.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace::Framework {
 
 class JSSpanString : public virtual AceType {
@@ -42,23 +42,40 @@ public:
     void SetLength(const JSCallbackInfo& info);
     void IsEqualToSpanString(const JSCallbackInfo& info);
     void GetSubSpanString(const JSCallbackInfo& info);
-    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(JSRef<JSObject> obj, int32_t maxLength);
+    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength);
+
     static JSRef<JSObject> CreateJsSpanBaseObject(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsSpanBase(int32_t start, int32_t length, SpanType type, const JSRef<JSObject>& obj);
+    static RefPtr<SpanBase> ParseJsSpanBaseWithoutSpecialSpan(
+        int32_t start, int32_t length, SpanType type, const JSRef<JSObject>& obj, const JSCallbackInfo& info);
+
     static JSRef<JSObject> CreateJsFontSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsFontSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
     static JSRef<JSObject> CreateJsDecorationSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsDecorationSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
     static JSRef<JSObject> CreateJsLetterSpacingSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsLetterSpacingSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
     static JSRef<JSObject> CreateJsBaselineOffsetSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsBaselineOffsetSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
     static JSRef<JSObject> CreateJsGestureSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> ParseJsGestureSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
     static JSRef<JSObject> CreateJsTextShadowSpan(const RefPtr<SpanBase>& spanObject);
-    static RefPtr<SpanBase> ParseJsSpanBase(int32_t start, int32_t length, SpanType type, JSRef<JSObject> obj);
-    static RefPtr<SpanBase> ParseJsFontSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static RefPtr<SpanBase> ParseJsDecorationSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static RefPtr<SpanBase> ParseJsLetterSpacingSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static RefPtr<SpanBase> ParseJsBaselineOffsetSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static RefPtr<SpanBase> ParseJsGestureSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static RefPtr<SpanBase> ParseJsTextShadowSpan(int32_t start, int32_t length, JSRef<JSObject> obj);
-    static bool CheckSpanType(const int32_t& spanType);
-    bool CheckParameters(const int32_t& start, const int32_t& length);
+    static RefPtr<SpanBase> ParseJsTextShadowSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+
+    static JSRef<JSObject> CreateJsImageSpan(const RefPtr<SpanBase>& spanObject);
+    static RefPtr<SpanBase> GetImageAttachment(int32_t start, int32_t length, const JSRef<JSObject>& obj);
+    static ImageSpanOptions ParseJsImageAttachment(const JSRef<JSObject>& obj);
+
+    static RefPtr<CustomSpan> ParseJsCustomSpan(const JSCallbackInfo& args);
+    static RefPtr<SpanBase> ParseJsCustomSpan(int32_t start, int32_t length, const JSCallbackInfo& args);
+
+    static bool CheckSpanType(int32_t spanType);
+    bool CheckParameters(int32_t start, int32_t length);
     void GetSpans(const JSCallbackInfo& info);
     const RefPtr<SpanString>& GetController();
     void SetController(const RefPtr<SpanString>& spanString);
@@ -69,8 +86,6 @@ private:
 };
 
 class JSMutableSpanString final : public JSSpanString {
-    DECLARE_ACE_TYPE(JSMutableSpanString, AceType)
-
 public:
     JSMutableSpanString() = default;
     ~JSMutableSpanString() override = default;
@@ -93,6 +108,11 @@ public:
     void SetMutableController(const RefPtr<MutableSpanString>& mutableSpanString);
 
 private:
+    bool IsImageNode(int32_t location);
+    bool IsCustomSpanNode(int32_t location);
+    bool VerifyImageParameters(int32_t start, int32_t length);
+    bool VerifyCustomSpanParameters(int32_t start, int32_t length);
+
     ACE_DISALLOW_COPY_AND_MOVE(JSMutableSpanString);
     WeakPtr<MutableSpanString> mutableSpanString_;
 };

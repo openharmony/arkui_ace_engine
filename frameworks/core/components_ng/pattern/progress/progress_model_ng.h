@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/progress/progress_model.h"
 
 namespace OHOS::Ace::NG {
+using ProgressMakeCallback = std::function<RefPtr<FrameNode>(const ProgressConfiguration& config)>;
 
 class ACE_EXPORT ProgressModelNG : public OHOS::Ace::ProgressModel {
 public:
@@ -79,6 +80,7 @@ public:
     static Color GetColor(FrameNode* frameNode);
     static double GetTotal(FrameNode* frameNode);
     static NG::ProgressType GetType(FrameNode* frameNode);
+    static void SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& jsMake);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

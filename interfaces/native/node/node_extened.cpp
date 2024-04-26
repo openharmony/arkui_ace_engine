@@ -59,16 +59,13 @@ void NodeAddExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType
 
 int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData)
 {
+    if (!node) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (eventType <= 0 || node->type != ARKUI_NODE_CUSTOM) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Custom event is not supported %{public}d", eventType);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
-
-    if (node == nullptr) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-
-    auto* impl = GetFullImpl();
 
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE) {
         NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, targetId, userData);
@@ -89,6 +86,7 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
     if (eventType & ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW) {
         NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW, targetId, userData);
     }
+    auto* impl = GetFullImpl();
     impl->getExtendedAPI()->registerCustomNodeAsyncEvent(
         node->uiNodeHandle, eventType, reinterpret_cast<void*>(node));
     return ERROR_CODE_NO_ERROR;
@@ -148,38 +146,91 @@ void (*g_customEventReceiver)(ArkUI_NodeCustomEvent* event) = nullptr;
 void RegisterNodeCustomReceiver(void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
 {
     g_customEventReceiver = eventReceiver;
-    if (g_customEventReceiver) {
-        // already check in entry point.
-        auto* impl = GetFullImpl();
-        auto innerReceiver = [](ArkUICustomNodeEvent* origin) {
-            if (g_customEventReceiver) {
-                auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
-                if (!nodePtr->extraCustomData) {
-                    return;
-                }
-
-                auto* extraCustomData = reinterpret_cast<ExtraCustomData*>(nodePtr->extraCustomData);
-                ArkUI_NodeCustomEventType eventType = static_cast<ArkUI_NodeCustomEventType>(origin->kind);
-
-                auto innerEventExtraParam = extraCustomData->eventMap.find(eventType);
-                if (innerEventExtraParam == extraCustomData->eventMap.end()) {
-                    return;
-                }
-                ArkUI_NodeCustomEvent event;
-                event.event = origin;
-                event.node = nodePtr;
-                event.targetId = innerEventExtraParam->second->targetId;
-                event.userData = innerEventExtraParam->second->userData;
-                g_customEventReceiver(&event);
-            }
-        };
-        impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(innerReceiver);
-    }
 }
 
 void UnregisterNodeCustomEventReceiver()
 {
     g_customEventReceiver = nullptr;
+}
+
+void HandleInnerCustomEvent(ArkUICustomNodeEvent* origin)
+{
+    if (!origin) {
+        return;
+    }
+    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
+    if (!nodePtr->extraCustomData) {
+        return;
+    }
+
+    auto* extraCustomData = reinterpret_cast<ExtraCustomData*>(nodePtr->extraCustomData);
+    ArkUI_NodeCustomEventType eventType = static_cast<ArkUI_NodeCustomEventType>(origin->kind);
+
+    auto innerEventExtraParam = extraCustomData->eventMap.find(eventType);
+    if (innerEventExtraParam == extraCustomData->eventMap.end()) {
+        return;
+    }
+    ArkUI_NodeCustomEvent event;
+    event.event = origin;
+    event.node = nodePtr;
+    event.targetId = innerEventExtraParam->second->targetId;
+    event.userData = innerEventExtraParam->second->userData;
+    HandleCustomEvent(&event);
+}
+
+void HandleCustomEvent(ArkUI_NodeCustomEvent* event)
+{
+    if (!event) {
+        return;
+    }
+    if (event->node && event->node->eventListeners) {
+        auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
+            event->node->eventListeners);
+        if (eventListenersSet) {
+            for (const auto& eventlistener : *eventListenersSet) {
+                (*eventlistener)(event);
+            }
+        }
+    }
+    if (g_customEventReceiver) {
+        g_customEventReceiver(event);
+    }
+}
+
+int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
+{
+    if (!nodePtr || !eventReceiver) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!nodePtr->eventListeners) {
+        nodePtr->eventListeners = new std::set<void (*)(ArkUI_NodeCustomEvent*)>();
+    }
+    auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
+        nodePtr->eventListeners);
+    if (!eventListenersSet) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    eventListenersSet->emplace(eventReceiver);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
+    void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
+{
+    if (!nodePtr || !eventReceiver || !nodePtr->eventListeners) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
+        nodePtr->eventListeners);
+    if (!eventListenersSet) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    eventListenersSet->erase(eventReceiver);
+    if (eventListenersSet->empty()) {
+        delete eventListenersSet;
+        nodePtr->eventListeners = nullptr;
+    }
+    return ERROR_CODE_NO_ERROR;
 }
 
 int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)

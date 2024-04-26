@@ -177,8 +177,8 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(
-    PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime, bool isPostEventResult)
+void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime,
+    bool isPostEventResult, int32_t postEventNodeId)
 {
     if (node.Invalid()) {
         return;
@@ -209,7 +209,7 @@ void NGGestureRecognizer::Transform(
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
             break;
         }
-        if (host->GetTag() == "NodeContainer" && isPostEventResult) {
+        if ((postEventNodeId == host->GetId()) && isPostEventResult) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:%{public}d", host->GetId());
             break;
         }
@@ -355,8 +355,10 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event)
     if (isChildTouchTestResult) {
         return true;
     }
+
     PointF localPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_, isPostEventResult_);
+    NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
+        isPostEventResult_, event.postEventNodeId);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto paintRect = renderContext->GetPaintRectWithoutTransform();

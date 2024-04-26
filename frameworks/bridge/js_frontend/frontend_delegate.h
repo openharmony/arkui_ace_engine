@@ -137,8 +137,8 @@ public:
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
-    virtual void PostJsTask(std::function<void()>&& task) = 0;
-    virtual void PostUITask(std::function<void()>&& task) {}
+    virtual void PostJsTask(std::function<void()>&& task, const std::string& name) = 0;
+    virtual void PostUITask(std::function<void()>&& task, const std::string& name) {}
 
     // ----------------
     // system.app
@@ -233,7 +233,7 @@ public:
     virtual void WaitTimer(const std::string& callbackId, const std::string& delay, bool isInterval, bool isFirst) = 0;
     virtual void ClearTimer(const std::string& callbackId) = 0;
 
-    virtual void PostSyncTaskToPage(std::function<void()>&& task) = 0;
+    virtual void PostSyncTaskToPage(std::function<void()>&& task, const std::string& name) = 0;
 
     virtual void AddTaskObserver(std::function<void()>&& task) = 0;
 

@@ -108,8 +108,9 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "[WMSMain] id: %{public}d, state: %{public}u, name: %{public}s",
-        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "[WMSMain] id: %{public}d, state: %{public}u, name: %{public}s, in recents: %{public}d",
+        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str(), session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;
@@ -417,11 +418,6 @@ bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
     return pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
-}
-
-void WindowPattern::OnModifyDone()
-{
-    Pattern::OnModifyDone();
 }
 
 void WindowPattern::TransferFocusState(bool focusState)

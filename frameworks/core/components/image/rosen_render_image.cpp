@@ -337,7 +337,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
                     renderImage->failedCallback_(sourceInfo,
                         "Fail to get thumbnail data of dataability or datashare, please check the validation of src.");
                 },
-                TaskExecutor::TaskType::UI);
+                TaskExecutor::TaskType::UI, "ArkUIImageThumbnailLoadFailed");
             return;
         }
         taskExecutor->PostTask(
@@ -348,7 +348,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
                 }
                 renderImage->UpdatePixmap(pixmapOhos);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIImageThumbnailLoad");
 #endif
     };
 }
@@ -1693,7 +1693,10 @@ RefPtr<PixelMap> RosenRenderImage::GetPixmapFromDrawingImage()
     auto rsImage = rosenImage->GetImage();
     RSBitmapFormat rsBitmapFormat = { RSColorType::COLORTYPE_BGRA_8888, rsImage->GetAlphaType() };
     RSBitmap rsBitmap;
-    rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat);
+    if (!rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat)) {
+        LOGW("rsBitmap build fail.");
+        return nullptr;
+    }
     CHECK_NULL_RETURN(rsImage->ReadPixels(rsBitmap, 0, 0), nullptr);
     const auto* addr = static_cast<uint32_t*>(rsBitmap.GetPixels());
     auto width = static_cast<int32_t>(rsBitmap.GetWidth());

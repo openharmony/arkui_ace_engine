@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,7 +117,7 @@ void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwin
         return;
     }
 }
-void SubwindowManager::DeleteHotAreas(int32_t instanceId, int32_t overlayid)
+void SubwindowManager::DeleteHotAreas(int32_t instanceId, int32_t nodeId)
 {
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
@@ -127,7 +127,7 @@ void SubwindowManager::DeleteHotAreas(int32_t instanceId, int32_t overlayid)
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->DeleteHotAreas(overlayid);
+        subwindow->DeleteHotAreas(nodeId);
     }
 }
 void SubwindowManager::RemoveSubwindow(int32_t instanceId)
@@ -259,8 +259,13 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool in
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menung enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
+#ifdef OHOS_STANDARD_SYSTEM
         // get the subwindow which overlay node in, not current
         subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+#else
+        subwindow =
+            GetSubwindow(GetParentContainerId(instanceId) != -1 ? GetParentContainerId(instanceId) : instanceId);
+#endif
     } else {
         subwindow = GetCurrentWindow();
     }
@@ -335,7 +340,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             CHECK_NULL_VOID(newComponent);
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup");
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -368,7 +373,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             }
             subwindow->ShowMenu(menu);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu");
 }
 
 void SubwindowManager::CloseMenu()
@@ -389,8 +394,9 @@ void SubwindowManager::ClearMenu()
     }
 }
 
-void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId, int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set hot areas enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
@@ -400,54 +406,10 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
     }
 
     if (subwindow) {
-        subwindow->SetHotAreas(rects, overlayId);
+        subwindow->SetHotAreas(rects, nodeId);
     }
 }
 
-void SubwindowManager::SetPopupHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
-{
-    RefPtr<Subwindow> subwindow;
-    if (instanceId != -1) {
-        // get the subwindow which overlay node in, not current
-        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
-    } else {
-        subwindow = GetCurrentWindow();
-    }
-
-    if (subwindow) {
-        subwindow->SetPopupHotAreas(rects, overlayId);
-    }
-}
-
-void SubwindowManager::DeletePopupHotAreas(int32_t overlayId, int32_t instanceId)
-{
-    RefPtr<Subwindow> subwindow;
-    if (instanceId != -1) {
-        // get the subwindow which overlay node in, not current
-        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
-    } else {
-        subwindow = GetCurrentWindow();
-    }
-
-    if (subwindow) {
-        subwindow->DeletePopupHotAreas(overlayId);
-    }
-}
-
-void SubwindowManager::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
-{
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set dialog hot areas enter");
-    RefPtr<Subwindow> subwindow;
-    if (instanceId != -1) {
-        // get the subwindow which overlay node in, not current
-        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
-    } else {
-        subwindow = GetCurrentWindow();
-    }
-    if (subwindow) {
-        subwindow->SetDialogHotAreas(rects, overlayId);
-    }
-}
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
@@ -614,7 +576,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
     const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdSafely();
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subwindow = GetOrCreateSubWindow();
@@ -623,7 +585,8 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
         subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
     } else {
         // for ability
-        auto taskExecutor = Container::CurrentTaskExecutor();
+        auto container = Container::CurrentSafely();
+        auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [containerId, message, duration, bottom, showMode, alignment,  offset] {
@@ -639,7 +602,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
                 subwindow->ShowToast(message, duration, bottom, showMode, alignment,  offset);
             },
-            TaskExecutor::TaskType::PLATFORM);
+            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
     }
 }
 
@@ -773,6 +736,7 @@ void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std:
     tmpPromptAttr.showInSubWindow = false;
     auto containerId = Container::CurrentId();
     // for pa service
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "container %{public}d open the custom dialog", containerId);
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subWindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subWindow);

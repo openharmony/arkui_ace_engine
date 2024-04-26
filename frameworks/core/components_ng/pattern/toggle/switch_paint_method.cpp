@@ -49,6 +49,8 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dra
     dragOffsetX_ = AceType::MakeRefPtr<PropertyFloat>(dragOffsetX);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isOn_ = AceType::MakeRefPtr<PropertyBool>(false);
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
@@ -61,6 +63,8 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dra
     AttachProperty(pointOffset_);
     AttachProperty(dragOffsetX_);
     AttachProperty(isSelect_);
+    AttachProperty(isFocused_);
+    AttachProperty(isOn_);
     AttachProperty(isHover_);
     AttachProperty(offset_);
     AttachProperty(size_);
@@ -88,6 +92,33 @@ void SwitchModifier::InitializeParam()
     pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
 }
 
+void SwitchModifier::DrawFocusBorder(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
+{
+    if (!isFocused_->Get() || isOn_->Get()) {
+        return;
+    }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    auto height = contentSize.Height();
+    auto radius = height / 2;
+    RSPoint point;
+    auto actualGap = radiusGap_.ConvertToPx() * height /
+                     (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    pointRadius_ = radius - actualGap;
+    point.SetX(contentOffset.GetX() + actualGap + pointRadius_ + pointOffset_->Get());
+    point.SetY(contentOffset.GetY() + radius);
+    RSPen pen;
+    pen.SetWidth(switchTheme->GetBorderWidthFocus().ConvertToPx());
+    pen.SetColor(ToRSColor(switchTheme->GetBorderColorFocus()));
+    pen.SetAntiAlias(true);
+    canvas.AttachPen(pen);
+    canvas.DrawCircle(point, pointRadius_);
+    canvas.DetachPen();
+}
+
 void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -95,13 +126,14 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
 
+    Dimension hotZoneVerticalPadding = switchTheme->GetHotZoneVerticalPadding();
     auto width = contentSize.Width();
     auto height = contentSize.Height();
     auto trackRadius =
         (animateTrackRadius_->Get() < 0) ? (height / NUM_TWO) : animateTrackRadius_->Get();
     auto radius = height / 2;
     auto actualGap = radiusGap_.ConvertToPx() * height /
-                     (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+                     (switchTheme->GetHeight() - hotZoneVerticalPadding * 2).ConvertToPx();
     auto xOffset = contentOffset.GetX();
     auto yOffset = contentOffset.GetY();
     if (animatePointRadius_->Get() < 0) {
@@ -118,12 +150,12 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     auto defaultWidthGap =
         defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
     auto defaultHeightGap =
-        defaultHeight - (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+        defaultHeight - (switchTheme->GetHeight() - hotZoneVerticalPadding * 2).ConvertToPx();
     actualWidth_ = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
     actualHeight_ = (pointRadius_ * NUM_TWO > height ? pointRadius_ * NUM_TWO : height) + defaultHeightGap;
     if ((animateTrackRadius_->Get() < 0) && (animateTrackRadius_->Get() < 0)) {
         hoverRadius_ = hoverRadius_ * height /
-                       (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
+                       (switchTheme->GetHeight() - hotZoneVerticalPadding * NUM_TWO).ConvertToPx();
     } else {
         hoverRadius_ = Dimension(trackRadius, DimensionUnit::PX) * actualHeight_ / (actualHeight_ - defaultHeightGap);
     }
@@ -132,13 +164,26 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
     DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
+    DrawRectCircle(canvas, contentOffset, contentSize, actualGap);
+    DrawFocusBorder(canvas, contentOffset, contentSize);
+    DrawFocusBoard(canvas, contentOffset, contentSize, actualGap);
+}
+
+void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize,
+    double& actualGap)
+{
+    auto xOffset = contentOffset.GetX();
+    auto yOffset = contentOffset.GetY();
+    auto height = contentSize.Height();
+    auto radius = height / 2;
+    auto trackRadius =
+        (animateTrackRadius_->Get() < 0) ? (height / NUM_TWO) : animateTrackRadius_->Get();
     RSRect rect;
     rect.SetLeft(xOffset);
     rect.SetTop(yOffset);
-    rect.SetRight(xOffset + width);
+    rect.SetRight(xOffset + contentSize.Width());
     rect.SetBottom(yOffset + height);
     RSRoundRect roundRect(rect, trackRadius, trackRadius);
-
     RSBrush brush;
     if (!enabled_->Get()) {
         brush.SetColor(
@@ -151,7 +196,6 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
-
     brush.SetColor(ToRSColor(animatePointColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
@@ -160,6 +204,51 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
     point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
+    canvas.DetachBrush();
+}
+
+void SwitchModifier::DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset, const SizeF& size, double& actualGap)
+{
+    if (!isFocused_->Get()) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+
+    auto height = size.Height();
+    auto width = size.Width();
+    auto defaultWidth = switchTheme->GetDefaultWidth().ConvertToPx();
+    auto defaultHeight = switchTheme->GetDefaultHeight().ConvertToPx();
+    auto defaultWidthGap = defaultWidth - (
+        switchTheme->GetFocusBoardWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
+    auto defaultHeightGap = defaultHeight - (
+        switchTheme->GetFocusBoardHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
+    actualWidth_ = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
+    actualHeight_ = (pointRadius_ * NUM_TWO > height ? pointRadius_ * NUM_TWO : height) + defaultHeightGap;
+    focusRadius_ = switchTheme->GetFocusBoardRadius();
+    float idealHeight =
+        (switchTheme->GetFocusBoardHeight() - switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
+    if (animateTrackRadius_->Get() < 0 && idealHeight != 0) {
+        focusRadius_ = focusRadius_ * height / idealHeight;
+    } else {
+        focusRadius_ = focusRadius_ * height / (switchTheme->GetFocusBoardHeight() -
+            switchTheme->GetHotZoneVerticalPadding() * NUM_TWO).ConvertToPx();
+    }
+    OffsetF focusBoardOffset;
+    focusBoardOffset.SetX(offset.GetX() - (actualWidth_ - width) / NUM_TWO);
+    focusBoardOffset.SetY(offset.GetY() - (actualHeight_ - height) / NUM_TWO);
+    auto rightBottomX = focusBoardOffset.GetX() + actualWidth_;
+    auto rightBottomY = focusBoardOffset.GetY() + actualHeight_;
+    auto rrect = RSRoundRect({ focusBoardOffset.GetX(), focusBoardOffset.GetY(), rightBottomX, rightBottomY },
+        focusRadius_.ConvertToPx(), focusRadius_.ConvertToPx());
+
+    RSBrush brush;
+    brush.SetColor(ToRSColor(switchTheme->GetFocusBoardColor()));
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    canvas.DrawRoundRect(rrect);
     canvas.DetachBrush();
 }
 

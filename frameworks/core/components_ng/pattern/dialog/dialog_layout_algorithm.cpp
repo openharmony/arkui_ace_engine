@@ -99,7 +99,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto maxSize = layoutConstraint->maxSize;
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
-        ComputeInnerLayoutParam(childLayoutConstraint);
+        ComputeInnerLayoutParam(childLayoutConstraint, dialogProp);
         UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
     }
 
@@ -117,22 +117,13 @@ void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayou
     auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
     auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
     auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
-    auto realWidth = GetRealSize(dialogWidth, static_cast<double>(childLayoutConstraint.maxSize.Width()));
-    auto realHeight = GetRealSize(dialogHeight, static_cast<double>(childLayoutConstraint.maxSize.Height()));
-    if (Positive(realHeight)) {
-        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(realHeight)));
+    if (NonNegative(dialogHeight.Value())) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
     }
-    if (Positive(realWidth)) {
-        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(realWidth), std::nullopt));
+    if (NonNegative(dialogWidth.Value())) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
     }
-    childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(realWidth, realHeight));
-}
-
-double DialogLayoutAlgorithm::GetRealSize(Dimension dialogFrame, double size)
-{
-    auto val = dialogFrame.Unit() == DimensionUnit::PERCENT ? dialogFrame.ConvertToPxWithSize(size)
-                                                            : dialogFrame.ConvertToPx();
-    return std::min(val, size);
+    childLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(dialogWidth.Value(), dialogHeight.Value()));
 }
 
 void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
@@ -252,7 +243,8 @@ LayoutConstraintF DialogLayoutAlgorithm::CreateDialogChildConstraint(
     return childConstraint;
 }
 
-bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout)
+bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout,
+    const RefPtr<DialogLayoutProperty>& dialogProp)
 {
     CHECK_NULL_RETURN(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE), false);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -263,25 +255,40 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
     auto maxSize = innerLayout.maxSize;
     auto width =
         maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
-    auto dialogMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
-    width = dialogMaxWidth < width ? dialogMaxWidth : width;
-    auto dialogMinHeight = DIALOG_MIN_HEIGHT.ConvertToPx();
-    innerLayout.minSize = SizeF(width, dialogMinHeight);
-    if (expandDisplay_) {
-        auto maxHeight = SystemProperties::GetDevicePhysicalHeight() *
-            EXPAND_DISPLAY_WINDOW_HEIGHT_RATIO * EXPAND_DISPLAY_DIALOG_HEIGHT_RATIO;
-        innerLayout.maxSize = SizeF(dialogMaxWidth, maxHeight);
-    } else {
-        innerLayout.maxSize = SizeF(width, maxSize.Height() * DIALOG_MAX_HEIGHT_RATIO);
+    auto defaultMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
+    width = defaultMaxWidth < width ? defaultMaxWidth : width;
+    
+    if (dialogProp->GetWidth().has_value()) {
+        auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
+        auto widthVal = dialogWidth.Unit() == DimensionUnit::PERCENT ? maxSize.Width() : dialogWidth.ConvertToPx();
+        if (Positive(widthVal)) {
+            width = widthVal;
+        }
+    }
+
+    auto defaultMinHeight = DIALOG_MIN_HEIGHT.ConvertToPx();
+    auto defaultMaxHeight = maxSize.Height() * DIALOG_MAX_HEIGHT_RATIO;
+    innerLayout.minSize = SizeF(width, defaultMinHeight);
+    innerLayout.maxSize = SizeF(width, defaultMaxHeight);
+
+    if (dialogProp->GetHeight().has_value()) {
+        auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
+        auto height = dialogHeight.Unit() == DimensionUnit::PERCENT ? maxSize.Height() : dialogHeight.ConvertToPx();
+        if (NonPositive(height)) {
+            height = defaultMaxHeight;
+        }
+        innerLayout.minSize = SizeF(width, 0.0);
+        innerLayout.maxSize = SizeF(width, height);
     }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
     return true;
 }
 
-void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayout)
+void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayout,
+    const RefPtr<DialogLayoutProperty>& dialogProp)
 {
-    CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout), true);
+    CHECK_EQUAL_VOID(ComputeInnerLayoutSizeParam(innerLayout, dialogProp), true);
     auto maxSize = innerLayout.maxSize;
     // Set different layout param for different devices
     // TODO: need to use theme json to replace this function.
@@ -474,24 +481,9 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
-    if (!customSize_) {
-        UpdateDialogContainerWidth(dialogProp, dialogTheme);
-    }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
-}
-
-void DialogLayoutAlgorithm::UpdateDialogContainerWidth(const RefPtr<DialogLayoutProperty>& dialogProp,
-    const RefPtr<DialogTheme>& dialogTheme)
-{
-    const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
-    auto maxSize = layoutConstraint->maxSize;
-    auto width =
-        maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
-    auto dialogMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
-    width = dialogMaxWidth < width ? dialogMaxWidth : width;
-    dialogProp->UpdateWidth(width);
 }
 
 void DialogLayoutAlgorithm::SetSubWindowHotarea(
@@ -506,7 +498,7 @@ void DialogLayoutAlgorithm::SetSubWindowHotarea(
             rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
         }
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetDialogHotAreas(rects, frameNodeId, subWindowId_);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, frameNodeId, subWindowId_);
     }
 }
 

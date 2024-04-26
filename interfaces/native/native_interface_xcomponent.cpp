@@ -17,6 +17,8 @@
 
 #include "node/node_model.h"
 #include "ui_input_event.h"
+#include "native_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 #include "base/error/error_code.h"
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
@@ -296,6 +298,16 @@ int32_t OH_NativeXComponent_GetTouchEventSourceType(
 {
     return (component && sourceType) ? component->GetSourceType(pointId, sourceType)
                                      : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+}
+
+OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle node)
+{
+    if (node == nullptr || node->type != ARKUI_NODE_XCOMPONENT) {
+        return nullptr;
+    }
+    auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();
+    return reinterpret_cast<OH_NativeXComponent*>(
+        nodeModifiers->getXComponentModifier()->getNativeXComponent(node->uiNodeHandle));
 }
 
 #ifdef __cplusplus

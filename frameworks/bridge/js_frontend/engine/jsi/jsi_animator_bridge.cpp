@@ -252,7 +252,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
         jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
             LOGI("call animation onstart event");
             CallAnimationStartJs(bridgeWeak, weakRuntime.lock());
-        });
+        }, "ArkUIAnimationStartEvent");
     });
     animator->AddStopListener([weakRuntime, bridgeWeak] {
         auto delegate = GetFrontendDelegate(weakRuntime);
@@ -264,7 +264,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
         jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
             LOGI("call animation onfinish event");
             CallAnimationFinishJs(bridgeWeak, weakRuntime.lock());
-        });
+        }, "ArkUIAnimationStopEvent");
     });
     animator->AddIdleListener([weakRuntime, bridgeWeak] {
         auto delegate = GetFrontendDelegate(weakRuntime);
@@ -276,7 +276,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
         jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
             LOGI("call animation oncancel event");
             CallAnimationCancelJs(bridgeWeak, weakRuntime.lock());
-        });
+        }, "ArkUIAnimationCancelEvent");
     });
     animator->AddRepeatListener([weakRuntime, bridgeWeak] {
         auto delegate = GetFrontendDelegate(weakRuntime);
@@ -288,7 +288,7 @@ void AddListenerForEventCallback(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, c
         jsTaskExecutor.PostTask([bridgeWeak, weakRuntime]() mutable {
             LOGI("call animation onrepeat event");
             CallAnimationRepeatJs(bridgeWeak, weakRuntime.lock());
-        });
+        }, "ArkUIAnimationRepeat");
     });
 }
 
@@ -306,7 +306,7 @@ void AddFrameListener(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, const RefPtr
         jsTaskExecutor.PostTask([bridgeWeak, weakRuntime, value]() mutable {
             LOGI("call animation onframe event");
             CallAnimationFrameJs(bridgeWeak, weakRuntime.lock(), value);
-        });
+        }, "ArkUIAnimationFrame");
     });
 }
 
@@ -483,7 +483,7 @@ JsiAnimatorBridge::~JsiAnimatorBridge()
               LOGI("release animator on UI thread");
               animator.Reset();
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIAnimatorRelease");
     }
 }
 
@@ -594,7 +594,7 @@ void JsiAnimatorTaskCreate::AnimatorBridgeTaskFunc(const RefPtr<JsAcePage>& page
             if (bridgeFree != nullptr) {
                 bridgeFree.Reset();
             }
-        });
+        }, "ArkUIAnimatorBridgeRelease");
     }
     page->RemoveAnimatorBridge(bridgeId);
     bridge_->JsCreateAnimation(param_);

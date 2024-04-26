@@ -25,6 +25,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
 
@@ -173,11 +174,14 @@ public:
             theme->textfieldShowHandle_ = StringUtils::StringToInt(textfield_show_handle);
 
             theme->textInputBorderColor_ = pattern->GetAttr<Color>("text_input_border_color", Color());
-            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_fp);
+            theme->textInputBorderWidth_ = pattern->GetAttr<Dimension>("text_input_border_width", 0.0_vp);
             theme->errorTextInputBorderWidth_ = pattern->GetAttr<Dimension>("error_text_input_border_width", 1.0_vp);
             theme->textInputAndErrTipsSpacing_ =
                 pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
             theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
+
+            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
+            theme->cancelButtonIconHeight_ = pattern->GetAttr<Dimension>("cancel_button_icon_height", Dimension());
         }
     };
 
@@ -528,6 +532,26 @@ public:
         return errorTextInputBorderWidth_;
     }
 
+    const Dimension& GetAvoidKeyboardOffset() const
+    {
+        return avoidKeyboardOffset_;
+    }
+
+    const CancelButtonStyle& GetCancelButtonStyle() const
+    {
+        return cancelButtonStyle_;
+    }
+
+    const Dimension& GetCancelButtonIconHeight() const
+    {
+        return cancelButtonIconHeight_;
+    }
+
+    const Color& GetCancelButtonIconColor() const
+    {
+        return cancelButtonIconColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -603,17 +627,24 @@ private:
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;
 
+    Dimension avoidKeyboardOffset_ = 24.0_vp;
+
     bool showEllipsis_ = true;
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;;
 
-    Dimension textInputBorderWidth_ = 0.5_vp;
+    Dimension textInputBorderWidth_ = 0.0_vp;
     Dimension textInputAndErrTipsSpacing_ = 4.0_vp;
     Dimension errorTextInputBorderWidth_ = 1.0_vp;
     Color textInputBorderColor_;
     bool showPasswordIcon_ = true;
+    
+    // cancelButton
+    Color cancelButtonIconColor_;
+    Dimension cancelButtonIconHeight_;
+    CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
 };
 
 } // namespace OHOS::Ace

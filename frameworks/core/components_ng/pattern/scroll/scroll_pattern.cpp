@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
@@ -1037,12 +1038,12 @@ void ScrollPattern::TriggerModifyDone()
     OnModifyDone();
 }
 
-void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json);
+    ScrollablePattern::ToJsonValue(json, filter);
     auto initialOffset = JsonUtil::Create(true);
-    initialOffset->Put("xOffset", initialOffset_.GetX().ToString().c_str());
-    initialOffset->Put("yOffset", initialOffset_.GetY().ToString().c_str());
-    json->Put("initialOffset", initialOffset);
+    initialOffset->Put("xOffset", GetInitialOffset().GetX().ToString().c_str());
+    initialOffset->Put("yOffset", GetInitialOffset().GetY().ToString().c_str());
+    json->PutExtAttr("initialOffset", initialOffset, filter);
 }
 } // namespace OHOS::Ace::NG

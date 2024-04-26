@@ -22,6 +22,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
@@ -72,20 +73,21 @@ RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
     return property;
 }
 
-void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->Put("friction", GetFriction());
+    json->PutExtAttr("friction", GetFriction(), filter);
     if (edgeEffect_ == EdgeEffect::SPRING) {
-        json->Put("edgeEffect", "EdgeEffect.Spring");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.Spring", filter);
     } else if (edgeEffect_ == EdgeEffect::FADE) {
-        json->Put("edgeEffect", "EdgeEffect.Fade");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.Fade", filter);
     } else {
-        json->Put("edgeEffect", "EdgeEffect.None");
+        json->PutExtAttr("edgeEffect", "EdgeEffect.None", filter);
     }
-    json->Put("flingSpeedLimit", Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str());
+    json->PutExtAttr("flingSpeedLimit",
+        Dimension(maxFlingVelocity_, DimensionUnit::VP).ToString().c_str(), filter);
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
+    json->PutExtAttr("edgeEffectOptions", JsonEdgeEffectOptions, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -462,6 +464,12 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->NotifyFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
+
+    scrollable->SetOnContinuousSliding([weak = WeakClaim(this)]() -> double {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        return pattern->GetMainContentSize();
+    });
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
@@ -1011,7 +1019,9 @@ void ScrollablePattern::AnimateTo(
     if (NearEqual(position, GetTotalOffset())) {
         return;
     }
+#ifdef OHOS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
     finalPosition_ = position;
     if (smooth) {
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
@@ -1087,7 +1097,9 @@ void ScrollablePattern::PlayCurveAnimation(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
+#ifdef OHOS_PLATFORM
             ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
@@ -2000,7 +2012,11 @@ void ScrollablePattern::Fling(double flingVelocity)
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     CHECK_NULL_VOID(scrollable);
-    scrollable->StartScrollAnimation(0.0, flingVelocity);
+    if (IsOutOfBoundary()) {
+        scrollable->HandleOverScroll(flingVelocity);
+    } else {
+        scrollable->StartScrollAnimation(0.0f, flingVelocity);
+    }
 }
 
 void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus)
@@ -2325,13 +2341,13 @@ void ScrollablePattern::HandleHotZone(
 void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
 {
     float offsetPct = IsInHotZone(point);
-    if (NearZero(offsetPct)) {
+    if ((Positive(offsetPct) && !IsAtTop()) || (Negative(offsetPct) && !IsAtBottom())) {
+        // The drag point enters the hot zone
+        HotZoneScroll(offsetPct);
+    } else {
         // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop
         // scrolling
         HandleLeaveHotzoneEvent();
-    } else {
-        // The drag point enters the hot zone
-        HotZoneScroll(offsetPct);
     }
 }
 
@@ -2501,6 +2517,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->IsReverse()) {
+                offset = -offset;
+            }
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
         });
         fixedVelocityMotion_->SetVelocity(velocity);

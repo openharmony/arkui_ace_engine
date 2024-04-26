@@ -52,7 +52,6 @@ constexpr float SPRINGMOTION_RESPONSE = 0.55f;
 constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
-float ContainerModalView::imageMaxTranslate = 0.0f;
 float ContainerModalView::baseScale = 1.0f;
 /**
  * The structure of container_modal is designed as follows :
@@ -290,10 +289,6 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
                             pow(buttonPattern->GetLocalLocation().GetY() - halfSize, 2.0));
         float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
-        float imageTranslate = 2 * icurve->Move((maxDis - curDis) / (maxDis));
-        imageMaxTranslate = imageTranslate > imageMaxTranslate ? imageTranslate : imageMaxTranslate;
-        float translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * imageMaxTranslate;
-        float translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * imageMaxTranslate;
         auto buttonNodeRenderContext = buttonNode->GetRenderContext();
         auto imageIconRenderContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(buttonNodeRenderContext);
@@ -302,22 +297,16 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         AnimationOption option = AnimationOption();
         auto motion = MakeRefPtr<ResponsiveSpringMotion>(SPRINGMOTION_RESPONSE, CURRENT_RATIO, CURRENT_DURATION);
         option.SetCurve(motion);
-        TranslateOptions translate;
-        translate.x = isHover ? translateX : 0.0f;
-        translate.y = isHover ? translateY : 0.0f;
         if (isHover) {
-            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
+            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
                 buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(1 / imageScale, 1 / imageScale));
-                imageIconRenderContext->UpdateTransformTranslate(translate);
             });
         } else {
             baseScale = 1.0f;
-            imageMaxTranslate = 0.0f;
-            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
+            AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
                 buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-                imageIconRenderContext->UpdateTransformTranslate(translate);
             });
         }
     };
@@ -351,23 +340,15 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageScale = baseScale;
-        float imageTranslate = 2 * icurve->Move((maxDis - curDis) / (maxDis));
-        imageMaxTranslate = imageTranslate > imageMaxTranslate ? imageTranslate : imageMaxTranslate;
-        float translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * imageMaxTranslate;
-        float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * imageMaxTranslate;
         float response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
         float dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
         float blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
         auto motion = MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
         AnimationOption option = AnimationOption();
         option.SetCurve(motion);
-        TranslateOptions translate;
-        translate.x = translateX;
-        translate.y = translateY;
-        AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
+        AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale]() {
             buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
             imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
-            imageIconRenderContext->UpdateTransformTranslate(translate);
         });
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));

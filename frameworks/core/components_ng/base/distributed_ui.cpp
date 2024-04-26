@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "base/ressched/ressched_report.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -382,15 +383,15 @@ bool DistributedUI::ReadyToDumpUpdate()
 
 void DistributedUI::SetIdMapping(int32_t srcNodeId, int32_t sinkNodeId)
 {
-    nodeIdMapping_.count(srcNodeId);
     nodeIdMapping_[srcNodeId] = sinkNodeId;
 }
 
 int32_t DistributedUI::GetIdMapping(int32_t srcNodeId)
 {
     int32_t sinkNodeId = ElementRegister::UndefinedElementId;
-    if (nodeIdMapping_.count(srcNodeId)) {
-        sinkNodeId = nodeIdMapping_[srcNodeId];
+    auto iter = nodeIdMapping_.find(srcNodeId);
+    if (iter != nodeIdMapping_.end()) {
+        sinkNodeId = iter->second;
     }
     return sinkNodeId;
 }
@@ -402,14 +403,16 @@ void DistributedUI::AddNodeHash(int32_t nodeId, std::size_t hashValue)
 
 void DistributedUI::DelNodeHash(int32_t nodeId)
 {
-    if (nodeHashs_.count(nodeId)) {
-        nodeHashs_.erase(nodeId);
+    auto iter = nodeHashs_.find(nodeId);
+    if (iter != nodeHashs_.end()) {
+        nodeHashs_.erase(iter);
     }
 }
 
 bool DistributedUI::IsRecordHash(int32_t nodeId, std::size_t hashValue)
 {
-    if (nodeHashs_.count(nodeId) && nodeHashs_.at(nodeId) == hashValue) {
+    auto iter = nodeHashs_.find(nodeId);
+    if (iter != nodeHashs_.end() && iter->second == hashValue) {
         return false;
     }
     AddNodeHash(nodeId, hashValue);
@@ -431,7 +434,8 @@ void DistributedUI::DumpNode(
     nodeObject->Put(DISTRIBUTE_UI_OPERATION, static_cast<int32_t>(op));
 
     std::unique_ptr<JsonValue> childObject = NodeObject::Create();
-    node->ToJsonValue(childObject);
+    InspectorFilter filter;
+    node->ToJsonValue(childObject, filter);
     nodeObject->Put(DISTRIBUTE_UI_ATTRS, (std::unique_ptr<NodeObject>&)childObject);
 }
 

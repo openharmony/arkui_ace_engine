@@ -68,6 +68,8 @@ public:
             auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));
             theme->padding_ = Edge(0.0, 0.0, padding.Value(), padding.Value(), padding.Unit());
             theme->scrollBarMargin_ = padding;
+            theme->defaultWidth_ = pattern->GetAttr<Dimension>("scroll_bar_default_width", 16.0_vp);
+            theme->defaultHeight_ = pattern->GetAttr<Dimension>("scroll_bar_default_height", 16.0_vp);
         }
     };
 
@@ -128,6 +130,16 @@ public:
         return scrollBarMargin_;
     }
 
+    const Dimension& GetDefaultWidth() const
+    {
+        return defaultWidth_;
+    }
+
+    const Dimension& GetDefaultHeight() const
+    {
+        return defaultHeight_;
+    }
+
 protected:
     ScrollBarTheme() = default;
 
@@ -140,6 +152,8 @@ private:
     Dimension reservedHeight_;
     Dimension touchWidth_;
     Dimension scrollBarMargin_;
+    Dimension defaultWidth_;
+    Dimension defaultHeight_;
     Color backgroundColor_;
     Color foregroundColor_;
     Edge padding_;

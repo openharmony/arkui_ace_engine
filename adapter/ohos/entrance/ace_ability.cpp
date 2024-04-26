@@ -420,7 +420,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
                     [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
                         const std::function<void()>& task) {
                         ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIAbilityInitRosenBackend");
                     }, id);
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
@@ -602,7 +602,7 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
                 configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration");
     LOGI("AceAbility OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
@@ -708,7 +708,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Platform::AceViewOhos::SurfaceChanged(aceView, rect.width_, rect.height_,
                 rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         },
-        TaskExecutor::TaskType::PLATFORM);
+        TaskExecutor::TaskType::PLATFORM, "ArkUISurfaceChanged");
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -725,7 +725,7 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIWindowModeChange");
 }
 
 void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
@@ -747,7 +747,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
                 CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
-            TaskExecutor::TaskType::UI);
+            TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
     }
 }
 
@@ -759,7 +759,8 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
     CHECK_NULL_VOID(taskExecutor);
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
-        [container, params, &info] { container->Dump(params, info); }, TaskExecutor::TaskType::UI);
+        [container, params, &info] { container->Dump(params, info); },
+        TaskExecutor::TaskType::UI, "ArkUIAbilityDump");
 }
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
@@ -841,7 +842,7 @@ void AceAbility::SetBackgroundColor(uint32_t color)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetAppBgColor(Color(bgColor));
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUISetAppBackgroundColor");
 }
 
 uint32_t AceAbility::GetBackgroundColor()
@@ -859,7 +860,7 @@ uint32_t AceAbility::GetBackgroundColor()
             CHECK_NULL_VOID(pipelineContext);
             bgColor = pipelineContext->GetAppBgColor().GetValue();
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIGetAppBackgroundColor");
 
     LOGI("AceAbilityHandler GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
@@ -888,7 +889,7 @@ void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHO
                 pipeline->UpdateCutoutSafeArea(safeArea);
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIAbilityAvoidAreaChanged");
 }
 
 } // namespace Ace

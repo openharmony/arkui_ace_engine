@@ -153,6 +153,8 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     float GetSwitchWidth() const;
     float GetSwitchContentOffsetX() const;
 
@@ -161,6 +163,7 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitFocusEvent();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);

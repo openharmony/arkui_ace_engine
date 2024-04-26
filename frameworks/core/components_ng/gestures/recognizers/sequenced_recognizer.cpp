@@ -156,6 +156,34 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
+bool SequencedRecognizer::HandleEvent(const AxisEvent& point)
+{
+    auto iter = recognizers_.begin();
+    std::advance(iter, currentIndex_);
+    RefPtr<NGGestureRecognizer> curRecognizer = *iter;
+    if (!curRecognizer) {
+        GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return true;
+    }
+    if (currentIndex_ > 0) {
+        auto prevState = curRecognizer->GetRefereeState();
+        if (prevState == RefereeState::READY) {
+            // the prevState is ready, need to pass axis-begin event to the new coming recognizer.
+            auto event = point;
+            event.action = AxisAction::BEGIN;
+            curRecognizer->HandleEvent(event);
+        }
+    }
+    if (point.action != AxisAction::NONE) {
+        curRecognizer->HandleEvent(point);
+    }
+
+    if ((point.action == AxisAction::END) && (refereeState_ == RefereeState::PENDING)) {
+        DeadlineTimer();
+    }
+    return true;
+}
+
 void SequencedRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     if (disposal == GestureDisposal::ACCEPT) {
@@ -227,7 +255,7 @@ void SequencedRecognizer::DeadlineTimer()
 
     deadlineTimer_.Reset(callback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    taskExecutor.PostDelayedTask(deadlineTimer_, SEQUENCE_GESTURE_TIMEOUT);
+    taskExecutor.PostDelayedTask(deadlineTimer_, SEQUENCE_GESTURE_TIMEOUT, "ArkUIGestureSequencedDeadlineTimer");
 }
 
 void SequencedRecognizer::HandleOverdueDeadline()

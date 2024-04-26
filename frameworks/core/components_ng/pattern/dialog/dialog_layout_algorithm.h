@@ -59,8 +59,8 @@ private:
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
 
-    bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout);
-    void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
+    bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
+    void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumn(GridSizeType type);
@@ -87,9 +87,6 @@ private:
     void UpdateSafeArea();
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    double GetRealSize(Dimension dialogFrame, double size);
-    void UpdateDialogContainerWidth(const RefPtr<DialogLayoutProperty>& dialogProp,
-        const RefPtr<DialogTheme>& dialogTheme);
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;

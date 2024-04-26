@@ -69,6 +69,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 constexpr float RK356_WIDTH = 720.0f;
 constexpr float RK356_HEIGHT = 1136.0f;
 constexpr float RK356_LOW_WIDTH = 50.0f;
@@ -91,7 +92,6 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
-constexpr bool ADAPT_FILL_VALUE = true;
 const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
@@ -112,6 +112,7 @@ const SizeF LARGE_CONTAINER_SIZE(LARGE_WIDTH, TEXT_HEIGHT);
 constexpr Dimension ADAPT_LINE_HEIGHT_VALUE = Dimension(10, DimensionUnit::PX);
 constexpr Dimension ADAPT_FONT_SIZE_VALUE = Dimension(30, DimensionUnit::PX);
 constexpr Dimension ADAPT_BASE_LINE_OFFSET_VALUE = Dimension(10, DimensionUnit::PX);
+constexpr Dimension ADAPT_LINE_SPACING_VALUE = Dimension(10, DimensionUnit::PX);
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const SizeT<float> LARGE_SIZE = SizeT<float>(10000.0f, 1000.0f);
@@ -129,6 +130,8 @@ const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 const Dimension TEXT_INDENT = Dimension(5, DimensionUnit::PX);
 const Dimension ADAPT_UPDATE_FONTSIZE_VALUE = Dimension(50, DimensionUnit::PX);
+const Dimension LINE_SPACING_VALUE = Dimension(20, DimensionUnit::PX);
+const Dimension LINE_SPACING_VALUE_1 = Dimension(30, DimensionUnit::PX);
 const std::string ROOT_TAG("root");
 constexpr int32_t NODE_ID = 143;
 const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
@@ -165,8 +168,8 @@ const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = { 0,
         \"location\":[{\"option\":\"导航至该位置\"},{\"option\":\"在地图中打开\"},\
         {\"option\":\"复制\"},{\"option\":\"选择文本\"}]}",
     "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}" };
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::unordered_map<std::string, int32_t> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 
@@ -213,6 +216,7 @@ struct TestProperty {
     std::optional<Ace::TextOverflow> textOverflowValue = std::nullopt;
     std::optional<uint32_t> maxLinesValue = std::nullopt;
     std::optional<Dimension> lineHeightValue = std::nullopt;
+    std::optional<Dimension> lineSpacingValue = std::nullopt;
     std::optional<Ace::TextDecoration> textDecorationValue = std::nullopt;
     std::optional<Color> textDecorationColorValue = std::nullopt;
     std::optional<Dimension> baselineOffsetValue = std::nullopt;
@@ -343,6 +347,9 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     if (testProperty.lineHeightValue.has_value()) {
         textModel.SetLineHeight(testProperty.lineHeightValue.value());
     }
+    if (testProperty.lineSpacingValue.has_value()) {
+        textModel.SetLineSpacing(testProperty.lineSpacingValue.value());
+    }
     if (testProperty.textDecorationValue.has_value()) {
         textModel.SetTextDecoration(testProperty.textDecorationValue.value());
     }
@@ -386,7 +393,6 @@ void TextTestNg::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textShadow.SetIsFilled(ADAPT_FILL_VALUE);
     textContentModifier.SetTextShadow({ textShadow });
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
@@ -477,6 +483,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.textOverflowValue = std::make_optional(TEXT_OVERFLOW_VALUE);
     testProperty.maxLinesValue = std::make_optional(MAX_LINES_VALUE);
     testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
+    testProperty.lineSpacingValue = std::make_optional(LINE_SPACING_VALUE);
     testProperty.textDecorationValue = std::make_optional(TEXT_DECORATION_VALUE);
     testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
     testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
@@ -507,6 +514,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetTextOverflow(), TEXT_OVERFLOW_VALUE);
     EXPECT_EQ(textStyle.GetMaxLines(), MAX_LINES_VALUE);
     EXPECT_EQ(textStyle.GetLineHeight(), LINE_HEIGHT_VALUE);
+    EXPECT_EQ(textStyle.GetLineSpacing(), LINE_SPACING_VALUE);
     EXPECT_EQ(textStyle.GetTextDecoration(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(textStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(textStyle.GetBaselineOffset(), BASELINE_OFFSET_VALUE);
@@ -1216,7 +1224,7 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, Build).Times(1);
+    EXPECT_CALL(*paragraph, Build).Times(4);
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -1458,7 +1466,7 @@ HWTEST_F(TextTestNg, ToJsonValue001, TestSize.Level1)
      * @tc.steps: step2. run ToJsonValue().
      */
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1491,7 +1499,7 @@ HWTEST_F(TextTestNg, ToJsonValue002, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::IDEOGRAPHIC);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1524,7 +1532,7 @@ HWTEST_F(TextTestNg, ToJsonValue003, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::TOP);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1557,7 +1565,7 @@ HWTEST_F(TextTestNg, ToJsonValue004, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::BOTTOM);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1590,7 +1598,7 @@ HWTEST_F(TextTestNg, ToJsonValue005, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::MIDDLE);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1623,7 +1631,7 @@ HWTEST_F(TextTestNg, ToJsonValue006, TestSize.Level1)
     textLayoutProperty->UpdateLetterSpacing(dim);
     textLayoutProperty->UpdateTextBaseline(TextBaseline::HANGING);
     auto json = std::make_unique<JsonValue>();
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
 }
 
 /**
@@ -1645,7 +1653,7 @@ HWTEST_F(TextTestNg, ToJsonValue007, TestSize.Level1)
      * @tc.steps: step2. expect default textDetectEnable_ false.
      */
     pattern->SetTextDetectEnable(true);
-    pattern->ToJsonValue(json);
+    pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("enableDataDetector"), "true");
 }
 
@@ -2107,7 +2115,8 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textContentModifier.SetParagraph(paragraph);
     // call onDraw function(textRacing_ = true)
-    textContentModifier.StartTextRace(6, 3, MarqueeDirection::LEFT, 0);
+    MarqueeOption option;
+    textContentModifier.StartTextRace(option);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
     textContentModifier.onDraw(context);
     // call onDraw function(textRacing_ = false)
@@ -2115,7 +2124,6 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textContentModifier.onDraw(context);
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
-    EXPECT_EQ(textContentModifier.shadows_[0].isFilled->Get(), ADAPT_FILL_VALUE);
     EXPECT_EQ(textContentModifier.paragraph_, paragraph);
 }
 
@@ -2680,10 +2688,10 @@ HWTEST_F(TextTestNg, TextPatternTest004, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call OnModifyDone function.
-     * @tc.expected: The copyOption_ value is equal to CopyOptions::None.
+     * @tc.expected: The copyOption_ value is equal to CopyOptions::InApp.
      */
     textPattern->OnModifyDone();
-    EXPECT_EQ(textPattern->copyOption_, CopyOptions::None);
+    EXPECT_EQ(textPattern->copyOption_, CopyOptions::InApp);
 }
 
 /**
@@ -3098,7 +3106,7 @@ HWTEST_F(TextTestNg, TextDecorationToJsonValue001, TestSize.Level1)
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -3131,7 +3139,7 @@ HWTEST_F(TextTestNg, TextDecorationToJsonValue002, TestSize.Level1)
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -3170,7 +3178,7 @@ HWTEST_F(TextTestNg, TextDecorationToJsonValue003, TestSize.Level1)
     std::vector<Shadow> shadows { textShadow1, textShadow2 };
     textLayoutProperty->UpdateTextShadow(shadows);
     auto json = JsonUtil::Create(true);
-    textLayoutProperty->ToJsonValue(json);
+    textLayoutProperty->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("textShadow"));
     auto textShadowJson = json->GetValue("textShadow");
     EXPECT_TRUE(textShadowJson->IsArray());
@@ -3194,6 +3202,7 @@ HWTEST_F(TextTestNg, UpdateChildProperty001, TestSize.Level1)
     testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
     testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
     testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
+    testProperty.lineSpacingValue = std::make_optional(LINE_SPACING_VALUE);
     /**
      * @tc.steps: step1. create text FrameNode and SpanNode, Update parent FrameNode properties
      * @tc.expected: Successfully created parent Node and child Node
@@ -3233,6 +3242,7 @@ HWTEST_F(TextTestNg, UpdateChildProperty001, TestSize.Level1)
         EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
         EXPECT_EQ(spanNode->GetLineHeight().value(), LINE_HEIGHT_VALUE);
         EXPECT_EQ(spanNode->GetFontFamily().value(), FONT_FAMILY_VALUE);
+        EXPECT_EQ(spanNode->GetLineSpacing().value(), LINE_SPACING_VALUE);
     }
 
     /**
@@ -6044,6 +6054,8 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern.
      */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(10); // 10 means min platformVersion.
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -6089,6 +6101,7 @@ HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
     EXPECT_EQ(responseRegion.GetHeight().Value(), frameSize.Height());
     EXPECT_EQ(responseRegion.GetWidth().Value(), 240.0);
     EXPECT_EQ(responseRegion.GetHeight().Value(), 60.0);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -6142,6 +6155,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty001, TestSize.Level1)
     TextModelNG::SetTextDecorationStyle(node, TextDecorationStyle::SOLID);
     TextModelNG::SetTextCase(node, TextCase::UPPERCASE);
     TextModelNG::SetMaxLines(node, 10); // 10 means maxlines.
+    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE);
 
     /**
      * @tc.steps: step2. test property.
@@ -6159,6 +6173,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetTextDecorationStyle().value(), TextDecorationStyle::SOLID);
     EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);
     EXPECT_EQ(layoutProperty->GetMaxLines().value(), 10);
+    EXPECT_EQ(layoutProperty->GetLineSpacing().value(), ADAPT_LINE_SPACING_VALUE);
 }
 
 /**
@@ -6494,5 +6509,27 @@ HWTEST_F(TextTestNg, UpdateFontFeature002, TestSize.Level1)
     textLayoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
     TextModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
     EXPECT_EQ(textLayoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: SetLineSpacing
+ * @tc.desc: test setLineSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetLineSpacing001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    textModelNG.SetLineSpacing(LINE_SPACING_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE);
+    TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1);
+    EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE_1);
 }
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,8 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
+constexpr float HALF = 0.5f;
+
 namespace OHOS::Ace::NG {
 int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 {
@@ -487,5 +489,41 @@ void WaterFlowLayoutInfo::PrintWaterFlowItems() const
         ss << "}";
         LOGI("%{public}s", ss.str().c_str());
     }
+}
+
+float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item) const
+{
+    float targetPosition = 0.0f;
+    ScrollAlign align = align_;
+    switch (align) {
+        case ScrollAlign::START:
+            targetPosition = -item.first;
+            break;
+        case ScrollAlign::END:
+            targetPosition = lastMainSize_ - (item.first + item.second);
+            break;
+        case ScrollAlign::AUTO:
+            if (currentOffset_ + item.first < 0) {
+                targetPosition = -item.first;
+            } else if (currentOffset_ + item.first + item.second > lastMainSize_) {
+                targetPosition = lastMainSize_ - (item.first + item.second);
+            } else {
+                targetPosition = currentOffset_;
+            }
+            break;
+        case ScrollAlign::CENTER:
+            targetPosition = -item.first + (lastMainSize_ - item.second) * HALF;
+            break;
+        default:
+            break;
+    }
+    return targetPosition;
+}
+
+void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
+{
+    currentOffset_ = JumpToTargetAlign(item);
+    align_ = ScrollAlign::START;
+    jumpIndex_ = EMPTY_JUMP_INDEX;
 }
 } // namespace OHOS::Ace::NG

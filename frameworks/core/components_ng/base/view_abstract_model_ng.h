@@ -477,6 +477,11 @@ public:
         ViewAbstract::SetPositionEdges(value);
     }
 
+    void ResetPosition() override
+    {
+        ViewAbstract::ResetPosition();
+    }
+
     void SetOffset(const Dimension& x, const Dimension& y) override
     {
         ViewAbstract::SetOffset({ x, y });
@@ -669,10 +674,25 @@ public:
     {
         ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
+    
+    void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) override
+    {
+        ViewAbstract::SetBgDynamicBrightness(brightnessOption);
+    }
+
+    void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) override
+     {
+        ViewAbstract::SetFgDynamicBrightness(brightnessOption);
+     }
 
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
     {
         ViewAbstract::SetFrontBlur(radius, blurOption);
+    }
+
+    void SetMotionBlur(const MotionBlurOption& motionBlurOption) override
+    {
+        ViewAbstract::SetMotionBlur(motionBlurOption);
     }
 
     void SetBackShadow(const std::vector<Shadow>& shadows) override
@@ -1065,11 +1085,16 @@ public:
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange) override;
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override;
+    RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
     void DismissContentCover() override;
+    void SheetSpringBack() override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

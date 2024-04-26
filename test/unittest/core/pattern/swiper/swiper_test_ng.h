@@ -30,6 +30,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"

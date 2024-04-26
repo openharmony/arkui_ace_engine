@@ -136,7 +136,8 @@ public:
                                                                      NavDestinationState::ON_APPEAR);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->AddBuildFinishCallBack([weakEventHub = WeakClaim(this)]() {
+        auto navigationManager = pipeline->GetNavigationManager();
+        navigationManager->AddNavigationUpdateCallback([weakEventHub = WeakClaim(this)]() {
             auto eventHub = weakEventHub.Upgrade();
             CHECK_NULL_VOID(eventHub);
             if (eventHub->onAppear_) {
@@ -151,11 +152,13 @@ public:
         });
     }
 
-    void FireOnDisappear() override
+    void FireDisappearCallback()
     {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to disappear state.", name_.c_str());
         EventHub::FireOnDisappear();
     }
+
+    void FireOnDisappear() override;
 
     void SetOnReady(const std::function<void(RefPtr<NavDestinationContext>)>& onReady)
     {
@@ -185,6 +188,66 @@ public:
         name_ = name;
     }
 
+    void SetOnWillAppear(std::function<void()>& willAppear)
+    {
+        onWillAppear_ = std::move(willAppear);
+    }
+
+    void FireOnWillAppear()
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will appear state", name_.c_str());
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_WILL_APPEAR);
+        if (onWillAppear_) {
+            onWillAppear_();
+        }
+    }
+
+    void SetOnWillShow(std::function<void()>& willShow)
+    {
+        onWillShow_ = std::move(willShow);
+    }
+
+    void FireOnWillShow()
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will show state", name_.c_str());
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_WILL_SHOW);
+        if (onWillShow_) {
+            onWillShow_();
+        }
+    }
+
+    void SetOnWillHide(std::function<void()>& willHide)
+    {
+        onWillHide_ = std::move(willHide);
+    }
+
+    void FireOnWillHide()
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will hide state", name_.c_str());
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_WILL_HIDE);
+        if (onWillHide_) {
+            onWillHide_();
+        }
+    }
+
+    void SetOnWillDisAppear(std::function<void()>& willDisAppear)
+    {
+        onWillDisAppear_ = std::move(willDisAppear);
+    }
+
+    void FireOnWillDisAppear()
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to will disappear state", name_.c_str());
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+                                                                     NavDestinationState::ON_WILL_DISAPPEAR);
+        if (onWillDisAppear_) {
+            onWillDisAppear_();
+        }
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -196,6 +259,10 @@ private:
     OnStateChangeEvent onStateChangeEvent_;
     std::function<void()> onShownEvent_;
     std::function<void()> onHiddenEvent_;
+    std::function<void()> onWillAppear_;
+    std::function<void()> onWillShow_;
+    std::function<void()> onWillHide_;
+    std::function<void()> onWillDisAppear_;
     std::function<bool()> onBackPressedEvent_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::function<void(bool)> onHiddenChange_;

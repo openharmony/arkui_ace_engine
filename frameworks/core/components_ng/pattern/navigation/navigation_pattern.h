@@ -72,6 +72,8 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -369,7 +371,7 @@ private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
     bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
 
@@ -412,7 +414,8 @@ private:
     void PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
-        const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage);
+        const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -452,6 +455,7 @@ private:
     RefPtr<NavDestinationContext> preContext_;
     WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
+    bool isRightToLeft_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
@@ -51,6 +52,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (!GetHost() || !GetHost()->IsActive()) {
+            return nullptr;
+        }
         if (UseContentModifier()) {
             return nullptr;
         }
@@ -134,16 +138,16 @@ public:
 
     void MarkIsSelected(bool isSelected);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        Pattern::ToJsonValue(json);
+        Pattern::ToJsonValue(json, filter);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
-        json->Put("value", value.c_str());
-        json->Put("group", group.c_str());
+        json->PutExtAttr("value", value.c_str(), filter);
+        json->PutExtAttr("group", group.c_str(), filter);
     }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -194,6 +198,9 @@ private:
     void ImageNodeCreate();
     void startEnterAnimation();
     void startExitAnimation();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     RefPtr<FrameNode> BuildContentModifierNode();
@@ -229,7 +236,7 @@ private:
     bool showHoverEffect_ = true;
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
-
+    bool focusEventInitialized_ = false;
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

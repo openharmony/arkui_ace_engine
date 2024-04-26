@@ -147,7 +147,8 @@ void GetSpanInspector(
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
 
-    parent->ToJsonValue(jsonObject);
+    InspectorFilter filter;
+    parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
@@ -200,7 +201,8 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         jsonNode->Put(INSPECTOR_VIEW_ID, node->GetViewId().c_str());
         auto jsonObject = JsonUtil::Create(true);
 
-        parent->ToJsonValue(jsonObject);
+        InspectorFilter filter;
+        parent->ToJsonValue(jsonObject, filter);
         jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     }
 
@@ -266,7 +268,8 @@ void GetSpanInspector(
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
 
-    parent->ToJsonValue(jsonObject);
+    InspectorFilter filter;
+    parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
@@ -299,7 +302,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
     auto jsonObject = JsonUtil::Create(true);
 
-    parent->ToJsonValue(jsonObject);
+    parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
@@ -419,7 +422,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key, const Inspe
     std::string debugLine = inspectorElement->GetDebugLine();
     jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
 
-    inspectorElement->ToJsonValue(jsonAttrs);
+    inspectorElement->ToJsonValue(jsonAttrs, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonAttrs));
     return jsonNode->ToString();
 }
@@ -588,7 +591,8 @@ void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_
 {
     auto tmpJson = JsonUtil::Create(true);
 
-    parent->ToJsonValue(tmpJson);
+    InspectorFilter filter;
+    parent->ToJsonValue(tmpJson, filter);
     jsonNode->Put(INSPECTOR_ATTR_ID, tmpJson->GetString(INSPECTOR_ATTR_ID).c_str());
 
     auto jsonObject = JsonUtil::Create(true);
@@ -748,14 +752,14 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
                     inspectorTimer.Reset(callback);
                     auto taskExecutor =
                         SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-                    taskExecutor.PostDelayedTask(inspectorTimer, LONG_PRESS_DELAY);
+                    taskExecutor.PostDelayedTask(inspectorTimer, LONG_PRESS_DELAY, "ArkUIInspectorLongPressTouchEvent");
                     break;
                 }
                 default:
                     break;
             }
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIInspectorSendEventByKey");
 
     return true;
 }

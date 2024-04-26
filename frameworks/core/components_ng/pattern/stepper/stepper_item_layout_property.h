@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STEPPER_STEPPER_ITEM_LAYOUT_PROPERTY_H
 
 #include "base/i18n/localization.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -46,17 +47,17 @@ public:
         ResetLabelStatus();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
+        LayoutProperty::ToJsonValue(json, filter);
 
-        json->Put(
-            "prevLabel", GetLeftLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.back")).c_str());
-        json->Put("nextLabel",
-            GetRightLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.next")).c_str());
+        json->PutExtAttr("prevLabel",
+            GetLeftLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.back")).c_str(), filter);
+        json->PutExtAttr("nextLabel",
+            GetRightLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.next")).c_str(), filter);
         static const std::map<std::string, std::string> STATUS_TO_STRING = { { "normal", "ItemState.Normal" },
             { "disabled", "ItemState.Disabled" }, { "waiting", "ItemState.Waiting" }, { "skip", "ItemState.Skip" } };
-        json->Put("status", STATUS_TO_STRING.at(GetLabelStatus().value_or("normal")).c_str());
+        json->PutExtAttr("status", STATUS_TO_STRING.at(GetLabelStatus().value_or("normal")).c_str(), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LeftLabel, std::string, PROPERTY_UPDATE_LAYOUT);

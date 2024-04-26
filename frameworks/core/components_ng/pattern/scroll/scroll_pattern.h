@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/web/slide_update_listener.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ScrollPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
@@ -319,17 +320,17 @@ public:
         initialOffset_ = offset;
     }
 
-    OffsetT<CalcDimension> GetInitialOffset()
+    OffsetT<CalcDimension> GetInitialOffset() const
     {
-        return initialOffset_;
+        return initialOffset_.has_value() ? initialOffset_.value() : OffsetT(CalcDimension(), CalcDimension());
     }
 
-    bool IsInitialized()
+    bool NeedSetInitialOffset()
     {
-        return isInitialized_;
+        return !isInitialized_ && initialOffset_.has_value();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -391,7 +392,7 @@ private:
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
 
     //initialOffset
-    OffsetT<CalcDimension> initialOffset_;
+    std::optional<OffsetT<CalcDimension>> initialOffset_;
 
     //scrollToEdge
     ScrollEdgeType scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;

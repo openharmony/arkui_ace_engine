@@ -20,6 +20,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
@@ -29,19 +30,21 @@ struct MagicItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LayoutWeight, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AspectRatio, float);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
-        json->Put("layoutWeight", propLayoutWeight.value_or(0));
+        json->PutExtAttr("layoutWeight", propLayoutWeight.value_or(0), filter);
         auto context = PipelineBase::GetCurrentContext();
         // add version protection, null as default start from API 10 or higher
         if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
             if (propAspectRatio.has_value()) {
-                json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value()) * 100) / 100);
+                json->PutExtAttr("aspectRatio",
+                    round(static_cast<double>(propAspectRatio.value()) * 100) / 100, filter);
             } else {
-                json->Put("aspectRatio", "");
+                json->PutExtAttr("aspectRatio", "", filter);
             }
         } else {
-            json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100);
+            json->PutExtAttr("aspectRatio",
+                round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100, filter);
         }
     }
 

@@ -20,6 +20,9 @@
 #include "base/log/dump_log.h"
 #include "base/thread/task_executor.h"
 #include "core/common/thread_checker.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
+
 
 namespace OHOS::Ace::NG {
 void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
@@ -58,5 +61,38 @@ void NavigationManager::FireNavigationUpdateCallback()
     for (const auto& func : updateCallbacks_) {
         func();
     }
+    updateCallbacks_.clear();
+}
+
+std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPtr<AceType>& node)
+{
+    RefPtr<UINode> current = nullptr;
+    auto customNode = AceType::DynamicCast<CustomNode>(node);
+    if (customNode) {
+        current = customNode->GetNavigationNode().Upgrade();
+    }
+
+    if (!current) {
+        current = AceType::DynamicCast<UINode>(node);
+        while (current) {
+            if (current->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+                break;
+            }
+            current = current->GetParent();
+        }
+    }
+
+    if (!current) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find parent navigation node failed");
+        return nullptr;
+    }
+    
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(current);
+    CHECK_NULL_RETURN(navigation, nullptr);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto stack = pattern->GetNavigationStack();
+    CHECK_NULL_RETURN(stack, nullptr);
+    return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
 }
 } // namespace OHOS::Ace::NG

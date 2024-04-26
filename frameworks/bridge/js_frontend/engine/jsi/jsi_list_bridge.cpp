@@ -58,7 +58,7 @@ shared_ptr<JsValue> JsiListBridge::JsGetCurrentOffset(const shared_ptr<JsRuntime
         LOGE("JsGetCurrentOffset failed. delegate is null.");
         return runtime->NewUndefined();
     }
-    delegate->PostSyncTaskToPage(task);
+    delegate->PostSyncTaskToPage(task, "ArkUIListGetCurrentOffset");
     shared_ptr<JsValue> offsetContext = runtime->NewObject();
     offsetContext->SetProperty(runtime, "x", runtime->NewNumber(offsetX));
     offsetContext->SetProperty(runtime, "y", runtime->NewNumber(offsetY));

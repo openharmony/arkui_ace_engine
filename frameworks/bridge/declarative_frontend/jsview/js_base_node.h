@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    RefPtr<NG::FrameNode> viewNode_;
+    RefPtr<NG::UINode> viewNode_;
     NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     std::string surfaceId_;

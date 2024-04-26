@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 
 #include "base/memory/ace_type.h"
+#include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -330,6 +331,12 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
             "appRotation:%{public}d, windowMode:%{public}d",
             displayInfo->GetFoldStatus(), isIntoFolderStack_, displayInfo->GetRotation(), windowMode);
     }
+    auto nowTime = std::time(0);
+    auto lastTime = pattern->GetLastTime();
+    auto inHoverTime = isIntoFolderStack_ ? 0 : static_cast<int32_t>(nowTime) - static_cast<int32_t>(lastTime);
+    EventReport::ReportHoverStatusChange(static_cast<int32_t>(displayInfo->GetFoldStatus()), inHoverTime,
+        isIntoFolderStack_, static_cast<int32_t>(displayInfo->GetRotation()), static_cast<int32_t>(windowMode));
+    pattern->SetLastTime(nowTime);
 }
 
 void FolderStackLayoutAlgorithm::MeasureByStack(

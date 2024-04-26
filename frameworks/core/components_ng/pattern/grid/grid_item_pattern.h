@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_PATTERN_H
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
@@ -93,11 +94,11 @@ public:
         return { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        Pattern::ToJsonValue(json);
-        json->Put("forceRebuild", forceRebuild_ ? "true" : "false");
-        json->Put("selectable", selectable_ ? "true" : "false");
+        Pattern::ToJsonValue(json, filter);
+        json->PutExtAttr("forceRebuild", forceRebuild_ ? "true" : "false", filter);
+        json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
     }
 
     void MarkIsSelected(bool isSelected);

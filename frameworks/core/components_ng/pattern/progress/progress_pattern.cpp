@@ -17,6 +17,7 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -44,7 +45,7 @@ void ProgressPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -58,10 +59,11 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
     jsonValue->Put("scaleCount", std::to_string(paintProperty->GetScaleCountValue(theme->GetScaleNumber())).c_str());
     jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
-    json->Put("style", jsonValue->ToString().c_str());
-    ToJsonValueForRingStyleOptions(json);
-    ToJsonValueForLinearStyleOptions(json);
-    json->Put("enableSmoothEffect", paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false");
+    json->PutExtAttr("style", jsonValue->ToString().c_str(), filter);
+    ToJsonValueForRingStyleOptions(json, filter);
+    ToJsonValueForLinearStyleOptions(json, filter);
+    json->PutExtAttr("enableSmoothEffect",
+        paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false", filter);
 }
 
 void ProgressPattern::InitTouchEvent()
@@ -201,6 +203,7 @@ void ProgressPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 void ProgressPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
@@ -225,7 +228,8 @@ void ProgressPattern::OnVisibleChange(bool isVisible)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json) const
+void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json,
+    const InspectorFilter& filter) const
 {
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
@@ -238,10 +242,11 @@ void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>&
     jsonValue->Put("shadow", paintProperty->GetPaintShadowValue(false) ? "true" : "false");
     jsonValue->Put("status",
         ConvertProgressStatusToString(paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING)).c_str());
-    json->Put("ringStyle", jsonValue);
+    json->PutExtAttr("ringStyle", jsonValue, filter);
 }
 
-void ProgressPattern::ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json) const
+void ProgressPattern::ToJsonValueForLinearStyleOptions(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
@@ -255,7 +260,7 @@ void ProgressPattern::ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue
     strokeRadius = std::min(strokeWidth / 2, strokeRadius);
     jsonValue->Put("strokeRadius", strokeRadius.ToString().c_str());
     jsonValue->Put("enableScanEffect", (paintProperty->GetEnableLinearScanEffect().value_or(false)) ? "true" : "false");
-    json->Put("linearStyle", jsonValue);
+    json->PutExtAttr("linearStyle", jsonValue, filter);
 }
 
 std::string ProgressPattern::ConvertProgressStatusToString(const ProgressStatus status)
@@ -273,5 +278,43 @@ std::string ProgressPattern::ConvertProgressStatusToString(const ProgressStatus 
     }
 
     return str;
+}
+
+void ProgressPattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> ProgressPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto renderProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_RETURN(renderProperty, nullptr);
+    auto value = renderProperty->GetValue().value_or(0);
+    auto total = renderProperty->GetMaxValue().value_or(0);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    return (makeFunc_.value())(ProgressConfiguration{value, total, enabled});
 }
 } // namespace OHOS::Ace::NG

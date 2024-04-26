@@ -50,11 +50,12 @@ enum class NodeStatus : char {
     BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the mainTree;
 };
 
+class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
 
 // UINode is the base class of FrameNode and SyntaxNode.
-class ACE_EXPORT UINode : public virtual AceType {
+class ACE_FORCE_EXPORT UINode : public virtual AceType {
     DECLARE_ACE_TYPE(UINode, AceType);
 
 public:
@@ -84,6 +85,7 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false);
+    RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -340,7 +342,7 @@ public:
         return useOffscreenProcess_;
     }
 
-    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -397,6 +399,7 @@ public:
     }
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false);
+    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node);
 
     void SetDebugLine(const std::string& line)
     {
@@ -542,6 +545,16 @@ public:
     void SetIsRootBuilderNode(bool isRootBuilderNode);
     bool GetIsRootBuilderNode() const;
 
+    bool IsArkTsFrameNode() const
+    {
+        return isArkTsFrameNode_;
+    }
+
+    void SetIsArkTsFrameNode(bool isArkTsFrameNode)
+    {
+        isArkTsFrameNode_ = isArkTsFrameNode;
+    }
+
     const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
     {
         return exportTextureInfo_;
@@ -668,13 +681,13 @@ private:
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
+    bool isArkTsFrameNode_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     uint32_t nodeFlag_ { 0 };
 
     int32_t childrenUpdatedFrom_ = -1;
-    static thread_local int64_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;

@@ -36,6 +36,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -886,7 +887,8 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     JsiObject obj(firstArg);
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); }, TaskExecutor::TaskType::UI);
+        [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); },
+        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -940,7 +942,8 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     JsiObject obj(firstArg);
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI);
+        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); },
+        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -991,7 +994,8 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     JsiObject obj(firstArg);
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); }, TaskExecutor::TaskType::UI);
+        [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); },
+        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -1118,7 +1122,13 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
-    windowConfig.UpdateDesignWidthScale(width);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
 
     double lpxValue = firstArg->ToNumber(vm)->Value();
     double pxValue = lpxValue * windowConfig.designWidthScale;
@@ -1146,7 +1156,13 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
-    windowConfig.UpdateDesignWidthScale(width);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
     
     double pxValue = firstArg->ToNumber(vm)->Value();
     double lpxValue = pxValue / windowConfig.designWidthScale;
@@ -1199,7 +1215,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
         [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -1224,7 +1240,7 @@ panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCall
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
         [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIJsSetCursor");
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1243,7 +1259,7 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
         [pipelineContext]() { pipelineContext->RestoreDefault(); },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
     return panda::JSValueRef::Undefined(vm);
 }
 

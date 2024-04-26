@@ -74,7 +74,7 @@ std::string PickerDate::ToString(bool jsonFormat, int32_t status) const
     if (!jsonFormat) {
         DateTime date;
         date.year = year_;
-        date.month = month_ - 1; // W3C's month start from 0 to 11
+        date.month = month_ ? month_ - 1 : 0; // W3C's month start from 0 to 11
         date.day = day_;
         return Localization::GetInstance()->FormatDateTime(date, DateTimeStyle::FULL, DateTimeStyle::NONE);
     }
@@ -86,7 +86,7 @@ std::string PickerDate::ToString(bool jsonFormat, int32_t status) const
 uint32_t PickerDate::ToDays() const
 {
     uint32_t days = 0;
-    days += day_ - 1; // day start from 1
+    days += day_ ? day_ - 1 : 0; // day start from 1
     // month start from 1
     for (uint32_t month = 1; month < month_; ++month) {
         days += PickerDate::GetMaxDay(year_, month);

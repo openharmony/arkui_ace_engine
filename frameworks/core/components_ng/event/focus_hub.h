@@ -28,6 +28,7 @@ class FrameNode;
 class FocusHub;
 class EventHub;
 class FocusView;
+class FocusManager;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
@@ -78,6 +79,8 @@ enum class FocusStyleType : int32_t {
     OUTER_BORDER = 1,
     CUSTOM_BORDER = 2,
     CUSTOM_REGION = 3,
+    FORCE_BORDER = 4,
+    FORCE_NONE = 5,
 };
 
 enum class OnKeyEventType : int32_t {
@@ -259,7 +262,7 @@ public:
 private:
     FocusType focusType_ = FocusType::DISABLE;
     bool focusable_ = false;
-    FocusStyleType styleType_ = FocusStyleType::OUTER_BORDER;
+    FocusStyleType styleType_ = FocusStyleType::NONE;
     std::unique_ptr<FocusPaintParam> paintParams_ = nullptr;
     bool isFocusActiveWhenFocused_ = false;
 };
@@ -460,6 +463,7 @@ public:
         focusPaintParamsPtr_->SetFocusPadding(padding);
     }
 
+    RefPtr<FocusManager> GetFocusManager() const;
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
@@ -766,6 +770,10 @@ public:
             RemoveSelf(BlurReason::FOCUS_SWITCH);
         }
         focusType_ = type;
+
+        if (IsImplicitFocusableScope() && focusDepend_ == FocusDependence::CHILD) {
+            focusDepend_ = FocusDependence::AUTO;
+        }
     }
     FocusType GetFocusType() const
     {
@@ -863,7 +871,7 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    bool PaintFocusState(bool isNeedStateStyles = true, bool forceUpdate = false);
+    bool PaintFocusState(bool isNeedStateStyles = true);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);

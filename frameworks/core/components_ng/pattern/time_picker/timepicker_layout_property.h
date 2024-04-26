@@ -20,6 +20,7 @@
 #include <vector>
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -54,11 +55,12 @@ public:
         ResetSelectedTextStyle();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("useMilitaryTime", V2::ConvertBoolToString(GetIsUseMilitaryTimeValue(false)).c_str());
-        json->Put("loop", V2::ConvertBoolToString(GetLoopValue(true)).c_str());
+        LayoutProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("useMilitaryTime",
+            V2::ConvertBoolToString(GetIsUseMilitaryTimeValue(false)).c_str(), filter);
+        json->PutExtAttr("loop", V2::ConvertBoolToString(GetLoopValue(true)).c_str(), filter);
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
         disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
@@ -66,7 +68,7 @@ public:
         auto disappearTextStyle = JsonUtil::Create(true);
         disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
-        json->Put("disappearTextStyle", disappearTextStyle);
+        json->PutExtAttr("disappearTextStyle", disappearTextStyle, filter);
 
         auto normalFont = JsonUtil::Create(true);
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
@@ -74,7 +76,7 @@ public:
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
-        json->Put("textStyle", normalTextStyle);
+        json->PutExtAttr("textStyle", normalTextStyle, filter);
 
         auto selectedFont = JsonUtil::Create(true);
         selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
@@ -83,19 +85,16 @@ public:
         auto selectedTextStyle = JsonUtil::Create(true);
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
-        json->Put("selectedTextStyle", selectedTextStyle);
+        json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
 
         auto options = JsonUtil::Create(true);
-
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            options->Put("hour", TimeFormat::GetHourFormat(
-                GetPrefixHourValue(0), GetIsUseMilitaryTimeValue(false)).c_str());
-            options->Put("minute", TimeFormat::GetMinuteFormat(GetPrefixMinuteValue(0)).c_str());
-            if (GetPrefixSecondValue(0) != static_cast<int32_t>(ZeroPrefixType::OFF)) {
-                options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
-            }
-            json->Put("dateTimeOptions", options);
+        options->Put("hour", TimeFormat::GetHourFormat(
+            GetPrefixHourValue(0), GetIsUseMilitaryTimeValue(false)).c_str());
+        options->Put("minute", TimeFormat::GetMinuteFormat(GetPrefixMinuteValue(0)).c_str());
+        if (GetPrefixSecondValue(0) != static_cast<int32_t>(ZeroPrefixType::OFF)) {
+            options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
         }
+        json->PutExtAttr("dateTimeOptions", options, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsUseMilitaryTime, bool, PROPERTY_UPDATE_MEASURE);

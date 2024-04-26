@@ -59,11 +59,13 @@ class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
 class FrameProxy;
+struct DirtySwapConfig;
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
@@ -347,7 +349,7 @@ public:
 
     void ChangeSensitiveStyle(bool isSensitive);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -387,7 +389,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter() const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -420,6 +422,16 @@ public:
 
     void MarkNeedRenderOnly();
 
+    void SetOnAttachFunc(std::function<void(int32_t)>&& attachFunc)
+    {
+        attachFunc_ = std::move(attachFunc);
+    }
+
+    void SetOnDetachFunc(std::function<void(int32_t)>&& detachFunc)
+    {
+        detachFunc_ = std::move(detachFunc);
+    }
+
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
@@ -429,6 +441,11 @@ public:
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
+    }
+
+    void SetColorModeUpdateCallback(const std::function<void()>&& callback)
+    {
+        colorModeUpdateCallback_ = callback;
     }
 
     bool MarkRemoving() override;
@@ -489,6 +506,7 @@ public:
     void SetDragPreviewOptions(const DragPreviewOption& previewOption)
     {
         previewOption_ = previewOption;
+        previewOption_.onApply = std::move(previewOption.onApply);
     }
 
     DragPreviewOption GetDragPreviewOption() const
@@ -668,6 +686,7 @@ public:
         return GetTag();
     }
 
+    void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
     bool ParentExpansive();
@@ -702,7 +721,7 @@ public:
     void SetCacheCount(
         int32_t cacheCount = 0, const std::optional<LayoutConstraintF>& itemConstraint = std::nullopt) override;
 
-    void SyncGeometryNode(bool needSyncRsNode);
+    void SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config);
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
@@ -805,6 +824,7 @@ public:
 
     void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
+    bool CheckAncestorPageShow();
 
 protected:
     void DumpInfo() override;
@@ -852,13 +872,13 @@ private:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
-    void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
-    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     bool GetTouchable() const;
-    bool OnLayoutFinish(bool& needSyncRsNode);
+    bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio);
@@ -902,6 +922,7 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
+    std::function<void()> colorModeUpdateCallback_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -927,6 +948,9 @@ private:
     std::optional<bool> skipMeasureContent_;
     std::unique_ptr<FrameProxy> frameProxy_;
     WeakPtr<TargetComponent> targetComponent_;
+
+    std::function<void(int32_t)> attachFunc_;
+    std::function<void(int32_t)> detachFunc_;
 
     bool needSyncRenderTree_ = false;
 

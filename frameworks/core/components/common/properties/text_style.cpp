@@ -15,6 +15,7 @@
 
 #include "core/components/common/properties/text_style.h"
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
@@ -39,7 +40,7 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            textDecorationColor_ == rhs.textDecorationColor_ && textCase_ == rhs.textCase_ &&
            baselineOffset_ == rhs.baselineOffset_ && adaptHeight_ == rhs.adaptHeight_ &&
            textIndent_ == rhs.textIndent_ && verticalAlign_ == rhs.verticalAlign_ && wordSpacing_ == rhs.wordSpacing_ &&
-           ellipsisMode_ == rhs.ellipsisMode_;
+           ellipsisMode_ == rhs.ellipsisMode_ && lineBreakStrategy_ == rhs.lineBreakStrategy_;
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const
@@ -56,7 +57,8 @@ void TextStyle::SetAdaptTextSize(
     adaptTextSize_ = true;
 }
 
-void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style)
+void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json,
+    const std::optional<TextBackgroundStyle>& style, const NG::InspectorFilter& filter)
 {
     NG::BorderRadiusProperty defaultRadius;
     TextBackgroundStyle exportStyle = { .backgroundColor = Color::TRANSPARENT, .backgroundRadius = defaultRadius };
@@ -68,8 +70,8 @@ void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const st
     auto styleJson = JsonUtil::Create(true);
     styleJson->Put("color", exportStyle.backgroundColor->ColorToString().c_str());
     auto radiusJson = JsonUtil::Create(true);
-    exportStyle.backgroundRadius->ToJsonValue(radiusJson, styleJson);
+    exportStyle.backgroundRadius->ToJsonValue(radiusJson, styleJson, filter);
 
-    json->Put("textBackgroundStyle", styleJson);
+    json->PutExtAttr("textBackgroundStyle", styleJson, filter);
 }
 } // namespace OHOS::Ace

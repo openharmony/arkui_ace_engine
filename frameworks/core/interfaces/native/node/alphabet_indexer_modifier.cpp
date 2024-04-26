@@ -485,6 +485,41 @@ void ResetPopupTitleBackground(ArkUINodeHandle node)
     Color color = indexerTheme->GetPopupTitleBackground();
     IndexerModelNG::SetPopupTitleBackground(frameNode, color);
 }
+
+void SetAdaptiveWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAdaptiveWidth(frameNode, true);
+}
+
+void ResetAdaptiveWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    IndexerModelNG::SetAdaptiveWidth(frameNode, false);
+}
+
+void SetArrayValue(ArkUINodeHandle node, ArkUI_CharPtr* value, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::vector<std::string> valueVector;
+    for (uint32_t i = 0; i < length; i++) {
+        valueVector.emplace_back(value[i]);
+    }
+    IndexerModelNG::SetArrayValue(frameNode, valueVector);
+}
+
+void ResetArrayValue(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<std::string> valueVector;
+    IndexerModelNG::SetArrayValue(frameNode, valueVector);
+}
+
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -498,9 +533,95 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
         SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
         ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
-        ResetPopupTitleBackground };
+        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue };
 
     return &modifier;
+}
+
+void SetOnIndexerSelected(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const int32_t selected) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_SELECTED;
+        event.componentAsyncEvent.data[0].i32 = selected;
+        SendArkUIAsyncEvent(&event);
+    };
+    IndexerModelNG::SetOnSelected(frameNode, std::move(onEvent));
+}
+
+void SetOnIndexerRequestPopupData(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const int32_t selected) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_REQUEST_POPUP_DATA;
+        event.componentAsyncEvent.data[0].i32 = selected;
+        SendArkUIAsyncEvent(&event);
+        char** valueArray = reinterpret_cast<char**>(event.textArrayEvent.nativeStringArrayPtr);
+        ArkUI_Int32 length = event.textArrayEvent.length;
+        std::vector<std::string> valueVector;
+        if (length != 0 && valueArray != nullptr) {
+            for (uint32_t i = 0; i < length; i++) {
+                valueVector.emplace_back(valueArray[i]);
+                free(valueArray[i]);
+            }
+            free(valueArray);
+        }
+        return valueVector;
+    };
+    IndexerModelNG::SetOnRequestPopupData(frameNode, std::move(onEvent));
+}
+
+void SetOnIndexerPopupSelected(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const int32_t selected) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_POPUP_SELECTED;
+        event.componentAsyncEvent.data[0].i32 = selected;
+        SendArkUIAsyncEvent(&event);
+    };
+    IndexerModelNG::SetOnPopupSelected(frameNode, std::move(onEvent));
+}
+
+void SetIndexerChangeEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const int32_t selected) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_CHANGE_EVENT;
+        event.componentAsyncEvent.data[0].i32 = selected;
+        SendArkUIAsyncEvent(&event);
+    };
+    IndexerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+}
+
+void SetIndexerCreatChangeEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const int32_t selected) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_CREAT_CHANGE_EVENT;
+        event.componentAsyncEvent.data[0].i32 = selected;
+        SendArkUIAsyncEvent(&event);
+    };
+    IndexerModelNG::SetCreatChangeEvent(frameNode, std::move(onEvent));
 }
 }
 } // namespace OHOS::Ace::NG

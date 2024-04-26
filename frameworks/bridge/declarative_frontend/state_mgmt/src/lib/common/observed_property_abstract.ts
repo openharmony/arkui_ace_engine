@@ -32,7 +32,7 @@ type SynchedPropertyFactoryFunc = <T>(source: ObservedPropertyAbstract<T>) => Ob
    Extended by ObservedProperty, SyncedPropertyOneWay
    and SyncedPropertyTwoWay
 */
-abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T> {
+abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T> implements AbstractProperty<T> {
   protected subscribers_: Set<number>
   private id_: number;
   protected info_?: PropertyInfo;

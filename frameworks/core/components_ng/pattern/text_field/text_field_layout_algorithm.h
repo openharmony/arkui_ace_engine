@@ -50,6 +50,7 @@ public:
     }
 
     const RefPtr<Paragraph>& GetParagraph() const override;
+    void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override;
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
@@ -87,6 +88,7 @@ public:
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
     void UpdateCounterNode(uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+    bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
@@ -124,6 +126,8 @@ protected:
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     virtual bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) = 0;
 
@@ -141,6 +145,7 @@ protected:
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
     Dimension textIndent_ = 0.0_px;
+    float indent_ = 0.0f;
 private:
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
@@ -153,6 +158,8 @@ private:
     float GetVisualTextWidth() const;
     void CalcInlineMeasureItem(LayoutWrapper* layoutWrapper);
     void ApplyIndent(double width);
+    bool IsInlineFocusAdaptExceedLimit(const SizeF& maxSize);
+    LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

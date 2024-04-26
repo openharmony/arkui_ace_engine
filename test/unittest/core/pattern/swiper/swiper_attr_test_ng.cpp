@@ -17,7 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const InspectorFilter filter;
+} // namespace
 
 class SwiperAttrTestNg : public SwiperTestNg {
 public:
@@ -697,8 +699,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin002, TestSize.Level1)
      * @tc.expected: Margin is 10,5
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
-        model.SetPreviousMargin(Dimension(5.f));
+        model.SetNextMargin(Dimension(10.f), false);
+        model.SetPreviousMargin(Dimension(5.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
@@ -716,8 +718,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin003, TestSize.Level1)
      * @tc.expected: Margin is 0
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1.f));
-        model.SetPreviousMargin(Dimension(5));
+        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1.f), false);
+        model.SetPreviousMargin(Dimension(5), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -735,8 +737,8 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin004, TestSize.Level1)
      * @tc.expected: Margin is 0
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
-        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1.f));
+        model.SetNextMargin(Dimension(10.f), false);
+        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -753,7 +755,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin005, TestSize.Level1)
      * @tc.cases: Only set nextMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(10.f));
+        model.SetNextMargin(Dimension(10.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 10.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0.f);
@@ -770,7 +772,7 @@ HWTEST_F(SwiperAttrTestNg, AttrMargin006, TestSize.Level1)
      * @tc.cases: Only set preMargin
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetPreviousMargin(Dimension(5.f));
+        model.SetPreviousMargin(Dimension(5.f), false);
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0.f);
     EXPECT_EQ(pattern_->GetPrevMargin(), 5.f);
@@ -1051,14 +1053,14 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg003, TestSize.Level1)
      * @tc.expected: paintProperty->GetPrevMargin() is equal to dimension.
      */
     auto dimension = Dimension(-1.0);
-    model.SetPreviousMargin(dimension);
+    model.SetPreviousMargin(dimension, false);
     EXPECT_EQ(layoutProperty->GetPrevMargin(), dimension);
 
     /**
      * @tc.steps: step3.3. Test SetNextMargin function.
      * @tc.expected: paintProperty->GetNextMargin() is equal to dimension.
      */
-    model.SetNextMargin(dimension);
+    model.SetNextMargin(dimension, false);
     EXPECT_EQ(layoutProperty->GetNextMargin(), dimension);
 
     /**
@@ -1149,7 +1151,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
      * @tc.expected: Check the swiper property value
      */
     auto json = JsonUtil::Create(true);
-    paintProperty_->ToJsonValue(json);
+    paintProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("autoPlay"), "false");
 
     /**

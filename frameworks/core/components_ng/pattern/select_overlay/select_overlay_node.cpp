@@ -965,6 +965,27 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     memset_s(isShowInDefaultMenu_, sizeof(isShowInDefaultMenu_), 0, sizeof(isShowInDefaultMenu_));
+    
+    if (ShowCutCopy(maxWidth, allocatedSize, info)) {
+        return true;
+    }
+
+    if (ShowPasteCopyAll(maxWidth, allocatedSize, info)) {
+        return true;
+    }
+
+    if (ShowShare(maxWidth, allocatedSize, info)) {
+        return true;
+    }
+
+    if (ShowCamera(maxWidth, allocatedSize, info)) {
+        return true;
+    }
+    return false;
+}
+
+bool SelectOverlayNode::ShowCutCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+{
     if (info->menuInfo.showCut) {
         float buttonWidth = 0.0f;
         auto button = BuildButton(
@@ -994,6 +1015,11 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     } else {
         isShowInDefaultMenu_[OPTION_INDEX_COPY] = true;
     }
+    return false;
+}
+
+bool SelectOverlayNode::ShowPasteCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+{
     if (info->menuInfo.showPaste) {
         float buttonWidth = 0.0f;
 #ifdef OHOS_PLATFORM
@@ -1028,8 +1054,16 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     } else {
         isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL] = true;
     }
+    return false;
+}
 
-    if (info->menuInfo.showCopy) {
+bool SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+{
+    bool enableMenuShare = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        enableMenuShare = false;
+    }
+    if (info->menuInfo.showCopy && enableMenuShare) {
         float buttonWidth = 0.0f;
         auto buttonShare = BuildButton(
             Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), nullptr, GetId(), buttonWidth, false);
@@ -1066,7 +1100,11 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
         isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
         isShowInDefaultMenu_[OPTION_INDEX_SEARCH] = true;
     }
+    return false;
+}
 
+bool SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+{
     if (info->menuInfo.showCameraInput) {
         float buttonWidth = 0.0f;
         auto pipeline = PipelineContext::GetCurrentContext();

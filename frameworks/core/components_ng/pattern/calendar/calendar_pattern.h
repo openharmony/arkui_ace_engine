@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class CalendarPattern : public Pattern {
     DECLARE_ACE_TYPE(CalendarPattern, Pattern);
@@ -135,7 +136,7 @@ public:
 
     void FireFirstRequestData();
     void FireGoToRequestData(int32_t year, int32_t month, int32_t day);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     PickerDate GetSelectedDay() const
     {

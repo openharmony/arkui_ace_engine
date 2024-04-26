@@ -319,7 +319,10 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
     CHECK_NULL_VOID(rsImage);
     RSBitmapFormat rsBitmapFormat { rsImage->GetColorType(), rsImage->GetAlphaType() };
     RSBitmap rsBitmap;
-    rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat);
+    if (!rsBitmap.Build(rsImage->GetWidth(), rsImage->GetHeight(), rsBitmapFormat)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "rsBitmap build fail.");
+        return;
+    }
     CHECK_NULL_VOID(rsImage->ReadPixels(rsBitmap, 0, 0));
     auto width = rsBitmap.GetWidth();
     auto height = rsBitmap.GetHeight();
@@ -341,9 +344,11 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
         auto taskExecutor = Container::CurrentTaskExecutor();
         auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
         if (taskExecutor) {
-            taskExecutor->PostDelayedTask(releaseTask, TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
+            taskExecutor->PostDelayedTask(
+                releaseTask, TaskExecutor::TaskType::UI,
+                ImageCompressor::releaseTimeMs, "ArkUIImageCompressorGetInstance");
         } else {
-            ImageUtils::PostToBg(std::move(releaseTask));
+            ImageUtils::PostToBg(std::move(releaseTask), "ArkUIImageDecoderTryCompress");
         }
     }
     SkGraphics::PurgeResourceCache();

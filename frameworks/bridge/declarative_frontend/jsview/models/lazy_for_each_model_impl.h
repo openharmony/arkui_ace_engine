@@ -27,6 +27,7 @@ public:
     ~LazyForEachModelImpl() override = default;
 
     void Create(const RefPtr<LazyForEachActuator>& actuator) override;
+    void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override {};
 };
 
 } // namespace OHOS::Ace

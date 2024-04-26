@@ -41,11 +41,23 @@ public:
     void RemoveCheckBoxFromGroup(const std::string& group, int32_t checkBoxId);
 
     std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> GetCheckBoxGroupMap();
+
+    std::string GetLastNavId()
+    {
+        return lastNavId_.value_or("");
+    }
+
+    void SetLastNavId(std::optional<std::string> lastNavId)
+    {
+        lastNavId_ = lastNavId;
+    }
+
     static WeakPtr<GroupManager> GetGroupManager();
 
 private:
     std::unordered_map<std::string, std::list<int32_t>> radioGroupNotify_;
     std::unordered_map<std::string, std::list<int32_t>> checkBoxGroupNotify_;
+    std::optional<std::string> lastNavId_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT NavigationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
@@ -136,7 +137,7 @@ public:
 
     bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
@@ -165,14 +166,12 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
 
-    WeakPtr<UINode> GetCustomNode() const {
-        return customNode_;
-    }
-
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
+
+    float CheckLanguageDirection();
 
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
@@ -187,7 +186,6 @@ private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
-    WeakPtr<UINode> customNode_;
     std::vector<RefPtr<NavDestinationGroupNode>> hideNodes_; // dialog destination hide pages.
     int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };

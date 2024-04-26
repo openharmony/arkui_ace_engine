@@ -41,8 +41,9 @@ class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
-class ACE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
+class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
@@ -152,6 +153,11 @@ public:
         syncLoad_ = value;
     }
 
+    bool GetSyncLoad() const
+    {
+        return syncLoad_;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
     void BeforeCreatePaintWrapper() override;
@@ -193,14 +199,32 @@ public:
             }
         }
         imagesChangedFlag_ = true;
-        isAnimation_ = true;
+        RegisterVisibleAreaChange();
     }
 
-    void StartAnimation() {
+    void ResetImages()
+    {
+        images_.clear();
+    }
+
+    void ResetImageProperties();
+
+    void ResetImageAndAlt();
+
+    void ResetPictureSize();
+
+    bool GetHasSizeChanged()
+    {
+        return hasSizeChanged;
+    }
+
+    void StartAnimation()
+    {
         status_ = Animator::Status::RUNNING;
     }
 
-    void StopAnimation() {
+    void StopAnimation()
+    {
         status_ = Animator::Status::STOPPED;
         OnAnimatedModifyDone();
     }
@@ -236,6 +260,11 @@ public:
 
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
+
+    void SetImageAnimator(bool isImageAnimator)
+    {
+        isImageAnimator_ = isImageAnimator;
+    }
 
 protected:
     void RegisterWindowStateChangedCallback();
@@ -276,7 +305,7 @@ private:
      * @param dstSize The size of the image to be decoded.
      */
     void StartDecoding(const SizeF& dstSize);
-    bool CheckIfNeeedLayout();
+    bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
@@ -297,7 +326,7 @@ private:
     void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     RectF CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode);
 
@@ -343,6 +372,8 @@ private:
     void ResetFormAnimationFlag();
     void OnAnimatedModifyDone();
     void OnImageModifyDone();
+    void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
+    void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
@@ -391,6 +422,8 @@ private:
     int32_t formAnimationRemainder_ = 0;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
+    bool isImageAnimator_ = false;
+    bool hasSizeChanged = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -135,7 +135,7 @@ private:
             animationController_->AddStopListener([onFinishEvent, weakContext = context_] {
                 auto context = weakContext.Upgrade();
                 if (context) {
-                    context->PostAsyncEvent(onFinishEvent);
+                    context->PostAsyncEvent(onFinishEvent, "ArkUIAnimationFinishEvent");
                 } else {
                     LOGE("the context is null");
                 }

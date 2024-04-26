@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -104,6 +105,22 @@ void FocusManager::GetFocusViewMap(FocusViewMap& focusViewMap)
         }
     }
 }
+
+void FocusManager::PaintFocusState()
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto rootFocusHub = rootNode->GetFocusHub();
+    CHECK_NULL_VOID(rootFocusHub);
+    if (!pipeline->GetIsFocusActive()) {
+        return;
+    }
+    rootFocusHub->ClearAllFocusState();
+    rootFocusHub->PaintAllFocusState();
+}
+
 
 void FocusManager::DumpFocusManager()
 {

@@ -70,6 +70,7 @@ public:
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);
     static bool GetSwitchIsOn(FrameNode* frameNode);
+    static Color GetUnselectedColor(FrameNode* frameNode);
 
 private:
     static void ReCreateFrameNode(

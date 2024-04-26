@@ -152,6 +152,7 @@ public:
     virtual void SetPositionEdges(const EdgesParam& value) {};
     virtual void SetOffsetEdges(const EdgesParam& value) {};
     virtual void MarkAnchor(const Dimension& x, const Dimension& y) = 0;
+    virtual void ResetPosition() {};
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
@@ -200,8 +201,11 @@ public:
 
     virtual void SetDynamicDim(float DimDegree) = 0;
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
+    virtual void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
+    virtual void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
 
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;
@@ -315,11 +319,14 @@ public:
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
         std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
-        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-        std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange) = 0;
+        std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) = 0;
     virtual void DismissContentCover() = 0;
     virtual void DismissSheet() = 0;
+    virtual void SheetSpringBack() = 0;
     virtual void DismissDialog() {};
 
     // accessibility

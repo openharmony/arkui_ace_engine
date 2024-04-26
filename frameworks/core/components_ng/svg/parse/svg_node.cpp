@@ -258,6 +258,12 @@ void SvgNode::OnFilter(RSCanvas& canvas, const Size& viewPort)
     CHECK_NULL_VOID(svgContext);
     auto refFilter = svgContext->GetSvgNodeById(hrefFilterId_);
     CHECK_NULL_VOID(refFilter);
+    auto effectPath = AsPath(viewPort);
+    auto bounds = effectPath.GetBounds();
+    refFilter->SetEffectFilterArea({
+        useOffsetX_ + bounds.GetLeft(), useOffsetY_ + bounds.GetTop(),
+        bounds.GetWidth(), bounds.GetHeight()
+    });
     refFilter->Draw(canvas, viewPort, std::nullopt);
     return;
 }

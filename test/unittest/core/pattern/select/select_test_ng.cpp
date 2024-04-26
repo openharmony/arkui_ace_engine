@@ -56,6 +56,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
+const InspectorFilter filter;
 const int32_t OFFSETX = 10;
 const int32_t OFFSETY = 20;
 constexpr int32_t SELECT_ERROR = -1;
@@ -1788,7 +1789,7 @@ HWTEST_F(SelectTestNg, ToJsonValue001, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
     ASSERT_NE(jsonValue, nullptr);
-    pattern->ToJsonValue(jsonValue);
+    pattern->ToJsonValue(jsonValue, filter);
     EXPECT_TRUE(pattern->options_.empty());
 }
 
@@ -1817,7 +1818,7 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
     pattern->options_.push_back(option);
     pattern->menuWrapper_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern->ToJsonValue(jsonValue);
+    pattern->ToJsonValue(jsonValue, filter);
     EXPECT_FALSE(pattern->options_.empty());
 }
 
@@ -1855,6 +1856,40 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     layoutWrapper->layoutWrapperBuilder_ = wrapperBuilder;
     layoutAlgorithm->Measure(layoutWrapper);
     EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
+}
+
+
+HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and geometryNode.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params;
+    SelectParam sparam_one;
+    sparam_one.first = "100";
+    sparam_one.second = "icon_one";
+    params.push_back(sparam_one);
+    selectModelNG.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    auto node = [params](MenuItemConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(params[0].first, config.value_);
+        EXPECT_EQ(params[0].second, config.icon_);
+    return nullptr;
+    };
+    selectModelNG.SetBuilderFunc(select, node);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    for (int i = 0; i < params.size(); i++) {
+        menuPattern->BuildContentModifierNode(i);
+    }
 }
 
 /**

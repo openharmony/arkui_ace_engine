@@ -23,6 +23,7 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 struct SwiperAnimationStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoPlay, bool);
@@ -61,7 +62,7 @@ public:
         ResetFadeColor();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 

@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -59,6 +60,8 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
@@ -189,7 +192,10 @@ public:
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
+    void SetDefaultColor(RefPtr<SpanNode>& spanNode);
     void HandleOnDelete(bool backward) override;
+    std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
+    int32_t CalculateDeleteLength(int32_t length, bool isBackward, bool& isSpanSelected);
     void DeleteBackward(int32_t length = 0) override;
     void DeleteBackward(int32_t length = 0, bool isExternalkeyboard = false);
     std::wstring DeleteBackwardOperation(int32_t length = 0, bool isExternalkeyboard = false);
@@ -228,8 +234,8 @@ public:
     void HandleSelectFontStyle(KeyCode code) override;
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
-    int32_t HandleSelectUpPos();
-    int32_t HandleSelectDownPos();
+    int32_t HandleSelectPosition(bool isForward);
+    int32_t HandleSelectParagraghPos(bool direction);
     int32_t HandleSelectWrapper(CaretMoveIntent direction);
     bool HandleOnDeleteComb(bool backward) override;
     int32_t GetLeftWordPosition(int32_t caretPosition);
@@ -292,13 +298,18 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void ShowHandles() override;
     void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
-    bool JudgeDraggable(GestureEvent& info);
+    void HandleDraggableFlag(GestureEvent& info, bool& isInterceptEvent);
+    bool JudgeContentDraggable();
     void CalculateCaretOffsetAndHeight(OffsetF& caretOffset, float& caretHeight);
     OffsetF CalculateEmptyValueCaretRect();
+    void RemoveEmptySpan(std::set<int32_t, std::greater<int32_t>>& deleteSpanIndexs);
+    RefPtr<GestureEventHub> GetGestureEventHub();
+    float GetSelectedMaxWidth();
 
     bool IsUsingMouse() const
     {
@@ -336,10 +347,22 @@ public:
         return paragraphs_.GetParagraphs();
     }
 
+    std::optional<SelectHandleInfo> GetFirstHandleInfo() const
+    {
+        return selectOverlay_->GetFirstHandleInfo();
+    }
+
+    std::optional<SelectHandleInfo> GetSecondHandleInfo() const
+    {
+        return selectOverlay_->GetSecondHandleInfo();
+    }
+
     RectF GetCaretRect() const override;
     void CloseSelectOverlay() override;
+    void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     bool IsSingleHandle();
+    bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
@@ -555,6 +578,21 @@ public:
 
     float GetCrossOverHeight() const;
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<RichEditorAccessibilityProperty>();
+    }
+
+    void AdjustSelector(int32_t& index, bool isFirst);
+    void AdjustSelector(int32_t& start, int32_t& end);
+    void UpdateSelector(int32_t start, int32_t end);
+    std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+
+    void SetContentChange(bool onChange)
+    {
+        contentChange_ = onChange;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -579,7 +617,7 @@ private:
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
-    void HandleOnlyImageSelected(const Offset& globalOffset);
+    void HandleOnlyImageSelected(const Offset& globalOffset, const bool isFingerSelected);
     void CalcCaretInfoByClick(const Offset& touchOffset);
     void HandleEnabled();
     void InitMouseEvent();
@@ -596,6 +634,7 @@ private:
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
+    void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void FireOnSelectionChange(const int32_t caretPosition);
@@ -623,7 +662,7 @@ private:
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
     void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
@@ -721,7 +760,7 @@ private:
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
     float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
-    void MoveCaretToContentRect();
+    void MoveCaretToContentRect(bool downStreamFirst = true);
     void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
     bool IsTextArea() const override
     {
@@ -743,8 +782,8 @@ private:
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
+    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos);
     bool IsClickBoundary(const int32_t position);
-    std::pair<bool, bool> CaretPositionIsEmoji(int32_t& emojiLength);
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
@@ -761,6 +800,7 @@ private:
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
+    void SetAccessibilityAction();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -850,6 +890,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
     int32_t richEditorInstanceId_;
+    bool contentChange_ = false;
 };
 } // namespace OHOS::Ace::NG
 

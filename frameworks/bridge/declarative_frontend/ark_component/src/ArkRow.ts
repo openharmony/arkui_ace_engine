@@ -48,9 +48,36 @@ class RowJustifyContentlModifier extends ModifierWithKey<number> {
   }
 }
 
+class RowSpaceModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
+  static identity:Symbol = Symbol('rowSpace');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().row.resetSpace(node);
+    }
+    else {
+      getUINativeModule().row.setSpace(node, this.value);
+    }
+  }
+  checkObjectDiff() : boolean {
+    return this.stageValue !== this.value;
+  }
+}
+interface RowParam {
+  space: string | number;
+}
+
 class ArkRowComponent extends ArkComponent implements RowAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): RowAttribute {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, RowSpaceModifier.identity, RowSpaceModifier, (value[0] as RowParam).space);
+    }
+    return this
   }
   alignItems(value: VerticalAlign): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);

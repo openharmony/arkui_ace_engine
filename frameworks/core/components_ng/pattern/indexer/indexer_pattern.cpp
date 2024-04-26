@@ -192,6 +192,7 @@ void IndexerPattern::BuildArrayValueItems()
             auto indexerChildNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(indexerChildNode);
+            InitChildInputEvent(indexerChildNode, index);
             host->AddChild(indexerChildNode);
         }
     }
@@ -405,7 +406,6 @@ void IndexerPattern::InitInputEvent()
     }
     isInputEventRegisted_ = true;
     InitCurrentInputEvent();
-    InitChildInputEvent();
 }
 
 void IndexerPattern::InitCurrentInputEvent()
@@ -422,22 +422,17 @@ void IndexerPattern::InitCurrentInputEvent()
     inputGesture->AddOnHoverEvent(hoverEvent);
 }
 
-void IndexerPattern::InitChildInputEvent()
+void IndexerPattern::InitChildInputEvent(RefPtr<FrameNode>& itemNode, int32_t childIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    for (int32_t i = 0; i < itemCount_; i++) {
-        auto child = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
-        CHECK_NULL_VOID(child);
-        auto childHoverCallback = [weak = WeakClaim(this), index = i](bool isHovered) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnChildHover(index, isHovered);
-        };
-        auto childOnHoverEvent = MakeRefPtr<InputEvent>(childHoverCallback);
-        auto childInputEventHub = child->GetOrCreateInputEventHub();
-        childInputEventHub->AddOnHoverEvent(childOnHoverEvent);
+    CHECK_NULL_VOID(itemNode);
+    auto childHoverCallback = [weak = WeakClaim(this), index = childIndex](bool isHovered) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnChildHover(index, isHovered);
     };
+    auto childOnHoverEvent = MakeRefPtr<InputEvent>(childHoverCallback);
+    auto childInputEventHub = itemNode->GetOrCreateInputEventHub();
+    childInputEventHub->AddOnHoverEvent(childOnHoverEvent);
 }
 
 void IndexerPattern::InitPopupInputEvent()
@@ -1204,16 +1199,23 @@ void IndexerPattern::UpdatePopupListGradientView(int32_t popupSize, int32_t maxI
         DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
         auto listEventHub = listNode->GetEventHub<ListEventHub>();
         CHECK_NULL_VOID(listEventHub);
-        auto onScroll = [this](Dimension offset, ScrollState state) {
-            auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
-            if (listNode->GetPattern<ListPattern>()->IsAtTop()) {
-                DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
+        auto onScroll = [weak = WeakClaim(this)](Dimension offset, ScrollState state) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto popupNode = pattern->popupNode_;
+            CHECK_NULL_VOID(popupNode);
+            auto listNode = DynamicCast<FrameNode>(popupNode->GetLastChild()->GetFirstChild());
+            CHECK_NULL_VOID(listNode);
+            auto listPattern = listNode->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(listPattern);
+            if (listPattern->IsAtTop()) {
+                pattern->DrawPopupListGradient(PopupListGradientStatus::BOTTOM);
                 return;
-            } else if (listNode->GetPattern<ListPattern>()->IsAtBottom()) {
-                DrawPopupListGradient(PopupListGradientStatus::TOP);
+            } else if (listPattern->IsAtBottom()) {
+                pattern->DrawPopupListGradient(PopupListGradientStatus::TOP);
                 return;
             } else {
-                DrawPopupListGradient(PopupListGradientStatus::BOTH);
+                pattern->DrawPopupListGradient(PopupListGradientStatus::BOTH);
                 return;
             }
         };
@@ -1712,7 +1714,7 @@ void IndexerPattern::StartDelayTask(uint32_t duration)
         pattern->StartBubbleDisappearAnimation();
         });
     context->GetTaskExecutor()->PostDelayedTask(
-        delayTask_, TaskExecutor::TaskType::UI, duration);
+        delayTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerBubbleDisappear");
 }
 
 void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration)
@@ -1727,7 +1729,7 @@ void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_
         hostNode->MarkDirtyNode();
         });
     context->GetTaskExecutor()->PostDelayedTask(
-        delayCollapseTask_, TaskExecutor::TaskType::UI, duration);
+        delayCollapseTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerCollapse");
 }
 
 void IndexerPattern::StartBubbleDisappearAnimation()

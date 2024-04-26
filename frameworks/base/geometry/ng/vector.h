@@ -28,6 +28,11 @@ struct VectorF {
         return NearEqual(x, other.x) && NearEqual(y, other.y);
     }
 
+    VectorF operator*(float value) const
+    {
+        return VectorF(x * value, y * value);
+    }
+
     float x = 0.0f;
     float y = 0.0f;
 };

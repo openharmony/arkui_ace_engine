@@ -184,7 +184,9 @@ enum AceLogTag : uint8_t {
     ACE_STATE_MGMT,           // C03947
     ACE_REPEAT,               // C03948
     ACE_SHEET,                // C03949
-    ACE_CANVAS_COMPONENT,     // C03950
+    ACE_CANVAS_COMPONENT,     // C0394A
+    ACE_SCROLL_BAR,           // C0394B
+    ACE_MOVING_PHOTO,         // C0394C
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

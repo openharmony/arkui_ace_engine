@@ -33,11 +33,14 @@ const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr uint8_t PIXEL_ROUND = 18;
+constexpr size_t ACCEPT_BUTTON_INDEX = 0;
+constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
-    const TimePickerSettingData& settingData, std::map<std::string, PickerTime> timePickerProperty,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
+    std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -134,7 +137,8 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
-    auto contentRow = CreateButtonNode(timePickerNode, timePickerNode, dialogEvent, std::move(dialogCancelEvent));
+    auto contentRow =
+        CreateButtonNode(timePickerNode, timePickerNode, buttonInfos, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_RETURN(contentRow, nullptr);
     auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
@@ -271,8 +275,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
 }
 
 RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>& frameNode,
-    const RefPtr<FrameNode>& timePickerNode, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
+    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto acceptEvent = dialogEvent["acceptId"];
     auto cancelEvent = dialogCancelEvent["cancelId"];
@@ -284,15 +288,15 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    auto buttonCancelNode = CreateCancelNode(cancelEvent, timePickerNode);
-    auto buttonConfirmNode = CreateConfirmNode(frameNode, timePickerNode, acceptEvent);
+    auto buttonCancelNode = CreateCancelNode(cancelEvent, timePickerNode, buttonInfos);
+    auto buttonConfirmNode = CreateConfirmNode(frameNode, timePickerNode, buttonInfos, acceptEvent);
     buttonCancelNode->MountToParent(contentRow);
     buttonConfirmNode->MountToParent(contentRow);
     return contentRow;
 }
 
-RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(
-    const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& timePickerNode, DialogEvent& acceptEvent)
+RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
+    const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -318,20 +322,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(
     buttonConfirmEventHub->SetStateEffect(true);
 
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
-    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
-    buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
-    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
+    UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    MarginProperty margin;
-    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+    UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
+    UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto eventConfirmHub = buttonConfirmNode->GetOrCreateGestureEventHub();
@@ -352,8 +349,30 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(
     return buttonConfirmNode;
 }
 
-RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(
-    NG::DialogGestureEvent& cancelEvent, const RefPtr<FrameNode>& timePickerNode)
+void TimePickerDialogView::UpdateButtonLayoutProperty(
+    const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
+    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
+    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+}
+
+void TimePickerDialogView::UpdateConfirmButtonMargin(
+    const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme)
+{
+    MarginProperty margin;
+    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+    margin.top = CalcLength(dialogTheme->GetDividerHeight());
+    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
+    buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
+}
+
+RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
+    const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -398,8 +417,80 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
     return buttonCancelNode;
+}
+
+void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
+{
+    if (index >= buttonInfos.size()) {
+        return;
+    }
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    CHECK_NULL_VOID(buttonRenderContext);
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (buttonInfos[index].type.has_value()) {
+        buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
+    }
+    UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
+    if (buttonInfos[index].fontSize.has_value()) {
+        buttonLayoutProperty->UpdateFontSize(buttonInfos[index].fontSize.value());
+    }
+    if (buttonInfos[index].fontColor.has_value()) {
+        buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
+    }
+    if (buttonInfos[index].fontWeight.has_value()) {
+        buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
+    }
+    if (buttonInfos[index].fontStyle.has_value()) {
+        buttonLayoutProperty->UpdateFontStyle(buttonInfos[index].fontStyle.value());
+    }
+    if (buttonInfos[index].fontFamily.has_value()) {
+        buttonLayoutProperty->UpdateFontFamily(buttonInfos[index].fontFamily.value());
+    }
+    if (buttonInfos[index].borderRadius.has_value()) {
+        buttonLayoutProperty->UpdateBorderRadius(buttonInfos[index].borderRadius.value());
+    }
+    if (buttonInfos[index].backgroundColor.has_value()) {
+        buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
+    }
+}
+
+void TimePickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
+    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+    const RefPtr<ButtonTheme>& buttonTheme)
+{
+    if (index >= buttonInfos.size()) {
+        return;
+    }
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    CHECK_NULL_VOID(buttonRenderContext);
+    CHECK_NULL_VOID(buttonTheme);
+    if (buttonInfos[index].role.has_value()) {
+        buttonLayoutProperty->UpdateButtonRole(buttonInfos[index].role.value());
+        ButtonStyleMode buttonStyleMode;
+        if (buttonInfos[index].buttonStyle.has_value()) {
+            buttonStyleMode = buttonInfos[index].buttonStyle.value();
+        } else {
+            buttonStyleMode = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        }
+        auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonInfos[index].role.value());
+        auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonInfos[index].role.value());
+        buttonRenderContext->UpdateBackgroundColor(bgColor);
+        buttonLayoutProperty->UpdateFontColor(textColor);
+    }
+    if (buttonInfos[index].buttonStyle.has_value()) {
+        buttonLayoutProperty->UpdateButtonStyle(buttonInfos[index].buttonStyle.value());
+        ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        auto bgColor = buttonTheme->GetBgColor(buttonInfos[index].buttonStyle.value(), buttonRole);
+        auto textColor = buttonTheme->GetTextColor(buttonInfos[index].buttonStyle.value(), buttonRole);
+        buttonRenderContext->UpdateBackgroundColor(bgColor);
+        buttonLayoutProperty->UpdateFontColor(textColor);
+    }
 }
 
 void TimePickerDialogView::SetSelectedTime(
@@ -488,5 +579,32 @@ void TimePickerDialogView::SetTextProperties(
         properties.selectedTextStyle_.fontFamily.value_or(selectedStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontStyle,
         properties.selectedTextStyle_.fontStyle.value_or(selectedStyle.GetFontStyle()));
+}
+
+void TimePickerDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+    const RefPtr<FrameNode>& buttonNode, bool isConfirm)
+{
+    bool setDefaultFocus = false;
+    if (buttonInfos.size() > CANCEL_BUTTON_INDEX) {
+        if (buttonInfos[ACCEPT_BUTTON_INDEX].isPrimary && buttonInfos[CANCEL_BUTTON_INDEX].isPrimary) {
+            return;
+        }
+        auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
+        if (buttonInfos[index].isPrimary) {
+            setDefaultFocus = true;
+        }
+    } else if (buttonInfos.size() == CANCEL_BUTTON_INDEX) {
+        bool isAcceptButtonPrimary = (buttonInfos[0].isAcceptButton && isConfirm && buttonInfos[0].isPrimary);
+        bool isCancelButtonPrimary = (!buttonInfos[0].isAcceptButton && !isConfirm && buttonInfos[0].isPrimary);
+        if (isAcceptButtonPrimary || isCancelButtonPrimary) {
+            setDefaultFocus = true;
+        }
+    }
+    if (setDefaultFocus && buttonNode) {
+        auto focusHub = buttonNode->GetOrCreateFocusHub();
+        if (focusHub) {
+            focusHub->SetIsDefaultFocus(true);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

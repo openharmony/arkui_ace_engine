@@ -48,7 +48,7 @@ public:
     bool CloseCurrent(bool animation, CloseReason reason);
     void CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation);
     void ShowOptionMenu();
-    void HideOptionMenu();
+    void HideOptionMenu(bool noAnimation = false);
     void ToggleOptionMenu();
     void DisableMenu();
     void EnableMenu();
@@ -60,6 +60,7 @@ public:
     void MarkSelectOverlayDirty(PropertyChangeFlag changeFlag);
     bool IsMenuShow();
     bool IsSingleHandle();
+    bool IsHandlesShow();
     bool IsHandleReverse();
     void ResetSelectionRect();
     void RestartHiddenHandleTask(bool isDelay);

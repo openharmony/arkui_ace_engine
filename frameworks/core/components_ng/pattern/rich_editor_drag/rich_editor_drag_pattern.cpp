@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -23,14 +24,16 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode)
+RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode,
+    const RichEditorDragInfo& info)
 {
     CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
     CHECK_NULL_RETURN(hostPattern, nullptr);
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dragNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, [hostPattern]() {
-        return MakeRefPtr<RichEditorDragPattern>(DynamicCast<TextPattern>(hostPattern));
+    auto dragNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, [hostPattern, info]() {
+        auto dragInfo = std::make_shared<RichEditorDragInfo>(info);
+        return MakeRefPtr<RichEditorDragPattern>(DynamicCast<TextPattern>(hostPattern), dragInfo);
     });
     auto dragContext = dragNode->GetRenderContext();
     CHECK_NULL_RETURN(dragContext, nullptr);
@@ -44,7 +47,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     }
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
-    auto data = CalculateTextDragData(hostPattern, dragNode);
+    auto data = CalculateTextDragData(hostPattern, dragNode, info.selectedWidth);
     dragPattern->Initialize(data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
 
@@ -56,10 +59,17 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren)
 {
+    RichEditorDragInfo info;
+    return RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
+}
+
+RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
+    const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren, const RichEditorDragInfo& info)
+{
     CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
     CHECK_NULL_RETURN(hostPattern, nullptr);
-    auto dragNode = CreateDragNode(hostNode);
+    auto dragNode = CreateDragNode(hostNode, info);
     CHECK_NULL_RETURN(dragNode, nullptr);
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
@@ -74,6 +84,9 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto boxes = hostPattern->GetTextBoxes();
     for (const auto& child : imageChildren) {
         auto imageIndex = placeholderIndex[index];
+        if (imageIndex >= rectsForPlaceholders.size()) {
+            break;
+        }
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {

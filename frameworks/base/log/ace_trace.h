@@ -71,7 +71,7 @@ private:
     bool traceEnabled_ { false };
 };
 
-class ACE_EXPORT AceScopedTraceFlag final {
+class ACE_FORCE_EXPORT AceScopedTraceFlag final {
 public:
     explicit AceScopedTraceFlag(bool flag, const char* format, ...) __attribute__((__format__(printf, 3, 4)));
     ~AceScopedTraceFlag();

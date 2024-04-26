@@ -15,16 +15,15 @@
 
 import { Chip, ChipSize } from '@ohos.arkui.advanced.Chip'
 
+
 interface ChipGroupTheme {
-  itemStyle: ChipItemStyle;
+  itemStyle: ChipGroupStyleTheme;
   chipGroupSpace: ChipGroupSpaceOptions;
-  leftPadding:number;
-  rightPadding:number;
 }
 
 const noop = (selectedIndexes: Array<number>) => {
 }
-const alpha: Array<[string, number]> = [['rgba(0, 0, 0, 1)', 0.5], ['rgba(0, 0, 0, 0)', 1]]
+const colorStops: Array<[string, number]> = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]]
 const defaultTheme: ChipGroupTheme = {
   itemStyle: {
     size: ChipSize.NORMAL,
@@ -32,20 +31,22 @@ const defaultTheme: ChipGroupTheme = {
     fontColor: $r('sys.color.ohos_id_color_text_primary'),
     selectedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     selectedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
+    fillColor: $r('sys.color.ohos_id_color_secondary'),
+    selectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
   },
-  chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 0 },
-  leftPadding:0,
-  rightPadding:8,
+  chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
 }
 
-const chipGroupSuffixTheme: BuilderTheme = {
+const iconGroupSuffixTheme: IconGroupSuffixTheme = {
   backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
   borderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
   smallIconSize: 16,
   normalIconSize: 24,
   smallBackgroundSize: 28,
-  normalbackgroundSize: 36,
+  normalBackgroundSize: 36,
   marginLeft: 8,
+  marginRight: 16,
+  fillColor: $r('sys.color.ohos_id_color_primary')
 }
 
 interface IconOptions {
@@ -53,18 +54,29 @@ interface IconOptions {
   size?: SizeOptions;
 }
 
+interface ChipGroupStyleTheme {
+  size: ChipSize | SizeOptions;
+  backgroundColor: ResourceColor;
+  fontColor: ResourceColor;
+  selectedFontColor: ResourceColor;
+  selectedBackgroundColor: ResourceColor;
+  fillColor: ResourceColor;
+  selectedFillColor: ResourceColor;
+}
+
+
 interface LabelOptions {
   text: string;
 }
 
-interface ChipGroupItemOptions {
+export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
   label: LabelOptions;
   suffixIcon?: IconOptions;
   allowClose?: boolean;
 }
 
-interface ChipItemStyle {
+export interface ChipItemStyle {
   size?: ChipSize | SizeOptions;
   backgroundColor?: ResourceColor;
   fontColor?: ResourceColor;
@@ -73,7 +85,7 @@ interface ChipItemStyle {
 }
 
 interface ChipGroupSpaceOptions {
-  itemSpace?: string | number;
+  itemSpace?: number | string;
   startSpace?: Length;
   endSpace?: Length;
 }
@@ -84,162 +96,300 @@ export interface IconItemOptions {
   action: Callback<void>
 }
 
-interface BuilderTheme {
+interface IconGroupSuffixTheme {
   smallIconSize: number;
   normalIconSize: number;
   backgroundColor: ResourceColor;
   smallBackgroundSize: number;
-  normalbackgroundSize: number;
+  normalBackgroundSize: number;
   borderRadius: Dimension;
   marginLeft: number;
-
+  marginRight: number;
+  fillColor: ResourceColor;
 }
 
+function parseDimension<T>(
+  uiContext: UIContext,
+  value: Dimension | Length | undefined,
+  isValid: Callback<string, boolean>,
+  defaultValue: T
+): T {
+  if (value === void (0) || value === null) {
+    return defaultValue;
+  }
+  const resourceManager = uiContext.getHostContext()?.resourceManager;
+  if (typeof value === "object") {
+    let temp: Resource = value as Resource;
+    if (temp.type === 10002) {
+      if (resourceManager.getNumber(temp.id) >= 0) {
+        return value as T;
+      }
+    } else if (temp.type === 10003) {
+      if (isValidDimensionString(resourceManager.getStringSync(temp.id))) {
+        return value as T;
+      }
+    }
+  } else if (typeof value === "number") {
+    if (value >= 0) {
+      return value as T;
+    }
+  } else if (typeof value === "string") {
+    if (isValid(value)) {
+      return value as T;
+    }
+  }
+  return defaultValue;
+}
+
+function isValidString(dimension: string, regex: RegExp): boolean {
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i"));
+}
+
+function isValidDimensionNoPercentageString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$", "i"));
+}
 
 @Component
 export struct IconGroupSuffix {
-  @Consume chipSize: ChipSize | SizeOptions | undefined
-  @Prop items: Array<IconItemOptions> = []
-
-  private getIconSize(): number {
-    if (this.chipSize === ChipSize.SMALL) {
-      return chipGroupSuffixTheme.smallIconSize
-    } else {
-      return chipGroupSuffixTheme.normalIconSize
-    }
-  }
+  @Consume chipSize: ChipSize | SizeOptions;
+  @Prop items: Array<IconItemOptions> = [];
 
   private getBackgroundSize(): number {
     if (this.chipSize === ChipSize.SMALL) {
-      return chipGroupSuffixTheme.smallBackgroundSize
+      return iconGroupSuffixTheme.smallBackgroundSize;
     } else {
-      return chipGroupSuffixTheme.normalbackgroundSize
+      return iconGroupSuffixTheme.normalBackgroundSize;
     }
   }
 
-  build() {
-    Stack() {
-      Row() {
-        ForEach(this.items, (suffixItem: IconItemOptions, index) => {
-          Image(suffixItem.icon.src)
-            .size(suffixItem.icon.size ?? { width: this.getIconSize(), height: this.getIconSize() })
-            .constraintSize({ maxWidth: this.getIconSize(), maxHeight: this.getIconSize() })
-            .backgroundColor(chipGroupSuffixTheme.backgroundColor)
-            .fillColor($r('sys.color.ohos_id_color_primary'))
-            .onClick((event: ClickEvent) => {
-              suffixItem.action()
-            })
-        })
-      }
+  private getIconSize(val: Length): Length {
+    let value: Length
+    if (this.chipSize === ChipSize.SMALL) {
+      value = parseDimension(this.getUIContext(), val, isValidDimensionString, iconGroupSuffixTheme.smallIconSize);
+    } else {
+      value = parseDimension(this.getUIContext(), val, isValidDimensionString, iconGroupSuffixTheme.normalIconSize);
     }
-    .margin({ left: chipGroupSuffixTheme.marginLeft })
-    .borderRadius(chipGroupSuffixTheme.borderRadius)
-    .backgroundColor(chipGroupSuffixTheme.backgroundColor)
-    .constraintSize({ maxWidth: this.getBackgroundSize(), maxHeight: this.getBackgroundSize() })
-    .size({ width: this.getBackgroundSize(), height: this.getBackgroundSize() })
-    .align(Alignment.Center)
+    return value;
+  }
+
+  build() {
+    Row() {
+      ForEach(this.items || [], (suffixItem: IconItemOptions) => {
+        Button() {
+          Image(suffixItem.icon.src)
+            .fillColor(iconGroupSuffixTheme.fillColor)
+            .size({
+              width: this.getIconSize(suffixItem.icon?.size?.width),
+              height: this.getIconSize(suffixItem.icon?.size?.height)
+            })
+            .focusable(true)
+        }
+        .size({
+          width: this.getBackgroundSize(),
+          height: this.getBackgroundSize()
+        })
+        .backgroundColor(iconGroupSuffixTheme.backgroundColor)
+        .borderRadius(iconGroupSuffixTheme.borderRadius)
+        .onClick(() => {
+          suffixItem.action();
+        })
+        .borderRadius(iconGroupSuffixTheme.borderRadius)
+      })
+    }
   }
 }
 
 
 @Component
 export struct ChipGroup {
-  @Provide chipSize: ChipSize | SizeOptions | undefined = defaultTheme.itemStyle.size
-  @Prop items: ChipGroupItemOptions[] = []
-  @Prop itemStyle: ChipItemStyle = defaultTheme.itemStyle
-  @Prop selectedIndexes: Array<number> = [0]
-  @Prop multiple: boolean = true
-  @Prop chipGroupSpaceSize: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace
-  @BuilderParam suffix?: Callback<void>
-  private scroller: Scroller = new Scroller()
-  public onChange: Callback<Array<number>> = noop
+  @Prop items: ChipGroupItemOptions[] = [];
+  @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
+  @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
+  @Prop selectedIndexes: Array<number> = [0];
+  @Prop multiple: boolean = false;
+  @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
+  @BuilderParam suffix?: Callback<void>;
+  public onChange: Callback<Array<number>> = noop;
+  private scroller: Scroller = new Scroller();
   @State isReachEnd: boolean = this.scroller.isAtEnd();
 
-  private init(): boolean {
-    this.chipSize = this.itemStyle.size
-    return true
+  itemStyleOnChange() {
+    this.chipSize = this.getChipSize();
   }
 
-  private getChipSize(): ChipSize | SizeOptions | undefined {
-    return this.itemStyle.size ?? defaultTheme.itemStyle.size
+  aboutToAppear() {
+    this.itemStyleOnChange();
+  }
+
+  private getChipSize(): ChipSize | SizeOptions {
+    if (this.itemStyle && this.itemStyle.size) {
+      return this.itemStyle.size
+    }
+    return defaultTheme.itemStyle.size;
+  }
+
+  private getFontColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.fontColor) {
+      return this.itemStyle.fontColor
+    }
+    return defaultTheme.itemStyle.fontColor;
+  }
+
+  private getSelectedFontColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedFontColor) {
+      return this.itemStyle.selectedFontColor
+    }
+    return defaultTheme.itemStyle.selectedFontColor;
+  }
+
+  private getFillColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.fontColor) {
+      return this.itemStyle.fontColor
+    }
+    return defaultTheme.itemStyle.fillColor;
+  }
+
+  private getSelectedFillColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedFontColor) {
+      return this.itemStyle.selectedFontColor
+    }
+    return defaultTheme.itemStyle.selectedFillColor;
+  }
+
+  private getBackgroundColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.backgroundColor) {
+      return this.itemStyle.backgroundColor
+    }
+    return defaultTheme.itemStyle.backgroundColor;
+  }
+
+  private getSelectedBackgroundColor(): ResourceColor {
+    if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
+      return this.itemStyle.selectedBackgroundColor
+    }
+    return defaultTheme.itemStyle.selectedBackgroundColor;
   }
 
   private getItemStyle(): ChipItemStyle {
-    return this.itemStyle ?? defaultTheme.itemStyle
+    return this.itemStyle ?? defaultTheme.itemStyle;
   }
 
   private getSelectedIndexes(): Array<number> {
-    return this.selectedIndexes ?? [0]
+    let temp: number[] = [];
+    temp = (this.selectedIndexes ?? [0]).filter(
+      (element, index, array) => {
+        return (
+          element >= 0 &&
+            element % 1 == 0 &&
+            array.indexOf(element) === index &&
+            element < (this.items || []).length);
+      });
+    return temp;
   }
 
-  private getMultiple(): boolean {
-    return this.multiple ?? true
+  private isMultiple(): boolean {
+    return this.multiple ?? false;
   }
 
-  private getChipGroupSpaceSize(): ChipGroupSpaceOptions {
-    return this.chipGroupSpaceSize ?? defaultTheme.chipGroupSpace
+  private getChipGroupItemSpace(): string | number {
+    return parseDimension(
+      this.getUIContext(),
+      this.chipGroupSpace.itemSpace,
+      isValidDimensionNoPercentageString,
+      defaultTheme.chipGroupSpace.itemSpace
+    );
+  }
+
+  private getChipGroupStartSpace() {
+    return parseDimension(
+      this.getUIContext(),
+      this.chipGroupSpace.startSpace,
+      isValidDimensionNoPercentageString,
+      defaultTheme.chipGroupSpace.startSpace
+    );
+  }
+
+  private getChipGroupEndSpace() {
+    return parseDimension(
+      this.getUIContext(),
+      this.chipGroupSpace.endSpace,
+      isValidDimensionNoPercentageString,
+      defaultTheme.chipGroupSpace.endSpace
+    );
   }
 
   private getOnChange(): (selectedIndexes: Array<number>) => void {
-    return this.onChange ?? noop
+    return this.onChange ?? noop;
   }
 
   private isSelected(itemIndex: number): boolean {
-    if (!this.getMultiple()) {
-      return itemIndex == this.getSelectedIndexes()[0]
+    if (!this.isMultiple()) {
+      return itemIndex == this.getSelectedIndexes()[0];
     } else {
-      return this.selectedIndexes.some((element, index, array) => {
+      return this.getSelectedIndexes().some((element, index, array) => {
         return (element == itemIndex);
       })
     }
   }
 
   build() {
-    Row() {
 
+    Row() {
       Stack() {
         Scroll(this.scroller) {
-          Row({ space: this.getChipGroupSpaceSize().itemSpace }) {
-            ForEach(this.items, (chipItem: ChipGroupItemOptions, index) => {
-              Chip({
-                prefixIcon: {
-                  src: chipItem.prefixIcon?.src ?? "",
-                },
-                label: {
-                  text: chipItem.label.text,
-                  fontColor: this.getItemStyle().fontColor ?? defaultTheme.itemStyle.fontColor,
-                  activatedFontColor: this.getItemStyle().selectedFontColor ?? defaultTheme.itemStyle.selectedFontColor,
-                },
-                suffixIcon: {
-                  src: chipItem.suffixIcon?.src ?? "",
-                },
-                allowClose: chipItem.allowClose,
-                enabled: true,
-                activated: this.isSelected(index),
-                backgroundColor: this.getItemStyle().backgroundColor ?? defaultTheme.itemStyle.backgroundColor,
-                size: this.getChipSize(),
-                activatedBackgroundColor: this.getItemStyle()
-                  .selectedBackgroundColor ?? defaultTheme.itemStyle.selectedBackgroundColor,
-                onClicked: () => {
-                  if (this.isSelected(index)) {
-                    this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1)
-                    if (this.getMultiple() == false) {
-                      this.selectedIndexes = [];
+          Row({ space: this.getChipGroupItemSpace() }) {
+            ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
+              if (chipItem) {
+                Chip({
+                  prefixIcon: {
+                    src: chipItem.prefixIcon?.src ?? "",
+                    size: chipItem.prefixIcon?.size ?? undefined,
+                    fillColor: this.getFillColor(),
+                    activatedFillColor: this.getSelectedFillColor()
+                  },
+                  label: {
+                    text: chipItem?.label?.text ?? " ",
+                    fontColor: this.getFontColor(),
+                    activatedFontColor: this.getSelectedFontColor(),
+                  },
+                  suffixIcon: {
+                    src: chipItem.suffixIcon?.src ?? "",
+                    size: chipItem.suffixIcon?.size ?? undefined,
+                    fillColor: this.getFillColor(),
+                    activatedFillColor: this.getSelectedFillColor()
+                  },
+                  allowClose: chipItem.allowClose ?? false,
+                  enabled: true,
+                  activated: this.isSelected(index),
+                  backgroundColor: this.getBackgroundColor(),
+                  size: this.getChipSize(),
+                  activatedBackgroundColor: this.getSelectedBackgroundColor(),
+                  onClicked: () => {
+                    if (this.isSelected(index)) {
+                      this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+                    } else {
+                      if (!this.isMultiple()) {
+                        this.selectedIndexes = [];
+                      }
+                      this.selectedIndexes.push(index);
                     }
-                  } else {
-                    this.selectedIndexes.push(index)
-                    if (!this.getMultiple()) {
-                      this.selectedIndexes = [];
-                      this.selectedIndexes.push(index)
-                    }
+                    this.getOnChange()(this.getSelectedIndexes());
                   }
-                  this.getOnChange()(this.selectedIndexes)
-                }
-              })
+                })
+              }
             });
           }
-          .padding({ left: this.getChipGroupSpaceSize().startSpace ?? defaultTheme.chipGroupSpace.startSpace,
-            right: this.getChipGroupSpaceSize().endSpace ?? defaultTheme.chipGroupSpace.endSpace })
+          .padding({ left: this.getChipGroupStartSpace(),
+            right: this.getChipGroupEndSpace() })
           .constraintSize({ minWidth: '100%' })
         }
         .scrollable(ScrollDirection.Horizontal)
@@ -247,18 +397,20 @@ export struct ChipGroup {
         .align(Alignment.Start)
         .width('100%')
         .onScroll(() => {
-          this.isReachEnd = this.scroller.isAtEnd()
+          this.isReachEnd = this.scroller.isAtEnd();
         })
 
-        if (this.init()) {
+        if (this.suffix && !this.isReachEnd) {
           Stack()
-            .width(chipGroupSuffixTheme.normalbackgroundSize)
-            .height(this.chipSize === ChipSize.SMALL ? chipGroupSuffixTheme.smallBackgroundSize : chipGroupSuffixTheme.normalbackgroundSize)
-            .linearGradient({ angle: 90, colors: alpha })
+            .width(iconGroupSuffixTheme.normalBackgroundSize)
+            .height(
+              this.getChipSize() === ChipSize.SMALL ? 
+              iconGroupSuffixTheme.smallBackgroundSize : 
+              iconGroupSuffixTheme.normalBackgroundSize)
+            .linearGradient({ angle: 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }
-
       }
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
@@ -266,15 +418,12 @@ export struct ChipGroup {
 
       if (this.suffix) {
         Row() {
-          this.suffix()
-        }
+          this.suffix();
+        }.padding({ left: iconGroupSuffixTheme.marginLeft, right: iconGroupSuffixTheme.marginRight, })
       }
     }
     .align(Alignment.End)
     .width("100%")
-    .padding({ left: defaultTheme.leftPadding, right: this.suffix == null ? 0 : defaultTheme.rightPadding })
     .height(64)
   }
 }
-
-

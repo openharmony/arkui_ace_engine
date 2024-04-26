@@ -216,7 +216,7 @@ void JSNavPathStack::OnPushDestination(const JSCallbackInfo& info)
         ProcessPromiseCallback(asyncContext, errorCode);
     };
 
-    context->PostAsyncEvent(asyncTask, TaskExecutor::TaskType::JS);
+    context->PostAsyncEvent(asyncTask, "ArkUINavigationPushDestination", TaskExecutor::TaskType::JS);
     ReturnPromise(info, result);
 }
 } // namespace OHOS::Ace::Framework

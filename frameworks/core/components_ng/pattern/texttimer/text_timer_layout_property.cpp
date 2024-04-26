@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/utils.h"
@@ -62,22 +63,24 @@ std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shado
     return jsonShadows;
 }
 
-void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    LayoutProperty::ToJsonValue(json);
-    json->Put("format", propFormat_.value_or(DEFAULT_FORMAT).c_str());
-    json->Put("isCountDown", propIsCountDown_.value_or(false) ? "true" : "false");
-    json->Put("count", std::to_string(propInputCount_.value_or(DEFAULT_COUNT)).c_str());
-    json->Put("fontSize", GetFontSize().value_or(Dimension()).ToString().c_str());
-    json->Put("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str());
-    json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-    json->Put(
-        "fontStyle", V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
-    json->Put("fontFamily", ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str());
+    LayoutProperty::ToJsonValue(json, filter);
+    json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT).c_str(), filter);
+    json->PutExtAttr("isCountDown", propIsCountDown_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("count", std::to_string(propInputCount_.value_or(DEFAULT_COUNT)).c_str(), filter);
+    json->PutExtAttr("fontSize", GetFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
+    json->PutExtAttr("fontWeight",
+        V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
+    json->PutExtAttr("fontStyle",
+        V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str(), filter);
+    json->PutExtAttr("fontFamily",
+        ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str(), filter);
 
     auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     // Determines if there are multiple textShadows
     auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
-    json->Put("textShadow", jsonShadow);
+    json->PutExtAttr("textShadow", jsonShadow, filter);
 }
 } // namespace OHOS::Ace::NG

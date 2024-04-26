@@ -44,8 +44,8 @@ public:
     int32_t GetTextIndexAtCursor() override;
 
 private:
-    void PostSyncTaskToUI(const std::function<void()>& task);
-    void PostTaskToUI(const std::function<void()>& task);
+    void PostSyncTaskToUI(const std::function<void()>& task, const std::string& name);
+    void PostTaskToUI(const std::function<void()>& task, const std::string& name);
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 

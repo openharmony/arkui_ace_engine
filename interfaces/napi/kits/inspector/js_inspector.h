@@ -45,10 +45,6 @@ public:
         for (auto& drawitem : cbDrawList_) {
             napi_delete_reference(env_, drawitem);
         }
-        if (thisVarRef_ != nullptr) {
-            napi_delete_reference(env_, thisVarRef_);
-        }
-
         auto jsEngine = EngineHelper::GetCurrentEngineSafely();
         if (!jsEngine) {
             return;
@@ -71,7 +67,6 @@ public:
     std::string componentId_;
     std::list<napi_ref> cbLayoutList_;
     std::list<napi_ref> cbDrawList_;
-    napi_ref thisVarRef_ = nullptr;
 
 private:
     void FunctionOn(napi_env& env, napi_value result, const char* funName);

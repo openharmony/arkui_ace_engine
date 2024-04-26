@@ -35,7 +35,8 @@ public:
     static RefPtr<FrameNode> Create(
         const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding = false);
 
-    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false) override;
+    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<NG::FrameNode>& placeholderNode = nullptr,
+        bool transferringCaller = false) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
     // for dynamic component

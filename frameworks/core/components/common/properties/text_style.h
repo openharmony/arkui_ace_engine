@@ -25,11 +25,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
-
 // The normal weight is W400, the larger the number after W, the thicker the font will be.
 // BOLD is equal to W700 and NORMAL is equal to W400, lighter is W100, BOLDER is W900.
 enum class FontWeight {
@@ -220,7 +220,8 @@ struct TextBackgroundStyle {
     std::optional<NG::BorderRadiusProperty> backgroundRadius;
     int32_t groupId = 0;
 
-    static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style);
+    static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style,
+        const NG::InspectorFilter& filter);
 
     bool operator==(const TextBackgroundStyle& value) const
     {
@@ -369,12 +370,12 @@ public:
         textIndent_ = textIndent;
     }
 
-    const std::unordered_map<std::string, int32_t>& GetFontFeatures() const
+    const std::list<std::pair<std::string, int32_t>>& GetFontFeatures() const
     {
         return fontFeatures_;
     }
 
-    void SetFontFeatures(const std::unordered_map<std::string, int32_t>& fontFeatures)
+    void SetFontFeatures(const std::list<std::pair<std::string, int32_t>>& fontFeatures)
     {
         fontFeatures_ = fontFeatures;
     }
@@ -388,6 +389,16 @@ public:
     {
         lineHeight_ = lineHeight;
         hasHeightOverride_ = hasHeightOverride;
+    }
+
+    const Dimension& GetLineSpacing() const
+    {
+        return lineSpacing_;
+    }
+
+    void SetLineSpacing(const Dimension& lineSpacing)
+    {
+        lineSpacing_ = lineSpacing;
     }
 
     bool HasHeightOverride() const
@@ -635,6 +646,16 @@ public:
         return textBackgroundStyle_;
     }
 
+    LineBreakStrategy GetLineBreakStrategy() const
+    {
+        return lineBreakStrategy_;
+    }
+
+    void SetLineBreakStrategy(const LineBreakStrategy breakStrategy)
+    {
+        lineBreakStrategy_ = breakStrategy;
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -644,6 +665,7 @@ public:
         JSON_STRING_PUT_STRINGABLE(jsonValue, wordSpacing_);
         JSON_STRING_PUT_STRINGABLE(jsonValue, textIndent_);
         JSON_STRING_PUT_STRINGABLE(jsonValue, letterSpacing_);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, lineSpacing_);
 
         JSON_STRING_PUT_INT(jsonValue, fontWeight_);
         JSON_STRING_PUT_INT(jsonValue, fontStyle_);
@@ -657,6 +679,7 @@ public:
         JSON_STRING_PUT_INT(jsonValue, wordBreak_);
         JSON_STRING_PUT_INT(jsonValue, textCase_);
         JSON_STRING_PUT_INT(jsonValue, ellipsisMode_);
+        JSON_STRING_PUT_INT(jsonValue, lineBreakStrategy_);
 
         std::stringstream ss;
         std::for_each(renderColors_.begin(), renderColors_.end(), [&ss](const Color& c) { ss << c.ToString() << ","; });
@@ -668,7 +691,7 @@ public:
 
 private:
     std::vector<std::string> fontFamilies_;
-    std::unordered_map<std::string, int32_t> fontFeatures_;
+    std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     std::vector<Shadow> textShadows_;
@@ -682,6 +705,7 @@ private:
     Dimension wordSpacing_;
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
     Dimension letterSpacing_;
+    Dimension lineSpacing_;
     FontWeight fontWeight_ { FontWeight::NORMAL };
     FontStyle fontStyle_ { FontStyle::NORMAL };
     TextBaseline textBaseline_ { TextBaseline::ALPHABETIC };
@@ -694,6 +718,7 @@ private:
     WordBreak wordBreak_ { WordBreak::BREAK_WORD };
     TextCase textCase_ { TextCase::NORMAL };
     EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
+    LineBreakStrategy lineBreakStrategy_ { LineBreakStrategy::GREEDY };
     Color textColor_ { Color::BLACK };
     Color textDecorationColor_ { Color::BLACK };
     uint32_t maxLines_ = UINT32_MAX;

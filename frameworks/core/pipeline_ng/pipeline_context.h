@@ -22,10 +22,13 @@
 #include <unordered_map>
 #include <utility>
 
+#include "interfaces/inner_api/ace/arkui_rect.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/frontend.h"
@@ -56,7 +59,7 @@ namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public PipelineBase {
+class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
@@ -196,11 +199,7 @@ public:
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
-    void AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback);
-    void RemoveFormVisibleChangeNode(int32_t nodeId);
-
     void HandleVisibleAreaChangeEvent();
-    void HandleFormVisibleChangeEvent(bool isVisible);
 
     void HandleSubwindow(bool isShow);
 
@@ -341,6 +340,7 @@ public:
     void FlushBuild() override;
 
     void FlushPipelineImmediately() override;
+    void RebuildFontNode() override;
 
     void AddBuildFinishCallBack(std::function<void()>&& callback);
 
@@ -603,7 +603,7 @@ public:
 
     void SetCursor(int32_t cursorValue) override;
 
-    void RestoreDefault() override;
+    void RestoreDefault(int32_t windowId = 0) override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
     void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
@@ -676,6 +676,45 @@ public:
 
     void FlushRequestFocus();
 
+    Dimension GetCustomTitleHeight();
+
+    void SetOverlayNodePositions(std::vector<Ace::RectF> rects);
+
+    std::vector<Ace::RectF> GetOverlayNodePositions();
+
+    void RegisterOverlayNodePositionsUpdateCallback(
+        const std::function<void(std::vector<Ace::RectF>)>&& callback);
+
+    void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
+
+    void CheckNeedUpdateBackgroundColor(Color& color);
+
+    bool CheckNeedDisableUpdateBackgroundImage();
+
+    void ChangeDarkModeBrightness(bool isFocus) override;
+    void SetLocalColorMode(ColorMode colorMode)
+    {
+        auto localColorModeValue = static_cast<int32_t>(colorMode);
+        localColorMode_ = localColorModeValue;
+    }
+
+    ColorMode GetLocalColorMode() const
+    {
+        ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
+        return colorMode;
+    }
+
+    void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
+    {
+        isFreezeFlushMessage_ = isFreezeFlushMessage;
+    }
+
+    bool IsFreezeFlushMessage() const
+    {
+        return isFreezeFlushMessage_;
+    }
+    bool IsContainerModalVisible() override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -695,7 +734,7 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
         const bool supportAvoidance = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
 
     void SetIsLayouting(bool layouting)
     {
@@ -706,6 +745,7 @@ protected:
         const float safeHeight = 0.0f, const bool supportAvoidance = false);
     void OriginalAvoidanceLogic(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    RefPtr<FrameNode> GetContainerModalNode();
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -816,7 +856,6 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
-    std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
 
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
@@ -846,6 +885,7 @@ private:
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
+    bool isWindowHasFocused_ = false;
     bool onShow_ = false;
     bool isNeedFlushMouseEvent_ = false;
     bool isNeedFlushAnimationStartTime_ = false;
@@ -856,6 +896,7 @@ private:
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
+    bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -876,7 +917,6 @@ private:
     std::list<std::function<void()>> animationClosuresList_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
-    std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
@@ -884,6 +924,8 @@ private:
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
+    std::vector<Ace::RectF> overlayNodePositions_;
+    std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
     VsyncCallbackFun vsyncListener_;
     VsyncCallbackFun onceVsyncListener_;
@@ -892,6 +934,8 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    bool customTitleSettedShow_ = true;
 };
 } // namespace OHOS::Ace::NG
 

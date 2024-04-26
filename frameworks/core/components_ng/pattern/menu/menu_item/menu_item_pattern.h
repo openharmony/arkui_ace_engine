@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/slider/render_slider.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
@@ -189,6 +190,7 @@ private:
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
 
     bool IsDisabled();
     void UpdateDisabledStyle();
@@ -205,6 +207,11 @@ private:
     bool IsSelectOverlayMenu();
 
     void RecordChangeEvent() const;
+    void ParseMenuRadius(MenuParam& param);
+
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
 
     std::list<TouchRegion> hoverRegions_;
 
@@ -216,6 +223,9 @@ private:
 
     bool isChanged_ = false;
     bool isHovered_ = false;
+    bool isFocused_ = false;
+    bool isFocusShadowSet_ = false;
+    bool isFocusBGColorSet_ = false;
 
     std::function<void()> subBuilderFunc_ = nullptr;
 

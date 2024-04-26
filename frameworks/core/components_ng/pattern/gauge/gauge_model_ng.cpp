@@ -223,4 +223,11 @@ void GaugeModelNG::ResetGradientColors(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, Values, PROPERTY_UPDATE_RENDER, frameNode);
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GaugeType, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
+void GaugeModelNG::SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
 } // namespace OHOS::Ace::NG

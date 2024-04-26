@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -87,11 +88,48 @@ void SwitchPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
+    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
     FireBuilder();
+}
+
+void SwitchPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch button handle focus event");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch button handle blur event");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void SwitchPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(switchModifier_);
+    switchModifier_->SetIsFocused(false);
+}
+
+void SwitchPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(switchModifier_);
+    switchModifier_->SetIsFocused(true);
 }
 
 void SwitchPattern::UpdateSwitchPaintProperty()
@@ -229,6 +267,8 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(host);
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
+    CHECK_NULL_VOID(switchModifier_);
+    switchModifier_->SetIsOn(isOn_.value());
     switchPaintProperty->UpdateIsOn(isOn_.value_or(false));
     UpdateChangeEvent();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
