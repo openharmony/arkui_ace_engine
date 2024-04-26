@@ -78,6 +78,7 @@ public:
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                 RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -108,7 +109,7 @@ public:
         return true;
     }
 
-    void UpdateSlideOffset() override;
+    void UpdateSlideOffset(bool isNeedReset = false) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -462,8 +463,8 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(const SizeF frameSize);
-    void CalculateVerticalDrawRect(const SizeF frameSize);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);

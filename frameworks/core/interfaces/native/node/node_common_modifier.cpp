@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#ifndef PREVIEW
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #endif
 #include "base/geometry/ng/vector.h"
@@ -5061,7 +5061,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                     historyMMIPointerEventIterator++;
                     continue;
                 }
-                #if !defined(PREVIEW)
+                #if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
                     auto tempTouchEvent = Platform::ConvertTouchEvent((*historyMMIPointerEventIterator));
                     allHistoryEvents[i].action = static_cast<int32_t>(tempTouchEvent.type);
                     allHistoryEvents[i].sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
