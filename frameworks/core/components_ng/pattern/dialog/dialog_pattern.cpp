@@ -647,6 +647,12 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         hub->AddClickEvent(params.action);
     }
 
+    if (params.isPrimary) {
+        auto focusHub = buttonNode->GetFocusHub();
+        CHECK_NULL_RETURN(focusHub, nullptr);
+        focusHub->SetIsDefaultFocus(params.isPrimary);
+    }
+
     // to close dialog when clicked inside button rect
     if (!isCancel) {
         BindCloseCallBack(hub, index);
