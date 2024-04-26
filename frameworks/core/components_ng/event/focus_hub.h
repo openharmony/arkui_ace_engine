@@ -1019,6 +1019,7 @@ private:
 
     bool UpdateFocusView();
 
+    bool IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub);
     WeakPtr<FocusHub> GetChildPriorfocusNode(const std::string& focusScopeId);
     bool RequestFocusByPriorityInScope();
     bool IsInFocusGroup();

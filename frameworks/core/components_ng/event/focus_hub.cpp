@@ -2310,6 +2310,21 @@ void FocusHub::SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId)
     }
 }
 
+bool FocusHub::IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub)
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        if (parent == parentFocusHub) {
+            if (!IsFocusableWholePath()) {
+                return false;
+            }
+            return true;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return false;
+}
+
 WeakPtr<FocusHub> FocusHub::GetChildPriorfocusNode(const std::string& focusScopeId)
 {
     if (focusScopeId.empty()) {
@@ -2317,28 +2332,22 @@ WeakPtr<FocusHub> FocusHub::GetChildPriorfocusNode(const std::string& focusScope
     }
 
     auto focusManager = GetFocusManager();
-    if (focusManager) {
-        RefPtr<FocusHub> thisNode = AceType::Claim(this);
-        auto optionalList = focusManager->GetFocusScopePriorityList(focusScopeId);
-        if (!optionalList.has_value()) {
-            return nullptr;
+    if (!focusManager) {
+        return nullptr;
+    }
+    RefPtr<FocusHub> thisNode = AceType::Claim(this);
+    auto optionalList = focusManager->GetFocusScopePriorityList(focusScopeId);
+    if (!optionalList.has_value()) {
+        return nullptr;
+    }
+    auto focusScopePriorityList = optionalList.value();
+    for (const auto& childWeak : (*focusScopePriorityList)) {
+        auto child = childWeak.Upgrade();
+        if (!child) {
+            continue;
         }
-        auto focusScopePriorityList = optionalList.value();
-        for (const auto& childWeak : (*focusScopePriorityList)) {
-            auto child = childWeak.Upgrade();
-            if (!child) {
-                continue;
-            }
-            auto parent = child->GetParentFocusHub();
-            while (parent) {
-                if (parent == thisNode) {
-                    if (!child->IsFocusableWholePath()) {
-                        break;
-                    }
-                    return childWeak;
-                }
-                parent = parent->GetParentFocusHub();
-            }
+        if (child->IsFocusAbleChildOf(thisNode)) {
+            return childWeak;
         }
     }
     return nullptr;
@@ -2386,7 +2395,8 @@ bool FocusHub::RequestFocusByPriorityInScope()
     return false;
 }
 
-bool FocusHub::IsNestingFocusGroup() {
+bool FocusHub::IsNestingFocusGroup()
+{
     if (!GetIsFocusGroup()) {
         return false;
     }
