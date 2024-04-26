@@ -1926,11 +1926,7 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     // and triggered in AnimateTo closure.
     // Note: this default transition effect will be removed after all transitions finished, implemented in
     // OnTransitionInFinish. and OnTransitionOutFinish.
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (isBreakingPoint_ && !transitionEffect_ &&
-        (pipeline->GetSyncAnimationOption().IsValid() ||
-            ViewStackProcessor::GetInstance()->GetImplicitAnimationOption().IsValid())) {
+    if (isBreakingPoint_ && !transitionEffect_ && AnimationUtils::IsImplicitAnimationOpen()) {
         hasDefaultTransition_ = true;
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
         RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
