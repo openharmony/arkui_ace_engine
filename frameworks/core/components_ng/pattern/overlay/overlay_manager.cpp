@@ -1569,7 +1569,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
             RemoveMenuNotInSubWindow(WeakClaim(RawPtr(node)), rootNodeWeak_, WeakClaim(this));
         }
     }
-    EraseMenuInfo(targetId);
+    menuMap_.erase(it);
 }
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
