@@ -51,8 +51,8 @@ private:
     napi_value ProcessWillClickUnRegister(napi_env env, napi_callback_info info);
     napi_value ProcessDidClickRegister(napi_env env, napi_callback_info info);
     napi_value ProcessDidClickUnRegister(napi_env env, napi_callback_info info);
-    void AddToScrollEventType(napi_env env, napi_value scrollEventType);
-    void AddToRouterPageState(napi_env env, napi_value routerPageState);
+    napi_value AddToScrollEventType(napi_env env);
+    napi_value AddToRouterPageState(napi_env env);
     std::map<std::string, Func> registerProcessMap_;
     std::map<std::string, Func> unregisterProcessMap_;
 };
