@@ -4566,7 +4566,7 @@ void OverlayManager::CloseUIExtensionMenu(const std::function<void(const std::st
 
 void OverlayManager::CreateOverlayNode()
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "create overlay node enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "create overlay node enter lyt");
     if (overlayNode_) {
         return;
     }
