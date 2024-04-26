@@ -2542,6 +2542,31 @@ void ViewAbstract::SetPosition(FrameNode *frameNode, const OffsetT<Dimension> &v
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
+void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& value)
+{
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
+    ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+}
+
+void ViewAbstract::ResetPosition(FrameNode* frameNode)
+{
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
+    CHECK_NULL_VOID(frameNode);
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parentNode);
+    auto parentPattern = parentNode->GetPattern();
+
+    if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RecalculatePosition();
+    }
+}
+
 void ViewAbstract::SetTransformMatrix(FrameNode *frameNode, const Matrix4 &matrix)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
@@ -2803,6 +2828,12 @@ void ViewAbstract::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& val
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
+}
+
+void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
+{
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
+    ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
 }
 
 void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)

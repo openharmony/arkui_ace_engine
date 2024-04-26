@@ -847,6 +847,82 @@ void ResetPosition(ArkUINodeHandle node)
     ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
 }
 
+bool ParseEdges(OHOS::Ace::EdgesParam& edges, const ArkUIStringAndFloat* options)
+{
+    bool result = false;
+    std::optional<CalcDimension> top;
+    std::optional<CalcDimension> left;
+    std::optional<CalcDimension> bottom;
+    std::optional<CalcDimension> right;
+    SetCalcDimension(top, options, NUM_13, NUM_0);
+    SetCalcDimension(left, options, NUM_13, NUM_3);
+    SetCalcDimension(bottom, options, NUM_13, NUM_6);
+    SetCalcDimension(right, options, NUM_13, NUM_9);
+    if (top.has_value()) {
+        result = true;
+        edges.SetTop(top.value());
+    }
+    if (left.has_value()) {
+        result = true;
+        edges.SetLeft(left.value());
+    }
+    if (bottom.has_value()) {
+        result = true;
+        edges.SetBottom(bottom.value());
+    }
+    if (right.has_value()) {
+        result = true;
+        edges.SetRight(right.value());
+    }
+    return result;
+}
+
+void SetPositionEdges(ArkUINodeHandle node, const int32_t useEdges, const ArkUIStringAndFloat* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool vaild = false;
+
+    if (useEdges) {
+        OHOS::Ace::EdgesParam edges;
+        if (ParseEdges(edges, options)) {
+            ViewAbstract::SetPositionEdges(frameNode, edges);
+        } else {
+            ViewAbstract::ResetPosition(frameNode);
+        }
+    } else {
+        OffsetT<Dimension> offset;
+        std::optional<CalcDimension> x;
+        std::optional<CalcDimension> y;
+        SetCalcDimension(x, options, NUM_7, NUM_0);
+        SetCalcDimension(y, options, NUM_7, NUM_3);
+        if (x.has_value()) {
+            vaild = true;
+            offset.SetX(x.value());
+        }
+        if (y.has_value()) {
+            vaild = true;
+            offset.SetY(y.value());
+        }
+        if (vaild) {
+            ViewAbstract::SetPosition(frameNode, offset);
+        } else {
+            ViewAbstract::ResetPosition(frameNode);
+        }
+    }
+}
+
+void ResetPositionEdges(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        ViewAbstract::ResetPosition();
+    } else {
+        ViewAbstract::SetPosition(frameNode, { 0.0_vp, 0.0_vp });
+    }
+}
+
 /**
  * @param styles styles value
  * styles[0] : styleLeft, styles[1] : styleRight, styles[2] : styleTop, styles[3] : styleBottom
@@ -2086,6 +2162,31 @@ void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_In
     Dimension xVal(*(number + 0), static_cast<DimensionUnit>(*(unit + 0)));
     Dimension yVal(*(number + 1), static_cast<DimensionUnit>(*(unit + 1)));
     ViewAbstract::SetOffset(frameNode, { xVal, yVal });
+}
+
+void SetOffsetEdges(ArkUINodeHandle node, ArkUI_Bool useEdges, const ArkUIStringAndFloat* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (useEdges) {
+        OHOS::Ace::EdgesParam edges;
+        ParseEdges(edges, options);
+        ViewAbstract::SetOffsetEdges(frameNode, edges);
+    } else {
+        OffsetT<Dimension> offset;
+        std::optional<CalcDimension> x;
+        std::optional<CalcDimension> y;
+        SetCalcDimension(x, options, NUM_7, NUM_0);
+        SetCalcDimension(y, options, NUM_7, NUM_3);
+        if (x.has_value()) {
+            offset.SetX(x.value());
+        }
+        if (y.has_value()) {
+            offset.SetY(y.value());
+        }
+        ViewAbstract::SetOffset(frameNode, offset);
+    }
 }
 
 ArkUIOffsetType GetOffset(ArkUINodeHandle node)
@@ -4875,8 +4976,9 @@ const ArkUICommonModifier* GetCommonModifier()
 {
     static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
         SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
-        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetBorderStyle, ResetBorderStyle,
-        SetBackShadow, ResetBackShadow, SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
+        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
+        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow,
+        SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
         ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
         ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
         ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
@@ -4893,8 +4995,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
         ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
         ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor, SetVisibility,
-        ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
+        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
+        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
         SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
         ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
         SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
