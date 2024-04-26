@@ -73,7 +73,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
     }
     if (static_cast<uint32_t>(length) == colorArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (uint32_t i = 0; i < length; i++) {
-            colorArray.emplace_back(color[i]);
+            colorArray.emplace_back(colorArray[i]);
         }
     }
     GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColor(nativeNode, colorArray.data(), colorArray.size());
