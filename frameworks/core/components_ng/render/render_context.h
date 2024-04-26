@@ -624,6 +624,8 @@ public:
         return false;
     }
 
+    virtual void SetSurfaceRotation(bool isLock) {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

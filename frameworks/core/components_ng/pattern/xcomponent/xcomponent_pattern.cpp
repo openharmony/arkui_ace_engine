@@ -1539,4 +1539,15 @@ float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool f
     }
     return value;
 }
+
+void XComponentPattern::SetSurfaceRotation(bool isLock)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    isSurfaceLock_ = isLock;
+
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
+}
 } // namespace OHOS::Ace::NG

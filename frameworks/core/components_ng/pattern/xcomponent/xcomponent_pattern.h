@@ -209,6 +209,13 @@ public:
         return renderContextForSurface_;
     }
 
+    void SetSurfaceRotation(bool isLock);
+
+    bool GetSurfaceRotation()
+    {
+        return isSurfaceLock_;
+    }
+
     void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
 
     void RestoreHandlingRenderContextForSurface();
@@ -373,6 +380,8 @@ private:
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
     std::string surfaceId_;
+
+    bool isSurfaceLock_ = false;
 
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
