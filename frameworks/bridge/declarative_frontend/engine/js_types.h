@@ -51,6 +51,8 @@ inline const panda::ecmascript::EcmaVM* GetEcmaVm()
 
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info);
+Local<JSValueRef> JsClickPreventDefault(panda::JsiRuntimeCallInfo *info);
+Local<JSValueRef> JsTouchPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info);
 
 #endif

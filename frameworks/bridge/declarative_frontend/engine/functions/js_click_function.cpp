@@ -80,7 +80,7 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
-    obj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
+    obj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsClickPreventDefault));
     if (info.GetTiltX().has_value()) {
         obj->SetProperty<double>("tiltX", info.GetTiltX().value());
     }
