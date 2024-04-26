@@ -833,6 +833,8 @@ public:
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void ScaleGestureChange(double scale, double centerX, double centerY);
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
+    // Backward
+    void Backward();
     
 private:
     void InitWebEvent();
@@ -882,8 +884,7 @@ private:
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
 
-    // Backward and forward
-    void Backward();
+    // forward
     void Forward();
     void ClearHistory();
     void ClearSslCache();
