@@ -712,6 +712,7 @@ public:
     {
         return isFreezeFlushMessage_;
     }
+    bool IsContainerModalVisible() override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -933,6 +934,7 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
+    bool customTitleSettedShow_ = true;
 };
 } // namespace OHOS::Ace::NG
 

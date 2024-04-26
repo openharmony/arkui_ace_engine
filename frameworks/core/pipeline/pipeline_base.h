@@ -1142,6 +1142,11 @@ public:
 
     virtual void ChangeSensitiveNodes(bool flag) {}
 
+    virtual bool IsContainerModalVisible()
+    {
+        return false;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
