@@ -1482,6 +1482,8 @@ private:
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
     bool isDetachFromMainTree_ = false;
+
+    bool isFocusBGColorSet_ = false;
     bool isFocusTextColorSet_ = false;
 };
 } // namespace OHOS::Ace::NG
