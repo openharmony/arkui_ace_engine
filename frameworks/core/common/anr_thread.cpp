@@ -36,7 +36,7 @@ void AnrThread::Stop()
     g_anrThread.Reset();
 }
 
-bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string name)
+bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string& name)
 {
     if (!g_anrThread || !task) {
         return false;
