@@ -38,7 +38,10 @@ bool JSScrollable::ParseAlwaysEnable(const JSRef<JSVal>& jsValue, bool defaultVa
 {
     auto alwaysEnabled = defaultValue;
     if (!(jsValue->IsNull() || jsValue->IsUndefined())) {
-        auto paramObject = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSObject> paramObject = JSRef<JSObject>::New();
+        if (jsValue->IsObject()) {
+            paramObject = JSRef<JSObject>::Cast(jsValue);
+        }
         JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
         alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : defaultValue;
     }

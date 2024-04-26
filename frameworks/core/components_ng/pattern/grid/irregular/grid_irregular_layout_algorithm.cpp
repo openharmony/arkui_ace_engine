@@ -117,7 +117,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
     }
 
     int32_t lastCrossCount = info.crossCount_;
-    info.crossCount_ = crossLens_.size();
+    info.crossCount_ = static_cast<int32_t>(crossLens_.size());
     CheckForReset(lastCrossCount);
 }
 

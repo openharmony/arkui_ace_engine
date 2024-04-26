@@ -1107,7 +1107,8 @@ void RenderList::UpdateStickyListItem(const RefPtr<RenderListItem>& newStickyIte
     }
 
     if (nextStickyItem && nextStickyItem == currentStickyItem_) {
-        ApplyPreviousStickyListItem(currentStickyIndex_ - 1, true);
+        size_t index = currentStickyIndex_ != 0 ? currentStickyIndex_ - 1 : INVALID_CHILD_INDEX;
+        ApplyPreviousStickyListItem(index, true);
         return;
     }
 
@@ -1362,7 +1363,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
     }
 
     double curMainPos = currentOffset_;
-    size_t curIndex = startIndex_ - 1;
+    size_t curIndex = startIndex_ != 0 ? startIndex_ - 1 : INVALID_CHILD_INDEX;
     std::vector<RefPtr<RenderListItem>> itemsInOneRow;
     for (auto it = items_.begin(); it != items_.end();) {
         int32_t lackItemCount = 0;

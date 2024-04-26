@@ -354,12 +354,20 @@ void JSGauge::SetDescription(const JSCallbackInfo& info)
         return;
     }
 
-    auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (info[0]->IsObject()) {
+        obj = JSRef<JSObject>::Cast(info[0]);
+    }
+    auto builderObject = obj->GetProperty("builder");
     if (builderObject->IsFunction()) {
         GaugeModel::GetInstance()->SetIsShowLimitValue(false);
         GaugeModel::GetInstance()->SetIsShowDescription(true);
         ViewStackModel::GetInstance()->NewScope();
-        JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+        JSRef<JSObject> builderObj = JSRef<JSObject>::New();
+        if (builderObject->IsObject()) {
+            builderObj = JSRef<JSObject>::Cast(builderObject);
+        }
+        JsFunction jsBuilderFunc(info.This(), builderObj);
         ACE_SCORING_EVENT("Gauge.description.builder");
         jsBuilderFunc.Execute();
         auto customNode = ViewStackModel::GetInstance()->Finish();

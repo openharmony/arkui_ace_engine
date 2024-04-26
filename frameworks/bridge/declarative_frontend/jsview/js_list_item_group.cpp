@@ -131,7 +131,10 @@ void JSListItemGroup::SetChildrenMainSize(const JSCallbackInfo& args)
         auto length = changeArray->Length();
         for (size_t i = 0; i < length; ++i) {
             auto change = changeArray->GetValueAt(i);
-            auto changeObject = JSRef<JSObject>::Cast(change);
+            JSRef<JSObject> changeObject = JSRef<JSObject>::New();
+            if (change->IsObject()) {
+                changeObject = JSRef<JSObject>::Cast(change);
+            }
             int32_t start = 0;
             int32_t deleteCount = 0;
             std::vector<float> newChildrenSize;

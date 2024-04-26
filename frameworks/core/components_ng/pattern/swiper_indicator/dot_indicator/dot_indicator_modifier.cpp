@@ -147,15 +147,16 @@ std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentPrope
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
     // 2.0 means get the long point radius
     float radius = (rightCenterX - leftCenterX) / 2.0f;
-    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isLeftTouchBottom = (currentIndex_ == static_cast<int32_t>(totalCount) - 1);
     bool isRightTouchBottom = (currentIndex_ == 0);
 
     if ((animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isLeftTouchBottom) ||
         (animationState_ == TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT && isRightTouchBottom)) {
         leftCenterX = contentProperty.vectorBlackPointCenterX[0] - radius;
         rightCenterX = contentProperty.vectorBlackPointCenterX[0] + radius;
-    } else if ((animationState_ == TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT && isLeftTouchBottom) ||
-        (animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isRightTouchBottom)) {
+    } else if (totalCount > 0 &&
+        ((animationState_ == TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT && isLeftTouchBottom) ||
+        (animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isRightTouchBottom))) {
         leftCenterX = contentProperty.vectorBlackPointCenterX[totalCount - 1] - radius;
         rightCenterX = contentProperty.vectorBlackPointCenterX[totalCount - 1] + radius;
     }
@@ -192,7 +193,7 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     PaintSelectedIndicator(canvas, leftCenter, rightCenter,
         contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
 
-    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isLeftTouchBottom = (currentIndex_ == static_cast<int32_t>(totalCount) - 1);
     bool isRightTouchBottom = (currentIndex_ == 0);
     bool isTouchBottom = (isLeftTouchBottom || isRightTouchBottom);
     if (!isTouchBottom || totalCount == 0 || !isTouchBottomLoop_) {

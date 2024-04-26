@@ -633,7 +633,10 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
-    auto obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (info[0]->IsObject()) {
+        obj = JSRef<JSObject>::Cast(info[0]);
+    }
     if (info[0]->IsObject()) {
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
 

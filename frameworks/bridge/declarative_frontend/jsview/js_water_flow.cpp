@@ -63,9 +63,15 @@ void ParseChanges(
     auto length = changeArray->Length();
     for (size_t i = 0; i < length; ++i) {
         auto change = changeArray->GetValueAt(i);
-        auto changeObject = JSRef<JSObject>::Cast(change);
+        JSRef<JSObject> changeObject = JSRef<JSObject>::New();
+        if (change->IsObject()) {
+            changeObject = JSRef<JSObject>::Cast(change);
+        }
         auto sectionValue = changeObject->GetProperty("sections");
-        auto sectionArray = JSRef<JSArray>::Cast(sectionValue);
+        JSRef<JSArray> sectionArray = JSRef<JSArray>::New();
+        if (sectionValue->IsObject()) {
+            sectionArray = JSRef<JSArray>::Cast(sectionValue);
+        }
         auto sectionsCount = sectionArray->Length();
         std::vector<NG::WaterFlowSections::Section> newSections;
         for (size_t j = 0; j < sectionsCount; ++j) {
@@ -109,7 +115,7 @@ void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sec
     auto lengthFunc = sectionsObject->GetProperty("length");
     CHECK_NULL_VOID(lengthFunc->IsFunction());
     auto sectionLength = (JSRef<JSFunc>::Cast(lengthFunc))->Call(sectionsObject);
-    if (waterFlowSections->GetSectionInfo().size() != sectionLength->ToNumber<int32_t>()) {
+    if (static_cast<int32_t>(waterFlowSections->GetSectionInfo().size()) != sectionLength->ToNumber<int32_t>()) {
         auto allSections = sectionsObject->GetProperty("sectionArray");
         CHECK_NULL_VOID(allSections->IsArray());
         ParseSections(args, JSRef<JSArray>::Cast(allSections), waterFlowSections);

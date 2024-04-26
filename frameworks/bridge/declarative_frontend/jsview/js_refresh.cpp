@@ -157,7 +157,10 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
     } else {
-        JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
+        JSRef<JSObject> refreshingObj = JSRef<JSObject>::New();
+        if (refreshing->IsObject()) {
+            refreshingObj = JSRef<JSObject>::Cast(refreshing);
+        }
         ParseRefreshingObject(info, refreshingObj);
         RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
     }
@@ -189,7 +192,11 @@ bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
     if (builder->IsFunction()) {
         {
             NG::ScopedViewStackProcessor builderViewStackProcessor;
-            JsFunction Jsfunc(info.This(), JSRef<JSObject>::Cast(builder));
+            JSRef<JSObject> builderObj = JSRef<JSObject>::New();
+            if (builder->IsObject()) {
+                builderObj = JSRef<JSObject>::Cast(builder);
+            }
+            JsFunction Jsfunc(info.This(), builderObj);
             Jsfunc.Execute();
             customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
