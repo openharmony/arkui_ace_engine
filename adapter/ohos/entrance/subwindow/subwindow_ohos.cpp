@@ -621,7 +621,6 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
         overlay->CleanMenuInSubWindow(targetId);
         overlay->RemoveFilter();
     }
-    overlay->EraseMenuInfo(targetId);
     HideWindow();
     context->FlushPipelineImmediately();
     if (inWindow) {
