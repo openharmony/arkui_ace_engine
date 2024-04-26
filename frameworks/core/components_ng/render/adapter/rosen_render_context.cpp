@@ -736,11 +736,18 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
         return;
     }
     if (!bgLoadingCtx_ || src != bgLoadingCtx_->GetSourceInfo()) {
-        LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
-        bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
-        CHECK_NULL_VOID(bgLoadingCtx_);
-        bgLoadingCtx_->LoadImageData();
+        auto frameNode = GetHost();
+        auto callback = [src, weak = WeakClaim(this)] {
+            auto renderContext = weak.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->OnBackgroundImageUpdate(src);
+        };
+        frameNode->SetColorModeUpdateCallback(std::move(callback));
     }
+    LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
+    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
+    CHECK_NULL_VOID(bgLoadingCtx_);
+    bgLoadingCtx_->LoadImageData();
 }
 
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& /*imageRepeat*/)
