@@ -287,6 +287,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaChange,
     NodeModifier::SetOnTextAreaPaste,
     NodeModifier::SetOnTextAreaSelectionChange,
+    NodeModifier::SetTextInputOnSubmit,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {

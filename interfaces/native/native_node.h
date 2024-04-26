@@ -4160,6 +4160,17 @@ typedef enum {
     NODE_TEXT_AREA_ON_EDIT_CHANGE,
 
     /**
+     * @brief textArea按下输入法回车键触发该事件。
+     *
+     * 触发该事件的条件：按下输入法回车键。keyType为ARKUI_ENTER_KEY_TYPE_NEW_LINE时不触发\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：输入法回车键类型。
+     *
+     */
+    NODE_TEXT_AREA_ON_SUBMIT,
+
+    /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
