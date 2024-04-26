@@ -2227,9 +2227,9 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
         }
     } else {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            value = static_cast<float>(StringUtils::StringToUint(info[0]->ToString()));
+            value = static_cast<float>(StringUtils::StringToUintCheck(info[0]->ToString()));
         } else {
-            value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+            value = static_cast<int32_t>(StringUtils::StringToUintCheck(info[0]->ToString()));
         }
     }
 
