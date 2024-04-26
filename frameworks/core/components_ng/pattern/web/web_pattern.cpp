@@ -513,6 +513,12 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         ResetDragAction();
     }
 
+    if (info.GetAction() == MouseAction::HOVER_EXIT) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "Set cursor to pointer when mouse pointer is hover exit.");
+        OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
+    }
+
     auto localLocation = info.GetLocalLocation();
     if (!HandleDoubleClickEvent(info)) {
         delegate_->OnMouseEvent(
@@ -2056,6 +2062,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
+            DelTouchOverlayInfoByTouchId(touchPoint.id);
         }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
@@ -2216,18 +2223,32 @@ RectF WebPattern::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     return paintRect;
 }
 
+void WebPattern::DelTouchOverlayInfoByTouchId(int32_t touchId)
+{
+    std::list<TouchInfo>::iterator iter;
+    for (iter = touchOverlayInfo_.begin(); iter != touchOverlayInfo_.end();) {
+        if (iter->id == touchId) {
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "SelectOverlay del touch overlay info by id:%{public}d", iter->id);
+            iter = touchOverlayInfo_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
 void WebPattern::CloseSelectOverlay()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (selectOverlayProxy_) {
-        if (IsSelectOverlayDragging()) {
-            for (auto& touchOverlayInfo : touchOverlayInfo_) {
-                TAG_LOGI(AceLogTag::ACE_WEB,
-                    "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
-                delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
-            }
+        TAG_LOGI(AceLogTag::ACE_WEB, "Close Select Overlay Now");
+        for (auto& touchOverlayInfo : touchOverlayInfo_) {
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
+            delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
         }
+        SetSelectOverlayDragging(false);
         touchOverlayInfo_.clear();
         selectOverlayProxy_->Close();
         pipeline->GetSelectOverlayManager()->DestroySelectOverlay(selectOverlayProxy_);
@@ -2442,24 +2463,31 @@ RectF WebPattern::ComputeClippedSelectionBounds(
         return RectF();
     }
     auto offset = GetCoordinatePoint().value_or(OffsetF());
-    int32_t startY = static_cast<int32_t>(startHandle->GetY() / pipeline->GetDipScale());
-    int32_t endY = static_cast<int32_t>(endHandle->GetY() / pipeline->GetDipScale());
+    int32_t startY = static_cast<int32_t>(
+        (startHandle->GetY() - startHandle->GetViewPortY()) / pipeline->GetDipScale());
+    int32_t endY = static_cast<int32_t>(
+        (endHandle->GetY() - endHandle->GetViewPortY()) / pipeline->GetDipScale());
     int32_t startEdgeHeight = static_cast<int32_t>(startHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
     int32_t endEdgeHeight = static_cast<int32_t>(endHandle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
     float selectX = 0;
     float selectY = 0;
     float selectWidth = params->GetSelectWidth();
     float selectHeight = static_cast<float>((startHandle->GetEdgeHeight() + endHandle->GetEdgeHeight()) / 2);
+    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
+    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
     if (endY < endEdgeHeight) {
         selectY -= selectHeight;
     } else if (startY >= startEdgeHeight &&
         LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), startHandle->GetY())) {
         selectY += GetHostFrameSize().value_or(SizeF()).Height();
-    } else {
+    } else if (startY < startEdgeHeight &&
+        GreatNotEqual(endHandle->GetY(), GetHostFrameSize().value_or(SizeF()).Height())) {
         selectY -= selectHeight;
+    } else {
+        return RectF(static_cast<float>(viewPortX + offset.GetX() + params->GetSelectX()),
+            static_cast<float>(viewPortY + offset.GetY() + params->GetSelectY()),
+            params->GetSelectWidth(), params->GetSelectXHeight());
     }
-    float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX()) / 2);
-    float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY()) / 2);
     if (viewPortX) {
         selectX += viewPortX;
     }
