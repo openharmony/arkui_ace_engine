@@ -213,6 +213,7 @@ void NavigationPattern::OnLanguageConfigurationUpdate()
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isRightToLeft_ = isRightToLeft;
     }
 }
 
