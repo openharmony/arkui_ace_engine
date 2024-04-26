@@ -66,6 +66,7 @@ constexpr int NUM_100 = 100;
 constexpr int NUM_400 = 400;
 const int ALLOW_SIZE_1(1);
 const int ALLOW_SIZE_2(2);
+const int ALLOW_SIZE_3(3);
 const int ALLOW_SIZE_4(4);
 const int ALLOW_SIZE_5(5);
 const int ALLOW_SIZE_7(7);
@@ -3993,6 +3994,54 @@ void ResetScrollEnablePaging(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollEnablePaging(node->uiNodeHandle);
+}
+
+void SetScrollToIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 values[ALLOW_SIZE_3] = { 0, DEFAULT_FALSE, ScrollAlign::NONE };
+    values[0] = item->value[0].i32;
+    if (item->size > 1 && InRegion(NUM_0, NUM_1, item->value[1].i32)) {
+        values[1] = item->value[1].i32;
+    }
+    if (item->size > 2 && InRegion(NUM_0, NUM_3, item->value[2].i32)) {
+        values[2] = item->value[2].i32;
+    }
+    switch (node->type) {
+        case ARKUI_NODE_LIST:
+            values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::START : values[2];
+            break;
+        case ARKUI_NODE_GRID:
+            values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::AUTO : values[2];
+            break;
+        case ARKUI_NODE_WATER_FLOW:
+            values[2] = (values[2] == ScrollAlign::NONE) ? ScrollAlign::START : values[2];
+            break;
+        default:
+            break;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollIndexTo(node->uiNodeHandle, );
+    return ERROR_CODE_NO_ERROR;
+}
+
+void SetScrollPage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_1, item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 values[ALLOW_SIZE_2] = { 0, DEFAULT_FALSE };
+    values[0] = item->value[0].i32;
+    if (item->size > 1 && InRegion(NUM_0, NUM_1, item->value[1].i32)) {
+        values[1] = item->value[1].i32;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollPage(node->uiNodeHandle, values[0], values[1]);
+    return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetListDirection(ArkUI_NodeHandle node)
@@ -9849,7 +9898,8 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
 {
     static Setter* setters[] = { SetScrollScrollBar, SetScrollScrollBarWidth, SetScrollScrollBarColor,
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
-        SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging };
+        SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging,
+        SetScrollToIndex, SetScrollPage, SetScrollBy };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;

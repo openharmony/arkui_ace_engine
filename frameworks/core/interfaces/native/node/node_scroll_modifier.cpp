@@ -428,6 +428,30 @@ ArkUI_Int32 GetScrollEdge(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(type);
 }
 
+void SetScrollIndexTo(ArkUINodeHandle node, ArkUI_Int32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->SupportScrollToIndex);
+    pattern->ScrollToIndex(values[0], values[1], values[2]);
+}
+
+void SetScrollPage(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollPage(next, animation);
+}
+
+void SetScrollBy(ArkUINodeHandle node)
+{
+
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -474,6 +498,9 @@ const ArkUIScrollModifier* GetScrollModifier()
         GetScrollNestedScroll,
         GetScrollOffset,
         GetScrollEdge,
+        SetScrollIndexTo,
+        SetScrollPage,
+        SetScrollBy,
     };
     /* clang-format on */
     return &modifier;

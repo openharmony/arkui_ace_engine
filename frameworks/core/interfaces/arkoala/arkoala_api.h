@@ -1880,6 +1880,9 @@ struct ArkUIScrollModifier {
     void (*getScrollNestedScroll)(ArkUINodeHandle node, ArkUI_Int32* values);
     void (*getScrollOffset)(ArkUINodeHandle node, ArkUI_Float32* values);
     ArkUI_Int32 (*getScrollEdge)(ArkUINodeHandle node);
+    void (*setScrollIndexTo)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32* values);
+    void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Int32* values);
 };
 
 struct ArkUIListItemModifier {

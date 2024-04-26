@@ -3323,6 +3323,10 @@ typedef enum {
      */
     NODE_SCROLL_ENABLE_PAGING,
 
+    NODE_SCROLL_TO_INDEX,
+    NODE_SCROLL_PAGE,
+    NODE_SCROLL_BY,
+
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.

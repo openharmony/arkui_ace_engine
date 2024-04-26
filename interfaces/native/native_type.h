@@ -763,6 +763,23 @@ typedef enum {
     ARKUI_SCROLL_EDGE_END,
 } ArkUI_ScrollEdge;
 
+
+/**
+ * @brief item对齐方式
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 首部对齐。指定item首部与List首部对齐。*/
+    ARKUI_SCROLL_ALIGN_START = 0,
+    /** 居中对齐。指定item主轴方向居中对齐于List。*/
+    ARKUI_SCROLL_ALIGN_CENTER,
+    /** 尾部对齐。指定item尾部与List尾部对齐。*/
+    ARKUI_SCROLL_ALIGN_END,
+    /** 自动对齐。若指定item完全处于显示区，不做调整。否则依照滑动距离最短的原则，将指定item首部对齐或尾部对齐于List,使指定item完全处于显示区。*/
+    ARKUI_SCROLL_ALIGN_AUTO,
+} ArkUI_ScrollAlign;
+
 /**
  * @brief Enumerates the types of the slider in the block direction.
  *
