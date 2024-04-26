@@ -1237,6 +1237,7 @@ private:
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
+    void ProcessRectPadding();
     void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
