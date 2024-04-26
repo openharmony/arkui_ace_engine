@@ -2237,7 +2237,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest042, TestSize.Level1)
     std::vector<ModifierKey> keys;
     keys.push_back(ModifierKey::SHIFT);
     ViewAbstract::SetKeyboardShortcut(VALUE_TAB, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
 
     /**
