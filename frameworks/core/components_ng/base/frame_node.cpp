@@ -3899,6 +3899,9 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
         visibleRect = ApplyFrameNodeTranformToRect(visibleRect, parentUi);
         auto parentRect = parentUi->GetPaintRectWithTransform();
         visibleRect = visibleRect.Constrain(parentRect);
+        if (visibleRect.IsEmpty()) {
+            return;
+        }
         frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }
