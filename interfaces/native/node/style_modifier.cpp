@@ -4096,7 +4096,7 @@ const ArkUI_AttributeItem* GetListNodeAdapter(ArkUI_NodeHandle node)
 {
     ArkUINodeAdapterHandle adapter =
         GetFullImpl()->getNodeModifiers()->getListModifier()->getNodeAdapter(node->uiNodeHandle);
-    g_attributeItem.object = &adapter;
+    g_attributeItem.object = reinterpret_cast<void*>(adapter);
     return &g_attributeItem;
 }
 
@@ -5328,7 +5328,7 @@ const ArkUI_AttributeItem* GetSwiperNodeAdapter(ArkUI_NodeHandle node)
 {
     ArkUINodeAdapterHandle adapter =
         GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getNodeAdapter(node->uiNodeHandle);
-    g_attributeItem.object = &adapter;
+    g_attributeItem.object = reinterpret_cast<void*>(adapter);
     return &g_attributeItem;
 }
 
@@ -8870,7 +8870,7 @@ const ArkUI_AttributeItem* GetWaterFlowNodeAdapter(ArkUI_NodeHandle node)
 {
     ArkUINodeAdapterHandle adapter =
         GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getNodeAdapter(node->uiNodeHandle);
-    g_attributeItem.object = &adapter;
+    g_attributeItem.object = reinterpret_cast<void*>(adapter);
     return &g_attributeItem;
 }
 
