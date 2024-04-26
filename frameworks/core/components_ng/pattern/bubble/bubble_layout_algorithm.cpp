@@ -451,7 +451,30 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childOffsetForPaint_ = childOffset_;
     arrowPositionForPaint_ = arrowPosition_;
     UpdateClipOffset(frameNode);
+    auto isBlock = bubbleProp->GetBlockEventValue(true);
+    SetHotAreas(showInSubWindow, isBlock, frameNode->GetId(), bubblePattern->GetContainerId());
 }
+
+void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock, int32_t nodeId, int32_t containerId)
+{
+    if (showInSubWindow) {
+        std::vector<Rect> rects;
+        if (!isBlock) {
+            auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(),
+                childSize_.Width(), childSize_.Height());
+            rects.emplace_back(rect);
+        } else {
+            auto parentWindowRect = SubwindowManager::GetInstance()->GetParentWindowRect();
+            auto rect = Rect(childOffset_.GetX(), childOffset_.GetY(),
+                childSize_.Width(), childSize_.Height());
+            rects.emplace_back(parentWindowRect);
+            rects.emplace_back(rect);
+        }
+        auto subWindowMgr = SubwindowManager::GetInstance();
+        subWindowMgr->SetHotAreas(rects, nodeId, containerId);
+    }
+}
+
 bool BubbleLayoutAlgorithm::GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize)
 {
     auto enableArrow = bubbleProp->GetEnableArrow().value_or(true);
