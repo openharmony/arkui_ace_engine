@@ -734,7 +734,7 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             }
         }
     }
-    if (index > values.size() - 1) {
+    if (index + 1 > values.size()) {
         if (resultStr.size() > 0) {
             values.emplace_back(resultStr.front());
         } else {
@@ -751,7 +751,23 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
         }
     }
 
-    if (index > selectedValues.size() - 1) {
+    SetSelectedValues(selectedValues, values, index, isHasSelectAttr, resultStr);
+
+    if (!jsRangeValue->GetValueAt(selectedValues[index])->IsObject()) {
+        return false;
+    }
+    auto jsObj = JSRef<JSObject>::Cast(jsRangeValue->GetValueAt(selectedValues[index]));
+    auto getChildren = jsObj->GetProperty("children");
+    if (getChildren->IsArray()) {
+        ParseInternalArray(getChildren, selectedValues, values, index + 1, isHasSelectAttr);
+    }
+    return true;
+}
+
+void JSTextPickerParser::SetSelectedValues(std::vector<uint32_t>& selectedValues, std::vector<std::string>& values,
+    uint32_t index, bool isHasSelectAttr, std::vector<std::string>& resultStr)
+{
+    if (index + 1 > selectedValues.size()) {
         selectedValues.emplace_back(0);
     } else {
         if (selectedValues[index] >= resultStr.size()) {
@@ -765,12 +781,6 @@ bool JSTextPickerParser::ParseInternalArray(const JSRef<JSArray>& jsRangeValue, 
             selectedValues[index] = std::distance(resultStr.begin(), valueIterator);
         }
     }
-    auto jsObj = JSRef<JSObject>::Cast(jsRangeValue->GetValueAt(selectedValues[index]));
-    auto getChildren = jsObj->GetProperty("children");
-    if (getChildren->IsArray()) {
-        ParseInternalArray(getChildren, selectedValues, values, index + 1, isHasSelectAttr);
-    }
-    return true;
 }
 
 bool JSTextPickerParser::ParseCascadeTextArray(const JSRef<JSObject>& paramObject,

@@ -51,7 +51,6 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    float pickerHeight = 0.0f;
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
     auto blendNode = DynamicCast<FrameNode>(columnNode->GetParent());
@@ -62,47 +61,11 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pickerNode);
     auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    isDefaultPickerItemHeight_ = layoutProperty->HasDefaultPickerItemHeight();
-    if (isDefaultPickerItemHeight_) {
-        auto defaultPickerItemHeightValue = layoutProperty->GetDefaultPickerItemHeightValue();
-        if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0)) {
-            isDefaultPickerItemHeight_ = false;
-        }
-    }
-
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
-    }
-
-    if (isDefaultPickerItemHeight_) {
-        pickerHeight = static_cast<float>(defaultPickerItemHeight_ * showCount_);
-    } else {
-        pickerHeight = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
-                                          pickerTheme->GetDividerSpacing().ConvertToPx());
-    }
-
-    auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
-    float pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
-
     auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
-    if (textPickerPattern->GetIsShowInDialog() && isDefaultPickerItemHeight_) {
-        float dialogButtonHeight =
-            static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight() +
-                                dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2)
-                                .ConvertToPx());
-        pickerHeight = std::min(pickerHeight, layoutConstraint->maxSize.Height() - dialogButtonHeight);
-        if (!NearZero(showCount_)) {
-            defaultPickerItemHeight_ = pickerHeight / showCount_;
-        }
-        textPickerPattern->SetResizePickerItemHeight(defaultPickerItemHeight_);
-        textPickerPattern->SetResizeFlag(true);
-    }
 
-    frameSize.SetWidth(pickerWidth);
-    frameSize.SetHeight(pickerHeight);
+    GetColumnSize(layoutProperty, pickerTheme, dialogTheme, frameSize, pickerNode);
+
     textPickerPattern->CheckAndUpdateColumnSize(frameSize);
     pickerItemHeight_ = frameSize.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
@@ -111,6 +74,13 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutChildConstraint);
     }
     MeasureText(layoutWrapper, frameSize);
+    float gradientPercent = GetGradientPercent(layoutProperty, textPickerPattern, frameSize, pickerTheme);
+    InitGradient(gradientPercent, blendNode, columnNode);
+}
+
+float TextPickerLayoutAlgorithm::GetGradientPercent(const RefPtr<TextPickerLayoutProperty>& layoutProperty,
+    const RefPtr<TextPickerPattern>& textPickerPattern, SizeF& frameSize, const RefPtr<PickerTheme>& pickerTheme)
+{
     float gradientPercent = 0.0f;
     bool isGradientHeight = layoutProperty->HasGradientHeight();
     if (LessNotEqual(textPickerPattern->GetGradientHeight().ConvertToPx(), 0.0)) {
@@ -133,7 +103,56 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
     }
-    InitGradient(gradientPercent, blendNode, columnNode);
+    return gradientPercent;
+}
+
+void TextPickerLayoutAlgorithm::GetColumnSize(const RefPtr<TextPickerLayoutProperty>& layoutProperty,
+    const RefPtr<PickerTheme>& pickerTheme, const RefPtr<DialogTheme>& dialogTheme, SizeF& frameSize,
+    const RefPtr<FrameNode>& pickerNode)
+{
+    float pickerHeight = 0.0f;
+    isDefaultPickerItemHeight_ = layoutProperty->HasDefaultPickerItemHeight();
+    if (isDefaultPickerItemHeight_) {
+        auto defaultPickerItemHeightValue = layoutProperty->GetDefaultPickerItemHeightValue();
+        if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0)) {
+            isDefaultPickerItemHeight_ = false;
+        }
+    }
+
+    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
+    }
+
+    if (isDefaultPickerItemHeight_) {
+        pickerHeight = static_cast<float>(defaultPickerItemHeight_ * showCount_);
+    } else {
+        pickerHeight =
+            static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (static_cast<int32_t>(showCount_) - 1) +
+                               pickerTheme->GetDividerSpacing().ConvertToPx());
+    }
+
+    auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
+    float pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
+
+    auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    if (textPickerPattern->GetIsShowInDialog() && isDefaultPickerItemHeight_) {
+        float dialogButtonHeight =
+            static_cast<float>((pickerTheme->GetButtonHeight() + dialogTheme->GetDividerHeight() +
+                                dialogTheme->GetDividerPadding().Bottom() + pickerTheme->GetContentMarginVertical() * 2)
+                                .ConvertToPx());
+        pickerHeight = std::min(pickerHeight, layoutConstraint->maxSize.Height() - dialogButtonHeight);
+        if (!NearZero(showCount_)) {
+            defaultPickerItemHeight_ = pickerHeight / showCount_;
+        }
+        textPickerPattern->SetResizePickerItemHeight(defaultPickerItemHeight_);
+        textPickerPattern->SetResizeFlag(true);
+    }
+
+    frameSize.SetWidth(pickerWidth);
+    frameSize.SetHeight(pickerHeight);
 }
 
 void TextPickerLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
