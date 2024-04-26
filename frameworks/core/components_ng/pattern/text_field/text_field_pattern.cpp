@@ -1214,7 +1214,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
         }
         return;
     }
-    ProcessOverlay({ .animation = true });
+    selectOverlay_->ProcessSelectAllOverlay({ .animation = true });
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
