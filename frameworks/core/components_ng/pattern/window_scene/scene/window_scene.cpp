@@ -152,9 +152,6 @@ void WindowScene::OnMountToParentDone()
     if (snapshotNode_) {
         snapshotNode_->MovePosition(-1);
     }
-    if (startingNode_) {
-        startingNode_->MovePosition(-1);
-    }
 }
 
 void WindowScene::RegisterFocusCallback()
