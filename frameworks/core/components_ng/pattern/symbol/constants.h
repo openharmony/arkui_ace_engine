@@ -22,28 +22,28 @@ namespace OHOS::Ace {
 
 enum class SymbolEffectType {
     NONE = 0,
-    SCALE = 1,
-    HIERARCHICAL = 2,
-    APPEAR = 3,
-    DISAPPEAR = 4,
-    BOUNCE = 5,
-    REPLACE = 6,
-    PULSE = 7,
+    SCALE,
+    HIERARCHICAL,
+    APPEAR,
+    DISAPPEAR,
+    BOUNCE,
+    REPLACE,
+    PULSE,
 };
 
 enum class CommonSubType {
     DOWN = 0,
-    UP = 1,
+    UP,
 };
 
 enum class ScopeType {
     LAYER = 0,
-    WHOLE = 1,
+    WHOLE,
 };
 
 enum class FillStyle {
     CUMULATIVE = 0,
-    ITERATIVE = 1,
+    ITERATIVE,
 };
 
 } // namespace OHOS::Ace

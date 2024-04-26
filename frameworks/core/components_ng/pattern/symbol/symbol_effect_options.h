@@ -126,22 +126,22 @@ public:
         isTxtActiveSource_ = isTxtActiveSource;
     }
 
-    SymbolEffectType GetEffectType() const
+    const SymbolEffectType& GetEffectType() const
     {
         return effectType_;
     }
 
-    std::optional<ScopeType> GetScopeType() const
+    const std::optional<ScopeType>& GetScopeType() const
     {
         return scopeType_;
     }
 
-    std::optional<CommonSubType> GetCommonSubType() const
+    const std::optional<CommonSubType>& GetCommonSubType() const
     {
         return commonSubType_;
     }
 
-    std::optional<FillStyle> GetFillStyle() const
+    const std::optional<FillStyle>& GetFillStyle() const
     {
         return fillStyle_;
     }
@@ -151,7 +151,7 @@ public:
         return repeatCount_;
     }
 
-    std::optional<bool> GetIsActive() const
+    const std::optional<bool>& GetIsActive() const
     {
         return isActive_;
     }
@@ -161,12 +161,12 @@ public:
         return isTxtActive_;
     }
 
-    std::optional<bool> IsTriggerChanged() const
+    const std::optional<bool>& IsTriggerChanged() const
     {
         return isTriggerNumChanged_;
     }
 
-    std::optional<int32_t> GetTriggerNum() const
+    const std::optional<int32_t>& GetTriggerNum() const
     {
         return triggerNum_;
     }

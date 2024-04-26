@@ -115,6 +115,8 @@ private:
     virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
+    bool UpdateSymbolTextStyle(const TextStyle& textStyle, RefPtr<Paragraph>& paragraph, LayoutWrapper* layoutWrapper,
+        RefPtr<FrameNode>& frameNode);
     void UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,

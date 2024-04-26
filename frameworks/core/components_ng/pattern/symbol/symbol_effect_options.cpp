@@ -24,31 +24,10 @@ SymbolEffectOptions::SymbolEffectOptions(SymbolEffectType effectType)
 
 bool SymbolEffectOptions::operator==(const SymbolEffectOptions& other) const
 {
-    if (effectType_ != other.GetEffectType()) {
-        return false;
-    }
-    if (scopeType_ != other.GetScopeType()) {
-        return false;
-    }
-    if (commonSubType_ != other.GetCommonSubType()) {
-        return false;
-    }
-    if (fillStyle_ != other.GetFillStyle()) {
-        return false;
-    }
-    if (repeatCount_ != other.GetRepeatCount()) {
-        return false;
-    }
-    if (isActive_ != other.GetIsActive()) {
-        return false;
-    }
-    if (isTxtActive_ != other.GetIsTxtActive()) {
-        return false;
-    }
-    if (triggerNum_ != other.GetTriggerNum()) {
-        return false;
-    }
-    return true;
+    return effectType_ == other.effectType_ && scopeType_ == other.scopeType_ &&
+           commonSubType_ == other.commonSubType_ && fillStyle_ == other.fillStyle_ &&
+           repeatCount_ == other.repeatCount_ && isActive_ == other.isActive_ && isTxtActive_ == other.isTxtActive_ &&
+           triggerNum_ == other.triggerNum_;
 }
 
 bool SymbolEffectOptions::operator!=(const SymbolEffectOptions& other) const
