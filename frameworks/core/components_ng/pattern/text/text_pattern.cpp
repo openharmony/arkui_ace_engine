@@ -1471,6 +1471,9 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
         }
 
         if (resultObj.type == SelectSpanType::TYPEIMAGE) {
+            if (isDragging) {
+                pattern->dragSpanItems_.emplace_back(spanItem);
+            }
             auto imageNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(resultObj.spanPosition.spanIndex));
             CHECK_NULL_VOID(imageNode);
             auto renderContext = imageNode->GetRenderContext();

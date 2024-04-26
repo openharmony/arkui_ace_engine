@@ -2436,11 +2436,31 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
-    std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [](RefPtr<SpanItem>& item) {
-        if (item) {
-            item->EndDrag();
-        }
+    std::unordered_set<int32_t> imgNodeIds;
+    std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [&imgNodeIds](RefPtr<SpanItem>& item) {
+        CHECK_NULL_VOID(item);
+        item->EndDrag();
+        auto imageSpanItem = DynamicCast<ImageSpanItem>(item);
+        CHECK_NULL_VOID(imageSpanItem);
+        imgNodeIds.emplace(imageSpanItem->imageNodeId);
     });
+    const auto& childrens = host->GetChildren();
+    for (const auto& child : childrens) {
+        auto findResult = imgNodeIds.find(child->GetId());
+        if (findResult == imgNodeIds.end()) {
+            continue;
+        }
+        auto imageNode = DynamicCast<ImageSpanNode>(child);
+        if (!imageNode) {
+            continue;
+        }
+        auto renderContext = imageNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        renderContext->UpdateOpacity(1);
+        imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
     dragSpanItems_.clear();
     if (recoverDragResultObjects_.empty()) {
         return;
