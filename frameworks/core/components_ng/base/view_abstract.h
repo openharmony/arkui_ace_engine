@@ -646,6 +646,10 @@ public:
     static float GetLayoutWeight(FrameNode* frameNode);
     static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
     static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
+    static int32_t GetDisplayIndex(FrameNode* frameNode);
+    static NG::BorderWidthProperty GetOuterBorderWidth(FrameNode* frameNode);
+    static void SetBias(FrameNode* frameNode, const BiasPair& biasPair);
+    static BiasPair GetBias(FrameNode* frameNode);
 
 private:
     static void AddDragFrameNodeToManager();

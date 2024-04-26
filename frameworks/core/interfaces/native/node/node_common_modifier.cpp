@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include "securec.h"
 #include <vector>
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
@@ -90,11 +91,16 @@ constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
-
+constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
+constexpr int32_t OUTLINE_TOP_WIDTH_INDEX = 1;
+constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
+constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
+constexpr int32_t OUTLINE_WIDTH_VECTOR_SIZE = 4;
 const int32_t ERROR_INT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
+constexpr int32_t MAX_ANCHOR_ID_LENGTH = 50;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -2559,6 +2565,13 @@ void ResetDisplayPriority(ArkUINodeHandle node)
     ViewAbstract::SetDisplayIndex(frameNode, DEFAULT_DISPLAY_PRIORITY);
 }
 
+ArkUI_Int32 GetDisplayPriority(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_DISPLAY_PRIORITY);
+    return ViewAbstract::GetDisplayIndex(frameNode);
+}
+
 void SetMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
 {
@@ -2731,6 +2744,13 @@ void ResetLayoutWeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetLayoutWeight(frameNode, DEFAULT_COMMON_LAYOUTWEIGHT);
+}
+
+ArkUI_Float32 GetLayoutWeight(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return ViewAbstract::GetLayoutWeight(frameNode);
 }
 
 void SetMinWidth(ArkUINodeHandle node, const struct ArkUISizeType* minWidth)
@@ -3036,6 +3056,31 @@ void SetAlignRules(ArkUINodeHandle node, char** anchors, const ArkUI_Int32* dire
     ViewAbstract::SetAlignRules(frameNode, rulesMap);
 }
 
+void SetAlignRulesWidthType(ArkUINodeHandle node, const ArkUIAlignRulesType* alignRulesType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(alignRulesType);
+    std::map<AlignDirection, AlignRule> rulesMap;
+    for (int32_t i = 0; i < alignRulesType->anchorCount && i < NUM_6; i++) {
+        std::string anchorId(alignRulesType->anchorIds[i]);
+        if (anchorId.empty()) {
+            continue;
+        }
+        AlignRule alignRule;
+        alignRule.anchor = anchorId;
+        if (i < NUM_3) {
+            alignRule.horizontal = static_cast<HorizontalAlign>(alignRulesType->alignTypes[i]);
+        } else {
+            alignRule.vertical = static_cast<VerticalAlign>(alignRulesType->alignTypes[i]);
+        }
+        rulesMap[static_cast<AlignDirection>(i)] = alignRule;
+    }
+    ViewAbstract::SetAlignRules(frameNode, rulesMap);
+    BiasPair biasPair(alignRulesType->biasHorizontalValue, alignRulesType->biasVerticalValue);
+    ViewAbstract::SetBias(frameNode, biasPair);
+}
+
 void ResetAlignRules(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3058,36 +3103,28 @@ void GetAlignRules(ArkUINodeHandle node, ArkUIAlignRulesType* alignRulesType)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto alignRules = ViewAbstract::GetAlignRules(frameNode);
-    auto leftIterator = alignRules.find(AlignDirection::LEFT);
-    if (leftIterator != alignRules.end()) {
-        alignRulesType->leftAlignAnchor = std::atoi(leftIterator->second.anchor.c_str());
-        alignRulesType->leftAlignType = static_cast<int32_t>(leftIterator->second.horizontal);
+    std::string emptyStr;
+    for (int32_t i = 0; i < NUM_6; i++) {
+        auto iterator = alignRules.find(static_cast<AlignDirection>(i));
+        if (iterator == alignRules.end()) {
+            if (strcpy_s(alignRulesType->anchorIds[i], MAX_ANCHOR_ID_LENGTH, emptyStr.c_str()) != 0) {
+                break;
+            }
+            alignRulesType->alignTypes[i] = 0;
+            continue;
+        }
+        if (strcpy_s(alignRulesType->anchorIds[i], MAX_ANCHOR_ID_LENGTH, iterator->second.anchor.c_str()) != 0) {
+            break;
+        }
+        if (i < NUM_3) {
+            alignRulesType->alignTypes[i] = static_cast<int32_t>(iterator->second.horizontal);
+        } else {
+            alignRulesType->alignTypes[i] = static_cast<int32_t>(iterator->second.vertical);
+        }
     }
-    auto middleIterator = alignRules.find(AlignDirection::MIDDLE);
-    if (alignRules.find(AlignDirection::MIDDLE) != alignRules.end()) {
-        alignRulesType->middleAlignAnchor = std::atoi(middleIterator->second.anchor.c_str());
-        alignRulesType->middleAlignType = static_cast<int32_t>(middleIterator->second.horizontal);
-    }
-    auto rightIterator = alignRules.find(AlignDirection::RIGHT);
-    if (rightIterator != alignRules.end()) {
-        alignRulesType->rightAlignAnchor = std::atoi(rightIterator->second.anchor.c_str());
-        alignRulesType->rightAlignType = static_cast<int32_t>(rightIterator->second.horizontal);
-    }
-    auto topIterator = alignRules.find(AlignDirection::TOP);
-    if (topIterator != alignRules.end()) {
-        alignRulesType->topAlignAnchor = std::atoi(topIterator->second.anchor.c_str());
-        alignRulesType->topAlignType = static_cast<int32_t>(topIterator->second.vertical);
-    }
-    auto centerIterator = alignRules.find(AlignDirection::CENTER);
-    if (centerIterator != alignRules.end()) {
-        alignRulesType->verticalCenterAlignAnchor = std::atoi(centerIterator->second.anchor.c_str());
-        alignRulesType->verticalCenterAlignType = static_cast<int32_t>(centerIterator->second.vertical);
-    }
-    auto bottomIterator = alignRules.find(AlignDirection::BOTTOM);
-    if (bottomIterator != alignRules.end()) {
-        alignRulesType->bottomAlignAnchor = std::atoi(bottomIterator->second.anchor.c_str());
-        alignRulesType->bottomAlignType = static_cast<int32_t>(bottomIterator->second.vertical);
-    }
+    BiasPair biasPair = ViewAbstract::GetBias(frameNode);
+    alignRulesType->biasHorizontalValue = biasPair.first;
+    alignRulesType->biasVerticalValue = biasPair.second;
 }
 
 void SetAccessibilityDescription(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -4206,6 +4243,38 @@ void SetOutlineWidth(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t 
     ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
 }
 
+void SetOutlineWidthFloat(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
+    ArkUI_Float32 right, ArkUI_Float32 bottom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = Dimension(left, DimensionUnit::VP);
+    borderWidth.topDimen = Dimension(top, DimensionUnit::VP);
+    borderWidth.rightDimen = Dimension(right, DimensionUnit::VP);
+    borderWidth.bottomDimen = Dimension(bottom, DimensionUnit::VP);
+    borderWidth.multiValued = true;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+}
+
+void GetOutlineWidthFloat(ArkUINodeHandle node, ArkUI_Float32* borderWidthVector, ArkUI_Int32 borderWidthSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (borderWidthSize < OUTLINE_WIDTH_VECTOR_SIZE) {
+        return;
+    }
+    NG::BorderWidthProperty borderWidth = ViewAbstract::GetOuterBorderWidth(frameNode);
+    borderWidthVector[OUTLINE_LEFT_WIDTH_INDEX] = borderWidth.leftDimen.has_value() ?
+        borderWidth.leftDimen->Value() : 0.0f;
+    borderWidthVector[OUTLINE_TOP_WIDTH_INDEX] = borderWidth.topDimen.has_value() ?
+        borderWidth.topDimen->Value() : 0.0f;
+    borderWidthVector[OUTLINE_RIGHT_WIDTH_INDEX] = borderWidth.rightDimen.has_value() ?
+        borderWidth.rightDimen->Value() : 0.0f;
+    borderWidthVector[OUTLINE_BOTTOM_WIDTH_INDEX] = borderWidth.bottomDimen.has_value() ?
+        borderWidth.bottomDimen->Value() : 0.0f;
+}
+
 void ResetOutlineWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4943,13 +5012,6 @@ ArkUI_Float32 GetAspectRatio(ArkUINodeHandle node)
     return ViewAbstract::GetAspectRatio(frameNode);
 }
 
-ArkUI_Float32 GetLayoutWeight(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
-    return ViewAbstract::GetLayoutWeight(frameNode);
-}
-
 void SetBackgroundImageSizeWithUnit(
     ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight, ArkUI_Int32 unit)
 {
@@ -5021,13 +5083,14 @@ const ArkUICommonModifier* GetCommonModifier()
         GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask,
         GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition, GetRotateTransition,
         GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle,
-        GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, GetScale, GetRotate, GetBrightness, GetSaturate,
+        GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat, GetOutlineWidthFloat,
+        GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate, GetBrightness, GetSaturate,
         GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale,
         GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth,
         GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
         GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
-        GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable, GetLayoutWeight,
-        SetBackgroundImageSizeWithUnit };
+        GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
+        SetBackgroundImageSizeWithUnit};
 
     return &modifier;
 }
