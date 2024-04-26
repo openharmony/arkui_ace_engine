@@ -3479,7 +3479,6 @@ struct ArkUINodeModifiers {
     const ArkUITabContentModifier* (*getTabContentModifier)();
     const ArkUITabsControllerModifier* (*getTabsControllerModifier)();
     const ArkUISwiperControllerModifier* (*getSwiperControllerModifier)();
-    const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
     const ArkUIGestureModifier* (*getGestureModifier)();
     const ArkUIBadgeModifier* (*getBadgeModifier)();
     const ArkUIWebModifier* (*getWebModifier)();
@@ -3494,6 +3493,7 @@ struct ArkUINodeModifiers {
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
     const ArkUIParticleModifier* (*getParticleModifier)();
     const ArkUINodeContentModifier* (*getNodeContentModifier)();
+    const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
 };
 
 // same as inner defines in property.h

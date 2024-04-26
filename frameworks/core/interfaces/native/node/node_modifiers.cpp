@@ -183,7 +183,6 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetLoadingProgressModifier,
     NodeModifier::GetTextClockModifier,
     NodeModifier::GetTextTimerModifier,
-    NodeModifier::GetSymbolGlyphModifier,
     NodeModifier::GetRenderNodeModifier,
     NodeModifier::GetFrameNodeModifier,
 
@@ -226,6 +225,7 @@ const ArkUINodeModifiers impl = {
     nullptr, // TextAreaControllerModifier
     NodeModifier::GetParticleModifier,
     NodeModifier::GetNodeContentModifier,
+    NodeModifier::GetSymbolGlyphModifier,
 };
 
 } // namespace
