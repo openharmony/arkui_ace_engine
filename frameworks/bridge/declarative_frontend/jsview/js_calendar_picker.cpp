@@ -641,6 +641,9 @@ std::map<std::string, NG::DialogGestureEvent> JSCalendarPickerDialog::DialogCanc
 
 void AppearDialogEvent(const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -670,6 +673,9 @@ void AppearDialogEvent(const JSCallbackInfo& info, std::map<std::string, NG::Dia
 void DisappearDialogEvent(
     const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
