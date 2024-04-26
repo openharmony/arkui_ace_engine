@@ -261,6 +261,11 @@ void ViewFunctions::InitViewFunctions(
         jsDisappearFunc_ = JSRef<JSFunc>::Cast(jsDisappearFunc);
     }
 
+    JSRef<JSVal> jsDidBuildFunc = jsObject->GetProperty("onDidBuild");
+    if (jsDidBuildFunc->IsFunction()) {
+        jsDidBuildFunc_ = JSRef<JSFunc>::Cast(jsDidBuildFunc);
+    }
+
     JSRef<JSVal> jsLayoutFunc = jsObject->GetProperty("onLayout");
     if (jsLayoutFunc->IsFunction()) {
         jsLayoutFunc_ = JSRef<JSFunc>::Cast(jsLayoutFunc);
@@ -395,6 +400,12 @@ void ViewFunctions::ExecuteDisappear()
     } else {
         LOGE("jsView Object is undefined and will not execute aboutToDisappear function");
     }
+}
+
+void ViewFunctions::ExecuteDidBuild()
+{
+    COMPONENT_LIFECYCLE_DURATION();
+    ExecuteFunction(jsDidBuildFunc_, "onDidBuild");
 }
 
 void ViewFunctions::ExecuteAboutToRecycle()

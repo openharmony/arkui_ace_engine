@@ -28,6 +28,9 @@ CustomNodeBase::~CustomNodeBase()
     // appearFunc_ & destroyFunc_ should be executed in pairs
     if (!executeFireOnAppear_ && appearFunc_) {
         appearFunc_();
+        if (didBuildFunc_) {
+            didBuildFunc_();
+        }
     }
     if (destroyFunc_) {
         destroyFunc_();
