@@ -77,7 +77,7 @@ struct AxisEvent final : public UIInputEvent {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
-    int32_t touchEventId;
+    int32_t touchEventId = 0;
 
     // Coordinates relative to the upper-left corner of the current component
     float localX = 0.0;

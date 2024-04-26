@@ -683,7 +683,7 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
-    int32_t recordSize = (dataSize != 0 ? dataSize : shadowInfos.size());
+    int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         recordSize = badgeNumber.value();
@@ -1392,7 +1392,7 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     }
     InitializeDragControllerCtx(env, info, dragAsyncContext);
 
-    std::string errMsg;
+    std::string errMsg = "";
     if (!CheckAndParseParams(dragAsyncContext, errMsg)) {
         NapiThrow(env, errMsg, ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);

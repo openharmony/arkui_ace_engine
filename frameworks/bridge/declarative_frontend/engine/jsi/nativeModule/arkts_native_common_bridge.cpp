@@ -1841,7 +1841,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
         shadows[NUM_1].i32 = type;
         shadows[NUM_5].u32 = color;
     }
-    shadows[NUM_6].i32 = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
+    shadows[NUM_6].i32 = fillArg->IsBoolean() ? fillArg->BooleaValue() : false;
     GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
         (sizeof(shadows) / sizeof(shadows[NUM_0])));
     return panda::JSValueRef::Undefined(vm);
@@ -4639,10 +4639,10 @@ ArkUINativeModuleValue CommonBridge::ResetSharedTransition(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    auto id = info[1]->ToString();
-    if (id.empty()) {
+    if (!info[1]->IsString() || info[1]->ToString().empty()) {
         return panda::JSValueRef::Undefined(vm);
     }
+    auto id = info[1]->ToString();
     std::shared_ptr<SharedTransitionOption> sharedOption;
     sharedOption = std::make_shared<SharedTransitionOption>();
     sharedOption->duration = DEFAULT_DURATION;
@@ -4663,10 +4663,10 @@ ArkUINativeModuleValue CommonBridge::SetSharedTransition(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    auto id = info[NUM_1]->ToString();
-    if (id.empty()) {
+    if (!info[NUM_1]->IsString() || info[NUM_1]->ToString().empty()) {
         return panda::JSValueRef::Undefined(vm);
     }
+    auto id = info[NUM_1]->ToString();
     std::shared_ptr<SharedTransitionOption> sharedOption;
     if (info[NUM_2]->IsObject()) {
         Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[NUM_2]);

@@ -1035,7 +1035,7 @@ bool JSViewPartialUpdate::JsElementIdExists(int32_t elmtId)
 
 void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }

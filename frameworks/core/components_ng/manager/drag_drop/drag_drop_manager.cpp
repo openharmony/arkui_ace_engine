@@ -50,7 +50,7 @@ constexpr float TOUCH_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr int32_t MAX_RETRY_TIMES = 3;
 constexpr int32_t MAX_RETRY_DURATION = 800;
 constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
-constexpr int64_t MOVE_TIME_LIMIT = 6L;
+constexpr uint64_t MOVE_TIME_LIMIT = 6L;
 constexpr int64_t DRAG_MOVE_TIME_THRESHOLD = 16 * 1000 * 1000;
 constexpr float MAX_DISTANCE_TO_PRE_POINTER = 20.0f;
 } // namespace
@@ -567,7 +567,7 @@ bool DragDropManager::isDistanceLimited(const Point& point)
 
 bool DragDropManager::isTimeLimited(const PointerEvent& pointerEvent, const Point& point)
 {
-    int64_t currentTimeStamp = static_cast<uint64_t>(
+    uint64_t currentTimeStamp = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
     if (currentTimeStamp > preTimeStamp_ && currentTimeStamp - preTimeStamp_ < MOVE_TIME_LIMIT) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "onDragMove, time is less than limit, point X: %{public}f, Y: %{public}f",
@@ -1681,7 +1681,7 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
     borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
     borderRadius.multiValued = false;
     int i = 0;
-    int cnt = gatherNodeChildrenInfo.size();
+    int cnt = static_cast<int>(gatherNodeChildrenInfo.size());
     for (const auto& child : gatherNodeChildrenInfo) {
         auto imageNode = child.imageNode.Upgrade();
         CHECK_NULL_VOID(imageNode);
