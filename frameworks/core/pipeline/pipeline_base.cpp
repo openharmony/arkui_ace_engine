@@ -471,11 +471,12 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     }
     if (GetIsDeclarative()) {
         viewScale_ = DEFAULT_VIEW_SCALE;
+        int32_t pageWidth = width;
         if (IsContainerModalVisible()) {
-            width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+            pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
         designWidthScale_ =
-            windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+            windowConfig.autoDesignWidth ? density_ : static_cast<double>(pageWidth) / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;

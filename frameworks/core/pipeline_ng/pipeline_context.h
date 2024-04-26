@@ -936,6 +936,7 @@ private:
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     bool customTitleSettedShow_ = true;
+    bool isShowTitle_ = false;
 };
 } // namespace OHOS::Ace::NG
 
