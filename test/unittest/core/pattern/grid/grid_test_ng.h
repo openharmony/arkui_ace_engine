@@ -66,6 +66,7 @@ public:
         int32_t colEnd = NULL_VALUE, float width = NULL_VALUE, float height = NULL_VALUE);
     static void CreateBigColItem(int32_t colStart, int32_t colEnd);
     static void CreateBigRowItem(int32_t rowStart, int32_t rowEnd);
+    void AddFixedHeightItems(int32_t cnt, float height);
     void ScrollTo(float position);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
 
