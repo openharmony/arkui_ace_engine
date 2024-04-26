@@ -116,9 +116,6 @@ public:
         CHECK_NULL_VOID(nativeXComponent_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        SetExpectedRateRangeInit();
-        OnFrameEventInit();
-        UnregisterOnFrameEventInit();
         auto width = initSize_.Width();
         auto height = initSize_.Height();
         nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
