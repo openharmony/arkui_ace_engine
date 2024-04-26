@@ -610,7 +610,7 @@ private:
     int32_t dismissTargetId_ = 0;
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
-    int32_t subWindowId_;
+    int32_t subWindowId_ = -1;
     bool hasPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };

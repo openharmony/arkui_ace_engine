@@ -1247,8 +1247,9 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
 
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
 {
-    auto beforeScalePreviewOffset = OffsetF((previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Width(),
-        (previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Height());
+    auto beforeRate = (1.0f - beforeAnimationScale) / 2;
+    auto beforeScalePreviewOffset = OffsetF((previewSize_ * beforeRate).Width(),
+        (previewSize_ * beforeRate).Height());
     auto afterScalePreviewOffset = OffsetF((previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Width(),
         (previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Height());
     auto scaleOffset = afterScalePreviewOffset + beforeScalePreviewOffset;
