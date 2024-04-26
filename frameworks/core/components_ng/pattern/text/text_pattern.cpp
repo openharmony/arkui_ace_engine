@@ -879,9 +879,9 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
     if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
         auto top = std::min(textSelector_.firstHandle.Top(), textSelector_.secondHandle.Top());
         auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
-        auto paintRect = host->GetPaintRectWithTransform();
-        auto left = paintRect.Left();
-        auto right = paintRect.Right();
+        auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
+        auto left = textContentGlobalOffset.GetX();
+        auto right = textContentGlobalOffset.GetY() + contentRect_.Width();
         aiRect = RectT(left, top, right - left, bottom - top);
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
