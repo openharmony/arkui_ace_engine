@@ -367,7 +367,7 @@ void MutableSpanString::ApplyInsertSpanStringToSpans(int32_t start, const RefPtr
             auto newSpanItem = (*it)->GetSameStyleSpanItem();
             newSpanItem->interval.first = start + offset;
             newSpanItem->interval.second = spanItemEnd;
-            auto wStr = StringUtils::ToWstring(newSpanItem->content);
+            auto wStr = StringUtils::ToWstring((*it)->content);
             newSpanItem->content = StringUtils::ToString(GetWideStringSubstr(wStr, start));
             (*it)->interval.second = start;
             (*it)->content = StringUtils::ToString(GetWideStringSubstr(wStr, 0, start - spanItemStart));
