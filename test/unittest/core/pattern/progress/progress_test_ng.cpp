@@ -1004,6 +1004,10 @@ HWTEST_F(ProgressTestNg, ProgressModifier001, TestSize.Level1)
     OffsetF offset(0, 0);
     progressModifier.SetContentOffset(offset);
     EXPECT_EQ(progressModifier.offset_->Get(), offset);
+    progressModifier.SetStrokeWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier.strokeWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetStrokeRadius(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier.strokeRadius_->Get(), PROGRESS_MODIFIER_VALUE);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2389,6 +2393,8 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetLinearSweepEffect(true);
+    progressModifier->SetColor(linearColor);
+    EXPECT_EQ(progressModifier->color_->Get(), linearColor);
     progressModifier->SetBackgroundColor(linearColor);
     EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
     progressModifier->SetBorderColor(linearColor);
@@ -2399,6 +2405,8 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     EXPECT_EQ(progressModifier->value_->Get(), value);
     progressModifier->SetScaleWidth(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier->scaleWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetStrokeRadius(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->strokeRadius_->Get(), PROGRESS_MODIFIER_VALUE);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2817,6 +2825,19 @@ HWTEST_F(ProgressTestNg, ProgressModifier005, TestSize.Level1)
     int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
     auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    LinearColor linearColor;
+    modifier->SetColor(linearColor);
+    EXPECT_EQ(modifier->color_->Get(), linearColor);
+    modifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(modifier->bgColor_->Get(), linearColor);
+    modifier->SetBorderColor(linearColor);
+    EXPECT_EQ(modifier->borderColor_->Get(), linearColor);
+    modifier->SetValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeRadius(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeRadius_->Get(), PROGRESS_MODIFIER_VALUE);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2875,6 +2896,19 @@ HWTEST_F(ProgressTestNg, ProgressModifier006, TestSize.Level1)
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
     auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    LinearColor linearColor;
+    modifier->SetColor(linearColor);
+    EXPECT_EQ(modifier->color_->Get(), linearColor);
+    modifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(modifier->bgColor_->Get(), linearColor);
+    modifier->SetBorderColor(linearColor);
+    EXPECT_EQ(modifier->borderColor_->Get(), linearColor);
+    modifier->SetValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeRadius(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeRadius_->Get(), PROGRESS_MODIFIER_VALUE);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2939,6 +2973,19 @@ HWTEST_F(ProgressTestNg, ProgressModifier007, TestSize.Level1)
     modifier->SetContentSize(contentSize);
     EXPECT_EQ(modifier->contentSize_->Get(), contentSize);
     EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_CAPSULE));
+    LinearColor linearColor;
+    modifier->SetColor(linearColor);
+    EXPECT_EQ(modifier->color_->Get(), linearColor);
+    modifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(modifier->bgColor_->Get(), linearColor);
+    modifier->SetBorderColor(linearColor);
+    EXPECT_EQ(modifier->borderColor_->Get(), linearColor);
+    modifier->SetValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeRadius(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeRadius_->Get(), PROGRESS_MODIFIER_VALUE);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -2987,6 +3034,19 @@ HWTEST_F(ProgressTestNg, ProgressModifier008, TestSize.Level1)
     modifier->SetContentSize(contentSize);
     EXPECT_EQ(modifier->contentSize_->Get(), contentSize);
     EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    modifier->SetColor(linearColor);
+    EXPECT_EQ(modifier->color_->Get(), linearColor);
+    modifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(modifier->bgColor_->Get(), linearColor);
+    modifier->SetBorderColor(linearColor);
+    EXPECT_EQ(modifier->borderColor_->Get(), linearColor);
+    modifier->SetValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeRadius(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeRadius_->Get(), PROGRESS_MODIFIER_VALUE);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -3043,6 +3103,19 @@ HWTEST_F(ProgressTestNg, ProgressModifier009, TestSize.Level1)
     modifier->SetContentSize(contentSize);
     EXPECT_EQ(modifier->contentSize_->Get(), contentSize);
     EXPECT_EQ(modifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
+    LinearColor linearColor;
+    modifier->SetColor(linearColor);
+    EXPECT_EQ(modifier->color_->Get(), linearColor);
+    modifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(modifier->bgColor_->Get(), linearColor);
+    modifier->SetBorderColor(linearColor);
+    EXPECT_EQ(modifier->borderColor_->Get(), linearColor);
+    modifier->SetValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->value_->Get(), PROGRESS_MODIFIER_VALUE);
+    modifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    EXPECT_EQ(modifier->strokeWidth_->Get(), PROGRESS_STROKE_WIDTH);
+    modifier->SetStrokeRadius(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(modifier->strokeRadius_->Get(), PROGRESS_MODIFIER_VALUE);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
