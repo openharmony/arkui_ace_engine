@@ -46,6 +46,12 @@ template("declarative_frontend") {
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (is_arkui_x) {
+      deps += [
+        "//arkcompiler/ets_runtime:libark_jsruntime_static",
+        "//foundation/arkui/napi:ace_napi",
+      ]
+    }
     external_deps = [
       "ets_runtime:libark_jsruntime",
       "napi:ace_napi",
@@ -843,7 +849,10 @@ template("declarative_js_engine_ng") {
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
     ]
-
+    
+    if (is_arkui_x) {
+      deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
+    }
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]

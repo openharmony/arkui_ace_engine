@@ -24,7 +24,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
 
@@ -101,7 +101,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetDraggingPressedState(true);
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     auto callback = [id = Container::CurrentId(), pipeline, info, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
                         const std::function<void()>& /*unused*/) {

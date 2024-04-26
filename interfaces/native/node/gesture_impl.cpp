@@ -23,6 +23,7 @@
 
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,14 @@ ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_Ges
             break;
     }
     return ret;
+}
+
+const ArkUI_UIInputEvent* OH_ArkUI_GestureEvent_GetRawInputEvent(const ArkUI_GestureEvent* event)
+{
+    if (!event) {
+        return nullptr;
+    }
+    return reinterpret_cast<ArkUI_UIInputEvent*>(event->eventData.rawPointerEvent);
 }
 
 int32_t OH_ArkUI_LongPress_GetRepeatCount(const ArkUI_GestureEvent* event)
@@ -234,7 +243,13 @@ ArkUI_GestureRecognizerType GetGestureType(ArkUI_GestureRecognizer* recognizer)
 void HandleGestureEvent(ArkUINodeEvent* event)
 {
     auto* extraData = reinterpret_cast<GestureInnerData*>(event->extraParam);
-    extraData->targetReceiver(reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent), extraData->extraParam);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent);
+    ArkUI_UIInputEvent uiEvent;
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    uiEvent.inputEvent = &(gestureEvent->eventData.rawPointerEvent);
+    gestureEvent->eventData.rawPointerEvent = &uiEvent;
+    extraData->targetReceiver(gestureEvent, extraData->extraParam);
     delete event;
 }
 

@@ -115,6 +115,12 @@ template("ace_core_interfaces_native_node") {
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
     include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
+    if (is_arkui_x) {
+      include_dirs += [
+        "${ace_napi_frameworks}/core/event",
+        "${ace_napi_frameworks}/base/input_manager",
+      ]
+    }
 
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
@@ -131,7 +137,7 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/plugin_modifier.cpp" ]
     }
     external_deps = []
-    if (is_ohos) {
+    if (is_ohos && !is_arkui_x) {
       external_deps += [ "input:libmmi-client" ]
     }
     if (use_hilog) {
