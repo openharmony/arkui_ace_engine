@@ -346,7 +346,7 @@ void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
     auto styleString = info[0]->ToString();
@@ -891,6 +891,9 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     auto jsValue = info[0];
     auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
         JSRef<JSFunc>::Cast(jsValue));
@@ -1301,7 +1304,7 @@ void JSTextField::SetSelectionMenuHidden(const JSCallbackInfo& info)
 bool JSTextField::ParseJsCustomKeyboardBuilder(
     const JSCallbackInfo& info, int32_t index, std::function<void()>& buildFunc)
 {
-    if (info.Length() <= index) {
+    if (info.Length() <= index || !info[index]->IsObject()) {
         return false;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[index]);

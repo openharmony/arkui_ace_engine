@@ -55,7 +55,7 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::stri
     std::u16string remainString = u"";
     std::u32string u32ContentToDelete;
     if (isBackward) {
-        if (startIndex == u16.length()) {
+        if (startIndex == static_cast<int32_t>(u16.length())) {
             u32ContentToDelete = StringUtils::ToU32string(content);
         } else {
             remainString = u16.substr(startIndex, u16.length() - startIndex);
@@ -89,7 +89,7 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::stri
         }
         content = StringUtils::Str16ToStr8(remainString) + StringUtils::U32StringToString(u32ContentToDelete);
     }
-    int32_t deletedLength = u16.length() - StringUtils::Str8ToStr16(content).length();
+    int32_t deletedLength = static_cast<int32_t>(u16.length() - StringUtils::Str8ToStr16(content).length());
     //we need length to update the cursor
     return deletedLength;
 }
@@ -99,7 +99,7 @@ bool TextEmojiProcessor::IsIndexInEmoji(int32_t index, std::string content, int3
     endIndex = index;
     startIndex = index;
     std::u16string u16Content = StringUtils::Str8ToStr16(content);
-    if (index <= 0 || index >= u16Content.length()) {
+    if (index <= 0 || index >= static_cast<int32_t>(u16Content.length())) {
         return false;
     }
     std::u32string u32Content;
@@ -109,8 +109,9 @@ bool TextEmojiProcessor::IsIndexInEmoji(int32_t index, std::string content, int3
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "IsIndexInEmoji backwardLen is 0");
         return false;
     }
-    int32_t u32Length = u32Content.length();
-    int32_t emojiBackwardLengthU16 = U32ToU16string(u32Content.substr(u32Length - backwardLen, u32Length)).length();
+    int32_t u32Length = static_cast<int32_t>(u32Content.length());
+    std::u16string tempstr = U32ToU16string(u32Content.substr(u32Length - backwardLen, u32Length));
+    int32_t emojiBackwardLengthU16 = static_cast<int32_t>(tempstr.length());
     index -= emojiBackwardLengthU16;
     emojiBackwardLengthU16 = endIndex - index; // calculate length of the part of emoji
 
@@ -143,14 +144,15 @@ std::u16string TextEmojiProcessor::U32ToU16string(const std::u32string& u32str)
 int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
     int32_t& startIndex, std::u16string u16Content)
 {
-    if (startIndex <= 0 || startIndex > u16Content.length()) {
+    if (startIndex <= 0 || startIndex > static_cast<int32_t>(u16Content.length())) {
         return 0;
     }
     do {
         // U32 string may be failed to tranfer for spliting. Try to enlarge string scope to get transferred u32 string.
         std::u16string temp = u16Content.substr(0, startIndex);
         u32Content = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
-    } while (u32Content.length() == 0 && ++startIndex <= u16Content.length());
+    } while (static_cast<int32_t>(u32Content.length()) == 0 &&
+            ++startIndex <= static_cast<int32_t>(u16Content.length()));
     if (u32Content.length() == 0) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetEmojiLengthBackward u32Content is 0");
         return 0;
@@ -161,15 +163,15 @@ int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
 int32_t TextEmojiProcessor::GetEmojiLengthForward(std::u32string& u32Content,
     int32_t& startIndex, std::u16string u16Content)
 {
-    if (startIndex >= u16Content.length()) {
+    if (startIndex >= static_cast<int32_t>(u16Content.length())) {
         return 0;
     }
     do {
         // U32 string may be failed to tranfer for spliting. Try to enlarge string scope to get transferred u32 string.
         std::u16string temp = u16Content.substr(startIndex, u16Content.length() - startIndex);
         u32Content = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
-    } while (u32Content.length() == 0 && --startIndex >= 0);
-    if (u32Content.length() == 0) {
+    } while (static_cast<int32_t>(u32Content.length()) == 0 && --startIndex >= 0);
+    if (static_cast<int32_t>(u32Content.length()) == 0) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetEmojiLengthForward u32Content is 0");
         return 0;
     }
@@ -504,7 +506,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthAtEnd(std::u32string u32Content, bool 
     int32_t deleteCount = 0;
     int32_t lastVSCount = 0;
     int32_t state = STATE_BEGIN;
-    int32_t tempOffset = u32Content.length() - 1;
+    int32_t tempOffset = static_cast<int32_t>(u32Content.length()) - 1;
     do {
         uint32_t codePoint = u32Content[tempOffset];
         tempOffset--;
@@ -562,8 +564,9 @@ int32_t TextEmojiProcessor::GetEmojiLengthAtFront(std::u32string u32Content, boo
     int32_t deleteCount = 0;
     int32_t state = STATE_BEGIN;
     int32_t tempOffset = 0;
+    int32_t u32ContentLength = static_cast<int32_t>(u32Content.length());
     do {
-        int32_t codePoint = u32Content[tempOffset];
+        int32_t codePoint = static_cast<int32_t>(u32Content[tempOffset]);
         tempOffset++;
         switch (state) {
             case STATE_BEGIN:
@@ -607,7 +610,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthAtFront(std::u32string u32Content, boo
             default:
                 break;
         }
-    } while (tempOffset < u32Content.length() && state != STATE_FINISHED);
+    } while (tempOffset < u32ContentLength && state != STATE_FINISHED);
     return deleteCount;
 }
 
@@ -621,7 +624,7 @@ bool TextEmojiProcessor::HandleDeleteAction(std::u32string& u32Content, int32_t 
 {
     if (isBackward) {
         if (deleteCount > 0) {
-            int32_t start = u32Content.length() - deleteCount;
+            int32_t start = static_cast<int32_t>(u32Content.length()) - deleteCount;
             u32Content.erase(start, deleteCount);
             return true;
         }
