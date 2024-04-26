@@ -437,9 +437,8 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
         auto prevMarginMontage = Positive(prevMargin_) ? prevMargin_ + spaceWidth_ : 0.0f;
         if ((jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_ - prevMarginMontage)) ||
             (isLoop_ && Positive(prevMargin_))) {
-            auto prevItemWidth = (Positive(prevMargin_) && NearZero(GetStartIndex()) ? spaceWidth_ : 0.0f);
             LayoutBackward(
-                layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition() - prevItemWidth);
+                layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
         }
         currentIndex_ = jumpIndex_.value();
     } else if (hasCachedCapture_) {

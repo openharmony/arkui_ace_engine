@@ -924,7 +924,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     auto swiper = weak.Upgrade();
                     CHECK_NULL_VOID(swiper);
                     swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, stopAutoPlay);
-                    swiper->PlayIndicatorTranslateAnimation(-targetPos);
+                    swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
                 });
             } else {
                 PlayTranslateAnimation(
@@ -2210,7 +2210,7 @@ void SwiperPattern::UpdateNextValidIndex()
     }
 }
 
-void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
+void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset, std::optional<int32_t> nextIndex)
 {
     if (!indicatorId_.has_value()) {
         return;
@@ -2243,6 +2243,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
         }
     }
 
+    currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
     CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
@@ -2937,7 +2938,7 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
     return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 328, 34);
 }
 
-void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
+void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex)
 {
     if (!stopIndicatorAnimation_) {
         stopIndicatorAnimation_ = true;
@@ -2947,7 +2948,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
     if (!indicatorId_.has_value() && !turnPageRateCallback) {
         return;
     }
-    CheckMarkDirtyNodeForRenderIndicator(translate);
+    CheckMarkDirtyNodeForRenderIndicator(translate, nextIndex);
     AnimationUtils::StopAnimation(indicatorAnimation_);
     indicatorAnimationIsRunning_ = false;
     if (itemPosition_.empty()) {
@@ -2995,7 +2996,7 @@ void SwiperPattern::PlayTranslateAnimation(
     }
 
     if (indicatorId_.has_value()) {
-        CheckMarkDirtyNodeForRenderIndicator(endPos - startPos);
+        CheckMarkDirtyNodeForRenderIndicator(endPos - startPos, nextIndex);
     }
 
     auto host = GetHost();
