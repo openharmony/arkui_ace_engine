@@ -2264,6 +2264,17 @@ void TextPattern::EnsureOverlayExists()
         CHECK_NULL_VOID(frameRenderContext);
         frameRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
         frameRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+
+        auto pixelRound = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                          static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM) |
+                          static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                          static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        layoutProperty->UpdatePixelRound(pixelRound);
+        textLayoutProperty->UpdatePixelRound(pixelRound);
+
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
