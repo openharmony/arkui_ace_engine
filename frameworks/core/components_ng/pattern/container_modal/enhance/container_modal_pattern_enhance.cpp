@@ -277,7 +277,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         AnimationUtils::Animate(option, [buttonsContext, titlePopupDistance, height]() {
             auto rect = buttonsContext->GetPaintRectWithoutTransform();
             buttonsContext->OnTransformTranslateUpdate({ 0.0f, static_cast<float>(height -
-                (titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConverToPx())/2 - rect.GetY()), 0.0f });
+                (titlePopupDistance - CONTAINER_TITLE_HEIGHT.ConvertToPx())/2 - rect.GetY()), 0.0f });
         });
     }
 
