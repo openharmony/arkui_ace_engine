@@ -100,6 +100,26 @@ void ParseSections(
     }
     waterFlowSections->ChangeData(0, waterFlowSections->GetSectionInfo().size(), newSections);
 }
+
+void ParseScroller(const JSRef<JSObject>& obj)
+{
+    auto scroller = obj->GetProperty("scroller");
+    if (scroller->IsObject()) {
+        auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
+        CHECK_NULL_VOID(jsScroller);
+        jsScroller->SetInstanceId(Container::CurrentId());
+        auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
+        jsScroller->SetController(positionController);
+
+        // Init scroll bar proxy.
+        auto proxy = jsScroller->GetScrollBarProxy();
+        if (!proxy) {
+            proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
+            jsScroller->SetScrollBarProxy(proxy);
+        }
+        WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
+    }
+}
 } // namespace
 
 void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
@@ -159,22 +179,8 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
     }
     WaterFlowModel::GetInstance()->SetLayoutMode(mode);
 
-    auto scroller = obj->GetProperty("scroller");
-    if (scroller->IsObject()) {
-        auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
-        CHECK_NULL_VOID(jsScroller);
-        jsScroller->SetInstanceId(Container::CurrentId());
-        auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
-        jsScroller->SetController(positionController);
+    ParseScroller(obj);
 
-        // Init scroll bar proxy.
-        auto proxy = jsScroller->GetScrollBarProxy();
-        if (!proxy) {
-            proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
-            jsScroller->SetScrollBarProxy(proxy);
-        }
-        WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
-    }
     auto sections = obj->GetProperty("sections");
     auto footerObject = obj->GetProperty("footer");
     if (sections->IsObject()) {

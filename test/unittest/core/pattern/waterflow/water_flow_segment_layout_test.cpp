@@ -16,7 +16,7 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_info->h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -1666,14 +1666,14 @@ HWTEST_F(WaterFlowSegmentTest, Replace003, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->layoutInfo_;
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     UpdateCurrentOffset(-2000.0f);
-    EXPECT_EQ(info.segmentStartPos_[2], 613.0f);
-    EXPECT_EQ(info.currentOffset_, -2000.0f);
-    EXPECT_EQ(info.startIndex_, 20);
-    EXPECT_EQ(info.endIndex_, 26);
-    EXPECT_EQ(info.itemInfos_.size(), 27);
-    EXPECT_EQ(info.endPosArray_.size(), 26);
+    EXPECT_EQ(info->segmentStartPos_[2], 613.0f);
+    EXPECT_EQ(info->currentOffset_, -2000.0f);
+    EXPECT_EQ(info->startIndex_, 20);
+    EXPECT_EQ(info->endIndex_, 26);
+    EXPECT_EQ(info->itemInfos_.size(), 27);
+    EXPECT_EQ(info->endPosArray_.size(), 26);
 
     AddItems(10);
     frameNode_->ChildrenUpdatedFrom(37);
@@ -1681,27 +1681,27 @@ HWTEST_F(WaterFlowSegmentTest, Replace003, TestSize.Level1)
     newSection[0].itemsCount = 40;
     secObj->ChangeData(2, 1, newSection);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    EXPECT_EQ(info.itemInfos_.size(), 27);
-    EXPECT_EQ(info.items_[2].at(0).size(), 20);
-    EXPECT_EQ(info.endPosArray_.size(), 26);
-    EXPECT_EQ(info.segmentStartPos_[2], 613.0f);
-    EXPECT_EQ(info.segmentStartPos_.size(), 3);
-    EXPECT_EQ(info.segmentTails_.size(), 3);
-    EXPECT_EQ(info.segmentTails_[2], 46);
+    EXPECT_EQ(info->itemInfos_.size(), 27);
+    EXPECT_EQ(info->items_[2].at(0).size(), 20);
+    EXPECT_EQ(info->endPosArray_.size(), 26);
+    EXPECT_EQ(info->segmentStartPos_[2], 613.0f);
+    EXPECT_EQ(info->segmentStartPos_.size(), 3);
+    EXPECT_EQ(info->segmentTails_.size(), 3);
+    EXPECT_EQ(info->segmentTails_[2], 46);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.currentOffset_, -2000.0f);
-    EXPECT_EQ(info.startIndex_, 20);
+    EXPECT_EQ(info->currentOffset_, -2000.0f);
+    EXPECT_EQ(info->startIndex_, 20);
     EXPECT_EQ(GetChildY(frameNode_, 20), -61.0f);
 
     AddItems(7);
     frameNode_->ChildrenUpdatedFrom(7);
     secObj->ChangeData(1, 1, ADD_SECTION_7);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    EXPECT_EQ(info.itemInfos_.size(), 14);
-    EXPECT_EQ(info.segmentTails_[1], 13);
+    EXPECT_EQ(info->itemInfos_.size(), 14);
+    EXPECT_EQ(info->segmentTails_[1], 13);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.startIndex_, 20);
+    EXPECT_EQ(info->startIndex_, 20);
     EXPECT_EQ(GetChildY(frameNode_, 20), -61.0f);
 }
 
@@ -1723,7 +1723,7 @@ HWTEST_F(WaterFlowSegmentTest, Replace004, TestSize.Level1)
     secObj->ChangeData(0, 0, SECTION_9);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     FlushLayoutTask(frameNode_);
-    auto& info = pattern_->layoutInfo_;
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
     AddItems(100);
     frameNode_->ChildrenUpdatedFrom(6);
@@ -1731,20 +1731,20 @@ HWTEST_F(WaterFlowSegmentTest, Replace004, TestSize.Level1)
     newSection[0].itemsCount = 106;
     secObj->ChangeData(0, 1, newSection);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    EXPECT_EQ(info.itemInfos_.size(), 6);
-    EXPECT_EQ(info.items_[0].at(0).size(), 2);
-    EXPECT_EQ(info.endPosArray_.size(), 2);
-    EXPECT_EQ(info.segmentStartPos_[0], 0.0f);
-    EXPECT_EQ(info.segmentStartPos_.size(), 1);
-    EXPECT_EQ(info.segmentTails_.size(), 1);
-    EXPECT_EQ(info.segmentTails_[0], 105);
+    EXPECT_EQ(info->itemInfos_.size(), 6);
+    EXPECT_EQ(info->items_[0].at(0).size(), 2);
+    EXPECT_EQ(info->endPosArray_.size(), 2);
+    EXPECT_EQ(info->segmentStartPos_[0], 0.0f);
+    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentTails_.size(), 1);
+    EXPECT_EQ(info->segmentTails_[0], 105);
 
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.currentOffset_, 0.0f);
-    EXPECT_EQ(info.endIndex_, 17);
-    EXPECT_EQ(info.items_[0].at(0).size(), 6);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
+    EXPECT_EQ(info->endIndex_, 17);
+    EXPECT_EQ(info->items_[0].at(0).size(), 6);
     UpdateCurrentOffset(-10000.0f);
-    EXPECT_EQ(info.currentOffset_, -3000.0f);
+    EXPECT_EQ(info->currentOffset_, -3000.0f);
     for (int i = 0; i < 100; ++i) {
         frameNode_->RemoveChildAtIndex(10);
     }
@@ -1752,11 +1752,11 @@ HWTEST_F(WaterFlowSegmentTest, Replace004, TestSize.Level1)
     newSection[0].itemsCount = 10;
     secObj->ChangeData(0, 1, newSection);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    EXPECT_EQ(info.segmentTails_[0], 9);
+    EXPECT_EQ(info->segmentTails_[0], 9);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info.currentOffset_, 0.0f);
-    EXPECT_EQ(info.endIndex_, 9);
-    EXPECT_EQ(info.items_[0].at(0).size(), 4);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
+    EXPECT_EQ(info->endIndex_, 9);
+    EXPECT_EQ(info->items_[0].at(0).size(), 4);
 }
 
 /**

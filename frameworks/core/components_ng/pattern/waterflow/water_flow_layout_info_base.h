@@ -47,7 +47,7 @@ public:
     /**
      * @brief Get which cross-axis lane the item is in.
      *
-     * @param itemIndex 
+     * @param itemIndex
      * @return lane index
      */
     virtual int32_t GetCrossIndex(int32_t itemIndex) const = 0;

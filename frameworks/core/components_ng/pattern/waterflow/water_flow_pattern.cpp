@@ -391,6 +391,14 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
+RefPtr<WaterFlowSections> WaterFlowPattern::GetSections() const
+{
+    if (layoutMode_ == LayoutMode::SLIDING_WINDOW) {
+        return nullptr;
+    }
+    return sections_;
+}
+
 RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 {
     if (layoutMode_ == LayoutMode::SLIDING_WINDOW) {
@@ -423,8 +431,11 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 }
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
-{    
+{
     // SlidingWindow mode should never reach this callback
+    if (layoutMode_ == LayoutMode::SLIDING_WINDOW) {
+        return;
+    }
     auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
     CHECK_NULL_VOID(info);
     auto host = GetHost();
@@ -455,8 +466,11 @@ void WaterFlowPattern::OnSectionChangedNow(int32_t start)
 
 void WaterFlowPattern::ResetSections()
 {
-    layoutInfo_->Reset();
     sections_.Reset();
+    if (layoutMode_ == LayoutMode::SLIDING_WINDOW) {
+        return;
+    }
+    layoutInfo_->Reset();
     MarkDirtyNodeSelf();
 }
 

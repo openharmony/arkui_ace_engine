@@ -88,7 +88,7 @@ private:
      */
     float FillFrontHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx);
     /**
-     * @brief Clear items above the viewport. 
+     * @brief Clear items above the viewport.
      * Iterate by index to keep item range continuous.
      */
     void ClearFront();
@@ -111,7 +111,7 @@ private:
     float FillBackHelper(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t laneIdx);
     /**
      * @brief Clear items below the viewport.
-     * 
+     *
      * @param bound of the viewport
      */
     void ClearBack(float bound);

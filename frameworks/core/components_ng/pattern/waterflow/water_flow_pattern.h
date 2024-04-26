@@ -124,10 +124,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
 
-    RefPtr<WaterFlowSections> GetSections() const
-    {
-        return sections_;
-    }
+    RefPtr<WaterFlowSections> GetSections() const;
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
     void ResetSections();
 
