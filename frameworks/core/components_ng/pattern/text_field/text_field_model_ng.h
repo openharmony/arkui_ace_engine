@@ -223,6 +223,7 @@ public:
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnEditChanged(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);
