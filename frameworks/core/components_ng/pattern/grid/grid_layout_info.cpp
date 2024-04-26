@@ -223,7 +223,7 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
 
     int32_t maxIdx = 0;
     // maxIdx might not be in the last position if hasBigItem_
-    for (auto it : lastLine->second) {
+    for (const auto& it : lastLine->second) {
         maxIdx = std::max(maxIdx, it.second);
     }
     maxIdx = std::max(maxIdx, FindEndIdx(endLine).itemIdx);
@@ -366,7 +366,7 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     }
     for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
         const auto& row = gridMatrix_.at(r);
-        for (auto it : row) {
+        for (const auto& it : row) {
             if (it.second == target) {
                 return { r, it.first };
             }
@@ -724,6 +724,9 @@ MatIter GridLayoutInfo::FindStartLineInMatrix(MatIter iter, int32_t index) const
 
 float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float mainGap) const
 {
+    if (endLine <= startLine) {
+        return 0.0f;
+    }
     float totalHeight = 0.0f;
     auto endIt = lineHeightMap_.find(endLine);
     for (auto it = lineHeightMap_.find(startLine); it != endIt; ++it) {
@@ -735,7 +738,7 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
 bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
 {
     other += mainGap;
-    for (auto it : lineHeightMap_) {
+    for (const auto& it : lineHeightMap_) {
         other -= it.second + mainGap;
         if (NonPositive(other)) {
             return false;
