@@ -36,7 +36,7 @@ extern "C" {
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 7
 #define ARKUI_AUTO_GENERATE_NODE_ID -2
-
+#define ARKUI_MAX_ANCHOR_ID_SIZE 50
 enum ArkUIAPIVariantKind {
     BASIC = 1,
     FULL = 2,
@@ -429,18 +429,9 @@ struct ArkUIAnchorType {
 };
 
 struct ArkUIAlignRulesType {
-    ArkUI_Int32 leftAlignAnchor;
-    ArkUI_Int32 leftAlignType;
-    ArkUI_Int32 middleAlignAnchor;
-    ArkUI_Int32 middleAlignType;
-    ArkUI_Int32 rightAlignAnchor;
-    ArkUI_Int32 rightAlignType;
-    ArkUI_Int32 topAlignAnchor;
-    ArkUI_Int32 topAlignType;
-    ArkUI_Int32 verticalCenterAlignAnchor;
-    ArkUI_Int32 verticalCenterAlignType;
-    ArkUI_Int32 bottomAlignAnchor;
-    ArkUI_Int32 bottomAlignType;
+    char (*anchorIds)[ARKUI_MAX_ANCHOR_ID_SIZE];
+    ArkUI_Int32* alignTypes;
+    ArkUI_Int32 anchorCount;
     ArkUI_Float32 biasHorizontalValue;
     ArkUI_Float32 biasVerticalValue;
 };
@@ -1239,6 +1230,12 @@ struct ArkUICommonModifier {
     ArkUIBlurStyleOptionType (*getBackgroundBlurStyle)(ArkUINodeHandle node);
     ArkUIImageSizeType (*getBackgroundImageSize)(ArkUINodeHandle node);
     ArkUI_Int32 (*getBackgroundImageSizeWithStyle)(ArkUINodeHandle node);
+    void (*setOutlineWidthFloat)(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
+        ArkUI_Float32 right, ArkUI_Float32 bottom);
+    void (*getOutlineWidthFloat)(ArkUINodeHandle node, ArkUI_Float32* borderWidthVector, ArkUI_Int32 borderWidthSize);
+    ArkUI_Int32 (*getDisplayPriority)(ArkUINodeHandle node);
+    void (*setAlignRulesWidthType)(ArkUINodeHandle node, const ArkUIAlignRulesType* alignRulesType);
+    ArkUI_Float32 (*getLayoutWeight)(ArkUINodeHandle node);
     void (*getScale)(ArkUINodeHandle node, ArkUIScaleType* scaleType);
     void (*getRotate)(ArkUINodeHandle node, ArkUIRotateType* rotateType);
     ArkUI_Float32 (*getBrightness)(ArkUINodeHandle node);
@@ -1275,7 +1272,6 @@ struct ArkUICommonModifier {
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
     void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
-    ArkUI_Float32 (*getLayoutWeight)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 unit);
 };

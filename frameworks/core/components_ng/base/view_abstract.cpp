@@ -56,6 +56,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DEFAULT_BIAS = 0.5f;
 // common function to bind menu
 void BindMenu(const RefPtr<FrameNode> &menuNode, int32_t targetId, const NG::OffsetF &offset)
 {
@@ -4177,5 +4178,46 @@ void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const 
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+int32_t ViewAbstract::GetDisplayIndex(FrameNode* frameNode)
+{
+    int32_t defaultDisplayIndex = 0;
+    CHECK_NULL_RETURN(frameNode, defaultDisplayIndex);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, defaultDisplayIndex);
+    const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(flexItemProperty, defaultDisplayIndex);
+    return flexItemProperty->GetDisplayIndex().value_or(defaultDisplayIndex);
+}
+
+NG::BorderWidthProperty ViewAbstract::GetOuterBorderWidth(FrameNode* frameNode)
+{
+    BorderWidthProperty borderWidth;
+    CHECK_NULL_RETURN(frameNode, borderWidth);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, borderWidth);
+    auto outBorderWidth = context->GetOuterBorder()->GetOuterBorderWidth();
+    CHECK_NULL_RETURN(outBorderWidth, borderWidth);
+    return outBorderWidth.value_or(borderWidth);
+}
+
+void ViewAbstract::SetBias(FrameNode* frameNode, const BiasPair& biasPair)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair, frameNode);
+}
+
+BiasPair ViewAbstract::GetBias(FrameNode* frameNode)
+{
+    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    CHECK_NULL_RETURN(frameNode, biasPair);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, biasPair);
+    const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(flexItemProperty, biasPair);
+    return flexItemProperty->GetBias().value_or(biasPair);
 }
 } // namespace OHOS::Ace::NG
