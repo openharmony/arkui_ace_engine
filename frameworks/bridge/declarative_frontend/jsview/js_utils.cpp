@@ -37,6 +37,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
@@ -45,6 +46,8 @@ namespace {
 #if defined(WINDOWS_PLATFORM)
 constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
+constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
+constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
 } // namespace
 
 #if !defined(PREVIEW)
@@ -273,5 +276,28 @@ bool CheckRegexValid(const std::string& pattern)
     napi_get_value_bool(env, result, &isValid);
     return isValid;
 #endif
+}
+
+void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
+{
+    options.color.reset();
+    options.blurStyle.reset();
+    if (!obj->IsObject()) {
+        return;
+    }
+    auto optObj = JSRef<JSObject>::Cast(obj);
+    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
+    Color color;
+    if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
+        options.color = color;
+    }
+    auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
+    if (blurProperty->IsNumber()) {
+        auto blurStyle = blurProperty->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            options.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework
