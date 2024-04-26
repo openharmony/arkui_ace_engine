@@ -9041,7 +9041,7 @@ class TextAreaCaretStyleModifier extends ModifierWithKey {
         if (reset) {
             getUINativeModule().textArea.resetCaretStyle(node);
         } else {
-            getUINativeModule().textArea.setCaretStyle(node, this.value.width);
+            getUINativeModule().textArea.setCaretStyle(node, this.value.width, this.value.color);
         }
     }
     checkObjectDiff() {
@@ -10160,7 +10160,7 @@ class TextInputCaretStyleModifier extends ModifierWithKey {
       getUINativeModule().textInput.resetCaretStyle(node);
     }
     else {
-      getUINativeModule().textInput.setCaretStyle(node, this.value.width);
+      getUINativeModule().textInput.setCaretStyle(node, this.value.width, this.value.color);
     }
   }
   checkObjectDiff() {

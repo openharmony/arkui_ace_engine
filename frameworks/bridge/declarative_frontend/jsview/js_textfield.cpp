@@ -377,30 +377,37 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
         return;
     }
     auto jsValue = info[0];
-    if (!jsValue->IsObject()) {
-        return;
-    }
-    CaretStyle caretStyle;
-    auto paramObject = JSRef<JSObject>::Cast(jsValue);
-    auto caretWidth = paramObject->GetProperty("width");
+    if (jsValue->IsObject()) {
+        CaretStyle caretStyle;
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
+        auto caretWidth = paramObject->GetProperty("width");
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
-        caretStyle.caretWidth = theme->GetCursorWidth();
-    } else {
-        CalcDimension width;
-        if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
-            width = theme->GetCursorWidth();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
+            caretStyle.caretWidth = theme->GetCursorWidth();
+        } else {
+            CalcDimension width;
+            if (!ParseJsDimensionVpNG(caretWidth, width, false)) {
+                width = theme->GetCursorWidth();
+            }
+            if (LessNotEqual(width.Value(), 0.0)) {
+                width = theme->GetCursorWidth();
+            }
+            caretStyle.caretWidth = width;
         }
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width = theme->GetCursorWidth();
+        TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
+
+        // set caret color
+        Color caretColor;
+        auto caretColorProp = paramObject->GetProperty("color");
+        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
+            caretColor = theme->GetCursorColor();
         }
-        caretStyle.caretWidth = width;
+        TextFieldModel::GetInstance()->SetCaretColor(caretColor);
     }
-    TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
 }
 
 void JSTextField::SetCaretPosition(const JSCallbackInfo& info)

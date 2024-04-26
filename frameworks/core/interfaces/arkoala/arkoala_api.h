@@ -2167,7 +2167,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaHeightAdaptivePolicy)(ArkUINodeHandle node);
     void (*setTextAreaSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextAreaSelectedBackgroundColor)(ArkUINodeHandle node);
-    void (*setTextAreaCaretStyle)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setTextAreaCaretStyle)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Uint32 caretColor);
     void (*resetTextAreaCaretStyle)(ArkUINodeHandle node);
     void (*setTextAreaTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaTextOverflow)(ArkUINodeHandle node);
@@ -2203,7 +2204,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputSelectionMenuHidden)(ArkUINodeHandle node);
     void (*setTextInputShowUnderline)(ArkUINodeHandle node, ArkUI_Uint32 showUnderLine);
     void (*resetTextInputShowUnderline)(ArkUINodeHandle node);
-    void (*setTextInputCaretStyle)(ArkUINodeHandle node, const ArkUILengthType* value);
+    void (*setTextInputCaretStyle)(
+        ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Uint32 caretColor);
     void (*resetTextInputCaretStyle)(ArkUINodeHandle node);
     void (*setTextInputEnableKeyboardOnFocus)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextInputEnableKeyboardOnFocus)(ArkUINodeHandle node);
