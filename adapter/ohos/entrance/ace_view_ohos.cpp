@@ -117,6 +117,9 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
     LogPointInfo(pointerEvent, instanceId);
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    container->SetCurPointerEvent(pointerEvent);
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
