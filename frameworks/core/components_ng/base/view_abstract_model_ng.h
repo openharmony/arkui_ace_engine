@@ -1213,6 +1213,16 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) override
+    {
+        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+    }
+
+    void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) override
+    {
+        ViewAbstract::SetFocusScopePriority(focusScopeId, focusPriority);
+    }
+
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
     {

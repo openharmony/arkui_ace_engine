@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_FOCUS_FOCUS_MANAGER_H
 
 #include <list>
+#include <optional>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -28,6 +29,7 @@ class PipelineContext;
 
 using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
 using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
+using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
 
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
@@ -86,6 +88,12 @@ public:
 
     void PaintFocusState();
 
+    bool AddFocusScope(const std::string& focusScopeId, const RefPtr<FocusHub>& scopeFocusHub);
+    void RemoveFocusScope(const std::string& focusScopeId);
+    void AddScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub);
+    void RemoveScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub);
+    std::optional<std::list<WeakPtr<FocusHub>>*> GetFocusScopePriorityList(const std::string& focusScopeId);
+
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
 
@@ -97,6 +105,7 @@ private:
 
     WeakPtr<FocusHub> lastFocusStateNode_;
     bool isNeedTriggerScroll_ = false;
+    FocusHubScopeMap focusHubScopeMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };
