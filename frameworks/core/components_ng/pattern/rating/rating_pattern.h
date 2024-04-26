@@ -156,7 +156,7 @@ private:
     void HandleTouchDown(const Offset& localPosition);
     void HandleTouchUp();
     void HandleClick(const GestureEvent& info);
-    void FireChangeEvent() const;
+    void FireChangeEvent();
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);

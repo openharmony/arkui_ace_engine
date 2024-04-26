@@ -81,8 +81,7 @@ class UINodeRegisterProxy {
 
     private populateRemoveElementInfo(removedElements: Array<number>) {
         for (const elmtId of removedElements) {
-            const removedElementInfo: RemovedElementInfo = { elmtId, tag: '' };
-            this.removeElementsInfo_.push(removedElementInfo);
+            this.removeElementsInfo_.push(elmtId);
         }
     }
 
@@ -90,7 +89,7 @@ class UINodeRegisterProxy {
     */
     private obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug('UINodeRegisterProxy.obtainDeletedElmtIds: ');
-        let removedElementsInfo = new Array<RemovedElementInfo>();
+        let removedElementsInfo = new Array<number>();
         ViewStackProcessor.moveDeletedElmtIds(removedElementsInfo);
         stateMgmtConsole.debug(`   ... ${removedElementsInfo.length} elmtIds newly obtained from ElementRegister: ${JSON.stringify(removedElementsInfo)} .`);
         this.removeElementsInfo_ = removedElementsInfo;
@@ -104,21 +103,21 @@ class UINodeRegisterProxy {
             return;
         }
         let owningView : IView | undefined;
-        this.removeElementsInfo_.forEach((rmElmtInfo  : RemovedElementInfo) => {
-            const owningViewPUWeak : WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId );
+        this.removeElementsInfo_.forEach((elmtId: number) => {
+            const owningViewPUWeak : WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
             if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
-                    owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
+                    owningView.purgeDeleteElmtId(elmtId);
                 } else {
-                    stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
+                    stateMgmtConsole.debug(`elmtIds ${elmtId} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
             } else {
-                stateMgmtConsole.debug(`elmtIds ${rmElmtInfo.elmtId} tag: ${rmElmtInfo.tag} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`);
+                stateMgmtConsole.debug(`elmtIds ${elmtId} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`);
             }
 
             // FIXME: only do this if app uses V3
-            ObserveV2.getObserve().clearBinding(rmElmtInfo.elmtId);
+            ObserveV2.getObserve().clearBinding(elmtId);
         })
 
         this.removeElementsInfo_.length = 0;
@@ -130,6 +129,6 @@ class UINodeRegisterProxy {
     }
 
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
-    public removeElementsInfo_: Array<RemovedElementInfo> = new Array<RemovedElementInfo>();
+    public removeElementsInfo_: Array<number> = new Array<number>();
     public static ElementIdToOwningViewPU_: Map<number, WeakRef<IView>> = new Map<number, WeakRef<IView>>();
 }

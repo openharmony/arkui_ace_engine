@@ -61,7 +61,7 @@ using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
-class RenderContext : public virtual AceType {
+class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType)
 
 public:
@@ -410,6 +410,7 @@ public:
     virtual void ClearAccessibilityFocus() {};
 
     virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
@@ -578,6 +579,7 @@ public:
 
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
@@ -594,7 +596,7 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
         return std::vector<double>();
@@ -621,6 +623,8 @@ public:
     {
         return false;
     }
+
+    virtual void SetSurfaceRotation(bool isLock) {}
 
 protected:
     RenderContext() = default;

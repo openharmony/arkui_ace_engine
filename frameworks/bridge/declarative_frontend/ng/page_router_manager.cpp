@@ -45,6 +45,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
+const char BUNDLE_TAG[] = "@bundle:";
 constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
@@ -891,12 +892,6 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
-        if (!CheckOhmUrlValid(target.url)) {
-            if (target.errorCallback != nullptr) {
-                target.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
-            }
-            return;
-        }
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pageUrlChecker = container->GetPageUrlChecker();
@@ -1093,9 +1088,6 @@ void PageRouterManager::StartBackToIndex(int32_t index, const std::string& param
     }
     PopPageToIndex(index - 1, params, true, true);
     return;
-    if (!restorePageStack_.empty()) {
-        StartRestore(target);
-    }
 }
 
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
@@ -1180,7 +1172,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!result) {
-        if (!target.isNamedRouterMode) {
+        if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
             ThrowError("Load Page Failed: " + target.url, ERROR_CODE_LOAD_PAGE_ERROR);
         }
         pageRouterStack_.pop_back();

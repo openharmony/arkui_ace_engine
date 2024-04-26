@@ -41,6 +41,9 @@ constexpr float SEGMENTS_SPACE_PERCENT = 0.008f;
 }
 void GaugeModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     RSCanvas& canvas = context.canvas;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         PaintCircularAndIndicator(canvas);

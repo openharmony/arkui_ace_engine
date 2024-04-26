@@ -21,6 +21,7 @@
 #include "resource_manager.h"
 
 #include "base/image/pixel_map.h"
+#include "base/utils/device_config.h"
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
@@ -77,6 +78,7 @@ public:
     uint32_t GetSymbolByName(const char* resName) const override;
     uint32_t GetSymbolById(uint32_t resId) const override;
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName) override;
+    void UpdateColorMode(ColorMode colorMode) override;
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;

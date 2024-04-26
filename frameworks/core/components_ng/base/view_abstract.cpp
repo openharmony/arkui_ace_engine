@@ -3233,7 +3233,7 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
     pipeline->AddOnAreaChangeNode(frameNode->GetId());

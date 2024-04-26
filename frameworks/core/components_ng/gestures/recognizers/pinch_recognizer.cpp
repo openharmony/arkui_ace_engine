@@ -195,22 +195,13 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
 
-    if (static_cast<int32_t>(activeFingers_.size()) < fingers_ || currentFingers_ < fingers_) {
-        double devX = event.x - touchPoints_[event.id].x;
-        double devY = event.y - touchPoints_[event.id].y;
-        double distance = sqrt(pow(devX, 2) + pow(devY, 2));
-        if (GreatOrEqual(distance, distance_)) {
-            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        }
-        return;
-    }
-
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     currentDev_ = ComputeAverageDeviation();
     time_ = event.time;
 
-    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_ ||
+        static_cast<int32_t>(activeFingers_.size()) < fingers_) {
         return;
     }
     if (refereeState_ == RefereeState::DETECTING) {
@@ -394,6 +385,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
+        info.SetPointerEvent(lastTouchEvent_.pointerEvent);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

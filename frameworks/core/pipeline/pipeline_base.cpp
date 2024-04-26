@@ -35,6 +35,7 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
@@ -470,7 +471,11 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     }
     if (GetIsDeclarative()) {
         viewScale_ = DEFAULT_VIEW_SCALE;
-        designWidthScale_ = static_cast<double>(width) / windowConfig.designWidth;
+        if (IsContainerModalVisible()) {
+            width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+        }
+        designWidthScale_ =
+            windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
     } else {
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;

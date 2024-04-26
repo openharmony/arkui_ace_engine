@@ -114,6 +114,7 @@ public:
     static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
+    static void SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& previewOption);
     static void SetDefaultScale();
     static void JsScaleX(const JSCallbackInfo& info);
     static void JsScaleY(const JSCallbackInfo& info);
@@ -129,6 +130,7 @@ public:
     static void JsTransform(const JSCallbackInfo& info);
     static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
+    static NG::DragPreviewOption ParseDragPreviewOptions (const JSCallbackInfo& info);
     static NG::TransitionOptions ParseJsTransition(const JSRef<JSObject>& jsObj);
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);

@@ -94,7 +94,9 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
     }
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    }
     UpdateBackgroundStyle(renderContext, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
         auto contentRow =
@@ -441,6 +443,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
                               : calendarTheme->GetDialogButtonBackgroundColor();
     buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
     buttonNode->MarkModifyDone();
     return buttonNode;
 }
@@ -719,6 +722,33 @@ void CalendarDialogView::UpdateBackgroundStyle(
             dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
         renderContext->UpdateBackBlurStyle(styleOption);
         renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
+    }
+}
+
+void CalendarDialogView::UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+    const RefPtr<FrameNode>& buttonNode, bool isConfirm)
+{
+    bool setDefaultFocus = false;
+    if (buttonInfos.size() > CANCEL_BUTTON_INDEX) {
+        if (buttonInfos[ACCEPT_BUTTON_INDEX].isPrimary && buttonInfos[CANCEL_BUTTON_INDEX].isPrimary) {
+            return;
+        }
+        auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
+        if (buttonInfos[index].isPrimary) {
+            setDefaultFocus = true;
+        }
+    } else if (buttonInfos.size() == CANCEL_BUTTON_INDEX) {
+        bool isAcceptButtonPrimary = (buttonInfos[0].isAcceptButton && isConfirm && buttonInfos[0].isPrimary);
+        bool isCancelButtonPrimary = (!buttonInfos[0].isAcceptButton && !isConfirm && buttonInfos[0].isPrimary);
+        if (isAcceptButtonPrimary || isCancelButtonPrimary) {
+            setDefaultFocus = true;
+        }
+    }
+    if (setDefaultFocus && buttonNode) {
+        auto focusHub = buttonNode->GetOrCreateFocusHub();
+        if (focusHub) {
+            focusHub->SetIsDefaultFocus(true);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

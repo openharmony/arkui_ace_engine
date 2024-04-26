@@ -35,6 +35,7 @@ public:
     static ArkUINativeModuleValue ResetGaugeIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetColors(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetColors(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetContentModifierBuilder(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

@@ -881,10 +881,23 @@ bool FocusHub::OnClick(const KeyEvent& event)
         auto geometryNode = GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);
         auto rect = geometryNode->GetFrameRect();
-        info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
-        info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
+        auto centerToWindow = Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2);
+        auto centerToNode = Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2);
+        info.SetGlobalLocation(centerToWindow);
+        info.SetLocalLocation(Offset(centerToNode));
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;
+            info.SetScreenLocation(windowOffset);
+        }
+        info.SetSourceTool(SourceTool::UNKNOWN);
+        auto eventHub = eventHub_.Upgrade();
+        if (eventHub) {
+            auto targetImpl = eventHub->CreateGetEventTargetImpl();
+            info.SetTarget(targetImpl().value_or(EventTarget()));
+        }
         onClickCallback(info);
         return true;
     }
@@ -1297,6 +1310,10 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return false;
     }
 
+    if (focusStyleType_ == FocusStyleType::FORCE_NONE) {
+        return true;
+    }
+
     if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
         CHECK_NULL_RETURN(getInnerFocusRectFunc_, false);
         RoundRect focusRectInner;
@@ -1357,6 +1374,9 @@ bool FocusHub::PaintAllFocusState()
 
     if (PaintFocusState()) {
         focusManager->SetLastFocusStateNode(AceType::Claim(this));
+        if (onPaintFocusStateCallback_) {
+            return onPaintFocusStateCallback_();
+        }
         return !isFocusActiveWhenFocused_;
     }
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();

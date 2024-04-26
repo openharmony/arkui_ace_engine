@@ -27,6 +27,8 @@ public:
     static ArkUINativeModuleValue ResetObjectFit(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTextBackgroundStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetTextBackgroundStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBaselineOffset(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

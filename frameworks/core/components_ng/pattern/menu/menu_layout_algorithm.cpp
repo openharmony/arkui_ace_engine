@@ -270,6 +270,10 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag) : t
     if (LessOrEqual(previewScale_, 0.0f)) {
         previewScale_ = 1.0f;
     }
+
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    targetSecurity_ = static_cast<float>(theme->GetMenuTargetSecuritySpace().ConvertToPx());
 }
 
 MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
@@ -600,8 +604,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 child->GetGeometryNode()->Reset();
                 child->GetGeometryNode()->SetContentSize(SizeF());
             } else {
-                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-                child->Measure(layoutConstraint);
+                child->Measure(childConstraint);
                 builderChildList.push_back(child);
             }
             BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
@@ -1244,8 +1247,9 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
 
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
 {
-    auto beforeScalePreviewOffset = OffsetF((previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Width(),
-        (previewSize_ * ((1.0f - beforeAnimationScale) / 2)).Height());
+    auto beforeRate = (1.0f - beforeAnimationScale) / 2;
+    auto beforeScalePreviewOffset = OffsetF((previewSize_ * beforeRate).Width(),
+        (previewSize_ * beforeRate).Height());
     auto afterScalePreviewOffset = OffsetF((previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Width(),
         (previewSize_ * ((afterAnimationScale - 1.0f) / 2)).Height());
     auto scaleOffset = afterScalePreviewOffset + beforeScalePreviewOffset;

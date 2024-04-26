@@ -69,7 +69,10 @@ void ListPattern::OnModifyDone()
         ChangeAxis(GetHost());
     }
     if (!GetScrollableEvent()) {
-        InitScrollableEvent();
+        AddScrollEvent();
+        auto scrollableEvent = GetScrollableEvent();
+        CHECK_NULL_VOID(scrollableEvent);
+        scrollable_ = scrollableEvent->GetScrollable();
     }
 
     SetEdgeEffect();
@@ -169,8 +172,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         targetIndexInGroup_.reset();
     }
     if (predictSnapOffset.has_value()) {
-        if (scrollableTouchEvent_ && !NearZero(predictSnapOffset.value()) && !AnimateRunning()) {
-            scrollableTouchEvent_->StartScrollSnapMotion(predictSnapOffset.value(), scrollSnapVelocity_);
+        if (scrollable_ && !NearZero(predictSnapOffset.value()) && !AnimateRunning()) {
+            scrollable_->StartScrollSnapMotion(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
             }
@@ -186,14 +189,17 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     if (predictSnapEndPos.has_value() && predictSnapEndPos_.has_value() &&
         !NearEqual(predictSnapEndPos.value(), predictSnapEndPos_.value())) {
-        if (scrollableTouchEvent_) {
-            scrollableTouchEvent_->UpdateScrollSnapEndWithOffset(
+        if (scrollable_) {
+            scrollable_->UpdateScrollSnapEndWithOffset(
                 predictSnapEndPos.value() - predictSnapEndPos_.value());
         }
         predictSnapEndPos_.reset();
     }
 
     if (isScrollEnd_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         // AccessibilityEventType::SCROLL_END
         isScrollEnd_ = false;
     }
@@ -535,7 +541,7 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
     bool barNeedPaint = GetScrollBar() ? GetScrollBar()->NeedPaint() : false;
     auto chainAnimation = listLayoutProperty->GetChainAnimation().value_or(false);
     bool drivenRender = !(axis != Axis::VERTICAL || stickyStyle != V2::StickyStyle::NONE || barNeedPaint ||
-                          chainAnimation || !scrollable_);
+                          chainAnimation || !isScrollable_);
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -570,20 +576,20 @@ void ListPattern::CheckScrollable()
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listProperty);
     if (itemPosition_.empty()) {
-        scrollable_ = false;
+        isScrollable_ = false;
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
             !IsScrollSnapAlignCenter()) {
-            scrollable_ = GetAlwaysEnabled() || GreatNotEqual(endMainPos_ - startMainPos_,
+            isScrollable_ = GetAlwaysEnabled() || GreatNotEqual(endMainPos_ - startMainPos_,
                 contentMainSize_ - contentStartOffset_ - contentEndOffset_);
         } else {
-            scrollable_ = true;
+            isScrollable_ = true;
         }
     }
 
-    SetScrollEnable(scrollable_);
+    SetScrollEnable(isScrollable_);
 
-    if (!listProperty->GetScrollEnabled().value_or(scrollable_)) {
+    if (!listProperty->GetScrollEnabled().value_or(isScrollable_)) {
         SetScrollEnable(false);
     }
 }
@@ -877,7 +883,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (!NearZero(offset)) {
         MarkDirtyNodeSelf();
     }
-    if (!IsOutOfBoundary() || !scrollable_) {
+    if (!IsOutOfBoundary() || !isScrollable_) {
         FireOnWillScroll(currentDelta_ - lastDelta);
         return true;
     }
@@ -975,19 +981,6 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     }
     ProcessDragUpdate(offset, source);
     return UpdateCurrentOffset(offset, source);
-}
-
-void ListPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto scrollableEvent = GetScrollableEvent();
-    CHECK_NULL_VOID(scrollableEvent);
-    scrollableTouchEvent_ = scrollableEvent->GetScrollable();
-    CHECK_NULL_VOID(scrollableTouchEvent_);
-    scrollableTouchEvent_->SetOnContinuousSliding([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        return list->contentMainSize_;
-    });
 }
 
 bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
@@ -1672,7 +1665,7 @@ void ListPattern::HandleScrollBarOutBoundary()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
-    if (!IsOutOfBoundary(false) || !scrollable_) {
+    if (!IsOutOfBoundary(false) || !isScrollable_) {
         ScrollablePattern::HandleScrollBarOutBoundary(0);
         return;
     }
@@ -2291,8 +2284,8 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("predictSnapEndPos:null");
     }
     // DumpLog::GetInstance().AddDesc("scrollAlign:%{public}d", scrollAlign_);
-    scrollable_ ? DumpLog::GetInstance().AddDesc("scrollable:true")
-                : DumpLog::GetInstance().AddDesc("scrollable:false");
+    isScrollable_ ? DumpLog::GetInstance().AddDesc("isScrollable:true")
+                : DumpLog::GetInstance().AddDesc("isScrollable:false");
     paintStateFlag_ ? DumpLog::GetInstance().AddDesc("paintStateFlag:true")
                     : DumpLog::GetInstance().AddDesc("paintStateFlag:false");
     isFramePaintStateValid_ ? DumpLog::GetInstance().AddDesc("isFramePaintStateValid:true")

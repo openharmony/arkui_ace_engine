@@ -169,6 +169,13 @@ public:
         shadowColorsLastLength_ = shadowColorsLastLength;
     };
 
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
+
 private:
     void PaintCircle(DrawingContext& context, OffsetF offset) const;
     void PaintLinearProgress(DrawingContext& context, OffsetF offset) const;
@@ -189,7 +196,8 @@ private:
     OffsetF offset_;
     bool isFirstCreate_ = true;
     bool isHasShadowValue_ = false;
-
+    RefPtr<PropertyBool> useContentModifier_;
+    
     RefPtr<AnimatablePropertyFloat> max_;
     std::vector<RefPtr<AnimatablePropertyFloat>> values_;
     std::vector<RefPtr<AnimatablePropertyVectorColor>> valueColors_;

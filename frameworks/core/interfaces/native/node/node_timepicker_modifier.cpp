@@ -44,6 +44,7 @@ void ResetTimepickerSelected(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     time_t now = time(nullptr);
     auto currentTm = localtime(&now);
+    CHECK_NULL_VOID(currentTm);
     PickerTime pickerTime(currentTm->tm_hour, currentTm->tm_min, 0);
 
     TimePickerModelNG::SetSelectedTime(frameNode, pickerTime);
@@ -200,7 +201,7 @@ ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -229,7 +230,7 @@ ArkUI_CharPtr GetTimepickerTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;
@@ -258,7 +259,7 @@ ArkUI_CharPtr GetTimepickerDisappearTextStyle(ArkUINodeHandle node)
     int index = 0;
     for (auto& family : fontFamilies) {
         families += family;
-        if (index != fontFamilies.size() - 1) {
+        if (index != static_cast<int>(fontFamilies.size()) - 1) {
             families += ",";
         }
         index++;

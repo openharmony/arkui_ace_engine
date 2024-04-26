@@ -47,6 +47,7 @@ public:
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetWordBreak(WordBreak value) override;
+    void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetEllipsisMode(EllipsisMode modal) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
@@ -72,7 +73,7 @@ public:
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
-    void SetClipEdge() override;
+    void SetClipEdge(bool clip) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;

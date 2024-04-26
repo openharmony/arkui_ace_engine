@@ -23,12 +23,6 @@
 
 namespace OHOS::Ace {
 
-enum class CancelButtonStyle {
-    CONSTANT,
-    INVISIBLE,
-    INPUT,
-};
-
 class SearchModel {
 public:
     static SearchModel* GetInstance();
@@ -84,6 +78,7 @@ public:
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void UpdateInspectorId(const std::string& key) {};
+    virtual void SetDragPreviewOptions(const NG::DragPreviewOption option) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
 
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};

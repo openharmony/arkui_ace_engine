@@ -76,6 +76,7 @@
                 "media_library",
                 "app_file_service",
                 "ets_utils",
+                "bounds_checking_function",
                 "ffrt"
             ],
             "third_party": [

@@ -116,6 +116,10 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
         "setXComponentSurfaceRect", &JSXComponentController::SetXComponentSurfaceRect);
     JSClass<JSXComponentController>::CustomMethod("startImageAnalyzer", &JSXComponentController::StartImageAnalyzer);
     JSClass<JSXComponentController>::CustomMethod("stopImageAnalyzer", &JSXComponentController::StopImageAnalyzer);
+    JSClass<JSXComponentController>::CustomMethod(
+        "setXComponentSurfaceRotation", &JSXComponentController::SetXComponentSurfaceRotation);
+    JSClass<JSXComponentController>::CustomMethod(
+        "getXComponentSurfaceRotation", &JSXComponentController::GetXComponentSurfaceRotation);
     JSClass<JSXComponentController>::Bind(
         globalObj, JSXComponentController::Constructor, JSXComponentController::Destructor);
 }
@@ -282,5 +286,27 @@ void JSXComponentController::StopImageAnalyzer(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(xcomponentController_);
     xcomponentController_->StopImageAnalyzer();
+}
+
+void JSXComponentController::SetXComponentSurfaceRotation(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    bool lock = false;
+    ConvertFromJSValue(obj->GetProperty("lock"), lock);
+    CHECK_NULL_VOID(xcomponentController_);
+    xcomponentController_->SetSurfaceRotation(lock);
+}
+
+void JSXComponentController::GetXComponentSurfaceRotation(const JSCallbackInfo& args)
+{
+    auto retObj = JSRef<JSObject>::New();
+    CHECK_NULL_VOID(xcomponentController_);
+    bool lock = xcomponentController_->GetSurfaceRotation();
+    retObj->SetProperty("lock", lock);
+    args.SetReturnValue(retObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -71,6 +71,7 @@ var TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
   TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
   TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+  TextDataDetectorType[TextDataDetectorType["DATETIME"] = 4] = "DATETIME";
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
@@ -661,6 +662,12 @@ var FormDimension;
   FormDimension["DIMENSION_1_1"] = 6;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
+
+var FormShape;
+(function (FormShape) {
+  FormShape["RECT"] = 1;
+  FormShape["CIRCLE"] = 2;
+})(FormShape || (FormShape = {}));
 
 let FormRenderingMode;
 (function (FormRenderingMode) {
@@ -2676,12 +2683,12 @@ var ParticleUpdater;
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
 
-var DisturbanceFieldsShape;
-(function (DisturbanceFieldsShape) {
-  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
-})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
+var DisturbanceFieldShape;
+(function (DisturbanceFieldShape) {
+  DisturbanceFieldShape[DisturbanceFieldShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldShape[DisturbanceFieldShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldShape[DisturbanceFieldShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldShape || (DisturbanceFieldShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {
@@ -2863,8 +2870,8 @@ let ButtonRole;
 let MenuPolicy;
 (function (MenuPolicy) {
   MenuPolicy['DEFAULT'] = 0;
-  MenuPolicy['NEVER'] = 1;
-  MenuPolicy['ALWAYS'] = 2;
+  MenuPolicy['HIDE'] = 1;
+  MenuPolicy['SHOW'] = 2;
 })(MenuPolicy || (MenuPolicy = {}));
 
 let PreDragStatus;

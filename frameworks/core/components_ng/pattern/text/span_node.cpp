@@ -24,6 +24,7 @@
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -387,9 +388,9 @@ void SpanItem::UpdateTextStyleForAISpan(
 
 void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     if (!aiSpanTextStyle.has_value()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
         TextStyle themeTextStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
         if (NearZero(themeTextStyle.GetFontSize().Value())) {
@@ -397,9 +398,12 @@ void SpanItem::SetAiSpanTextStyle(std::optional<TextStyle>& aiSpanTextStyle)
         }
         aiSpanTextStyle = themeTextStyle;
     } else {
-        aiSpanTextStyle.value().SetTextColor(Color::BLUE);
+        auto hyerlinkTheme = pipelineContext->GetTheme<HyperlinkTheme>();
+        CHECK_NULL_VOID(hyerlinkTheme);
+        auto hyerlinkColor = hyerlinkTheme->GetTextColor();
+        aiSpanTextStyle.value().SetTextColor(hyerlinkColor);
         aiSpanTextStyle.value().SetTextDecoration(TextDecoration::UNDERLINE);
-        aiSpanTextStyle.value().SetTextDecorationColor(Color::BLUE);
+        aiSpanTextStyle.value().SetTextDecorationColor(hyerlinkColor);
     }
 }
 
@@ -569,6 +573,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
+        resultObject.span = WeakClaim(this);
         resultObject.valueString = content;
         resultObject.isInit = true;
     }
@@ -781,12 +786,12 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
 
     int32_t endPosition = interval.second;
     int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEIMAGE;
     if ((start <= startPosition) && (end >= endPosition)) {
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
-        resultObject.type = SelectSpanType::TYPEIMAGE;
         if (options.image.has_value()) {
             resultObject.valueString = options.image.value();
         }

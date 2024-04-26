@@ -2376,7 +2376,7 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectCenter() const
+OffsetF FrameNode::GetPaintRectCenter(bool checkWindowBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
@@ -2385,6 +2385,9 @@ OffsetF FrameNode::GetPaintRectCenter() const
     auto center = offset + OffsetF(trans.Width() / 2.0f, trans.Height() / 2.0f);
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
+        if (checkWindowBoundary && parent->IsWindowBoundary()) {
+            break;
+        }
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         auto scale = renderContext->GetTransformScale();
@@ -3014,6 +3017,7 @@ void FrameNode::Layout()
     if (SelfOrParentExpansive()) {
         if (IsRootMeasureNode() && !needRestoreSafeArea_ && SelfExpansive()) {
             GetGeometryNode()->RestoreCache();
+            needRestoreSafeArea_ = true;
         } else if (needRestoreSafeArea_) {
             // if safeArea not restored in measure because of constraint not changed and so on,
             // restore this node

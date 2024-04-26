@@ -109,7 +109,7 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 }
 
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback, bool isInjected)
 {
     CHECK_NULL_VOID(view);
     CHECK_NULL_VOID(pointerEvent);
@@ -124,15 +124,15 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
             (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END)) {
-            view->ProcessAxisEvent(pointerEvent, node);
+            view->ProcessAxisEvent(pointerEvent, node, isInjected);
         } else {
             view->ProcessDragEvent(pointerEvent);
-            view->ProcessMouseEvent(pointerEvent, node);
+            view->ProcessMouseEvent(pointerEvent, node, isInjected);
         }
     } else {
         // touch event
         view->ProcessDragEvent(pointerEvent);
-        view->ProcessTouchEvent(pointerEvent, node, callback);
+        view->ProcessTouchEvent(pointerEvent, node, callback, isInjected);
     }
 }
 
@@ -266,10 +266,11 @@ void AceViewOhos::Launch()
 }
 
 void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback, bool isInjected)
 {
     CHECK_NULL_VOID(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
+    touchPoint.SetIsInjected(isInjected);
     if (SystemProperties::GetDebugEnabled()) {
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
@@ -341,7 +342,7 @@ void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& 
 }
 
 void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected)
 {
     MouseEvent event;
     bool markEnabled = true;
@@ -351,6 +352,7 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ConvertMouseEvent(pointerEvent, event, container->IsScenceBoardWindow());
         markEnabled = pointerEvent->IsMarkEnabled();
     }
+    event.isInjected = isInjected;
     auto markProcess = [event, markEnabled]() {
         MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
             std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
@@ -362,10 +364,11 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
 }
 
 void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected)
 {
     CHECK_NULL_VOID(axisEventCallback_);
     AxisEvent event;
+    event.isInjected = isInjected;
     if (!pointerEvent) {
         axisEventCallback_(event, nullptr, node);
         return;

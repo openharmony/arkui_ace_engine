@@ -306,26 +306,13 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         CHECK_NULL_VOID(paragraph_);
         UpdateFadeout(drawingContext);
         auto& canvas = drawingContext.canvas;
-        canvas.Save();
         if (!textRacing_) {
-            auto contentSize = contentSize_->Get();
-            auto contentOffset = contentOffset_->Get();
-            if (clip_ && clip_->Get() &&
-                (!fontSize_.has_value() || !fontSizeFloat_ ||
-                    NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-                RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-                    contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-                canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-            }
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
         } else {
             // Racing
             float textRacePercent = marqueeOption_.direction == MarqueeDirection::LEFT
                                         ? GetTextRacePercent()
                                         : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
-            if (clip_ && clip_->Get()) {
-                canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
-            }
             float paragraph1Offset =
                 (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
             if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
@@ -338,7 +325,6 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
             }
         }
-        canvas.Restore();
     } else {
         DrawObscuration(drawingContext);
     }
@@ -645,7 +631,7 @@ void TextContentModifier::SetFontSize(const Dimension& value)
     float fontSizeValue;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(value);
+        fontSizeValue = value.ConvertToPx();
     } else {
         fontSizeValue = value.Value();
     }

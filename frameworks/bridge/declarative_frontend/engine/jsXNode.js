@@ -61,12 +61,18 @@ class BuilderNode {
     update(params) {
         this._JSBuilderNode.update(params);
     }
-    build(builder, params) {
-        this._JSBuilderNode.build(builder, params);
+    build(builder, params, needPrxoy = true) {
+        this._JSBuilderNode.build(builder, params, needPrxoy);
         this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+    }
+    getNodePtr() {
+        return this._JSBuilderNode.getValidNodePtr();
     }
     getFrameNode() {
         return this._JSBuilderNode.getFrameNode();
+    }
+    getFrameNodeWithoutCheck() {
+        return this._JSBuilderNode.getFrameNodeWithoutCheck();
     }
     postTouchEvent(touchEvent) {
         return this._JSBuilderNode.postTouchEvent(touchEvent);
@@ -122,11 +128,11 @@ class JSBuilderNode extends BaseNode {
         }
         return nodeInfo;
     }
-    build(builder, params) {
+    build(builder, params, needPrxoy = true) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params_ = params;
         this.updateFuncByElmtId.clear();
-        this.nodePtr_ = super.create(builder.builder, this.params_);
+        this.nodePtr_ = super.create(builder.builder, this.params_, needPrxoy);
         this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
             this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
@@ -174,6 +180,9 @@ class JSBuilderNode extends BaseNode {
             return this.frameNode_;
         }
         return null;
+    }
+    getFrameNodeWithoutCheck() {
+        return this.frameNode_;
     }
     observeComponentCreation(func) {
         let elmId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -296,6 +305,10 @@ class JSBuilderNode extends BaseNode {
     }
     getNodePtr() {
         return this.nodePtr_;
+    }
+    getValidNodePtr() {
+        var _a;
+        return (_a = this._nativeRef) === null || _a === void 0 ? void 0 : _a.getNativeHandle();
     }
     dispose() {
         var _a;
@@ -543,6 +556,17 @@ class FrameNode {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
         }
         this._childList.set(node._nodeId, node);
+    }
+    addComponentContent(content) {
+        if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        if (!flag) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
     }
     insertChildAfter(child, sibling) {
         if (child === undefined || child === null) {
@@ -899,7 +923,6 @@ var LengthUnit;
     LengthUnit[LengthUnit["PERCENT"] = 3] = "PERCENT";
     LengthUnit[LengthUnit["LPX"] = 4] = "LPX";
 })(LengthUnit || (LengthUnit = {}));
-
 class LengthMetrics {
     constructor(value, unit) {
         if (unit in LengthUnit) {
@@ -908,7 +931,7 @@ class LengthMetrics {
         }
         else {
             this.unit = LengthUnit.VP;
-            this.value = unit === undefined? value : 0;
+            this.value = unit === undefined ? value : 0;
         }
     }
     static px(value) {
@@ -1483,19 +1506,21 @@ class Content {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 class ComponentContent extends Content {
     constructor(uiContext, builder, params) {
         super();
         let builderNode = new BuilderNode(uiContext, {});
         this.builderNode_ = builderNode;
-        this.builderNode_.build(builder, params !== null && params !== void 0 ? params : {});
+        this.builderNode_.build(builder, params !== null && params !== void 0 ? params : undefined, false);
     }
     update(params) {
         this.builderNode_.update(params);
     }
     getFrameNode() {
-        return this.builderNode_.getFrameNode();
+        return this.builderNode_.getFrameNodeWithoutCheck();
+    }
+    getNodePtr() {
+        return this.builderNode_.getNodePtr();
     }
 }
 

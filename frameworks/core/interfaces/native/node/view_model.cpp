@@ -61,6 +61,8 @@
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
+#include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -347,6 +349,20 @@ void* createDividerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = IndexerModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSearchNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -398,6 +414,8 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createFlowItemNode,
         createBlankNode,
         createDividerNode,
+        createAlphabetIndexerNode,
+        createSearchNode,
         createCircleNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {

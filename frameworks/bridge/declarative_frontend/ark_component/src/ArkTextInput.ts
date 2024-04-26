@@ -63,8 +63,8 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+class TextInputDecorationModifier  extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity: Symbol = Symbol('textInputDecoration');
@@ -72,12 +72,12 @@ class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecoration
     if (reset) {
       getUINativeModule().textInput.resetDecoration(node);
     } else {
-      getUINativeModule().textInput.setDecoration(node, this.value!.type, this.value!.color);
+      getUINativeModule().textInput.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (isResource(this.stageValue.color) && isResource(this.value.color)) {
@@ -271,6 +271,22 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
       getUINativeModule().textInput.resetShowPasswordIcon(node);
     } else {
       getUINativeModule().textInput.setShowPasswordIcon(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class TextInputShowPasswordModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputShowPassword');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetShowPassword(node);
+    } else {
+      getUINativeModule().textInput.setShowPassword(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -830,6 +846,11 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   showPasswordIcon(value: boolean): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordIconModifier.identity,
       TextInputShowPasswordIconModifier, value);
+    return this;
+  }
+  showPassword(value: boolean): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputShowPasswordModifier.identity,
+      TextInputShowPasswordModifier, value);
     return this;
   }
   textAlign(value: TextAlign): TextInputAttribute {

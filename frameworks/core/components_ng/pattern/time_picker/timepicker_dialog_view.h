@@ -61,6 +61,8 @@ private:
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
     static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties);
+    static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
+        const RefPtr<FrameNode>& buttonNode, bool isConfirm);
 };
 } // namespace OHOS::Ace::NG
 

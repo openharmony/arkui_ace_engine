@@ -208,8 +208,6 @@ RefPtr<FrameNode> AppBarView::BuildDivider()
     MarginProperty margin;
     margin.left = CalcLength(-(theme->GetDividerWidth()));
     auto renderProperty = divider->GetPaintProperty<DividerRenderProperty>();
-    // color
-    renderProperty->UpdateDividerColor(theme->GetDividerColor());
     // line cap
     renderProperty->UpdateLineCap(LineCap::ROUND);
 

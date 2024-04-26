@@ -123,6 +123,8 @@ private:
     bool isOritationListenerRegisted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     LastAnimationParam lastAnimationParam_;
+    int32_t lastWindowHeight_ = 0.0;
+    int32_t lastWindowWidth_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

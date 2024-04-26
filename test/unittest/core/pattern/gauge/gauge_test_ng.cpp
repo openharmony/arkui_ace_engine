@@ -1772,4 +1772,38 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest004, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetValuesValue(), VALUES);
     EXPECT_EQ(paintProperty_->GetIsShowIndicatorValue(), SHOW_INDICATOR);
 }
+
+/**
+ * @tc.name: GaugePatternTest001
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Gauge node.
+     */
+    auto gaugePattern = AceType::MakeRefPtr<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, gaugePattern);
+    gaugePattern->AttachToFrameNode(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    gaugePaintProperty->UpdateValue(VALUE);
+    gaugePaintProperty->UpdateMin(MIN);
+    gaugePaintProperty->UpdateMax(MAX);
+    auto node = [](GaugeConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(VALUE, config.value_);
+        EXPECT_EQ(MIN, config.min_);
+        EXPECT_EQ(MAX, config.max_);
+        return nullptr;
+    };
+
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    gaugePattern->SetBuilderFunc(node);
+    gaugePattern->BuildContentModifierNode();
+}
 } // namespace OHOS::Ace::NG

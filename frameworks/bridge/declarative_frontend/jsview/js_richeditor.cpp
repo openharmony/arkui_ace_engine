@@ -1233,11 +1233,10 @@ void JSRichEditorController::ParseJsTextStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
-        updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle);
@@ -1284,11 +1283,10 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
         !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
-    } else if (size.Unit() == DimensionUnit::PERCENT) {
+    } else if (size.IsNonPositive() || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = JSContainerBase::GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         size = theme->GetTextStyle().GetFontSize();
-        updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
     ParseJsLineHeightLetterSpacingTextStyle(styleObject, style, updateSpanStyle, true);
@@ -1352,7 +1350,7 @@ void JSRichEditorController::ParseTextDecoration(
             updateSpanStyle.hasResourceDecorationColor = color->IsObject();
         }
     }
-    if (!updateSpanStyle.updateTextDecorationColor.has_value()) {
+    if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
         updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
         style.SetTextDecorationColor(style.GetTextColor());
     }
@@ -1814,7 +1812,7 @@ void JSRichEditorController::ParseJsSelectionOptions(
     JSRef<JSVal> menuPolicy = placeholderOptionObject->GetProperty("menuPolicy");
     double tempPolicy = 0.0;
     if (!menuPolicy->IsNull() && JSContainerBase::ParseJsDouble(menuPolicy, tempPolicy)) {
-        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:NEVER, 2:ALWAYS
+        if (0 == tempPolicy || 1 == tempPolicy || 2 == tempPolicy) { // 0:DEFAULT, 1:HIDE, 2:SHOW
             optionTemp.menuPolicy = static_cast<MenuPolicy>(tempPolicy);
             options = optionTemp;
         }
@@ -2002,13 +2000,13 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             CalcDimension height;
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
-            style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
+            style.leadingMargin->size = NG::LeadingMarginSize(width, height);
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
             if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
                 CalcDimension width;
                 JSContainerBase::ParseJsDimensionVp(lm, width);
-                style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
+                style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
             }
         }
     } else if (!lm->IsNull()) {
@@ -2016,7 +2014,7 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
         CalcDimension width;
         JSContainerBase::ParseJsDimensionVp(lm, width);
-        style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
+        style.leadingMargin->size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()));
     }
     return true;
 }

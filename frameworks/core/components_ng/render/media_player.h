@@ -29,7 +29,7 @@ using StateChangedEvent = std::function<void(PlaybackStatus)>;
 using CommonEvent = std::function<void()>;
 using TextureRefreshEnVent = std::function<void(uint32_t, uint64_t)>;
 // MediaPlayer is used to show and play meida
-class MediaPlayer : public virtual AceType {
+class ACE_FORCE_EXPORT MediaPlayer : public virtual AceType {
     DECLARE_ACE_TYPE(NG::MediaPlayer, AceType)
 
 public:
@@ -50,6 +50,11 @@ public:
     virtual void SetVolume(float leftVolume, float rightVolume) {}
 
     virtual bool SetSource(const std::string& /*src*/)
+    {
+        return false;
+    }
+
+    virtual bool SetSourceByFd(int32_t fd)
     {
         return false;
     }

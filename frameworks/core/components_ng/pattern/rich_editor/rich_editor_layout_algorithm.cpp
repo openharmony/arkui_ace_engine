@@ -235,7 +235,7 @@ void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
-    auto contentOffset = TextLayoutAlgorithm::GetContentOffset(layoutWrapper);
+    auto contentOffset = TextLayoutAlgorithm::SetContentOffset(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, contentOffset);
     auto pattern = host->GetPattern<RichEditorPattern>();
@@ -273,7 +273,9 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     }
     if (lineStyle->propTextIndent) {
         style.leadingMargin = std::make_optional<LeadingMargin>();
-        style.leadingMargin->size = SizeF(lineStyle->propTextIndent->ConvertToPx(), 0.0f);
+        style.leadingMargin->size =
+            NG::LeadingMarginSize(Dimension(lineStyle->propTextIndent->Value(), lineStyle->propTextIndent->Unit()),
+                Dimension(0.0f, lineStyle->propTextIndent->Unit()));
     }
     if (lineStyle->propLeadingMargin) {
         if (!style.leadingMargin) {

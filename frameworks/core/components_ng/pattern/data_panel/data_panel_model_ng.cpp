@@ -108,4 +108,11 @@ void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gr
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
 }
+
+void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<DataPanelPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
 } // namespace OHOS::Ace::NG

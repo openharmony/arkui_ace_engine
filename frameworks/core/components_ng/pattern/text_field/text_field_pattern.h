@@ -208,13 +208,9 @@ public:
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
-    void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    bool OverCounter(int32_t originLength);
-    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
-    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
@@ -230,9 +226,9 @@ public:
         return counterTextNode_;
     }
 
-    bool GetCounterState() const
+    bool GetShowCounterStyleValue() const
     {
-        return counterChange_;
+        return showCountBorderStyle_;
     }
 
     void SetCounterState(bool counterChange)
@@ -789,6 +785,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
@@ -1033,8 +1031,10 @@ public:
 
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
+    std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
     bool IsShowCancelButtonMode() const;
+    void CheckPasswordAreaState();
 
     bool GetShowSelect() const
     {
@@ -1107,6 +1107,7 @@ public:
     bool IsUnderlineMode();
     bool IsInlineMode();
     bool IsShowError();
+    bool IsShowCount();
     void ResetContextAttr();
     void RestoreDefaultMouseState();
 
@@ -1175,7 +1176,6 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
-    void HanldeMaxLengthAndUnderlineTypingColor();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
 
@@ -1231,6 +1231,7 @@ private:
     void RequestKeyboardOnFocus();
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction();
+    void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
 
@@ -1302,6 +1303,8 @@ private:
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
+    void HandleCountStyle();
+    void HandleDeleteOnCounterScene();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1456,8 +1459,11 @@ private:
     bool isFillRequestFinish_ = false;
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
+    bool showCountBorderStyle_ = false;
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
+
+    bool isFocusTextColorSet_ = false;
 };
 } // namespace OHOS::Ace::NG
 
