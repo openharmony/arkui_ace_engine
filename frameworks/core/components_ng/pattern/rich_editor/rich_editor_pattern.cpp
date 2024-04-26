@@ -4847,7 +4847,7 @@ void RichEditorPattern::CreateHandles()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CalculateHandleOffsetAndShowOverlay();
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
 }
 
 void RichEditorPattern::ShowHandles()
@@ -5131,14 +5131,19 @@ bool RichEditorPattern::IsShowHandle()
     return !richEditorTheme->IsRichEditorShowHandle();
 }
 
-void RichEditorPattern::SetHandles()
+void RichEditorPattern::UpdateSelectionInfo(int32_t start, int32_t end)
 {
-    ResetIsMousePressed();
-    sourceType_ = SourceType::TOUCH;
-    SetShowSelect(true);
-    isShowMenu_ = false;
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(),
-        TextResponseType::LONG_PRESS);
+    UpdateSelectionType(GetSpansInfo(start, end, GetSpansMethod::ONSELECT));
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
+    textResponseType_ = selectOverlayInfo
+                        ? static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0))
+                        : TextResponseType::LONG_PRESS;
+    if (IsShowHandle() && !selectOverlay_->IsUsingMouse()) {
+        ResetIsMousePressed();
+        sourceType_ = SourceType::TOUCH;
+    } else {
+        isMousePressed_ = true;
+    }
 }
 
 void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options,
@@ -5159,7 +5164,6 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     }
     UpdateSelector(start, end);
 
-    auto oldSelectedType = selectedType_;
     if (textSelector_.IsValid() && !textSelector_.StartEqualToDest()) {
         StopTwinkling();
         if (start != textSelector_.GetTextStart() || end != textSelector_.GetTextEnd()) {
@@ -5168,23 +5172,23 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     }
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
     CalculateHandleOffsetAndShowOverlay();
-    bool isNotUseDefault =
-        options.has_value() && MenuPolicy::DEFAULT != options.value().menuPolicy && !textSelector_.SelectNothing();
-    bool isShowHandle = IsShowHandle();
-    if (!isShowHandle) {
+    UpdateSelectionInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    if (!IsShowHandle()) {
         CloseSelectOverlay();
-    } else if (isNotUseDefault) {
-        HandleSelectOverlayWithOptions(options.value());
-    } else if (SelectOverlayIsOn() && selectOverlay_->IsCurrentMenuVisibile()) {
-        isMousePressed_ = selectOverlay_->IsUsingMouse();
-        auto selectedTypeChange = (oldSelectedType.has_value() && selectedType_.has_value() &&
-                                      oldSelectedType.value() != selectedType_.value()) ||
-                                  (!oldSelectedType.has_value() && selectedType_.has_value());
-        RefreshSelectOverlay(isMousePressed_, selectedTypeChange);
-    }
-    if (!SelectOverlayIsOn() && isShowHandle) {
-        SetHandles();
-        isShowMenu_ = true;
+    } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
+        selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
+           .animation = true, .requestCode = REQUEST_RECREATE });
+    } else if (options.value().menuPolicy == MenuPolicy::HIDE) {
+        if (selectOverlay_->IsUsingMouse()) {
+            CloseSelectOverlay();
+        } else {
+            selectOverlay_->ProcessOverlay({ .menuIsShow = false, .animation = true });
+        }
+    } else if (options.value().menuPolicy == MenuPolicy::SHOW) {
+        if (selectOverlay_->IsUsingMouse() || sourceType_ == SourceType::MOUSE) {
+            selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
+        }
+        selectOverlay_->ProcessOverlay({ .animation = true, .requestCode = REQUEST_RECREATE });
     }
     MoveCaretToContentRect();
     auto host = GetHost();
