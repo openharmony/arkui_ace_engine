@@ -621,7 +621,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             if (curNode) {
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
-                curNavDestination->SetIsOnAnimation(false);
                 if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
                     PageTransitionType::ENTER_PUSH) {
                     return;
@@ -644,7 +643,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         RadiusF(EdgeF(0.0f, 0.0f)));
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
-    curNavDestination->SetIsOnAnimation(true);
 
     /* start transition animation */
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
