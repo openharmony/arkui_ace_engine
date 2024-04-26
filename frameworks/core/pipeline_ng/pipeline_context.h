@@ -691,6 +691,7 @@ public:
 
     bool CheckNeedDisableUpdateBackgroundImage();
 
+    void ChangeDarkModeBrightness(bool isFocus) override;
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
