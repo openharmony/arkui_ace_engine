@@ -651,7 +651,7 @@ void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper,
     float& startPos, bool isGroup, bool forwardLayout)
 {
     if (!isGroup || IsScrollSnapAlignCenter(layoutWrapper) ||
-        (forwardLayout && NonNegative(startPos)) || (!forwardLayout && LessOrEqual(startPos, contentMainSize_))) {
+        (forwardLayout && NonNegative(startPos)) || (!forwardLayout && LessOrEqual(startPos, prevContentMainSize_))) {
         return;
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(startIndex);
@@ -663,7 +663,7 @@ void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper,
     }
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", startIndex);
-    SetListItemGroupParam(wrapper, startIndex, startPos, forwardLayout, listLayoutProperty, false);
+    SetListItemGroupParam(wrapper, startIndex, startPos, forwardLayout, listLayoutProperty, false, true);
     wrapper->Measure(GetGroupLayoutConstraint());
     auto algorithmWrapper = wrapper->GetLayoutAlgorithm();
     CHECK_NULL_VOID(algorithmWrapper);
@@ -1339,7 +1339,8 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
 }
 
 void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index,
-    float referencePos, bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout)
+    float referencePos, bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
+    bool needAdjustRefPos)
 {
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
@@ -1352,7 +1353,8 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
         auto wrapper = layoutWrapper;
         itemGroup->ClearItemPosition(&(*wrapper));
     }
-    itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
+    itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, prevContentMainSize_, forwardLayout);
+    itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
     itemGroup->SetListLayoutProperty(layoutProperty);
     if (!isSnapCenter_) {
         itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
@@ -1450,9 +1452,11 @@ void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWra
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
     if (forwardLayout) {
-        itemGroup->SetListMainSize(startMainPos_, endMainPos_, itemPosition_[index].endPos, !forwardLayout);
+        itemGroup->SetListMainSize(startMainPos_, endMainPos_, itemPosition_[index].endPos, prevContentMainSize_,
+            !forwardLayout);
     } else {
-        itemGroup->SetListMainSize(startMainPos_, endMainPos_, itemPosition_[index].startPos, !forwardLayout);
+        itemGroup->SetListMainSize(startMainPos_, endMainPos_, itemPosition_[index].startPos, prevContentMainSize_,
+            !forwardLayout);
     }
     itemGroup->SetScrollAlign(ScrollAlign::NONE);
     wrapper->Measure(GetGroupLayoutConstraint());
