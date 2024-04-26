@@ -43,6 +43,17 @@ SpanString::SpanString(const ImageSpanOptions& options) : text_(" ")
     spansMap_[SpanType::Image].emplace_back(MakeRefPtr<ImageSpan>(options));
 }
 
+SpanString::SpanString(RefPtr<CustomSpan>& span) : text_(" ")
+{
+    auto spanItem = MakeRefPtr<NG::CustomSpanItem>();
+    spanItem->content = " ";
+    spanItem->interval = { 0, 1 };
+    spanItem->onMeasure = span->GetOnMeasure();
+    spanItem->onDraw = span->GetOnDraw();
+    spans_.emplace_back(spanItem);
+    spansMap_[SpanType::CustomSpan].emplace_back(span);
+}
+
 SpanString::~SpanString()
 {
     spansMap_.clear();
@@ -153,7 +164,8 @@ void SpanString::MergeIntervals(std::list<RefPtr<SpanBase>>& spans)
 {
     auto it = spans.begin();
     while (it != spans.end()) {
-        if ((*it)->GetSpanType() == SpanType::Image) {
+        auto spanType = (*it)->GetSpanType();
+        if (spanType == SpanType::Image || spanType == SpanType::CustomSpan) {
             return;
         }
         auto current = it++;
@@ -196,46 +208,55 @@ int32_t SpanString::GetStepsByPosition(int32_t pos)
     return step;
 }
 
-void SpanString::AddImageSpan(const RefPtr<SpanBase>& span)
+void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
 {
-    auto imageSpan = DynamicCast<ImageSpan>(span);
-    CHECK_NULL_VOID(imageSpan);
-    auto step = GetStepsByPosition(span->GetStartIndex());
     auto iter = spans_.begin();
+    auto step = GetStepsByPosition(span->GetStartIndex());
     std::advance(iter, step);
-    auto spanItem = MakeRefPtr<NG::ImageSpanItem>();
-    auto wStr = GetWideString();
-    text_ = StringUtils::ToString(
-        wStr.substr(0, span->GetStartIndex()) + StringUtils::ToWstring(" ") + wStr.substr(span->GetStartIndex()));
-    spanItem->content = " ";
-    spanItem->interval.first = span->GetStartIndex();
-    spanItem->interval.second = span->GetEndIndex();
-    spanItem->SetImageSpanOptions(imageSpan->GetImageSpanOptions());
-    iter = spans_.insert(iter, spanItem);
+    if (type == SpanType::Image) {
+        auto imageSpan = DynamicCast<ImageSpan>(span);
+        CHECK_NULL_VOID(imageSpan);
+        auto spanItem = MakeRefPtr<NG::ImageSpanItem>();
+        spanItem->content = " ";
+        spanItem->interval.first = span->GetStartIndex();
+        spanItem->interval.second = span->GetEndIndex();
+        spanItem->SetImageSpanOptions(imageSpan->GetImageSpanOptions());
+        iter = spans_.insert(iter, spanItem);
+    } else if (type == SpanType::CustomSpan) {
+        auto customSpan = AceType::DynamicCast<CustomSpan>(span);
+        CHECK_NULL_VOID(customSpan);
+        auto spanItem = MakeRefPtr<NG::CustomSpanItem>();
+        spanItem->content = " ";
+        spanItem->interval.first = span->GetStartIndex();
+        spanItem->interval.second = span->GetEndIndex();
+        spanItem->onDraw = customSpan->GetOnDraw();
+        spanItem->onMeasure = customSpan->GetOnMeasure();
+        iter = spans_.insert(iter, spanItem);
+    }
     for (++iter; iter != spans_.end(); ++iter) {
         ++(*iter)->interval.first;
         ++(*iter)->interval.second;
     }
 
-    if (spansMap_.find(SpanType::Image) == spansMap_.end()) {
-        spansMap_[SpanType::Image].emplace_back(span);
+    if (spansMap_.find(type) == spansMap_.end()) {
+        spansMap_[type].emplace_back(span);
     } else {
-        auto imageList = spansMap_[SpanType::Image];
+        auto specialList = spansMap_[type];
         int32_t step = 0;
-        for (const auto& imageSpan : imageList) {
-            if (imageSpan->GetStartIndex() == span->GetStartIndex()) {
+        for (const auto& specialSpan : specialList) {
+            if (specialSpan->GetStartIndex() == span->GetStartIndex()) {
                 break;
             }
             ++step;
         }
-        auto iter = imageList.begin();
+        auto iter = specialList.begin();
         std::advance(iter, step);
-        imageList.insert(iter, span);
-        for (++iter; iter != imageList.end(); ++iter) {
+        specialList.insert(iter, span);
+        for (++iter; iter != specialList.end(); ++iter) {
             (*iter)->UpdateStartIndex((*iter)->GetStartIndex() + 1);
             (*iter)->UpdateEndIndex((*iter)->GetEndIndex() + 1);
         }
-        spansMap_[SpanType::Image] = imageList;
+        spansMap_[type] = specialList;
     }
 }
 
@@ -245,7 +266,11 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
         return;
     }
     if (span->GetSpanType() == SpanType::Image) {
-        AddImageSpan(span);
+        AddSpecialSpan(span, SpanType::Image);
+        return;
+    }
+    if (span->GetSpanType() == SpanType::CustomSpan) {
+        AddSpecialSpan(span, SpanType::CustomSpan);
         return;
     }
     auto start = span->GetStartIndex();
@@ -277,10 +302,13 @@ void SpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
     auto spans = spansMap_[key];
     auto end = start + length;
     if (key == SpanType::Image) {
-        RemoveImageSpan(start, end);
+        RemoveSpecialSpan(start, end, key);
         return;
     }
-
+    if (key == SpanType::CustomSpan) {
+        RemoveSpecialSpan(start, end, key);
+        return;
+    }
     auto defaultSpan = GetDefaultSpan(key);
     CHECK_NULL_VOID(defaultSpan);
     defaultSpan->UpdateStartIndex(start);
@@ -323,8 +351,8 @@ bool SpanString::CheckRange(const RefPtr<SpanBase>& spanBase) const
     if (length <= 0) {
         return false;
     }
-
-    auto len = spanBase->GetSpanType() == SpanType::Image ? GetLength() + 1 : GetLength();
+    auto spanType = spanBase->GetSpanType();
+    auto len = spanType == SpanType::Image || spanType == SpanType::CustomSpan ? GetLength() + 1 : GetLength();
     auto end = start + length;
 
     if (start > len || end > len) {
@@ -592,9 +620,9 @@ void SpanString::UpdateSpanBaseWithOffset(RefPtr<SpanBase>& span, int32_t start,
     }
 }
 
-void SpanString::RemoveImageSpan(int32_t start, int32_t end)
+void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
 {
-    auto spans = spansMap_[SpanType::Image];
+    auto spans = spansMap_[type];
     int32_t count = 0;
     for (auto iter = spans.begin(); iter != spans.end();) {
         if ((*iter)->GetStartIndex() >= start && (*iter)->GetStartIndex() < end - count) {
@@ -609,14 +637,15 @@ void SpanString::RemoveImageSpan(int32_t start, int32_t end)
         ++iter;
     }
     if (spans.empty()) {
-        spansMap_.erase(SpanType::Image);
+        spansMap_.erase(type);
     } else {
-        spansMap_[SpanType::Image] = spans;
+        spansMap_[type] = spans;
     }
     count = 0;
     for (auto iter = spans_.begin(); iter != spans_.end();) {
-        if ((*iter)->interval.first >= start && (*iter)->interval.first < end - count &&
-            (*iter)->spanItemType == NG::SpanItemType::IMAGE) {
+        if ((*iter)->interval.first >= start && (*iter)->interval.first < end - count
+            && ((type == SpanType::Image && (*iter)->spanItemType == NG::SpanItemType::IMAGE)
+                || (type == SpanType::CustomSpan && (*iter)->spanItemType == NG::SpanItemType::CustomSpan))) {
             UpdateSpansWithOffset((*iter)->interval.first, -1);
             iter = spans_.erase(iter);
             ++count;

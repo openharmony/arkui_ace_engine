@@ -24,6 +24,23 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace {
+
+struct CustomSpanMeasureInfo {
+    float fontSize;
+};
+
+struct CustomSpanOptions {
+    float x;
+    float lineTop;
+    float lineBottom;
+    float baseline;
+};
+
+struct CustomSpanMetrics {
+    float width;
+    std::optional<float> height;
+};
+
 struct UserGestureOptions {
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;

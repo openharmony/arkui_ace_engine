@@ -149,6 +149,7 @@ private:
     void DrawImageNodeList(const float drawingContextWidth, const float paragraph1Offset, const float paragraph2Offset);
     void UpdateImageNodeVisible(const VisibleType visible);
     void PaintImage(RSCanvas& canvas, float x, float y);
+    void PaintCustomSpan(DrawingContext& drawingContext);
 
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;

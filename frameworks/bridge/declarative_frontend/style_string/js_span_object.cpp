@@ -18,11 +18,15 @@
 #include <numeric>
 #include <string>
 
+#include "canvas_napi/js_canvas.h"
+
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -889,5 +893,135 @@ void JSImageAttachment::SetImageSpan(const RefPtr<ImageSpan>& imageSpan)
 const ImageSpanOptions& JSImageAttachment::GetImageOptions() const
 {
     return imageSpan_->GetImageSpanOptions();
+}
+
+JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj, const JSCallbackInfo& args) : customSpanObj_(customSpanObj)
+{
+    auto obj = JSRef<JSObject>::Cast(customSpanObj);
+    if (obj->IsUndefined()) {
+        return;
+    }
+    JSRef<JSVal> onMeasure = obj->GetProperty("onMeasure");
+    if (onMeasure->IsFunction()) {
+        auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(obj), JSRef<JSFunc>::Cast(onMeasure));
+        auto onMeasureFunc = JSCustomSpan::ParseOnMeasureFunc(jsDrawFunc, args.GetExecutionContext());
+        CustomSpan::SetOnMeasure(onMeasureFunc);
+    }
+    JSRef<JSVal> onDraw = obj->GetProperty("onDraw");
+    if (onDraw->IsFunction()) {
+        auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(obj), JSRef<JSFunc>::Cast(onDraw));
+        auto onDrawFunc = JSCustomSpan::ParseOnDrawFunc(jsDrawFunc, args.GetExecutionContext());
+        CustomSpan::SetOnDraw(onDrawFunc);
+    }
+}
+
+JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj,
+    std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end)
+    : CustomSpan(onMeasure, onDraw, start, end), customSpanObj_(customSpanObj)
+{}
+void JSCustomSpan::SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj)
+{
+    customSpanObj_ = customSpanObj;
+}
+
+JSRef<JSObject>& JSCustomSpan::GetJsCustomSpanObject()
+{
+    return customSpanObj_;
+}
+RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    if (end - start > 1) {
+        return nullptr;
+    }
+    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(customSpanObj_, GetOnMeasure(), GetOnDraw(), start, end);
+    return spanBase;
+}
+
+bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto customSpan = DynamicCast<JSCustomSpan>(other);
+    if (!customSpan) {
+        return false;
+    }
+    return &(customSpan->customSpanObj_) == &customSpanObj_;
+}
+
+std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+{
+    std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> drawCallback =
+        [func = std::move(jsDraw), execCtx](CustomSpanMeasureInfo customSpanMeasureInfo) -> CustomSpanMetrics {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        contextObj->SetProperty<float>("fontSize", customSpanMeasureInfo.fontSize);
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        JSRef<JSObject> result = JSRef<JSObject>::Cast(func->ExecuteJS(1, &jsVal));
+        float width = 0;
+        if (result->HasProperty("width")) {
+            auto widthObj = result->GetProperty("width");
+            width = widthObj->ToNumber<float>();
+        }
+        std::optional<float> height;
+        if (result->HasProperty("height")) {
+            auto heightObj = result->GetProperty("height");
+            height = heightObj->ToNumber<float>();
+        }
+        return { width, height };
+    };
+    return drawCallback;
+}
+std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseOnDrawFunc(
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+{
+    std::function<void(NG::DrawingContext&, CustomSpanOptions)> drawCallback =
+        [func = std::move(jsDraw), execCtx](NG::DrawingContext& context, CustomSpanOptions customSpanOptions) -> void {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(1);
+        JSRef<JSObject> contextObj = objectTemplate->NewInstance();
+        JSRef<JSObject> sizeObj = objectTemplate->NewInstance();
+        sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
+        sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
+        contextObj->SetPropertyObject("size", sizeObj);
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        ScopeRAII scope(env);
+        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
+        OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+        napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+        if (unwrapCanvas) {
+            unwrapCanvas->SaveCanvas();
+            unwrapCanvas->ClipCanvas(context.width, context.height);
+        }
+        JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+        contextObj->SetPropertyObject("canvas", jsCanvasVal);
+
+        auto jsVal = JSRef<JSVal>::Cast(contextObj);
+        panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+        napi_wrap(
+            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        JSRef<JSObject> customSpanOptionsObj = objectTemplate->NewInstance();
+        customSpanOptionsObj->SetProperty<float>("x", customSpanOptions.x);
+        customSpanOptionsObj->SetProperty<float>("lineTop", customSpanOptions.lineTop);
+        customSpanOptionsObj->SetProperty<float>("lineBottom", customSpanOptions.lineBottom);
+        customSpanOptionsObj->SetProperty<float>("baseline", customSpanOptions.baseline);
+        auto customSpanOptionsVal = JSRef<JSVal>::Cast(customSpanOptionsObj);
+        JSRef<JSVal> params[] = { jsVal, customSpanOptionsVal };
+        func->ExecuteJS(2, params);
+        if (unwrapCanvas) {
+            unwrapCanvas->RestoreCanvas();
+            unwrapCanvas->ResetCanvas();
+        }
+    };
+    return drawCallback;
 }
 } // namespace OHOS::Ace::Framework

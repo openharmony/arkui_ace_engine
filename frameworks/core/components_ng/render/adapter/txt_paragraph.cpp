@@ -394,9 +394,9 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
     auto boxes = paragraph_->GetRectsForRange(
         prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
-        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetTextRectsByBoundary(prev, extent,
+        needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
+        Rosen::TextRectWidthStyle::TIGHT);
 #endif
     while (boxes.empty() && !text_.empty()) {
         graphemeClusterLength *= 2;
@@ -406,9 +406,9 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
             boxes = paragraph_->GetRectsForRange(
                 0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-            boxes = paragraph_->GetTextRectsByBoundary(
-                0, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
-                Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
+            boxes = paragraph_->GetTextRectsByBoundary(0, extent,
+                needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
+                Rosen::TextRectWidthStyle::TIGHT);
 #endif
             break;
         }
@@ -416,9 +416,9 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         boxes = paragraph_->GetRectsForRange(
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-        boxes = paragraph_->GetTextRectsByBoundary(
-            prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
-            Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
+        boxes = paragraph_->GetTextRectsByBoundary(prev, extent,
+            needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
+            Rosen::TextRectWidthStyle::TIGHT);
 #endif
     }
     if (boxes.empty()) {
@@ -498,9 +498,9 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
     auto boxes = paragraph_->GetRectsForRange(
         extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    auto boxes = paragraph_->GetTextRectsByBoundary(
-        extent, next, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
-        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
+    auto boxes = paragraph_->GetTextRectsByBoundary(extent, next,
+        needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
+        Rosen::TextRectWidthStyle::TIGHT);
 #endif
 
     if (boxes.empty() && !text_.empty()) {
@@ -510,9 +510,9 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
         boxes = paragraph_->GetRectsForRange(
             extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-        boxes = paragraph_->GetTextRectsByBoundary(
-            extent, next, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
-            Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
+        boxes = paragraph_->GetTextRectsByBoundary(extent, next,
+            needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
+            Rosen::TextRectWidthStyle::TIGHT);
 #endif
     }
 
@@ -698,6 +698,33 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
         HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
     }
     return true;
+}
+
+LineMetrics TxtParagraph::GetLineMetricsByRectF(RectF& rect)
+{
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragraph_.get());
+#endif
+    LineMetrics lineMetrics;
+    auto metrics = paragraphTxt->GetLineMetrics();
+    if (metrics.empty()) {
+        return lineMetrics;
+    }
+    auto res = metrics.size() - 1;
+    for (size_t index = 0; index < metrics.size() - 1; index++) {
+        if (metrics[index].y <= rect.Top() && metrics[index + 1].y >= rect.Bottom()) {
+            res = index;
+            break;
+        }
+    }
+    auto resMetric = metrics[res];
+    lineMetrics.x = resMetric.x;
+    lineMetrics.y = resMetric.y;
+    lineMetrics.ascender = resMetric.ascender;
+    lineMetrics.height = resMetric.height;
+    return lineMetrics;
 }
 
 std::u16string TxtParagraph::GetParagraphText()

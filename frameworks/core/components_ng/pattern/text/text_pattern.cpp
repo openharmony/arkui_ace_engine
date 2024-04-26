@@ -2374,6 +2374,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             nodes.push({ .node = *iter, .containerSpanNode = containerSpanNode });
         }
     }
+    placeholderCount_ += onDraws_.size();
 }
 
 void TextPattern::UpdateContainerChildren(const RefPtr<UINode>& parentNode, const RefPtr<UINode>& child)
