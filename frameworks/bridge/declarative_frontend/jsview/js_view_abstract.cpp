@@ -3121,9 +3121,39 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
 void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto borderRadiusValue = menuOptions->GetProperty("borderRadius");
-    NG::BorderRadiusProperty radius;
-    if (JSViewAbstract::ParseBorderRadius(borderRadiusValue, radius)) {
-        menuParam.borderRadius = radius;
+    NG::BorderRadiusProperty menuBorderRadius;
+    CalcDimension borderRadius;
+    if (JSViewAbstract::ParseJsDimensionVp(borderRadiusValue, borderRadius)) {
+        if (borderRadius.Unit() != DimensionUnit::PERCENT && GreatOrEqual(borderRadius.Value(), 0.0f)) {
+            menuBorderRadius.SetRadius(borderRadius);
+            menuBorderRadius.multiValued = false;
+            menuParam.borderRadius = menuBorderRadius;
+        };
+    } else if (borderRadiusValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(borderRadiusValue);
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
+        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        if (LessNotEqual(topLeft.Value(), 0.0f)) {
+            topLeft.Reset();
+        }
+        if (LessNotEqual(topRight.Value(), 0.0f)) {
+            topRight.Reset();
+        }
+        if (LessNotEqual(bottomLeft.Value(), 0.0f)) {
+            bottomLeft.Reset();
+        }
+        if (LessNotEqual(bottomRight.Value(), 0.0f)) {
+            bottomRight.Reset();
+        }
+        menuBorderRadius.radiusTopLeft = topLeft;
+        menuBorderRadius.radiusTopRight = topRight;
+        menuBorderRadius.radiusBottomLeft = bottomLeft;
+        menuBorderRadius.radiusBottomRight = bottomRight;
+        menuBorderRadius.multiValued = true;
+        menuParam.borderRadius = menuBorderRadius;
     }
 }
 
