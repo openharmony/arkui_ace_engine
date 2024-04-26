@@ -98,6 +98,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!customSize_) {
         auto maxSize = layoutConstraint->maxSize;
         maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
+        }
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
         ComputeInnerLayoutParam(childLayoutConstraint, dialogProp);
         UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
@@ -267,15 +270,20 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
     }
 
     auto defaultMinHeight = DIALOG_MIN_HEIGHT.ConvertToPx();
-    auto defaultMaxHeight = maxSize.Height() * DIALOG_MAX_HEIGHT_RATIO;
+    auto defaultMaxHeight = IsGetExpandDisplayValidHeight() ? expandDisplayValidHeight_ : maxSize.Height();
     innerLayout.minSize = SizeF(width, defaultMinHeight);
-    innerLayout.maxSize = SizeF(width, defaultMaxHeight);
+    innerLayout.maxSize = SizeF(width, defaultMaxHeight * DIALOG_MAX_HEIGHT_RATIO);
 
     if (dialogProp->GetHeight().has_value()) {
         auto dialogHeight = dialogProp->GetHeight().value_or(Dimension(-1, DimensionUnit::VP));
-        auto height = dialogHeight.Unit() == DimensionUnit::PERCENT ? maxSize.Height() : dialogHeight.ConvertToPx();
-        if (NonPositive(height)) {
-            height = defaultMaxHeight;
+        // covert user input height to px
+        auto realHeight = dialogHeight.Unit() == DimensionUnit::PERCENT ?
+            dialogHeight.ConvertToPxWithSize(defaultMaxHeight) : dialogHeight.ConvertToPx();
+        // percent and abs height default max value
+        auto height = dialogHeight.Unit() == DimensionUnit::PERCENT ? defaultMaxHeight : realHeight;
+        // abnormal height proc
+        if (NonPositive(realHeight)) {
+            height = defaultMaxHeight * DIALOG_MAX_HEIGHT_RATIO;
         }
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, height);
@@ -283,6 +291,33 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
     return true;
+}
+
+bool DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight()
+{
+    CHECK_NULL_RETURN(expandDisplay_ && isShowInSubWindow_, false);
+    auto pipelineContext = GetCurrentPipelineContext();
+    auto expandDisplayValidHeight = pipelineContext->GetDisplayAvailableRect().Height();
+    if (Positive(expandDisplayValidHeight)) {
+        expandDisplayValidHeight_ = expandDisplayValidHeight;
+        return true;
+    }
+    return false;
+}
+
+RefPtr<PipelineContext> DialogLayoutAlgorithm::GetCurrentPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineContext> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+    } else {
+        context = PipelineContext::GetCurrentContext();
+    }
+    return context;
 }
 
 void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayout,
