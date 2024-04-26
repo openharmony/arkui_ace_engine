@@ -100,7 +100,10 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Leve
      */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.percentReference = SizeF(MAXSIZE_WIDTH, MAXSIZE_HEIGHT);
-    auto size1 = layoutAlgorithm.MeasureContent(layoutConstraint, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto size1 = layoutAlgorithm.MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_NE(size1, std::nullopt);
     EXPECT_EQ(size1.value(), SizeF(MAXSIZE_WIDTH, MAXSIZE_WIDTH));
     /**
@@ -109,7 +112,7 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Leve
      */
     layoutConstraint.selfIdealSize.width_ = SELFSIZE_WIDTH;
     layoutConstraint.selfIdealSize.height_ = SELFSIZE_HEIGHT;
-    auto size2 = layoutAlgorithm.MeasureContent(layoutConstraint, nullptr);
+    auto size2 = layoutAlgorithm.MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_NE(size2, std::nullopt);
     EXPECT_EQ(size2.value(), SizeF(SELFSIZE_WIDTH, SELFSIZE_WIDTH));
 }
@@ -280,6 +283,41 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest004, TestSize.Level1)
     loadingProgressPattern->enableLoading_ = false;
     loadingProgressPattern->StartAnimation();
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+}
+
+/**
+ * @tc.name: LoadingProgressPatternTest005
+ * @tc.desc: SetChangeValue and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode.
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    /**
+     * @tc.steps: step2. get parament to enableloading
+     */
+    modelNg.SetEnableLoading(true);
+    /**
+     * @tc.steps: step3.
+     * @tc.expected: check the switch property value.
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+        EXPECT_EQ(config.enableloading_, true);
+        return nullptr;
+    };
+    /**
+     * @tc.steps: step2. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->BuildContentModifierNode();
 }
 
 /**
