@@ -28,6 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr uint32_t DEFAULT_BORDER_COLOR = 0x33007dff;
 constexpr int32_t INT32_TWO = 2;
 constexpr int32_t ANGLE_45 = 45;
 constexpr int32_t ANGLE_90 = 90;
@@ -54,10 +55,16 @@ constexpr float RING_SHADOW_OPACITY = 0.4f;
 constexpr Dimension LINEAR_SWEEPING_LEN = 80.0_vp;
 } // namespace
 ProgressModifier::ProgressModifier()
-    : ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
+    : strokeWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO)),
+      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
+      bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::GRAY)),
+      borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(DEFAULT_BORDER_COLOR))),
+      value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+      ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingTailDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+      strokeRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO / INT32_TWO)),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
@@ -74,7 +81,12 @@ ProgressModifier::ProgressModifier()
       smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true)),
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false))
 {
+    AttachProperty(strokeWidth_);
+    AttachProperty(color_);
+    AttachProperty(bgColor_);
+    AttachProperty(borderColor_);
     AttachProperty(maxValue_);
+    AttachProperty(value_);
     AttachProperty(scaleWidth_);
     AttachProperty(scaleCount_);
     AttachProperty(progressType_);
@@ -82,6 +94,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(sweepEffect_);
     AttachProperty(trailingHeadDate_);
     AttachProperty(trailingTailDate_);
+    AttachProperty(strokeRadius_);
 
     AttachProperty(ringProgressColors_);
     AttachProperty(sweepingDate_);
@@ -110,41 +123,25 @@ void ProgressModifier::SetUseContentModifier(bool useContentModifier)
 
 void ProgressModifier::SetStrokeWidth(float width)
 {
-    if (!strokeWidth_) {
-        strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(width);
-        AttachProperty(strokeWidth_);
-        return;
-    }
+    CHECK_NULL_VOID(strokeWidth_);
     strokeWidth_->Set(width);
 }
 
 void ProgressModifier::SetColor(LinearColor color)
 {
-    if (!color_) {
-        color_ = AceType::MakeRefPtr<AnimatablePropertyColor>(color);
-        AttachProperty(color_);
-        return;
-    }
+    CHECK_NULL_VOID(color_);
     color_->Set(color);
 }
 
 void ProgressModifier::SetBackgroundColor(LinearColor color)
 {
-    if (!bgColor_) {
-        bgColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(color);
-        AttachProperty(bgColor_);
-        return;
-    }
+    CHECK_NULL_VOID(bgColor_);
     bgColor_->Set(color);
 }
 
 void ProgressModifier::SetBorderColor(LinearColor color)
 {
-    if (!borderColor_) {
-        borderColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(color);
-        AttachProperty(borderColor_);
-        return;
-    }
+    CHECK_NULL_VOID(borderColor_);
     borderColor_->Set(color);
 }
 
@@ -513,7 +510,6 @@ void ProgressModifier::StopSweepingAnimation(float date)
 
 float ProgressModifier::CalcRingProgressAdditionalAngle() const
 {
-    CHECK_NULL_RETURN(strokeWidth_, 0.0f);
     auto contentSize = contentSize_->Get();
     auto strokeWidth = strokeWidth_->Get();
     PointF centerPt = PointF(contentSize.Width() / 2, contentSize.Height() / 2);
@@ -529,7 +525,6 @@ float ProgressModifier::CalcRingProgressAdditionalAngle() const
 
 void ProgressModifier::StartLinearSweepingAnimation(float value)
 {
-    CHECK_NULL_VOID(strokeWidth_);
     auto contentSize = contentSize_->Get();
     float radius = strokeWidth_->Get() / 2;
     float barLength = 0.0f;
@@ -618,11 +613,7 @@ void ProgressModifier::SetValue(float value)
         return;
     }
 
-    if (!value_) {
-        value_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(value);
-        AttachProperty(value_);
-        return;
-    }
+    CHECK_NULL_VOID(value_);
     AnimationOption option = AnimationOption();
     if (smoothEffect_->Get()) {
         if (isVisible_) {
@@ -720,7 +711,6 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
 
 void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && value_ && strokeRadius_ && strokeWidth_);
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
@@ -785,7 +775,6 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
 void ProgressModifier::PaintLinearSweeping(
     RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const
 {
-    CHECK_NULL_VOID(value_ && strokeWidth_);
     if (NearZero(value_->Get()) || NearZero(maxValue_->Get())) {
         return;
     }
@@ -871,7 +860,6 @@ void ProgressModifier::GenerateLinearSweepingGradientInfo(
 
 void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(value_ && strokeWidth_);
     auto centerPt = PointF(contentSize.Width() / 2, contentSize.Height() / 2) + offset;
     auto radius = std::min(contentSize.Width() / 2, contentSize.Height() / 2);
     auto angle = (value_->Get() / maxValue_->Get()) * ANGLE_360;
@@ -917,7 +905,6 @@ void ProgressModifier::PaintRing(RSCanvas& canvas, const OffsetF& offset, const 
 
 void ProgressModifier::PaintRingBackground(RSCanvas& canvas, const RingProgressData& ringProgressData) const
 {
-    CHECK_NULL_VOID(bgColor_);
     RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetWidth(ringProgressData.thickness);
@@ -1152,7 +1139,6 @@ Gradient ProgressModifier::SortGradientColorsByOffset(const Gradient& gradient) 
 
 void ProgressModifier::PaintRingSweeping(RSCanvas& canvas, const RingProgressData& ringProgressData) const
 {
-    CHECK_NULL_VOID(value_);
     if (NearZero(value_->Get()) || NearZero(maxValue_->Get())) {
         return;
     }
@@ -1350,7 +1336,6 @@ void ProgressModifier::PaintTrailing(RSCanvas& canvas, const RingProgressData& r
 
 void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && value_ && strokeWidth_);
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double lengthOfScale = strokeWidth_->Get();
@@ -1395,7 +1380,6 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
 
 void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && value_);
     static int32_t totalDegree = 1;
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
@@ -1441,7 +1425,6 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
 
 void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && borderColor_ && value_);
     auto borderWidth = capsuleBorderWidth_->Get();
     if (GreatNotEqual(2 * borderWidth, contentSize.Height())) {
         borderWidth = contentSize.Height() / 2;
@@ -1511,7 +1494,6 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
 
 void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && borderColor_ && value_);
     auto borderWidth = capsuleBorderWidth_->Get();
     if (GreatNotEqual(2 * borderWidth, contentSize.Width())) {
         borderWidth = contentSize.Width() / 2;
@@ -1675,17 +1657,11 @@ bool ProgressModifier::PostTask(const TaskExecutor::Task& task, const std::strin
 
 void ProgressModifier::SetStrokeRadius(float strokeRaidus)
 {
-    if (!strokeRadius_) {
-        strokeRadius_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(strokeRaidus);
-        AttachProperty(strokeRadius_);
-        return;
-    }
     strokeRadius_->Set(strokeRaidus);
 }
 
 void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && value_ && strokeWidth_);
     auto scaleWidth = scaleWidth_->Get();
     PointF centerPt = PointF(frameSize.Width() / 2, frameSize.Height() / 2) + offset;
     double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
@@ -1724,7 +1700,6 @@ void ProgressModifier::PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF&
 
 void ProgressModifier::PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && value_);
     double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
@@ -1761,7 +1736,6 @@ void ProgressModifier::PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& o
 void ProgressModifier::PaintVerticalCapsuleForApiNine(
     RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
 {
-    CHECK_NULL_VOID(color_ && bgColor_ && value_);
     double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
