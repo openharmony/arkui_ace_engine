@@ -459,7 +459,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         showSelect_ = true;
     }
     if (needSelectAll_ && !isLongPress_) {
-        HandleOnSelectAll(true);
+        HandleOnSelectAll(false);
         needSelectAll_ = false;
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
@@ -1905,7 +1905,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) &&
         info.GetSourceDevice() != SourceType::MOUSE) {
         if (needSelectAll_) {
-            HandleOnSelectAll(true);
+            HandleOnSelectAll(false);
         } else {
             needCloseOverlay = false;
             ProcessOverlay({ .hideHandle = contentController_->IsEmpty(), .animation = true, .hideHandleLine = true });
@@ -1916,7 +1916,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             needCloseOverlay = false;
             DelayProcessOverlay({ .menuIsShow = false, .animation = true });
         } else if (needSelectAll_) {
-            HandleOnSelectAll(true);
+            HandleOnSelectAll(false);
         } else {
             needCloseOverlay = false;
             ProcessOverlay({ .menuIsShow = false, .animation = true, .hideHandleLine = true });
@@ -4027,6 +4027,9 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
+    if (newWidth == prevWidth && newHeight == prevHeight) {
+        return;
+    }
     if (SelectOverlayIsOn()) {
         if (selectOverlay_->IsShowMouseMenu()) {
             CloseSelectOverlay();
