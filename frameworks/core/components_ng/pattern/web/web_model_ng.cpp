@@ -1052,4 +1052,22 @@ void WebModelNG::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
+
+void WebModelNG::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnRenderProcessNotRespondingEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnRenderProcessRespondingEvent(std::move(uiCallback));
+}
 } // namespace OHOS::Ace::NG

@@ -1797,6 +1797,13 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
         onIntelligentTrackingPreventionResultV2_ = useNewPipe ?
             eventHub->GetOnIntelligentTrackingPreventionResultEvent() : nullptr;
+        onRenderProcessNotRespondingV2_ = useNewPipe
+                                              ? eventHub->GetOnRenderProcessNotRespondingEvent()
+                                              : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::
+                                                Create(webCom->GetRenderProcessNotRespondingId(), oldContext);
+        onRenderProcessRespondingV2_ = useNewPipe ? eventHub->GetOnRenderProcessRespondingEvent()
+                                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::
+													Create(webCom->GetRenderProcessRespondingId(), oldContext);
     }
     return true;
 }
@@ -6411,4 +6418,39 @@ std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_
     CHECK_NULL_RETURN(webPattern, vec);
     return webPattern->GetWordSelection(text, offset);
 }
+
+void WebDelegate::OnRenderProcessNotResponding(
+    const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jsStack, pid, reason]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onRenderProcessNotRespondingV2 = delegate->onRenderProcessNotRespondingV2_;
+            if (onRenderProcessNotRespondingV2) {
+                onRenderProcessNotRespondingV2(std::make_shared<RenderProcessNotRespondingEvent>(
+                    jsStack, pid, static_cast<int>(reason)));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebHandleRenderProcessNotResponding");
+}
+
+void WebDelegate::OnRenderProcessResponding()
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto onRenderProcessRespondingV2 = delegate->onRenderProcessRespondingV2_;
+            if (onRenderProcessRespondingV2) {
+                onRenderProcessRespondingV2(std::make_shared<RenderProcessRespondingEvent>());
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebHandleRenderProcessResponding");
+}
+
 } // namespace OHOS::Ace

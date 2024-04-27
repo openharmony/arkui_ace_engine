@@ -248,6 +248,9 @@ public:
     }
 
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset) override;
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason) override;
+    void OnRenderProcessResponding() override;
 
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;

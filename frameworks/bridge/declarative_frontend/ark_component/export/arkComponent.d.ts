@@ -1488,6 +1488,10 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     javaScriptOnDocumentStart(scripts: ScriptItem[]): this;
     layoutMode(mode: WebLayoutMode): this;
     nestedScroll(value: NestedScrollOptions): this;
+    onRenderProcessNotResponding(callback: (event: {
+        data: RenderProcessNotRespondingData;
+    }) => void): this;
+    onRenderProcessResponding(callback: () => void): this;
 }
 declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;

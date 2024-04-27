@@ -50,6 +50,8 @@ struct WebEvent : Event {
     EventMarker overScrollId;
     EventMarker nativeEmbedLifecycleChangeId;
     EventMarker nativeEmbedGestureEventId;
+    EventMarker renderProcessNotRespondingId;
+    EventMarker renderProcessRespondingId;
 };
 
 struct WebMethod : Method {
@@ -352,6 +354,30 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.nativeEmbedGestureEventId;
+    }
+
+    void SetRenderProcessNotRespondingId(const EventMarker& renderProcessNotRespondingId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.renderProcessNotRespondingId = renderProcessNotRespondingId;
+    }
+
+    const EventMarker& GetRenderProcessNotRespondingId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.renderProcessNotRespondingId;
+    }
+
+    void SetRenderProcessRespondingId(const EventMarker& renderProcessRespondingId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.renderProcessRespondingId = renderProcessRespondingId;
+    }
+
+    const EventMarker& GetRenderProcessRespondingId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.renderProcessRespondingId;
     }
 
 protected:

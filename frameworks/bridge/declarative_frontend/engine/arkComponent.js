@@ -18974,6 +18974,12 @@ class ArkWebComponent extends ArkComponent {
   enableNativeMediaPlayer(config) {
     throw new Error('Method not implemented.');
   }
+  onRenderProcessNotResponding(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onRenderProcessResponding(callback) {
+    throw new Error('Method not implemented.');
+  }
 }
 // @ts-ignore
 if (globalThis.Web !== undefined) {
