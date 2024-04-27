@@ -296,7 +296,7 @@ public:
 
     void ForceFullGC() override;
 
-    void SetLocalStorage(NativeReference* storage, NativeReference* context);
+    void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
     bool ParseThemeConfig(const std::string& themeConfig);
 

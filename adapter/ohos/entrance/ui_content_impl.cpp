@@ -1096,13 +1096,13 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
-            container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+            container->SetLocalStorage(nullptr, context);
         } else {
             auto env = reinterpret_cast<napi_env>(nativeEngine);
             napi_ref ref = nullptr;
             napi_create_reference(env, storage, 1, &ref);
             container->SetLocalStorage(
-                reinterpret_cast<NativeReference*>(ref), context->GetBindingObject()->Get<NativeReference>());
+                reinterpret_cast<NativeReference*>(ref), context);
         }
     }
 
@@ -1571,13 +1571,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (runtime_) {
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
-            container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+            container->SetLocalStorage(nullptr, context);
         } else {
             auto env = reinterpret_cast<napi_env>(nativeEngine);
             napi_ref ref = nullptr;
             napi_create_reference(env, storage, 1, &ref);
-            container->SetLocalStorage(
-                reinterpret_cast<NativeReference*>(ref), context->GetBindingObject()->Get<NativeReference>());
+            container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
         }
     }
 
