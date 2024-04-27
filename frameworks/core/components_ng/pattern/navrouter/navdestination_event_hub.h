@@ -231,6 +231,8 @@ public:
         if (onWillHide_) {
             onWillHide_();
         }
+
+        FireAutoSave();
     }
 
     void SetOnWillDisAppear(std::function<void()>& willDisAppear)
@@ -255,6 +257,8 @@ private:
         CHECK_NULL_RETURN(node, nullptr);
         return node->GetPattern();
     }
+
+    void FireAutoSave();
 
     OnStateChangeEvent onStateChangeEvent_;
     std::function<void()> onShownEvent_;

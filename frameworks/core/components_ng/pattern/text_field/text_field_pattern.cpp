@@ -49,6 +49,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -1948,26 +1949,47 @@ bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillTyp
            autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
-bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType)
+bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType)
+{
+    if (autoFillType == AceAutoFillType::ACE_UNSPECIFIED) {
+        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :autoFillType is ACE_UNSPECIFIED.");
+        return false;
+    } else if (IsAutoFillPasswordType(autoFillType)) {
+        return GetAutoFillTriggeredStateByType(autoFillType);
+    }
+    return true;
+}
+
+bool TextFieldPattern::GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto pageNode = host->GetPageNode();
-    CHECK_NULL_RETURN(pageNode, false);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, false);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    if (aceAutoFillAllType == AceAutoFillType::ACE_UNSPECIFIED) {
-        TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "CheckAutoFillType :aceAutoFillAllType is ACE_UNSPECIFIED.");
-        return false;
-    } else if (aceAutoFillAllType == AceAutoFillType::ACE_USER_NAME ||
-               aceAutoFillAllType == AceAutoFillType::ACE_PASSWORD) {
-        return !pagePattern->IsAutoFillPasswordTriggered();
-    } else if (aceAutoFillAllType == AceAutoFillType::ACE_NEW_PASSWORD) {
-        return !pagePattern->IsAutoFillNewPasswordTriggered();
+    auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
+    CHECK_NULL_RETURN(autoFillContainerNode, false);
+    auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();
+    CHECK_NULL_RETURN(stateHolder, false);
+    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
+        return !stateHolder->IsAutoFillPasswordTriggered();
     }
-    return true;
+    if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
+        return !stateHolder->IsAutoFillNewPasswordTriggered();
+    }
+    return false;
+}
+
+void TextFieldPattern::SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto autoFillContainerNode = host->GetFirstAutoFillContainerNode();
+    CHECK_NULL_VOID(autoFillContainerNode);
+    auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();
+    CHECK_NULL_VOID(stateHolder);
+    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
+        stateHolder->SetAutoFillPasswordTriggered(true);
+    } else if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
+        stateHolder->SetAutoFillNewPasswordTriggered(true);
+    }
 }
 
 AceAutoFillType TextFieldPattern::GetAutoFillType()
@@ -2009,22 +2031,12 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup)
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto pageNode = host->GetPageNode();
-    CHECK_NULL_RETURN(pageNode, false);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, false);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
     auto autoFillType = GetAutoFillType();
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    if (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD) {
-        pagePattern->SetAutoFillPasswordTriggered(true);
-    } else if (autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
-        pagePattern->SetAutoFillNewPasswordTriggered(true);
-    }
+    SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
-    return (container->RequestAutoFill(host, autoFillType, isPopup));
+    return container->RequestAutoFill(host, autoFillType, isPopup);
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)

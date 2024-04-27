@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
@@ -32,8 +33,8 @@
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern, public FocusView {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView);
+class NavDestinationPattern : public Pattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);

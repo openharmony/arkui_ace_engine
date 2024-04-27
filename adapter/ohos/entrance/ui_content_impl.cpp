@@ -2580,7 +2580,8 @@ bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData, AbilityBase::A
     return ret;
 }
 
-bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap)
+bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
+    bool skipSubAutoFillContainer)
 {
     CHECK_NULL_RETURN(viewDataWrap, false);
     auto context = context_.lock();
@@ -2608,7 +2609,7 @@ bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewD
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
-    return pipelineContext->DumpPageViewData(node, viewDataWrap);
+    return pipelineContext->DumpPageViewData(node, viewDataWrap, skipSubAutoFillContainer);
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(

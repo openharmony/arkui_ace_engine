@@ -574,11 +574,22 @@ void UINode::OnAttachToMainTree(bool)
     }
 }
 
-void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap)
+bool UINode::IsAutoFillContainerNode()
+{
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG;
+}
+
+void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
 {
     DumpViewDataPageNode(viewDataWrap);
     for (const auto& item : GetChildren()) {
-        item->DumpViewDataPageNodes(viewDataWrap);
+        if (!item) {
+            continue;
+        }
+        if (skipSubAutoFillContainer && item->IsAutoFillContainerNode()) {
+            continue;
+        }
+        item->DumpViewDataPageNodes(viewDataWrap, skipSubAutoFillContainer);
     }
 }
 
