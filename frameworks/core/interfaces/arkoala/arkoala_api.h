@@ -3302,8 +3302,8 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getPreviousSibling)(ArkUINodeHandle node);
     ArkUINodeHandle (*getParent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIdByNodePtr)(ArkUINodeHandle node);
-    ArkUI_Float32* (*getPositionToParent)(ArkUINodeHandle node);
-    ArkUI_Float32* (*getPositionToWindow)(ArkUINodeHandle node);
+    void (*getPositionToParent)(ArkUINodeHandle node, ArkUI_Float32* parentOffset);
+    void (*getPositionToWindow)(ArkUINodeHandle node, ArkUI_Float32* windowOffset);
     ArkUI_Float32* (*getMeasuredSize)(ArkUINodeHandle node);
     ArkUI_Float32* (*getLayoutPosition)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getInspectorId)(ArkUINodeHandle node);
