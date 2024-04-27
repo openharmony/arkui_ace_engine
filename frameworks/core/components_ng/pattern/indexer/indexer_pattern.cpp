@@ -93,6 +93,7 @@ void IndexerPattern::OnModifyDone()
         sharpItemCount_ = 0;
         itemCountChanged = (itemCount_ != 0);
         itemCount_ = 0;
+        arrayValue_.clear();
     }
     BuildArrayValueItems();
 
@@ -670,6 +671,7 @@ void IndexerPattern::ApplyIndexChanged(
         UpdateChildBoundary(childNode);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
         auto childRenderContext = childNode->GetRenderContext();
+        childRenderContext->SetClipToBounds(true);
         auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
             StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
         if (index == childHoverIndex_ || index == childPressIndex_) {
@@ -723,7 +725,6 @@ void IndexerPattern::ApplyIndexChanged(
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
             nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
             nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
-            childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
             if (isTextNodeInTree) {
                 childNode->MarkDirtyNode();
