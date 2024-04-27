@@ -38,18 +38,7 @@ namespace OHOS::Ace {
 using ElementIdType = int32_t;
 class Element;
 
-
-// removed_items is a Set of elmtId and UINode TAG
-// The TAG aims easier analysis for DFX and debug
-// This std::pair needs a custom has function
-struct deleted_element_hash {
-    inline std::size_t operator()(const std::pair<ElementIdType, std::string>& v) const
-    {
-        return v.first;
-    }
-};
-
-using RemovedElementsType = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>;
+using RemovedElementsType = std::unordered_set<ElementIdType>;
 
 class ACE_EXPORT ElementRegister {
 public:
@@ -91,7 +80,7 @@ public:
      * means GetElementById on this elmtId no longer returns an Element
      * method adds the elmtId to the removed Element Set
      */
-    bool RemoveItem(ElementIdType elementId, const std::string& tag = std::string("undefined TAG"));
+    bool RemoveItem(ElementIdType elementId);
 
     /**
      * remove Element with given elmtId from the Map

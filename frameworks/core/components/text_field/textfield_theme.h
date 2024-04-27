@@ -25,6 +25,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
 
@@ -178,6 +179,9 @@ public:
             theme->textInputAndErrTipsSpacing_ =
                 pattern->GetAttr<Dimension>("text_input_and_error_tips_spacing", 8.0_vp);
             theme->showPasswordIcon_ = static_cast<bool>(pattern->GetAttr<double>("show_icon_text_input", 1.0));
+
+            theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
+            theme->cancelButtonIconHeight_ = pattern->GetAttr<Dimension>("cancel_button_icon_height", Dimension());
         }
     };
 
@@ -533,6 +537,21 @@ public:
         return avoidKeyboardOffset_;
     }
 
+    const CancelButtonStyle& GetCancelButtonStyle() const
+    {
+        return cancelButtonStyle_;
+    }
+
+    const Dimension& GetCancelButtonIconHeight() const
+    {
+        return cancelButtonIconHeight_;
+    }
+
+    const Color& GetCancelButtonIconColor() const
+    {
+        return cancelButtonIconColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -621,6 +640,11 @@ private:
     Dimension errorTextInputBorderWidth_ = 1.0_vp;
     Color textInputBorderColor_;
     bool showPasswordIcon_ = true;
+    
+    // cancelButton
+    Color cancelButtonIconColor_;
+    Dimension cancelButtonIconHeight_;
+    CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
 };
 
 } // namespace OHOS::Ace

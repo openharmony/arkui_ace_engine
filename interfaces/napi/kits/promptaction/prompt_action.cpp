@@ -20,7 +20,7 @@
 #include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-
+#include "base/i18n/localization.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
@@ -352,9 +352,11 @@ void DeleteContextAndThrowError(
 bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
+    bool isPrimaryButtonSet = false;
     napi_value buttonArray = nullptr;
     napi_value textNApi = nullptr;
     napi_value colorNApi = nullptr;
+    napi_value primaryButtonNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
     int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
@@ -389,6 +391,16 @@ bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, in
             }
         }
         ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
+        if (!isPrimaryButtonSet) {
+            napi_get_named_property(env, buttonArray, "primary", &primaryButtonNApi);
+            napi_typeof(env, primaryButtonNApi, &valueType);
+            if (valueType == napi_boolean) {
+                napi_get_value_bool(env, primaryButtonNApi, &buttonInfo.isPrimary);
+            }
+            if (buttonInfo.isPrimary) {
+                isPrimaryButtonSet = true;
+            }
+        }
         context->buttons.emplace_back(buttonInfo);
     }
     return true;
@@ -1074,6 +1086,16 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     return nullptr;
                 }
             }
+            bool isPrimaryButtonSet = false;
+            for (auto btn : asyncContext->buttons) {
+                if (btn.isPrimary) {
+                    isPrimaryButtonSet = true;
+                    break;
+                }
+            }
+            ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+                .textColor = "", .isPrimary = !isPrimaryButtonSet};
+            asyncContext->buttons.emplace_back(buttonInfo);
             napi_typeof(env, asyncContext->autoCancel, &valueType);
             if (valueType == napi_boolean) {
                 napi_get_value_bool(env, asyncContext->autoCancel, &asyncContext->autoCancelBool);

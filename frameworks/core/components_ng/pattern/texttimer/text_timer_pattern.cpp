@@ -192,6 +192,7 @@ void TextTimerPattern::OnModifyDone()
     InitTimerDisplay();
     textNode_->MarkModifyDone();
     RegisterVisibleAreaChangeCallback();
+    FireBuilder();
 }
 
 void TextTimerPattern::RegisterVisibleAreaChangeCallback()
@@ -232,6 +233,10 @@ void TextTimerPattern::OnVisibleAreaChange(bool visible)
 
 void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
 {
+    if (UseContentModifier()) {
+        FireBuilder();
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(textNode_);
@@ -360,5 +365,39 @@ uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
 void TextTimerPattern::ResetCount()
 {
     resetCount_ = true;
+}
+
+void TextTimerPattern::FireBuilder()
+{
+    if (!makeFunc_.has_value()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    contentModifierNode_ = BuildContentModifierNode();
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> TextTimerPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<TextTimerEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_RETURN(textTimerLayoutProperty, nullptr);
+    auto count = textTimerLayoutProperty->GetInputCount().value_or(DEFAULT_COUNT);
+    auto isCountDown = textTimerLayoutProperty->GetIsCountDown().value_or(false);
+    auto started = scheduler_ && scheduler_->IsActive();
+    auto elapsedTime = GetFormatDuration(elapsedTime_);
+    TextTimerConfiguration textTimerConfiguration(count, isCountDown, started, elapsedTime, enabled);
+    return (makeFunc_.value())(textTimerConfiguration);
 }
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,6 @@ void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto childConstraint = layoutProperty->CreateChildConstraint();
 
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
@@ -35,12 +34,14 @@ void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         for (const auto& child : childList) {
             if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
                 child->GetGeometryNode()->SetFrameSize(SizeF());
+                child->GetGeometryNode()->SetContentSize(SizeF());
             } else {
                 auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
                 child->Measure(layoutConstraint);
             }
         }
     } else {
+        auto childConstraint = layoutProperty->CreateChildConstraint();
         textWrapper->Measure(childConstraint);
     }
 

@@ -26,9 +26,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Color ERROR_COLOR = Color(0xFFE84026);
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
+constexpr uint32_t NUM_0 = 0;
+constexpr uint32_t NUM_1 = 1;
+constexpr uint32_t NUM_2 = 2;
 const char* GAUGE_NODEPTR_OF_UINODE = "nodePtr_";
 
 void ResetColor(ArkUINodeHandle nativeNode)

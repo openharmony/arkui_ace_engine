@@ -495,7 +495,8 @@ void RenderPickerColumn::FlushCurrentOptions()
     uint32_t showOptionCount = options_.size();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     for (uint32_t index = 0; index < showOptionCount; index++) {
-        uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
+        auto sum = totalOptionCount + currentIndex + index;
+        uint32_t optionIndex = (sum > selectedIndex ? sum - selectedIndex : 0) % totalOptionCount;
         int diffIndex = static_cast<int>(index) - static_cast<int>(selectedIndex);
         int virtualIndex = static_cast<int>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int>(totalOptionCount);

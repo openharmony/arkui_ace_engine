@@ -26,6 +26,7 @@ public:
     void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
+    void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) override;
     void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName) override;
     void SetSubtitle(const std::string& subtitle) override;

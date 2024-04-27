@@ -70,7 +70,7 @@ void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
 
     auto selfLayoutInfo = jsParam->GetSelfLayoutInfo();
     auto childArray = jsParam->GetChildArray();
-    auto constraint = jsParam->GetConstraint();
+    auto constraint = jsParam->GetPlaceChildrenConstraint();
 
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
     jsPlaceChildrenFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */
@@ -134,6 +134,7 @@ void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
     }
 }
 
+// recycleSelf
 void ViewFunctions::ExecuteRecycle(const std::string& viewName)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
@@ -258,6 +259,11 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsDisappearFunc = jsObject->GetProperty("aboutToDisappear");
     if (jsDisappearFunc->IsFunction()) {
         jsDisappearFunc_ = JSRef<JSFunc>::Cast(jsDisappearFunc);
+    }
+
+    JSRef<JSVal> jsDidBuildFunc = jsObject->GetProperty("onDidBuild");
+    if (jsDidBuildFunc->IsFunction()) {
+        jsDidBuildFunc_ = JSRef<JSFunc>::Cast(jsDidBuildFunc);
     }
 
     JSRef<JSVal> jsLayoutFunc = jsObject->GetProperty("onLayout");
@@ -394,6 +400,12 @@ void ViewFunctions::ExecuteDisappear()
     } else {
         LOGE("jsView Object is undefined and will not execute aboutToDisappear function");
     }
+}
+
+void ViewFunctions::ExecuteDidBuild()
+{
+    COMPONENT_LIFECYCLE_DURATION();
+    ExecuteFunction(jsDidBuildFunc_, "onDidBuild");
 }
 
 void ViewFunctions::ExecuteAboutToRecycle()

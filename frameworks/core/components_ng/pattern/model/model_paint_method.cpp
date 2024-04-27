@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/model/model_paint_method.h"
 
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/canvas.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter/skia_adapter/skia_canvas.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,11 +48,5 @@ void ModelPaintMethod::PerformPaint(RSCanvas& canvas, PaintWrapper* paintWrapper
     auto paintProperty = DynamicCast<ModelPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     adapter->OnPaint3D(paintProperty);
-    std::shared_ptr<Rosen::Drawing::CoreCanvasImpl> coreCanvas = canvas.GetCanvasData();
-    const Rosen::Drawing::SkiaCanvas* skiaCanvas = static_cast<const Rosen::Drawing::SkiaCanvas*>(coreCanvas.get());
-    CHECK_NULL_VOID(skiaCanvas);
-    SkCanvas* skCanvas = skiaCanvas->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-    adapter->OnPaint3DSceneTexture(skCanvas);
 }
 } // namespace OHOS::Ace::NG

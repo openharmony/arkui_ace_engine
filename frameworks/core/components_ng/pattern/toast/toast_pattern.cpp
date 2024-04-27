@@ -30,7 +30,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
-constexpr Dimension MAX_WIDTH = 400.0_vp;
 constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
 
 float GetTextHeight(const RefPtr<FrameNode>& textNode)
@@ -311,7 +310,7 @@ double ToastPattern::GetTextMaxHeight()
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto maxHeight = deviceHeight - bottom - top - toastBottom_;
     auto limitHeight = (deviceHeight - bottom - top) * 0.65;
-    if (maxHeight > limitHeight) {
+    if (GreatNotEqual(maxHeight, limitHeight)) {
         maxHeight = limitHeight;
     }
     return maxHeight;
@@ -334,8 +333,9 @@ double ToastPattern::GetTextMaxWidth()
     CHECK_NULL_RETURN(toastTheme, 0.0);
     auto marging = toastTheme->GetMarging();
     auto maxWidth = deviceWidth - marging.Left().ConvertToPx() - marging.Right().ConvertToPx();
-    if (maxWidth > MAX_WIDTH.ConvertToPx()) {
-        maxWidth = MAX_WIDTH.ConvertToPx();
+    auto maxLimitWidth = toastTheme->GetMaxWidth();
+    if (GreatNotEqual(maxWidth, maxLimitWidth.ConvertToPx())) {
+        maxWidth = maxLimitWidth.ConvertToPx();
     }
     return maxWidth;
 }

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_VIEW_H
 
+#include <memory>
 #include <mutex>
 
 #include "custom/custom_render_descriptor.h"
@@ -32,14 +33,26 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 
+#if defined(KIT_3D_ENABLE)
+#include "scene_adapter/intf_scene_adapter.h"
+#endif
+
 namespace OHOS::Ace {
+
+struct ModelViewContext {
+    std::string bundleName_;
+    std::string moduleName_;
+    Render3D::SurfaceType surfaceType_;
+#if defined(KIT_3D_ENABLE)
+    std::shared_ptr<Render3D::ISceneAdapter> sceneAdapter_ = nullptr;
+#endif
+};
 
 class ModelView {
 public:
     static ModelView* GetInstance();
     virtual ~ModelView() = default;
-    virtual void Create(const std::string& bundleName, const std::string& moduleName,
-        Render3D::SurfaceType surfaceType) = 0;
+    virtual void Create(const ModelViewContext& context) = 0;
     virtual void SetBackground(const std::string& src) = 0;
     virtual void SetModelSource(const std::string& src) = 0;
     virtual void SetHandleCameraMove(bool value) = 0;

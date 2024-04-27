@@ -38,6 +38,9 @@ const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
 const std::string SURFACE_WIDTH = "surface_width";
 const std::string SURFACE_HEIGHT = "surface_height";
+const int32_t SIZE_LIMIT = 7999;
+const int32_t PERMITTED_DIFFERENCE = 100;
+const int32_t FAILED_LIMIT = 3;
 
 GraphicTransformType ConvertRotation(Rotation rotation)
 {
@@ -250,7 +253,7 @@ void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)
     }
 }
 
-void RosenRenderSurface::DrawBuffer()
+void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
 {
 #ifdef OHOS_PLATFORM
     auto renderContext = renderContext_.Upgrade();
@@ -267,6 +270,10 @@ void RosenRenderSurface::DrawBuffer()
     }
     if (!surfaceNode) {
         LOGE("RosenRenderSurface::surfaceNode is null");
+        return;
+    }
+    if (!CompareBufferSize(width, height, surfaceNode)) {
+        LOGE("RosenRenderSurface buffer is not matched.");
         return;
     }
     ACE_SCOPED_TRACE("Web DrawBuffer");
@@ -298,6 +305,28 @@ void RosenRenderSurface::DrawBuffer()
     rosenRenderContext->StopRecordingIfNeeded();
 #endif
 }
+
+#ifdef OHOS_PLATFORM
+bool RosenRenderSurface::CompareBufferSize(int32_t width, int32_t height,
+                                           std::shared_ptr<SurfaceBufferNode> surfaceNode)
+{
+    int32_t bufferWidth = surfaceNode->buffer_->GetSurfaceBufferWidth();
+    int32_t bufferHeight = surfaceNode->buffer_->GetSurfaceBufferHeight();
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
+
+    if (bufferWidth > SIZE_LIMIT || bufferHeight > SIZE_LIMIT
+        || (abs(height - bufferHeight) < PERMITTED_DIFFERENCE && abs(width - bufferWidth) < PERMITTED_DIFFERENCE)) {
+        failTimes_ = 0;
+    } else {
+        if (failTimes_ <= FAILED_LIMIT) {
+            pipeline->SetIsFreezeFlushMessage(true);
+            return false;
+        }
+        failTimes_++;
+    }
+    return true;
+}
+#endif
 
 void RosenRenderSurface::ConsumeWebBuffer()
 {

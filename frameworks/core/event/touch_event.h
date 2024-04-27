@@ -109,6 +109,7 @@ struct TouchEvent final : public UIInputEvent {
     float localX = 0.0f;
     float localY = 0.0f;
     int32_t originalId = 0;
+    bool isInjected = false;
 
     TouchEvent() {}
 
@@ -238,6 +239,12 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetIsInjected(bool isInjected)
+    {
+        this->isInjected = isInjected;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -266,7 +273,8 @@ struct TouchEvent final : public UIInputEvent {
             .SetIsInterpolated(isInterpolated)
             .SetPointers(pointers)
             .SetPointerEvent(pointerEvent)
-            .SetOriginalId(originalId);
+            .SetOriginalId(originalId)
+            .SetIsInjected(isInjected);
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const

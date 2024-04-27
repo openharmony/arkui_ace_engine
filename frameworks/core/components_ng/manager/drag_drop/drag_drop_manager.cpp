@@ -52,7 +52,7 @@ constexpr int32_t MAX_RETRY_DURATION = 800;
 constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
 constexpr int64_t MOVE_TIME_LIMIT = 6L;
 constexpr int64_t DRAG_MOVE_TIME_THRESHOLD = 16 * 1000 * 1000;
-constexpr float MAX_DISTANCE_TO_PRE_POINTER = 20.0f;
+constexpr float MAX_DISTANCE_TO_PRE_POINTER = 3.0f;
 } // namespace
 
 RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
@@ -1784,8 +1784,16 @@ void DragDropManager::GetGatherPixelMap(const RefPtr<PixelMap>& pixelMap)
 void DragDropManager::PushGatherPixelMap(DragDataCore& dragData, float scale)
 {
     for (auto gatherPixelMap : gatherPixelMaps_) {
-        gatherPixelMap->Scale(scale, scale, AceAntiAliasingOption::HIGH);
-        dragData.shadowInfos.push_back({gatherPixelMap, 0.0f, 0.0f});
+        RefPtr<PixelMap> pixelMapDuplicated = gatherPixelMap;
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixelMapDuplicated = PixelMap::CopyPixelMap(gatherPixelMap);
+        if (!pixelMapDuplicated) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Copy PixelMap is failure!");
+            pixelMapDuplicated = gatherPixelMap;
+        }
+#endif
+        pixelMapDuplicated->Scale(scale, scale, AceAntiAliasingOption::HIGH);
+        dragData.shadowInfos.push_back({pixelMapDuplicated, 0.0f, 0.0f});
     }
     gatherPixelMaps_.clear();
     return;

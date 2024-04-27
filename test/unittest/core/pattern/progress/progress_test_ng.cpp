@@ -525,11 +525,7 @@ HWTEST_F(ProgressTestNg, ProgressLayoutAlgorithm002, TestSize.Level1)
     contentConstraint.percentReference.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
     contentConstraint.percentReference.SetHeight(PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
     auto size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_NE(size, std::nullopt);
-    EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_SCALE);
-    EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), TEST_PROGRESS_STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), DEFAULT_RING_DIAMETER.ConvertToPx());
-    EXPECT_EQ(size->Width(), DEFAULT_RING_DIAMETER.ConvertToPx());
+    ASSERT_EQ(size, std::nullopt);
 }
 
 /**

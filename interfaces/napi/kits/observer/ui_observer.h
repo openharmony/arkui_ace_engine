@@ -55,9 +55,8 @@ public:
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterRouterPageCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
     static void UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_value callback);
-    static void HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
-        const std::string& name, const std::string& path, NG::RouterPageState state);
-    
+    static void HandleRouterPageStateChange(NG::AbilityContextInfo& info, const NG::RouterPageInfoNG& pageInfo);
+
     static void RegisterDensityCallback(
         int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
     static void UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_value callback);

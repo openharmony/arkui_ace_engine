@@ -1512,25 +1512,25 @@ ArkUINativeModuleValue CommonBridge::ResetHeight(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetPosition(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue CommonBridge::SetPosition(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> sizeX = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> sizeY = runtimeCallInfo->GetCallArgRef(NUM_2);
+    bool useEdges = runtimeCallInfo->GetCallArgRef(NUM_1)->ToBoolean(vm)->Value();
+    std::vector<ArkUIStringAndFloat> options;
+    std::vector<std::optional<CalcDimension>> edges;
 
-    CalcDimension x;
-    CalcDimension y;
-    bool hasX = ArkTSUtils::ParseJsDimensionVp(vm, sizeX, x);
-    bool hasY = ArkTSUtils::ParseJsDimensionVp(vm, sizeY, y);
-    if (!hasX && !hasY) {
-        GetArkUINodeModifiers()->getCommonModifier()->resetPosition(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+    if (useEdges) {
+        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        PushDimensionsToVector(options, edges);
+        GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(nativeNode, useEdges, options.data());
+    } else {
+        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
+        PushDimensionsToVector(options, edges);
+        GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(nativeNode, useEdges, options.data());
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setPosition(nativeNode, x.Value(), static_cast<int>(x.Unit()),
-        y.Value(), static_cast<int>(y.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1540,7 +1540,7 @@ ArkUINativeModuleValue CommonBridge::ResetPosition(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getCommonModifier()->resetPosition(nativeNode);
+    GetArkUINodeModifiers()->getCommonModifier()->resetPositionEdges(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2679,21 +2679,12 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     } else {
         CalcDimension x(0, DimensionUnit::VP);
         CalcDimension y(0, DimensionUnit::VP);
-
-        if (ArkTSUtils::ParseJsDimensionVp(vm, xArg, x)) {
-            valueX = x.Value();
-        }
-        if (ArkTSUtils::ParseJsDimensionVp(vm, yArg, y)) {
-            valueY = y.Value();
-        }
-        if (x.Unit() == DimensionUnit::PERCENT) {
-            valueX = x.Value();
-            typeX = DimensionUnit::PERCENT;
-        }
-        if (y.Unit() == DimensionUnit::PERCENT) {
-            valueY = y.Value();
-            typeY = DimensionUnit::PERCENT;
-        }
+        ArkTSUtils::ParseJsDimensionVp(vm, xArg, x);
+        ArkTSUtils::ParseJsDimensionVp(vm, yArg, y);
+        valueX = x.Value();
+        typeX = x.Unit();
+        valueY = y.Value();
+        typeY = y.Unit();
     }
 
     ArkUI_Float32 values[SIZE_OF_TWO];
@@ -2759,6 +2750,10 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
 
     if (imageSizeArg->IsNumber()) {
         auto sizeType = imageSizeArg->ToNumber(vm)->Value();
+        if (sizeType < static_cast<uint32_t>(BackgroundImageSizeType::CONTAIN) ||
+            sizeType > static_cast<uint32_t>(BackgroundImageSizeType::FILL)) {
+            sizeType = static_cast<uint32_t>(BackgroundImageSizeType::AUTO);
+        }
         typeWidth = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
         typeHeight = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
     } else {
@@ -3520,22 +3515,25 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityDescription(ArkUIRuntimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetOffset(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue CommonBridge::SetOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CalcDimension xVal(0, DimensionUnit::VP);
-    CalcDimension yVal(0, DimensionUnit::VP);
-    ArkTSUtils::ParseJsDimensionVp(vm, secondArg, xVal);
-    ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, yVal);
+    bool useEdges = runtimeCallInfo->GetCallArgRef(NUM_1)->ToBoolean(vm)->Value();
+    std::vector<ArkUIStringAndFloat> options;
+    std::vector<std::optional<CalcDimension>> edges;
 
-    ArkUI_Float32 number[2] = {xVal.Value(), yVal.Value()};
-    ArkUI_Int32 unit[2] = {static_cast<int8_t>(xVal.Unit()), static_cast<int8_t>(yVal.Unit())};
-    GetArkUINodeModifiers()->getCommonModifier()->setOffset(nativeNode, number, unit);
+    if (useEdges) {
+        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        PushDimensionsToVector(options, edges);
+        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data());
+    } else {
+        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
+        PushDimensionsToVector(options, edges);
+        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

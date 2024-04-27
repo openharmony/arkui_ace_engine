@@ -1873,8 +1873,6 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu inner enter");
-    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
-    dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
         ShowActionMenuInnerNG(dialogProperties, button, std::move(callback));
         return;

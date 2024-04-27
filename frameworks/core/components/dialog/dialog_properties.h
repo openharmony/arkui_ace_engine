@@ -177,6 +177,8 @@ struct ButtonInfo {
     std::optional<std::vector<std::string>> fontFamily;
     std::optional<Color> backgroundColor;
     std::optional<NG::BorderRadiusProperty> borderRadius;
+    bool isPrimary = false;
+    bool isAcceptButton = false;
 
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const
