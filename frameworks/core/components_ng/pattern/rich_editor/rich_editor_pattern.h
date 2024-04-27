@@ -889,7 +889,7 @@ private:
     TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
     bool keyboardAvoidance_ = false;
-    int32_t richEditorInstanceId_;
+    int32_t richEditorInstanceId_ = -1;
     bool contentChange_ = false;
 };
 } // namespace OHOS::Ace::NG

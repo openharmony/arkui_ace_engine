@@ -714,7 +714,7 @@ void RichEditorPattern::DeleteSpansByRange(
 
     auto itStart = childrens.begin();
     if (startInfo.spanIndex_ >= static_cast<int32_t>(childrens.size())) {
-        std::advance(itStart, childrens.size() - 1);
+        std::advance(itStart, static_cast<int32_t>(childrens.size()) - 1);
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "startInfo.spanIndex_ is larger than childrens size");
     } else {
         std::advance(itStart, startInfo.spanIndex_);
@@ -6528,7 +6528,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     }
 
     auto it = textTemp.find(lineSeparator);
-    bool containNextLine = it != std::wstring::npos && it != textTemp.length() - 1;
+    bool containNextLine = it != std::wstring::npos && it != static_cast<int32_t>(textTemp.length()) - 1;
     auto content = StringUtils::ToString(textTemp);
 
     if (style || containNextLine) { // SpanNode Fission
@@ -6639,7 +6639,7 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
             return (spanItem->position - spanLength <= caretPosition) && (caretPosition <= spanItem->position);
         });
     if (it == spans_.end()) {
-        info.SetSpanIndex(spans_.size() - 1);
+        info.SetSpanIndex(static_cast<int32_t>(spans_.size()) - 1);
         info.SetOffsetInSpan(StringUtils::ToWstring((*spans_.rbegin())->content).length());
         return;
     }
