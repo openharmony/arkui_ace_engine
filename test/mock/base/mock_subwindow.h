@@ -53,6 +53,8 @@ public:
     MOCK_METHOD0(GetShown, bool());
     MOCK_METHOD2(SetHotAreas, void(const std::vector<Rect>& rects, int32_t overlayId));
     MOCK_CONST_METHOD0(GetParentWindowRect, Rect());
+    MOCK_CONST_METHOD0(GetUIExtensionHostWindowRect, Rect());
+    MOCK_CONST_METHOD0(CheckHostWindowStatus, bool());
     MOCK_METHOD0(ClearToast, void());
     MOCK_METHOD6(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset));

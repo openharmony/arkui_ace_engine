@@ -83,7 +83,12 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
-    if ((dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) ||
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(pattern, dialog);
+    pattern->SetDialogProperties(param);
+
+    auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
+    if ((isSubWindow && dialogLayoutProp->GetIsModal().value_or(true)) ||
         !dialogLayoutProp->GetIsModal().value_or(true)) {
         dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
@@ -94,12 +99,10 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     }
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
-    CHECK_NULL_RETURN(hub, nullptr);
+    CHECK_NULL_RETURN(hub, dialog);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
 
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
     pattern->SetOnWillDismiss(param.onWillDismiss);
 
@@ -110,8 +113,6 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
         pattern->SetOpenAnimation(param.openAnimation);
         pattern->SetCloseAnimation(param.closeAnimation);
     }
-
-    pattern->SetDialogProperties(param);
 
     dialog->MarkModifyDone();
     return dialog;
