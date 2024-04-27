@@ -324,10 +324,10 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     }
     if (displayMode_ != DisplayMode::OFF) {
-        updateFlag = updateFlag || UpdateScrollBarDisplay();
+        updateFlag = UpdateScrollBarDisplay() || updateFlag;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        updateFlag = updateFlag || CheckChildState();
+        updateFlag = CheckChildState() || updateFlag;
     }
     return updateFlag;
 }
