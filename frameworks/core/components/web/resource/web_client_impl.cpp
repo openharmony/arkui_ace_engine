@@ -1031,4 +1031,16 @@ std::vector<int8_t> WebClientImpl::GetWordSelection(const std::string& text, int
     CHECK_NULL_RETURN(delegate, vec);
     return delegate->GetWordSelection(text, offset);
 }
+
+bool WebClientImpl::OnOpenAppLink(
+    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+
+    return delegate->OnOpenAppLink(url, callback);
+}
 } // namespace OHOS::Ace

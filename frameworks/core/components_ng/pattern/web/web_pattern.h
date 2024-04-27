@@ -93,6 +93,7 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
@@ -211,6 +212,16 @@ public:
     PermissionClipboardCallback GetPermissionClipboardCallback() const
     {
         return permissionClipboardCallback_;
+    }
+
+    void SetOnOpenAppLinkCallback(OnOpenAppLinkCallback&& callback)
+    {
+        onOpenAppLinkCallback_ = std::move(callback);
+    }
+
+    OnOpenAppLinkCallback GetOnOpenAppLinkCallback() const
+    {
+        return onOpenAppLinkCallback_;
     }
 
     void SetRenderMode(RenderMode renderMode)
@@ -682,6 +693,7 @@ private:
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
+    OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;

@@ -234,6 +234,8 @@ public:
         const std::string& websiteHost, const std::string& trackerHost) override;
     void OnTooltip(const std::string& tooltip) override;
     bool OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
+    bool OnOpenAppLink(const std::string& url,
+                       std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
