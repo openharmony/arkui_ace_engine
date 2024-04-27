@@ -18409,16 +18409,21 @@ class ArkTextClockComponent extends ArkComponent {
       getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context, textClockConfiguration) {
     textClockConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.textClockNode)) {
+    if (isUndefined(this.textClockNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.textClockNode = new xNode.BuilderNode(context);
       this.textClockNode.build(this.builder, textClockConfiguration);
+      this.needRebuild = false;
     } else {
       this.textClockNode.update(textClockConfiguration);
     }
