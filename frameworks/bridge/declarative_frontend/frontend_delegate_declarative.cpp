@@ -3324,7 +3324,7 @@ RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEf
 {
     napi_value napiVal = reinterpret_cast<napi_value>(value);
     JSRef<JSVal> transitionVal = JsConverter::ConvertNapiValueToJsVal(napiVal);
-    if (transitionVal.IsEmpty()) {
+    if (transitionVal.IsEmpty() || !transitionVal->IsObject()) {
         LOGE("Convert TransitionEffect from napi value to JSVal failed.");
         return nullptr;
     }

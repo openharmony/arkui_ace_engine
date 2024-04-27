@@ -372,9 +372,11 @@ std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(
             lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
         }
     }
-    avgX /= i;
-    avgY /= i;
-    avgTime /= i;
+    if (i > 0) {
+        avgX /= i;
+        avgY /= i;
+        avgTime /= static_cast<uint64_t>(i);
+    }
     return std::make_tuple(avgX, avgY, avgTime);
 }
 
@@ -609,7 +611,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-    resampleTimeStamp_ = nanoTimestamp - window_->GetVSyncPeriod() + ONE_MS_IN_NS;
+    resampleTimeStamp_ = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -1745,7 +1747,7 @@ bool PipelineContext::OnBackPressed()
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
             hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
-            hasOverlay |= overlay->RemoveOverlay(true);
+            hasOverlay = hasOverlay || overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
     if (hasOverlay) {
@@ -3544,7 +3546,7 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
     auto lastFrameInfo = dumpFrameInfos_.back();
     const uint64_t timeout = 1000000000; // unit is ns, 1s
     if (lastFrameInfo.frameRecvTime_ < window_->GetLastRequestVsyncTime() &&
-        GetSysTimestamp() - window_->GetLastRequestVsyncTime() >= timeout) {
+        static_cast<uint64_t>(GetSysTimestamp()) - window_->GetLastRequestVsyncTime() >= timeout) {
         LOGW("lastRequestVsyncTime is %{public}" PRIu64 ", now time is %{public}" PRId64
              ", timeout, window foreground:%{public}d, lastReceiveVsync info:%{public}s",
             window_->GetLastRequestVsyncTime(), GetSysTimestamp(), onShow_, lastFrameInfo.GetTimeInfo().c_str());
