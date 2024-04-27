@@ -25,7 +25,8 @@ function getUINativeModule(): any {
 enum ModifierType {
   ORIGIN = 0,
   STATE = 1,
-  FRAME_NODE = 2
+  FRAME_NODE = 2,
+  EXPOSE_MODIFIER = 3,
 }
 
 type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
@@ -2731,6 +2732,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         value.applyStage(this.nativePtr);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
       })
+    } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
+      this._modifiersWithKeys = new ObservedMap();
     } else {
       this._modifiersWithKeys = new Map();
     }

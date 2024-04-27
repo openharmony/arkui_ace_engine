@@ -25,7 +25,8 @@ let ModifierType;
 (function (ModifierType) {
     ModifierType[ModifierType['ORIGIN'] = 0] = 'ORIGIN';
     ModifierType[ModifierType['STATE'] = 1] = 'STATE';
-    ModifierType[ModifierType['FRAME_NODE'] = 1] = 'FRAME_NODE';
+    ModifierType[ModifierType['FRAME_NODE'] = 2] = 'FRAME_NODE';
+    ModifierType[ModifierType['EXPOSE_MODIFIER'] = 3] = 'EXPOSE_MODIFIER';
 })(ModifierType || (ModifierType = {}));
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
@@ -2656,6 +2657,8 @@ class ArkComponent {
         value.applyStage(this.nativePtr);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
       })
+    } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
+      this._modifiersWithKeys = new ObservedMap();
     } else {
       this._modifiersWithKeys = new Map();
     }

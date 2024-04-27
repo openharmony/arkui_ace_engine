@@ -210,8 +210,10 @@ AttributeUpdater.StateEnum = {
 };
 class CommonModifier extends ArkComponent {
   constructor(nativePtr, classType) {
+    if (!classType) {
+      classType = ModifierType.EXPOSE_MODIFIER;
+    }
     super(nativePtr, classType);
-    this._modifiersWithKeys = new ModifierMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
