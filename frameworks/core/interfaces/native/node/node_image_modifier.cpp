@@ -457,9 +457,22 @@ int32_t GetImageDraggable(ArkUINodeHandle node)
  * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
  * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
  */
-void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length) {}
+void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length)
+{
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(node, values, units, length);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
 
-void ResetImageBorderRadius(ArkUINodeHandle node) {}
+
+void ResetImageBorderRadius(ArkUINodeHandle node)
+{
+    GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
 
 void SetImageBorder(ArkUINodeHandle node)
 {
