@@ -643,9 +643,9 @@ Axis SwiperModelNG::GetDirection(FrameNode* frameNode)
 
 uint32_t SwiperModelNG::GetDuration(FrameNode* frameNode)
 {
-    int32_t value = SwiperAnimationStyle::DEFAULT_DURATION;
+    uint32_t value = SwiperAnimationStyle::DEFAULT_DURATION;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(SwiperPaintProperty, Duration, value, frameNode, value);
-    return static_cast<uint32_t>(value);
+    return value;
 }
 
 int SwiperModelNG::GetDisplayCount(FrameNode* frameNode)

@@ -37,11 +37,8 @@ EdgeEffect JSScrollable::ParseEdgeEffect(const JSRef<JSVal>& jsValue, EdgeEffect
 bool JSScrollable::ParseAlwaysEnable(const JSRef<JSVal>& jsValue, bool defaultValue)
 {
     auto alwaysEnabled = defaultValue;
-    if (!(jsValue->IsNull() || jsValue->IsUndefined())) {
-        JSRef<JSObject> paramObject = JSRef<JSObject>::New();
-        if (jsValue->IsObject()) {
-            paramObject = JSRef<JSObject>::Cast(jsValue);
-        }
+    if ((!(jsValue->IsNull() || jsValue->IsUndefined())) && jsValue->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> alwaysEnabledParam = paramObject->GetProperty("alwaysEnabled");
         alwaysEnabled = alwaysEnabledParam->IsBoolean() ? alwaysEnabledParam->ToBoolean() : defaultValue;
     }

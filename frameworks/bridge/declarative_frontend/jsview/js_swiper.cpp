@@ -633,11 +633,8 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
     if (info[0]->IsObject()) {
-        obj = JSRef<JSObject>::Cast(info[0]);
-    }
-    if (info[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
 
         JSRef<JSVal> typeParam = obj->GetProperty("type");
@@ -658,13 +655,13 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
             SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
     } else {
-        SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(JSRef<JSObject>::New());
         SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
         SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }
     if (info[0]->IsBoolean()) {
         bool showIndicator = false;
-        ParseJsBool(obj, showIndicator);
+        ParseJsBool(info[0], showIndicator);
         SwiperModel::GetInstance()->SetShowIndicator(showIndicator);
     } else {
         SwiperModel::GetInstance()->SetShowIndicator(true);

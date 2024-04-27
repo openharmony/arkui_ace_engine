@@ -39,7 +39,7 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
         result += item;
         result += ",";
     }
-    if (result.size() != 0) {
+    if (!result.empty()) {
         result = result.substr(0, result.size() - 1);
     }
     return result;
@@ -63,7 +63,7 @@ std::string ConvertTextShadow(const std::vector<Shadow>& textShadow)
         result += CovertShadowToString(item);
         result += ",";
     }
-    if (result.size() != 0) {
+    if (!result.empty()) {
         result = result.substr(0, result.size() - 1);
     }
     return result;
@@ -76,7 +76,7 @@ std::string ConvertFeature(const FONT_FEATURES_LIST& fontFeaTures)
         result += item.first + std::string(" ") + std::to_string(item.second);
         result += ",";
     }
-    if (result.size() != 0) {
+    if (!result.empty()) {
         result = result.substr(0, result.size() - 1);
     }
     return result;

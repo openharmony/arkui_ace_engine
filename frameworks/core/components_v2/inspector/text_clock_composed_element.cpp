@@ -132,7 +132,7 @@ std::string TextClockComposedElement::ConvertFontFamily(const std::vector<std::s
         result += item;
         result += ",";
     }
-    if (result.size() != 0) {
+    if (!result.empty()) {
         result = result.substr(0, result.size() - 1);
     }
     return result;
