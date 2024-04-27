@@ -638,6 +638,11 @@ void ImagePattern::OnAnimatedModifyDone()
         AddImageLoadSuccessEvent(imageFrameNode);
     }
     UpdateFormDurationByRemainder();
+    ControlAnimation(index);
+}
+
+void ImagePattern::ControlAnimation(int32_t index)
+{
     switch (status_) {
         case Animator::Status::IDLE:
             animator_->Cancel();
@@ -658,7 +663,13 @@ void ImagePattern::OnAnimatedModifyDone()
                 ResetFormAnimationFlag();
                 return;
             }
-            animator_->Forward();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            if (host->IsVisible()) {
+                animator_->Forward();
+            } else {
+                animator_->Pause();
+            }
     }
 }
 
@@ -876,7 +887,7 @@ void ImagePattern::OnVisibleChange(bool visible)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (isAnimation_) {
+    if (isAnimation_ && !animator_->IsStopped()) {
         if (visible) {
             animator_->Forward();
         } else {
