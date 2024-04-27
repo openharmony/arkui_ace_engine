@@ -993,7 +993,9 @@ class SymbolGlyphModifier extends ArkSymbolGlyphComponent {
   constructor(src, nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
-    this.initialize(src);
+    if (src !== undefined) {
+      this.initialize([src]);
+    }
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

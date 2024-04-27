@@ -39,7 +39,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolId(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    std::uint32_t content;
+    uint32_t content = 0;
     if (ArkTSUtils::ParseJsSymbolId(vm, secondArg, content)) {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolId(nativeNode, content);
     }

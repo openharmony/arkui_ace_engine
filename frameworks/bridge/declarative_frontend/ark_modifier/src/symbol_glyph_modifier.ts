@@ -18,7 +18,9 @@ class SymbolGlyphModifier extends ArkSymbolGlyphComponent implements AttributeMo
     constructor(src: Resource, nativePtr: KNode, classType: ModifierType) {
       super(nativePtr, classType);
       this._modifiersWithKeys = new ModifierMap();
-      this.initialize(src);
+      if (src !== undefined) {
+        this.initialize([src]);
+      }
     }
       
     applyNormalAttribute(instance: SymbolGlyphAttribute): void {

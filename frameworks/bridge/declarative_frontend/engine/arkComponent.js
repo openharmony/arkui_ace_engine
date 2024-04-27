@@ -22626,8 +22626,10 @@ class ArkSymbolGlyphComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   initialize(value) {
-      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value);
-      return this;
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
+    }
+    return this;
   }
   fontColor(value) {
     modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
@@ -22657,7 +22659,7 @@ if (globalThis.SymbolGlyph !== undefined) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
       return new ArkSymbolGlyphComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.SymbolGlyphModifier(nativePtr, classType);
+      return new modifierJS.SymbolGlyphModifier(undefined, nativePtr, classType);
     });
   };
 }

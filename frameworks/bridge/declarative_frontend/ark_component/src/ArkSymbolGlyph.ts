@@ -144,9 +144,11 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     constructor(nativePtr: KNode, classType?: ModifierType) {
       super(nativePtr, classType);
     }
-    initialize(value: Object): SymbolGlyphAttribute {
-        modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value);
-        return this;
+    initialize(value: Object[]): SymbolGlyphAttribute {
+      if(value[0] !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
+      }
+      return this;
     }
     fontColor(value: object): SymbolGlyphAttribute {
       modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
@@ -181,6 +183,6 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
       return new ArkSymbolGlyphComponent(nativePtr);
     }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-      return new modifierJS.SymbolGlyphModifier(nativePtr, classType);
+      return new modifierJS.SymbolGlyphModifier(undefined, nativePtr, classType);
     });
   };
