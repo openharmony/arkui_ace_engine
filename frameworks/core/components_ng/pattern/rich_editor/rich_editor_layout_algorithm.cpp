@@ -214,13 +214,16 @@ float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem
 
 void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    TextLayoutAlgorithm::Measure(layoutWrapper);
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    OptionalSizeF frameSize =
+    OptionalSizeF idealSize =
         CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (layoutConstraint->maxSize.Width() < layoutConstraint->minSize.Width()) {
-        frameSize.SetWidth(layoutConstraint->minSize.Width());
+        idealSize.SetWidth(layoutConstraint->minSize.Width());
     }
-    TextLayoutAlgorithm::Measure(layoutWrapper);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    frameSize.SetWidth(idealSize.ConvertToSizeT().Width());
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
