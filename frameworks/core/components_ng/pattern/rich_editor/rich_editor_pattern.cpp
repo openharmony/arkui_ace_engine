@@ -5167,6 +5167,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         }
     }
     SetCaretPosition(isForward ? textSelector_.GetTextStart() : textSelector_.GetTextEnd());
+    MoveCaretToContentRect();
     CalculateHandleOffsetAndShowOverlay();
     bool isNotUseDefault =
         options.has_value() && MenuPolicy::DEFAULT != options.value().menuPolicy && !textSelector_.SelectNothing();
@@ -5186,7 +5187,6 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
         SetHandles();
         isShowMenu_ = true;
     }
-    MoveCaretToContentRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
