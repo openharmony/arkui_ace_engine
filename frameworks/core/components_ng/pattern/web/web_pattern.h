@@ -480,6 +480,7 @@ public:
     void OnTooltip(const std::string& tooltip);
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
+    void Backward();
 
 private:
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
