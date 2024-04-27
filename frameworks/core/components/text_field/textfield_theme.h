@@ -182,6 +182,8 @@ public:
 
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->cancelButtonIconHeight_ = pattern->GetAttr<Dimension>("cancel_button_icon_height", Dimension());
+            theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
+            theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
         }
     };
 
@@ -552,6 +554,16 @@ public:
         return cancelButtonIconColor_;
     }
 
+    const Color& GetPreviewUnderlineColor() const
+    {
+        return previewUnderlineColor_;
+    }
+
+    const Color& GetPreviewBoardColor() const
+    {
+        return previewBoardColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -645,6 +657,8 @@ private:
     Color cancelButtonIconColor_;
     Dimension cancelButtonIconHeight_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
+    Color previewUnderlineColor_;
+    Color previewBoardColor_;
 };
 
 } // namespace OHOS::Ace
