@@ -1120,7 +1120,7 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(true);
+        HandleOnSelectAll(false);
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1204,7 +1204,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     showSelect_ = true;
-    if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
+    if (!IsShowHandle() || isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
         if (inlineSelectAllFlag_ && !isKeyEvent && !IsUsingMouse()) {
             return;
@@ -4413,7 +4413,6 @@ void TextFieldPattern::SetSelectionFlag(
     }
 
     SetIsSingleHandle(!IsSelected());
-    selectOverlay_->SetUsingMouse(false);
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
     } else {
@@ -4426,7 +4425,11 @@ void TextFieldPattern::SetSelectionFlag(
         } else {
             isShowMenu = false;
         }
-        ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        if (!isShowMenu && IsUsingMouse()) {
+            CloseSelectOverlay();
+        } else {
+            ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
