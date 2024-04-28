@@ -1714,6 +1714,7 @@ struct ArkUINavigatorModifier {
 
 struct ArkUINodeContainerModifier {
     void (*rebuild)(ArkUI_Int32 nodeId);
+    void (*clean)(ArkUINodeHandle node);
 };
 
 struct ArkUITimepickerModifier {

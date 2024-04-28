@@ -505,6 +505,26 @@ class FrameNode {
         this._nativeRef = null;
         this.nodePtr_ = null;
     }
+    static disposeTreeRecursively(node) {
+        if (node === null) {
+            return;
+        }
+        let child = node.getFirstChild();
+        FrameNode.disposeTreeRecursively(child);
+        let sibling = node.getNextSibling();
+        FrameNode.disposeTreeRecursively(sibling);
+        node.dispose();
+    }
+    disposeTree() {
+        let parent = this.getParent();
+        if (parent?.getNodeType() == "NodeContainer") {
+            getUINativeModule().nodeContainer.clean(parent?.getNodePtr());
+        }
+        else {
+            parent?.removeChild(this);
+        }
+        FrameNode.disposeTreeRecursively(this);
+    }
     checkType() {
         if (!this.isModifiable()) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
