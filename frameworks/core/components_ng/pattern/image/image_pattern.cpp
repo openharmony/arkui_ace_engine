@@ -617,7 +617,7 @@ void ImagePattern::OnAnimatedModifyDone()
     Pattern::OnModifyDone();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
-        LOGE("image size is less than 0.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "image size is less than 0.");
         return;
     }
     GenerateCachedImages();
@@ -1510,7 +1510,8 @@ void ImagePattern::SetShowingIndex(int32_t index)
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     if (index >= static_cast<int32_t>(images_.size())) {
-        LOGW("ImageAnimator update index error, index: %{public}d, size: %{public}zu", index, images_.size());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator update index error, index: %{public}d, size: %{public}zu",
+            index, images_.size());
         return;
     }
     CHECK_NULL_VOID(images_[index].pixelMap);
@@ -1589,7 +1590,8 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
 void ImagePattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index)
 {
     if (index >= static_cast<int32_t>(images_.size())) {
-        LOGW("PrepareImageInfo index error, index: %{public}d, size: %{public}zu", index, images_.size());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "PrepareImageInfo index error, index: %{public}d, size: %{public}zu",
+            index, images_.size());
         return;
     }
     auto host = GetHost();
@@ -1721,7 +1723,7 @@ void ImagePattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameN
             }
             iter->isLoaded = true;
             if (pattern->nowImageIndex_ >= static_cast<int32_t>(pattern->images_.size())) {
-                LOGW("ImageAnimator showImage index is invalid");
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator showImage index is invalid");
                 return;
             }
             if (pattern->nowImageIndex_ == iter->index &&
