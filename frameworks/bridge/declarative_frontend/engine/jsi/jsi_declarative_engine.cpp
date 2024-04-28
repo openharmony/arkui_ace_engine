@@ -971,7 +971,7 @@ napi_value JsiDeclarativeEngineInstance::GetFrameNodeValueByNodeId(int32_t nodeI
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
 thread_local std::unordered_map<std::string, panda::Global<panda::ObjectRef>> JsiDeclarativeEngine::builderMap_;
-panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
+thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
 // Start JsiDeclarativeEngine
