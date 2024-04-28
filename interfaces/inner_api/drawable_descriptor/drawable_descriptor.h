@@ -71,6 +71,10 @@ public:
     {
         pixelMap_ = pixelMap;
     }
+    bool HasPixelMap()
+    {
+        return pixelMap_.has_value();
+    }
     void ResetPixelMap()
     {
         pixelMap_.reset();
@@ -135,6 +139,11 @@ public:
     {
         mask_ = mask;
         customized_ = true;
+    }
+
+    bool Customized()
+    {
+        return customized_;
     }
 
     void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
