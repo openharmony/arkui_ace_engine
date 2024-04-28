@@ -1541,6 +1541,12 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto obscuredReasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
+    const auto& castRenderContext = imageFrameNode->GetRenderContext();
+    if (castRenderContext) {
+        castRenderContext->UpdateObscured(obscuredReasons);
+    }
+    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
