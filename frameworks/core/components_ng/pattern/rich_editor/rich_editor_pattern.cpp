@@ -2118,6 +2118,8 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
 void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caretUpdateType=%{public}d", caretUpdateType_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     textResponseType_ = TextResponseType::LONG_PRESS;
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         HandleUserLongPressEvent(info);
@@ -2125,6 +2127,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     bool isDoubleClick = caretUpdateType_== CaretUpdateType::DOUBLE_CLICK;
     if (isDoubleClick && info.GetSourceTool() == SourceTool::FINGER && IsSelected()) {
         showSelect_ = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
     bool isInterceptEvent = false;
@@ -2134,8 +2137,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     if (isInterceptEvent) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     HandleDoubleClickOrLongPress(info, host);
 }
 
@@ -4310,7 +4311,6 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         isOnlyImageDrag_ = false;
-        showSelect_ = true;
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
         HandleTouchMove(info.GetTouches().front().GetLocalLocation());
@@ -4850,13 +4850,28 @@ void RichEditorPattern::CreateHandles()
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
 }
 
+void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
+{
+    if (!isNeedShowHandles) {
+        auto info = GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
+        auto selResult = info.GetSelection().resultObjects;
+        if (selResult.size() == 1 && selResult.front().type == SelectSpanType::TYPEIMAGE) {
+            textSelector_.Update(-1, -1);
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            return;
+        }
+    }
+    ShowHandles();
+}
+
 void RichEditorPattern::ShowHandles()
 {
     if (!selectOverlay_->IsHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
         selectOverlay_->ProcessOverlay({.animation = false});
     }
 }
-
 void RichEditorPattern::OnAreaChangedInner()
 {
     float selectLineHeight = 0.0f;

@@ -294,7 +294,7 @@ void RichEditorDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow
 void RichEditorDragOverlayModifier::StartFloatingAnimate()
 {
     auto pattern = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
-    if (!pattern || !IsHandlesShow()) {
+    if (!pattern) {
         type_ = DragAnimType::DEFAULT;
         SetSelectedBackgroundOpacity(0.0);
         SetHandleOpacity(0.0);
@@ -304,7 +304,7 @@ void RichEditorDragOverlayModifier::StartFloatingAnimate()
     type_ = DragAnimType::FLOATING;
     isAnimating_ = true;
 
-    SetHandleOpacity(1.0);
+    SetHandleOpacity(IsHandlesShow() ? 1.0 : 0.0);
     AnimationOption handleOption;
     handleOption.SetDuration(FLOATING_ANIMATE_HANDLE_OPACITY_DURATION);
     handleOption.SetCurve(Curves::LINEAR);
@@ -334,7 +334,7 @@ void RichEditorDragOverlayModifier::StartFloatingAnimate()
 void RichEditorDragOverlayModifier::StartFloatingSelBackgroundAnimate()
 {
     SetBackgroundOffset(0);
-    SetSelectedBackgroundOpacity(1.0);
+    SetSelectedBackgroundOpacity(IsHandlesShow() ? 1.0 : 0.0);
     AnimationOption backgroundOption;
     backgroundOption.SetDuration(FLOATING_ANIMATE_BACKGROUND_CHANGE_DURATION);
     backgroundOption.SetCurve(Curves::FRICTION);
@@ -397,17 +397,17 @@ void RichEditorDragOverlayModifier::StartSelBackgroundCancelAnimate()
         weakPattern = WeakPtr<RichEditorPattern>(pattern)]() {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->ShowHandles();
         auto modifier = weakModifier.Upgrade();
         CHECK_NULL_VOID(modifier);
+        pattern->ShowHandles(modifier->IsHandlesShow());
         modifier->SetAnimateFlag(false);
     };
     selOption.SetOnFinishEvent(selectAnimFinishFuc);
     auto selPropertyCallback = [weakModifier = WeakClaim(this)]() {
         auto modifier = weakModifier.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->SetHandleOpacity(1.0);
-        modifier->SetSelectedBackgroundOpacity(1.0);
+        modifier->SetHandleOpacity(modifier->IsHandlesShow() ? 1.0 : 0.0);
+        modifier->SetSelectedBackgroundOpacity(modifier->IsHandlesShow() ? 1.0 : 0.0);
     };
     AnimationUtils::Animate(selOption, selPropertyCallback, selOption.GetOnFinishEvent());
 }
