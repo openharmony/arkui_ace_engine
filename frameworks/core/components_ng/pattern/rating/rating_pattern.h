@@ -102,6 +102,12 @@ public:
 
     void SetBuilderFunc(RatingMakeCallback&& makeFunc)
     {
+        if (makeFunc == nullptr) {
+            makeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         makeFunc_ = std::move(makeFunc);
     }
 
@@ -156,7 +162,7 @@ private:
     void HandleTouchDown(const Offset& localPosition);
     void HandleTouchUp();
     void HandleClick(const GestureEvent& info);
-    void FireChangeEvent() const;
+    void FireChangeEvent();
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag);

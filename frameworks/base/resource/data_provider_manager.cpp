@@ -101,4 +101,12 @@ int32_t DataProviderManagerStandard::GetDataProviderFile(const std::string& uriS
     return helper_->OpenFile(uriStr, mode);
 }
 
+int32_t DataProviderManagerStandard::ReadMovingPhotoVideo(const std::string &uri)
+{
+    InitHelper();
+    std::shared_lock lock(helperMutex_);
+    CHECK_NULL_RETURN(helper_, -1);
+    return helper_->ReadMovingPhotoVideo(uri);
+}
+
 } // namespace OHOS::Ace

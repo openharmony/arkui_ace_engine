@@ -74,6 +74,30 @@ static void ParseParams(napi_env env, napi_value params, std::string& paramsStri
     paramsString = paramsChar.get();
 }
 
+static napi_value ParseJSONParams(napi_env env, const std::string& paramsStr)
+{
+    napi_value globalValue;
+    napi_get_global(env, &globalValue);
+    napi_value jsonValue;
+    napi_get_named_property(env, globalValue, "JSON", &jsonValue);
+    napi_value parseValue;
+    napi_get_named_property(env, jsonValue, "parse", &parseValue);
+    
+    napi_value paramsNApi;
+    napi_create_string_utf8(env, paramsStr.c_str(), NAPI_AUTO_LENGTH, &paramsNApi);
+    napi_value funcArgv[1] = { paramsNApi };
+    napi_value result;
+    napi_call_function(env, jsonValue, parseValue, 1, funcArgv, &result);
+    
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, result, &valueType);
+    if (valueType != napi_object) {
+        return nullptr;
+    }
+    
+    return result;
+}
+
 struct RouterAsyncContext {
     napi_env env = nullptr;
     napi_ref callbackSuccess = nullptr;
@@ -534,20 +558,25 @@ static napi_value JSGetStateByIndex(napi_env env, napi_callback_info info)
     }
     size_t routeNameLen = routeName.length();
     size_t routePathLen = routePath.length();
-    size_t routeParamsLen = routeParams.length();
 
-    napi_value resultArray[4] = { 0 };
+    napi_value resultArray[3] = { 0 };
     napi_create_int32(env, routeIndex, &resultArray[0]);
     napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[1]);
     napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[2]);
-    napi_create_string_utf8(env, routeParams.c_str(), routeParamsLen, &resultArray[3]);
+    
+    napi_value parsedParams = nullptr;
+    if (!routeParams.empty()) {
+        parsedParams = ParseJSONParams(env, routeParams);
+    } else {
+        napi_create_object(env, &parsedParams);
+    }
 
     napi_value result = nullptr;
     napi_create_object(env, &result);
     napi_set_named_property(env, result, "index", resultArray[0]);
     napi_set_named_property(env, result, "name", resultArray[1]);
     napi_set_named_property(env, result, "path", resultArray[2]);
-    napi_set_named_property(env, result, "params", resultArray[3]);
+    napi_set_named_property(env, result, "params", parsedParams);
     return result;
 }
 
@@ -586,16 +615,20 @@ static napi_value JSGetStateByUrl(napi_env env, napi_callback_info info)
         napi_value indexValue = nullptr;
         napi_value nameValue = nullptr;
         napi_value pathValue = nullptr;
-        napi_value paramsValue = nullptr;
 
         napi_create_int32(env, routeIndex, &indexValue);
         napi_create_string_utf8(env, routeName.c_str(), NAPI_AUTO_LENGTH, &nameValue);
         napi_create_string_utf8(env, routePath.c_str(), NAPI_AUTO_LENGTH, &pathValue);
-        napi_create_string_utf8(env, routeParams.c_str(), NAPI_AUTO_LENGTH, &paramsValue);
+        napi_value parsedParams = nullptr;
+        if (!routeParams.empty()) {
+            parsedParams = ParseJSONParams(env, routeParams);
+        } else {
+            napi_create_object(env, &parsedParams);
+        }
         napi_set_named_property(env, pageObj, "index", indexValue);
         napi_set_named_property(env, pageObj, "name", nameValue);
         napi_set_named_property(env, pageObj, "path", pathValue);
-        napi_set_named_property(env, pageObj, "params", paramsValue);
+        napi_set_named_property(env, pageObj, "params", parsedParams);
         napi_set_element(env, result, index++, pageObj);
     }
     return result;
@@ -777,26 +810,13 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
+    
     std::string paramsStr = delegate->GetParams();
     if (paramsStr.empty()) {
         return nullptr;
     }
-    napi_value globalValue;
-    napi_get_global(env, &globalValue);
-    napi_value jsonValue;
-    napi_get_named_property(env, globalValue, "JSON", &jsonValue);
-    napi_value parseValue;
-    napi_get_named_property(env, jsonValue, "parse", &parseValue);
-    napi_value routerParamsNApi;
-    napi_create_string_utf8(env, paramsStr.c_str(), NAPI_AUTO_LENGTH, &routerParamsNApi);
-    napi_value funcArgv[1] = { routerParamsNApi };
-    napi_value result;
-    napi_call_function(env, jsonValue, parseValue, 1, funcArgv, &result);
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, result, &valueType);
-    if (valueType != napi_object) {
-        return nullptr;
-    }
+    
+    napi_value result = ParseJSONParams(env, paramsStr);
     return result;
 }
 

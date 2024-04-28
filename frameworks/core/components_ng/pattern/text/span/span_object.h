@@ -29,9 +29,16 @@
 
 namespace OHOS::Ace {
 
-class AttachmentImage {};
-
-enum class SpanType { Font = 0, Decoration, BaselineOffset, LetterSpacing, TextShadow = 4, Gesture = 100, Image = 300 };
+enum class SpanType {
+    Font = 0,
+    Decoration,
+    BaselineOffset,
+    LetterSpacing,
+    TextShadow = 4,
+    Gesture = 100,
+    Image = 300,
+    CustomSpan = 400
+};
 
 enum class SpanOperation {
     ADD = 0,
@@ -196,7 +203,6 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
-    static RefPtr<SpanBase> CreateDefaultSpan();
 
 private:
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
@@ -207,6 +213,7 @@ private:
 
 class ImageSpan : public SpanBase {
     DECLARE_ACE_TYPE(ImageSpan, SpanBase);
+
 public:
     explicit ImageSpan(const ImageSpanOptions& options);
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
@@ -220,6 +227,32 @@ public:
 
 private:
     ImageSpanOptions imageOptions_;
+};
+
+class CustomSpan : public SpanBase {
+    DECLARE_ACE_TYPE(CustomSpan, SpanBase);
+
+public:
+    CustomSpan();
+    explicit CustomSpan(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+        std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw);
+
+    explicit CustomSpan(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+        std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end);
+    virtual ~CustomSpan() override = default;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    void SetOnMeasure(std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> onMeasure);
+    void SetOnDraw(std::function<void(NG::DrawingContext&, CustomSpanOptions)> onDraw);
+    std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> GetOnMeasure();
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> GetOnDraw();
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure_;
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H

@@ -338,17 +338,23 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
     EXPECT_TRUE(FRAME_NODE->IsSupportDrawModifier());
 
     /**
-     * @tc.steps: step 3. call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 3. call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
 
     /**
-     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     FRAME_NODE->SetDrawModifier(drawModifier);
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
+
+    /**
+     * @tc.steps: step 5. Nodes created by virtual classes, call SetRemoveCustomProperties.
+     * @tc.expect: expect call successfully.
+     */
+    FRAME_NODE->SetRemoveCustomProperties([]()->void {});
 }
 
 /**
@@ -2308,6 +2314,33 @@ HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
     option = { static_cast<NG::DragPreviewMode>(NG::DragPreviewMode::AUTO) };
     frameNode->SetDragPreviewOptions(option);
     EXPECT_LT(frameNode->GetPreviewScaleVal(), 1.0f);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPreviewApplyVal001
+ * @tc.desc: Test frame node method GetPreviewApplyVal001
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewApplyVal001, TestSize.Level1)
+{
+    auto frameNode = FRAME_NODE;
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. set drag preview options and call GetDragPreviewOption.
+     * @tc.expected: expect GetDragPreviewOption return apply .
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+    NG::DragPreviewOption previewOption;
+    previewOption.onApply = [](WeakPtr<NG::FrameNode> frameNode) {};
+    frameNode->SetDragPreviewOptions(previewOption);
+    EXPECT_NE(frameNode->GetDragPreviewOption().onApply, nullptr);
 }
 
 /**

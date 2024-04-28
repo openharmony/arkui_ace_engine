@@ -38,7 +38,15 @@ void GaugeLayoutAlgorithm::OnReset() {}
 void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(pattern);
     BoxLayoutAlgorithm::Measure(layoutWrapper);
+    if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
+        return;
+    }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         MeasureLimitValueTextWidth(layoutWrapper);
         auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -55,6 +63,14 @@ void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<GaugePattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->UseContentModifier()) {
+        host->GetGeometryNode()->Reset();
+        return BoxLayoutAlgorithm::MeasureContent(contentConstraint, layoutWrapper);
+    }
     if (contentConstraint.selfIdealSize.IsValid()) {
         auto len =
             std::min(contentConstraint.selfIdealSize.Height().value(), contentConstraint.selfIdealSize.Width().value());
@@ -236,6 +252,11 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto gaugePattern = hostNode->GetPattern<GaugePattern>();
     CHECK_NULL_VOID(gaugePattern);
+    if (gaugePattern->UseContentModifier()) {
+        BoxLayoutAlgorithm::Layout(layoutWrapper);
+        hostNode->GetGeometryNode()->Reset();
+        return;
+    }
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
     auto paddingSize = layoutGeometryNode->GetPaddingSize();

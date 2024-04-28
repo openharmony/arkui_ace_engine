@@ -75,9 +75,7 @@ void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(richEditorPattern);
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     CHECK_NULL_VOID(overlayMod);
-    OffsetF caretOffset;
-    float caretHeight = 0.0f;
-    richEditorPattern->CalculateCaretOffsetAndHeight(caretOffset, caretHeight);
+    auto [caretOffset, caretHeight] = richEditorPattern->CalculateCaretOffsetAndHeight();
     overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
 }
 

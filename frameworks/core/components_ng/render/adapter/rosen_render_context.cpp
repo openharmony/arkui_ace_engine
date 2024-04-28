@@ -219,6 +219,7 @@ RSBrush GetRsBrush(uint32_t fillColor)
 
     return brush;
 }
+
 } // namespace
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
@@ -703,15 +704,17 @@ void RosenRenderContext::PaintBackground()
         PaintRSBgImage();
 #endif
     } else {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            rsNode_->SetBgImage(std::make_shared<Rosen::RSImage>());
+        }
         return;
     }
-
+    auto srcSize = bgLoadingCtx_->GetImageSize();
     SizeF renderSize = ImagePainter::CalculateBgImageSize(
-        GetHost()->GetGeometryNode()->GetFrameSize(), bgLoadingCtx_->GetImageSize(), GetBackgroundImageSize());
+        GetHost()->GetGeometryNode()->GetFrameSize(), srcSize, GetBackgroundImageSize());
     OffsetF positionOffset = ImagePainter::CalculateBgImagePosition(
         GetHost()->GetGeometryNode()->GetFrameSize(), renderSize, GetBackgroundImagePosition());
     auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
-    auto srcSize = bgLoadingCtx_->GetImageSize();
     Rosen::Vector4f rect(slice.left.ConvertToPxWithSize(srcSize.Width()),
         slice.top.ConvertToPxWithSize(srcSize.Height()),
         srcSize.Width() - (slice.left + slice.right).ConvertToPxWithSize(srcSize.Width()),
@@ -727,14 +730,24 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
 {
     CHECK_NULL_VOID(rsNode_);
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
+        bgImage_ = nullptr;
+        bgLoadingCtx_ = nullptr;
+        PaintBackground();
         return;
     }
     if (!bgLoadingCtx_ || src != bgLoadingCtx_->GetSourceInfo()) {
-        LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
-        bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
-        CHECK_NULL_VOID(bgLoadingCtx_);
-        bgLoadingCtx_->LoadImageData();
+        auto frameNode = GetHost();
+        auto callback = [src, weak = WeakClaim(this)] {
+            auto renderContext = weak.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->OnBackgroundImageUpdate(src);
+        };
+        frameNode->SetColorModeUpdateCallback(std::move(callback));
     }
+    LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
+    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
+    CHECK_NULL_VOID(bgLoadingCtx_);
+    bgLoadingCtx_->LoadImageData();
 }
 
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& /*imageRepeat*/)
@@ -759,6 +772,18 @@ void RosenRenderContext::OnBackgroundImageResizableSliceUpdate(const ImageResiza
 {
     CHECK_NULL_VOID(rsNode_);
     PaintBackground();
+}
+
+bool RosenRenderContext::HasValidBgImageResizable()
+{
+    CHECK_NULL_RETURN(bgLoadingCtx_, false);
+    auto srcSize = bgLoadingCtx_->GetImageSize();
+    auto slice = GetBackgroundImageResizableSliceValue(ImageResizableSlice());
+    auto left = slice.left.ConvertToPxWithSize(srcSize.Width());
+    auto right = slice.right.ConvertToPxWithSize(srcSize.Width());
+    auto top = slice.top.ConvertToPxWithSize(srcSize.Width());
+    auto bottom = slice.bottom.ConvertToPxWithSize(srcSize.Width());
+    return srcSize.Width() > left + right && srcSize.Height() > top + bottom && right > 0 && bottom > 0;
 }
 
 void RosenRenderContext::SetBackBlurFilter()
@@ -1139,7 +1164,9 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
                     Rosen::RectF(0, 0, skiaImage->GetImage()->width(), skiaImage->GetImage()->height()));
             }
         }
-        rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        if (!HasValidBgImageResizable()) {
+            rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        }
 #else
     } else if (InstanceOf<DrawingImage>(image)) {
         auto drawingImage = DynamicCast<DrawingImage>(image);
@@ -1157,7 +1184,9 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
                     Rosen::RectF(0, 0, drawingImage->GetImage()->GetWidth(), drawingImage->GetImage()->GetHeight()));
             }
         }
-        rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        if (!HasValidBgImageResizable()) {
+            rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+        }
 #endif
     }
 }
@@ -1378,6 +1407,15 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetAlpha(opacity);
     RequestNextFrame();
+}
+
+void RosenRenderContext::OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode)
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+    CHECK_NULL_VOID(rsCanvasDrawingNode);
+    if (dynamicRangeMode < DynamicRangeMode::STANDARD) {
+        rsCanvasDrawingNode->SetHDRPresent(true);
+    }
 }
 
 void RosenRenderContext::SetAlphaOffscreen(bool isOffScreen)
@@ -1913,11 +1951,7 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     // and triggered in AnimateTo closure.
     // Note: this default transition effect will be removed after all transitions finished, implemented in
     // OnTransitionInFinish. and OnTransitionOutFinish.
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (isBreakingPoint_ && !transitionEffect_ &&
-        (pipeline->GetSyncAnimationOption().IsValid() ||
-            ViewStackProcessor::GetInstance()->GetImplicitAnimationOption().IsValid())) {
+    if (isBreakingPoint_ && !transitionEffect_ && AnimationUtils::IsImplicitAnimationOpen()) {
         hasDefaultTransition_ = true;
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
         RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
@@ -2120,6 +2154,14 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
 }
 
+void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect)
+{
+    auto isAccessibilityFocus = GetAccessibilityFocus().value_or(false);
+    if (isAccessibilityFocus) {
+        PaintAccessibilityFocus();
+    }
+}
+
 void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -2150,14 +2192,19 @@ void RosenRenderContext::PaintAccessibilityFocus()
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
     frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
+    RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
+    if (localRect != RectT<int32_t>()) {
+        RectF globalRect = frameRect.GetRect();
+        globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
+            localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
+        frameRect.SetRect(globalRect);
+    }
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
 void RosenRenderContext::ClearAccessibilityFocus()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(accessibilityFocusStateModifier_);
     rsNode_->RemoveModifier(accessibilityFocusStateModifier_);
     RequestNextFrame();
@@ -4574,9 +4621,10 @@ void RosenRenderContext::SetBounds(float positionX, float positionY, float width
     rsNode_->SetBounds(positionX, positionY, width, height);
 }
 
-void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value)
+void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect)
 {
     useContentRectForRSFrame_ = value;
+    adjustRSFrameByContentRect_ = adjustRSFrameByContentRect;
 }
 
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
@@ -4617,6 +4665,15 @@ bool RosenRenderContext::StopTextureExport()
         rsSurfaceNode->SetTextureExport(false);
     }
     return true;
+}
+
+void RosenRenderContext::SetSurfaceRotation(bool isLock)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    if (rsSurfaceNode) {
+        rsSurfaceNode->SetForceHardwareAndFixRotation(isLock);
+    }
 }
 
 void RosenRenderContext::ClearDrawCommands()
@@ -5353,7 +5410,9 @@ void RosenRenderContext::PaintRSBgImage()
     } else {
         rosenImage->SetImage(image->GetImage());
     }
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    if (!HasValidBgImageResizable()) {
+        rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    }
     rsNode_->SetBgImage(rosenImage);
 }
 
@@ -5367,7 +5426,9 @@ void RosenRenderContext::PaintPixmapBgImage()
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     rosenImage->SetPixelMap(pixmap->GetPixelMapSharedPtr());
-    rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    if (!HasValidBgImageResizable()) {
+        rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+    }
     rsNode_->SetBgImage(rosenImage);
 }
 
@@ -5406,13 +5467,21 @@ void RosenRenderContext::SetContentRectToFrame(RectF rect)
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto&& padding = host->GetGeometryNode()->GetPadding();
-    // minus padding to get contentRect
-    if (padding) {
-        rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
-        auto size = rect.GetSize();
-        MinusPaddingToSize(*padding, size);
-        rect.SetSize(size);
+    if (adjustRSFrameByContentRect_) {
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto contentRect = geometryNode->GetContentRect();
+        rect.SetOffset(rect.GetOffset() + contentRect.GetOffset());
+        rect.SetSize(contentRect.GetSize());
+    } else {
+        auto&& padding = host->GetGeometryNode()->GetPadding();
+        // minus padding to get contentRect
+        if (padding) {
+            rect.SetOffset(rect.GetOffset() + OffsetF { padding->left.value_or(0), padding->top.value_or(0) });
+            auto size = rect.GetSize();
+            MinusPaddingToSize(*padding, size);
+            rect.SetSize(size);
+        }
     }
     rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
 }

@@ -118,10 +118,14 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             }
             break;
         }
-        case TouchType::UP:
-            HandleTouchUpEvent(point);
-            currentFingers_--;
+        case TouchType::UP: {
+            auto result = AboutToMinusCurrentFingers(point.id);
+            if (result) {
+                HandleTouchUpEvent(point);
+                currentFingers_--;
+            }
             break;
+        }
         case TouchType::CANCEL:
             HandleTouchCancelEvent(point);
             currentFingers_--;

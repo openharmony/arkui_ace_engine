@@ -26,8 +26,10 @@
 #include "ability_info.h"
 #include "auto_fill_manager.h"
 #include "base/json/json_util.h"
+#include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
+#include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
 
@@ -87,8 +89,8 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
-constexpr uint32_t POPUPSIZE_HEIGHT = 200;
-constexpr uint32_t POPUPSIZE_WIDTH = 400;
+constexpr uint32_t POPUPSIZE_HEIGHT = 0;
+constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 
 #ifdef _ARM64_
@@ -175,6 +177,15 @@ void DecodeBundleAndModule(const std::string& encode, std::string& bundleName, s
     StringUtils::StringSplitter(encode, ' ', tokens);
     bundleName = tokens[0];
     moduleName = tokens[1];
+}
+
+void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
+{
+    if (sharedRuntime && storage) {
+        auto nativeEngine = reinterpret_cast<NativeEngine*>(sharedRuntime);
+        auto env = reinterpret_cast<napi_env>(nativeEngine);
+        napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
+    }
 }
 } // namespace
 
@@ -1405,23 +1416,36 @@ void AceContainer::ForceFullGC()
         TaskExecutor::TaskType::JS, "ArkUIForceFullGC");
 }
 
-void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* context)
+void AceContainer::SetLocalStorage(
+    NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     ContainerScope scope(instanceId_);
     taskExecutor_->PostTask(
-        [frontend = WeakPtr<Frontend>(frontend_), storage, context, id = instanceId_] {
+        [frontend = WeakPtr<Frontend>(frontend_), storage,
+            contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context), id = instanceId_,
+            sharedRuntime = sharedRuntime_] {
             auto sp = frontend.Upgrade();
-            CHECK_NULL_VOID(sp);
+            auto contextRef = contextWeak.lock();
+            if (!sp || !contextRef) {
+                ReleaseStorageReference(sharedRuntime, storage);
+                return;
+            }
 #ifdef NG_BUILD
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(sp);
 #else
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(sp);
 #endif
-            CHECK_NULL_VOID(declarativeFrontend);
+            if (!declarativeFrontend) {
+                ReleaseStorageReference(sharedRuntime, storage);
+                return;
+            }
             auto jsEngine = declarativeFrontend->GetJsEngine();
-            CHECK_NULL_VOID(jsEngine);
-            if (context) {
-                jsEngine->SetContext(id, context);
+            if (!jsEngine) {
+                ReleaseStorageReference(sharedRuntime, storage);
+                return;
+            }
+            if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<NativeReference>()) {
+                jsEngine->SetContext(id, contextRef->GetBindingObject()->Get<NativeReference>());
             }
             if (storage) {
                 jsEngine->SetLocalStorage(id, storage);
@@ -2618,6 +2642,17 @@ void AceContainer::RegisterOverlayNodePositionsUpdateCallback(
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     CHECK_NULL_VOID(pipeline);
     pipeline->RegisterOverlayNodePositionsUpdateCallback(std::move(callback));
+}
+
+void AceContainer::TerminateUIExtension()
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    uiExtensionContext->TerminateSelf();
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

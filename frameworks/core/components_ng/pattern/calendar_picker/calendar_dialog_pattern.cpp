@@ -679,8 +679,8 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
     calendarPattern->SetCurrentMonthData(currentMonthData);
 
     if (focusedDayIndex == -1) {
-        focusedDay_ = preMonthData.days[preMonthData.days.size() - 1];
-        preMonthData.days[preMonthData.days.size() - 1].isKeyFocused = true;
+        focusedDay_ = preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0];
+        preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0].isKeyFocused = true;
         calendarPattern->SetPreMonthData(preMonthData);
         swiperPattern->ShowPrevious();
         return;

@@ -112,6 +112,7 @@ const SizeF LARGE_CONTAINER_SIZE(LARGE_WIDTH, TEXT_HEIGHT);
 constexpr Dimension ADAPT_LINE_HEIGHT_VALUE = Dimension(10, DimensionUnit::PX);
 constexpr Dimension ADAPT_FONT_SIZE_VALUE = Dimension(30, DimensionUnit::PX);
 constexpr Dimension ADAPT_BASE_LINE_OFFSET_VALUE = Dimension(10, DimensionUnit::PX);
+constexpr Dimension ADAPT_LINE_SPACING_VALUE = Dimension(10, DimensionUnit::PX);
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const SizeT<float> LARGE_SIZE = SizeT<float>(10000.0f, 1000.0f);
@@ -129,6 +130,8 @@ const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 const Dimension TEXT_INDENT = Dimension(5, DimensionUnit::PX);
 const Dimension ADAPT_UPDATE_FONTSIZE_VALUE = Dimension(50, DimensionUnit::PX);
+const Dimension LINE_SPACING_VALUE = Dimension(20, DimensionUnit::PX);
+const Dimension LINE_SPACING_VALUE_1 = Dimension(30, DimensionUnit::PX);
 const std::string ROOT_TAG("root");
 constexpr int32_t NODE_ID = 143;
 const Color FOREGROUND_COLOR_VALUE = Color::FOREGROUND;
@@ -213,6 +216,7 @@ struct TestProperty {
     std::optional<Ace::TextOverflow> textOverflowValue = std::nullopt;
     std::optional<uint32_t> maxLinesValue = std::nullopt;
     std::optional<Dimension> lineHeightValue = std::nullopt;
+    std::optional<Dimension> lineSpacingValue = std::nullopt;
     std::optional<Ace::TextDecoration> textDecorationValue = std::nullopt;
     std::optional<Color> textDecorationColorValue = std::nullopt;
     std::optional<Dimension> baselineOffsetValue = std::nullopt;
@@ -342,6 +346,9 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     }
     if (testProperty.lineHeightValue.has_value()) {
         textModel.SetLineHeight(testProperty.lineHeightValue.value());
+    }
+    if (testProperty.lineSpacingValue.has_value()) {
+        textModel.SetLineSpacing(testProperty.lineSpacingValue.value());
     }
     if (testProperty.textDecorationValue.has_value()) {
         textModel.SetTextDecoration(testProperty.textDecorationValue.value());
@@ -476,6 +483,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.textOverflowValue = std::make_optional(TEXT_OVERFLOW_VALUE);
     testProperty.maxLinesValue = std::make_optional(MAX_LINES_VALUE);
     testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
+    testProperty.lineSpacingValue = std::make_optional(LINE_SPACING_VALUE);
     testProperty.textDecorationValue = std::make_optional(TEXT_DECORATION_VALUE);
     testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
     testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
@@ -506,6 +514,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetTextOverflow(), TEXT_OVERFLOW_VALUE);
     EXPECT_EQ(textStyle.GetMaxLines(), MAX_LINES_VALUE);
     EXPECT_EQ(textStyle.GetLineHeight(), LINE_HEIGHT_VALUE);
+    EXPECT_EQ(textStyle.GetLineSpacing(), LINE_SPACING_VALUE);
     EXPECT_EQ(textStyle.GetTextDecoration(), TEXT_DECORATION_VALUE);
     EXPECT_EQ(textStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(textStyle.GetBaselineOffset(), BASELINE_OFFSET_VALUE);
@@ -1215,7 +1224,7 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, Build).Times(4);
+    EXPECT_CALL(*paragraph, Build).Times(1);
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -3193,6 +3202,7 @@ HWTEST_F(TextTestNg, UpdateChildProperty001, TestSize.Level1)
     testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
     testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
     testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
+    testProperty.lineSpacingValue = std::make_optional(LINE_SPACING_VALUE);
     /**
      * @tc.steps: step1. create text FrameNode and SpanNode, Update parent FrameNode properties
      * @tc.expected: Successfully created parent Node and child Node
@@ -3232,6 +3242,7 @@ HWTEST_F(TextTestNg, UpdateChildProperty001, TestSize.Level1)
         EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
         EXPECT_EQ(spanNode->GetLineHeight().value(), LINE_HEIGHT_VALUE);
         EXPECT_EQ(spanNode->GetFontFamily().value(), FONT_FAMILY_VALUE);
+        EXPECT_EQ(spanNode->GetLineSpacing().value(), LINE_SPACING_VALUE);
     }
 
     /**
@@ -6144,6 +6155,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty001, TestSize.Level1)
     TextModelNG::SetTextDecorationStyle(node, TextDecorationStyle::SOLID);
     TextModelNG::SetTextCase(node, TextCase::UPPERCASE);
     TextModelNG::SetMaxLines(node, 10); // 10 means maxlines.
+    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE);
 
     /**
      * @tc.steps: step2. test property.
@@ -6161,6 +6173,7 @@ HWTEST_F(TextTestNg, TextModelNgProperty001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetTextDecorationStyle().value(), TextDecorationStyle::SOLID);
     EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);
     EXPECT_EQ(layoutProperty->GetMaxLines().value(), 10);
+    EXPECT_EQ(layoutProperty->GetLineSpacing().value(), ADAPT_LINE_SPACING_VALUE);
 }
 
 /**
@@ -6496,5 +6509,27 @@ HWTEST_F(TextTestNg, UpdateFontFeature002, TestSize.Level1)
     textLayoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
     TextModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
     EXPECT_EQ(textLayoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
+}
+
+/**
+ * @tc.name: SetLineSpacing
+ * @tc.desc: test setLineSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetLineSpacing001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    textModelNG.SetLineSpacing(LINE_SPACING_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE);
+    TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1);
+    EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE_1);
 }
 } // namespace OHOS::Ace::NG

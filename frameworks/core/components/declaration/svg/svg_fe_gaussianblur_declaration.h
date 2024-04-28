@@ -43,7 +43,7 @@ public:
     ~SvgFeGaussianBlurDeclaration() override = default;
     void InitializeStyle() override;
 
-    void SetStdDeviation(const std::vector<double>& stdDeviation)
+    void SetStdDeviation(const std::vector<float>& stdDeviation)
     {
         if (stdDeviation.empty() || stdDeviation.size() > 2) {
             return;

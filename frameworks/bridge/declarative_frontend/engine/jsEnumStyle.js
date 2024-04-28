@@ -71,6 +71,7 @@ var TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
   TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
   TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+  TextDataDetectorType[TextDataDetectorType["DATETIME"] = 4] = "DATETIME";
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
@@ -189,6 +190,13 @@ var ImageFit;
   ImageFit[ImageFit["None"] = 5] = "None";
   ImageFit[ImageFit["ScaleDown"] = 6] = "ScaleDown";
 })(ImageFit || (ImageFit = {}));
+
+var DynamicRangeMode ;
+(function (DynamicRangeMode ) {
+  DynamicRangeMode [DynamicRangeMode ["HIGH"] = 0] = "HIGH";
+  DynamicRangeMode [DynamicRangeMode ["CONSTRAINT"] = 1] = "CONSTRAINT";
+  DynamicRangeMode [DynamicRangeMode ["STANDARD"] = 2] = "STANDARD";
+})(DynamicRangeMode  || (DynamicRangeMode  = {}));
 
 var ImageRepeat;
 (function (ImageRepeat) {
@@ -661,6 +669,12 @@ var FormDimension;
   FormDimension["DIMENSION_1_1"] = 6;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
+
+var FormShape;
+(function (FormShape) {
+  FormShape["RECT"] = 1;
+  FormShape["CIRCLE"] = 2;
+})(FormShape || (FormShape = {}));
 
 let FormRenderingMode;
 (function (FormRenderingMode) {
@@ -1199,6 +1213,111 @@ var SymbolEffectStrategy;
   SymbolEffectStrategy[SymbolEffectStrategy["SCALE"] = 1] = "SCALE";
   SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
 })(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
+
+var EffectDirection;
+(function (EffectDirection) {
+  EffectDirection[EffectDirection["DOWN"] = 0] = "DOWN";
+  EffectDirection[EffectDirection["UP"] = 1] = "UP";
+})(EffectDirection || (EffectDirection = {}));
+
+var EffectScope;
+(function (EffectScope) {
+  EffectScope[EffectScope["LAYER"] = 0] = "LAYER";
+  EffectScope[EffectScope["WHOLE"] = 1] = "WHOLE";
+})(EffectScope || (EffectScope = {}));
+
+var EffectFillStyle;
+(function (EffectFillStyle) {
+  EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
+  EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
+})(EffectFillStyle || (EffectFillStyle = {}));
+
+class SymbolEffect {
+}
+
+class ScaleSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "ScaleSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class HierarchicalSymbolEffect extends SymbolEffect {
+  constructor(fillStyle) {
+    super();
+    this.type = "HierarchicalSymbolEffect";
+    this.fillStyle = fillStyle;
+  }
+}
+
+class AppearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "AppearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+class DisappearSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "DisappearSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class BounceSymbolEffect extends SymbolEffect {
+  constructor(scope, direction) {
+    super();
+    this.type = "BounceSymbolEffect";
+    this.scope = scope;
+    this.direction = direction;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+  direction(value) {
+    this.direction = value;
+    return this;
+  }
+}
+
+class ReplaceSymbolEffect extends SymbolEffect {
+  constructor(scope) {
+    super();
+    this.type = "ReplaceSymbolEffect";
+    this.scope = scope;
+  }
+  scope(value) {
+    this.scope = value;
+    return this;
+  }
+}
+
+class PulseSymbolEffect extends SymbolEffect {
+  constructor() {
+    super();
+    this.type = "PulseSymbolEffect";
+  }
+}
 
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
@@ -2676,12 +2795,12 @@ var ParticleUpdater;
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
 
-var DisturbanceFieldsShape;
-(function (DisturbanceFieldsShape) {
-  DisturbanceFieldsShape[DisturbanceFieldsShape["RECT"] = 0] = "RECT";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["CIRCLE"] = 1] = "CIRCLE";
-  DisturbanceFieldsShape[DisturbanceFieldsShape["ELLIPSE"] = 2] = "ELLIPSE";
-})(DisturbanceFieldsShape || (DisturbanceFieldsShape = {}));
+var DisturbanceFieldShape;
+(function (DisturbanceFieldShape) {
+  DisturbanceFieldShape[DisturbanceFieldShape["RECT"] = 0] = "RECT";
+  DisturbanceFieldShape[DisturbanceFieldShape["CIRCLE"] = 1] = "CIRCLE";
+  DisturbanceFieldShape[DisturbanceFieldShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(DisturbanceFieldShape || (DisturbanceFieldShape = {}));
 
 var SwiperNestedScrollMode;
 (function (SwiperNestedScrollMode) {
@@ -2863,8 +2982,8 @@ let ButtonRole;
 let MenuPolicy;
 (function (MenuPolicy) {
   MenuPolicy['DEFAULT'] = 0;
-  MenuPolicy['NEVER'] = 1;
-  MenuPolicy['ALWAYS'] = 2;
+  MenuPolicy['HIDE'] = 1;
+  MenuPolicy['SHOW'] = 2;
 })(MenuPolicy || (MenuPolicy = {}));
 
 let PreDragStatus;
@@ -2899,4 +3018,16 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
+  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
 })(StyledStringKey || (StyledStringKey = {}));
+
+class CustomSpan {
+  type_ = "CustomSpan"
+}
+
+let FocusPriority;
+(function (FocusPriority) {
+  FocusPriority[FocusPriority["AUTO"] = 0] = "AUTO";
+  FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
+  FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
+})(FocusPriority || (FocusPriority = {}));

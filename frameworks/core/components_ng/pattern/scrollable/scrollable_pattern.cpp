@@ -465,6 +465,12 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
+    scrollable->SetOnContinuousSliding([weak = WeakClaim(this)]() -> double {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0.0);
+        return pattern->GetMainContentSize();
+    });
+
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
@@ -2335,13 +2341,13 @@ void ScrollablePattern::HandleHotZone(
 void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
 {
     float offsetPct = IsInHotZone(point);
-    if (NearZero(offsetPct)) {
+    if ((Positive(offsetPct) && !IsAtTop()) || (Negative(offsetPct) && !IsAtBottom())) {
+        // The drag point enters the hot zone
+        HotZoneScroll(offsetPct);
+    } else {
         // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop
         // scrolling
         HandleLeaveHotzoneEvent();
-    } else {
-        // The drag point enters the hot zone
-        HotZoneScroll(offsetPct);
     }
 }
 

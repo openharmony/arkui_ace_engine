@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -451,6 +451,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
+        OffsetF backButtonOffset = OffsetF(0.0f, 0.0f);
         if (!showBackButton_) {
             SizeF size = SizeF(0.0f, 0.0f);
             geometryNode->SetFrameSize(size);
@@ -459,16 +460,19 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             auto offsetY = (menuHeight_ - BACK_BUTTON_ICON_SIZE.ConvertToPx()) / 2;
-            geometryNode->SetMarginFrameOffset(OffsetF { maxPaddingStart_.ConvertToPx(), offsetY });
+            auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+                static_cast<float>(maxPaddingStart_.ConvertToPx()));
+            backButtonOffset = OffsetF(offsetXResult, offsetY);
+            geometryNode->SetMarginFrameOffset(backButtonOffset);
             backButtonWrapper->Layout();
             return;
         }
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
             auto offsetY = (titleHeight - backButtonHeight_) / 2;
-            OffsetF backButtonOffset = OffsetF(static_cast<float>(
-                (maxPaddingStart_ - MENU_BUTTON_PADDING).ConvertToPx()),
-                static_cast<float>(offsetY.ConvertToPx()));
+            auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+                static_cast<float>((maxPaddingStart_ - MENU_BUTTON_PADDING).ConvertToPx()));
+            backButtonOffset = OffsetF(offsetXResult, offsetY.ConvertToPx());
             geometryNode->SetMarginFrameOffset(backButtonOffset);
             backButtonWrapper->Layout();
             return;
@@ -476,8 +480,9 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
         auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
         auto offsetY = (titleHeight - BACK_BUTTON_SIZE) / 2;
 
-        OffsetF backButtonOffset = OffsetF(static_cast<float>((maxPaddingStart_ - BUTTON_PADDING).ConvertToPx()),
-            static_cast<float>(offsetY.ConvertToPx()));
+        auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+            static_cast<float>((maxPaddingStart_ - BUTTON_PADDING).ConvertToPx()));
+        backButtonOffset = OffsetF(offsetXResult, offsetY.ConvertToPx());
         geometryNode->SetMarginFrameOffset(backButtonOffset);
         backButtonWrapper->Layout();
         return;
@@ -500,6 +505,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
     auto titleHeight = titleBarLayoutProperty->GetTitleHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
     auto offsetY = (titleHeight - BACK_BUTTON_SIZE) / 2;
     auto offsetX = (maxPaddingStart_ - (BACK_BUTTON_SIZE - BACK_BUTTON_ICON_SIZE) / 2).ConvertToPx();
+    offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
     OffsetF backButtonOffset = OffsetF(offsetX, static_cast<float>(offsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(backButtonOffset);
     backButtonWrapper->Layout();
@@ -528,16 +534,22 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(titleBarNode->GetParent());
         CHECK_NULL_VOID(navDestination);
         auto isCustom = navDestination->GetPrevTitleIsCustomValue(false);
+        OffsetF titleOffset = OffsetF(0.0f, 0.0f);
         // add sdk 9 compatible
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (showBackButton_) {
-                geometryNode->SetMarginFrameOffset(OffsetF {
-                    static_cast<float>((maxPaddingStart_ + BACK_BUTTON_ICON_SIZE +
-                        NAV_HORIZONTAL_MARGIN_M).ConvertToPx()), offsetY });
+                auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+                    static_cast<float>(
+                        (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_M).ConvertToPx()));
+                titleOffset = OffsetF(offsetXResult, offsetY);
+                geometryNode->SetMarginFrameOffset(titleOffset);
                 titleWrapper->Layout();
                 return;
             }
-            geometryNode->SetMarginFrameOffset(OffsetF { maxPaddingStart_.ConvertToPx(), offsetY});
+            auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+                static_cast<float>(maxPaddingStart_.ConvertToPx()));
+            titleOffset = OffsetF(offsetXResult, offsetY);
+            geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
             return;
         }
@@ -545,14 +557,17 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             auto offsetX = isCustom ? (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + BUTTON_PADDING).ConvertToPx() :
                 (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
             offsetY = isCustom ? 0.0f : offsetY;
-            geometryNode->SetMarginFrameOffset(OffsetF { offsetX, offsetY });
+            auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+            titleOffset = OffsetF(offsetXResult, offsetY);
+            geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
             return;
         }
         auto offsetX = isCustom ? 0.0f : maxPaddingStart_.ConvertToPx();
         offsetY = isCustom ? 0.0f : offsetY;
-        OffsetF offset = OffsetF(offsetX, offsetY);
-        geometryNode->SetMarginFrameOffset(offset);
+        auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+        titleOffset = OffsetF(offsetXResult, offsetY);
+        geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
     }
@@ -574,12 +589,15 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
-                geometryNode->SetMarginFrameOffset(OffsetF { maxPaddingStart_.ConvertToPx(), offsetY });
+                auto offsetX = maxPaddingStart_.ConvertToPx();
+                offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+                geometryNode->SetMarginFrameOffset(OffsetF { offsetX, offsetY });
                 titleWrapper->Layout();
                 return;
             }
-            geometryNode->SetMarginFrameOffset(OffsetF { (defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE +
-            NAV_HORIZONTAL_MARGIN_L).ConvertToPx(), offsetY});
+            auto offsetX =  (defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
+            offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+            geometryNode->SetMarginFrameOffset(OffsetF {offsetX, offsetY});
             titleWrapper->Layout();
             return;
         }
@@ -587,6 +605,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         offsetY = isCustom ? 0 : offsetY;
         if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
             auto offsetX = isCustom ? 0.0f : (maxPaddingStart_).ConvertToPx();
+            offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
             OffsetF titleOffset = OffsetF(offsetX, offsetY);
             geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
@@ -595,6 +614,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
 
         auto offsetX = isCustom ? (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + BUTTON_PADDING).ConvertToPx() :
             (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
+        offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
         OffsetF offset = OffsetF(offsetX, offsetY);
         geometryNode->SetMarginFrameOffset(offset);
         titleWrapper->Layout();
@@ -603,8 +623,9 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
 
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            geometryNode->SetMarginFrameOffset(
-                OffsetF { maxPaddingStart_.ConvertToPx(), menuHeight_ + offsetY });
+            auto offsetX = maxPaddingStart_.ConvertToPx();
+            offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+            geometryNode->SetMarginFrameOffset(OffsetF { offsetX, menuHeight_ + offsetY });
             titleWrapper->Layout();
             return;
         }
@@ -612,19 +633,23 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         if (isCustom) {
             // custom title margin is (0.0f, menuHeight_)
             auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
-            geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
+            auto offsetX = 0.0f;
+            offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+            geometryNode->SetMarginFrameOffset(OffsetF { offsetX, customOffsetY});
             titleWrapper->Layout();
         } else {
             // fixed white space menuHeight
             OffsetF titleOffset = OffsetF(0.0f, 0.0f);
+            auto offsetX = 0.0f;
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 offsetY = static_cast<float>(paddingTopTwolines_.ConvertToPx());
-                titleOffset = OffsetF(static_cast<float>(marginLeft_.ConvertToPx()),
-                    menuHeight_ + offsetY);
+                offsetX = static_cast<float>(marginLeft_.ConvertToPx());
+                titleOffset = OffsetF(offsetX, menuHeight_ + offsetY);
             } else {
-                titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
-                    menuHeight_ + offsetY);
+                offsetX = static_cast<float>(maxPaddingStart_.ConvertToPx());
+                titleOffset = OffsetF(offsetX, menuHeight_ + offsetY);
             }
+            offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
             geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
         }
@@ -637,11 +662,14 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     } else {
         offsetX = static_cast<float>(maxPaddingStart_.ConvertToPx());
     }
+    offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     if (isCustom) {
         // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
         auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
-        geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
+        auto customOffsetX = 0.0f;
+        customOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+        geometryNode->SetMarginFrameOffset(OffsetF { customOffsetX, customOffsetY});
         titleWrapper->Layout();
         return;
     }
@@ -708,21 +736,30 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
+        OffsetF subTitleOffset = OffsetF(0.0f, 0.0f);
         // subtitle doesn't support custom title
         if (showBackButton_) {
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-                geometryNode->SetMarginFrameOffset(OffsetF {
-                    (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_M).ConvertToPx(), offsetY });
+                auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+                    static_cast<float>(
+                        (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_M).ConvertToPx()));
+                subTitleOffset = OffsetF(offsetXResult, offsetY);
+                geometryNode->SetMarginFrameOffset(subTitleOffset);
             } else {
-                geometryNode->SetMarginFrameOffset(OffsetF { (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE
-                + NAV_HORIZONTAL_MARGIN_L).ConvertToPx(), offsetY });
+                auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+                    static_cast<float>(
+                        (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L).ConvertToPx()));
+                subTitleOffset = OffsetF(offsetXResult, offsetY);
+                geometryNode->SetMarginFrameOffset(subTitleOffset);
             }
             subtitleWrapper->Layout();
             return;
         }
 
-        OffsetF offset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), offsetY);
-        geometryNode->SetMarginFrameOffset(offset);
+        auto offsetXResult = ChangeOffsetByDirection(layoutWrapper, geometryNode,
+            static_cast<float>(maxPaddingStart_.ConvertToPx()));
+        subTitleOffset = OffsetF(offsetXResult, offsetY);
+        geometryNode->SetMarginFrameOffset(subTitleOffset);
         subtitleWrapper->Layout();
         return;
     }
@@ -737,6 +774,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
         } else {
             offsetX = static_cast<float>(maxPaddingStart_.ConvertToPx());
         }
+        offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
         if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
             initialSubtitleOffsetY_ = menuHeight_ + offsetY;
             if (isInitialSubtitle_) {
@@ -769,7 +807,9 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     }
     // mini mode + hideBackButton true
     if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
-        OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), offsetY);
+        auto offsetX = static_cast<float>(maxPaddingStart_.ConvertToPx());
+        offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
+        OffsetF titleOffset = OffsetF(offsetX, offsetY);
         geometryNode->SetMarginFrameOffset(titleOffset);
         subtitleWrapper->Layout();
         return;
@@ -781,7 +821,9 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     } else {
         occupiedWidth = maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L;
     }
-    OffsetF offset = OffsetF(static_cast<float>(occupiedWidth.ConvertToPx()), offsetY);
+    auto miniOffsetX = static_cast<float>(occupiedWidth.ConvertToPx());
+    miniOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, miniOffsetX);
+    OffsetF offset = OffsetF(miniOffsetX, offsetY);
     geometryNode->SetMarginFrameOffset(offset);
     subtitleWrapper->Layout();
 }
@@ -808,7 +850,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     } else {
         isCustomMenu = titleBarNode->GetPrevMenuIsCustomValue(false);
     }
-
+    auto currentOffsetX = maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx();
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         auto overDragOffset = titlePattern->GetOverDragOffset();
@@ -823,12 +865,14 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
                                    : (maxWidth - menuWidth - static_cast<float>(maxPaddingEnd_.ConvertToPx()) +
                                          BUTTON_PADDING.ConvertToPx());
         }
+        currentOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, currentOffsetX);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            geometryNode->SetMarginFrameOffset(OffsetF { maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx(),
+            geometryNode->SetMarginFrameOffset(OffsetF { currentOffsetX,
                 menuOffsetY + overDragOffset / MENU_OFFSET_RATIO });
             menuWrapper->Layout();
             return;
         }
+        offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
         OffsetF menuOffset(offsetX, menuOffsetY + overDragOffset / MENU_OFFSET_RATIO);
         geometryNode->SetMarginFrameOffset(menuOffset);
         menuWrapper->Layout();
@@ -836,8 +880,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto totalHeight = NearZero(subtitleHeight) ? SINGLE_LINE_TITLEBAR_HEIGHT : DOUBLE_LINE_TITLEBAR_HEIGHT;
-        geometryNode->SetMarginFrameOffset(OffsetF { maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx(),
-            (totalHeight.ConvertToPx() - menuHeight_) / 2 });
+        geometryNode->SetMarginFrameOffset(OffsetF { currentOffsetX, (totalHeight.ConvertToPx() - menuHeight_) / 2 });
         menuWrapper->Layout();
         return;
     }
@@ -852,6 +895,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         menuOffsetX =
             isCustomMenu ? menuOffsetX : (menuOffsetX - maxPaddingEnd_.ConvertToPx() + BUTTON_PADDING.ConvertToPx());
     }
+    menuOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, menuOffsetX);
     OffsetF menuOffset(menuOffsetX, menuOffsetY);
     geometryNode->SetMarginFrameOffset(menuOffset);
     menuWrapper->Layout();
@@ -952,4 +996,17 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutMenu(layoutWrapper, titleBarNode, layoutProperty, subtitleHeight);
 }
 
+float TitleBarLayoutAlgorithm::ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
+    const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, offsetX);
+    CHECK_NULL_RETURN(childGeometryNode, offsetX);
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, offsetX);
+        auto parentWidth = geometryNode->GetFrameSize().Width();
+        offsetX = parentWidth - offsetX - childGeometryNode->GetFrameSize().Width();
+    }
+    return offsetX;
+}
 } // namespace OHOS::Ace::NG

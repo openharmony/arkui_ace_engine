@@ -1382,7 +1382,8 @@ typedef enum {
      *
      */
     NODE_LAYOUT_WEIGHT,
-
+    NODE_DISPLAY_PRIORITY,
+    NODE_OUTLINE_WIDTH,
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -1448,17 +1449,6 @@ typedef enum {
      *
      */
     NODE_TEXT_LINE_HEIGHT,
-    /**
-     * @brief Defines the text line spacing attribute, which can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: line spacing, in fp.\n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: line spacing, in fp.\n
-     *
-     */
-    NODE_TEXT_LINE_SPACING,
     /**
      * @brief Defines the text decoration style and color.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -1678,6 +1668,17 @@ typedef enum {
      *
      */
     NODE_TEXT_ELLIPSIS_MODE,
+    /**
+     * @brief Defines the text line spacing attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: line spacing, in fp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: line spacing, in fp.\n
+     *
+     */
+    NODE_TEXT_LINE_SPACING,
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
@@ -2139,6 +2140,18 @@ typedef enum {
     NODE_TEXT_INPUT_TEXT_SELECTION,
 
     /**
+     * @brief 设置长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单，支持属性设置，属性重置和属性获取接口。
+     * 
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。\n
+     *
+     */
+    NODE_TEXT_INPUT_SELECTION_MENU_HIDDEN,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -2265,6 +2278,18 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_SHOW_COUNTER,
+
+    /**
+     * @brief 设置长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单，支持属性设置，属性重置和属性获取接口。
+     * 
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32： 长按、双击输入框或者右键输入框时，是否不弹出文本选择菜单。\n
+     *
+     */
+    NODE_TEXT_AREA_SELECTION_MENU_HIDDEN,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -3341,7 +3366,6 @@ typedef enum {
      */
     NODE_LIST_SPACE,
 
-
     /**
     * @brief Defines the list adapter. The attribute can be set, reset, and obtained as required through APIs.
     *
@@ -3358,6 +3382,18 @@ typedef enum {
     * .value[0].i32: number of cached items in the list adapter. \n
     */
     NODE_LIST_CACHED_COUNT,
+
+    /**
+    * @brief 设置List交叉轴方向宽度大于ListItem交叉轴宽度 * lanes时，
+    * ListItem在List交叉轴方向的布局方式，支持属性设置，属性重置和属性获取接口。
+    *
+    * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign} \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：交叉轴方向的布局方式。参数类型{@link ArkUI_ListItemAlign}  \n
+    */
+    NODE_LIST_ALIGN_LIST_ITEM,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -4066,6 +4102,17 @@ typedef enum {
      *
      */
     NODE_TEXT_INPUT_ON_TEXT_SELECTION_CHANGE,
+
+    /**
+     * @brief 输入状态变化时，触发该回调。
+     *
+     * 触发该事件的条件：输入状态变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示true表示正在输入。\n
+     *
+     */
+    NODE_TEXT_INPUT_ON_EDIT_CHANGE,
     /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
@@ -4101,6 +4148,28 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_TEXT_SELECTION_CHANGE,
+
+    /**
+     * @brief 输入状态变化时，触发该回调。
+     *
+     * 触发该事件的条件：输入状态变化时。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：表示true表示正在输入。\n
+     *
+     */
+    NODE_TEXT_AREA_ON_EDIT_CHANGE,
+
+    /**
+     * @brief textArea按下输入法回车键触发该事件。
+     *
+     * 触发该事件的条件：按下输入法回车键。keyType为ARKUI_ENTER_KEY_TYPE_NEW_LINE时不触发\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：输入法回车键类型。
+     *
+     */
+    NODE_TEXT_AREA_ON_SUBMIT,
 
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.

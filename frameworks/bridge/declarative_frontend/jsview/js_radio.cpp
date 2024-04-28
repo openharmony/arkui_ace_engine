@@ -360,7 +360,9 @@ void JSRadio::JsOnClick(const JSCallbackInfo& args)
         JSViewAbstract::JsOnClick(args);
         return;
     }
-
+    if (!args[0]->IsFunction()) {
+        return;
+    }
     RadioModel::GetInstance()->SetOnClickEvent(
         JsEventCallback<void()>(args.GetExecutionContext(), JSRef<JSFunc>::Cast(args[0])));
 

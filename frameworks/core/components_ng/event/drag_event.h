@@ -65,11 +65,22 @@ public:
         return actionCancel_;
     }
 
+    const GestureEventFunc& GetLongPressEventFunc() const
+    {
+        return actionLongPress_;
+    }
+
+    void SetLongPressEventFunc(GestureEventFunc&& actionLongPress)
+    {
+        actionLongPress_ = std::move(actionLongPress);
+    }
+
 private:
     GestureEventFunc actionStart_;
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
+    GestureEventFunc actionLongPress_;
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
@@ -210,7 +221,17 @@ public:
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
     static RefPtr<FrameNode> CreateBadgeTextNode(
         const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset = false);
-    
+
+private:
+    void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
+    void ApplyNewestOptionExecutedFromModifierToNode(
+        const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode);
+    // check global dragging status
+    bool IsGlobalStatusSuitableForDragging();
+    // check the current node's status to decide if it can initiate one drag operation
+    bool IsCurrentNodeStatusSuitableForDragging(
+        const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     WeakPtr<FrameNode> itemFatherNode_;

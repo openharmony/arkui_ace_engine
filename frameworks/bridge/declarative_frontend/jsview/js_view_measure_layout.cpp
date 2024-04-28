@@ -52,6 +52,42 @@ JSRef<JSObject> GenConstraintNG(const NG::LayoutConstraintF& parentConstraint)
     return constraint;
 }
 
+JSRef<JSObject> GenPlaceChildrenConstraintNG(const NG::SizeF& size, RefPtr<NG::LayoutProperty> layoutProperty)
+{
+    JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, JSRef<JSObject>::New());
+    if (!layoutProperty) {
+        constraint->SetProperty<double>("minWidth", 0.0f);
+        constraint->SetProperty<double>("minHeight", 0.0f);
+        constraint->SetProperty<double>("maxWidth", 0.0f);
+        constraint->SetProperty<double>("maxHeight", 0.0f);
+        return constraint;
+    }
+    auto minSize = layoutProperty->GetLayoutConstraint().value().minSize;
+    constraint->SetProperty<double>("minWidth", minSize.Width() / pipeline->GetDipScale());
+    constraint->SetProperty<double>("minHeight", minSize.Height() / pipeline->GetDipScale());
+    auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
+    if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+        layoutProperty = parentNode->GetLayoutProperty();
+    }
+    const std::unique_ptr<NG::PaddingProperty>& padding =  layoutProperty->GetPaddingProperty();
+    const std::unique_ptr<NG::BorderWidthProperty>& borderWidth =  layoutProperty->GetBorderWidthProperty();
+    auto topPadding = padding ? padding->top->GetDimension().ConvertToVp() : 0.0f;
+    auto bottomPadding = padding ? padding->bottom->GetDimension().ConvertToVp() : 0.0f;
+    auto leftPadding = padding ? padding->left->GetDimension().ConvertToVp() : 0.0f;
+    auto rightPadding = padding ? padding->right->GetDimension().ConvertToVp() : 0.0f;
+    auto topBorder = borderWidth ? borderWidth->topDimen->ConvertToVp() : 0.0f;
+    auto bottomBorder = borderWidth ? borderWidth->bottomDimen->ConvertToVp() : 0.0f;
+    auto leftBorder = borderWidth ? borderWidth->leftDimen->ConvertToVp() : 0.0f;
+    auto rightBorder = borderWidth ? borderWidth->rightDimen->ConvertToVp() : 0.0f;
+    constraint->SetProperty<double>("maxWidth", size.Width() / pipeline->GetDipScale() - leftPadding - rightPadding -
+        leftBorder - rightBorder);
+    constraint->SetProperty<double>("maxHeight", size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
+        topBorder - bottomBorder);
+    return constraint;
+}
+
 JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& paddingNative)
 {
     JSRef<JSObject> padding = JSRef<JSObject>::New();
@@ -352,6 +388,13 @@ JSRef<JSObject> JSMeasureLayoutParamNG::GetConstraint()
     auto layoutWrapper = GetLayoutWrapper();
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint().value();
     return GenConstraintNG(layoutConstraint);
+}
+
+JSRef<JSObject> JSMeasureLayoutParamNG::GetPlaceChildrenConstraint()
+{
+    auto layoutWrapper = GetLayoutWrapper();
+    auto layoutFrameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    return GenPlaceChildrenConstraintNG(layoutFrameSize, layoutWrapper->GetLayoutProperty());
 }
 
 JSRef<JSObject> JSMeasureLayoutParamNG::GetSelfLayoutInfo()

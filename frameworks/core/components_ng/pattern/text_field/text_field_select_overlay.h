@@ -59,6 +59,8 @@ public:
 
     void HandleOnShowMenu();
 
+    void ProcessSelectAllOverlay(const OverlayRequest& request);
+
     void SetLastSourceType(SourceType sourceType)
     {
         lastSourceType_ = sourceType;
@@ -71,7 +73,7 @@ public:
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(HandleIndex handlIndex);
-    void UpdatePattern();
+    void UpdatePattern(const OverlayRequest& request);
     int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset);

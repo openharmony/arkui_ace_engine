@@ -184,7 +184,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnOffset(float mainSize)
         return;
     }
 
-    if (gridLayoutInfo_.currentOffset_ > 0.0f) {
+    if (Positive(gridLayoutInfo_.currentOffset_)) {
         MeasureBackward(mainSize);
     } else {
         MeasureForward(mainSize);
@@ -199,28 +199,20 @@ inline void UpdateStartInfo(GridLayoutInfo& info, const GridLayoutRangeSolver::S
     info.startIndex_ = res.idx;
 }
 
-float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
+inline float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
 {
-    float height = 0.0f;
-    auto endIt = info.lineHeightMap_.find(info.endMainLineIndex_ + 1);
-    for (auto it = info.lineHeightMap_.find(info.startMainLineIndex_); it != endIt; ++it) {
-        height += it->second + mainGap;
-    }
-    return height;
+    return info.GetHeightInRange(info.startMainLineIndex_, info.endMainLineIndex_, mainGap);
 }
 } // namespace
 
 void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 {
     auto& info = gridLayoutInfo_;
-    if (info.endIndex_ == -1) {
-        info.endMainLineIndex_ = -1;
-    }
 
     float heightToFill = mainSize - info.currentOffset_ - GetPrevHeight(info, mainGap_);
     if (Positive(heightToFill)) {
         GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-        filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info.endMainLineIndex_ + 1);
+        filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info.endMainLineIndex_);
     }
 
     GridLayoutRangeSolver solver(&info, wrapper_);
@@ -238,10 +230,8 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
             return;
         }
         info.currentOffset_ += overDis;
-        res = solver.FindStartingRow(mainGap_);
-        UpdateStartInfo(info, res);
-        if (info.startIndex_ == 0) {
-            info.currentOffset_ = std::min(info.currentOffset_, 0.0f);
+        if (Positive(info.currentOffset_)) {
+            MeasureBackward(mainSize);
         }
     }
 }
@@ -275,7 +265,7 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
     float delta = std::abs(info.currentOffset_ - info.prevOffset_);
     if (enableSkip_ && GreatNotEqual(delta, mainSize)) {
         // a more costly check, therefore perform after comparing to [mainSize]
-        if (LessOrEqual(delta, SKIP_THRESHOLD * GetPrevHeight(info, mainGap_))) {
+        if (LessOrEqual(delta, SKIP_THRESHOLD * info.GetTotalHeightOfItemsInView(mainGap_))) {
             return false;
         }
         info.jumpIndex_ = Negative(info.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();

@@ -165,6 +165,19 @@ class FrameNode {
     }
     this._childList.set(node._nodeId, node);
   }
+
+  addComponentContent(content: ComponentContent): void {
+    if (content === undefined || content === null || content.getNodePtr() === null || content.getNodePtr() == undefined) {
+      return;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    if (!flag) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+  }
+
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
     if (child === undefined || child === null) {
       return;
@@ -333,6 +346,10 @@ class FrameNode {
     return getUINativeModule().frameNode.getId(this.getNodePtr());
   }
 
+  getUniqueId(): number {
+      return getUINativeModule().frameNode.getIdByNodePtr(this.getNodePtr());
+  }
+
   getNodeType(): string {
     return getUINativeModule().frameNode.getNodeType(this.getNodePtr());
   }
@@ -357,6 +374,10 @@ class FrameNode {
     const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
     const inspectorInfo = JSON.parse(inspectorInfoStr);
     return inspectorInfo;
+  }
+
+  getCustomProperty(key: string): Object | undefined {
+    return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
   }
 
   get commonAttribute(): ArkComponent {

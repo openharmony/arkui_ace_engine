@@ -389,7 +389,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter() const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -441,6 +441,11 @@ public:
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
+    }
+
+    void SetColorModeUpdateCallback(const std::function<void()>&& callback)
+    {
+        colorModeUpdateCallback_ = callback;
     }
 
     bool MarkRemoving() override;
@@ -501,6 +506,7 @@ public:
     void SetDragPreviewOptions(const DragPreviewOption& previewOption)
     {
         previewOption_ = previewOption;
+        previewOption_.onApply = std::move(previewOption.onApply);
     }
 
     DragPreviewOption GetDragPreviewOption() const
@@ -820,6 +826,13 @@ public:
     RectF GetRectWithRender();
     bool CheckAncestorPageShow();
 
+    void SetRemoveCustomProperties(std::function<void()> func)
+    {
+        if (!removeCustomProperties_) {
+            removeCustomProperties_ = func;
+        }
+    }
+
 protected:
     void DumpInfo() override;
 
@@ -916,6 +929,7 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
+    std::function<void()> colorModeUpdateCallback_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;
@@ -933,6 +947,7 @@ private:
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
+    std::function<void()> removeCustomProperties_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 

@@ -53,6 +53,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -487,6 +489,26 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     CalcDimension dimension(value->ToNumber<double>(), unit);
     result = dimension;
     return true;
+}
+
+bool CheckLengthMetrics(const JSRef<JSObject>& object)
+{
+    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+        return true;
+    }
+    if (object->HasProperty(TOP_PROPERTY) && object->GetProperty(TOP_PROPERTY)->IsObject()) {
+        JSRef<JSObject> topObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_PROPERTY));
+        if (topObj->HasProperty("value")) {
+            return true;
+        }
+    }
+    if (object->HasProperty(BOTTOM_PROPERTY) && object->GetProperty(BOTTOM_PROPERTY)->IsObject()) {
+        JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_PROPERTY));
+        if (bottomObj->HasProperty("value")) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool ParseLocalizedEdges(const JSCallbackInfo& info, EdgesParam& edges)
@@ -1203,6 +1225,9 @@ void CompleteResourceObjectFromParams(
     }
 
     JSRef<JSVal> args = jsObj->GetProperty("params");
+    if (!args->IsArray()) {
+        return;
+    }
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     if (resId != UNKNOWN_RESOURCE_ID) {
         return;
@@ -1454,7 +1479,7 @@ void ParseLocalizedEdgeWidthsProps(const JSRef<JSObject>& object, LocalizedCalcD
 
 void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidths(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -1469,7 +1494,7 @@ void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& c
 
 void ParseCommonEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidthsProps(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -1497,7 +1522,9 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
         bundleName = bundle->ToString();
         moduleName = module->ToString();
     }
-
+    if (!args->IsArray()) {
+        return nullptr;
+    }
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
     std::vector<ResourceObjectParams> resObjParamsList;
     auto size = static_cast<int32_t>(params->Length());
@@ -1839,7 +1866,11 @@ NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSObject>& j
 
 RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseJsTransitionEffect(const JSCallbackInfo& info)
 {
-    auto obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return nullptr;
+    }
+    auto obj = JSRef<JSObject>::Cast(arg);
     auto transitionVal = obj->GetProperty("transition");
     if (!transitionVal->IsObject()) {
         return nullptr;
@@ -2134,7 +2165,11 @@ void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
         return;
     }
     uint8_t value = 0;
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(arg);
     JSRef<JSVal> jsStartValue = object->GetProperty("start");
     if (jsStartValue->IsNumber()) {
         int32_t startValue = jsStartValue->ToNumber<int32_t>();
@@ -2192,9 +2227,9 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
         }
     } else {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            value = static_cast<float>(StringUtils::StringToUint(info[0]->ToString()));
+            value = static_cast<float>(StringUtils::StringToUintCheck(info[0]->ToString()));
         } else {
-            value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+            value = static_cast<int32_t>(StringUtils::StringToUintCheck(info[0]->ToString()));
         }
     }
 
@@ -2414,7 +2449,8 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
         visible = arg->ToNumber<int32_t>();
     }
 
-    if (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        (visible < static_cast<int32_t>(VisibleType::VISIBLE) || visible > static_cast<int32_t>(VisibleType::GONE))) {
         visible = 0;
     }
 
@@ -2632,7 +2668,6 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
             pixmap = CreatePixelMapFromNapiValue(info[0]);
         }
 #endif
-        CHECK_NULL_VOID(pixmap);
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
     }
 
@@ -2936,6 +2971,10 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         auto sizeType = static_cast<BackgroundImageSizeType>(info[0]->ToNumber<int32_t>());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+            (sizeType < BackgroundImageSizeType::CONTAIN || sizeType > BackgroundImageSizeType::FILL)) {
+            sizeType = BackgroundImageSizeType::AUTO;
+        }
         bgImgSize.SetSizeTypeX(sizeType);
         bgImgSize.SetSizeTypeY(sizeType);
     } else {
@@ -3030,6 +3069,10 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
             valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
         }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            typeX = x.Unit();
+            typeY = y.Unit();
+        }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
     }
 
@@ -3038,7 +3081,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 
 std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, size_t optionIndex)
 {
-    auto paramArray = JSRef<JSArray>::Cast(info[optionIndex]);
+    JSRef<JSVal> arg = info[optionIndex];
+    if (!arg->IsArray()) {
+        return std::vector<NG::OptionParam>();
+    }
+    auto paramArray = JSRef<JSArray>::Cast(arg);
     std::vector<NG::OptionParam> params(paramArray->Length());
     // parse paramArray
     for (size_t i = 0; i < paramArray->Length(); ++i) {
@@ -3074,9 +3121,39 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info, si
 void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto borderRadiusValue = menuOptions->GetProperty("borderRadius");
-    NG::BorderRadiusProperty radius;
-    if (JSViewAbstract::ParseBorderRadius(borderRadiusValue, radius)) {
-        menuParam.borderRadius = radius;
+    NG::BorderRadiusProperty menuBorderRadius;
+    CalcDimension borderRadius;
+    if (JSViewAbstract::ParseJsDimensionVp(borderRadiusValue, borderRadius)) {
+        if (borderRadius.Unit() != DimensionUnit::PERCENT && GreatOrEqual(borderRadius.Value(), 0.0f)) {
+            menuBorderRadius.SetRadius(borderRadius);
+            menuBorderRadius.multiValued = false;
+            menuParam.borderRadius = menuBorderRadius;
+        };
+    } else if (borderRadiusValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(borderRadiusValue);
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
+        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        if (LessNotEqual(topLeft.Value(), 0.0f)) {
+            topLeft.Reset();
+        }
+        if (LessNotEqual(topRight.Value(), 0.0f)) {
+            topRight.Reset();
+        }
+        if (LessNotEqual(bottomLeft.Value(), 0.0f)) {
+            bottomLeft.Reset();
+        }
+        if (LessNotEqual(bottomRight.Value(), 0.0f)) {
+            bottomRight.Reset();
+        }
+        menuBorderRadius.radiusTopLeft = topLeft;
+        menuBorderRadius.radiusTopRight = topRight;
+        menuBorderRadius.radiusBottomLeft = bottomLeft;
+        menuBorderRadius.radiusBottomRight = bottomRight;
+        menuBorderRadius.multiValued = true;
+        menuParam.borderRadius = menuBorderRadius;
     }
 }
 
@@ -3274,6 +3351,9 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
 void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
     std::function<void()>& previewBuildFunc)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     auto menuContentOptions = JSRef<JSObject>::Cast(args);
     ParseMenuParam(info, menuContentOptions, menuParam);
     RefPtr<JsFunction> previewBuilderFunc;
@@ -3347,7 +3427,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             if (info.Length() > PARAMETER_LENGTH_SECOND) {
                 ParseBindOptionParam(info, menuParam, builderIndex + 1);
             }
-        } else {
+        } else if (info[0]->IsObject()) {
             JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
             menuParam.onStateChange = ParseDoubleBindCallback(info, callbackObj);
             auto isShowObj = callbackObj->GetProperty("value");
@@ -3498,7 +3578,7 @@ void JSViewAbstract::ParseLocalizedMarginOrLocalizedPaddingCorner(
 void JSViewAbstract::ParseCommonMarginOrPaddingCorner(
     const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
-    if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
+    if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedMarginOrLocalizedPaddingCorner(object, localizedCalcDimension);
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -3788,6 +3868,9 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBorderImageDimension(
     const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension)
 {
+    if (!args->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
     if (object->HasProperty(START_PROPERTY) || object->HasProperty(END_PROPERTY)) {
         LocalizedCalcDimension localizedCalcDimension;
@@ -4451,6 +4534,9 @@ void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBrightnessInternal(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BrightnessOption option;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
@@ -4461,6 +4547,9 @@ void JSViewAbstract::JsBackgroundBrightnessInternal(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsForegroundBrightness(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BrightnessOption option;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
@@ -4928,6 +5017,9 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
 
 bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result)
 {
+    if (!jsValue->IsObject()) {
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
@@ -5034,6 +5126,9 @@ bool JSViewAbstract::ParseJsSymbolId(
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
         symbolId = 0;
+        return false;
+    }
+    if (!jsValue->IsObject()) {
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
@@ -5646,12 +5741,8 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
     ViewAbstractModel::GetInstance()->SetDraggable(draggable);
 }
 
-void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
+NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsSetDragPreviewOptions", info, checkList)) {
-        return;
-    }
     NG::DragPreviewOption previewOption;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
@@ -5688,6 +5779,19 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
     }
+    
+    JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);
+
+    return previewOption;
+}
+
+void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsSetDragPreviewOptions", info, checkList)) {
+        return;
+    }
+    NG::DragPreviewOption previewOption = ParseDragPreviewOptions(info);
     ViewAbstractModel::GetInstance()->SetDragPreviewOptions(previewOption);
 }
 
@@ -5968,6 +6072,9 @@ void JSViewAbstract::SetPopupDismiss(
 PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
     auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
+    if (!onWillDismissFunc->IsFunction()) {
+        return PopupOnWillDismiss();
+    }
     RefPtr<JsFunction> jsFunc =
         AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -6110,7 +6217,11 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(arg);
     newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
     // center
     JSRef<JSVal> center = jsObj->GetProperty("center");
@@ -6164,7 +6275,11 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 
 void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
 {
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(arg);
     newGradient.CreateGradientWithType(NG::GradientType::SWEEP);
     // center
     JSRef<JSVal> center = jsObj->GetProperty("center");
@@ -6814,15 +6929,16 @@ void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto builder = obj->GetProperty("builder");
-
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_VOID(builderFunc);
-    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("AccessibilityVirtualNode");
-        func->Execute();
-    };
-    NG::ViewAbstractModelNG::GetInstance()->SetAccessibilityVirtualNode(std::move(buildFunc));
+    if (builder->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_VOID(builderFunc);
+        auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("AccessibilityVirtualNode");
+            func->Execute();
+        };
+        NG::ViewAbstractModelNG::GetInstance()->SetAccessibilityVirtualNode(std::move(buildFunc));
+    }
 }
 
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
@@ -7077,7 +7193,14 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
-
+    auto uiContextObj = paramObj->GetProperty("uiContext");
+    if (uiContextObj->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
+        auto prop = obj->GetProperty("instanceId_");
+        if (prop->IsNumber()) {
+            sheetStyle.instanceId = prop->ToNumber<int32_t>();
+        }
+    }
     NG::SheetLevel sheetLevel = NG::SheetLevel::OVERLAY;
     ParseSheetLevel(showMode, sheetLevel);
     sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);
@@ -7592,37 +7715,47 @@ void JSViewAbstract::JsExpandSafeArea(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
+void ParseJSLightSource(JSRef<JSObject>& lightSource)
+{
+    if (lightSource->IsUndefined()) {
+        return;
+    }
+    JSRef<JSVal> positionX = lightSource->GetProperty("positionX");
+    JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
+    JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
+    JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
+    JSRef<JSVal> color = lightSource->GetProperty("color");
+
+    CalcDimension dimPositionX;
+    CalcDimension dimPositionY;
+    CalcDimension dimPositionZ;
+    if (JSViewAbstract::ParseJsDimensionVp(positionX, dimPositionX) &&
+        JSViewAbstract::ParseJsDimensionVp(positionY, dimPositionY) &&
+        JSViewAbstract::ParseJsDimensionVp(positionZ, dimPositionZ)) {
+        ViewAbstractModel::GetInstance()->SetLightPosition(dimPositionX, dimPositionY, dimPositionZ);
+    }
+
+    if (intensity->IsNumber()) {
+        float intensityValue = intensity->ToNumber<float>();
+        ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
+    }
+
+    Color lightColor;
+    if (JSViewAbstract::ParseJsColor(color, lightColor)) {
+        ViewAbstractModel::GetInstance()->SetLightColor(lightColor);
+    }
+}
+
 void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
 {
+#ifdef POINT_LIGHT_ENABLE
     if (!info[0]->IsObject()) {
         return;
     }
 
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSObject> lightSource = object->GetProperty("lightSource");
-    if (!lightSource->IsUndefined()) {
-        JSRef<JSVal> positionX = lightSource->GetProperty("positionX");
-        JSRef<JSVal> positionY = lightSource->GetProperty("positionY");
-        JSRef<JSVal> positionZ = lightSource->GetProperty("positionZ");
-        JSRef<JSVal> intensity = lightSource->GetProperty("intensity");
-        JSRef<JSVal> color = lightSource->GetProperty("color");
-
-        CalcDimension dimPositionX, dimPositionY, dimPositionZ;
-        if (ParseJsDimensionVp(positionX, dimPositionX) && ParseJsDimensionVp(positionY, dimPositionY) &&
-            ParseJsDimensionVp(positionZ, dimPositionZ)) {
-            ViewAbstractModel::GetInstance()->SetLightPosition(dimPositionX, dimPositionY, dimPositionZ);
-        }
-
-        if (intensity->IsNumber()) {
-            float intensityValue = intensity->ToNumber<float>();
-            ViewAbstractModel::GetInstance()->SetLightIntensity(intensityValue);
-        }
-
-        Color lightColor;
-        if (ParseJsColor(color, lightColor)) {
-            ViewAbstractModel::GetInstance()->SetLightColor(lightColor);
-        }
-    }
+    ParseJSLightSource(lightSource);
 
     auto resourceWrapper = CreateResourceWrapper();
     if (!resourceWrapper) {
@@ -7650,6 +7783,7 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         std::vector<Shadow> shadows { shadow };
         ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
     }
+#endif
 }
 
 void JSViewAbstract::JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info)
@@ -7852,10 +7986,14 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("expandSafeArea", &JSViewAbstract::JsExpandSafeArea);
 
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
+    JSClass<JSViewAbstract>::StaticMethod("customProperty", &JSViewAbstract::JsCustomProperty);
     JSClass<JSViewAbstract>::StaticMethod("gestureModifier", &JSViewAbstract::JsGestureModifier);
 
     JSClass<JSViewAbstract>::StaticMethod(
         "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
+
+    JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
+    JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -8319,6 +8457,9 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         auto style = static_cast<ShadowStyle>(shadowStyle);
         return GetShadowFromTheme(style, shadow);
     }
+    if (!jsValue->IsObject()) {
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     double radius = 0.0;
     ParseJsDouble(jsObj->GetProperty("radius"), radius);
@@ -8411,7 +8552,11 @@ bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension&
 bool JSViewAbstract::ParseDataDetectorConfig(
     const JSCallbackInfo& info, std::string& types, std::function<void(const std::string&)>& onResult)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> arg = info[0];
+    if (!arg->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg);
     JSRef<JSVal> typeValue = obj->GetProperty("types");
     if (!typeValue->IsArray()) {
         return false;
@@ -8809,8 +8954,12 @@ void JSViewAbstract::JsOnTouchIntercept(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined() || arg->IsNull()) {
         ViewAbstractModel::GetInstance()->SetClickEffectLevel(ClickEffectLevel::UNDEFINED, DEFAULT_SCALE_LIGHT);
+        return;
+    }
+    if (!arg->IsObject()) {
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -8894,7 +9043,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
         return;
     }
 
@@ -9263,6 +9412,36 @@ bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiu
     return true;
 }
 
+void JSViewAbstract::SetDragPreviewOptionApply(const JSCallbackInfo& info, NG::DragPreviewOption& option)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyImageModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (globalFuncRef->IsFunction()) {
+        auto modifierObj = obj->GetProperty("modifier");
+        if (modifierObj->IsUndefined()) {
+            option.onApply = nullptr;
+        } else {
+            RefPtr<JsFunction> jsFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+            auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                               modifier = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto node = frameNode.Upgrade();
+                JSRef<JSVal> params[SECOND_INDEX];
+                params[0] = modifier;
+                params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+                PipelineContext::SetCallBackNode(node);
+                func->ExecuteJS(SECOND_INDEX, params);
+            };
+            option.onApply = onApply;
+        }
+    }
+}
+
 void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
 {
     // Parse cornerRadius.
@@ -9358,6 +9537,47 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
     return drawCallback;
 }
 
+void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
+{
+    if (info[0]->GetLocalHandle()->IsUndefined()) {
+        return;
+    }
+
+    auto* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto global = JSNApi::GetGlobalObject(vm);
+    auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
+    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction()) {
+        return;
+    }
+    auto obj = setCustomProperty->ToObject(vm);
+    panda::Local<panda::FunctionRef> func = obj;
+    auto thisObj = info.This()->GetLocalHandle();
+    auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+    auto nodeId = frameNode->GetId();
+    panda::Local<panda::JSValueRef> params[3] = { panda::NumberRef::New(vm, nodeId), info[0]->GetLocalHandle(),
+        info[1]->GetLocalHandle()
+    };
+    auto customPropertyExisted = func->Call(vm, thisObj, params, 3)->ToBoolean(vm)->Value();
+    if (customPropertyExisted) {
+        frameNode->SetRemoveCustomProperties([vm, thisObj, nodeId]()->void {
+            CHECK_NULL_VOID(vm);
+            panda::LocalScope scope(vm);
+            auto global = JSNApi::GetGlobalObject(vm);
+            auto removeCustomProperty = global->Get(vm,
+                panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
+            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction()) {
+                return;
+            }
+
+            auto obj = removeCustomProperty->ToObject(vm);
+            panda::Local<panda::FunctionRef> func = obj;
+            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+            func->Call(vm, thisObj, params, 1);
+        });
+    }
+}
+
 void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
 {
     auto* vm = info.GetExecutionContext().vm_;
@@ -9388,6 +9608,9 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         return;
     }
     auto sliceValue = resizableObject->GetProperty("slice");
+    if (!sliceValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
     if (sliceObj->IsEmpty()) {
         ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
@@ -9420,5 +9643,43 @@ void JSViewAbstract::JsBackgroundImageResizable(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+}
+
+void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
+        return;
+    }
+
+    std::string focusScopeId = info[0]->ToString();
+
+    bool isGroup = false;
+    if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
+        info[1]->IsBoolean()) {
+        isGroup = info[1]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+
+    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
+        return;
+    }
+    std::string focusScopeId = info[0]->ToString();
+
+    int32_t focusPriority = 0;
+    if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
+        info[1]->IsNumber()) {
+        focusPriority = info[1]->ToNumber<int32_t>();
+    }
+    ViewAbstractModel::GetInstance()->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 } // namespace OHOS::Ace::Framework

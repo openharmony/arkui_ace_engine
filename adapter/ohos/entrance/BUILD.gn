@@ -45,6 +45,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
 
       # innerkits impl
@@ -113,6 +114,7 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:auto_fill_manager",
       "ability_runtime:data_ability_helper",
+      "ability_runtime:ui_extension",
       "bundle_framework:appexecfwk_core",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",

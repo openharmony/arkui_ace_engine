@@ -196,6 +196,57 @@ JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eve
     return JSRef<JSVal>::Cast(dateObj);
 }
 
+std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
+{
+    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    if (!args->IsObject()) {
+        return prop;
+    }
+
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    CalcDimension topLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+        radiusTopLeft = topLeft;
+    }
+    CalcDimension topRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+        radiusTopRight = topRight;
+    }
+    CalcDimension bottomLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+        radiusBottomLeft = bottomLeft;
+    }
+    CalcDimension bottomRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+        radiusBottomRight = bottomRight;
+    }
+    if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+        !radiusBottomRight.has_value()) {
+        return prop;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    if (radiusTopLeft.has_value()) {
+        borderRadius.radiusTopLeft = radiusTopLeft;
+    }
+    if (radiusTopRight.has_value()) {
+        borderRadius.radiusTopRight = radiusTopRight;
+    }
+    if (radiusBottomLeft.has_value()) {
+        borderRadius.radiusBottomLeft = radiusBottomLeft;
+    }
+    if (radiusBottomRight.has_value()) {
+        borderRadius.radiusBottomRight = radiusBottomRight;
+    }
+    borderRadius.multiValued = true;
+    prop = borderRadius;
+
+    return prop;
+}
+
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
@@ -209,19 +260,7 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
         borderRadius.multiValued = false;
         prop = borderRadius;
     } else if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.radiusTopLeft = topLeft;
-        borderRadius.radiusTopRight = topRight;
-        borderRadius.radiusBottomLeft = bottomLeft;
-        borderRadius.radiusBottomRight = bottomRight;
-        borderRadius.multiValued = true;
-        prop = borderRadius;
+        prop = HandleDifferentRadius(args);
     }
     return prop;
 }
@@ -289,6 +328,11 @@ ButtonInfo ParseButtonStyle(const JSRef<JSObject>& pickerButtonParamObject)
         buttonInfo.borderRadius = radius.value();
     }
 
+    auto primaryValue = pickerButtonParamObject->GetProperty("primary");
+    if (primaryValue->IsBoolean()) {
+        buttonInfo.isPrimary = primaryValue->ToBoolean();
+    }
+
     return buttonInfo;
 }
 
@@ -299,6 +343,7 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
     if (acceptButtonStyle->IsObject()) {
         auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
         buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
+        buttonInfos[0].isAcceptButton = true;
     }
     auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
     if (cancelButtonStyle->IsObject()) {
@@ -611,6 +656,9 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
 void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject, bool isDatePicker)
 {
     JSRef<JSVal> changeEventVal = selectedObject->GetProperty("changeEvent");
+    if (changeEventVal->IsUndefined() || !changeEventVal->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
@@ -761,6 +809,9 @@ void DatePickerDialogAppearEvent(const JSCallbackInfo& info, PickerDialogEvent& 
 {
     std::function<void()> didAppearEvent;
     std::function<void()> willAppearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -791,6 +842,9 @@ void DatePickerDialogDisappearEvent(const JSCallbackInfo& info, PickerDialogEven
 {
     std::function<void()> didDisappearEvent;
     std::function<void()> willDisappearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
@@ -1190,9 +1244,15 @@ PickerDate JSDatePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
         return pickerDate;
     }
     auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
-    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
-    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+    auto yearFuncJsVal = dateObj->GetProperty("getFullYear");
+    auto monthFuncJsVal = dateObj->GetProperty("getMonth");
+    auto dateFuncJsVal = dateObj->GetProperty("getDate");
+    if (!(yearFuncJsVal->IsFunction() && monthFuncJsVal->IsFunction() && dateFuncJsVal->IsFunction())) {
+        return pickerDate;
+    }
+    auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+    auto monthFunc = JSRef<JSFunc>::Cast(monthFuncJsVal);
+    auto dateFunc = JSRef<JSFunc>::Cast(dateFuncJsVal);
     JSRef<JSVal> year = yearFunc->Call(dateObj);
     JSRef<JSVal> month = monthFunc->Call(dateObj);
     JSRef<JSVal> date = dateFunc->Call(dateObj);
@@ -1212,9 +1272,15 @@ PickerTime JSDatePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
-    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
-    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
-    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    auto hourFuncJsVal = timeObj->GetProperty("getHours");
+    auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
+    auto secondFuncJsVal = timeObj->GetProperty("getSeconds");
+    if (!(hourFuncJsVal->IsFunction() && minuteFuncJsVal->IsFunction() && secondFuncJsVal->IsFunction())) {
+        return pickerTime;
+    }
+    auto hourFunc = JSRef<JSFunc>::Cast(hourFuncJsVal);
+    auto minuteFunc = JSRef<JSFunc>::Cast(minuteFuncJsVal);
+    auto secondFunc = JSRef<JSFunc>::Cast(secondFuncJsVal);
     JSRef<JSVal> hour = hourFunc->Call(timeObj);
     JSRef<JSVal> minute = minuteFunc->Call(timeObj);
     JSRef<JSVal> second = secondFunc->Call(timeObj);
@@ -1453,6 +1519,9 @@ void TimePickerDialogAppearEvent(const JSCallbackInfo& info, TimePickerDialogEve
 {
     std::function<void()> didAppearEvent;
     std::function<void()> willAppearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -1483,6 +1552,9 @@ void TimePickerDialogDisappearEvent(const JSCallbackInfo& info, TimePickerDialog
 {
     std::function<void()> didDisappearEvent;
     std::function<void()> willDisappearEvent;
+    if (info.Length() == 0 || !info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");

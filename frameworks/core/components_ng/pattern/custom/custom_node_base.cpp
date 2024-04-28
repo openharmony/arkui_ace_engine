@@ -28,6 +28,9 @@ CustomNodeBase::~CustomNodeBase()
     // appearFunc_ & destroyFunc_ should be executed in pairs
     if (!executeFireOnAppear_ && appearFunc_) {
         appearFunc_();
+        if (didBuildFunc_) {
+            didBuildFunc_();
+        }
     }
     if (destroyFunc_) {
         destroyFunc_();
@@ -72,7 +75,9 @@ void CustomNodeBase::FireRecycleRenderFunc()
             ScopedViewStackProcessor scopedViewStackProcessor;
             recycleRenderFunc_();
         }
-        AceType::DynamicCast<UINode>(Claim(this))->OnReuse();
+        auto node = AceType::DynamicCast<UINode>(Claim(this));
+        node->OnReuse();
+        node->SetJSViewActive(true);
         recycleRenderFunc_ = nullptr;
     }
 }

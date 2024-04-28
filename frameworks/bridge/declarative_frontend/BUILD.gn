@@ -148,6 +148,9 @@ template("declarative_js_engine") {
     ]
 
     configs = [ "$ace_root:ace_config" ]
+    if (ace_engine_feature_enable_point_light) {
+      defines += [ "POINT_LIGHT_ENABLE" ]
+    }
 
     sources = [
       "engine/bindings_implementation.cpp",

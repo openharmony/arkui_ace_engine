@@ -419,7 +419,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
         remain = NearZero(pullDownRatio) ? delta : delta - (scrollOffset_ - lastScrollOffset) / pullDownRatio;
         if (!isSourceFromAnimation_) {
-            FireOnOffsetChange(Dimension(scrollOffset_).ConvertToVp());
+            FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
                 UpdateFirstChildPlacement();
@@ -514,9 +514,12 @@ void RefreshPattern::FireChangeEvent(const std::string& value)
 
 void RefreshPattern::FireOnOffsetChange(float value)
 {
-    auto refreshEventHub = GetEventHub<RefreshEventHub>();
-    CHECK_NULL_VOID(refreshEventHub);
-    refreshEventHub->FireOnOffsetChange(value);
+    if (!NearEqual(lastScrollOffset_, value)) {
+        auto refreshEventHub = GetEventHub<RefreshEventHub>();
+        CHECK_NULL_VOID(refreshEventHub);
+        refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
+        lastScrollOffset_ = value;
+    }
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)

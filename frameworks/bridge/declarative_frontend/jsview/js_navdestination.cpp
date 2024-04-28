@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 namespace OHOS::Ace {
@@ -142,6 +143,12 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     } else {
         NavDestinationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
     }
+
+    NG::NavigationTitlebarOptions options;
+    if (info.Length() > 1) {
+        ParseBackgroundOptions(info[1], options.bgOptions);
+    }
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
 
 void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)

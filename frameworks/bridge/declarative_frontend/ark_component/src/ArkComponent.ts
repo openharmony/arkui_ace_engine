@@ -25,7 +25,8 @@ function getUINativeModule(): any {
 enum ModifierType {
   ORIGIN = 0,
   STATE = 1,
-  FRAME_NODE = 2
+  FRAME_NODE = 2,
+  EXPOSE_MODIFIER = 3,
 }
 
 type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | object>;
@@ -173,36 +174,6 @@ type KNode = number | null
 
 interface Equable {
   isEqual(value: Equable): boolean;
-}
-
-class Modifier<T extends number | string | boolean | Equable | Resource | object> {
-  stageValue?: T;
-  value?: T;
-  constructor(value: T) {
-    this.stageValue = value;
-  }
-
-  applyStage(node: KNode): boolean {
-    if (this.stageValue === this.value) {
-      if (this.value === undefined) {
-        this.applyPeer(node, true);
-      }
-      delete this.stageValue;
-      return;
-    }
-    if (typeof this.stageValue === 'object' && typeof this.value === 'object') {
-      if ((this.stageValue as Equable).isEqual(this.value as Equable)) {
-        delete this.stageValue;
-        return;
-      }
-    }
-    this.value = this.stageValue;
-    delete this.stageValue;
-    this.applyPeer(node, this.value === undefined);
-    return (this.value === undefined);
-  }
-
-  applyPeer(node: KNode, reset: boolean): void { }
 }
 
 class ModifierWithKey<T extends number | string | boolean | object | Function> {
@@ -366,8 +337,8 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
   }
 }
 
-class PositionModifier extends ModifierWithKey<Position> {
-  constructor(value: Position) {
+class PositionModifier extends ModifierWithKey<Position | Edges> {
+  constructor(value: Position | Edges) {
     super(value);
   }
   static identity: Symbol = Symbol('position');
@@ -375,12 +346,25 @@ class PositionModifier extends ModifierWithKey<Position> {
     if (reset) {
       getUINativeModule().common.resetPosition(node);
     } else {
-      getUINativeModule().common.setPosition(node, this.value.x, this.value.y);
+      let positionType = new ArkPositionType();
+      if (!positionType.parsePositionType(this.value)) {
+        getUINativeModule().common.resetPosition(node);
+      } else {
+        if (!positionType.useEdges) {
+          getUINativeModule().common.setPosition(node, positionType.useEdges, this.value.x, this.value.y);
+        } else {
+          getUINativeModule().common.setPosition(node, positionType.useEdges, this.value.top, this.value.left, this.value.bottom, this.value.right);
+        }
+      }
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
-      !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
+      !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right);
   }
 }
 
@@ -1831,8 +1815,8 @@ class FocusOnTouchModifier extends ModifierWithKey<boolean> {
     }
   }
 }
-class OffsetModifier extends ModifierWithKey<Position> {
-  constructor(value: Position) {
+class OffsetModifier extends ModifierWithKey<Position | Edges> {
+  constructor(value: Position | Edges) {
     super(value);
   }
   static identity: Symbol = Symbol('offset');
@@ -1840,13 +1824,26 @@ class OffsetModifier extends ModifierWithKey<Position> {
     if (reset) {
       getUINativeModule().common.resetOffset(node);
     } else {
-      getUINativeModule().common.setOffset(node, this.value?.x, this.value?.y);
+      let positionType = new ArkPositionType();
+      if (!positionType.parsePositionType(this.value)) {
+        getUINativeModule().common.resetOffset(node);
+      } else {
+        if (!positionType.useEdges) {
+          getUINativeModule().common.setOffset(node, positionType.useEdges, this.value.x, this.value.y);
+        } else {
+          getUINativeModule().common.setOffset(node, positionType.useEdges, this.value.top, this.value.left, this.value.bottom, this.value.right);
+        }
+      }
     }
   }
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
-      !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
+      !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right);
   }
 }
 
@@ -2678,6 +2675,21 @@ class KeyBoardShortCutModifier extends ModifierWithKey<ArkKeyBoardShortCut> {
   }
 }
 
+class CustomPropertyModifier extends ModifierWithKey<ArkCustomProperty> {
+  constructor(value: ArkCustomProperty) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('customProperty');
+  applyPeer(node: KNode, reset: boolean): void {
+    const nodeId = getUINativeModule().frameNode.getIdByNodePtr(node);
+    if (reset) {
+      __removeCustomProperty__(nodeId, this.value.key);
+    } else {
+      __setValidCustomProperty__(nodeId, this.value.key, this.value.value);
+    }
+  }
+}
+
 class TransitionModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);
@@ -2723,19 +2735,6 @@ function parseWithDefaultNumber(val, defaultValue) {
   }
   else { return defaultValue; }
 }
-function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(
-  modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>,
-  modifierClass: new (value: T) => M,
-  value: T
-) {
-  const identity: Symbol = (modifierClass as any)['identity'];
-  const item = modifiers.get(identity);
-  if (item) {
-    item.stageValue = value;
-  } else {
-    modifiers.set(identity, new modifierClass(value));
-  }
-}
 
 function modifierWithKey<T extends number | string | boolean | object, M extends ModifierWithKey<T>>(
   modifiers: Map<Symbol, AttributeModifierWithKey>,
@@ -2753,7 +2752,6 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
 }
 
 class ArkComponent implements CommonMethod<CommonAttribute> {
-  _modifiers: Map<Symbol, Modifier<number | string | boolean | Equable>>;
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
   nativePtr: KNode;
@@ -2763,7 +2761,6 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _gestureEvent: UIGestureEvent;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
-    this._modifiers = new Map();
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
@@ -2776,6 +2773,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         value.applyStage(this.nativePtr);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
       })
+    } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
+      this._modifiersWithKeys = new ObservedMap();
     } else {
       this._modifiersWithKeys = new Map();
     }
@@ -2817,18 +2816,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   applyModifierPatch(): void {
     let expiringItems = [];
     let expiringItemsWithKeys = [];
-    this._modifiers.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
-        expiringItems.push(key);
-      }
-    });
     this._modifiersWithKeys.forEach((value, key) => {
       if (value.applyStage(this.nativePtr)) {
         expiringItemsWithKeys.push(key);
       }
-    });
-    expiringItems.forEach(key => {
-      this._modifiers.delete(key);
     });
     expiringItemsWithKeys.forEach(key => {
       this._modifiersWithKeys.delete(key);
@@ -3544,8 +3535,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  position(value: Position): this {
-    modifierWithKey(this._modifiersWithKeys, PositionModifier.identity, PositionModifier, value);
+  position(value: Position | Edges): this {
+    if (isObject(value)) {
+      modifierWithKey(this._modifiersWithKeys, PositionModifier.identity, PositionModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, PositionModifier.identity, PositionModifier, undefined);
+    }
     return this;
   }
 
@@ -3554,8 +3549,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  offset(value: Position): this {
-    modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, value);
+  offset(value: Position | Edges): this {
+    if (isObject(value)) {
+      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, undefined);
+    }
     return this;
   }
 
@@ -3920,6 +3919,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
+
+  customProperty(key: string, value: object): this {
+    const property = new ArkCustomProperty();
+    property.key = key;
+    property.value = value;
+    modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    return this;
+  }
 }
 
 const isNull = (val: any) => typeof val === 'object' && val === null;
@@ -4204,4 +4211,56 @@ function __gestureModifier__(modifier) {
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = new ArkComponent(nativeNode);
   applyGesture(modifier, component);
+}
+
+const __elementIdToCustomProperties__ = new Map();
+
+function __setValidCustomProperty__(nodeId: number, key: string, value: Object): void {
+  if (!__elementIdToCustomProperties__.has(nodeId)) {
+    __elementIdToCustomProperties__.set(nodeId, new Map());
+  }
+
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+  if (customProperties) {
+    customProperties.set(key, value);
+  }
+}
+
+function __removeCustomProperty__(nodeId: number, key: string): boolean {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      customProperties.delete(key);
+      return customProperties.size > 0;
+    }
+  }
+
+  return false;
+}
+
+function __removeCustomProperties__(nodeId: number): void {
+  __elementIdToCustomProperties__.delete(nodeId);
+}
+
+function __getCustomProperty__(nodeId: number, key: string): Object | undefined {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      return customProperties.get(key);
+    }
+  }
+
+  return undefined;
+}
+
+function __setCustomProperty__(nodeId: number, key: string, value: Object): boolean {
+  if (value !== undefined) {
+    __setValidCustomProperty__(nodeId, key, value);
+    return true;
+  } else {
+    return __removeCustomProperty__(nodeId, key);
+  }
 }

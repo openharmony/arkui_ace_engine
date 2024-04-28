@@ -203,6 +203,7 @@ void ProgressPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 void ProgressPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
@@ -277,5 +278,43 @@ std::string ProgressPattern::ConvertProgressStatusToString(const ProgressStatus 
     }
 
     return str;
+}
+
+void ProgressPattern::FireBuilder()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(contentModifierNode_);
+        contentModifierNode_ = nullptr;
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    auto node = BuildContentModifierNode();
+    if (contentModifierNode_ == node) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(contentModifierNode_);
+    contentModifierNode_ = node;
+    CHECK_NULL_VOID(contentModifierNode_);
+    host->AddChild(contentModifierNode_, 0);
+    host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> ProgressPattern::BuildContentModifierNode()
+{
+    if (!makeFunc_.has_value()) {
+        return nullptr;
+    }
+    auto renderProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_RETURN(renderProperty, nullptr);
+    auto value = renderProperty->GetValue().value_or(0);
+    auto total = renderProperty->GetMaxValue().value_or(0);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto enabled = eventHub->IsEnabled();
+    return (makeFunc_.value())(ProgressConfiguration{value, total, enabled});
 }
 } // namespace OHOS::Ace::NG

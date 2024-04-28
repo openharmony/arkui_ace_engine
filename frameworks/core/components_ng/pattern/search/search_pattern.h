@@ -150,6 +150,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
+    void SetAccessibilityAction();
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();
     void InitTextFieldClickEvent();

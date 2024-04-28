@@ -227,6 +227,8 @@ namespace OHOS::Ace::NG {
                     cachedItems_.emplace(position - 1, child);
                 } else if (position == from) {
                     cachedItems_.emplace(to, child);
+                } else {
+                    cachedItems_.emplace(itemIndex, child);
                 }
             }
         } else {
@@ -236,6 +238,8 @@ namespace OHOS::Ace::NG {
                     cachedItems_.emplace(position + 1, child);
                 } else if (position == from) {
                     cachedItems_.emplace(to, child);
+                } else {
+                    cachedItems_.emplace(itemIndex, child);
                 }
             }
         }

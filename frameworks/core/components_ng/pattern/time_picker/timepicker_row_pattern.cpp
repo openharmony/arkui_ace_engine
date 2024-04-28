@@ -233,7 +233,7 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
         }
     } else {
         if (!hasSecond_) {
-            host->RemoveChildAtIndex(host->GetChildren().size() - 1);
+            host->RemoveChildAtIndex(static_cast<int32_t>(host->GetChildren().size()) - 1);
             secondId_.reset();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }

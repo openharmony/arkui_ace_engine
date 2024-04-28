@@ -255,12 +255,13 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
         CHECK_NULL_VOID(pattern);
         size_t index = 0;
         auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+        auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
         for (const auto& imageWeak : imageNodeList_) {
             auto imageChild = imageWeak.Upgrade();
             if (!imageChild) {
                 continue;
             }
-            auto rect = rectsForPlaceholders.at(index);
+            auto rect = rectsForPlaceholders.at(placeHolderIndexVector.at(index));
             auto imagePattern = DynamicCast<ImagePattern>(imageChild->GetPattern());
             if (!imagePattern) {
                 continue;
@@ -297,6 +298,29 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
     }
 }
 
+void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
+{
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    size_t index = 0;
+    size_t indexTmp = 0;
+    auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+    auto customSpanIndex = pattern->GetCustomSpanIndex();
+    auto onDraws = pattern->GetOnDrawList();
+    for (auto onDraw : onDraws) {
+        indexTmp = customSpanIndex.at(index);
+        index++;
+        auto rect = rectsForPlaceholders.at(indexTmp);
+        auto lineMetrics = paragraph_->GetLineMetricsByRectF(rect);
+        CustomSpanOptions customSpanOptions;
+        customSpanOptions.x = static_cast<double>(rect.Left());
+        customSpanOptions.lineTop = lineMetrics.y;
+        customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height;
+        customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender;
+        onDraw(drawingContext, customSpanOptions);
+    }
+}
+
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     ACE_SCOPED_TRACE("Text::onDraw");
@@ -306,26 +330,13 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         CHECK_NULL_VOID(paragraph_);
         UpdateFadeout(drawingContext);
         auto& canvas = drawingContext.canvas;
-        canvas.Save();
         if (!textRacing_) {
-            auto contentSize = contentSize_->Get();
-            auto contentOffset = contentOffset_->Get();
-            if (clip_ && clip_->Get() &&
-                (!fontSize_.has_value() || !fontSizeFloat_ ||
-                    NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-                RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-                    contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-                canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-            }
             paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
         } else {
             // Racing
             float textRacePercent = marqueeOption_.direction == MarqueeDirection::LEFT
                                         ? GetTextRacePercent()
                                         : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
-            if (clip_ && clip_->Get()) {
-                canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
-            }
             float paragraph1Offset =
                 (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
             if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
@@ -338,10 +349,10 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
             }
         }
-        canvas.Restore();
     } else {
         DrawObscuration(drawingContext);
     }
+    PaintCustomSpan(drawingContext);
 }
 
 void TextContentModifier::UpdateFadeout(const DrawingContext& drawingContext)
@@ -645,7 +656,7 @@ void TextContentModifier::SetFontSize(const Dimension& value)
     float fontSizeValue;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(value);
+        fontSizeValue = value.ConvertToPx();
     } else {
         fontSizeValue = value.Value();
     }

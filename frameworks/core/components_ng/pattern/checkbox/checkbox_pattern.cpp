@@ -916,11 +916,13 @@ void CheckBoxPattern::SetCheckBoxSelect(bool select)
 
 void CheckBoxPattern::FireBuilder()
 {
-    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value() && !toggleMakeFunc_.has_value()) {
+        host->RemoveChildAtIndex(0);
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
     host->RemoveChildAtIndex(0);
     contentModifierNode_ = BuildContentModifierNode();
     CHECK_NULL_VOID(contentModifierNode_);
@@ -985,15 +987,21 @@ void CheckBoxPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
-            navId_ = std::to_string(parent->GetId());
+            currentNavId_ = std::to_string(parent->GetId());
+            groupManager->SetLastNavId(currentNavId_);
             UpdateState();
             return;
         }
         parent = parent->GetParent();
     }
+    currentNavId_ = "";
+    groupManager->SetLastNavId(std::nullopt);
+    UpdateState();
 }
 
 std::string CheckBoxPattern::GetGroupNameWithNavId()
@@ -1002,6 +1010,21 @@ std::string CheckBoxPattern::GetGroupNameWithNavId()
     CHECK_NULL_RETURN(host, "");
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_RETURN(eventHub, "");
-    return eventHub->GetGroupName() + navId_;
+    if (currentNavId_.has_value()) {
+        return eventHub->GetGroupName() + currentNavId_.value();
+    }
+    auto groupManager = GetGroupManager();
+    CHECK_NULL_RETURN(groupManager, eventHub->GetGroupName());
+    return eventHub->GetGroupName() + groupManager->GetLastNavId();
+}
+
+RefPtr<GroupManager> CheckBoxPattern::GetGroupManager()
+{
+    auto manager = groupManager_.Upgrade();
+    if (manager) {
+        return manager;
+    }
+    groupManager_ = GroupManager::GetGroupManager();
+    return groupManager_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

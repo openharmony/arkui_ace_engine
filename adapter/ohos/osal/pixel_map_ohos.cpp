@@ -87,6 +87,20 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
 }
 
+RefPtr<PixelMap> PixelMap::CopyPixelMap(const RefPtr<PixelMap>& pixelMap)
+{
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    OHOS::Media::InitializationOptions opts;
+    auto mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
+    std::unique_ptr<Media::PixelMap> uniquePixelMap = Media::PixelMap::Create(*mediaPixelMap, opts);
+    CHECK_NULL_RETURN(uniquePixelMap, nullptr);
+    Media::PixelMap* pixelMapRelease = uniquePixelMap.release();
+    CHECK_NULL_RETURN(pixelMapRelease, nullptr);
+    std::shared_ptr<Media::PixelMap> newPixelMap(pixelMapRelease);
+    CHECK_NULL_RETURN(newPixelMap, nullptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(newPixelMap);
+}
+
 RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
 {
     CHECK_NULL_RETURN(ptr, nullptr);

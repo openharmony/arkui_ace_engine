@@ -297,11 +297,22 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
     ContainerScope scope(instanceId_);
-    auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
         return;
     }
-    delegate->OnHttpErrorReceive(request, response);
+    std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
+    task->PostTask([webClient = webClientWeak, request, response] {
+        auto webClientUpgrade = webClient.lock();
+        if (webClientUpgrade == nullptr) {
+            return;
+        }
+        auto delegate = webClientUpgrade->GetWebDelegate();
+        if (delegate) {
+            delegate->OnHttpErrorReceive(request, response);
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebHttpError");
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
@@ -374,6 +385,9 @@ bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrl
             break;
         case WebResponseDataType::RESOURCE_URL_TYPE:
             response->PutResponseResourceUrl(webResponse->GetResourceUrl());
+            break;
+        case WebResponseDataType::BUFFER_TYPE:
+            response->PutResponseDataBuffer(webResponse->GetBuffer(), webResponse->GetBufferSize());
             break;
         default:
             response->PutResponseData(data);
@@ -647,6 +661,14 @@ bool WebClientImpl::RunContextMenu(
     return jsResult;
 }
 
+void WebClientImpl::UpdateClippedSelectionBounds(int x, int y, int w, int h)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->UpdateClippedSelectionBounds(x, y, w, h);
+}
+
 bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
                                  std::shared_ptr<NWeb::NWebQuickMenuCallback> callback)
 {
@@ -795,7 +817,7 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
     delegate->OnTouchIconUrl(icon_url, precomposed);
 }
 
-bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
+bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, std::shared_ptr<NWeb::NWebCursorInfo> info)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
@@ -1011,5 +1033,38 @@ std::vector<int8_t> WebClientImpl::GetWordSelection(const std::string& text, int
     std::vector<int8_t> vec = { -1, -1 };
     CHECK_NULL_RETURN(delegate, vec);
     return delegate->GetWordSelection(text, offset);
+}
+
+bool WebClientImpl::OnOpenAppLink(
+    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+
+    return delegate->OnOpenAppLink(url, callback);
+}
+
+void WebClientImpl::OnRenderProcessNotResponding(
+    const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRenderProcessNotResponding(jsStack, pid, reason);
+}
+
+void WebClientImpl::OnRenderProcessResponding()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRenderProcessResponding();
 }
 } // namespace OHOS::Ace

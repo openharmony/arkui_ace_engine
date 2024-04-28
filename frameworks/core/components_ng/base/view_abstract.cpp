@@ -56,6 +56,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DEFAULT_BIAS = 0.5f;
 // common function to bind menu
 void BindMenu(const RefPtr<FrameNode> &menuNode, int32_t targetId, const NG::OffsetF &offset)
 {
@@ -1498,7 +1499,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
-    popupInfo.focusable = param->GetFocusable();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -1579,6 +1579,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
     }
+    popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
@@ -2543,6 +2544,31 @@ void ViewAbstract::SetPosition(FrameNode *frameNode, const OffsetT<Dimension> &v
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
+void ViewAbstract::SetPositionEdges(FrameNode* frameNode, const EdgesParam& value)
+{
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
+    ACE_UPDATE_RENDER_CONTEXT(PositionEdges, value);
+}
+
+void ViewAbstract::ResetPosition(FrameNode* frameNode)
+{
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Position);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, PositionEdges);
+    CHECK_NULL_VOID(frameNode);
+    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parentNode);
+    auto parentPattern = parentNode->GetPattern();
+
+    if (parentNode->GetTag() == V2::COLUMN_ETS_TAG || parentNode->GetTag() == V2::ROW_ETS_TAG ||
+        parentNode->GetTag() == V2::FLEX_ETS_TAG) {
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->RecalculatePosition();
+    }
+}
+
 void ViewAbstract::SetTransformMatrix(FrameNode *frameNode, const Matrix4 &matrix)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformMatrix, matrix, frameNode);
@@ -2804,6 +2830,12 @@ void ViewAbstract::SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& val
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Offset, value, frameNode);
+}
+
+void ViewAbstract::SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value)
+{
+    ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
+    ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
 }
 
 void ViewAbstract::MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value)
@@ -3234,7 +3266,7 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
     pipeline->AddOnAreaChangeNode(frameNode->GetId());
@@ -4133,5 +4165,60 @@ float ViewAbstract::GetLayoutWeight(FrameNode* frameNode)
         return magicItemProperty.GetLayoutWeight().value_or(layoutWeight);
     }
     return layoutWeight;
+}
+
+void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+}
+
+void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+int32_t ViewAbstract::GetDisplayIndex(FrameNode* frameNode)
+{
+    int32_t defaultDisplayIndex = 0;
+    CHECK_NULL_RETURN(frameNode, defaultDisplayIndex);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, defaultDisplayIndex);
+    const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(flexItemProperty, defaultDisplayIndex);
+    return flexItemProperty->GetDisplayIndex().value_or(defaultDisplayIndex);
+}
+
+NG::BorderWidthProperty ViewAbstract::GetOuterBorderWidth(FrameNode* frameNode)
+{
+    BorderWidthProperty borderWidth;
+    CHECK_NULL_RETURN(frameNode, borderWidth);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, borderWidth);
+    auto outBorderWidth = context->GetOuterBorder()->GetOuterBorderWidth();
+    CHECK_NULL_RETURN(outBorderWidth, borderWidth);
+    return outBorderWidth.value_or(borderWidth);
+}
+
+void ViewAbstract::SetBias(FrameNode* frameNode, const BiasPair& biasPair)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Bias, biasPair, frameNode);
+}
+
+BiasPair ViewAbstract::GetBias(FrameNode* frameNode)
+{
+    BiasPair biasPair(DEFAULT_BIAS, DEFAULT_BIAS);
+    CHECK_NULL_RETURN(frameNode, biasPair);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, biasPair);
+    const auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
+    CHECK_NULL_RETURN(flexItemProperty, biasPair);
+    return flexItemProperty->GetBias().value_or(biasPair);
 }
 } // namespace OHOS::Ace::NG

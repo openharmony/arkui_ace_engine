@@ -150,6 +150,10 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::CLOSE_BUTTON);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
+    // make the close button focusable when press tab
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
     buttonNode->MarkModifyDone();
 
     auto imageNode = FrameNode::CreateFrameNode(

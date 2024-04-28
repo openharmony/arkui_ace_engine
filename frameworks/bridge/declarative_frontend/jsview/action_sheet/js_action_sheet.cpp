@@ -175,6 +175,9 @@ void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties
         if (style->IsNumber()) {
             SetParseStyle(buttonInfo, style->ToNumber<int32_t>());
         }
+        if (!buttonInfo.defaultFocus) {
+            buttonInfo.isPrimary = true;
+        }
         if (buttonInfo.IsValid()) {
             properties.buttons.clear();
             properties.buttons.emplace_back(buttonInfo);

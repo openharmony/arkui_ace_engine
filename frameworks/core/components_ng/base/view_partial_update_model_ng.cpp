@@ -60,6 +60,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
         info.updateNodeFunc(customNode);
     }
     customNode->SetAppearFunction(std::move(info.appearFunc));
+    customNode->SetDidBuildFunction(std::move(info.didBuildFunc));
     auto renderFunc = [renderFunction = std::move(info.renderFunc)]() -> RefPtr<UINode> {
         auto node = renderFunction();
         return AceType::DynamicCast<UINode>(node);

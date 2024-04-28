@@ -518,10 +518,10 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d", touchEvent.id);
         }
-    } else if (touchEvent.type == TouchType::UP) {
+    } else if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         if (touchEventFindResult == downFingerIds_.end()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP event without receive DOWN event,"
-                " touchEvent id is %{public}d", touchEvent.id);
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP/CANCEL event "
+                "without receive DOWN event, touchEvent id is %{public}d", touchEvent.id);
         } else {
             downFingerIds_.erase(touchEvent.id);
         }
@@ -560,6 +560,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
             for (auto& item : dumpList) {
                 TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
             }
+            eventTree_.eventTreeList.clear();
             refereeNG_->ForceCleanGestureReferee();
         }
         // first collect gesture into gesture referee.

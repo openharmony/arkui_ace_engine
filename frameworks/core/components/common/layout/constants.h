@@ -217,6 +217,7 @@ enum class TextDataDetectType {
     URL,
     EMAIL,
     ADDRESS,
+    DATETIME,
 };
 
 enum class LineBreakStrategy {
@@ -329,6 +330,18 @@ enum class ImageFit {
     SCALE_DOWN,
     TOP_LEFT,
     COVER_TOP_LEFT,
+};
+
+enum class DynamicRangeMode {
+    HIGH = 0,
+    CONSTRAINT,
+    STANDARD,
+};
+
+enum class AIImageQuality {
+    NONE = 1,
+    NORMAL,
+    HIGH,
 };
 
 enum class ImageRenderMode {

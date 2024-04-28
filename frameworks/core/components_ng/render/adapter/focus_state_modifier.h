@@ -106,6 +106,13 @@ public:
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
 #endif
+        if (!rect_) {
+            rect_ = std::make_shared<Rosen::RSProperty<RectF>>(rect.GetRect());
+        } else {
+            rect_->Set(rect.GetRect());
+        }
+        AttachProperty(rect_);
+
         overlayRect_ = std::make_shared<Rosen::RectF>(
             rect.GetRect().Left() - borderWidth / 2, rect.GetRect().Top() - borderWidth / 2,
             rect.GetRect().Width() + borderWidth, rect.GetRect().Height() + borderWidth);
@@ -117,6 +124,7 @@ public:
     }
 
 private:
+    std::shared_ptr<Rosen::RSProperty<RectF>> rect_;
     RSRoundRect roundRect_;
     std::shared_ptr<Rosen::RectF> overlayRect_;
     std::function<void(const RSRoundRect&, RSCanvas&)> paintTask_;

@@ -237,7 +237,20 @@ void SystemWindowScene::RegisterFocusCallback()
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
-    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {};
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            CHECK_NULL_VOID(self->GetSession());
+            pipeline->RestoreDefault(self->GetSession()->GetPersistentId());
+        },
+            "ArkUIWindowUnfocus", TaskExecutor::TaskType::UI);
+    };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
 

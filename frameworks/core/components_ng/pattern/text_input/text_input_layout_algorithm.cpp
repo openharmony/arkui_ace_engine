@@ -41,8 +41,8 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder_ && !isInlineStyle;
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     if (textStyle.GetAdaptTextSize()) {
-        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, textFieldContentConstraint,
-            layoutWrapper)) {
+        if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty,
+            BuildLayoutConstraintWithoutResponseArea(textFieldContentConstraint, layoutWrapper), layoutWrapper)) {
             return std::nullopt;
         }
     } else {
@@ -248,5 +248,33 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
             pattern->GetNakedCharPosition(), disableTextAlign);
     }
     return true;
+}
+
+LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponseArea(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, contentConstraint);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, contentConstraint);
+
+    auto responseArea = pattern->GetResponseArea();
+    auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
+    float childWidth = 0.0f;
+    if (responseArea) {
+        auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
+        childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
+    }
+    if (cleanNodeResponseArea) {
+        auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
+        childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
+    }
+
+    auto newLayoutConstraint = contentConstraint;
+    newLayoutConstraint.maxSize.MinusWidth(childWidth);
+    if (newLayoutConstraint.selfIdealSize.Width()) {
+        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth);
+    }
+    return newLayoutConstraint;
 }
 } // namespace OHOS::Ace::NG

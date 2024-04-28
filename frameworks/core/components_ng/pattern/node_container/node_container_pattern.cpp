@@ -30,8 +30,8 @@ void NodeContainerPattern::RemakeNode()
         return;
     }
     host->RemoveChildAtIndex(0);
-    if (newNode && !(newNode->GetTag() == V2::CUSTOM_FRAME_NODE_ETS_TAG) && !newNode->GetIsRootBuilderNode()) {
-        TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "Cannot return with a ArkTsNode");
+    if (newNode && !(newNode->IsArkTsFrameNode()) && !newNode->GetIsRootBuilderNode()) {
+        TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "Cannot return node created by declarative UI function");
         return;
     }
     host->AddChild(newNode, 0);

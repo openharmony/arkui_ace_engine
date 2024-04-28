@@ -26,6 +26,9 @@
 #include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace {
+
+const std::vector<SpanType> specailTypes = { SpanType::Image, SpanType::CustomSpan };
+
 std::wstring MutableSpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
 {
     if (start >= content.length()) {
@@ -234,9 +237,9 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
     if (other.length() == 0 || start > len) {
         return;
     }
-    auto isAround = IsInsertAroundImage(start);
-    if (isAround != AroundImage::NONE) {
-        InsertStringAroundImage(start, other, isAround);
+    auto isAround = IsInsertAroundSpecialNode(start);
+    if (isAround != AroundSpecialNode::NONE) {
+        InsertStringAroundSpecialNode(start, other, isAround);
         return;
     }
     bool useFrontStyle = InsertUseFrontStyle(start);
@@ -249,7 +252,7 @@ void MutableSpanString::InsertString(int32_t start, const std::string& other)
         spans_.clear();
         auto spanItem = MakeRefPtr<NG::SpanItem>();
         spanItem->content = other;
-        spanItem->interval = { 0, otherLength};
+        spanItem->interval = { 0, otherLength };
         spans_.emplace_back(spanItem);
         return;
     }
@@ -281,21 +284,23 @@ void MutableSpanString::RemoveString(int32_t start, int32_t length)
     ReplaceString(start, length, "");
 }
 
-void MutableSpanString::RemoveImageSpanText()
+void MutableSpanString::RemoveSpecialpanText()
 {
-    auto spans = spansMap_[SpanType::Image];
-    int32_t count = 0;
-    for (const auto& span : spans) {
-        auto wStr = GetWideString();
-        wStr.erase(span->GetStartIndex() - count, 1);
-        text_ = StringUtils::ToString(wStr);
-        ++count;
+    for (const auto& type : specailTypes) {
+        auto spans = spansMap_[type];
+        int32_t count = 0;
+        for (const auto& span : spans) {
+            auto wStr = GetWideString();
+            wStr.erase(span->GetStartIndex() - count, 1);
+            text_ = StringUtils::ToString(wStr);
+            ++count;
+        }
     }
 }
 
 void MutableSpanString::ClearAllSpans()
 {
-    RemoveImageSpanText();
+    RemoveSpecialpanText();
     spansMap_.clear();
     spans_.clear();
     spans_.emplace_back(GetDefaultSpanItem(text_));
@@ -362,7 +367,7 @@ void MutableSpanString::ApplyInsertSpanStringToSpans(int32_t start, const RefPtr
             auto newSpanItem = (*it)->GetSameStyleSpanItem();
             newSpanItem->interval.first = start + offset;
             newSpanItem->interval.second = spanItemEnd;
-            auto wStr = StringUtils::ToWstring(newSpanItem->content);
+            auto wStr = StringUtils::ToWstring((*it)->content);
             newSpanItem->content = StringUtils::ToString(GetWideStringSubstr(wStr, start));
             (*it)->interval.second = start;
             (*it)->content = StringUtils::ToString(GetWideStringSubstr(wStr, 0, start - spanItemStart));
@@ -396,7 +401,7 @@ void MutableSpanString::ApplyInsertSpanStringToSpanBase(int32_t start, const Ref
                 continue;
             }
             if (spanItemEnd != start) {
-                auto newSpanItem = (*it)->GetSubSpan(start+offset, spanItemEnd);
+                auto newSpanItem = (*it)->GetSubSpan(start + offset, spanItemEnd);
                 (*it)->UpdateEndIndex(start);
                 ++it;
                 spans.insert(it, newSpanItem);
@@ -404,9 +409,8 @@ void MutableSpanString::ApplyInsertSpanStringToSpanBase(int32_t start, const Ref
             break;
         }
         auto otherSpans = otherSpansMap[iter.first];
-        for (auto& spanBase: otherSpans) {
-            auto newSpanItem = spanBase->GetSubSpan(spanBase->GetStartIndex() + start,
-                spanBase->GetEndIndex() + start);
+        for (auto& spanBase : otherSpans) {
+            auto newSpanItem = spanBase->GetSubSpan(spanBase->GetStartIndex() + start, spanBase->GetEndIndex() + start);
             spans.emplace_back(newSpanItem);
         }
         spansMap_[iter.first] = spans;
@@ -421,8 +425,8 @@ void MutableSpanString::InsertSpanString(int32_t start, const RefPtr<SpanString>
     }
     auto offset = spanString->GetLength();
     auto wContent = GetWideString();
-    SetString(StringUtils::ToString(GetWideStringSubstr(wContent, 0, start)
-        + spanString->GetWideString() + GetWideStringSubstr(wContent, start)));
+    SetString(StringUtils::ToString(
+        GetWideStringSubstr(wContent, 0, start) + spanString->GetWideString() + GetWideStringSubstr(wContent, start)));
     UpdateSpanAndSpanMapAfterInsertSpanString(start, offset);
     if (start == 0 || start == len) {
         auto it = start == 0 ? spans_.begin() : spans_.end();
@@ -446,37 +450,41 @@ void MutableSpanString::AppendSpanString(const RefPtr<SpanString>& spanString)
     InsertSpanString(GetLength(), spanString);
 }
 
-AroundImage MutableSpanString::IsInsertAroundImage(int32_t start)
+AroundSpecialNode MutableSpanString::IsInsertAroundSpecialNode(int32_t start)
 {
-    AroundImage res = AroundImage::NONE;
-    if (spansMap_.find(SpanType::Image) == spansMap_.end()) {
+    AroundSpecialNode res = AroundSpecialNode::NONE;
+    if (spansMap_.find(SpanType::Image) == spansMap_.end() && spansMap_.find(SpanType::CustomSpan) == spansMap_.end()) {
         return res;
     }
-    auto imageSpans = spansMap_[SpanType::Image];
-    for (const auto& span : imageSpans) {
-        if (span->GetEndIndex() == start) {
-            res = (res == AroundImage::NONE || res == AroundImage::AFTER)?
-                AroundImage::AFTER : AroundImage::BETWEEN;
-        }
-        if (span->GetStartIndex() == start) {
-            res = (res == AroundImage::NONE || res == AroundImage::BEFORE)?
-                AroundImage::BEFORE : AroundImage::BETWEEN;
+
+    for (const auto& type : specailTypes) {
+        auto specialSpans = spansMap_[type];
+        for (const auto& span : specialSpans) {
+            if (span->GetEndIndex() == start) {
+                res = (res == AroundSpecialNode::NONE || res == AroundSpecialNode::AFTER) ? AroundSpecialNode::AFTER
+                                                                                          : AroundSpecialNode::BETWEEN;
+            }
+            if (span->GetStartIndex() == start) {
+                res = (res == AroundSpecialNode::NONE || res == AroundSpecialNode::BEFORE) ? AroundSpecialNode::BEFORE
+                                                                                           : AroundSpecialNode::BETWEEN;
+            }
         }
     }
     return res;
 }
 
-void MutableSpanString::InsertStringAroundImage(int32_t start, const std::string& str, AroundImage aroundMode)
+void MutableSpanString::InsertStringAroundSpecialNode(
+    int32_t start, const std::string& str, AroundSpecialNode aroundMode)
 {
     auto iter = spans_.begin();
     auto step = GetStepsByPosition(start);
     RefPtr<NG::SpanItem> spanItem = MakeRefPtr<NG::SpanItem>();
     std::advance(iter, step);
-    if (aroundMode == AroundImage::BEFORE && step >= 1) {
+    if (aroundMode == AroundSpecialNode::BEFORE && step >= 1) {
         auto iter2 = spans_.begin();
-        std::advance(iter2, step-1);
+        std::advance(iter2, step - 1);
         spanItem = (*iter2)->GetSameStyleSpanItem();
-    } else if (aroundMode == AroundImage::AFTER && iter != spans_.end()) {
+    } else if (aroundMode == AroundSpecialNode::AFTER && iter != spans_.end()) {
         spanItem = (*iter)->GetSameStyleSpanItem();
     }
     int32_t length = StringUtils::ToWstring(str).length();
@@ -501,7 +509,7 @@ void MutableSpanString::InsertStringAroundImage(int32_t start, const std::string
         auto spans = spansMap_[mapIter.first];
         for (auto& span : spans) {
             if (span->GetStartIndex() > start ||
-                (span->GetStartIndex() == start && aroundMode != AroundImage::AFTER)) {
+                (span->GetStartIndex() == start && aroundMode != AroundSpecialNode::AFTER)) {
                 span->UpdateStartIndex(span->GetStartIndex() + length);
                 span->UpdateEndIndex(span->GetEndIndex() + length);
             }
@@ -510,18 +518,18 @@ void MutableSpanString::InsertStringAroundImage(int32_t start, const std::string
     }
 }
 
-bool MutableSpanString::IsImageNode(int32_t location)
+bool MutableSpanString::IsSpeicalNode(int32_t location, SpanType speicalType)
 {
-    if (spansMap_.find(SpanType::Image) == spansMap_.end()) {
+    if (spansMap_.find(speicalType) == spansMap_.end()) {
         return false;
     }
-    auto imageList = spansMap_[SpanType::Image];
-    for (const auto& image : imageList) {
-        if (image->GetStartIndex() == location) {
+    auto speicalList = spansMap_[speicalType];
+    for (const auto& speicalNode : speicalList) {
+        if (speicalNode->GetStartIndex() == location) {
             return true;
         }
 
-        if (image->GetStartIndex() > location) {
+        if (speicalNode->GetStartIndex() > location) {
             return false;
         }
     }

@@ -42,6 +42,8 @@ public:
         innerHandleColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLACK);
         handleOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         selectedColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+        backgroundOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+        shadowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         AttachProperty(firstHandle_);
         AttachProperty(secondHandle_);
         AttachProperty(handleRadius_);
@@ -50,6 +52,8 @@ public:
         AttachProperty(innerHandleColor_);
         AttachProperty(handleOpacity_);
         AttachProperty(selectedColor_);
+        AttachProperty(backgroundOpacity_);
+        AttachProperty(shadowOpacity_);
     }
 
     ~RichEditorDragOverlayModifier() override = default;
@@ -108,9 +112,21 @@ public:
         selectedColor_->Set(static_cast<int32_t>(selectedColor));
     }
 
+    void SetBackgroundOpacity(float opacity)
+    {
+        CHECK_NULL_VOID(backgroundOpacity_);
+        backgroundOpacity_->Set(opacity);
+    }
+
+    void SetShadowOpacity(float opacity)
+    {
+        CHECK_NULL_VOID(shadowOpacity_);
+        shadowOpacity_->Set(opacity);
+    }
+
 private:
     void PaintImage(DrawingContext& context);
-    void PaintBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
+    void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
         RefPtr<RichEditorPattern> richEditorPattern);
     void PaintSelBackground(RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern,
         RefPtr<RichEditorPattern> richEditorPattern);
@@ -118,6 +134,7 @@ private:
     void PaintHandleRing(RSCanvas& canvas);
     void PaintHandleHold(RSCanvas& canvas, const RectF& handleRect, const OffsetF& startPoint,
         const OffsetF& endPoint);
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
 
     DragAnimType type_ = DragAnimType::DEFAULT;
     const WeakPtr<TextPattern> hostPattern_;
@@ -128,6 +145,8 @@ private:
     RefPtr<PropertyFloat> innerHandleRadius_;
     RefPtr<PropertyColor> innerHandleColor_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;
+    RefPtr<AnimatablePropertyFloat> backgroundOpacity_;
+    RefPtr<AnimatablePropertyFloat> shadowOpacity_;
     RefPtr<PropertyInt> selectedColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragOverlayModifier);
 };

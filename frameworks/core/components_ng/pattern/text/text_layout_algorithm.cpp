@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -122,8 +123,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
-        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]",
-            heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
+        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal,
+            paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
         return SizeF {};
     }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
@@ -218,6 +219,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     auto aiSpanMap = pattern->GetAISpanMap();
     std::vector<WeakPtr<FrameNode>> imageNodeList;
+    std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraws;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
@@ -238,10 +240,9 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             Dimension baselineOffset = Dimension(0.0f);
             auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>((*iterItems)->GetLayoutProperty());
             if (imageLayoutProperty) {
-                placeholderStyle.verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(
-                    VerticalAlign::BOTTOM);
-                baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(
-                    Dimension(0.0f));
+                placeholderStyle.verticalAlign =
+                    imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
+                baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(Dimension(0.0f));
             }
             auto geometryNode = (*iterItems)->GetGeometryNode();
             if (!geometryNode) {
@@ -263,6 +264,15 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             auto imageNode = (*iterItems)->GetHostNode();
             imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
             iterItems++;
+        } else if (AceType::DynamicCast<CustomSpanItem>(child)) {
+            auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+            UpdateParagraphByCustomSpan(customSpanItem, layoutWrapper);
+            child->content = " ";
+            child->position = spanTextLength + 1;
+            spanTextLength += 1;
+            if (customSpanItem->onDraw.has_value()) {
+                onDraws.emplace_back(customSpanItem->onDraw.value());
+            }
         } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
             if (!placeholderSpanItem) {
@@ -307,6 +317,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
         }
     }
     pattern->SetImageSpanNodeList(imageNodeList);
+    pattern->SetOnDrawList(onDraws);
 }
 
 void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper)
@@ -329,9 +340,12 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     dragSpanPosition.dragEnd = pattern->GetRecoverEnd();
     bool isDragging = pattern->IsDragging();
     TextStyle aiSpanTextStyle = textStyle;
-    aiSpanTextStyle.SetTextColor(Color::BLUE);
+    auto hyerlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(hyerlinkTheme);
+    auto hyerlinkColor = hyerlinkTheme->GetTextColor();
+    aiSpanTextStyle.SetTextColor(hyerlinkColor);
     aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
+    aiSpanTextStyle.SetTextDecorationColor(hyerlinkColor);
     for (auto kv : pattern->GetAISpanMap()) {
         if (preEnd >= wTextForAILength) {
             break;
@@ -358,8 +372,39 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     }
 }
 
-void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition,
-    const std::wstring wTextForAI, const TextStyle& textStyle, bool isDragging)
+void TextLayoutAlgorithm::UpdateParagraphByCustomSpan(
+    RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
+    auto fontSizeOpt = textLayoutProperty->GetFontSize();
+    if (fontSizeOpt.has_value()) {
+        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScale();
+    }
+    auto width = 0.0;
+    auto height = 0.0;
+    if (customSpanItem->onMeasure.has_value()) {
+        auto onMeasure = customSpanItem->onMeasure.value();
+        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+        width = customSpanMetrics.width * context->GetDipScale();
+        height = customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale();
+    }
+    PlaceholderStyle placeholderStyle;
+    placeholderStyle.width = width;
+    placeholderStyle.height = height;
+    placeholderStyle.verticalAlign = VerticalAlign::NONE;
+    customSpanItem->placeholderIndex = customSpanItem->UpdateParagraph(nullptr, paragraph_, placeholderStyle);
+}
+
+void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,
+    const TextStyle& textStyle, bool isDragging)
 {
     int32_t dragStart = dragSpanPosition.dragStart;
     int32_t dragEnd = dragSpanPosition.dragEnd;
@@ -414,23 +459,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        CHECK_NULL_RETURN(layoutProperty, false);
-        auto symbolSourceInfo = layoutProperty->GetSymbolSourceInfo();
-        CHECK_NULL_RETURN(symbolSourceInfo, false);
-        TextStyle symbolTextStyle = textStyle;
-        symbolTextStyle.isSymbolGlyph_ = true;
-        symbolTextStyle.SetRenderStrategy(
-            symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
-        symbolTextStyle.SetEffectStrategy(
-            symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
-        symbolTextStyle.SetFontFamilies({"HM Symbol"});
-        paragraph_->PushStyle(symbolTextStyle);
-        paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
-        paragraph_->PopStyle();
-        paragraph_->Build();
-        paragraph_->SetParagraphSymbolAnimation(frameNode);
-        return true;
+        return UpdateSymbolTextStyle(textStyle, paragraph_, layoutWrapper, frameNode);
     }
     paragraph_->PushStyle(textStyle);
     if (spanItemChildren_.empty()) {
@@ -450,6 +479,35 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     }
     paragraph_->Build();
     UpdateSymbolSpanEffect(frameNode);
+    return true;
+}
+
+bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, RefPtr<Paragraph>& paragraph,
+    LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode)
+{
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto symbolSourceInfo = layoutProperty->GetSymbolSourceInfo();
+    CHECK_NULL_RETURN(symbolSourceInfo, false);
+    TextStyle symbolTextStyle = textStyle;
+    symbolTextStyle.isSymbolGlyph_ = true;
+    symbolTextStyle.SetRenderStrategy(
+        symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
+    symbolTextStyle.SetEffectStrategy(
+        symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
+    symbolTextStyle.SetFontFamilies({ "HM Symbol" });
+    paragraph->PushStyle(symbolTextStyle);
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.Reset();
+    layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
+        auto symboloptiOns = symbolTextStyle.GetSymbolEffectOptions().value();
+        symboloptiOns.Reset();
+    }
+    paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
+    paragraph->PopStyle();
+    paragraph->Build();
+    paragraph->SetParagraphSymbolAnimation(frameNode);
     return true;
 }
 
@@ -501,7 +559,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     return ret;
 }
 
-OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+OffsetF TextLayoutAlgorithm::SetContentOffset(LayoutWrapper* layoutWrapper)
 {
     OffsetF contentOffset(0.0, 0.0);
     CHECK_NULL_RETURN(layoutWrapper, contentOffset);
@@ -525,20 +583,31 @@ OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
     return contentOffset;
 }
 
+OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
+{
+    SetContentOffset(layoutWrapper);
+    return OffsetF(0.0, 0.0);
+}
+
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto contentOffset = GetContentOffset(layoutWrapper);
     std::vector<int32_t> placeholderIndex;
+    std::vector<int32_t> customSpanIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
+            continue;
+        }
+        if (AceType::InstanceOf<CustomSpanItem>(child)) {
+            customSpanIndex.emplace_back(child->placeholderIndex);
             continue;
         }
         if (AceType::InstanceOf<ImageSpanItem>(child) || AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             placeholderIndex.emplace_back(child->placeholderIndex);
         }
     }
-    if (spanItemChildren_.empty() || placeholderIndex.empty()) {
+    if (spanItemChildren_.empty() || (placeholderIndex.empty() && customSpanIndex.empty())) {
         return;
     }
 
@@ -558,7 +627,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         child->SetActive(true);
-        auto rect = rectsForPlaceholders.at(index) - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+        auto rect = rectsForPlaceholders.at(placeholderIndex.at(index)) - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
@@ -576,12 +645,52 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, contentOffset);
+    pattern->InitCustomSpan(customSpanIndex);
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
-    return AdaptMinFontSize(textStyle, content, 1.0_fp, contentConstraint, layoutWrapper);
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
+        return false;
+    }
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
+        return false;
+    }
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
+            return false;
+        }
+        return true;
+    }
+    constexpr Dimension ADAPT_UNIT = 1.0_fp;
+    Dimension step = ADAPT_UNIT;
+    if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
+        step = textStyle.GetAdaptFontSizeStep();
+    }
+    double stepSize = 0.0;
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(),
+            contentConstraint.maxSize.Height(), stepSize)) {
+        return false;
+    }
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    while (GreatOrEqual(maxFontSize, minFontSize)) {
+        textStyle.SetFontSize(Dimension(maxFontSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
+            return false;
+        }
+        if (!DidExceedMaxLines(maxSize)) {
+            break;
+        }
+        maxFontSize -= stepSize;
+    }
+    return true;
 }
 
 bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
@@ -655,7 +764,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
         }
     } else {
         if (!AdaptMinTextSize(
-                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
             return false;
         }
     }

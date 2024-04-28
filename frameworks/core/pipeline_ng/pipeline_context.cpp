@@ -44,6 +44,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
@@ -371,9 +372,11 @@ std::tuple<float, float, uint64_t> PipelineContext::GetAvgPoint(
             lastTime = static_cast<uint64_t>(iter->time.time_since_epoch().count());
         }
     }
-    avgX /= i;
-    avgY /= i;
-    avgTime /= i;
+    if (i > 0) {
+        avgX /= i;
+        avgY /= i;
+        avgTime /= static_cast<uint64_t>(i);
+    }
     return std::make_tuple(avgX, avgY, avgTime);
 }
 
@@ -541,6 +544,7 @@ void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
         windowFocus_.reset();
         windowShow_.reset();
+        CHECK_NULL_VOID(focusOnNodeCallback_);
         focusOnNodeCallback_();
         preNodeId_ = curFrameNode->GetId();
         return;
@@ -572,7 +576,6 @@ void PipelineContext::IsCloseSCBKeyboard()
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
-        FocusHub::CloseKeyboard();
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
@@ -608,7 +611,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-    resampleTimeStamp_ = nanoTimestamp - window_->GetVSyncPeriod() + ONE_MS_IN_NS;
+    resampleTimeStamp_ = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -665,7 +668,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushMessages();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
-    if (!isFormRender_ && onShow_ && onFocus_) {
+    if (!isFormRender_ && onShow_ && onFocus_ && isWindowHasFocused_) {
         FlushFocusView();
         FlushFocus();
         FlushFocusScroll();
@@ -764,6 +767,10 @@ void PipelineContext::FlushModifier()
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
+    if (IsFreezeFlushMessage()) {
+        SetIsFreezeFlushMessage(false);
+        return;
+    }
     window_->FlushTasks();
 }
 
@@ -1740,7 +1747,7 @@ bool PipelineContext::OnBackPressed()
             auto selectOverlay = weakSelectOverlay.Upgrade();
             CHECK_NULL_VOID(selectOverlay);
             hasOverlay = selectOverlay->ResetSelectionAndDestroySelectOverlay();
-            hasOverlay |= overlay->RemoveOverlay(true);
+            hasOverlay = hasOverlay || overlay->RemoveOverlay(true);
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedRemoveOverlay");
     if (hasOverlay) {
@@ -2245,6 +2252,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+    } else if (params[0] == "-allelements") {
+        AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto rootNode = pipeline->GetRootElement();
+            if (rootNode) {
+                DumpLog::GetInstance().Print(0, "ContainerId: " + std::to_string(Container::CurrentId()));
+                rootNode->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+        });
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
@@ -2664,31 +2681,6 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     }
 }
 
-void PipelineContext::AddFormVisibleChangeNode(const RefPtr<FrameNode>& node, const std::function<void(bool)>& callback)
-{
-    CHECK_NULL_VOID(node);
-    onFormVisibleChangeNodeIds_.emplace(node->GetId());
-    onFormVisibleChangeEvents_.insert_or_assign(node->GetId(), callback);
-}
-
-void PipelineContext::RemoveFormVisibleChangeNode(int32_t nodeId)
-{
-    onFormVisibleChangeNodeIds_.erase(nodeId);
-    auto iter = onFormVisibleChangeEvents_.find(nodeId);
-    if (iter != onFormVisibleChangeEvents_.end()) {
-        onFormVisibleChangeEvents_.erase(iter);
-    }
-}
-
-void PipelineContext::HandleFormVisibleChangeEvent(bool isVisible)
-{
-    for (auto& pair : onFormVisibleChangeEvents_) {
-        if (pair.second) {
-            pair.second(isVisible);
-        }
-    }
-}
-
 void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.emplace(nodeId);
@@ -2730,11 +2722,8 @@ void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
     onShow_ = true;
-    if (focusOnNodeCallback_) {
-        windowShow_ = true;
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowShow is OK.");
-    }
     window_->OnShow();
+    windowShow_ = true;
     RequestFrame();
     FlushWindowStateChangedCallback(true);
     AccessibilityEvent event;
@@ -2771,6 +2760,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
+        isWindowHasFocused_ = true;
         auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
         auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
         if (!curFocusViewHub) {
@@ -2785,10 +2775,7 @@ void PipelineContext::WindowFocus(bool isFocus)
                 curFocusView->RequestDefaultFocus();
             }
         }
-        if (focusOnNodeCallback_) {
-            windowFocus_ = true;
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowfocus focusOnNodeCallback_.");
-        }
+        windowFocus_ = true;
         RequestFrame();
     }
     FlushWindowFocusChangedCallback(isFocus);
@@ -2818,6 +2805,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
+    isShowTitle_ = isShow && hasDeco;
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -3463,6 +3451,7 @@ void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, 
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+    customTitleSettedShow_ = customTitleSettedShow;
 }
 
 void PipelineContext::SetContainerModalTitleHeight(int32_t height)
@@ -3552,7 +3541,7 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
     auto lastFrameInfo = dumpFrameInfos_.back();
     const uint64_t timeout = 1000000000; // unit is ns, 1s
     if (lastFrameInfo.frameRecvTime_ < window_->GetLastRequestVsyncTime() &&
-        GetSysTimestamp() - window_->GetLastRequestVsyncTime() >= timeout) {
+        static_cast<uint64_t>(GetSysTimestamp()) - window_->GetLastRequestVsyncTime() >= timeout) {
         LOGW("lastRequestVsyncTime is %{public}" PRIu64 ", now time is %{public}" PRId64
              ", timeout, window foreground:%{public}d, lastReceiveVsync info:%{public}s",
             window_->GetLastRequestVsyncTime(), GetSysTimestamp(), onShow_, lastFrameInfo.GetTimeInfo().c_str());
@@ -3616,4 +3605,31 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
     return true;
 }
 
+void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
+{
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0) {
+        auto percent = SystemProperties::GetDarkModeBrightnessPercent();
+        auto stage = stageManager_->GetStageNode();
+        CHECK_NULL_VOID(stage);
+        auto renderContext = stage->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CalcDimension dimension;
+        if (isFocus) {
+            dimension.SetValue(1 + percent.front());
+        } else {
+            dimension.SetValue(1 + percent.back());
+        }
+        renderContext->UpdateFrontBrightness(dimension);
+    }
+}
+
+bool PipelineContext::IsContainerModalVisible()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return false;
+    }
+    auto windowManager = GetWindowManager();
+    bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
+}
 } // namespace OHOS::Ace::NG

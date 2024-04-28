@@ -20,12 +20,16 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Color ERROR_COLOR = Color(0xFFE84026);
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
+constexpr uint32_t NUM_0 = 0;
+constexpr uint32_t NUM_1 = 1;
+constexpr uint32_t NUM_2 = 2;
+const char* GAUGE_NODEPTR_OF_UINODE = "nodePtr_";
 
 void ResetColor(ArkUINodeHandle nativeNode)
 {
@@ -450,6 +454,52 @@ ArkUINativeModuleValue GaugeBridge::ResetGaugeIndicator(ArkUIRuntimeCallInfo* ru
         GetArkUINodeModifiers()->getGaugeModifier()->resetIndicatorSpace(nativeNode);
         GetArkUINodeModifiers()->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GaugeBridge::SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (!secondArg->IsObject()) {
+        GaugeModelNG::SetBuilderFunc(frameNode, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::CopyableGlobal<panda::ObjectRef> obj(vm, secondArg);
+    auto containerId = Container::CurrentId();
+    GaugeModelNG::SetBuilderFunc(frameNode,
+        [vm, frameNode, obj = std::move(obj), containerId](
+            GaugeConfiguration config) -> RefPtr<FrameNode> {
+            ContainerScope scope(containerId);
+            auto context = ArkTSUtils::GetContext(vm);
+            const char* keyOfGauge[] = { "value", "min", "max" };
+            Local<JSValueRef> valuesOfGauge[] = { panda::NumberRef::New(vm, config.value_),
+                panda::NumberRef::New(vm, config.min_), panda::NumberRef::New(vm, config.max_) };
+            auto gauge = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keyOfGauge),
+                keyOfGauge, valuesOfGauge);
+            gauge->SetNativePointerFieldCount(vm, 1);
+            gauge->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
+            panda::Local<panda::JSValueRef> params[NUM_2] = { context, gauge };
+            LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            auto jsObject = obj.ToLocal();
+            auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            panda::Local<panda::FunctionRef> func = makeFunc;
+            auto result = func->Call(vm, jsObject, params, NUM_2);
+            JSNApi::ExecutePendingJob(vm);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            auto resultObj = result->ToObject(vm);
+            panda::Local<panda::JSValueRef> nodeptr =
+                resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, GAUGE_NODEPTR_OF_UINODE));
+            CHECK_EQUAL_RETURN(nodeptr.IsEmpty() || nodeptr->IsUndefined() || nodeptr->IsNull(), true, nullptr);
+            auto* frameNode = reinterpret_cast<FrameNode*>(nodeptr->ToNativePointer(vm)->Value());
+            CHECK_NULL_RETURN(frameNode, nullptr);
+            return AceType::Claim(frameNode);
+        });
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

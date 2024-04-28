@@ -85,7 +85,7 @@ RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
 
 FocusPattern UIExtensionPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::NONE };
+    return { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
 }
 
 RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionAdapter()

@@ -886,7 +886,7 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
     std::vector<std::string> selectedValues;
     std::vector<uint32_t> valuesIndex;
     for (uint32_t i = 0; i < options_.size(); i++) {
-        if (i > values.size() - 1) {
+        if (values.size() > 0 && i > values.size() - 1) {
             if (options_[i].rangeResult.size() > 0) {
                 selectedValues.emplace_back(options_[i].rangeResult[0]);
             } else {
@@ -1019,14 +1019,14 @@ std::string TextPickerModelNG::getTextPickerRange(FrameNode* frameNode)
             result.append(range.text_ + ";");
         }
         if (result.length() > 0) {
-            result = result.substr(0, result.length() - 1);
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
         }
     } else {
         for (auto option : options_) {
             for (auto range : option.rangeResult) {
                 result.append(range + ",");
             }
-            result = result.substr(0, result.length() - 1);
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
             result.append(";");
         }
         if (result.length() > 0) {

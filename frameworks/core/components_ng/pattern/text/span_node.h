@@ -34,6 +34,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 
 #define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
 public:                                                                      \
@@ -142,10 +143,8 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType {
-    NORMAL = 0,
-    IMAGE = 1
-};
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2 };
+
 struct PlaceholderStyle {
     double width = 0.0f;
     double height = 0.0f;
@@ -194,9 +193,8 @@ public:
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
-    virtual void UpdateTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle,
-        const int32_t selStart, const int32_t selEnd);
+    virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
+        const std::optional<TextStyle>& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void SetAiSpanTextStyle(std::optional<TextStyle>& textStyle);
@@ -280,6 +278,7 @@ enum class PropertyInfo {
     FONTFEATURE,
     BASELINE_OFFSET,
     LINESPACING,
+    SYMBOL_EFFECT_OPTIONS,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -388,6 +387,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
     DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
@@ -516,6 +516,22 @@ private:
     RefPtr<PlaceholderSpanItem> placeholderSpanItem_ = MakeRefPtr<PlaceholderSpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanNode);
+};
+
+struct CustomSpanItem : public PlaceholderSpanItem {
+    DECLARE_ACE_TYPE(CustomSpanItem, PlaceholderSpanItem);
+
+public:
+    CustomSpanItem() : PlaceholderSpanItem()
+    {
+        this->spanItemType = SpanItemType::CustomSpan;
+    }
+    ~CustomSpanItem() override = default;
+    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
+    ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
+    std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
+    std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
 };
 
 struct ImageSpanItem : public PlaceholderSpanItem {

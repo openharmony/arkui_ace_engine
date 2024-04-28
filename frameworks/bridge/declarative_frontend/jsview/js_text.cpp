@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -83,6 +84,8 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
     TextAlign::LEFT, TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
+    LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
@@ -262,6 +265,24 @@ void JSText::SetEllipsisMode(const JSCallbackInfo& info)
     if (index < ELLIPSIS_MODALS.size()) {
         TextModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
     }
+}
+
+void JSText::SetLineBreakStrategy(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TextModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        TextModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(LINE_BREAK_STRATEGY_TYPES.size())) {
+        TextModel::GetInstance()->SetLineBreakStrategy(LineBreakStrategy::GREEDY);
+        return;
+    }
+    TextModel::GetInstance()->SetLineBreakStrategy(LINE_BREAK_STRATEGY_TYPES[index]);
 }
 
 void JSText::SetTextSelection(const JSCallbackInfo& info)
@@ -851,7 +872,7 @@ void JSText::JsClip(const JSCallbackInfo& info)
     JSViewAbstract::JsClip(info);
     JSRef<JSVal> args = info[0];
     if (args->IsBoolean()) {
-        TextModel::GetInstance()->SetClipEdge();
+        TextModel::GetInstance()->SetClipEdge(args->ToBoolean());
     }
 }
 
@@ -881,6 +902,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
     JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
+    JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
     JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);

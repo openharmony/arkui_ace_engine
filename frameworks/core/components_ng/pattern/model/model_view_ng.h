@@ -26,8 +26,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ModelViewNG : public ModelView {
 public:
     ModelViewNG();
-    void Create(const std::string& bundleName, const std::string& moduleName,
-        Render3D::SurfaceType surfaceType) override;
+    void Create(const ModelViewContext& context) override;
     void SetBackground(const std::string& value) override;
     void SetModelSource(const std::string& value) override;
     void SetHandleCameraMove(bool value) override;

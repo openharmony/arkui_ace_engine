@@ -137,6 +137,7 @@ class ACE_EXPORT PixelMap : public AceType {
 public:
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
+    static RefPtr<PixelMap> CopyPixelMap(const RefPtr<PixelMap>& pixelMap);
     /**
      * @param ptr: drawable pointer of type Napi::DrawableDescriptor&
      */

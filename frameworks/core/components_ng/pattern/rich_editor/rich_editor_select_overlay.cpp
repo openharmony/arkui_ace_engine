@@ -138,11 +138,8 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
     } else {
         pattern->SetCaretPosition(currentHandleIndex);
         if (IsSingleHandle()) {
-            float selectLineHeight = 0.0f;
             auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
-            auto lastClickOffset =
-                pattern->paragraphs_.ComputeCursorInfoByClick(currentHandleIndex, selectLineHeight, textOffset);
-            pattern->SetLastClickOffset(lastClickOffset + pattern->richTextRect_.GetOffset());
+            pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
             textSelector.Update(currentHandleIndex);
         } else {
             pattern->HandleSelectionChange(textSelector.baseOffset, currentHandleIndex);
@@ -316,6 +313,11 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
         pattern->ResetSelection();
         pattern->StartTwinkling();
     }
+}
+
+void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+{
+    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
 }
 
 std::optional<SelectOverlayInfo> RichEditorSelectOverlay::GetSelectOverlayInfo()

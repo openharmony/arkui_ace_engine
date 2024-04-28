@@ -22,6 +22,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 enum class TouchBottomType {
@@ -52,6 +53,7 @@ public:
           itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4))),
           backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
+          isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
           unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
           selectedColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
           touchBottomPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT))
@@ -66,6 +68,7 @@ public:
         AttachProperty(indicatorPadding_);
         AttachProperty(indicatorMargin_);
         AttachProperty(itemHalfSizes_);
+        AttachProperty(isFocused_);
         AttachProperty(unselectedColor_);
         AttachProperty(selectedColor_);
         AttachProperty(backgroundWidthDilateRatio_);
@@ -97,6 +100,7 @@ public:
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
     LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
+    void SetFocusedAndSelectedColor(PaintWrapper* paintWrapper);
     // Update property
     void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
@@ -163,6 +167,13 @@ public:
     void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
     {
         normalToHoverIndex_ = normalToHoverIndex;
+    }
+
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
     }
 
     void SetHoverToNormalIndex(const std::optional<int32_t>& hoverToNormalIndex)
@@ -292,6 +303,8 @@ private:
         TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
     void PlayOpacityAnimation();
     std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
+    int32_t GetLoopTranslateDuration() const;
+    int32_t GetLoopOpacityDuration() const;
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -305,6 +318,7 @@ private:
     RefPtr<AnimatablePropertyVectorFloat> itemHalfSizes_;
     RefPtr<AnimatablePropertyFloat> backgroundWidthDilateRatio_;
     RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
+    RefPtr<PropertyBool> isFocused_;
 
     RefPtr<Curve> headCurve_;
     float motionVelocity_ = 0;

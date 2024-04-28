@@ -43,7 +43,7 @@ class ImageAnalyzerManager;
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
+class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient {
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
@@ -118,6 +118,16 @@ public:
         return true;
     }
 
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -151,6 +161,11 @@ public:
     void SetSyncLoad(bool value)
     {
         syncLoad_ = value;
+    }
+
+    bool GetSyncLoad() const
+    {
+        return syncLoad_;
     }
 
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
@@ -195,7 +210,7 @@ public:
             }
         }
         imagesChangedFlag_ = true;
-        isAnimation_ = true;
+        RegisterVisibleAreaChange();
     }
 
     void ResetImages()
@@ -370,6 +385,7 @@ private:
     void OnImageModifyDone();
     void SetColorFilter(const RefPtr<FrameNode>& imageFrameNode);
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
+    void ControlAnimation(int32_t index);
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;
@@ -395,6 +411,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;

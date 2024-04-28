@@ -202,8 +202,8 @@ void PickerDateComponent::HandleYearChange(bool isAdd, uint32_t index, std::vect
 void PickerDateComponent::HandleLunarYearChange(bool isAdd, uint32_t index)
 {
     auto yearColumn = GetColumn(PICKER_YEAR_COLUMN);
-    if (!yearColumn) {
-        LOGE("year column is null.");
+    if (!yearColumn || yearColumn->GetOptionCount() == 0) {
+        LOGE("year column is null or empty.");
         return;
     }
 
@@ -272,8 +272,9 @@ void PickerDateComponent::HandleLunarMonthChange(bool isAdd, uint32_t index)
             lunarDate.year = startDateLunar_.year;
         }
     }
-    if (!isAdd && index == monthColumn->GetOptionCount() - 1) {
-        lunarDate.year = lunarDate.year - 1; // reduce to previous year
+    uint32_t val = monthColumn->GetOptionCount() > 0 ? monthColumn->GetOptionCount() - 1 : 0;
+    if (!isAdd && index == val) {
+        lunarDate.year = lunarDate.year > 0 ? lunarDate.year - 1 : 0; // reduce to previous year
         if (lunarDate.year < startDateLunar_.year) {
             lunarDate.year = endDateLunar_.year;
         }
@@ -302,7 +303,8 @@ void PickerDateComponent::HandleSolarMonthChange(bool isAdd, uint32_t index)
         }
     }
     if (!isAdd && date.GetMonth() == 12) { // the last month is 12
-        date.SetYear(date.GetYear() - 1); // reduce 1 year, the previous year
+        uint32_t yearVal = date.GetYear() > 0 ? date.GetYear() - 1 : 0;
+        date.SetYear(yearVal); // reduce 1 year, the previous year
         if (date.GetYear() < startDateSolar_.GetYear()) {
             date.SetYear(endDateSolar_.GetYear());
         }
@@ -348,7 +350,8 @@ void PickerDateComponent::HandleSolarDayChange(bool isAdd, uint32_t index)
             }
         }
     }
-    if (!isAdd && dayColumn->GetCurrentIndex() == dayColumn->GetOptionCount() - 1) { // last index is count - 1
+    uint32_t val = dayColumn->GetOptionCount() > 0 ? dayColumn->GetOptionCount() - 1 : 0;
+    if (!isAdd && dayColumn->GetCurrentIndex() == val) { // last index is count - 1
         date.SetMonth(date.GetMonth() - 1); // reduce to previous month
         if (date.GetMonth() == 0) { // min month is 1, invalidate
             date.SetMonth(12); // set to be the last month
@@ -391,7 +394,8 @@ void PickerDateComponent::HandleAddLunarDayChange(uint32_t index)
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarDate.year, lunarLeapMonth);
     if (index == 0) {
-        if (monthColumn->GetCurrentIndex() == monthColumn->GetOptionCount() - 1) { // max index is count - 1
+        uint32_t val = monthColumn->GetOptionCount() > 0 ? monthColumn->GetOptionCount() - 1 : 0;
+        if (monthColumn->GetCurrentIndex() == val) { // max index is count - 1
             lunarDate.year = lunarDate.year + 1; // add to next year
             if (lunarDate.year > endDateLunar_.year) {
                 lunarDate.year = startDateLunar_.year;
@@ -430,7 +434,8 @@ void PickerDateComponent::HandleReduceLunarDayChange(uint32_t index)
     auto lunarDate = GetCurrentLunarDate(nowLunarYear);
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarDate.year, lunarLeapMonth);
-    if (dayColumn->GetCurrentIndex() == dayColumn->GetOptionCount() - 1) { // max index is count - 1
+    uint32_t val = dayColumn->GetOptionCount() > 0 ? dayColumn->GetOptionCount() - 1 : 0;
+    if (dayColumn->GetCurrentIndex() == val) { // max index is count - 1
         if (monthColumn->GetCurrentIndex() == 0) {
             lunarDate.year = lunarDate.year - 1; // reduce to previous year
             if (lunarDate.year < startDateLunar_.year) {
@@ -511,7 +516,7 @@ LunarDate PickerDateComponent::SolarToLunar(const PickerDate& date) const
 
 PickerDate PickerDateComponent::LunarToSolar(const LunarDate& date) const
 {
-    uint32_t days = date.day - 1; // calculate days from 1900.1.1 to this date
+    uint32_t days = date.day > 0 ? date.day - 1 : 0; // calculate days from 1900.1.1 to this date
     if (date.isLeapMonth) {
         days += LunarCalculator::GetLunarMonthDays(date.year, date.month);
     } else {

@@ -136,7 +136,13 @@ enum class CleanNodeStyle {
     INPUT,
 };
 
-enum class MenuPolicy { DEFAULT = 0, NEVER, ALWAYS };
+enum class CancelButtonStyle {
+    CONSTANT,
+    INVISIBLE,
+    INPUT,
+};
+
+enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
@@ -261,6 +267,7 @@ public:
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
+    virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
     virtual void SetCaretPosition(const int32_t& value) = 0;
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
@@ -281,6 +288,7 @@ public:
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
     virtual void SetOnChange(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
+    virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
@@ -295,6 +303,7 @@ public:
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
+    virtual void SetShowPasswordText(bool value) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
 
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;

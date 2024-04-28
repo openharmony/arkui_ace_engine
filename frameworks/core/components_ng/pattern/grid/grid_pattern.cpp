@@ -153,13 +153,6 @@ void GridPattern::OnModifyDone()
         InitOnKeyEvent(focusHub);
     }
     SetAccessibilityAction();
-    auto scrollable = GetScrollableEvent()->GetScrollable();
-    if (scrollable) {
-        scrollable->SetOnContinuousSliding([weak = AceType::WeakClaim(this)]() -> double {
-            auto grid = weak.Upgrade();
-            return grid->GetMainContentSize();
-        });
-    }
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
@@ -1530,15 +1523,19 @@ bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
 
 float GridPattern::GetEndOffset()
 {
-    float contentHeight = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
+    auto& info = gridLayoutInfo_;
+    float contentHeight = info.lastMainSize_ - info.contentEndPadding_;
     float mainGap = GetMainGap();
     bool regular = !UseIrregularLayout();
-    float heightInView = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap, regular);
-    if (GetAlwaysEnabled()) {
-        float totalHeight = gridLayoutInfo_.GetTotalLineHeight(mainGap);
-        if (GreatNotEqual(contentHeight, totalHeight)) {
-            return totalHeight - heightInView;
+    float heightInView = info.GetTotalHeightOfItemsInView(mainGap, regular);
+
+    if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
+        // overScroll with contentHeight < viewport
+        if (!regular) {
+            return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
         }
+        float totalHeight = info.GetTotalLineHeight(mainGap);
+        return totalHeight - heightInView;
     }
 
     if (regular) {
@@ -1914,8 +1911,8 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
 
 inline bool GridPattern::UseIrregularLayout() const
 {
-    return SystemProperties::GetGridIrregularLayoutEnabled() &&
-           GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions();
+    return irregular_ || (SystemProperties::GetGridIrregularLayoutEnabled() &&
+           GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions());
 }
 
 bool GridPattern::IsReverse() const

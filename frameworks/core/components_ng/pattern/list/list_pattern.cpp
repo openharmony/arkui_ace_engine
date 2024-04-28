@@ -54,6 +54,7 @@ constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr float LIST_FADINGEDGE_DEFAULT = 32.0f;
 constexpr float LIST_START_MAIN_POS = 0.0f;
+constexpr float LIST_FADE_ERROR_RANGE = 1.0f;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -69,7 +70,10 @@ void ListPattern::OnModifyDone()
         ChangeAxis(GetHost());
     }
     if (!GetScrollableEvent()) {
-        InitScrollableEvent();
+        AddScrollEvent();
+        auto scrollableEvent = GetScrollableEvent();
+        CHECK_NULL_VOID(scrollableEvent);
+        scrollable_ = scrollableEvent->GetScrollable();
     }
 
     SetEdgeEffect();
@@ -169,8 +173,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         targetIndexInGroup_.reset();
     }
     if (predictSnapOffset.has_value()) {
-        if (scrollableTouchEvent_ && !NearZero(predictSnapOffset.value()) && !AnimateRunning()) {
-            scrollableTouchEvent_->StartScrollSnapMotion(predictSnapOffset.value(), scrollSnapVelocity_);
+        if (scrollable_ && !NearZero(predictSnapOffset.value()) && !AnimateRunning()) {
+            scrollable_->StartScrollSnapMotion(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
             }
@@ -186,14 +190,17 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     if (predictSnapEndPos.has_value() && predictSnapEndPos_.has_value() &&
         !NearEqual(predictSnapEndPos.value(), predictSnapEndPos_.value())) {
-        if (scrollableTouchEvent_) {
-            scrollableTouchEvent_->UpdateScrollSnapEndWithOffset(
+        if (scrollable_) {
+            scrollable_->UpdateScrollSnapEndWithOffset(
                 predictSnapEndPos.value() - predictSnapEndPos_.value());
         }
         predictSnapEndPos_.reset();
     }
 
     if (isScrollEnd_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         // AccessibilityEventType::SCROLL_END
         isScrollEnd_ = false;
     }
@@ -389,20 +396,34 @@ void ListPattern::UpdateFadingEdge(const RefPtr<ListPaintMethod> paint)
     CHECK_NULL_VOID(overlayNode);
     auto overlayRenderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(overlayRenderContext);
-    if (Negative(startMainPos_) || GreatNotEqual(endMainPos_, contentMainSize_)) {
-        auto isTopEdgeFadingUpdate = isTopEdgeFading_ != (startMainPos_ < LIST_START_MAIN_POS);
-        auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != (endMainPos_ > contentMainSize_);
+    auto isFadingTop = LessNotEqual(startMainPos_, LIST_START_MAIN_POS - LIST_FADE_ERROR_RANGE);
+    auto isFadingBottom = GreatNotEqual(endMainPos_, contentMainSize_ + LIST_FADE_ERROR_RANGE);
+    if (isFadingTop || isFadingBottom) {
+        auto isTopEdgeFadingUpdate = isTopEdgeFading_ != isFadingTop;
+        auto isLowerEdgeFadingUpdate = isLowerEdgeFading_ != isFadingBottom;
         if (isTopEdgeFadingUpdate || isLowerEdgeFadingUpdate) {
-            auto isFadingTop = startMainPos_ < LIST_START_MAIN_POS;
-            auto isFadingBottom = endMainPos_ > contentMainSize_;
-            auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
-                std::abs(contentMainSize_ - LIST_START_MAIN_POS);
             paint->SetOverlayRenderContext(overlayRenderContext);
-            paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading);
+            UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
         }
+    } else if (isTopEdgeFading_ || isLowerEdgeFading_) {
+        paint->SetOverlayRenderContext(overlayRenderContext);
+        UpdateFadeInfo(isFadingTop, isFadingBottom, paint);
     }
-    isTopEdgeFading_ = (startMainPos_ < LIST_START_MAIN_POS);
-    isLowerEdgeFading_ = (endMainPos_ > contentMainSize_);
+    isTopEdgeFading_ = isFadingTop;
+    isLowerEdgeFading_ = isFadingBottom;
+}
+
+void ListPattern::UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ListPaintMethod> paint)
+{
+    if (startIndex_ > 0) {
+        isFadingTop = true;
+    }
+    if (endIndex_ < maxListItemIndex_) {
+        isFadingBottom = true;
+    }
+    auto percentFading = CalcDimension(LIST_FADINGEDGE_DEFAULT, DimensionUnit::VP).ConvertToPx() /
+        std::abs(contentMainSize_ - LIST_START_MAIN_POS);
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, percentFading);
 }
 
 bool ListPattern::UpdateStartListItemIndex()
@@ -535,7 +556,7 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
     bool barNeedPaint = GetScrollBar() ? GetScrollBar()->NeedPaint() : false;
     auto chainAnimation = listLayoutProperty->GetChainAnimation().value_or(false);
     bool drivenRender = !(axis != Axis::VERTICAL || stickyStyle != V2::StickyStyle::NONE || barNeedPaint ||
-                          chainAnimation || !scrollable_);
+                          chainAnimation || !isScrollable_);
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -570,20 +591,20 @@ void ListPattern::CheckScrollable()
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listProperty);
     if (itemPosition_.empty()) {
-        scrollable_ = false;
+        isScrollable_ = false;
     } else {
         if ((itemPosition_.begin()->first == 0) && (itemPosition_.rbegin()->first == maxListItemIndex_) &&
             !IsScrollSnapAlignCenter()) {
-            scrollable_ = GetAlwaysEnabled() || GreatNotEqual(endMainPos_ - startMainPos_,
+            isScrollable_ = GetAlwaysEnabled() || GreatNotEqual(endMainPos_ - startMainPos_,
                 contentMainSize_ - contentStartOffset_ - contentEndOffset_);
         } else {
-            scrollable_ = true;
+            isScrollable_ = true;
         }
     }
 
-    SetScrollEnable(scrollable_);
+    SetScrollEnable(isScrollable_);
 
-    if (!listProperty->GetScrollEnabled().value_or(scrollable_)) {
+    if (!listProperty->GetScrollEnabled().value_or(isScrollable_)) {
         SetScrollEnable(false);
     }
 }
@@ -877,7 +898,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (!NearZero(offset)) {
         MarkDirtyNodeSelf();
     }
-    if (!IsOutOfBoundary() || !scrollable_) {
+    if (!IsOutOfBoundary() || !isScrollable_) {
         FireOnWillScroll(currentDelta_ - lastDelta);
         return true;
     }
@@ -975,19 +996,6 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     }
     ProcessDragUpdate(offset, source);
     return UpdateCurrentOffset(offset, source);
-}
-
-void ListPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto scrollableEvent = GetScrollableEvent();
-    CHECK_NULL_VOID(scrollableEvent);
-    scrollableTouchEvent_ = scrollableEvent->GetScrollable();
-    CHECK_NULL_VOID(scrollableTouchEvent_);
-    scrollableTouchEvent_->SetOnContinuousSliding([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        return list->contentMainSize_;
-    });
 }
 
 bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
@@ -1672,7 +1680,7 @@ void ListPattern::HandleScrollBarOutBoundary()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
-    if (!IsOutOfBoundary(false) || !scrollable_) {
+    if (!IsOutOfBoundary(false) || !isScrollable_) {
         ScrollablePattern::HandleScrollBarOutBoundary(0);
         return;
     }
@@ -2291,8 +2299,8 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("predictSnapEndPos:null");
     }
     // DumpLog::GetInstance().AddDesc("scrollAlign:%{public}d", scrollAlign_);
-    scrollable_ ? DumpLog::GetInstance().AddDesc("scrollable:true")
-                : DumpLog::GetInstance().AddDesc("scrollable:false");
+    isScrollable_ ? DumpLog::GetInstance().AddDesc("isScrollable:true")
+                : DumpLog::GetInstance().AddDesc("isScrollable:false");
     paintStateFlag_ ? DumpLog::GetInstance().AddDesc("paintStateFlag:true")
                     : DumpLog::GetInstance().AddDesc("paintStateFlag:false");
     isFramePaintStateValid_ ? DumpLog::GetInstance().AddDesc("isFramePaintStateValid:true")

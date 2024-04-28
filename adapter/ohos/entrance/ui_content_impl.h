@@ -91,7 +91,6 @@ public:
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
-    void ProcessFormVisibleChange(bool isVisible) override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyRotationAnimationEnd() override;
 
@@ -301,6 +300,8 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const override;
 
     void SetFormRenderingMode(int8_t renderMode) override;
+
+    void SetContentNodeGrayScale(float grayscale) override;
 
 private:
     UIContentErrorCode InitializeInner(

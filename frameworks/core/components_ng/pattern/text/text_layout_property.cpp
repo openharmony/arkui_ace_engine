@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 #include "base/utils/string_utils.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/inspector_filter.h"
 
 namespace OHOS::Ace::NG {
@@ -94,6 +95,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("renderingStrategy",
         GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str(), filter);
     json->PutExtAttr("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str(), filter);
+    json->Put("symbolEffect", GetSymbolEffectOptionsInJson(
+        GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
 
     auto jsonDecoration = JsonUtil::Create(true);
     std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));
@@ -130,6 +133,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("copyOption", GetCopyOptionString().c_str(), filter);
     json->PutExtAttr("wordBreak",
         V2::ConvertWrapWordBreakToString(GetWordBreak().value_or(WordBreak::BREAK_WORD)).c_str(), filter);
+    json->PutExtAttr("lineBreakStrategy", V2::ConvertWrapLineBreakStrategyToString(
+        GetLineBreakStrategy().value_or(LineBreakStrategy::GREEDY)).c_str(), filter);
     json->PutExtAttr("ellipsisMode",
         V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str(), filter);
 }

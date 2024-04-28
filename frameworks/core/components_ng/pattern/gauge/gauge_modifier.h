@@ -57,6 +57,7 @@ public:
     GaugeModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern): pattern_(pattern)
     {
         InitProperty();
+        useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
         AttachProperty(min_);
         AttachProperty(max_);
         AttachProperty(startAngle_);
@@ -78,6 +79,13 @@ public:
 
     void onDraw(DrawingContext& context) override;
     void UpdateValue();
+
+    void SetUseContentModifier(bool useContentModifier)
+    {
+        if (useContentModifier_) {
+            useContentModifier_->Set(useContentModifier);
+        }
+    }
 
     float start_ = 0.0f;
     float end_ = 0.0f;
@@ -121,6 +129,7 @@ private:
     void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos);
     void CreateDefaultTrianglePath(float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path);
     WeakPtr<Pattern> pattern_;
+    void GetDrawPath(RSPath& path, RenderRingInfo& data, float startAngle, float sweepAngle);
 
     RefPtr<AnimatablePropertyFloat> value_;
     RefPtr<AnimatablePropertyFloat> min_;
@@ -139,6 +148,7 @@ private:
     std::vector<RefPtr<AnimatablePropertyColor>> gradientColors_;
 
     RefPtr<PropertyBool> isShowIndicator_;
+    RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> indicatorChange_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GaugeModifier);

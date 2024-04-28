@@ -489,6 +489,7 @@ void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
     caretRect.SetSize(SizeF(caretInfo_.rect.Width(),
         LessOrEqual(caretMetrics.height, 0.0) ? textFiled->PreferredLineHeight() : caretMetrics.height));
     caretInfo_.rect = caretRect;
+    MoveHandleToContentRect(caretInfo_.rect, 0.0f);
 }
 
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
