@@ -1942,5 +1942,5 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
 
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    emitter(fields: Array<EmitterProps>): ParticleAttribute;
+    emitter(fields: Array<EmitterProperty>): ParticleAttribute;
 }

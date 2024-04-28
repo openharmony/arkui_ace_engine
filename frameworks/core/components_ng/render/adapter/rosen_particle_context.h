@@ -24,7 +24,7 @@ public:
     static void UpdateDisturbance(
         const RefPtr<FrameNode>& frameNode, const std::vector<ParticleDisturbance>& disturbanceArray);
     static void updateEmitterPosition(const RefPtr<FrameNode>& frameNode,
-        const std::vector<EmitterProps>& props);
+        const std::vector<EmitterProperty>& props);
 };
 
 } // namespace OHOS::Ace::NG
