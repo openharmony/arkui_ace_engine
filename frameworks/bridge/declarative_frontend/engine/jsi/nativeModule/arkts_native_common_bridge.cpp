@@ -4376,7 +4376,6 @@ ArkUINativeModuleValue CommonBridge::ResetObscured(ArkUIRuntimeCallInfo* runtime
 ArkUINativeModuleValue CommonBridge::SetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
@@ -4392,7 +4391,6 @@ ArkUINativeModuleValue CommonBridge::SetForegroundEffect(ArkUIRuntimeCallInfo* r
 ArkUINativeModuleValue CommonBridge::ResetForegroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetForegroundEffect(nativeNode);
