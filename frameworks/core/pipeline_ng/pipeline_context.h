@@ -687,6 +687,8 @@ public:
 
     void TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects);
 
+    void DetachNode(RefPtr<UINode> uiNode);
+
     void CheckNeedUpdateBackgroundColor(Color& color);
 
     bool CheckNeedDisableUpdateBackgroundImage();

@@ -207,6 +207,17 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 
 } // namespace
 
+void TextFieldPattern::OnAttachContext(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    SetInstanceId(context->GetInstanceId());
+}
+
+void TextFieldPattern::OnDetachContext(PipelineContext* context)
+{
+    SetInstanceId(INSTANCE_ID_UNDEFINED);
+}
+
 RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
 {
     if (!textFieldContentModifier_) {
@@ -1741,11 +1752,10 @@ void TextFieldPattern::InitDragDropCallBack()
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
 
-    auto onDragEnd = [weakPtr = WeakClaim(this), id = Container::CurrentId()](
-                         const RefPtr<OHOS::Ace::DragEvent>& event) {
-        ContainerScope scope(id);
+    auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        ContainerScope scope(pattern->GetHostInstanceId());
         if (pattern->dragStatus_ == DragStatus::DRAGGING) {
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
@@ -2253,7 +2263,6 @@ void TextFieldPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    instanceId_ = context->GetInstanceId();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
