@@ -165,7 +165,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 
         Dimension space;
-        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
+        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsNonNegative()) {
             ListItemGroupModel::GetInstance()->SetSpace(space);
         }
 
