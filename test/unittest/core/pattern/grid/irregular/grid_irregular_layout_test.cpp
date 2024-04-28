@@ -1085,21 +1085,21 @@ HWTEST_F(GridIrregularLayoutTest, FindRangeOnJump001, TestSize.Level1)
     GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
 
     info.scrollAlign_ = ScrollAlign::START;
-    auto res = solver.FindRangeOnJump(2, 5.0f);
+    auto res = solver.FindRangeOnJump(3, 2, 5.0f);
     EXPECT_EQ(res.startRow, 0);
     EXPECT_EQ(res.pos, -160.0f);
     EXPECT_EQ(res.endIdx, 10);
     EXPECT_EQ(res.endRow, 5);
 
     info.scrollAlign_ = ScrollAlign::CENTER;
-    res = solver.FindRangeOnJump(4, 5.0f);
+    res = solver.FindRangeOnJump(8, 4, 5.0f);
     EXPECT_EQ(res.startRow, 0);
     EXPECT_EQ(res.pos, -185.0f);
     EXPECT_EQ(res.endIdx, 10);
     EXPECT_EQ(res.endRow, 5);
 
     info.scrollAlign_ = ScrollAlign::END;
-    res = solver.FindRangeOnJump(4, 5.0f);
+    res = solver.FindRangeOnJump(8, 4, 5.0f);
     EXPECT_EQ(res.startRow, 0);
     EXPECT_EQ(res.pos, -100.0f);
     EXPECT_EQ(res.endIdx, 8);
@@ -1127,11 +1127,61 @@ HWTEST_F(GridIrregularLayoutTest, FindRangeOnJump002, TestSize.Level1)
     GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
 
     info.scrollAlign_ = ScrollAlign::END;
-    auto res = solver.FindRangeOnJump(5, 5.0f);
+    auto res = solver.FindRangeOnJump(5, 5, 5.0f);
     EXPECT_EQ(res.startRow, 1);
     EXPECT_EQ(res.pos, -125.0f);
     EXPECT_EQ(res.endIdx, 6);
     EXPECT_EQ(res.endRow, 5);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::JumpCenter001
+ * @tc.desc: Test jumping with align center
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, JumpCenter001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetRowsGap(Dimension { 5.0f });
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateFixedHeightItems(1, 605.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 1825.0f);
+        CreateFixedHeightItems(4, 300.0f);
+    });
+    pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startMainLineIndex_, 1);
+    EXPECT_EQ(info.endMainLineIndex_, 5);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -512.5f);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::ToEdge001
+ * @tc.desc: Test jumping to bottom edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, ToEdge001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(GetOptionDemo12());
+        model.SetEdgeEffect(EdgeEffect::NONE, true);
+        CreateFixedHeightItems(1, 600.0f);
+        CreateFixedHeightItems(1, 300.0f);
+        CreateFixedHeightItems(1, 1800.0f);
+        CreateFixedHeightItems(4, 300.0f);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startMainLineIndex_, 1);
+    EXPECT_EQ(info.currentOffset_, -1000.0f);
+    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -1000.0f);
 }
 
 /**
