@@ -1659,6 +1659,10 @@ void ImagePattern::AdaptSelfSize()
         layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->IsValid()) {
         return;
     }
+    if (images_.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(images_[0].pixelMap);
     hasSizeChanged = true;
     CalcSize realSize = {
         CalcLength(images_[0].pixelMap->GetWidth()), CalcLength(images_[0].pixelMap->GetHeight()) };
