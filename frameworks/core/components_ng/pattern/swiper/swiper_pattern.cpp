@@ -1411,12 +1411,12 @@ void SwiperPattern::ShowNext()
     indicatorDoingAnimation_ = false;
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
+    auto loopIndex = usePropertyAnimation_ ? GetLoopIndex(propertyAnimationIndex_) : GetLoopIndex(currentIndex_);
     if (preTargetIndex_.has_value()) {
-        if (GetLoopIndex(preTargetIndex_.value()) >= childrenSize - GetDisplayCount() && !IsLoop()) {
-            return;
-        }
+        loopIndex = GetLoopIndex(preTargetIndex_.value());
         preIndex = preTargetIndex_.value();
-    } else if (GetLoopIndex(currentIndex_) >= childrenSize - GetDisplayCount() && !IsLoop()) {
+    }
+    if (loopIndex >= childrenSize - GetDisplayCount() && !IsLoop()) {
         return;
     }
     if (childrenSize <= 0 || GetDisplayCount() == 0) {
@@ -1427,7 +1427,7 @@ void SwiperPattern::ShowNext()
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
     StopIndicatorAnimation();
-    if (preIndex) {
+    if (preIndex || usePropertyAnimation_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ + 1)) {
@@ -1466,12 +1466,12 @@ void SwiperPattern::ShowPrevious()
     indicatorDoingAnimation_ = false;
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
+    auto loopIndex = usePropertyAnimation_ ? GetLoopIndex(propertyAnimationIndex_) : GetLoopIndex(currentIndex_);
     if (preTargetIndex_.has_value()) {
-        if (GetLoopIndex(preTargetIndex_.value()) <= 0 && !IsLoop()) {
-            return;
-        }
+        loopIndex = GetLoopIndex(preTargetIndex_.value());
         preIndex = preTargetIndex_.value();
-    } else if (GetLoopIndex(currentIndex_) <= 0 && !IsLoop()) {
+    }
+    if (loopIndex <= 0 && !IsLoop()) {
         return;
     }
     if (childrenSize <= 0 || GetDisplayCount() == 0) {
@@ -1482,7 +1482,7 @@ void SwiperPattern::ShowPrevious()
     StopFadeAnimation();
     StopIndicatorAnimation();
 
-    if (preIndex) {
+    if (preIndex || usePropertyAnimation_) {
         isUserFinish_ = false;
         FinishAnimation();
         if (!ContentWillChange(currentIndex_ - 1)) {
