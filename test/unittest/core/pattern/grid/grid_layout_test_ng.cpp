@@ -1755,7 +1755,7 @@ HWTEST_F(GridLayoutTestNg, TestChildrenUpdate001, TestSize.Level1)
     });
     auto& info = pattern_->gridLayoutInfo_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
-
+    EXPECT_FALSE(pattern_->irregular_);
     for (int i = 0; i < 2; ++i) {
         frameNode_->ChildrenUpdatedFrom(i);
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1794,6 +1794,7 @@ HWTEST_F(GridLayoutTestNg, GetVisibleSelectedItems001, TestSize.Level1)
     });
     GetChildPattern<GridItemPattern>(frameNode_, 1)->SetSelected(true);
     EXPECT_EQ(pattern_->GetVisibleSelectedItems().size(), 1);
+    EXPECT_FALSE(pattern_->irregular_);
 }
 
 /**

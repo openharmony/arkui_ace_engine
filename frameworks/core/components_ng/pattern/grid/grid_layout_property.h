@@ -136,10 +136,7 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LayoutOptions, GridLayoutOptions);
-    void OnLayoutOptionsUpdate(GridLayoutOptions /* layoutOptions */) const
-    {
-        ResetGridLayoutInfoAndMeasure();
-    }
+    void OnLayoutOptionsUpdate(const GridLayoutOptions& layoutOptions) const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
@@ -153,6 +150,8 @@ private:
     std::string GetGridDirectionStr() const;
     Color GetBarColor() const;
     Dimension GetBarWidth() const;
+
+    void UpdateIrregularFlag(const GridLayoutOptions& layoutOptions) const;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
