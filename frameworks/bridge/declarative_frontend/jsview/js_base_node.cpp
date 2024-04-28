@@ -215,6 +215,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
             point.y = itemObj->GetPropertyValue<float>("y", 0.0f);
             point.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
             point.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+            point.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
             touchEvent.pointers.emplace_back(point);
         }
     }
@@ -244,6 +245,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         touchEvent.y = itemObj->GetPropertyValue<float>("y", 0.0f);
         touchEvent.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
         touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+        touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (!pipelineContext) {
