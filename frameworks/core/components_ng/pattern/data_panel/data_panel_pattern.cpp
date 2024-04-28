@@ -113,7 +113,7 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
 
     std::vector<double> tmpArry;
     if (paintProperty->GetValues().value().size() > 0) {
-        for (int i = 0; i < paintProperty->GetValues().value().size(); i++) {
+        for (size_t i = 0; i < paintProperty->GetValues().value().size(); i++) {
             tmpArry.push_back(paintProperty->GetValues().value()[i]);
         }
     } else {
