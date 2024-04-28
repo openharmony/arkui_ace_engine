@@ -381,6 +381,11 @@ FrameNode::~FrameNode()
         destroyCallback();
     }
 
+    if (removeCustomProperties_) {
+        removeCustomProperties_();
+        removeCustomProperties_ = nullptr;
+    }
+
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false);

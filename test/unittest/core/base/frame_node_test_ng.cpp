@@ -338,17 +338,23 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
     EXPECT_TRUE(FRAME_NODE->IsSupportDrawModifier());
 
     /**
-     * @tc.steps: step 3. call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 3. call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
 
     /**
-     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null .
+     * @tc.steps: step 4. Nodes created by virtual classes, call GetContentModifier when drawModifier is null.
      * @tc.expect: expect the return value to be correct.
      */
     FRAME_NODE->SetDrawModifier(drawModifier);
     EXPECT_EQ(FRAME_NODE->GetContentModifier(), nullptr);
+
+    /**
+     * @tc.steps: step 5. Nodes created by virtual classes, call SetRemoveCustomProperties.
+     * @tc.expect: expect call successfully.
+     */
+    FRAME_NODE->SetRemoveCustomProperties([]()->void {});
 }
 
 /**

@@ -826,6 +826,13 @@ public:
     RectF GetRectWithRender();
     bool CheckAncestorPageShow();
 
+    void SetRemoveCustomProperties(std::function<void()> func)
+    {
+        if (!removeCustomProperties_) {
+            removeCustomProperties_ = func;
+        }
+    }
+
 protected:
     void DumpInfo() override;
 
@@ -940,6 +947,7 @@ private:
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
+    std::function<void()> removeCustomProperties_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
