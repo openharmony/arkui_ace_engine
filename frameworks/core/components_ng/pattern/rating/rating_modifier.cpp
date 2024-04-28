@@ -25,6 +25,7 @@ RatingModifier::RatingModifier()
     : needDraw_(AceType::MakeRefPtr<PropertyBool>(false)), starNum_(AceType::MakeRefPtr<PropertyInt>(0)),
       touchStar_(AceType::MakeRefPtr<PropertyInt>(0)), drawScore_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
       stepSize_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
+      useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT))),
@@ -35,6 +36,7 @@ RatingModifier::RatingModifier()
     AttachProperty(touchStar_);
     AttachProperty(drawScore_);
     AttachProperty(stepSize_);
+    AttachProperty(useContentModifier_);
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(boardColor_);
@@ -43,6 +45,9 @@ RatingModifier::RatingModifier()
 
 void RatingModifier::onDraw(DrawingContext& context)
 {
+    if (useContentModifier_->Get()) {
+        return;
+    }
     CHECK_NULL_VOID(foregroundImageCanvas_);
     CHECK_NULL_VOID(secondaryImageCanvas_);
     CHECK_NULL_VOID(backgroundImageCanvas_);
