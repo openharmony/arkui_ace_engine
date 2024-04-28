@@ -3038,6 +3038,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto object = JSRef<JSVal>::Cast(paramObject->GetProperty("object"));
     auto name = JSRef<JSVal>::Cast(paramObject->GetProperty("name"));
     auto methodList = JSRef<JSVal>::Cast(paramObject->GetProperty("methodList"));
+    auto asyncMethodList = JSRef<JSVal>::Cast(paramObject->GetProperty("asyncMethodList"));
     if (!controllerObj->IsObject()) {
         return;
     }
@@ -3045,9 +3046,9 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto jsProxyFunction = controller->GetProperty("jsProxy");
     if (jsProxyFunction->IsFunction()) {
         auto jsProxyCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(jsProxyFunction), object,
-                                   name, methodList]() {
-            JSRef<JSVal> argv[] = { object, name, methodList };
-            func->Call(webviewController, 3, argv);
+                                   name, methodList, asyncMethodList]() {
+            JSRef<JSVal> argv[] = { object, name, methodList, asyncMethodList };
+            func->Call(webviewController, 4, argv);
         };
 
         WebModel::GetInstance()->SetJsProxyCallback(jsProxyCallback);
