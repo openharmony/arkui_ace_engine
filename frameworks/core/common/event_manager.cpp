@@ -28,6 +28,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -179,21 +180,31 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             }
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
-        RecordHitEmptyMessage(touchPoint, resultInfo);
+        RecordHitEmptyMessage(touchPoint, resultInfo, frameNode);
     }
     LogTouchTestResultRecognizers(touchTestResults_[touchPoint.id]);
 }
 
-void EventManager::RecordHitEmptyMessage(const TouchEvent& touchPoint, const std::string& resultInfo)
+void EventManager::RecordHitEmptyMessage(
+    const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode)
 {
     auto hitEmptyMessage = JsonUtil::Create(true);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto windowId = container->GetWindowId();
+    auto windowId = 0;
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = NG::WindowSceneHelper::GetWindowIdForWindowScene(frameNode);
+#endif
+    if (windowId == 0) {
+        windowId = container->GetWindowId();
+    }
     hitEmptyMessage->Put("windowId", static_cast<int32_t>(windowId));
-    auto window = container->GetPipelineContext()->GetWindow();
-    if (window) {
-        hitEmptyMessage->Put("windowName", window->GetWindowName().c_str());
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        auto window = pipelineContext->GetWindow();
+        if (window) {
+            hitEmptyMessage->Put("windowName", window->GetWindowName().c_str());
+        }
     }
     hitEmptyMessage->Put("resultInfo", resultInfo.c_str());
     hitEmptyMessage->Put("x", touchPoint.x);
