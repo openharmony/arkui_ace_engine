@@ -34,8 +34,6 @@ public:
 
     void BeforeCreateLayoutWrapper() override;
 
-    bool CheckChildPosition(const RefPtr<FrameNode>& frameNode);
-
     int32_t GetTargetId()
     {
         return targetId_;
