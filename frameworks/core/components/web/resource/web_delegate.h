@@ -355,6 +355,30 @@ private:
     int32_t parentNWebId_ = -1;
 };
 
+class WebAppLinkCallbackOhos : public WebAppLinkCallback {
+    DECLARE_ACE_TYPE(WebAppLinkCallbackOhos, WebAppLinkCallback)
+public:
+    WebAppLinkCallbackOhos(const std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback>& callback)
+        : callback_(callback) {}
+
+    void ContinueLoad() override
+    {
+        if (callback_) {
+            callback_->ContinueLoad();
+        }
+    }
+
+    void CancelLoad() override
+    {
+        if (callback_) {
+            callback_->CancelLoad();
+        }
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback_;
+};
+
 class DataResubmittedOhos : public DataResubmitted {
     DECLARE_ACE_TYPE(DataResubmittedOhos, DataResubmitted)
 
@@ -834,7 +858,10 @@ public:
     bool OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void ScaleGestureChange(double scale, double centerX, double centerY);
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
-    
+    // Backward
+    void Backward();
+    bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -883,8 +910,7 @@ private:
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
 
-    // Backward and forward
-    void Backward();
+    // forward
     void Forward();
     void ClearHistory();
     void ClearSslCache();

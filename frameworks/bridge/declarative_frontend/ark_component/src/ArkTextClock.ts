@@ -18,6 +18,7 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   textClockNode: BuilderNode<[TextClockConfiguration]> | null = null;
   modifier: ContentModifier<TextClockConfiguration>;
+  needRebuild: Boolean = false;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -60,16 +61,21 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
       getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
+    }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
     getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, this);
   }
   makeContentModifierNode(context: UIContext, textClockConfiguration: TextClockConfiguration): FrameNode | null {
     textClockConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.textClockNode)) {
+    if (isUndefined(this.textClockNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.textClockNode = new xNode.BuilderNode(context);
       this.textClockNode.build(this.builder, textClockConfiguration);
+      this.needRebuild = false;
     } else {
       this.textClockNode.update(textClockConfiguration);
     }
@@ -182,7 +188,7 @@ globalThis.TextClock.attributeModifier = function (modifier: ArkComponent): void
 };
 
 // @ts-ignore
-globalThis.TextClock.contentModifier = function (modifier) {
+globalThis.TextClock.contentModifier = function (modifier: ContentModifier<TextClockConfiguration>) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

@@ -45,7 +45,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
-const char BUNDLE_TAG[] = "@bundle:";
 constexpr int32_t BUNDLE_START_POS = 8;
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
@@ -1172,9 +1171,11 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!result) {
+#if !defined(PREVIEW)
         if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
             ThrowError("Load Page Failed: " + target.url, ERROR_CODE_LOAD_PAGE_ERROR);
         }
+#endif
         pageRouterStack_.pop_back();
         return;
     }

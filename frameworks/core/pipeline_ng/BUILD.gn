@@ -66,6 +66,12 @@ template("ace_core_pipeline_ng_source_set") {
         "//foundation/window/window_manager",
         "//foundation/window/window_manager/interfaces/innerkits",
       ]
+      if (is_arkui_x) {
+        include_dirs += [
+          "//foundation/graphic/graphic_2d/utils/color_manager/export",
+          "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+        ]
+      }
     }
 
     if (platform == "ohos" && defined(config.enable_native_view) &&

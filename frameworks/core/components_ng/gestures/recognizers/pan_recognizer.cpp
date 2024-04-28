@@ -153,7 +153,8 @@ void PanRecognizer::OnRejected()
 void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
 {
     PointF windowPoint(event.x, event.y);
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
 
     TouchEvent transformEvent = event;
     transformEvent.x = windowPoint.GetX();
@@ -362,8 +363,10 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     PointF windowPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
     PointF windowTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
-    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false, isPostEventResult_);
-    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false, isPostEventResult_);
+    NGGestureRecognizer::Transform(windowPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
+    NGGestureRecognizer::Transform(windowTouchPoint, GetAttachedNode(), false,
+        isPostEventResult_, event.postEventNodeId);
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
 
@@ -615,7 +618,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         }
         info.SetPointerId(touchPoint.id);
         PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
-        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+            isPostEventResult_, touchPoint.postEventNodeId);
         info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);

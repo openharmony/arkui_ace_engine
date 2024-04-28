@@ -32,6 +32,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/core/common/ace_engine.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -1042,13 +1043,20 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
             TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
     };
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
-        RefPtr<NG::FrameNode> dialog;
-        CHECK_NULL_VOID(overlayManager);
         LOGI("Begin to show dialog ");
+        CHECK_NULL_VOID(overlayManager);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+            container = AceEngine::Get().GetContainer(currentId);
+            CHECK_NULL_VOID(container);
+        }
+        RefPtr<NG::FrameNode> dialog;
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
             CHECK_NULL_VOID(dialog);
-            if (dialogProperties.isModal) {
+            if (dialogProperties.isModal && !container->IsUIExtensionWindow()) {
                 DialogProperties Maskarg;
                 Maskarg.isMask = true;
                 Maskarg.autoCancel = dialogProperties.autoCancel;

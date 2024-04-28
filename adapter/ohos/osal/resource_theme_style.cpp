@@ -80,7 +80,8 @@ static const std::set<std::string> stringAttrs = {
     "dialog_expand_display",
     "show_password_directly",
     "textfield_show_handle",
-    "list_fadeout_enable"
+    "list_fadeout_enable",
+    "text_fadeout_enable"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

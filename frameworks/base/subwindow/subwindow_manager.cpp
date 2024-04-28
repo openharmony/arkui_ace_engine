@@ -419,6 +419,7 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         CHECK_NULL_RETURN(subwindow, nullptr);
+        CHECK_NULL_RETURN(subwindow->CheckHostWindowStatus(), nullptr);
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
@@ -433,6 +434,7 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogPropert
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         CHECK_NULL_RETURN(subwindow, nullptr);
+        CHECK_NULL_RETURN(subwindow->CheckHostWindowStatus(), nullptr);
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
@@ -458,6 +460,7 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, s
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         CHECK_NULL_VOID(subwindow);
+        CHECK_NULL_VOID(subwindow->CheckHostWindowStatus());
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
@@ -561,12 +564,16 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
     return currentDialogSubwindow_;
 }
 
-RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
+RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow(bool isDialog)
 {
     auto containerId = Container::CurrentId();
     auto subwindow = GetDialogSubwindow(containerId);
     if (!subwindow) {
         subwindow = Subwindow::CreateSubwindow(containerId);
+        CHECK_NULL_RETURN(subwindow, nullptr);
+        if (isDialog) {
+            CHECK_NULL_RETURN(subwindow->CheckHostWindowStatus(), nullptr);
+        }
         AddDialogSubwindow(containerId, subwindow);
     }
     return subwindow;
@@ -643,7 +650,7 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subwindow = GetOrCreateSubWindow();
+        auto subwindow = GetOrCreateSubWindow(true);
         CHECK_NULL_VOID(subwindow);
         subwindow->ShowDialog(title, message, buttons, autoCancel, std::move(napiCallback), dialogCallbacks);
         // for ability
@@ -651,6 +658,8 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
         auto subwindow = GetSubwindow(containerId);
         if (!subwindow) {
             subwindow = Subwindow::CreateSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            CHECK_NULL_VOID(subwindow->CheckHostWindowStatus());
             subwindow->InitContainer();
             AddSubwindow(containerId, subwindow);
         }
@@ -672,7 +681,7 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subWindow = GetOrCreateSubWindow();
+        auto subWindow = GetOrCreateSubWindow(true);
         CHECK_NULL_VOID(subWindow);
         subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
         // for ability
@@ -680,6 +689,8 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
         auto subWindow = GetSubwindow(containerId);
         if (!subWindow) {
             subWindow = Subwindow::CreateSubwindow(containerId);
+            CHECK_NULL_VOID(subWindow);
+            CHECK_NULL_VOID(subWindow->CheckHostWindowStatus());
             subWindow->InitContainer();
             AddSubwindow(containerId, subWindow);
         }
@@ -738,7 +749,7 @@ void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std:
     // for pa service
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "container %{public}d open the custom dialog", containerId);
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subWindow = GetOrCreateSubWindow();
+        auto subWindow = GetOrCreateSubWindow(true);
         CHECK_NULL_VOID(subWindow);
         subWindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
         // for ability
@@ -746,6 +757,8 @@ void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std:
         auto subWindow = GetSubwindow(containerId);
         if (!subWindow) {
             subWindow = Subwindow::CreateSubwindow(containerId);
+            CHECK_NULL_VOID(subWindow);
+            CHECK_NULL_VOID(subWindow->CheckHostWindowStatus());
             subWindow->InitContainer();
             AddSubwindow(containerId, subWindow);
         }

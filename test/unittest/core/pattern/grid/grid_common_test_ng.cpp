@@ -14,13 +14,17 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/render/mock_render_context.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 namespace OHOS::Ace::NG {
 
 namespace {
-const Offset LEFT_TOP = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 0.5); // (60, 100)
-const Offset LEFT_BOTTOM = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 1.5); // (60, 300)
-const Offset RIGHT_TOP = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 0.5); // (180, 100)
+const Offset LEFT_TOP = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 0.5);     // (60, 100)
+const Offset LEFT_BOTTOM = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 1.5);  // (60, 300)
+const Offset RIGHT_TOP = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 0.5);    // (180, 100)
 const Offset RIGHT_BOTTOM = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 1.5); // (180, 300)
 } // namespace
 
@@ -58,8 +62,7 @@ int32_t GridCommonTestNg::FindFocusNodeIndex(RefPtr<FocusHub>& focusNode)
     return NULL_VALUE;
 }
 
-AssertionResult GridCommonTestNg::IsEqualNextFocusNode(
-    FocusStep step, int32_t currentIndex, int32_t expectNextIndex)
+AssertionResult GridCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex)
 {
     RefPtr<FocusHub> currentFocusNode = GetChildFocusHub(frameNode_, currentIndex);
     currentFocusNode->RequestFocusImmediately();
@@ -1044,9 +1047,7 @@ HWTEST_F(GridCommonTestNg, GetCollectionInfo002, TestSize.Level1)
      * @tc.cases: Create with empty items
      * @tc.expected: columns is zero
      */
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    });
+    Create([](GridModelNG model) { model.SetColumnsTemplate("1fr 1fr 1fr 1fr"); });
     AceCollectionInfo info = accessibilityProperty_->GetCollectionInfo();
     EXPECT_EQ(info.rows, 0);
     EXPECT_EQ(info.columns, 0);
@@ -1139,9 +1140,7 @@ HWTEST_F(GridCommonTestNg, SetSpecificSupportAction004, TestSize.Level1)
      * @tc.cases: Grid is unscrollable.
      * @tc.expected: Check actions value
      */
-    Create([](GridModelNG model) {
-        CreateFixedItem(14);
-    });
+    Create([](GridModelNG model) { CreateFixedItem(14); });
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 
     accessibilityProperty_->ResetSupportAction();
@@ -1235,19 +1234,19 @@ HWTEST_F(GridCommonTestNg, EventHub001, TestSize.Level1)
      * @tc.expected: Return -1
      */
     EXPECT_EQ(eventHub_->GetInsertPosition(GRID_WIDTH + 1.f, GRID_HEIGHT), NULL_VALUE);
-    
+
     /**
      * @tc.cases: case2. Position in item
      * @tc.expected: Return item index
      */
     EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH / 2, ITEM_HEIGHT / 2), 0);
-    
+
     /**
      * @tc.cases: case3. Position in grid but not in item
      * @tc.expected: Return items count:8
      */
     EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_WIDTH, GRID_HEIGHT), 8);
-        
+
     /**
      * @tc.cases: case4. Position in grid but not in item and in currentRect_
      * @tc.expected: Return -1
@@ -1350,9 +1349,7 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
  */
 HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
 {
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    });
+    Create([](GridModelNG model) { model.SetColumnsTemplate("1fr 1fr 1fr 1fr"); });
 
     /**
      * @tc.steps: step1. get pattern .
