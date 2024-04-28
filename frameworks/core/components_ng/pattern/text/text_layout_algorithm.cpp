@@ -403,6 +403,10 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     auto frameNode = layoutWrapper->GetHostNode();
     auto pipeline = frameNode->GetContextRefPtr();
     auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, -1);
+    if (pattern->IsSensitiveEnalbe()) {
+        UpdateSensitiveContent(content);
+    }
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
@@ -429,7 +433,6 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         return true;
     }
     paragraph_->PushStyle(textStyle);
-    CHECK_NULL_RETURN(pattern, -1);
     if (spanItemChildren_.empty()) {
         if (pattern->NeedShowAIDetect()) {
             UpdateParagraphForAISpan(textStyle, layoutWrapper);
@@ -1000,6 +1003,15 @@ int32_t TextLayoutAlgorithm::GetFirstSpanStartPositon()
         }
     }
     return start;
+}
+
+void TextLayoutAlgorithm::UpdateSensitiveContent(std::string& content)
+{
+    std::replace_if(
+        content.begin(), content.end(),
+        [](char c) {
+            return c != '\n';
+        }, '-');
 }
 
 void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyle,

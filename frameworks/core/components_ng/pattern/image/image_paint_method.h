@@ -29,9 +29,9 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    explicit ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected,
+    explicit ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, bool selected, bool sensitive,
         ImageInterpolation interpolation = ImageInterpolation::NONE)
-        : canvasImage_(canvasImage), selected_(selected), interpolationDefault_(interpolation)
+        : canvasImage_(canvasImage), selected_(selected), sensitive_(sensitive), interpolationDefault_(interpolation)
     {}
     ~ImagePaintMethod() override = default;
 
@@ -43,6 +43,7 @@ private:
     void UpdateBorderRadius(PaintWrapper* paintWrapper);
     RefPtr<CanvasImage> canvasImage_;
     bool selected_ = false;
+    bool sensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);

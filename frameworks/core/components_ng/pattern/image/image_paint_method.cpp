@@ -143,7 +143,12 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
         }
     }
     ImagePainter imagePainter(canvasImage_);
-    return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };
+    auto sensitive = sensitive_;
+    return [imagePainter, contentSize, sensitive](RSCanvas& canvas) {
+        if (!sensitive) {
+            imagePainter.DrawImage(canvas, {}, contentSize);
+        }
+    };
 }
 
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
