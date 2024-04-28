@@ -26,6 +26,7 @@
 #include "core/common/container.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -197,17 +198,11 @@ void JSCheckbox::JsWidth(const JSCallbackInfo& info)
 
 void JSCheckbox::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
-    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
-    auto width = defaultWidth - horizontalPadding * 2;
-    CalcDimension value(width);
+    CalcDimension value;
     ParseJsDimensionVp(jsValue, value);
     if (value.IsNegative()) {
-        value = width;
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        return;
     }
     CheckBoxModel::GetInstance()->SetWidth(value);
 }
@@ -223,17 +218,11 @@ void JSCheckbox::JsHeight(const JSCallbackInfo& info)
 
 void JSCheckbox::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
-    CHECK_NULL_VOID(checkBoxTheme);
-    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
-    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
-    auto height = defaultHeight - verticalPadding * 2;
-    CalcDimension value(height);
+    CalcDimension value;
     ParseJsDimensionVp(jsValue, value);
     if (value.IsNegative()) {
-        value = height;
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return;
     }
     CheckBoxModel::GetInstance()->SetHeight(value);
 }
