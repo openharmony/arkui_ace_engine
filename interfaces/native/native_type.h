@@ -781,6 +781,20 @@ typedef enum {
 } ArkUI_ScrollAlign;
 
 /**
+ * @brief 定义当前滚动状态。
+ *
+ * @since 12
+ */
+typedef enum {
+    /** 空闲状态。使用控制器提供的方法控制滚动时触发，拖动滚动条滚动时触发。*/
+    ARKUI_SCROLL_STATE_IDLE = 0,
+    /** 滚动状态。使用手指拖动List滚动时触发。*/
+    ARKUI_SCROLL_STATE_SCROLL,
+    /** 惯性滚动状态。快速划动松手后进行惯性滚动和划动到边缘回弹时触发。*/
+    ARKUI_SCROLL_STATE_FLING,
+} ArkUI_ScrollState;
+
+/**
  * @brief Enumerates the types of the slider in the block direction.
  *
  * @since 12
