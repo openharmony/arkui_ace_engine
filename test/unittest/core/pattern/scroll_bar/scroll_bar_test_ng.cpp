@@ -1561,11 +1561,12 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest023, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     pattern_->UpdateScrollBarOffset();
     EXPECT_EQ(pattern_->scrollBar_->paintOffset_, Offset(0.0f, 0.0f));
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
     pattern_->scrollBar_->displayMode_ = DisplayMode::OFF;
     pattern_->SetControlDistance(SCROLL_BAR_FLOAT_100);
     pattern_->SetCurrentPosition(SCROLL_BAR_FLOAT_100);
-    pattern_->UpdateScrollBarOffset();
+    pattern_->HandleScrollBarOutBoundary(SCROLL_BAR_FLOAT_100);
     EXPECT_EQ(pattern_->scrollBar_->outBoundary_, SCROLL_BAR_FLOAT_100);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }

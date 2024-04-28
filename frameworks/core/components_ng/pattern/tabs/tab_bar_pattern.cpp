@@ -106,9 +106,9 @@ void TabBarPattern::InitSurfaceChangedCallback()
                 if (!pattern) {
                     return;
                 }
-                if (type == WindowSizeChangeReason::UNDEFINED) {
-                    pattern->windowSizeChangeReason_ = type;
-                }
+
+                pattern->windowSizeChangeReason_ = type;
+                pattern->prevRootSize_ = std::make_pair(prevWidth, prevHeight);
 
                 if (type == WindowSizeChangeReason::ROTATION) {
                     pattern->windowSizeChangeReason_ = type;
@@ -714,13 +714,14 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             animationTargetIndex_ != indicator) {
             swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
             animationTargetIndex_.reset();
-        } else if (*windowSizeChangeReason_ == WindowSizeChangeReason::UNDEFINED ||
-            *windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
+            windowSizeChangeReason_.reset();
+        } else if (prevRootSize_.first != PipelineContext::GetCurrentRootWidth() ||
+            prevRootSize_.second != PipelineContext::GetCurrentRootHeight()) {
             // UNDEFINED currently implies window change on foldable
             PlayTabBarTranslateAnimation(indicator_);
             UpdateIndicator(indicator_);
+            windowSizeChangeReason_.reset();
         }
-        windowSizeChangeReason_.reset();
     }
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&

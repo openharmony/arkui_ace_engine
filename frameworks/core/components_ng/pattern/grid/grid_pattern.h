@@ -233,6 +233,10 @@ public:
     bool IsReverse() const override;
 
 private:
+    /**
+     * @brief calculate where startMainLine_ should be after spring animation.
+     * @return main axis position relative to viewport, positive when below viewport.
+     */
     float GetEndOffset();
     float GetMainGap() const;
     float GetAllDelta();

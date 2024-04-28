@@ -2886,6 +2886,21 @@ struct ArkUITextTimerModifier {
     void (*resetFormat)(ArkUINodeHandle node);
 };
 
+struct ArkUISymbolGlyphModifier {
+    void (*setFontColor)(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size);
+    void (*resetFontColor)(ArkUINodeHandle node);
+    void (*setFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetFontSize)(ArkUINodeHandle node);
+    void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
+    void (*setFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
+    void (*resetFontWeight)(ArkUINodeHandle node);
+    void (*setRenderingStrategy)(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy);
+    void (*resetRenderingStrategy)(ArkUINodeHandle node);
+    void (*setEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
+    void (*resetEffectStrategy)(ArkUINodeHandle node);
+    void (*setSymbolId)(ArkUINodeHandle node, ArkUI_Uint32 copyOption);
+};
+
 struct ArkUITextTimerControllerModifier {
     ArkUINodeHandle (*getTextTimerController)(ArkUINodeHandle node);
     void (*setTextTimerStart)(ArkUINodeHandle node);
@@ -3315,8 +3330,8 @@ struct ArkUIFrameNodeModifier {
     ArkUINodeHandle (*getPreviousSibling)(ArkUINodeHandle node);
     ArkUINodeHandle (*getParent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIdByNodePtr)(ArkUINodeHandle node);
-    ArkUI_Float32* (*getPositionToParent)(ArkUINodeHandle node);
-    ArkUI_Float32* (*getPositionToWindow)(ArkUINodeHandle node);
+    void (*getPositionToParent)(ArkUINodeHandle node, ArkUI_Float32* parentOffset);
+    void (*getPositionToWindow)(ArkUINodeHandle node, ArkUI_Float32* windowOffset);
     ArkUI_Float32* (*getMeasuredSize)(ArkUINodeHandle node);
     ArkUI_Float32* (*getLayoutPosition)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getInspectorId)(ArkUINodeHandle node);
@@ -3514,6 +3529,7 @@ struct ArkUINodeModifiers {
     const ArkUITextAreaControllerModifier* (*getTextAreaControllerModifier)();
     const ArkUIParticleModifier* (*getParticleModifier)();
     const ArkUINodeContentModifier* (*getNodeContentModifier)();
+    const ArkUISymbolGlyphModifier* (*getSymbolGlyphModifier)();
 };
 
 // same as inner defines in property.h

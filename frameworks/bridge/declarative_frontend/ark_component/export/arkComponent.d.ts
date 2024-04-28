@@ -16,7 +16,9 @@ declare type KNode = number | null;
 declare function getUINativeModule(): any;
 declare enum ModifierType {
     ORIGIN = 0,
-    STATE = 1
+    STATE = 1,
+    FRAME_NODE = 2,
+    EXPOSE_MODIFIER = 3,
 }
 declare class JsPointerClass {
     invalid(): boolean;
@@ -1932,6 +1934,15 @@ declare class ArkParticleComponent extends ArkComponent implements ParticleAttri
 declare class CheckboxWidthModifier extends ModifierWithKey<Length> {}
 declare class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {}
 declare class TextForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {}
+
+declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyphAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    fontColor(value: ResourceColor[]): SymbolGlyphAttribute;
+    fontSize(value: number | string | Resource): SymbolGlyphAttribute;
+    fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
+    renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
+    effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
+}
 
 declare class ArkParticleComponent extends ArkComponent implements ParticleAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

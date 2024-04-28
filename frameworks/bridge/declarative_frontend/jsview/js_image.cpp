@@ -564,13 +564,11 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
-#ifndef PREVIEW
         auto drawingColorFilter = CreateDrawingColorFilter(tmpInfo);
         if (drawingColorFilter) {
             ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
             return;
         }
-#endif
         JSColorFilter* colorFilter;
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();

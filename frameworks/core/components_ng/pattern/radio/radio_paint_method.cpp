@@ -69,6 +69,7 @@ RadioModifier::RadioModifier()
     pointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_POINT_SCALE);
     ringPointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     AttachProperty(enabled_);
     AttachProperty(isCheck_);

@@ -54,6 +54,7 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dra
     offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
     size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     animatePointRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
     animateTrackRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
 

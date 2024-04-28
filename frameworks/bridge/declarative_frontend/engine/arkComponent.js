@@ -25,7 +25,8 @@ let ModifierType;
 (function (ModifierType) {
     ModifierType[ModifierType['ORIGIN'] = 0] = 'ORIGIN';
     ModifierType[ModifierType['STATE'] = 1] = 'STATE';
-    ModifierType[ModifierType['FRAME_NODE'] = 1] = 'FRAME_NODE';
+    ModifierType[ModifierType['FRAME_NODE'] = 2] = 'FRAME_NODE';
+    ModifierType[ModifierType['EXPOSE_MODIFIER'] = 3] = 'EXPOSE_MODIFIER';
 })(ModifierType || (ModifierType = {}));
 const UI_STATE_NORMAL = 0;
 const UI_STATE_PRESSED = 1;
@@ -2678,6 +2679,8 @@ class ArkComponent {
         value.applyStage(this.nativePtr);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
       })
+    } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
+      this._modifiersWithKeys = new ObservedMap();
     } else {
       this._modifiersWithKeys = new Map();
     }
@@ -12859,7 +12862,12 @@ class ArkToggleComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().toggle.setContentModifierBuilder(this.nativePtr, false);
       return;
+    }
+    this.needRebuild = false;
+    if (this.builder !== modifier.applyContent()) {
+      this.needRebuild = true;
     }
     this.builder = modifier.applyContent();
     this.modifier = modifier;
@@ -12867,10 +12875,11 @@ class ArkToggleComponent extends ArkComponent {
   }
   makeContentModifierNode(context, toggleConfiguration) {
     toggleConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.toggleNode)) {
+    if (isUndefined(this.toggleNode) || this.needRebuild) {
       const xNode = globalThis.requireNapi('arkui.node');
       this.toggleNode = new xNode.BuilderNode(context);
       this.toggleNode.build(this.builder, toggleConfiguration);
+      this.needRebuild = false;
     } else {
       this.toggleNode.update(toggleConfiguration);
     }
@@ -13627,6 +13636,7 @@ class ArkRadioComponent extends ArkComponent {
   }
   setContentModifier(modifier) {
     if (modifier === undefined || modifier === null) {
+      getUINativeModule().radio.setContentModifierBuilder(this.nativePtr, false);
       return;
     }
     this.builder = modifier.applyContent();
@@ -22823,6 +22833,146 @@ if (globalThis.Particle !== undefined) {
       return new ArkParticleComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ParticleModifier(nativePtr, classType);
+    });
+  };
+}
+
+class SymbolFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetFontColor(node);
+    }
+    else {
+      getUINativeModule().symbolGlyph.setFontColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SymbolFontColorModifier.identity = Symbol('symbolGlyphFontColor');
+
+class SymbolFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetFontSize(node);
+    }
+    else {
+      getUINativeModule().symbolGlyph.setFontSize(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SymbolFontSizeModifier.identity = Symbol('symbolGlyphFontSize');
+
+class SymbolFontWeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetFontWeight(node);
+    }
+    else {
+      getUINativeModule().symbolGlyph.setFontWeight(node, this.value);
+    }
+  }
+}
+SymbolFontWeightModifier.identity = Symbol('symbolGlyphFontWeight');
+
+class RenderingStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetRenderingStrategy(node);
+    }
+    else {
+      getUINativeModule().symbolGlyph.setRenderingStrategy(node, this.value);
+    }
+  }
+}
+RenderingStrategyModifier.identity = Symbol('symbolGlyphRenderingStrategy');
+
+class EffectStrategyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.resetEffectStrategy(node);
+    }
+    else {
+      getUINativeModule().symbolGlyph.setEffectStrategy(node, this.value);
+    }
+  }
+}
+EffectStrategyModifier.identity = Symbol('symbolGlyphEffectStrategy');
+
+class SymbolContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().symbolGlyph.setSymbolId(node, "");
+    }
+    else {
+      getUINativeModule().symbolGlyph.setSymbolId(node, this.value);
+    }
+  }
+}
+SymbolContentModifier.identity = Symbol('symbolContent');
+
+/// <reference path='./import.ts' />
+class ArkSymbolGlyphComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
+    }
+    return this;
+  }
+  fontColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
+    return this;
+  }
+  fontSize(value) {
+    modifierWithKey(this._modifiersWithKeys, SymbolFontSizeModifier.identity, SymbolFontSizeModifier, value);
+    return this;
+  }
+  fontWeight(value) {
+    modifierWithKey(this._modifiersWithKeys, SymbolFontWeightModifier.identity, SymbolFontWeightModifier, value);
+    return this;
+  }
+  renderingStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, RenderingStrategyModifier.identity, RenderingStrategyModifier, value);
+    return this;
+  }
+  effectStrategy(value) {
+    modifierWithKey(this._modifiersWithKeys, EffectStrategyModifier.identity, EffectStrategyModifier, value);
+    return this;
+  }
+}
+
+// @ts-ignore
+if (globalThis.SymbolGlyph !== undefined) {
+  globalThis.SymbolGlyph.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkSymbolGlyphComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.SymbolGlyphModifier(undefined, nativePtr, classType);
     });
   };
 }

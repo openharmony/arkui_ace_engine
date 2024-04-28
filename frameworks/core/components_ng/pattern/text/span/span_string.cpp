@@ -244,14 +244,14 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type)
         auto specialList = spansMap_[type];
         int32_t step = 0;
         for (const auto& specialSpan : specialList) {
-            if (specialSpan->GetStartIndex() == span->GetStartIndex()) {
+            if (specialSpan->GetStartIndex() >= span->GetStartIndex()) {
                 break;
             }
             ++step;
         }
         auto iter = specialList.begin();
         std::advance(iter, step);
-        specialList.insert(iter, span);
+        iter = specialList.insert(iter, span);
         for (++iter; iter != specialList.end(); ++iter) {
             (*iter)->UpdateStartIndex((*iter)->GetStartIndex() + 1);
             (*iter)->UpdateEndIndex((*iter)->GetEndIndex() + 1);

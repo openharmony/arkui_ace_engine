@@ -59,9 +59,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (UseContentModifier()) {
-            return nullptr;
-        }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -88,6 +85,7 @@ public:
             checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         }
         checkboxModifier_->SetCheckboxStyle(checkboxStyle);
+        checkboxModifier_->SetUseContentModifier(UseContentModifier());
         checkboxModifier_->SetHasBuilder(builder_.has_value());
         host->SetCheckboxFlag(true);
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
@@ -164,6 +162,12 @@ public:
 
     void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
     {
+        if (toggleMakeFunc == nullptr) {
+            toggleMakeFunc_ = std::nullopt;
+            contentModifierNode_ = nullptr;
+            OnModifyDone();
+            return;
+        }
         toggleMakeFunc_ = std::move(toggleMakeFunc);
     }
 

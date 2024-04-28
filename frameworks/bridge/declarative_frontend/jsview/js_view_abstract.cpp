@@ -4534,6 +4534,9 @@ void JSViewAbstract::JsBackgroundBrightness(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBrightnessInternal(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BrightnessOption option;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
@@ -4544,6 +4547,9 @@ void JSViewAbstract::JsBackgroundBrightnessInternal(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsForegroundBrightness(const JSCallbackInfo& info)
 {
+    if (info.Length() == 0) {
+        return;
+    }
     BrightnessOption option;
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);

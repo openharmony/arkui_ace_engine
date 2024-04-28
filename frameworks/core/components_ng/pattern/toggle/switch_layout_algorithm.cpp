@@ -34,6 +34,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
+        frameNode->GetGeometryNode()->Reset();
         return std::nullopt;
     }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -77,15 +78,28 @@ void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<SwitchPattern>();
     CHECK_NULL_VOID(pattern);
-    if (pattern->UseContentModifier()) {
+    if (layoutWrapper->GetHostTag() == V2::TOGGLE_ETS_TAG && !pattern->UseContentModifier()) {
+        // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
+        for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            child->GetGeometryNode()->SetFrameSize(SizeF());
+        }
+        PerformMeasureSelf(layoutWrapper);
+    } else if (pattern->UseContentModifier()) {
+        auto childList = layoutWrapper->GetAllChildrenWithBuild();
+        std::list<RefPtr<LayoutWrapper>> builderChildList;
+        for (const auto& child : childList) {
+            if (child->GetHostNode()->GetId() != pattern->GetBuilderId()) {
+                child->GetGeometryNode()->SetContentSize(SizeF());
+            } else {
+                auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+                child->Measure(layoutConstraint);
+                builderChildList.push_back(child);
+            }
+        }
+        BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, builderChildList);
+    } else {
         BoxLayoutAlgorithm::Measure(layoutWrapper);
-        return;
     }
-    // switch does not have child nodes. If a child is added to a toggle, then hide the child.
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->GetGeometryNode()->SetFrameSize(SizeF());
-    }
-    PerformMeasureSelf(layoutWrapper);
 }
 
 void SwitchLayoutAlgorithm::CalcHeightAndWidth(float& height, float& width, float frameHeight, float frameWidth)
