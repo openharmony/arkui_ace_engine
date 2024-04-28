@@ -2809,6 +2809,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
+    isShowTitle_ = isShow && hasDeco;
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
@@ -3628,8 +3629,11 @@ void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
 
 bool PipelineContext::IsContainerModalVisible()
 {
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return false;
+    }
     auto windowManager = GetWindowManager();
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    return isFloatingWindow && customTitleSettedShow_;
+    return isShowTitle_ && isFloatingWindow && customTitleSettedShow_;
 }
 } // namespace OHOS::Ace::NG
