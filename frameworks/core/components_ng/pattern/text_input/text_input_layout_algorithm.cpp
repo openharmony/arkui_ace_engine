@@ -89,12 +89,21 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textFieldTheme);
     auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
-    frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum());
+    if (LessOrEqual(contentWidth, 0)) {
+        frameSize.SetWidth(contentWidth);
+    } else {
+        frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum());
+    }
 
     auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
-        frameSize.SetHeight(textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+        if (LessOrEqual(contentWidth, 0)) {
+            frameSize.SetHeight(textFieldContentConstraint.maxSize.Height());
+        } else {
+            frameSize.SetHeight(
+                textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+        }
     } else {
         auto height = LessNotEqual(contentHeight, defaultHeight)
                           ? defaultHeight + pattern->GetVerticalPaddingAndBorderSum()
@@ -109,6 +118,18 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
         frameSize.SetHeight(finalSize.Height());
     }
+    ResponseAreaMeasure(layoutWrapper, frameSize, textFieldContentConstraint, contentWidth, contentHeight);
+}
+
+void TextInputLayoutAlgorithm::ResponseAreaMeasure(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize,
+    LayoutConstraintF& textFieldContentConstraint, float contentWidth, float contentHeight)
+{
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     auto responseArea = pattern->GetResponseArea();
     auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
