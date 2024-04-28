@@ -3096,17 +3096,17 @@ void FrameNode::Layout()
         CHECK_NULL_VOID(safeAreaManager);
         safeAreaManager->SetRootMeasureNodeId(GetId());
     }
-    // if a node has geo transition but not the root node, add task only but not flush
-    // or add to expand list, self node will be added to expand list in next layout
-    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
-        return;
-    }
     if (SelfOrParentExpansive()) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_VOID(safeAreaManager);
         safeAreaManager->AddNeedExpandNode(GetHostNode());
+    }
+    // if a node has geo transition but not the root node, add task only but not flush
+    // or add to expand list, self node will be added to expand list in next layout
+    if (geometryTransition != nullptr && !IsRootMeasureNode()) {
+        return;
     }
     if (geometryTransition != nullptr) {
         pipeline->FlushSyncGeometryNodeTasks();
