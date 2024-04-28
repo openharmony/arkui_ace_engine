@@ -1613,6 +1613,7 @@ HWTEST_F(GridIrregularLayoutTest, GetOverScrollOffset001, TestSize.Level1)
         model.SetEdgeEffect(EdgeEffect::SPRING, true);
         ViewAbstract::SetHeight(CalcLength(300.0f));
     });
+    EXPECT_TRUE(pattern_->irregular_);
     auto& info = pattern_->gridLayoutInfo_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     UpdateCurrentOffset(-200.0f);

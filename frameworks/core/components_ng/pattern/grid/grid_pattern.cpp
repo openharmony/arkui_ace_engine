@@ -1911,8 +1911,8 @@ bool GridPattern::IsPredictOutOfRange(int32_t index) const
 
 inline bool GridPattern::UseIrregularLayout() const
 {
-    return SystemProperties::GetGridIrregularLayoutEnabled() &&
-           GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions();
+    return irregular_ || (SystemProperties::GetGridIrregularLayoutEnabled() &&
+           GetLayoutProperty<GridLayoutProperty>()->HasLayoutOptions());
 }
 
 bool GridPattern::IsReverse() const
