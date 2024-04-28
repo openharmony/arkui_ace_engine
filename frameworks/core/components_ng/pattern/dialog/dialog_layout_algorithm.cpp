@@ -266,7 +266,6 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         maxSize.Width() - dialogTheme->GetMarginLeft().ConvertToPx() - dialogTheme->GetMarginRight().ConvertToPx();
     auto defaultMaxWidth = dialogTheme->GetContainerMaxWidth().ConvertToPx();
     width = defaultMaxWidth < width ? defaultMaxWidth : width;
-    
     if (dialogProp->GetWidth().has_value()) {
         auto dialogWidth = dialogProp->GetWidth().value_or(Dimension(-1, DimensionUnit::VP));
         auto widthVal = dialogWidth.Unit() == DimensionUnit::PERCENT ? maxSize.Width() : dialogWidth.ConvertToPx();
@@ -396,14 +395,15 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
 }
 int32_t DialogLayoutAlgorithm::GetDeviceColumn(GridSizeType type)
 {
-    int32_t columnNum = 0;
+    int32_t columnNum;
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, columnNum);
+
+    CHECK_NULL_RETURN(pipelineContext, 0);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, columnNum);
+    CHECK_NULL_RETURN(dialogTheme, 0);
     int32_t deviceColumn = dialogTheme->GetDeviceColumns();
     if (deviceColumn > 0) {
-        return deviceColumn;
+        columnNum = deviceColumn;
     } else {
         if (type == GridSizeType::SM) {
             columnNum = DIALOG_DEVICE_COLUMN_TWO;
