@@ -2272,9 +2272,11 @@ void TextPattern::EnsureOverlayExists()
 
         auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        layoutProperty->UpdatePixelRound(pixelRound);
-        textLayoutProperty->UpdatePixelRound(pixelRound);
+        if (0 == textLayoutProperty->GetPixelRound()) {
+            textLayoutProperty->UpdatePixelRound(pixelRound);
+        }
 
+        layoutProperty->UpdatePixelRound(pixelRound);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
