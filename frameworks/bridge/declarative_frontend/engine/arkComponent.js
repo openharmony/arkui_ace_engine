@@ -9444,7 +9444,7 @@ class TextAreaTypeModifier extends ModifierWithKey {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-TextAreaTypeModifier.identity = Symbol('textAreaTypeCounter');
+TextAreaTypeModifier.identity = Symbol('textAreaType');
 class TextAreaPaddingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
