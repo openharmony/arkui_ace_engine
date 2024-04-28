@@ -107,6 +107,8 @@ public:
 
     void FlushContentModifier();
 
+    void FlushForegroundModifier();
+
 private:
     WeakPtr<RenderContext> renderContext_;
     RefPtr<GeometryNode> geometryNode_;
