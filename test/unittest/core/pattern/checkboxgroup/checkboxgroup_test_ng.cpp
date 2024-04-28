@@ -92,6 +92,7 @@ constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
 constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
 constexpr Dimension SHADOW_WIDTH_FORUPDATE = Dimension(6.0);
 constexpr float CHECKBOX_GROUP_LENGTH_ZERO = 0.0f;
+constexpr Dimension PADDING_SIZE = Dimension(2.0);
 } // namespace
 
 class CheckBoxGroupTestNG : public testing::Test {
@@ -123,7 +124,7 @@ CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
     CheckBoxGroupModifier::Parameters parameters = { BORDER_WIDTH, BORDER_RADIUS, CHECK_STROKE, CHECKMARK_PAINTSIZE,
         HOVER_DURATION, HOVER_TO_TOUCH_DURATION, POINT_COLOR, ACTIVE_COLOR, INACTIVE_COLOR, SHADOW_COLOR,
         CLICK_EFFECT_COLOR, HOVER_COLOR, INACTIVE_POINT_COLOR, HOVER_RADIUS, HORIZONTAL_PADDING, VERTICAL_PADDING,
-        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, CheckBoxGroupPaintProperty::SelectStatus::NONE };
+        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, PADDING_SIZE, CheckBoxGroupPaintProperty::SelectStatus::NONE };
 
     return parameters;
 }
