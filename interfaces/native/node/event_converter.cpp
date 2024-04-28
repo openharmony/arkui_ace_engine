@@ -128,6 +128,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
                 return ON_LIST_SCROLL_FRAME_BEGIN;
             }
             return ON_SCROLL_FRAME_BEGIN;
+        case NODE_SCROLL_EVENT_ON_WILL_SCROLL:
+            return ON_SCROLL_WILL_SCROLL;
+        case NODE_SCROLL_EVENT_ON_DID_SCROLL:
+            return ON_SCROLL_DID_SCROLL;
         case NODE_SCROLL_EVENT_ON_SCROLL_START:
             if (arkUINodeType == ARKUI_NODE_LIST) {
                 return ON_LIST_SCROLL_START;
@@ -209,6 +213,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
                 return ON_LIST_WILL_SCROLL;
             }
             return ON_WILL_SCROLL;
+        case NODE_ON_DID_SCROLL:
+            return ON_DID_SCROLL;
         case NODE_ON_TOUCH_INTERCEPT:
             return ON_TOUCH_INTERCEPT;
         case NODE_ON_REACH_END:
@@ -227,6 +233,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL;
         case ON_SCROLL_FRAME_BEGIN:
             return NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN;
+        case ON_SCROLL_WILL_SCROLL:
+            return NODE_SCROLL_EVENT_ON_WILL_SCROLL;
+        case ON_SCROLL_DID_SCROLL:
+            return NODE_SCROLL_EVENT_ON_DID_SCROLL;
         case ON_SCROLL_START:
             return NODE_SCROLL_EVENT_ON_SCROLL_START;
         case ON_SCROLL_STOP:

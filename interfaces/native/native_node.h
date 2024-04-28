@@ -4315,6 +4315,9 @@ typedef enum {
      * needs to scroll based on the real-world situation and return the result in this parameter. \n
      */
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
+
+    NODE_SCROLL_EVENT_ON_WILL_SCROLL,
+    NODE_SCROLL_EVENT_ON_DID_SCROLL,
     /**
      * @brief Defines the event triggered when scrolling starts in the <b>ARKUI_NODE_SCROLL</b> component.
      *

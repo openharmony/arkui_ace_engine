@@ -547,6 +547,44 @@ void SetOnScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
     ScrollModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
 
+void SetOnWillScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onWillScroll = [nodeId, node, extraParam](const Dimension& xOffset, const Dimension& yOffset,
+        const ScrollState& state) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_WILL_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.Value());
+        event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
+        event.componentAsyncEvent.data[2].i32 = static_cast<int>(state);
+        SendArkUIAsyncEvent(&event);
+    };
+    ScrollModelNG::SetOnWillScroll(frameNode, std::move(onWillScroll));
+}
+
+void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onDidScroll = [nodeId, node, extraParam](const Dimension& xOffset, const Dimension& yOffset,
+        const ScrollState& state) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_DID_SCROLL;
+        event.componentAsyncEvent.data[0].f32 = static_cast<float>(xOffset.Value());
+        event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
+        event.componentAsyncEvent.data[2].i32 = static_cast<int>(state);
+        SendArkUIAsyncEvent(&event);
+    };
+    ScrollModelNG::SetOnDidScroll(std::move(onDidScroll));
+}
+
 void SetOnScrollStart(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

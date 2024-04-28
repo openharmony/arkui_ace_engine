@@ -22,6 +22,8 @@ const ArkUIScrollModifier* GetScrollModifier();
 
 void SetOnScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
+void SetOnWillScroll(ArkUINodeHandle node, void* extraParam);
+void SetOnDidScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollStart(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollEdge(ArkUINodeHandle node, void* extraParam);
