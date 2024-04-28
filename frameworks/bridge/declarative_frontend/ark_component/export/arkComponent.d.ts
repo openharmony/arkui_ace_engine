@@ -16,7 +16,9 @@ declare type KNode = number | null;
 declare function getUINativeModule(): any;
 declare enum ModifierType {
     ORIGIN = 0,
-    STATE = 1
+    STATE = 1,
+    FRAME_NODE = 2,
+    EXPOSE_MODIFIER = 3,
 }
 declare class JsPointerClass {
     invalid(): boolean;
