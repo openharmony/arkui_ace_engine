@@ -72,6 +72,10 @@ void CustomNode::Render()
                 child->MountToParent(Claim(this));
             }
         }
+        {
+            ACE_SCOPED_TRACE("CustomNode::DidBuild");
+            FireDidBuild();
+        }
     }
     {
         FireRecycleRenderFunc();

@@ -94,6 +94,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
+std::vector<double> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
 
 void SystemProperties::InitDeviceType(DeviceType type)

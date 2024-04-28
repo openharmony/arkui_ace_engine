@@ -183,6 +183,8 @@ void PipelineContext::SetContainerWindow(bool isShow) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
+void PipelineContext::ChangeDarkModeBrightness(bool isFocus) {}
+
 void PipelineContext::SetAppTitle(const std::string& title) {}
 
 void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
@@ -566,6 +568,10 @@ void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
 
 void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
 
+bool PipelineContext::IsContainerModalVisible()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

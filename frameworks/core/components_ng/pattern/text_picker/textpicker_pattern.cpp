@@ -625,7 +625,7 @@ void TextPickerPattern::ProcessCascadeOptions(const std::vector<NG::TextCascadeP
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[selecteds_[index]].children, reOptions, index + 1);
         }
-        if (i == options.size() - 1) {
+        if (options.size() > 0 && i == options.size() - 1) {
             option.children = options[0].children;
             reOptions.emplace_back(option);
             return ProcessCascadeOptions(options[0].children, reOptions, index + 1);
@@ -744,7 +744,7 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     result = std::string("{\"value\":") + "[";
     for (uint32_t i = 0; i < values.size(); i++) {
         result += "\"" + values[i];
-        if (i != values.size() - 1) {
+        if (values.size() > 0 && i != values.size() - 1) {
             result += "\",";
         } else {
             result += "\"]";
@@ -753,7 +753,7 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     result += std::string(",\"index\":") + "[";
     for (uint32_t i = 0; i < indexs.size(); i++) {
         result += "\"" + std::to_string(indexs[i]);
-        if (i != indexs.size() - 1) {
+        if (indexs.size() > 0 && i != indexs.size() - 1) {
             result += "\",";
         } else {
             result += "\"]";
@@ -854,7 +854,7 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
             result += std::string(", \"children\":");
             result += GetOptionsCascadeStr(options[i].children);
         }
-        if (i != options.size() - 1) {
+        if (options.size() > 0 && i != options.size() - 1) {
             result += "},";
         } else {
             result += "}]";
@@ -876,7 +876,7 @@ std::string TextPickerPattern::GetOptionsMultiStrInternal() const
                 result += "\"]";
             }
         }
-        if (i != cascadeOptions_.size() - 1) {
+        if (cascadeOptions_.size() > 0 && i != cascadeOptions_.size() - 1) {
             result += ",";
         } else {
             result += "]";

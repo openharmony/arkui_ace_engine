@@ -56,6 +56,57 @@ namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 
+std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
+{
+    std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
+    if (!args->IsObject()) {
+        return prop;
+    }
+
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    CalcDimension topLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+        radiusTopLeft = topLeft;
+    }
+    CalcDimension topRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+        radiusTopRight = topRight;
+    }
+    CalcDimension bottomLeft;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+        radiusBottomLeft = bottomLeft;
+    }
+    CalcDimension bottomRight;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+        radiusBottomRight = bottomRight;
+    }
+    if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+        !radiusBottomRight.has_value()) {
+        return prop;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    if (radiusTopLeft.has_value()) {
+        borderRadius.radiusTopLeft = radiusTopLeft;
+    }
+    if (radiusTopRight.has_value()) {
+        borderRadius.radiusTopRight = radiusTopRight;
+    }
+    if (radiusBottomLeft.has_value()) {
+        borderRadius.radiusBottomLeft = radiusBottomLeft;
+    }
+    if (radiusBottomRight.has_value()) {
+        borderRadius.radiusBottomRight = radiusBottomRight;
+    }
+    borderRadius.multiValued = true;
+    prop = borderRadius;
+
+    return prop;
+}
+
 std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;
@@ -69,19 +120,7 @@ std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args
         borderRadius.multiValued = false;
         prop = borderRadius;
     } else if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.radiusTopLeft = topLeft;
-        borderRadius.radiusTopRight = topRight;
-        borderRadius.radiusBottomLeft = bottomLeft;
-        borderRadius.radiusBottomRight = bottomRight;
-        borderRadius.multiValued = true;
-        prop = borderRadius;
+        prop = HandleDifferentRadius(args);
     }
     return prop;
 }
@@ -149,6 +188,11 @@ ButtonInfo ParseButtonStyle(const JSRef<JSObject>& pickerButtonParamObject)
         buttonInfo.borderRadius = radius.value();
     }
 
+    auto primaryValue = pickerButtonParamObject->GetProperty("primary");
+    if (primaryValue->IsBoolean()) {
+        buttonInfo.isPrimary = primaryValue->ToBoolean();
+    }
+
     return buttonInfo;
 }
 
@@ -159,6 +203,7 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
     if (acceptButtonStyle->IsObject()) {
         auto acceptButtonStyleParamObject = JSRef<JSObject>::Cast(acceptButtonStyle);
         buttonInfos.emplace_back(ParseButtonStyle(acceptButtonStyleParamObject));
+        buttonInfos[0].isAcceptButton = true;
     }
     auto cancelButtonStyle = paramObject->GetProperty("cancelButtonStyle");
     if (cancelButtonStyle->IsObject()) {
@@ -596,6 +641,9 @@ std::map<std::string, NG::DialogGestureEvent> JSCalendarPickerDialog::DialogCanc
 
 void AppearDialogEvent(const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
@@ -625,6 +673,9 @@ void AppearDialogEvent(const JSCallbackInfo& info, std::map<std::string, NG::Dia
 void DisappearDialogEvent(
     const JSCallbackInfo& info, std::map<std::string, NG::DialogCancelEvent>& dialogLifeCycleEvent)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");

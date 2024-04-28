@@ -84,7 +84,7 @@ struct EdgesParam {
 };
 
 enum class AlignDirection {
-    LEFT,
+    LEFT = 0,
     MIDDLE,
     RIGHT,
     TOP,

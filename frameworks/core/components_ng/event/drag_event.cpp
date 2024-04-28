@@ -132,6 +132,49 @@ void DragEventActuator::CancelDragForWeb()
     }
 }
 
+/**
+ * Do some nessessary check before returning the gesture recognizer collection result
+ * to parent during the hittest process. For example, if there is one drag operation
+ * already in our system, it is not allowed to start new interation for drag operation.
+ */
+bool DragEventActuator::IsGlobalStatusSuitableForDragging()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, false);
+    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "No need to collect drag gestures result, dragging is %{public}d,"
+            "MSDP dragging is %{public}d",
+            dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * check the current node's status to decide if it can initiate one drag operation
+ */
+bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
+    const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_RETURN(gestureHub, false);
+    if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
+        IsBelongToMultiItemNode(frameNode) || touchRestrict.inputEventType == InputEventType::AXIS) {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "No need to collect drag gestures result, drag forbidden set is %{public}d,"
+            "frameNode draggable is %{public}d, custom set is %{public}d",
+            gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
+        return false;
+    }
+
+    return true;
+}
+
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
@@ -146,16 +189,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetPrepareDragFrameNode(nullptr);
-    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, dragging is %{public}d,"
-            "MSDP dragging is %{public}d", dragDropManager->IsDragging(), dragDropManager->IsMsdpDragging());
-        return;
-    }
-    if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        IsBelongToMultiItemNode(frameNode) || touchRestrict.inputEventType == InputEventType::AXIS) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d", gestureHub->IsDragForbidden(),
-            frameNode->IsDraggable(), frameNode->IsCustomerSet());
+    if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
         return;
     }
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
@@ -373,6 +407,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->SetIsNotInPreviewState(true);
+        if (actuator->userCallback_) {
+            auto customLongPress = actuator->userCallback_->GetLongPressEventFunc();
+            if (customLongPress) {
+                customLongPress(info);
+            }
+        }
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
@@ -436,7 +476,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->SetBadgeNumber(badgeNumber.value());
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
-        actuator->SetFilter(actuator);
+        bool isBindMenuPreview = gestureHub->GetPreviewMode() != MenuPreviewMode::NONE;
+        if (!isBindMenuPreview) {
+            actuator->SetFilter(actuator);
+        }
         auto manager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(manager);
         actuator->SetIsNotInPreviewState(false);
@@ -450,7 +493,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        if (gestureHub->GetPreviewMode() == MenuPreviewMode::NONE) {
+        if (!isBindMenuPreview) {
             if (actuator->IsNeedGather()) {
                 DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
                 actuator->ShowPreviewBadgeAnimation(actuator, manager);
@@ -671,7 +714,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
 OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap)
 {
     CHECK_NULL_RETURN(frameNode, OffsetF());
-    auto centerPosition = frameNode->GetPaintRectCenter();
+    auto centerPosition = frameNode->GetPaintRectCenter(true);
     float width = 0.0f;
     float height = 0.0f;
     if (pixelMap) {

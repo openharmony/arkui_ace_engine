@@ -111,6 +111,8 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
     void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
+    float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper, RefPtr<NG::GeometryNode>& geometryNode,
+		float offsetX);
 
     // set variables from theme
     void InitializeTheme();

@@ -93,9 +93,12 @@ struct RouterPageInfoNG {
     std::string name;
     std::string path;
     RouterPageState state;
+    std::string pageId;
 
-    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state)
-        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state)
+    RouterPageInfoNG(napi_value context, int32_t index, std::string name, std::string path, RouterPageState state,
+        std::string pageId)
+        : context(context), index(index), name(std::move(name)), path(std::move(path)), state(state),
+          pageId(std::move(pageId))
     {}
 };
 
@@ -130,8 +133,7 @@ public:
         std::optional<NavDestinationInfo>&& to, NavigationOperation operation);
     using NavigationHandleFunc = void (*)(const NavDestinationInfo& info);
     using ScrollEventHandleFunc = void (*)(const std::string&, ScrollEventType, float);
-    using RouterPageHandleFunc = void (*)(
-        AbilityContextInfo&, napi_value, int32_t, const std::string&, const std::string&, RouterPageState);
+    using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
     using NavDestinationSwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;

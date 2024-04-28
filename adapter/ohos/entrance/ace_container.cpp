@@ -28,6 +28,7 @@
 #include "base/json/json_util.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
+#include "ui_extension_context.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
 
@@ -2618,6 +2619,17 @@ void AceContainer::RegisterOverlayNodePositionsUpdateCallback(
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     CHECK_NULL_VOID(pipeline);
     pipeline->RegisterOverlayNodePositionsUpdateCallback(std::move(callback));
+}
+
+void AceContainer::TerminateUIExtension()
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    uiExtensionContext->TerminateSelf();
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

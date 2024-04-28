@@ -100,6 +100,7 @@ struct MouseEvent final {
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     int32_t touchEventId;
     int32_t originalId = 0;
+    bool isInjected = false;
 
     Offset GetOffset() const
     {
@@ -151,7 +152,8 @@ struct MouseEvent final {
                 .targetDisplayId = targetDisplayId,
                 .sourceType = sourceType,
                 .pointerEvent = pointerEvent,
-                .originalId = originalId
+                .originalId = originalId,
+                .isInjected = isInjected
             };
         }
 
@@ -175,7 +177,8 @@ struct MouseEvent final {
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
             .pointerEvent = pointerEvent,
-            .originalId = originalId
+            .originalId = originalId,
+            .isInjected = isInjected
         };
     }
 
@@ -216,7 +219,8 @@ struct MouseEvent final {
             .SetTargetDisplayId(targetDisplayId)
             .SetSourceType(sourceType)
             .SetPointerEvent(pointerEvent)
-            .SetOriginalId(GetId());
+            .SetOriginalId(GetId())
+            .SetIsInjected(isInjected);
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -242,7 +246,8 @@ struct MouseEvent final {
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
             .pointerEvent = pointerEvent,
-            .originalId = originalId
+            .originalId = originalId,
+            .isInjected = isInjected
         };
     }
 };

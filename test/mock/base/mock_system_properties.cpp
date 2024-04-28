@@ -64,6 +64,7 @@ bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
+std::vector<double> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
 bool g_irregularGrid = true;

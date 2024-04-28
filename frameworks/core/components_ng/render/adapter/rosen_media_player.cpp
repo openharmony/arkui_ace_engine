@@ -118,11 +118,6 @@ bool RosenMediaPlayer::SetSource(const std::string& src)
         LOGI("Source without fd, just return true.");
         return true;
     }
-    return SetSourceByFd(fd);
-}
-
-bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
-{
     if (fd >= 0) {
         // Get size of file.
         struct stat statBuf {};
@@ -143,6 +138,26 @@ bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
     }
     LOGE("Video source fd is invalid.");
     return false;
+}
+
+bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
+{
+    if (fd < 0) {
+        LOGE("Video source fd is invalid.");
+        return false;
+    }
+    struct stat statBuf {};
+    auto statRes = fstat(fd, &statBuf);
+    if (statRes != 0) {
+        LOGE("Video media player get stat failed.");
+        return false;
+    }
+    auto size = statBuf.st_size;
+    if (mediaPlayer_ && mediaPlayer_->SetSource(fd, 0, size) != 0) {
+        LOGE("Video media player etSource failed");
+        return false;
+    }
+    return true;
 }
 
 // Interim programme

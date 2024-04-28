@@ -703,6 +703,9 @@ void RosenRenderContext::PaintBackground()
         PaintRSBgImage();
 #endif
     } else {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            rsNode_->SetBgImage(std::make_shared<Rosen::RSImage>());
+        }
         return;
     }
 
@@ -727,14 +730,24 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
 {
     CHECK_NULL_VOID(rsNode_);
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
+        bgImage_ = nullptr;
+        bgLoadingCtx_ = nullptr;
+        PaintBackground();
         return;
     }
     if (!bgLoadingCtx_ || src != bgLoadingCtx_->GetSourceInfo()) {
-        LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
-        bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
-        CHECK_NULL_VOID(bgLoadingCtx_);
-        bgLoadingCtx_->LoadImageData();
+        auto frameNode = GetHost();
+        auto callback = [src, weak = WeakClaim(this)] {
+            auto renderContext = weak.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->OnBackgroundImageUpdate(src);
+        };
+        frameNode->SetColorModeUpdateCallback(std::move(callback));
     }
+    LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
+    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
+    CHECK_NULL_VOID(bgLoadingCtx_);
+    bgLoadingCtx_->LoadImageData();
 }
 
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& /*imageRepeat*/)
@@ -1913,11 +1926,7 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     // and triggered in AnimateTo closure.
     // Note: this default transition effect will be removed after all transitions finished, implemented in
     // OnTransitionInFinish. and OnTransitionOutFinish.
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (isBreakingPoint_ && !transitionEffect_ &&
-        (pipeline->GetSyncAnimationOption().IsValid() ||
-            ViewStackProcessor::GetInstance()->GetImplicitAnimationOption().IsValid())) {
+    if (isBreakingPoint_ && !transitionEffect_ && AnimationUtils::IsImplicitAnimationOpen()) {
         hasDefaultTransition_ = true;
         transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
         RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
@@ -2120,6 +2129,14 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
 }
 
+void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect)
+{
+    auto isAccessibilityFocus = GetAccessibilityFocus().value_or(false);
+    if (isAccessibilityFocus) {
+        PaintAccessibilityFocus();
+    }
+}
+
 void RosenRenderContext::OnUseEffectUpdate(bool useEffect)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -2150,14 +2167,19 @@ void RosenRenderContext::PaintAccessibilityFocus()
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
     frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
+    RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
+    if (localRect != RectT<int32_t>()) {
+        RectF globalRect = frameRect.GetRect();
+        globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
+            localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
+        frameRect.SetRect(globalRect);
+    }
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
 void RosenRenderContext::ClearAccessibilityFocus()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(accessibilityFocusStateModifier_);
     rsNode_->RemoveModifier(accessibilityFocusStateModifier_);
     RequestNextFrame();
@@ -4618,6 +4640,15 @@ bool RosenRenderContext::StopTextureExport()
         rsSurfaceNode->SetTextureExport(false);
     }
     return true;
+}
+
+void RosenRenderContext::SetSurfaceRotation(bool isLock)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    if (rsSurfaceNode) {
+        rsSurfaceNode->SetForceHardwareAndFixRotation(isLock);
+    }
 }
 
 void RosenRenderContext::ClearDrawCommands()

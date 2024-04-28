@@ -84,4 +84,11 @@ void LoadingProgressModelNG::SetForegroundColor(FrameNode* frameNode, const Colo
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
+
+void LoadingProgressModelNG::SetBuilderFunc(FrameNode* frameNode, NG::LoadingProgressMakeCallback&& makeFunc)
+{
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBuilderFunc(std::move(makeFunc));
+}
 } // namespace OHOS::Ace::NG

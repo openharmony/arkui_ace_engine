@@ -60,6 +60,8 @@ private:
     void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
 
     bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
+    bool IsGetExpandDisplayValidHeight();
+    RefPtr<PipelineContext> GetCurrentPipelineContext();
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
@@ -100,6 +102,7 @@ private:
     TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
 
     bool expandDisplay_ = false;
+    double expandDisplayValidHeight_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

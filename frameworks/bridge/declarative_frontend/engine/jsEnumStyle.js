@@ -2975,8 +2975,8 @@ let ButtonRole;
 let MenuPolicy;
 (function (MenuPolicy) {
   MenuPolicy['DEFAULT'] = 0;
-  MenuPolicy['NEVER'] = 1;
-  MenuPolicy['ALWAYS'] = 2;
+  MenuPolicy['HIDE'] = 1;
+  MenuPolicy['SHOW'] = 2;
 })(MenuPolicy || (MenuPolicy = {}));
 
 let PreDragStatus;
@@ -3011,4 +3011,16 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
+  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
 })(StyledStringKey || (StyledStringKey = {}));
+
+class CustomSpan {
+  type_ = "CustomSpan"
+}
+
+let FocusPriority;
+(function (FocusPriority) {
+  FocusPriority[FocusPriority["AUTO"] = 0] = "AUTO";
+  FocusPriority[FocusPriority["PRIOR"] = 2000] = "PRIOR";
+  FocusPriority[FocusPriority["PREVIOUS"] = 3000] = "PREVIOUS";
+})(FocusPriority || (FocusPriority = {}));

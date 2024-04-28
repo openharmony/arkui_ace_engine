@@ -91,6 +91,7 @@ constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1473,6 +1474,8 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         std::optional<TextDecorationStyle> textDecorationStyle;
         if (styleValue->IsNumber()) {
             textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        } else {
+            textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
         }
         TextFieldModel::GetInstance()->SetTextDecoration(textDecoration);
         TextFieldModel::GetInstance()->SetTextDecorationColor(result);
@@ -1582,12 +1585,18 @@ void JSTextField::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
         auto tmpInfo = info[0];
-        if (info.Length() < 1 || !tmpInfo->IsNumber() || tmpInfo->IsUndefined()) {
+        int32_t overflow = 0;
+        if (info.Length() < 1) {
             break;
         }
-        auto overflow = tmpInfo->ToNumber<int32_t>();
-        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        if (!tmpInfo->IsNumber() && !tmpInfo->IsUndefined()) {
             break;
+        }
+        if (!tmpInfo->IsUndefined()) {
+            overflow = tmpInfo->ToNumber<int32_t>();
+            if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+                break;
+            }
         }
         TextFieldModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
     } while (false);

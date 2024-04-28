@@ -156,6 +156,7 @@ private:
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
         std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+    void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper);
     int32_t GetFirstSpanStartPositon();
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;

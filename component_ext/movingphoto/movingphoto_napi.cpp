@@ -73,7 +73,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     NG::MovingPhotoModelNG::GetInstance()->Create(Referenced::Claim(controller));
 
     napi_value jsData = nullptr;
-    napi_get_named_property(env, argv[0], "data", &jsData);
+    napi_get_named_property(env, argv[0], "movingPhoto", &jsData);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, jsData, napi_object)) {
         return ExtNapiUtils::CreateNull(env);
     }
@@ -240,16 +240,16 @@ napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info inf
 {
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-    auto controller = new (std::nothrow) NG::MovingPhotoController();
+    auto controller = AceType::MakeRefPtr<NG::MovingPhotoController>();
     if (controller == nullptr) {
         return ExtNapiUtils::CreateNull(env);
     }
+    controller->IncRefCount();
     napi_wrap(
-        env, thisVar, controller,
+        env, thisVar, AceType::RawPtr(controller),
         [](napi_env env, void* data, void* hint) {
             auto* controller = reinterpret_cast<NG::MovingPhotoController*>(data);
-            delete controller;
-            controller = nullptr;
+            controller->DecRefCount();
         },
         nullptr, nullptr);
     return thisVar;

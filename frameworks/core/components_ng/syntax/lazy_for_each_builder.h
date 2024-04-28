@@ -249,6 +249,19 @@ public:
         return needBuild;
     }
 
+    int32_t GetChildIndex(const RefPtr<FrameNode>& targetNode)
+    {
+        for (auto& [index, node] : cachedItems_) {
+            if (node.second) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                if (frameNode == targetNode) {
+                    return index;
+                }
+            }
+        }
+        return -1;
+    }
+
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {
         for (const auto& item : cachedItems_) {

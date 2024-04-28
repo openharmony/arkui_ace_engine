@@ -23,6 +23,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -332,7 +333,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
         child.second->AttachToMainTree();
     }
     PostIdleTask();
-    return child.second->GetFrameChildByIndex(0, needBuild);
+    auto childNode = child.second->GetFrameChildByIndex(0, needBuild);
+    if (onMoveEvent_) {
+        InitDragManager(AceType::DynamicCast<FrameNode>(childNode));
+    }
+    return childNode;
 }
 
 int32_t LazyForEachNode::GetIndexByUINode(const RefPtr<UINode>& uiNode) const
@@ -425,4 +430,78 @@ void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configura
     }
 }
 
+void LazyForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
+{
+    if (onMove && !onMoveEvent_) {
+        InitAllChilrenDragManager(true);
+    } else if (!onMove && onMoveEvent_) {
+        InitAllChilrenDragManager(false);
+    }
+    onMoveEvent_ = onMove;
+}
+
+void LazyForEachNode::MoveData(int32_t from, int32_t to)
+{
+    if (builder_) {
+        builder_->OnDataMoveToNewPlace(from, to);
+    }
+    children_.clear();
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)
+{
+    CHECK_NULL_RETURN(builder_, nullptr);
+    auto child = builder_->GetChildByIndex(index, false, false);
+    CHECK_NULL_RETURN(child.second, nullptr);
+    return AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
+}
+int32_t LazyForEachNode::GetFrameNodeIndex(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_RETURN(builder_, -1);
+    return builder_->GetChildIndex(node);
+}
+void LazyForEachNode::InitDragManager(const RefPtr<FrameNode>& childNode)
+{
+    CHECK_NULL_VOID(childNode);
+    auto parentNode = GetParentFrameNode();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+        return;
+    }
+    auto pattern = childNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitDragManager(AceType::Claim(this));
+}
+
+void LazyForEachNode::InitAllChilrenDragManager(bool init)
+{
+    auto parentNode = GetParentFrameNode();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
+        return;
+    }
+    const auto& children = GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        auto childNode = child->GetFrameChildByIndex(0, false);
+        auto listItem = AceType::DynamicCast<FrameNode>(childNode);
+        if (!listItem) {
+            continue;
+        }
+
+        auto pattern = listItem->GetPattern<ListItemPattern>();
+        if (!pattern) {
+            continue;
+        }
+        if (init) {
+            pattern->InitDragManager(AceType::Claim(this));
+        } else {
+            pattern->DeInitDragManager();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

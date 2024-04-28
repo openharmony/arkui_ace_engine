@@ -123,8 +123,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
         // text content is empty
-        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]",
-            heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
+        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal,
+            paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
         return SizeF {};
     }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
@@ -219,6 +219,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     auto aiSpanMap = pattern->GetAISpanMap();
     std::vector<WeakPtr<FrameNode>> imageNodeList;
+    std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraws;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
@@ -239,10 +240,9 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             Dimension baselineOffset = Dimension(0.0f);
             auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>((*iterItems)->GetLayoutProperty());
             if (imageLayoutProperty) {
-                placeholderStyle.verticalAlign = imageLayoutProperty->GetVerticalAlign().value_or(
-                    VerticalAlign::BOTTOM);
-                baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(
-                    Dimension(0.0f));
+                placeholderStyle.verticalAlign =
+                    imageLayoutProperty->GetVerticalAlign().value_or(VerticalAlign::BOTTOM);
+                baselineOffset = imageLayoutProperty->GetBaselineOffset().value_or(Dimension(0.0f));
             }
             auto geometryNode = (*iterItems)->GetGeometryNode();
             if (!geometryNode) {
@@ -264,6 +264,15 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             auto imageNode = (*iterItems)->GetHostNode();
             imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
             iterItems++;
+        } else if (AceType::DynamicCast<CustomSpanItem>(child)) {
+            auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+            UpdateParagraphByCustomSpan(customSpanItem, layoutWrapper);
+            child->content = " ";
+            child->position = spanTextLength + 1;
+            spanTextLength += 1;
+            if (customSpanItem->onDraw.has_value()) {
+                onDraws.emplace_back(customSpanItem->onDraw.value());
+            }
         } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
             if (!placeholderSpanItem) {
@@ -308,6 +317,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
         }
     }
     pattern->SetImageSpanNodeList(imageNodeList);
+    pattern->SetOnDrawList(onDraws);
 }
 
 void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper)
@@ -362,8 +372,39 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     }
 }
 
-void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition,
-    const std::wstring wTextForAI, const TextStyle& textStyle, bool isDragging)
+void TextLayoutAlgorithm::UpdateParagraphByCustomSpan(
+    RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
+    auto fontSizeOpt = textLayoutProperty->GetFontSize();
+    if (fontSizeOpt.has_value()) {
+        fontSize = fontSizeOpt.value().ConvertToVp() * context->GetFontScale();
+    }
+    auto width = 0.0;
+    auto height = 0.0;
+    if (customSpanItem->onMeasure.has_value()) {
+        auto onMeasure = customSpanItem->onMeasure.value();
+        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+        width = customSpanMetrics.width * context->GetDipScale();
+        height = customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale();
+    }
+    PlaceholderStyle placeholderStyle;
+    placeholderStyle.width = width;
+    placeholderStyle.height = height;
+    placeholderStyle.verticalAlign = VerticalAlign::NONE;
+    customSpanItem->placeholderIndex = customSpanItem->UpdateParagraph(nullptr, paragraph_, placeholderStyle);
+}
+
+void TextLayoutAlgorithm::GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring wTextForAI,
+    const TextStyle& textStyle, bool isDragging)
 {
     int32_t dragStart = dragSpanPosition.dragStart;
     int32_t dragEnd = dragSpanPosition.dragEnd;
@@ -550,15 +591,20 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto contentOffset = GetContentOffset(layoutWrapper);
     std::vector<int32_t> placeholderIndex;
+    std::vector<int32_t> customSpanIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
+            continue;
+        }
+        if (AceType::InstanceOf<CustomSpanItem>(child)) {
+            customSpanIndex.emplace_back(child->placeholderIndex);
             continue;
         }
         if (AceType::InstanceOf<ImageSpanItem>(child) || AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             placeholderIndex.emplace_back(child->placeholderIndex);
         }
     }
-    if (spanItemChildren_.empty() || placeholderIndex.empty()) {
+    if (spanItemChildren_.empty() || (placeholderIndex.empty() && customSpanIndex.empty())) {
         return;
     }
 
@@ -578,7 +624,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         child->SetActive(true);
-        auto rect = rectsForPlaceholders.at(index) - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+        auto rect = rectsForPlaceholders.at(placeholderIndex.at(index)) - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
@@ -596,12 +642,52 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, contentOffset);
+    pattern->InitCustomSpan(customSpanIndex);
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
     const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
-    return AdaptMinFontSize(textStyle, content, 1.0_fp, contentConstraint, layoutWrapper);
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
+        return false;
+    }
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
+        return false;
+    }
+    if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
+            return false;
+        }
+        return true;
+    }
+    constexpr Dimension ADAPT_UNIT = 1.0_fp;
+    Dimension step = ADAPT_UNIT;
+    if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
+        step = textStyle.GetAdaptFontSizeStep();
+    }
+    double stepSize = 0.0;
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(),
+            contentConstraint.maxSize.Height(), stepSize)) {
+        return false;
+    }
+    auto maxSize = GetMaxMeasureSize(contentConstraint);
+    while (GreatOrEqual(maxFontSize, minFontSize)) {
+        textStyle.SetFontSize(Dimension(maxFontSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
+            return false;
+        }
+        if (!DidExceedMaxLines(maxSize)) {
+            break;
+        }
+        maxFontSize -= stepSize;
+    }
+    return true;
 }
 
 bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
@@ -675,7 +761,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
         }
     } else {
         if (!AdaptMinTextSize(
-                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
             return false;
         }
     }

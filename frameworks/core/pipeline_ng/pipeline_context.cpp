@@ -44,6 +44,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/layout_inspector.h"
@@ -665,7 +666,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushMessages();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
-    if (!isFormRender_ && onShow_ && onFocus_) {
+    if (!isFormRender_ && onShow_ && onFocus_ && isWindowHasFocused_) {
         FlushFocusView();
         FlushFocus();
         FlushFocusScroll();
@@ -764,6 +765,10 @@ void PipelineContext::FlushModifier()
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
+    if (IsFreezeFlushMessage()) {
+        SetIsFreezeFlushMessage(false);
+        return;
+    }
     window_->FlushTasks();
 }
 
@@ -2245,6 +2250,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+    } else if (params[0] == "-allelements") {
+        AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto rootNode = pipeline->GetRootElement();
+            if (rootNode) {
+                DumpLog::GetInstance().Print(0, "ContainerId: " + std::to_string(Container::CurrentId()));
+                rootNode->DumpTree(0);
+                DumpLog::GetInstance().OutPutBySize();
+            }
+        });
     } else if (params[0] == "-default") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutDefault();
@@ -2746,6 +2761,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
+        isWindowHasFocused_ = true;
         auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
         auto curFocusViewHub = curFocusView ? curFocusView->GetFocusHub() : nullptr;
         if (!curFocusViewHub) {
@@ -3438,6 +3454,7 @@ void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, 
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+    customTitleSettedShow_ = customTitleSettedShow;
 }
 
 void PipelineContext::SetContainerModalTitleHeight(int32_t height)
@@ -3591,4 +3608,28 @@ bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
     return true;
 }
 
+void PipelineContext::ChangeDarkModeBrightness(bool isFocus)
+{
+    if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0) {
+        auto percent = SystemProperties::GetDarkModeBrightnessPercent();
+        auto stage = stageManager_->GetStageNode();
+        CHECK_NULL_VOID(stage);
+        auto renderContext = stage->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CalcDimension dimension;
+        if (isFocus) {
+            dimension.SetValue(1 + percent.front());
+        } else {
+            dimension.SetValue(1 + percent.back());
+        }
+        renderContext->UpdateFrontBrightness(dimension);
+    }
+}
+
+bool PipelineContext::IsContainerModalVisible()
+{
+    auto windowManager = GetWindowManager();
+    bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    return isFloatingWindow && customTitleSettedShow_;
+}
 } // namespace OHOS::Ace::NG

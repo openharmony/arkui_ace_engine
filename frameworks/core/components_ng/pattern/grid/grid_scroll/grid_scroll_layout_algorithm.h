@@ -84,6 +84,8 @@ protected:
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     void ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    void ReloadFromUpdateIdxToStartIndex(
+        float mainSize, float crossSize, int32_t updateLineIndex, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     virtual void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper);
@@ -164,13 +166,18 @@ private:
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const GridPredictLayoutParam& param);
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
-    void CompeleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
+    void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
     /**
      * @brief Updates the main line during ReloadToStartIndex based on the new crossCount_.
      *
      * @param startIdx index of the first GridItem in viewport
      */
     virtual void UpdateMainLineOnReload(int32_t startIdx);
+
+    // get [resetFromStart,resetFromUpdate]
+    std::pair<bool, bool> GetResetMode(int32_t updateIdx);
+
+    void CheckReset(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
 protected:
     uint32_t crossCount_ = 0;

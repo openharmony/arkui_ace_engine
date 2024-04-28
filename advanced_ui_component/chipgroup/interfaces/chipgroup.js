@@ -15,6 +15,7 @@
 
 const Chip = requireNapi("arkui.advanced.Chip").Chip;
 const ChipSize = requireNapi("arkui.advanced.Chip").ChipSize;
+
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
@@ -29,10 +30,10 @@ const defaultTheme = {
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         selectedFontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         selectedBackgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        fillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        selectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
-    leftPadding: 16,
-    rightPadding: 16,
 };
 const iconGroupSuffixTheme = {
     backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -180,7 +181,7 @@ export class IconGroupSuffix extends ViewPU {
                 }, Image);
                 Button.pop();
             };
-            this.forEachUpdateFunction(t2, this.items, v2);
+            this.forEachUpdateFunction(t2, this.items || [], v2);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -206,7 +207,6 @@ export class ChipGroup extends ViewPU {
         this.onChange = noop;
         this.scroller = new Scroller();
         this.__isReachEnd = new ObservedPropertySimplePU(this.scroller.isAtEnd(), this, "isReachEnd");
-        this.chipCount = this.items.length;
         this.setInitiallyProvidedValue(m2);
         this.declareWatch("itemStyle", this.itemStyleOnChange);
         this.finalizeConstruction();
@@ -241,9 +241,6 @@ export class ChipGroup extends ViewPU {
         }
         if (k2.isReachEnd !== undefined) {
             this.isReachEnd = k2.isReachEnd;
-        }
-        if (k2.chipCount !== undefined) {
-            this.chipCount = k2.chipCount;
         }
     }
     updateStateVars(j2) {
@@ -339,6 +336,18 @@ export class ChipGroup extends ViewPU {
         }
         return defaultTheme.itemStyle.selectedFontColor;
     }
+    getFillColor() {
+        if (this.itemStyle && this.itemStyle.fontColor) {
+            return this.itemStyle.fontColor;
+        }
+        return defaultTheme.itemStyle.fillColor;
+    }
+    getSelectedFillColor() {
+        if (this.itemStyle && this.itemStyle.selectedFontColor) {
+            return this.itemStyle.selectedFontColor;
+        }
+        return defaultTheme.itemStyle.selectedFillColor;
+    }
     getBackgroundColor() {
         if (this.itemStyle && this.itemStyle.backgroundColor) {
             return this.itemStyle.backgroundColor;
@@ -357,7 +366,10 @@ export class ChipGroup extends ViewPU {
     getSelectedIndexes() {
         let w1 = [];
         w1 = (this.selectedIndexes ?? [0]).filter((y1, z1, a2) => {
-            return (y1 >= 0 && y1 % 1 == 0 && y1 <= this.chipCount);
+            return (y1 >= 0 &&
+                y1 % 1 == 0 &&
+                a2.indexOf(y1) === z1 &&
+                y1 < (this.items || []).length);
         });
         return w1;
     }
@@ -426,6 +438,8 @@ export class ChipGroup extends ViewPU {
                             Chip.bind(this)(makeBuilderParameterProxy("Chip", { prefixIcon: () => ({
                                     src: b1.prefixIcon?.src ?? "",
                                     size: b1.prefixIcon?.size ?? undefined,
+                                    fillColor: this.getFillColor(),
+                                    activatedFillColor: this.getSelectedFillColor()
                                 }), label: () => ({
                                     text: b1?.label?.text ?? " ",
                                     fontColor: this.getFontColor(),
@@ -433,6 +447,8 @@ export class ChipGroup extends ViewPU {
                                 }), suffixIcon: () => ({
                                     src: b1.suffixIcon?.src ?? "",
                                     size: b1.suffixIcon?.size ?? undefined,
+                                    fillColor: this.getFillColor(),
+                                    activatedFillColor: this.getSelectedFillColor()
                                 }), allowClose: () => b1.allowClose ?? false, enabled: () => true, activated: () => this.isSelected(a1), backgroundColor: () => this.getBackgroundColor(), size: () => this.getChipSize(), activatedBackgroundColor: () => this.getSelectedBackgroundColor(), onClicked: () => () => {
                                     if (this.isSelected(a1)) {
                                         this.selectedIndexes.splice(this.selectedIndexes.indexOf(a1), 1);

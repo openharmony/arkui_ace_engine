@@ -155,6 +155,7 @@ void RichEditorPattern::OnModifyDone()
     HandleEnabled();
     ProcessInnerPadding();
     InitScrollablePattern();
+    SetAccessibilityAction();
     if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->StartAITask();
     }
@@ -1352,6 +1353,32 @@ void RichEditorPattern::CloseSystemMenu()
     }
 }
 
+void RichEditorPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetActionSetSelection(
+        [weakPtr = WeakClaim(this)](int32_t start, int32_t end, bool isForward) {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetSelection(start, end, std::nullopt, isForward);
+        });
+
+    textAccessibilityProperty->SetActionSetIndex([weakPtr = WeakClaim(this)](int32_t index) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCaretPosition(index);
+    });
+
+    textAccessibilityProperty->SetActionGetIndex([weakPtr = WeakClaim(this)]() -> int32_t {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_RETURN(pattern, -1);
+        auto index = pattern->GetCaretPosition();
+        return index;
+    });
+}
+
 std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, int32_t end)
 {
     std::vector<ParagraphInfo> res;
@@ -1368,8 +1395,8 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
 
             res.emplace_back(ParagraphInfo {
                 .leadingMarginPixmap = lm.pixmap,
-                .leadingMarginSize = { Dimension(lm.size.Width()).ConvertToVp(),
-                    Dimension(lm.size.Height()).ConvertToVp() },
+                .leadingMarginSize = { lm.size.Width().ToString(),
+                    lm.size.Height().ToString() },
                 .textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START)),
                 .wordBreak = static_cast<int32_t>((*it)->GetWordBreakValue(WordBreak::BREAK_WORD)),
                 .lineBreakStrategy = static_cast<int32_t>((*it)->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY)),
@@ -1714,8 +1741,8 @@ bool RichEditorPattern::HandleUserGestureEvent(
         if (isParagraphHead && !selectedRects.empty()) {
             if (item->leadingMargin.has_value()) {
                 auto addWidth = item->leadingMargin.value().size.Width();
-                selectedRects[0].SetLeft(selectedRects[0].GetX() - addWidth);
-                selectedRects[0].SetWidth(selectedRects[0].GetSize().Width() + addWidth);
+                selectedRects[0].SetLeft(selectedRects[0].GetX() - addWidth.ConvertToPx());
+                selectedRects[0].SetWidth(selectedRects[0].GetSize().Width() + addWidth.ConvertToPx());
             }
             paragraphOffset.SetX(selectedRects[0].GetOffset().GetX());
             paragraphOffset.SetY(selectedRects[0].GetOffset().GetY());
@@ -2409,11 +2436,31 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
-    std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [](RefPtr<SpanItem>& item) {
-        if (item) {
-            item->EndDrag();
-        }
+    std::unordered_set<int32_t> imgNodeIds;
+    std::for_each(dragSpanItems_.begin(), dragSpanItems_.end(), [&imgNodeIds](RefPtr<SpanItem>& item) {
+        CHECK_NULL_VOID(item);
+        item->EndDrag();
+        auto imageSpanItem = DynamicCast<ImageSpanItem>(item);
+        CHECK_NULL_VOID(imageSpanItem);
+        imgNodeIds.emplace(imageSpanItem->imageNodeId);
     });
+    const auto& childrens = host->GetChildren();
+    for (const auto& child : childrens) {
+        auto findResult = imgNodeIds.find(child->GetId());
+        if (findResult == imgNodeIds.end()) {
+            continue;
+        }
+        auto imageNode = DynamicCast<ImageSpanNode>(child);
+        if (!imageNode) {
+            continue;
+        }
+        auto renderContext = imageNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        renderContext->UpdateOpacity(1);
+        imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
     dragSpanItems_.clear();
     if (recoverDragResultObjects_.empty()) {
         return;
@@ -3126,7 +3173,6 @@ void RichEditorPattern::ResetFirstNodeStyle()
         auto&& firstNode = DynamicCast<SpanNode>(*(spans.begin()));
         if (firstNode) {
             firstNode->ResetTextAlign();
-            firstNode->ResetWordBreak();
             firstNode->ResetLineBreakStrategy();
             firstNode->ResetLeadingMargin();
             tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -5037,7 +5083,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
 
 void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& options)
 {
-    if (options.menuPolicy == MenuPolicy::ALWAYS) {
+    if (options.menuPolicy == MenuPolicy::SHOW) {
         if (isMousePressed_ || sourceType_ == SourceType::MOUSE) {
             selectionMenuOffsetByMouse_ = selectionMenuOffsetClick_;
         }
@@ -5046,7 +5092,7 @@ void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& o
         } else {
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll());
         }
-    } else if (options.menuPolicy == MenuPolicy::NEVER) {
+    } else if (options.menuPolicy == MenuPolicy::HIDE) {
         if (SelectOverlayIsOn()) {
             CloseSelectOverlay();
         }
@@ -6475,7 +6521,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
             style = typingTextStyle_;
             ++spanIndex; // create a new span When have a different typingStyle
             offsetInSpan = 0;
-        } else if (spanNode && spanNode->GetSpanItem()) {
+        } else if (!isCreate && spanNode && spanNode->GetSpanItem()) {
             textTemp = StringUtils::ToWstring(spanNode->GetSpanItem()->content);
             textTemp.insert(offsetInSpan, wInsertValue);
         }
@@ -6518,7 +6564,7 @@ void RichEditorPattern::GetReplacedSpanFission(RichEditorChangeValue& changeValu
         if (offsetInSpan != static_cast<int32_t>(textBefore.length())) {
             CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, textBefore.length(),
                 StringUtils::ToString(textBefore), style);
-            innerPosition += textBefore.length();
+            innerPosition += textBefore.length() - offsetInSpan;
         }
         wContent = textAfter;
         index = wContent.find(lineSeparator);
@@ -6598,7 +6644,7 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         return;
     }
     if (isCreate) {
-        info.SetSpanIndex(spans_.size());
+        info.SetSpanIndex(std::distance(spans_.begin(), it) + 1);
         info.SetOffsetInSpan(0);
         return;
     }
@@ -6626,7 +6672,9 @@ void RichEditorPattern::GetDeletedSpan(
         if (direction == RichEditorDeleteDirection::BACKWARD) {
             innerPosition -= emojiLength;
         }
-        length = emojiLength;
+        if (length < emojiLength) {
+            length = emojiLength;
+        }
     }
 
     info.SetOffset(innerPosition);
@@ -6703,17 +6751,18 @@ bool RichEditorPattern::BeforeChangeText(RichEditorChangeValue& changeValue, con
     }
     int32_t innerPosition = caretPosition_;
 
-    // AddTextSpan
+   // AddTextSpan
     std::optional<TextStyle> textStyle = std::nullopt;
     if (options.style.has_value()) {
         textStyle = options.style;
     }
     if (options.offset.has_value()) {
-        if (spans_.empty()) {
+        if (spans_.empty() || options.offset.value() < 0) {
             innerPosition = 0;
+        } else if (options.offset.value() > GetTextContentLength()) {
+            innerPosition = GetTextContentLength();
         } else {
-            auto positionInfo = GetSpanPositionInfo(options.offset.value());
-            innerPosition = positionInfo.spanStart_;
+            innerPosition = options.offset.value();
         }
     } else {
         innerPosition = GetTextContentLength();
@@ -6734,7 +6783,6 @@ void RichEditorPattern::FixMoveDownChange(RichEditorChangeValue& changeValue, in
         }
     }
     for (auto& it : const_cast<std::list<RichEditorAbstractSpanResult>&>(changeValue.GetRichEditorReplacedSpans())) {
-        it.SetSpanRangeStart(it.GetSpanRangeStart() - delLength);
         if (delSpanCount) {
             it.SetSpanIndex(it.GetSpanIndex() - delSpanCount);
         }
@@ -6790,16 +6838,22 @@ void RichEditorPattern::BeforeDrag(
 {
     int length = StringUtils::ToWstring(record.addText.value_or("")).length();
     int32_t nowPosition = innerPosition;
-    if (nowPosition < record.beforeCaretPosition + length) { // move up
+    std::optional<TextStyle> style = std::nullopt;
+    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
+        style = typingTextStyle_.value();
+    }
+    if (!isDragSponsor_) { // drag from outside
+        GetReplacedSpan(changeValue, innerPosition, record.addText.value(), innerPosition, style, true, false);
+    } else if (nowPosition < record.beforeCaretPosition + length) { // move up
         innerPosition = record.beforeCaretPosition;
         GetDeletedSpan(changeValue, innerPosition, length, RichEditorDeleteDirection::FORWARD);
         innerPosition = nowPosition;
-        GetReplacedSpan(changeValue, innerPosition, record.addText.value(), nowPosition, std::nullopt, false, false);
+        GetReplacedSpan(changeValue, innerPosition, record.addText.value(), nowPosition, style, true, false);
     } else { // move down
         innerPosition = record.beforeCaretPosition;
         GetDeletedSpan(changeValue, innerPosition, length, RichEditorDeleteDirection::FORWARD);
         innerPosition = nowPosition - length;
-        GetReplacedSpan(changeValue, innerPosition, record.addText.value(), nowPosition, std::nullopt, false, false);
+        GetReplacedSpan(changeValue, innerPosition, record.addText.value(), nowPosition, style, true, false);
         FixMoveDownChange(changeValue, length);
     }
 }

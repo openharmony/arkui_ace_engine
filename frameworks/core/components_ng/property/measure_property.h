@@ -354,6 +354,14 @@ struct PaddingPropertyT {
         bottom = padding;
     }
 
+    void SetEdges(const T& leftValue, const T& rightValue, const T& topValue, const T& bottomValue)
+    {
+        left = leftValue;
+        right = rightValue;
+        top = topValue;
+        bottom = bottomValue;
+    }
+
     bool operator==(const PaddingPropertyT& value) const
     {
         return (left == value.left) && (right == value.right) && (top == value.top) && (bottom == value.bottom);

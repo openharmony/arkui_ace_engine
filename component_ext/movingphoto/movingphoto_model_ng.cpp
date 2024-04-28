@@ -56,6 +56,19 @@ void MovingPhotoModelNG::Create(const RefPtr<MovingPhotoController>& controller)
 
 void MovingPhotoModelNG::SetImageSrc(const std::string& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = AceType::DynamicCast<MovingPhotoLayoutProperty>(frameNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasImageSourceInfo()) {
+        auto imageSourceInfo = layoutProperty->GetImageSourceInfo().value();
+        const std::string& preValue = imageSourceInfo.GetSrc();
+        if (preValue == value) {
+            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "src not changed.");
+            return;
+        }
+    }
+
     ImageSourceInfo src;
     src.SetSrc(value);
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src);

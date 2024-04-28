@@ -76,7 +76,9 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
-    routerPageHandleFunc_(info, context, index, name, path, state);
+    std::string pageId = std::to_string(pageInfo->GetPageId());
+    RouterPageInfoNG routerPageInfo(context, index, name, path, state, pageId);
+    routerPageHandleFunc_(info, routerPageInfo);
 }
 
 void UIObserverHandler::NotifyDensityChange(double density)
@@ -183,12 +185,14 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
+    std::string pageId = std::to_string(pageInfo->GetPageId());
     return std::make_shared<RouterPageInfoNG>(
         GetUIContextValue(),
         index,
         name,
         path,
-        RouterPageState(pattern->GetPageState()));
+        RouterPageState(pattern->GetPageState()),
+        pageId);
 }
 
 void UIObserverHandler::HandleDrawCommandSendCallBack()

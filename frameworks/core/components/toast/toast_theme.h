@@ -56,7 +56,6 @@ public:
                 return;
             }
 
-            theme->maxWidth_ = toastPattern->GetAttr<Dimension>("toast_content_max_width", 0.0_vp);
             theme->minWidth_ = toastPattern->GetAttr<Dimension>("toast_content_min_width", 0.0_vp);
             theme->minHeight_ = toastPattern->GetAttr<Dimension>("toast_content_min_height", 0.0_vp);
             theme->bottom_ = toastPattern->GetAttr<Dimension>("toast_bottom", 0.0_vp);
@@ -75,6 +74,7 @@ public:
                 theme->marging_ = Edge(toastPattern->GetAttr<Dimension>("toast_margin_left", 0.0_vp).Value(), 0.0,
                     toastPattern->GetAttr<Dimension>("toast_margin_right", 0.0_vp).Value(), 0.0,
                     toastPattern->GetAttr<Dimension>("toast_margin_right", 0.0_vp).Unit());
+                theme->maxWidth_ = toastPattern->GetAttr<Dimension>("toast_content_limit_max_width", 400.0_vp);
                 theme->textStyle_.SetTextColor(toastPattern->GetAttr<Color>("toast_font_primary", Color()));
                 theme->textStyle_.SetFontSize(toastPattern->GetAttr<Dimension>("toast_Body_M", 0.0_vp));
                 theme->textStyle_.SetFontWeight(
@@ -90,6 +90,7 @@ public:
                 theme->marging_ = Edge(toastPattern->GetAttr<Dimension>("toast_margin", 0.0_vp).Value(), 0.0,
                     toastPattern->GetAttr<Dimension>("toast_margin", 0.0_vp).Value(), 0.0,
                     toastPattern->GetAttr<Dimension>("toast_margin", 0.0_vp).Unit());
+                theme->maxWidth_ = toastPattern->GetAttr<Dimension>("toast_content_max_width", 0.0_vp);
                 theme->textStyle_.SetTextColor(toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
                 theme->textStyle_.SetFontSize(toastPattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp));
                 theme->textStyle_.SetFontWeight(

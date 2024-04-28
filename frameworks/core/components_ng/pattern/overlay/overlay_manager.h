@@ -492,6 +492,12 @@ public:
     bool CheckPageNeedAvoidKeyboard() const;
     void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
     void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
+    void EraseMenuInfo(int32_t targetId)
+    {
+        if (menuMap_.find(targetId) != menuMap_.end()) {
+            menuMap_.erase(targetId);
+        }
+    }
 
 private:
     void PopToast(int32_t targetId);
@@ -610,7 +616,7 @@ private:
     int32_t dismissTargetId_ = 0;
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
-    int32_t subWindowId_;
+    int32_t subWindowId_ = -1;
     bool hasPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };

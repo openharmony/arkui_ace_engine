@@ -49,6 +49,7 @@ public:
     void ExecuteForceNodeRerender(int32_t elemId);
     void ExecuteAppear();
     void ExecuteDisappear();
+    void ExecuteDidBuild();
     void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
     void ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper);
     void ExecuteLayout(NG::LayoutWrapper* layoutWrapper);
@@ -92,6 +93,7 @@ private:
     JSWeak<JSObject> jsObject_;
     JSWeak<JSFunc> jsAppearFunc_;
     JSWeak<JSFunc> jsDisappearFunc_;
+    JSWeak<JSFunc> jsDidBuildFunc_;
     JSWeak<JSFunc> jsMeasureFunc_;
     JSWeak<JSFunc> jsMeasureSizeFunc_;
     JSWeak<JSFunc> jsLayoutFunc_;

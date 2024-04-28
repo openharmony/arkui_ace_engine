@@ -389,7 +389,7 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectCenter() const;
+    OffsetF GetPaintRectCenter(bool checkWindowBoundary = false) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
@@ -441,6 +441,11 @@ public:
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
+    }
+
+    void SetColorModeUpdateCallback(const std::function<void()>&& callback)
+    {
+        colorModeUpdateCallback_ = callback;
     }
 
     bool MarkRemoving() override;
@@ -917,6 +922,7 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     std::list<std::function<void()>> destroyCallbacks_;
+    std::function<void()> colorModeUpdateCallback_;
 
     RefPtr<AccessibilityProperty> accessibilityProperty_;
     RefPtr<LayoutProperty> layoutProperty_;

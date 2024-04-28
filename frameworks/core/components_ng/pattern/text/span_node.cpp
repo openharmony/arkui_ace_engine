@@ -577,6 +577,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
+        resultObject.span = WeakClaim(this);
         resultObject.valueString = content;
         resultObject.isInit = true;
     }
@@ -789,12 +790,12 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
 
     int32_t endPosition = interval.second;
     int32_t startPosition = interval.first;
+    resultObject.type = SelectSpanType::TYPEIMAGE;
     if ((start <= startPosition) && (end >= endPosition)) {
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
-        resultObject.type = SelectSpanType::TYPEIMAGE;
         if (options.image.has_value()) {
             resultObject.valueString = options.image.value();
         }
@@ -827,6 +828,14 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     run_ = run;
     builder->PopStyle();
     return index;
+}
+
+RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
+{
+    auto sameSpan = MakeRefPtr<CustomSpanItem>();
+    sameSpan->onMeasure = onMeasure;
+    sameSpan->onDraw = onDraw;
+    return sameSpan;
 }
 
 void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)

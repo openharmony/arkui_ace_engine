@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
+
 #include "movingphoto_pattern.h"
 #include "movingphoto_layout_property.h"
 #include "movingphoto_node.h"
@@ -27,8 +29,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DELAY = 300;
-constexpr int32_t ANIMATION_DURATION_100 = 100;
-constexpr int32_t ANIMATION_DURATION_200 = 200;
+constexpr int32_t ANIMATION_DURATION_300 = 300;
+constexpr int32_t ANIMATION_DURATION_400 = 400;
 constexpr float NORMAL_SCALE = 1.0f;
 constexpr float ZOOM_IN_SCALE = 1.1f;
 constexpr double NORMAL_PLAY_SPEED = 1.0;
@@ -303,7 +305,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     auto movingPhotoPattern = WeakClaim(this);
 
     auto&& positionUpdatedEvent = [movingPhotoPattern, uiTaskExecutor](uint32_t currentPos) {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern, currentPos] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern, currentPos] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -312,7 +314,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& stateChangedEvent = [movingPhotoPattern, uiTaskExecutor](PlaybackStatus status) {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern, status] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern, status] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -321,7 +323,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& errorEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([&movingPhotoPattern] {
+        uiTaskExecutor.PostTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -330,7 +332,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& resolutionChangeEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -339,7 +341,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([&movingPhotoPattern] {
+        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -656,7 +658,7 @@ void MovingPhotoPattern::StartAnimation()
     videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
 
     AnimationOption opacityOption;
-    opacityOption.SetDuration(ANIMATION_DURATION_100);
+    opacityOption.SetDuration(ANIMATION_DURATION_400);
     opacityOption.SetCurve(Curves::FRICTION);
     opacityOption.SetOnFinishEvent([this]() {
         isShowVideo_ = true;
@@ -667,7 +669,7 @@ void MovingPhotoPattern::StartAnimation()
          }, opacityOption.GetOnFinishEvent());
 
     AnimationOption scaleOption;
-    scaleOption.SetDuration(ANIMATION_DURATION_200);
+    scaleOption.SetDuration(ANIMATION_DURATION_400);
     scaleOption.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(scaleOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
@@ -709,7 +711,7 @@ void MovingPhotoPattern::StopAnimation()
     video->MarkModifyDone();
 
     AnimationOption option;
-    option.SetDuration(ANIMATION_DURATION_200);
+    option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
     option.SetOnFinishEvent([this]() {
         isShowVideo_ = false;
@@ -846,5 +848,12 @@ void MovingPhotoPattern::OnWindowHide()
     rsContext->UpdateOpacity(1.0);
     image->MarkModifyDone();
     isShowVideo_ = false;
+}
+
+MovingPhotoPattern::~MovingPhotoPattern()
+{
+    if (fd_ > 0) {
+        close(fd_);
+    }
 }
 } // namespace OHOS::Ace::NG

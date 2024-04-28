@@ -554,6 +554,31 @@ public:
         CopySelectionMenuParams(selectInfo, textResponseType_.value_or(TextResponseType::NONE));
     }
 
+    std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> GetOnDrawList()
+    {
+        return onDraws_;
+    }
+
+    void SetOnDrawList(std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraws)
+    {
+        onDraws_ = onDraws;
+    }
+
+    void ClearOnDrawList()
+    {
+        onDraws_.clear();
+    }
+
+    void InitCustomSpan(std::vector<int32_t> customSpanIndex)
+    {
+        customSpanIndex_ = customSpanIndex;
+    }
+
+    std::vector<int32_t> GetCustomSpanIndex()
+    {
+        return customSpanIndex_;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -715,6 +740,7 @@ private:
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeholderIndex_;
+    std::vector<int32_t> customSpanIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
@@ -732,6 +758,7 @@ private:
     bool isShowMenu_ = true;
     RefPtr<TextSelectOverlay> selectOverlay_;
     std::vector<WeakPtr<FrameNode>> imageNodeList_;
+    std::vector<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraws_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -342,6 +342,32 @@ class LocalStorage extends NativeLocalStorage {
         return true;
     }
     /**
+     * Obtain a handle or an alias to LocalStorage property with given name.
+     *
+     * @param propName LocalStorage property name
+     * @returns AbstractProperty object is property with given name exists
+     * undefined otherwise
+     */
+    ref(propName) {
+        return this.storage_.get(propName);
+    }
+    /**
+     * Obtain a handle or an alias to LocalStorage property with given name.
+     *
+     * If property does not exist in LocalStorage, create it with given default value.
+     *
+     * @param propName LocalStorage property name
+     * @param defaultValue If property does not exist in LocalStorage,
+     *        create it with given default value.
+     * @returns AbstractProperty object
+     */
+    setAndRef(propName, defaultValue) {
+        if (!this.has(propName)) {
+            this.addNewPropertyInternal(propName, defaultValue);
+        }
+        return this.storage_.get(propName);
+    }
+    /**
      * Internal use helper function to create and initialize a new property.
      * caller needs to be all the checking beforehand
      * @param propName
@@ -642,6 +668,33 @@ class AppStorage extends LocalStorage {
         else {
             stateMgmtConsole.error("AppStorage.createNewInstance(..): instance exists already, internal error!");
         }
+    }
+    /**
+     * Obtain a handle or an alias to AppStorage property with given name.
+     *
+     * @param propName AppStorage property name
+     * @returns AbstractProperty object is property with given name exists
+     * undefined otherwise
+     *
+     * @since 12
+     */
+    static ref(propName) {
+        return AppStorage.getOrCreate().ref(propName);
+    }
+    /**
+     * Obtain a handle or an alias to AppStorage property with given name.
+     *
+     * If property does not exist in AppStorage, create it with given default value.
+     *
+     * @param propName LocalStorage property name
+     * @param defaultValue If property does not exist in AppStorage,
+     *        create it with given default value.
+     * @returns AbstractProperty object
+     *
+     * @since 12
+     */
+    static setAndRef(propName, defaultValue) {
+        return AppStorage.getOrCreate().setAndRef(propName, defaultValue);
     }
     /**
     * create and return a two-way sync "(link") to named property
@@ -1738,6 +1791,10 @@ class PersistentStorage {
                 returnValue = this.readFromPersistentStorage(propName);
             }
             link = AppStorage.setAndLink(propName, returnValue, this);
+            if (link === undefined) {
+                
+                return false;
+            }
             this.links_.set(propName, link);
             
         }
@@ -5724,8 +5781,7 @@ class UINodeRegisterProxy {
     }
     populateRemoveElementInfo(removedElements) {
         for (const elmtId of removedElements) {
-            const removedElementInfo = { elmtId, tag: '' };
-            this.removeElementsInfo_.push(removedElementInfo);
+            this.removeElementsInfo_.push(elmtId);
         }
     }
     /* just get the remove items from the native side
@@ -5744,12 +5800,12 @@ class UINodeRegisterProxy {
             return;
         }
         let owningView;
-        this.removeElementsInfo_.forEach((rmElmtInfo) => {
-            const owningViewPUWeak = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId);
+        this.removeElementsInfo_.forEach((elmtId) => {
+            const owningViewPUWeak = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
             if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
-                    owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
+                    owningView.purgeDeleteElmtId(elmtId);
                 }
                 else {
                     
@@ -5759,7 +5815,7 @@ class UINodeRegisterProxy {
                 
             }
             // FIXME: only do this if app uses V3
-            ObserveV2.getObserve().clearBinding(rmElmtInfo.elmtId);
+            ObserveV2.getObserve().clearBinding(elmtId);
         });
         this.removeElementsInfo_.length = 0;
     }
@@ -5813,7 +5869,6 @@ class ViewPU extends PUV2ViewBase {
         // flag for initial rendering being done
         this.isInitialRenderDone = false;
         this.runReuse_ = false;
-        this.hasBeenRecycled_ = false;
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
         // @Provide'd variables by this class and its ancestors
@@ -6023,9 +6078,6 @@ class ViewPU extends PUV2ViewBase {
                 childViewPU.setActiveInternal(this.isActive_);
             }
         }
-        if (this.hasRecycleManager()) {
-            this.getRecycleManager().setActive(this.isActive_);
-        }
     }
     onInactiveInternal() {
         if (this.isActive_) {
@@ -6042,9 +6094,6 @@ class ViewPU extends PUV2ViewBase {
             if (childViewPU) {
                 childViewPU.setActiveInternal(this.isActive_);
             }
-        }
-        if (this.hasRecycleManager()) {
-            this.getRecycleManager().setActive(this.isActive_);
         }
     }
     initialRenderView() {
@@ -6474,7 +6523,7 @@ class ViewPU extends PUV2ViewBase {
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
         this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
-        this.hasBeenRecycled_ = true;
+        this.addChild(node);
         this.rebuildUpdateFunc(oldElmtId, compilerAssignedUpdateFunc);
         recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
@@ -6502,9 +6551,7 @@ class ViewPU extends PUV2ViewBase {
             const child = weakRefChild.deref();
             if (child) {
                 if (child instanceof ViewPU) {
-                    if (!child.hasBeenRecycled_) {
-                        child.aboutToReuseInternal();
-                    }
+                    child.aboutToReuseInternal();
                 }
                 else {
                     // FIXME fix for mixed V2 - V3 Hierarchies
@@ -6523,9 +6570,7 @@ class ViewPU extends PUV2ViewBase {
             const child = weakRefChild.deref();
             if (child) {
                 if (child instanceof ViewPU) {
-                    if (!child.hasBeenRecycled_) {
-                        child.aboutToRecycleInternal();
-                    }
+                    child.aboutToRecycleInternal();
                 }
                 else {
                     // FIXME fix for mixed V2 - V3 Hierarchies
@@ -6540,7 +6585,8 @@ class ViewPU extends PUV2ViewBase {
         if (this.getParent() && this.getParent() instanceof ViewPU && !this.getParent().isDeleting_) {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
-            this.hasBeenRecycled_ = true;
+            this.parent_.removeChild(this);
+            this.setActiveInternal(false);
         }
         else {
             this.resetRecycleCustomNode();

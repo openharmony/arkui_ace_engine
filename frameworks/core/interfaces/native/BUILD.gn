@@ -114,7 +114,6 @@ template("ace_core_interfaces_native_node") {
       "node/view_model.cpp",
       "node/water_flow_modifier.cpp",
     ]
-
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
 
     include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
@@ -134,9 +133,6 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/plugin_modifier.cpp" ]
     }
     external_deps = []
-    if (is_ohos) {
-      external_deps += [ "input:libmmi-client" ]
-    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

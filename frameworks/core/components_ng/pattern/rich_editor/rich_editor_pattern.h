@@ -800,6 +800,7 @@ private:
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
+    void SetAccessibilityAction();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

@@ -205,7 +205,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(double width)
     } else {
         indentValue = width * textIndent_.Value();
     }
-    float indent_ = static_cast<float>(indentValue);
+    indent_ = static_cast<float>(indentValue);
     std::vector<float> indents;
     // only indent first line
     indents.emplace_back(indent_);
@@ -317,7 +317,7 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
             longestLine = longestLine + letterSpacing;
         }
     }
-    paragraph_->Layout(std::ceil(longestLine)); // paragraph_->GetLongestLine()));
+    paragraph_->Layout(std::ceil(longestLine) + indent_); // paragraph_->GetLongestLine()));
 
     auto contentWidth = contentConstraint.maxSize.Width() - imageWidth;
     CounterNodeMeasure(contentWidth, layoutWrapper);
@@ -341,7 +341,7 @@ SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF&
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height(), height);
 
-    textRect_.SetSize(SizeF(std::max(0.0f, longestLine), paragraph_->GetHeight()));
+    textRect_.SetSize(SizeF(std::max(0.0f, longestLine) + indent_, paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
 }
 
@@ -363,20 +363,12 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
-    std::string counterText = "";
-    TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
+    std::string counterText;
+    TextStyle countTextStyle =
+        pattern->GetShowCounterStyleValue() ? theme->GetOverCountTextStyle() : theme->GetCountTextStyle();
     auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    uint32_t limitsize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
-    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != DEFAULT_MODE)) {
-        countTextStyle = theme->GetOverCountTextStyle();
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        countTextStyle.SetTextColor(theme->GetOverCounterColor());
-        pattern->SetCounterState(false);
-    } else if ((textLength >= limitsize) && (counterType != DEFAULT_MODE)) {
-        countTextStyle = theme->GetCountTextStyle();
-        counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-        countTextStyle.SetTextColor(theme->GetDefaultCounterColor());
-    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == DEFAULT_MODE) {
+    auto limitSize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
+    if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     }
     textLayoutProperty->UpdateContent(counterText);
@@ -838,7 +830,11 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
             }
             break;
         case TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST:
-            result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
+                result = AdaptInlineFocusFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            } else {
+                result = AdaptMaxFontSize(textStyle, textContent_, 1.0_fp, contentConstraint, layoutWrapper);
+            }
             break;
         default:
             break;
@@ -866,13 +862,14 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
     int32_t left = 0;
     int32_t right = length - 1;
     float fontSize = 0.0f;
+    auto newContentConstraint = BuildInfinityLayoutConstraint(contentConstraint);
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
     while (left <= right) {
         int32_t mid = left + (right - left) / 2;
         fontSize = static_cast<float>((mid == length - 1) ? (maxFontSize) : (minFontSize + stepSize * mid));
         textStyle.SetFontSize(Dimension(fontSize));
-        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+        if (!CreateParagraphAndLayout(textStyle, content, newContentConstraint, layoutWrapper)) {
             return false;
         }
         if (!IsInlineFocusAdaptExceedLimit(maxSize)) {
@@ -882,15 +879,31 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
         }
     }
     fontSize = static_cast<float>((left - 1 == length - 1) ? (maxFontSize) : (minFontSize + stepSize * (left - 1)));
+    fontSize = LessNotEqual(fontSize, minFontSize) ? minFontSize : fontSize;
+    fontSize = GreatNotEqual(fontSize, maxFontSize) ? maxFontSize : fontSize;
     textStyle.SetFontSize(Dimension(fontSize));
     return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
+}
+
+LayoutConstraintF TextFieldLayoutAlgorithm::BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint)
+{
+    auto newContentConstraint = contentConstraint;
+    newContentConstraint.maxSize = { std::numeric_limits<double>::infinity(),
+        std::numeric_limits<double>::infinity() };
+    if (newContentConstraint.selfIdealSize.Width()) {
+        newContentConstraint.selfIdealSize.SetWidth(std::numeric_limits<double>::infinity());
+    }
+    if (newContentConstraint.selfIdealSize.Height()) {
+        newContentConstraint.selfIdealSize.SetHeight(std::numeric_limits<double>::infinity());
+    }
+    return newContentConstraint;
 }
 
 bool TextFieldLayoutAlgorithm::IsInlineFocusAdaptExceedLimit(const SizeF& maxSize)
 {
     auto paragraph = GetParagraph();
     CHECK_NULL_RETURN(paragraph, false);
-    bool didExceedMaxLines = paragraph->DidExceedMaxLines();
+    bool didExceedMaxLines = false;
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetHeight() / paragraph->GetLineCount(),
         maxSize.Height());
     didExceedMaxLines = didExceedMaxLines || GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width());

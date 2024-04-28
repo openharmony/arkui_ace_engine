@@ -324,6 +324,18 @@ void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
     ParseCommonTitle(hasSubTitle, true, "", title);
 }
 
+void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
 void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
     const std::string& bundleName, const std::string& moduleName)
 {

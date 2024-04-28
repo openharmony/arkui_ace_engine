@@ -273,7 +273,9 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     }
     if (lineStyle->propTextIndent) {
         style.leadingMargin = std::make_optional<LeadingMargin>();
-        style.leadingMargin->size = SizeF(lineStyle->propTextIndent->ConvertToPx(), 0.0f);
+        style.leadingMargin->size =
+            NG::LeadingMarginSize(Dimension(lineStyle->propTextIndent->Value(), lineStyle->propTextIndent->Unit()),
+                Dimension(0.0f, lineStyle->propTextIndent->Unit()));
     }
     if (lineStyle->propLeadingMargin) {
         if (!style.leadingMargin) {

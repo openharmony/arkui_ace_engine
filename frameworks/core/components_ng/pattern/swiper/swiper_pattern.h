@@ -926,6 +926,8 @@ private:
     bool CheckDragOutOfBoundary(double dragVelocity);
     void UpdateCurrentFocus();
 
+    std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;

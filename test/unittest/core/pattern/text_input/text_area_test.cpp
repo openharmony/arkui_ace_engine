@@ -779,10 +779,10 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::ALWAYS
+     * @tc.steps: step2. Set menuPolicy to be MenuPolicy::SHOW
      */
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::ALWAYS;
+    options.menuPolicy = MenuPolicy::SHOW;
     pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
 
     /**
@@ -800,9 +800,9 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
     pattern_->OnKeyEvent(event);
 
     /**
-     * @tc.steps: step5. Set menuPolicy to be MenuPolicy::NEVER
+     * @tc.steps: step5. Set menuPolicy to be MenuPolicy::HIDE
      */
-    options.menuPolicy = MenuPolicy::NEVER;
+    options.menuPolicy = MenuPolicy::HIDE;
     pattern_->SetSelectionFlag(0, DEFAULT_TEXT.length(), options);
 
     /**
@@ -1248,5 +1248,42 @@ HWTEST_F(TextFieldUXTest, TextAreaWordBreak001, TestSize.Level1)
     layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: TextAreaLineSpacing001
+ * @tc.desc: test TextArea lineSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLineSpacing001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetLineSpacing(2.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetLineSpacing(), 2.0_fp);
 }
 }

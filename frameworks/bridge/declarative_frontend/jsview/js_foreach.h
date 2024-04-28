@@ -42,6 +42,8 @@ public:
     // id: string | number
     // parentView : JSView
     static void CreateNewChildFinish(const JSCallbackInfo& info);
+
+    static void OnMove(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

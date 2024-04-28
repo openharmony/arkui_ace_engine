@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace {
@@ -32,6 +33,7 @@ public:
         std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
+    virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;

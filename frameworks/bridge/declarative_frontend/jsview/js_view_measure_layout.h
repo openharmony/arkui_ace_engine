@@ -49,6 +49,7 @@ class JSMeasureLayoutParamNG : public NG::MeasureLayoutParam {
 public:
     JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper);
     JSRef<JSObject> GetConstraint();
+    JSRef<JSObject> GetPlaceChildrenConstraint();
     JSRef<JSArray> GetChildArray()
     {
         return childArray_;

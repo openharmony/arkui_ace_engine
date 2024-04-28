@@ -658,6 +658,14 @@ bool WebClientImpl::RunContextMenu(
     return jsResult;
 }
 
+void WebClientImpl::UpdateClippedSelectionBounds(int x, int y, int w, int h)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->UpdateClippedSelectionBounds(x, y, w, h);
+}
+
 bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
                                  std::shared_ptr<NWeb::NWebQuickMenuCallback> callback)
 {
@@ -806,7 +814,7 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
     delegate->OnTouchIconUrl(icon_url, precomposed);
 }
 
-bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
+bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, std::shared_ptr<NWeb::NWebCursorInfo> info)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
