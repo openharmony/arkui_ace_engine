@@ -4747,7 +4747,7 @@ bool JSViewAbstract::ParseJsLengthNG(
     } else if (jsValue->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> value = jsObj->GetProperty("value");
-        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>()))) {
+        if (value->IsNull() || (value->IsNumber() && std::isnan(value->ToNumber<double>())) || value->IsUndefined()) {
             return false;
         }
         DimensionUnit unit = defaultUnit;
