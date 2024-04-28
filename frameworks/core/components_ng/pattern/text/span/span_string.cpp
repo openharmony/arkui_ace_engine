@@ -25,12 +25,32 @@
 #include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace {
+
+std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
+{
+    if (start >= content.length()) {
+        return StringUtils::ToWstring("");
+    }
+    return content.substr(start, length);
+}
+
+std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start)
+{
+    if (start >= content.length()) {
+        return StringUtils::ToWstring("");
+    }
+    return content.substr(start);
+}
+
+
 SpanString::SpanString(const std::string& text) : text_(text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
     spanItem->content = text;
     spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
     spans_.emplace_back(spanItem);
+    auto it = spans_.begin();
+    SplitSpansAndForward(it);
 }
 
 SpanString::SpanString(const ImageSpanOptions& options) : text_(" ")
@@ -58,6 +78,29 @@ SpanString::~SpanString()
 {
     spansMap_.clear();
     spans_.clear();
+}
+
+std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
+    std::list<RefPtr<NG::SpanItem>>::iterator& it)
+{
+    auto wString = StringUtils::ToWstring((*it)->content);
+    auto newlineIndex = static_cast<int32_t>(wString.find(L'\n'));
+    int32_t offset = (*it)->interval.first;
+    while (newlineIndex != -1 && newlineIndex != wString.size() - 1) {
+        auto newSpan = (*it)->GetSameStyleSpanItem();
+        newSpan->interval = { offset + newlineIndex + 1, (*it)->interval.second };
+        (*it)->interval = { offset, offset + newlineIndex + 1 };
+        (*it)->content = StringUtils::ToString(GetWideStringSubstr(wString, 0, newlineIndex + 1));
+        wString = GetWideStringSubstr(wString, newlineIndex + 1);
+        newSpan->content = StringUtils::ToString(wString);
+        newlineIndex = static_cast<int32_t>(wString.find(L'\n'));
+
+        offset = newSpan->interval.first;
+        ++it;
+        it = spans_.insert(it, newSpan);
+    }
+
+    return std::next(it);
 }
 
 void SpanString::ApplyToSpans(
@@ -339,6 +382,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<BaselineOffsetSpan>();
         case SpanType::LetterSpacing:
             return MakeRefPtr<LetterSpacingSpan>();
+        case SpanType::ParagraphStyle:
+            return MakeRefPtr<ParagraphStyleSpan>();
         default:
             return nullptr;
     }
@@ -572,7 +617,7 @@ bool SpanString::operator==(const SpanString& other) const
     return true;
 }
 
-const std::list<RefPtr<NG::SpanItem>>& SpanString::GetSpanItems() const
+std::list<RefPtr<NG::SpanItem>> SpanString::GetSpanItems() const
 {
     return spans_;
 }

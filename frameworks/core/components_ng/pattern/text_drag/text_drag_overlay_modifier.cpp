@@ -50,13 +50,9 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     }
     canvas.DetachBrush();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
-    auto&& paragraph = pattern->GetParagraph();
-    if (std::holds_alternative<RefPtr<Paragraph>>(paragraph)) {
-        auto paragraphPtr = std::get<RefPtr<Paragraph>>(paragraph);
-        paragraphPtr->Paint(canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
-    } else {
-        auto rsParagraph = std::get<std::shared_ptr<RSParagraph>>(paragraph);
-        rsParagraph->Paint(&canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
+    auto paragraph = pattern->GetParagraph().Upgrade();
+    if (paragraph) {
+        paragraph->Paint(canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
     }
 
     size_t index = 0;

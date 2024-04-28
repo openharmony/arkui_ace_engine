@@ -45,13 +45,16 @@ public:
         return false;
     }
 
-    static bool GetAdaptMaxMinFontSize(TextStyle& textStyle, double& maxFontSize, double& minFontSize,
-        const LayoutConstraintF& contentConstraint);
-    static bool GetAdaptFontSizeStep(TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
-        const LayoutConstraintF& contentConstraint);
+    static bool GetAdaptMaxMinFontSize(
+        TextStyle& textStyle, double& maxFontSize, double& minFontSize, const LayoutConstraintF& contentConstraint);
+    static bool GetAdaptFontSizeStep(
+        TextStyle& textStyle, double& stepSize, const Dimension& stepUnit, const LayoutConstraintF& contentConstraint);
     static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
-private:
+
+protected:
     bool DidExceedMaxLines(const SizeF& maxSize);
+
+private:
     virtual bool IsAdaptExceedLimit(const SizeF& maxSize);
 };
 } // namespace OHOS::Ace::NG

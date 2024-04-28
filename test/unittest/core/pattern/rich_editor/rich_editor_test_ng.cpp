@@ -1651,7 +1651,8 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     ParagraphStyle paragraphStyle;
-    richEditorPattern->paragraph_ = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 

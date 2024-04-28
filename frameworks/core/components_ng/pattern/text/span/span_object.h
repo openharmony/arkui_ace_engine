@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
 
@@ -36,8 +37,26 @@ enum class SpanType {
     LetterSpacing,
     TextShadow = 4,
     Gesture = 100,
+    ParagraphStyle = 200,
     Image = 300,
     CustomSpan = 400
+};
+
+struct SpanParagraphStyle {
+    std::optional<TextAlign> align;
+    std::optional<uint32_t> maxLines;
+    std::optional<WordBreak> wordBreak;
+    std::optional<TextOverflow> textOverflow;
+    std::optional<NG::LeadingMargin> leadingMargin;
+    std::optional<Dimension> lineHeight;
+    std::optional<Dimension> textIndent;
+
+    bool Equal(const SpanParagraphStyle& other) const
+    {
+        return align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
+               textOverflow == other.textOverflow && leadingMargin == other.leadingMargin &&
+               lineHeight == other.lineHeight && textIndent == other.textIndent;
+    }
 };
 
 enum class SpanOperation {
@@ -253,6 +272,27 @@ public:
 private:
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure_;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw_;
+};
+
+class ParagraphStyleSpan : public SpanBase {
+    DECLARE_ACE_TYPE(ParagraphStyleSpan, SpanBase);
+
+public:
+    ParagraphStyleSpan() = default;
+    explicit ParagraphStyleSpan(SpanParagraphStyle paragraphStyle);
+    ParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end);
+    SpanParagraphStyle GetParagraphStyle() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    void RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+
+    SpanParagraphStyle paragraphStyle_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H
