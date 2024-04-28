@@ -1067,4 +1067,21 @@ void WebClientImpl::OnRenderProcessResponding()
     }
     delegate->OnRenderProcessResponding();
 }
+
+void WebClientImpl::OnShowAutofillPopup(
+    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnShowAutofillPopup(offsetX, offsetY, menu_items);
+}
+
+void WebClientImpl::OnHideAutofillPopup()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnHideAutofillPopup();
+}
 } // namespace OHOS::Ace
