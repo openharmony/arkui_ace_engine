@@ -518,10 +518,10 @@ void EventManager::CheckTouchEvent(TouchEvent touchEvent)
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
                 " touchEvent id is %{public}d", touchEvent.id);
         }
-    } else if (touchEvent.type == TouchType::UP) {
+    } else if (touchEvent.type == TouchType::UP || touchEvent.type == TouchType::CANCEL) {
         if (touchEventFindResult == downFingerIds_.end()) {
-            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP event without receive DOWN event,"
-                " touchEvent id is %{public}d", touchEvent.id);
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP/CANCEL event "
+                "without receive DOWN event, touchEvent id is %{public}d", touchEvent.id);
         } else {
             downFingerIds_.erase(touchEvent.id);
         }
