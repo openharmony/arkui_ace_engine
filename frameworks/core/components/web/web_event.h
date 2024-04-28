@@ -44,6 +44,11 @@ enum class NavigationType {
     NAVIGATION_TYPE_AUTO_SUBFRAME = 5,
 };
 
+enum class RenderProcessNotRespondingReason {
+    INPUT_TIMEOUT,
+    NAVIGATION_COMMIT_TIMEOUT,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
 public:
@@ -1815,6 +1820,44 @@ private:
     std::string surfaceId_ = "";
     std::string embedId_ = "";
     EmbedInfo embedInfo_;
+};
+
+class ACE_EXPORT RenderProcessNotRespondingEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RenderProcessNotRespondingEvent, BaseEventInfo);
+
+public:
+    RenderProcessNotRespondingEvent(const std::string& jsStack, int pid, int reason)
+        : BaseEventInfo("RenderProcessNotRespondingEvent"), jsStack_(jsStack), pid_(pid), reason_(reason)
+    {}
+    ~RenderProcessNotRespondingEvent() = default;
+
+    const std::string& GetJsStack() const
+    {
+        return jsStack_;
+    }
+
+    int GetPid() const
+    {
+        return pid_;
+    }
+
+    int GetReason() const
+    {
+        return reason_;
+    }
+
+private:
+    std::string jsStack_;
+    int pid_;
+    int reason_;
+};
+
+class ACE_EXPORT RenderProcessRespondingEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(RenderProcessRespondingEvent, BaseEventInfo);
+
+public:
+    RenderProcessRespondingEvent() : BaseEventInfo("RenderProcessRespondingEvent") {}
+    ~RenderProcessRespondingEvent() = default;
 };
 
 } // namespace OHOS::Ace

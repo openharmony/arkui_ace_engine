@@ -1046,4 +1046,25 @@ bool WebClientImpl::OnOpenAppLink(
 
     return delegate->OnOpenAppLink(url, callback);
 }
+
+void WebClientImpl::OnRenderProcessNotResponding(
+    const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRenderProcessNotResponding(jsStack, pid, reason);
+}
+
+void WebClientImpl::OnRenderProcessResponding()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnRenderProcessResponding();
+}
 } // namespace OHOS::Ace

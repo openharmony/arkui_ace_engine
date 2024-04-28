@@ -862,6 +862,10 @@ public:
     void Backward();
     bool OnOpenAppLink(const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback);
 
+    void OnRenderProcessNotResponding(
+        const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason);
+    void OnRenderProcessResponding();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1001,6 +1005,8 @@ private:
     EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
     EventCallbackV2 OnNativeEmbedGestureEventV2_;
     EventCallbackV2 onIntelligentTrackingPreventionResultV2_;
+    EventCallbackV2 onRenderProcessNotRespondingV2_;
+    EventCallbackV2 onRenderProcessRespondingV2_;
 
     int32_t renderMode_;
     std::string bundlePath_;
