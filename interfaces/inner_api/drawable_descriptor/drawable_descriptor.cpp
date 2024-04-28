@@ -614,7 +614,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> AnimatedDrawableDescriptor::GetPix
 int32_t AnimatedDrawableDescriptor::GetDuration()
 {
     if (duration_ <= 0) {
-        duration_ = DEFAULT_DURATION * pixelMapList_.size();
+        duration_ = DEFAULT_DURATION * static_cast<int32_t>(pixelMapList_.size());
     }
     return duration_;
 }
