@@ -97,6 +97,26 @@ public:
         return containerId_;
     }
 
+    void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
+    {
+        dynamicMode_ = dynamicMode;
+    }
+
+    DynamicRangeMode GetDynamicRangeMode()
+    {
+        return dynamicMode_;
+    }
+
+    void SetImageQuality(AIImageQuality imageQuality)
+    {
+        imageQuality_ = imageQuality;
+    }
+
+    AIImageQuality GetImageQuality()
+    {
+        return imageQuality_;
+    }
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
@@ -142,6 +162,9 @@ private:
 
     bool autoResize_ = true;
     bool syncLoad_ = false;
+
+    DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
+    AIImageQuality imageQuality_ = AIImageQuality::NONE;
 
     RectF srcRect_;
     RectF dstRect_;

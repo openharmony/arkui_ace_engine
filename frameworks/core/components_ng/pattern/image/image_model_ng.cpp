@@ -174,6 +174,32 @@ void ImageModelNG::SetSmoothEdge(FrameNode *frameNode, float value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value, frameNode);
 }
 
+void ImageModelNG::SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode);
+    ACE_UPDATE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode);
+}
+
+void ImageModelNG::SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode, frameNode);
+}
+
+void ImageModelNG::SetEnhancedImageQuality(AIImageQuality imageQuality)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageQuality(imageQuality);
+}
+
+void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageQuality(imageQuality);
+}
+
 void ImageModelNG::SetBorder(const Border &border) {}
 
 void ImageModelNG::SetBackBorder()
