@@ -479,11 +479,11 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
     CHECK_NULL_VOID(host);
     auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
     CHECK_NULL_VOID(targetNode);
-    auto callback = [weak = WeakClaim(this), id = Container::CurrentId(), captureId, targetIndex](
+    auto callback = [weak = WeakClaim(this), captureId, targetIndex](
                         std::shared_ptr<Media::PixelMap> pixelMap) {
-        ContainerScope scope(id);
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+        ContainerScope scope(swiper->GetHostInstanceId());
         swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
     };
     if (forceUpdate) {

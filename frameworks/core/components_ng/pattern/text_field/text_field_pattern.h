@@ -152,6 +152,11 @@ public:
     TextFieldPattern();
     ~TextFieldPattern() override;
 
+    int32_t GetInstanceId() const override
+    {
+        return GetHostInstanceId();
+    }
+
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
@@ -1191,6 +1196,8 @@ private:
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
     void UpdateSelectionByMouseDoubleClick();
 
     void AfterSelection();

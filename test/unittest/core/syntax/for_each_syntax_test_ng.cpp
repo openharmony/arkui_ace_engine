@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 
 #define private public
+#define protected public
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
@@ -234,6 +235,8 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. Set branch id which is same as before.
      */
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
     ForEachModelNG forEach;
     forEach.Create();
     std::list<std::string> ids = FOR_EACH_ARRAY;
@@ -247,6 +250,7 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest007, TestSize.Level1)
     forEachNode->CreateTempItems();
     std::list<std::string> ids2 = FOR_EACH_IDS;
     forEachNode->SetIds(std::move(ids2));
+    forEachNode->context_ = AceType::RawPtr(context);
     forEachNode->onMainTree_ = true;
     auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     forEachNode->SetParent(node);

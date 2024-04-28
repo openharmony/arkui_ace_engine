@@ -833,6 +833,9 @@ public:
         }
     }
 
+    void AttachContext(PipelineContext* context, bool recursive = false) override;
+    void DetachContext(bool recursive = false) override;
+
 protected:
     void DumpInfo() override;
 

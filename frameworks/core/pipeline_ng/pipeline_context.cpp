@@ -988,7 +988,7 @@ void PipelineContext::SetupRootElement()
     rootFocusHub->SetFocusType(FocusType::SCOPE);
     rootFocusHub->SetFocusable(true);
     window_->SetRootFrameNode(rootNode_);
-    rootNode_->AttachToMainTree();
+    rootNode_->AttachToMainTree(false, this);
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
@@ -1065,7 +1065,7 @@ void PipelineContext::SetupSubRootElement()
     rootFocusHub->SetFocusType(FocusType::SCOPE);
     rootFocusHub->SetFocusable(true);
     window_->SetRootFrameNode(rootNode_);
-    rootNode_->AttachToMainTree();
+    rootNode_->AttachToMainTree(false, this);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
@@ -1507,6 +1507,44 @@ void PipelineContext::CheckVirtualKeyboardHeight()
         LOGI("Current View has keyboard.");
     }
     OnVirtualKeyboardHeightChange(keyboardHeight);
+}
+
+void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
+{
+    dirtyNodes_.erase(uiNode);
+
+    auto frameNode = DynamicCast<FrameNode>(uiNode);
+
+    CHECK_NULL_VOID(frameNode);
+
+    RemoveStoredNode(frameNode->GetRestoreId());
+    if (frameNode->IsPrivacySensitive()) {
+        auto privacyManager = GetPrivacySensitiveManager();
+        privacyManager->RemoveNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+
+    dirtyPropertyNodes_.erase(frameNode);
+    needRenderNode_.erase(frameNode);
+
+    if (dirtyFocusNode_ == frameNode) {
+        dirtyFocusNode_.Reset();
+    }
+
+    if (dirtyFocusScope_ == frameNode) {
+        dirtyFocusScope_.Reset();
+    }
+
+    if (dirtyRequestFocusNode_ == frameNode) {
+        dirtyRequestFocusNode_.Reset();
+    }
+
+    if (activeNode_ == frameNode) {
+        activeNode_.Reset();
+    }
+
+    if (focusNode_ == frameNode) {
+        focusNode_.Reset();
+    }
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
@@ -2913,6 +2951,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
+    rootNode_->DetachFromMainTree();
     taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();

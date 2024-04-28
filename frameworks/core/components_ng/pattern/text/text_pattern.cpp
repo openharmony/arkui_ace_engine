@@ -1581,11 +1581,10 @@ void TextPattern::InitDragEvent()
         pattern->OnDragMove(event);
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
-    auto onDragEnd = [weakPtr = WeakClaim(this), scopeId = Container::CurrentId()](
-                         const RefPtr<OHOS::Ace::DragEvent>& event) {
-        ContainerScope scope(scopeId);
+    auto onDragEnd = [weakPtr = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        ContainerScope scope(pattern->GetHostInstanceId());
         pattern->showSelect_ = true;
         if (pattern->spans_.empty()) {
             pattern->OnDragEndNoChild(event);

@@ -138,7 +138,7 @@ void ForEachNode::CompareAndUpdateChildren()
 
     if (IsOnMainTree()) {
         for (const auto& newChild : additionalChildComps) {
-            newChild->AttachToMainTree();
+            newChild->AttachToMainTree(false, GetContext());
         }
     }
 

@@ -90,6 +90,10 @@ UINode::~UINode()
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     context_ = context;
+    instanceId_ = context->GetInstanceId();
+    if (updateJSInstanceCallback_) {
+        updateJSInstanceCallback_(instanceId_);
+    }
     if (recursive) {
         for (auto& child : children_) {
             child->AttachContext(context, recursive);
@@ -99,7 +103,10 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
+    CHECK_NULL_VOID(context_);
+    context_->DetachNode(Claim(this));
     context_ = nullptr;
+    instanceId_ = INSTANCE_ID_UNDEFINED;
     if (recursive) {
         for (auto& child : children_) {
             child->DetachContext(recursive);
@@ -422,7 +429,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (onMainTree_) {
         return;
     }
-    context_ = context;
+    AttachContext(context, false);
     onMainTree_ = true;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
@@ -464,7 +471,7 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
-    context_ = nullptr;
+    DetachContext(false);
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -890,14 +897,14 @@ void UINode::UpdateChildrenVisible(bool isVisible) const
 
 void UINode::OnRecycle()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnRecycle();
     }
 }
 
 void UINode::OnReuse()
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnReuse();
     }
 }
@@ -1135,13 +1142,16 @@ std::string UINode::GetCurrentCustomNodeInfo()
             auto custom = DynamicCast<CustomNode>(parent);
             auto list = custom->GetExtraInfos();
             for (const auto& child : list) {
-                extraInfo.append("    ").append("at (").append(child.page).append(":")
-                    .append(std::to_string(child.line)).append(")\n");
+                extraInfo.append("    ")
+                    .append("at (")
+                    .append(child.page)
+                    .append(":")
+                    .append(std::to_string(child.line))
+                    .append(")\n");
             }
             break;
         }
         parent = parent->GetParent();
-       
     }
     return extraInfo;
 }
